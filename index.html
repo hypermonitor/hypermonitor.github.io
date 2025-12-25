@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hypermonitor — Discover & Track Top Hyperliquid Wallets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Discover, rank, and live-track Hyperliquid wallets. Research performance, follow wallets, and subscribe to curated vaults." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Hypermonitor — Discover & Track Top Hyperliquid Wallets" />
+  <meta property="og:description" content="Find well-performing Hyperliquid wallets, track live activity, and subscribe to curated vaults." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Hypermonitor" />
+  <!-- TODO: replace with your own social preview image -->
+  <meta property="og:image" content="https://cdnstatic.tencentcs.com/edgeone/pages/assets/1765821358918-2Psz.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://www.hypermonitor.org/" />
+  <link rel="canonical" href="https://www.hypermonitor.org/" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hypermonitor — Discover & Track Top Hyperliquid Wallets" />
+  <meta name="twitter:description" content="Discover, rank, and live-track Hyperliquid wallets. Subscribe to curated vaults." />
+  <meta name="twitter:image" content="https://cdnstatic.tencentcs.com/edgeone/pages/assets/1765821358918-2Psz.png" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+    <defs>
+      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+        <stop offset='0%25' stop-color='%2326d97f'/>
+        <stop offset='100%25' stop-color='%2338bdf8'/>
+      </linearGradient>
+    </defs>
+    <circle cx='32' cy='32' r='22' fill='url(%23g)'/>
+  </svg>"/>
+
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: dark;
+
+      --bg: #101014;
+      --card-bg: #17181f;
+      --accent: #26d97f;
+      --accent-2: #38bdf8;
+      --accent-soft: rgba(38, 217, 127, 0.18);
+      --danger: #f25f5c;
+      --muted: #a1a1b5;
+      --border: #262637;
+      --text-main: #f5f5ff;
+
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+      --radius: 0.9rem;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Top nav */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+    }
+
+    .logo-dot {
+      width: .7rem;
+      height: .7rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      font-size: 1.35rem;
+      margin: 0;
+    }
+
+    .brand-name em { font-style: italic; }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      font-size: .8rem;
+      color: var(--muted);
+      padding: .35rem .65rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover { color: var(--text-main); border-color: var(--border); text-decoration: none; }
+
+    .nav-cta {
+      padding: .35rem .85rem;
+      border-radius: 999px;
+      border: 1px solid #1fa766;
+      background: var(--accent);
+      color: #050810;
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .nav-cta:hover { filter: brightness(1.05); text-decoration: none; }
+
+    .theme-toggle-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.7rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .theme-toggle-btn:hover { filter: brightness(1.07); }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: calc(var(--radius) + .2rem);
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(900px 300px at 20% 10%, rgba(56, 189, 248, 0.12), transparent 60%),
+        radial-gradient(700px 260px at 80% 30%, rgba(38, 217, 127, 0.12), transparent 65%),
+        var(--card-bg);
+      box-shadow: var(--shadow);
+      padding: 1.35rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      header { align-items: flex-start; }
+      nav { justify-content: flex-start; }
+    }
+
+    .hero h1 {
+      margin: 0 0 .5rem;
+      font-size: 2.05rem;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      max-width: 60ch;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      padding: .55rem .95rem;
+      border-radius: 999px;
+      font-size: .85rem;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      cursor: pointer;
+      text-decoration: none;
+      user-select: none;
+    }
+    .btn:hover { filter: brightness(1.06); text-decoration: none; }
+
+    .btn-primary {
+      border: 1px solid #1fa766;
+      background: var(--accent);
+      color: #050810;
+      font-weight: 800;
+    }
+    .btn-primary:hover { filter: brightness(1.05); }
+
+    .btn-ghost {
+      background: transparent;
+    }
+
+    .btn small {
+      font-weight: 600;
+      opacity: .85;
+    }
+
+    .hero-card {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(16, 16, 24, 0.35);
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      padding: 1rem;
+    }
+
+    .hero-card h3 {
+      margin: 0 0 .55rem;
+      font-size: .9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+    }
+
+    .badge {
+      font-size: .65rem;
+      padding: .05rem .35rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .mini-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: .55rem;
+    }
+
+    .mini-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      padding: .55rem .6rem;
+      border-radius: .7rem;
+      border: 1px solid rgba(38, 217, 127, 0.15);
+      background: rgba(38, 217, 127, 0.06);
+    }
+
+    .mini-item strong { font-size: .8rem; }
+    .mini-item span { color: var(--muted); font-size: .75rem; }
+
+    .spark {
+      font-variant-numeric: tabular-nums;
+      font-size: .8rem;
+    }
+
+    .spark.good { color: #4ade80; }
+    .spark.bad { color: #fb7185; }
+
+    /* Section layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0 1rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      justify-content: space-between;
+    }
+
+    .card h2 .left {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+    }
+
+    .muted { color: var(--muted); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    thead {
+      background: #17181f;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    th, td {
+      padding: 0.45rem 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) { background: #14141c; }
+
+    .pill {
+      display: inline-flex;
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--muted);
+    }
+    .pill-live { color: #22c55e; border-color: rgba(34, 197, 94, 0.55); background: rgba(22, 163, 74, 0.12); }
+    .pill-soon { color: #facc15; border-color: rgba(250, 204, 21, 0.55); background: rgba(250, 204, 21, 0.10); }
+
+    /* Feature list */
+    .feature {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: .7rem;
+      align-items: start;
+      padding: .7rem .75rem;
+      border-radius: .85rem;
+      border: 1px solid var(--border);
+      background: rgba(16, 16, 24, 0.35);
+    }
+
+    .feature .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(56, 189, 248, 0.09);
+      flex-shrink: 0;
+    }
+    .feature h4 {
+      margin: 0 0 .2rem;
+      font-size: .9rem;
+    }
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.4;
+    }
+
+    /* Team */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: .8rem;
+    }
+
+    .person {
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+      border-radius: .9rem;
+      border: 1px solid var(--border);
+      background: rgba(16, 16, 24, 0.35);
+      padding: .75rem;
+    }
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: linear-gradient(135deg, rgba(38, 217, 127, 0.20), rgba(56, 189, 248, 0.20));
+      overflow: hidden;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .person h4 {
+      margin: 0;
+      font-size: .9rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+    .person p {
+      margin: .15rem 0 0;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.35;
+    }
+
+    .linkedin-badge {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      vertical-align: middle;
+      transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    }
+    .linkedin-badge svg { width: 11px; height: 11px; transition: fill 0.15s ease; }
+    body:not(.light) .linkedin-badge { background: rgba(10, 102, 194, 0.12); border: 1px solid rgba(10, 102, 194, 0.35); }
+    body:not(.light) .linkedin-badge svg { fill: #3396ff; }
+    body:not(.light) .linkedin-badge:hover { background: rgba(10, 102, 194, 0.20); border-color: #3396ff; }
+    body.light .linkedin-badge { background: rgba(10, 102, 194, 0.10); border: 1px solid rgba(10, 102, 194, 0.30); }
+    body.light .linkedin-badge svg { fill: #0a66c2; }
+    body.light .linkedin-badge:hover { background: rgba(10, 102, 194, 0.18); border-color: #0a66c2; }
+
+    /* Footer */
+    footer {
+      margin-top: 1.2rem;
+      padding: 1rem 0 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+
+    /* Light theme */
+    body.light {
+      background: #ffffff;
+      color: #0f172a;
+      color-scheme: light;
+    }
+    body.light #app { color: #0f172a; }
+    body.light .theme-toggle-btn { background: #ffffff; color: #0f172a; border-color: #d1d5db; }
+    body.light .nav-link { color: #475569; }
+    body.light .hero,
+    body.light .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+    }
+    body.light .hero-card,
+    body.light .feature,
+    body.light .person {
+      background: #f8fafc;
+      border-color: #e5e7eb;
+      box-shadow: none;
+    }
+    body.light thead { background: #f9fafb; }
+    body.light th, body.light td { border-bottom: 1px solid #e5e7eb; }
+    body.light tbody tr:nth-child(even) { background: #f9fafb; }
+    body.light footer { border-top-color: #e5e7eb; }
+    body.light .badge { border-color: #e5e7eb; color: #64748b; }
+    body.light .muted { color: #64748b; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- HEADER / NAV -->
+    <header>
+      <a class="brand" href="/" aria-label="Hypermonitor home">
+        <span class="logo-dot" aria-hidden="true"></span>
+        <h1 class="brand-name">Hyper<em>monitor</em></h1>
+      </a>
+
+      <nav aria-label="Primary">
+        <!-- TODO: point these to your real pages -->
+        <a class="nav-link" href="#how">How it works</a>
+        <a class="nav-link" href="#leaderboard">Leaderboard</a>
+        <a class="nav-link" href="#vaults">Vaults</a>
+        <a class="nav-link" href="#team">Who we are</a>
+        <button id="themeToggle" class="theme-toggle-btn" type="button">☀️ Light</button>
+
+        <!-- TODO: set href to your tracker page -->
+        <a class="nav-cta" href="/tracker.html">Open Tracker</a>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" aria-label="Hero">
+      <div class="hero-grid">
+        <div>
+          <h1>
+            Discover top Hyperliquid wallets.
+            <br />
+            Track them live. Build conviction.
+          </h1>
+          <p>
+            Hypermonitor helps you find well-performing wallets on Hyperliquid using transparent, research-grade metrics —
+            then monitor positions, orders, fills, and performance in real time.
+          </p>
+
+          <div class="hero-actions">
+            <!-- TODO: set href to your tracker route -->
+            <a class="btn btn-primary" href="/tracker.html" title="Start tracking a wallet">
+              ▶ Start tracking
+              <small>live</small>
+            </a>
+
+            <!-- TODO: set href to your upcoming leaderboard page -->
+            <a class="btn btn-ghost" href="#leaderboard" title="Explore ranked wallets">
+              📈 Explore wallets
+            </a>
+
+            <!-- TODO: set href to your docs/FAQ -->
+            <a class="btn" href="#faq" title="Read FAQs">
+              ❓ FAQ
+            </a>
+          </div>
+
+          <div style="margin-top: .9rem; color: var(--muted); font-size: .78rem; line-height: 1.45;">
+            <span class="pill pill-live">Live</span>
+            <span class="muted">Wallet tracking + real-time streams</span>
+            &nbsp;&nbsp;·&nbsp;&nbsp;
+            <span class="pill pill-soon">Coming</span>
+            <span class="muted">Leaderboard metrics, alerts, curated vaults</span>
+          </div>
+        </div>
+
+        <aside class="hero-card" aria-label="Preview">
+          <h3>
+            Today’s preview
+            <span class="badge">template</span>
+          </h3>
+
+          <!-- TODO: Replace with real stats or connect to your API -->
+          <ul class="mini-list">
+            <li class="mini-item">
+              <div>
+                <strong>Tracked wallets</strong><br />
+                <span>Live streams active</span>
+              </div>
+              <div class="spark good">TODO</div>
+            </li>
+            <li class="mini-item">
+              <div>
+                <strong>Wallets indexed</strong><br />
+                <span>Eligible for ranking</span>
+              </div>
+              <div class="spark">TODO</div>
+            </li>
+            <li class="mini-item">
+              <div>
+                <strong>Vaults</strong><br />
+                <span>Curated strategies</span>
+              </div>
+              <div class="spark">TODO</div>
+            </li>
+          </ul>
+
+          <div style="margin-top: .75rem; color: var(--muted); font-size: .75rem; line-height: 1.45;">
+            <!-- TODO: optional compliance text -->
+            <strong>Note:</strong> This site provides analytics and monitoring. It is not investment advice.
+            Always do your own research.
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS / FEATURES -->
+    <section id="how" class="grid" aria-label="How it works">
+      <div class="card">
+        <h2>
+          <span class="left">How it works <span class="badge">overview</span></span>
+        </h2>
+
+        <div style="display:grid; gap:.65rem;">
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🔎</div>
+            <div>
+              <h4>Discover</h4>
+              <p>
+                Surface wallets by objective filters (PnL, drawdown, consistency, volatility, leverage, time-in-market).
+                <span class="muted">TODO: list the exact metrics you’ll compute.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🧠</div>
+            <div>
+              <h4>Evaluate</h4>
+              <p>
+                See clean performance charts, risk stats, and trading behavior (holding time, concentration, win rate).
+                <span class="muted">TODO: add behavior analytics.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon" aria-hidden="true">⚡</div>
+            <div>
+              <h4>Track in real time</h4>
+              <p>
+                Live positions, open orders, cancellations, and fills — plus portfolio history.
+                Works with public wallet addresses.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>
+          <span class="left">What you can do <span class="badge">roadmap</span></span>
+        </h2>
+
+        <div style="display:grid; gap:.65rem;">
+          <div class="feature">
+            <div class="icon" aria-hidden="true">📊</div>
+            <div>
+              <h4>Rank wallets (Leaderboard)</h4>
+              <p>
+                Sort and filter by performance and risk.
+                <span class="muted">TODO: add “Sharpe-like”, drawdown, time windows, etc.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🔔</div>
+            <div>
+              <h4>Alerts & watchlists</h4>
+              <p>
+                Get notified when a wallet opens/closes key positions or reaches risk thresholds.
+                <span class="muted">TODO: email/telegram/discord integration.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🏦</div>
+            <div>
+              <h4>Curated vaults</h4>
+              <p>
+                Subscribe to vaults built from research-backed strategies.
+                <span class="muted">We can describe this as “curated strategies” rather than “hedge fund”.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEADERBOARD PREVIEW -->
+    <section id="leaderboard" class="card" aria-label="Leaderboard preview">
+      <h2>
+        <span class="left">Leaderboard <span class="badge">preview</span></span>
+        <span class="muted" style="font-size:.8rem;">TODO: connect to your data</span>
+      </h2>
+
+      <div class="muted" style="font-size:.82rem; margin-bottom:.65rem; line-height:1.4;">
+        This is a placeholder leaderboard section. Replace the rows with your computed metrics and link each wallet to the tracker
+        (e.g., <span class="mono">/tracker.html?wallet=0x...</span>).
+      </div>
+
+      <div style="max-height: 340px; overflow: auto; border-radius: .75rem; border: 1px solid var(--border);">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Wallet</th>
+              <th>Window</th>
+              <th>Net PnL</th>
+              <th>Max DD</th>
+              <th>Consistency</th>
+              <th>Risk</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- TODO: populate dynamically -->
+            <tr>
+              <td>1</td>
+              <td class="mono">0xTODO…</td>
+              <td>30d</td>
+              <td>$TODO</td>
+              <td>$TODO</td>
+              <td>TODO</td>
+              <td>TODO</td>
+              <td><a class="btn" style="padding:.25rem .6rem; font-size:.75rem;" href="/tracker.html?wallet=0xTODO">Track</a></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td class="mono">0xTODO…</td>
+              <td>90d</td>
+              <td>$TODO</td>
+              <td>$TODO</td>
+              <td>TODO</td>
+              <td>TODO</td>
+              <td><a class="btn" style="padding:.25rem .6rem; font-size:.75rem;" href="/tracker.html?wallet=0xTODO">Track</a></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td class="mono">0xTODO…</td>
+              <td>All</td>
+              <td>$TODO</td>
+              <td>$TODO</td>
+              <td>TODO</td>
+              <td>TODO</td>
+              <td><a class="btn" style="padding:.25rem .6rem; font-size:.75rem;" href="/tracker.html?wallet=0xTODO">Track</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:.75rem; display:flex; gap:.5rem; flex-wrap:wrap;">
+        <!-- TODO: link to real pages -->
+        <a class="btn" href="/leaderboard.html">Open full leaderboard</a>
+        <a class="btn" href="/metrics.html">Read about metrics</a>
+      </div>
+    </section>
+
+    <!-- VAULTS -->
+    <section id="vaults" class="grid" aria-label="Vaults">
+      <div class="card">
+        <h2><span class="left">Vaults <span class="badge">curated</span></span></h2>
+        <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
+          We plan to offer curated vaults built from transparent rules and risk controls.
+          This can be positioned as <strong>“curated strategies”</strong> rather than calling it a hedge fund.
+          <br /><br />
+          <span class="muted">TODO: add your vault names, objectives, and risk constraints.</span>
+        </p>
+
+        <div style="margin-top:.85rem; display:grid; gap:.55rem;">
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🧩</div>
+            <div>
+              <h4>Strategy templates</h4>
+              <p>Market-neutral, momentum, mean reversion, carry — with guardrails. <span class="muted">TODO</span></p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🛡️</div>
+            <div>
+              <h4>Risk controls</h4>
+              <p>Position sizing, max leverage, stop logic, drawdown caps. <span class="muted">TODO</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="left">For builders <span class="badge">API</span></span></h2>
+        <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
+          If you want to integrate, we can expose ranked wallet datasets and real-time tracking endpoints.
+          <br /><br />
+          <span class="muted">TODO: add contact email + API docs link.</span>
+        </p>
+
+        <div style="margin-top:.85rem; display:flex; gap:.5rem; flex-wrap:wrap;">
+          <!-- TODO -->
+          <a class="btn" href="/docs.html">Docs</a>
+          <a class="btn" href="mailto:TODO@hypermonitor.org">Contact</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section id="team" class="card" aria-label="Who we are">
+      <h2>
+        <span class="left">Who we are <span class="badge">team</span></span>
+        <span class="muted" style="font-size:.8rem;">Research + engineering</span>
+      </h2>
+
+      <p class="muted" style="margin:0 0 .85rem; font-size:.86rem; line-height:1.55;">
+        We build professional-grade analytics for Hyperliquid: wallet discovery, performance attribution, and live monitoring.
+        <span class="muted">TODO: add a 1–2 sentence mission statement.</span>
+      </p>
+
+      <div class="team-grid">
+        <!-- Person 1 -->
+        <div class="person">
+          <div class="avatar" aria-label="Photo: Roshan">
+            <!-- TODO: replace src with your image URL. Keep a fallback gradient if empty. -->
+            <img src="TODO_ROSHAN_PHOTO_URL" alt="Roshan Mahes" onerror="this.remove();" />
+          </div>
+          <div>
+            <h4>
+              Dr. Roshan Mahes
+              <a class="linkedin-badge" href="https://www.linkedin.com/in/roshanmahes/" target="_blank" rel="noopener noreferrer" aria-label="Roshan on LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+                </svg>
+              </a>
+            </h4>
+            <p>
+              <!-- TODO: 1-liner -->
+              TODO: Role (e.g., Quant research / Product) · Focus (metrics, risk, modeling).
+            </p>
+          </div>
+        </div>
+
+        <!-- Person 2 -->
+        <div class="person">
+          <div class="avatar" aria-label="Photo: Shreehari">
+            <img src="TODO_SHREEHARI_PHOTO_URL" alt="Shreehari Bodas" onerror="this.remove();" />
+          </div>
+          <div>
+            <h4>
+              Shreehari Bodas
+              <a class="linkedin-badge" href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/" target="_blank" rel="noopener noreferrer" aria-label="Shreehari on LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+                </svg>
+              </a>
+            </h4>
+            <p>TODO: Role (e.g., Engineering) · Focus (real-time infra, UI/UX, data pipelines).</p>
+          </div>
+        </div>
+
+        <!-- Person 3 -->
+        <div class="person">
+          <div class="avatar" aria-label="Photo: Donato">
+            <img src="TODO_DONATO_PHOTO_URL" alt="Donato Maragno" onerror="this.remove();" />
+          </div>
+          <div>
+            <h4>
+              Dr. Donato Maragno
+              <a class="linkedin-badge" href="https://www.linkedin.com/in/donato-maragno/" target="_blank" rel="noopener noreferrer" aria-label="Donato on LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+                </svg>
+              </a>
+            </h4>
+            <p>TODO: Role (e.g., Research) · Focus (strategy design, evaluation, risk controls).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="grid" aria-label="FAQ">
+      <div class="card">
+        <h2><span class="left">FAQ <span class="badge">basics</span></span></h2>
+
+        <div style="display:grid; gap:.65rem;">
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🧾</div>
+            <div>
+              <h4>Is this financial advice?</h4>
+              <p>No. Hypermonitor provides analytics and monitoring tools. <span class="muted">TODO: add your disclaimer.</span></p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🔐</div>
+            <div>
+              <h4>Do I need to sign in?</h4>
+              <p>
+                You can track public wallets without signing in.
+                <span class="muted">TODO: describe when accounts become necessary (watchlists, alerts, subscriptions).</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon" aria-hidden="true">⚙️</div>
+            <div>
+              <h4>How are wallets ranked?</h4>
+              <p>
+                We’ll publish the formulas and assumptions behind each metric.
+                <span class="muted">TODO: link to /metrics.html</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="left">Get in touch <span class="badge">contact</span></span></h2>
+        <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
+          Want early access to leaderboard filters, alerts, or vaults? Reach out.
+          <br /><br />
+          <span class="muted">TODO: add your support email + socials.</span>
+        </p>
+
+        <div style="margin-top:.85rem; display:flex; gap:.5rem; flex-wrap:wrap;">
+          <a class="btn" href="mailto:TODO@hypermonitor.org">Email</a>
+          <a class="btn" href="https://x.com/TODO" target="_blank" rel="noopener noreferrer">X / Twitter</a>
+          <a class="btn" href="https://discord.gg/TODO" target="_blank" rel="noopener noreferrer">Discord</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>
+        <strong>Privacy:</strong> wallet addresses are public. Hypermonitor does not require sign-in for basic tracking.
+        Tracking links can be shared using <span class="mono">?wallet=</span>.
+      </div>
+      <div style="margin-top:.35rem;">
+        <!-- TODO -->
+        <strong>Disclaimer:</strong> This website is for informational purposes only and does not constitute investment advice.
+      </div>
+      <div style="margin-top:.35rem;">
+        © <span id="year"></span> Hypermonitor ·
+        <!-- TODO -->
+        <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // ===== Theme (matches your tracker UX) =====
+    const themeToggleBtn = document.getElementById("themeToggle");
+    function applyTheme(theme) {
+      if (theme === "light") {
+        document.body.classList.add("light");
+        themeToggleBtn.textContent = "☀️ Light";
+      } else {
+        document.body.classList.remove("light");
+        themeToggleBtn.textContent = "🌙 Dark";
+      }
+      try { localStorage.setItem("hypermonitor-theme", theme); } catch (e) {}
+    }
+
+    function initTheme() {
+      let initial = "dark";
+      try {
+        const saved = localStorage.getItem("hypermonitor-theme");
+        if (saved === "light" || saved === "dark") initial = saved;
+      } catch (e) {}
+      applyTheme(initial);
+    }
+
+    themeToggleBtn.addEventListener("click", () => {
+      const isLight = document.body.classList.contains("light");
+      applyTheme(isLight ? "dark" : "light");
+    });
+
+    // Footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    initTheme();
+  </script>
+</body>
+</html>
