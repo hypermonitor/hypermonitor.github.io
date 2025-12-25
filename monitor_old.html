@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hypermonitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Hyperliquid wallet tracker" />
+
+  <meta property="og:title" content="Hyperliquid wallet tracker" />
+  <meta property="og:description" content="Track any Hyperliquid wallet: positions, orders, fills, and performance." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Hypermonitor" />
+
+  <meta property="og:image" content="https://cdnstatic.tencentcs.com/edgeone/pages/assets/1765821358918-2Psz.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta property="og:url" content="https://www.hypermonitor.org/" />
+  <link rel="canonical" href="https://www.hypermonitor.org/" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hyperliquid wallet tracker" />
+  <meta name="twitter:description" content="Track any Hyperliquid wallet: positions, orders, fills, and performance." />
+  <meta name="twitter:image" content="https://cdnstatic.tencentcs.com/edgeone/pages/assets/1765821358918-2Psz.png" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+    <defs>
+      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+        <stop offset='0%25' stop-color='%2326d97f'/>
+        <stop offset='100%25' stop-color='%2338bdf8'/>
+      </linearGradient>
+    </defs>
+    <circle cx='32' cy='32' r='22' fill='url(%23g)'/>
+  </svg>"/>
+
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: dark;
+      --bg: #101014;
+      --card-bg: #17181f;
+      --accent: #26d97f;
+      --accent-soft: rgba(38, 217, 127, 0.18);
+      --danger: #f25f5c;
+      --muted: #a1a1b5;
+      --border: #262637;
+      --text-main: #f5f5ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin: 0 0 .4rem;
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+
+    header h1 span.logo-dot {
+      width: .7rem;
+      height: .7rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #26d97f, #38bdf8);
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+      flex-shrink: 0;
+    }
+
+    header h1 .logo-word { display: inline-block; }
+    header h1 .logo-word-regular { font-style: normal; }
+    header h1 .logo-word-italic { font-style: italic; }
+
+    .wallet-controls {
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+      max-width: 680px;
+      width: 100%;
+    }
+
+    .wallet-line {
+      font-size: .85rem;
+      color: var(--muted);
+      word-break: break-all;
+      display: none;
+    }
+
+    .wallet-input-row {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .wallet-input-row label {
+      font-size: .8rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .wallet-input-row input {
+      flex: 1 1 340px;
+      padding: 0.35rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      outline: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .wallet-input-row input:focus {
+      border-color: #97fde5;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+    }
+
+    .wallet-input-row button {
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid #1fa766;
+      background: #26d97f;
+      color: #050810;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .wallet-input-row button:hover:not(:disabled) { filter: brightness(1.05); }
+    .wallet-input-row button:disabled { opacity: 0.5; cursor: default; }
+
+    @media (max-width: 600px) {
+      .wallet-input-row { flex-direction: column; align-items: stretch; }
+      .wallet-input-row input { flex: 1 1 auto; width: 100%; }
+      .wallet-input-row button { width: 100%; }
+      .header-right { width: 100%; align-items: flex-end; }
+      .header-right-top { width: 100%; justify-content: flex-end; }
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+    }
+
+    .header-right-top {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theme-toggle-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.7rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .theme-toggle-btn:hover { filter: brightness(1.07); }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+    }
+
+    .status-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: #fbbf24;
+      box-shadow: 0 0 4px rgba(251, 191, 36, 0.6);
+    }
+
+    .status-dot.connected {
+      background: var(--accent);
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+    }
+
+    .status-dot.error {
+      background: var(--danger);
+      box-shadow: 0 0 6px rgba(248, 113, 113, 0.7);
+    }
+
+    .status-spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      object-fit: contain;
+      display: none;
+      margin-left: 0.15rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 0.85rem;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+
+    .card h2 span.badge {
+      font-size: .65rem;
+      padding: 0.05rem 0.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .kv-list {
+      font-size: 0.85rem;
+      display: grid;
+      grid-template-columns: 1.1fr 1.3fr;
+      gap: .25rem .5rem;
+    }
+
+    .kv-label { color: var(--muted); }
+    .kv-value { text-align: right; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    thead {
+      background: #17181f;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th, td {
+      padding: 0.35rem 0.45rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) { background: #14141c; }
+
+    .pill {
+      display: inline-flex;
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .pill-buy {
+      color: #4ade80;
+      border-color: rgba(34, 197, 94, 0.6);
+      background: rgba(22, 163, 74, 0.12);
+    }
+
+    .pill-sell {
+      color: #f97373;
+      border-color: rgba(248, 113, 113, 0.6);
+      background: rgba(220, 38, 38, 0.12);
+    }
+
+    .pill-new {
+      color: #facc15;
+      border-color: rgba(250, 204, 21, 0.6);
+      background: rgba(250, 204, 21, 0.12);
+    }
+
+    .pill-cancel {
+      color: #f472b6;
+      border-color: rgba(236, 72, 153, 0.6);
+      background: rgba(190, 24, 93, 0.12);
+    }
+
+    .pill-fill {
+      color: #22c55e;
+      border-color: rgba(22, 163, 74, 0.6);
+      background: rgba(21, 128, 61, 0.16);
+    }
+
+    .muted { color: var(--muted); }
+    .money { font-variant-numeric: tabular-nums; }
+
+    .layout-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout-two { grid-template-columns: 1fr; }
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      margin: 0 0 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+    }
+
+    .section-title small {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .tagline { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .error { margin-top: .5rem; font-size: .75rem; color: #fecaca; }
+    .timestamp { font-size: 0.75rem; color: var(--muted); }
+
+    tbody tr.flash { animation: flashRow 1s ease-out; }
+    @keyframes flashRow {
+      from { background: rgba(34, 197, 94, 0.22); }
+      to { background: #14141c; }
+    }
+
+    tbody tr.flash-cancel { animation: flashCancel 1s ease-out; }
+    @keyframes flashCancel {
+      from { background: rgba(244, 114, 182, 0.22); }
+      to { background: #14141c; }
+    }
+
+    p { margin: 1.5rem 0; }
+
+    .chart-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .chart-range-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--muted);
+      padding: 0.2rem 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .chart-range-btn:hover { border-color: rgba(148, 163, 184, 0.8); }
+
+    .chart-range-btn.active {
+      border-color: #1fa766;
+      color: #1fa766;
+      background: #101018;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .chart-card {
+      background: #17181f;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.75rem 0.75rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 220px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+    }
+
+    .chart-card h3 {
+      margin: 0 0 0.25rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .chart-card h3 span.spark-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .chart-canvas-wrap {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 170px;
+    }
+
+    .chart-canvas-wrap canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .chart-loading { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
+
+    body.light {
+      background: #ffffff;
+      color: #0f172a;
+      color-scheme: light;
+    }
+
+    body.light #app { color: #0f172a; }
+
+    body.light .theme-toggle-btn {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #d1d5db;
+    }
+
+    body.light .wallet-input-row input {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #d1d5db;
+    }
+
+    body.light .wallet-input-row input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+    }
+
+    body.light .status-pill {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #0f172a;
+    }
+
+    body.light .status-dot { box-shadow: 0 0 4px rgba(251, 191, 36, 0.6); }
+
+    body.light .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    body.light .card h2 span.badge {
+      border-color: #e5e7eb;
+      color: #6b7280;
+    }
+
+    body.light .kv-label { color: #6b7280; }
+    body.light .muted { color: #6b7280; }
+
+    body.light table { color: #0f172a; }
+    body.light thead { background: #f9fafb; }
+
+    body.light th, body.light td { border-bottom: 1px solid #e5e7eb; }
+    body.light tbody tr:nth-child(even) { background: #f9fafb; }
+    body.light .timestamp { color: #6b7280; }
+
+    body.light .chart-range-btn {
+      background: #ffffff;
+      color: #6b7280;
+      border-color: #e5e7eb;
+    }
+
+    body.light .chart-range-btn:hover { border-color: #d1d5db; }
+
+    body.light .chart-range-btn.active {
+      border-color: #1fa766;
+      color: #1fa766;
+    }
+
+    body.light .chart-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    body.light .chart-loading { color: #6b7280; }
+
+    .linkedin-badge {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      margin-left: 4px;
+      border-radius: 4px;
+      text-decoration: none;
+      vertical-align: middle;
+      transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    }
+
+    .linkedin-badge svg {
+      width: 11px;
+      height: 11px;
+      transition: fill 0.15s ease;
+    }
+
+    body:not(.light) .linkedin-badge {
+      background: rgba(10, 102, 194, 0.12);
+      border: 1px solid rgba(10, 102, 194, 0.35);
+    }
+
+    body:not(.light) .linkedin-badge svg { fill: #3396ff; }
+
+    body:not(.light) .linkedin-badge:hover {
+      background: rgba(10, 102, 194, 0.20);
+      border-color: #3396ff;
+    }
+
+    body.light .linkedin-badge {
+      background: rgba(10, 102, 194, 0.10);
+      border: 1px solid rgba(10, 102, 194, 0.30);
+    }
+
+    body.light .linkedin-badge svg { fill: #0a66c2; }
+
+    body.light .linkedin-badge:hover {
+      background: rgba(10, 102, 194, 0.18);
+      border-color: #0a66c2;
+    }
+
+    .linkedin-badge::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+    }
+
+    body.light .linkedin-badge::after {
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+    }
+
+    .linkedin-badge:hover::after { opacity: 1; }
+
+    .status-logo {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 0.25rem;
+    }
+
+    .status-logo.hidden { display: none; }
+    .status-logo svg { height: 12px; width: auto; }
+
+    body:not(.light) .status-logo { color: #97fde5; }
+    body.light .status-logo { color: #072722; }
+
+    .status-logo-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .orders-tabs {
+      display: flex;
+      gap: 0.4rem;
+      margin: 0.25rem 0 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .orders-tab-btn {
+      padding: 0.2rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 0.75rem;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .orders-tab-btn:hover { border-color: rgba(148, 163, 184, 0.8); }
+
+    .orders-tab-btn.active {
+      border-color: #1fa766;
+      color: #1fa766;
+      background: #101018;
+    }
+
+    body.light .orders-tab-btn {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #6b7280;
+    }
+
+    body.light .orders-tab-btn:hover { border-color: #d1d5db; }
+
+    body.light .orders-tab-btn.active {
+      border-color: #1fa766;
+      color: #1fa766;
+      background: #f9fafb;
+    }
+
+    .tab-panel.hidden { display: none; }
+
+    .orders-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.25rem 0 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .orders-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .orders-filter-label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .orders-filter-input,
+    .orders-filter-select {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      min-width: 80px;
+      max-width: 140px;
+      outline: none;
+    }
+
+    .orders-filter-input::placeholder {
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    body.light .orders-filter-input,
+    body.light .orders-filter-select {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #0f172a;
+    }
+  </style>
+</head>
+
+<body>
+<div id="app">
+  <header>
+    <div class="wallet-controls">
+      <h1>
+        <span class="logo-dot"></span>
+        <span class="logo-word logo-word-regular">Hyper<span class="logo-word logo-word-italic">monitor</span></span>
+      </h1>
+      <div class="tagline">
+        Track any Hyperliquid wallet: positions, orders, fills, and performance.
+      </div>
+      <div class="wallet-input-row">
+        <label for="walletInput">Wallet address:</label>
+        <input id="walletInput" type="text" placeholder="0x..." autocomplete="off" />
+        <button id="trackBtn">Track</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="header-right-top">
+        <button id="themeToggle" class="theme-toggle-btn">☀️ Light</button>
+        <div class="status-pill">
+          <span id="statusDot" class="status-dot"></span>
+          <span id="statusText"></span>
+          <img id="statusSpinner" class="status-spinner" alt="Connecting to Hyperliquid" />
+          <span class="status-logo hidden" aria-hidden="true">
+            <a href="https://hyperfoundation.org/" target="_blank" rel="noopener noreferrer" class="status-logo-link">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 179 28">
+                <g clip-path="url(#clip0_975_1209)" fill="currentColor">
+                  <path d="M31.8056 11.727C31.8346 14.3384 31.2881 16.8337 30.2146 19.2178C28.6816 22.6126 25.0063 25.3885 21.6501 22.4337C18.913 20.0254 18.4052 15.1363 14.3044 14.4206C8.87845 13.7629 8.74788 20.0544 5.20315 20.7653C1.2522 21.5681 -0.0583338 14.9235 -0.000302664 11.9059C0.0577284 8.88828 0.860492 4.64717 4.294 4.64717C8.24495 4.64717 8.51092 10.6292 13.5258 10.3052C18.4923 9.96669 18.5793 3.74285 21.8242 1.07826C24.6242 -1.22364 27.9175 0.464096 29.5665 3.23508C31.0947 5.79812 31.7669 8.80606 31.8007 11.727H31.8056Z"/>
+                  <path d="M46.7054 21.8777V1.68286H48.6204V10.4165H60.4297V1.68286H62.3157V21.8777H60.4297V12.0414H48.6204V21.8777H46.7054Z"/>
+                  <path d="M67.316 27.9999L69.9274 21.5004L64.2694 7.92114H66.2425L69.9565 17.1191C70.1692 17.68 70.4691 18.4248 70.8559 19.3533C70.914 19.2179 70.972 19.0679 71.03 18.9035C71.0881 18.7391 71.1461 18.5892 71.2041 18.4538C71.3202 18.2023 71.4217 17.9654 71.5088 17.7429C71.5958 17.5205 71.6781 17.3028 71.7554 17.0901L75.2373 7.92114H77.1233L69.2021 27.9999H67.316Z"/>
+                  <path d="M79.0383 28.0001V7.92135H80.8372V10.4747C81.3015 9.60426 81.9737 8.89338 82.8538 8.34208C83.734 7.79078 84.7156 7.51514 85.7989 7.51514C87.0949 7.51514 88.2217 7.82947 89.1792 8.45814C90.1367 9.08681 90.8718 9.95728 91.3844 11.0695C91.897 12.1818 92.1533 13.444 92.1533 14.8561C92.1533 16.2682 91.8873 17.5642 91.3554 18.6861C90.8234 19.8081 90.0738 20.6882 89.1067 21.3265C88.1395 21.9649 87.0369 22.284 85.7989 22.284C84.7543 22.284 83.792 22.0326 82.9118 21.5296C82.0317 21.0267 81.3402 20.2916 80.8372 19.3245V28.0001H79.0383ZM85.5378 20.8333C86.4856 20.8333 87.3222 20.5818 88.0476 20.0789C88.773 19.5759 89.3291 18.8747 89.716 17.9752C90.1029 17.0758 90.2963 16.036 90.2963 14.8561C90.2963 13.6761 90.098 12.6992 89.7015 11.8094C89.3049 10.9196 88.7488 10.2281 88.0331 9.73483C87.3174 9.24156 86.4856 8.99493 85.5378 8.99493C84.5899 8.99493 83.7823 9.23673 83.0569 9.72032C82.3315 10.2039 81.7657 10.8906 81.3595 11.7804C80.9533 12.6702 80.7502 13.6954 80.7502 14.8561C80.7502 16.0167 80.9533 17.0758 81.3595 17.9752C81.7657 18.8747 82.3267 19.5759 83.0424 20.0789C83.7581 20.5818 84.5899 20.8333 85.5378 20.8333Z"/>
+                  <path d="M100.742 22.284C99.4267 22.284 98.2709 21.9939 97.2747 21.4136C96.2785 20.8333 95.5048 19.9821 94.9535 18.8602C94.4022 17.7383 94.1265 16.3939 94.1265 14.8271C94.1265 13.4343 94.4118 12.1818 94.9825 11.0695C95.5531 9.95728 96.3317 9.08681 97.3182 8.45814C98.3048 7.82947 99.4074 7.51514 100.626 7.51514C101.941 7.51514 103.063 7.81496 103.992 8.41462C104.92 9.01427 105.626 9.86056 106.11 10.9535C106.594 12.0464 106.835 13.3182 106.835 14.769V15.1462H95.9255C95.9255 16.3455 96.1286 17.3708 96.5348 18.2219C96.941 19.073 97.5117 19.721 98.2467 20.1659C98.9818 20.6108 99.8232 20.8333 100.771 20.8333C101.893 20.8333 102.826 20.5673 103.571 20.0353C104.316 19.5034 104.775 18.7055 104.949 17.6416H106.748C106.613 18.5314 106.299 19.3245 105.805 20.0208C105.312 20.7172 104.635 21.2685 103.774 21.6747C102.913 22.0809 101.903 22.284 100.742 22.284ZM104.92 13.7825C104.901 12.3317 104.514 11.1711 103.76 10.3006C103.005 9.43016 101.961 8.99493 100.626 8.99493C99.2913 8.99493 98.2612 9.44467 97.4198 10.3442C96.5783 11.2436 96.0996 12.3897 95.9835 13.7825H104.92Z"/>
+                  <path d="M109.616 21.8778V7.92135H111.415V10.7068C111.802 9.77835 112.406 9.01427 113.228 8.41462C114.05 7.81496 115.013 7.51514 116.115 7.51514C116.386 7.51514 116.647 7.53448 116.899 7.57317V9.3141C116.57 9.27541 116.28 9.25607 116.028 9.25607C115.1 9.25607 114.287 9.46401 113.591 9.8799C112.895 10.2958 112.358 10.8906 111.981 11.6644C111.603 12.4381 111.415 13.3376 111.415 14.3628V21.8778H109.616Z"/>
+                  <path d="M121.367 21.491L121.285 21.8827H115.593L115.675 21.491C117.247 21.3217 117.89 20.872 118.142 19.6969L121.338 4.63295C121.677 3.09029 121.198 2.83883 119.573 3.17251L119.655 2.7808L123.132 1.60083H123.524L119.679 19.692C119.428 20.872 119.849 21.3169 121.362 21.4861L121.367 21.491Z"/>
+                  <path d="M127.78 21.4909L127.697 21.8826H122.006L122.088 21.4909C123.659 21.3216 124.303 20.8719 124.554 19.6967L126.488 10.523C126.827 8.9513 126.377 8.72885 124.723 9.06253L124.806 8.67082L128.283 7.49085H128.674L126.092 19.6919C125.84 20.8719 126.261 21.3168 127.775 21.486L127.78 21.4909ZM128.732 2.41797C129.492 2.41797 129.995 3.00795 129.912 3.76236C129.801 4.5216 129.129 5.08256 128.399 5.08256C127.615 5.08256 127.078 4.5216 127.194 3.76236C127.277 3.00312 127.954 2.41797 128.737 2.41797H128.732Z"/>
+                  <path d="M137.582 25.9255L139.144 18.7103C138.162 20.8429 136.117 22.2985 133.955 22.2985C130.478 22.2985 128.848 19.0149 129.888 14.1065C130.618 10.5424 133.815 7.48608 137.601 7.48608C139.342 7.48608 140.769 8.2695 141.359 9.42045L142.679 7.48608H143.071L139.125 25.9158C138.844 27.178 139.855 27.4294 140.866 27.5987L140.783 27.9904H134.25L134.332 27.5987C136.213 27.4294 137.306 27.178 137.587 25.9158L137.582 25.9255ZM134.884 21.2636C136.678 21.2636 138.472 19.721 139.313 17.8688L140.493 12.3414C140.803 10.349 139.85 8.27434 137.127 8.27434C134.405 8.27434 132.277 10.6294 131.576 14.0774C130.676 18.3137 131.938 21.2588 134.884 21.2588V21.2636Z"/>
+                  <path d="M162.531 21.4909L162.448 21.8826H156.756L156.839 21.4909C158.41 21.3216 159.054 20.8719 159.305 19.6967L161.239 10.523C161.578 8.9513 161.128 8.72885 159.474 9.06253L159.556 8.67082L163.034 7.49085H163.425L160.843 19.6919C160.591 20.8719 161.012 21.3168 162.526 21.486L162.531 21.4909ZM163.483 2.41797C164.242 2.41797 164.745 3.00795 164.663 3.76236C164.552 4.5216 163.88 5.08256 163.15 5.08256C162.366 5.08256 161.829 4.5216 161.945 3.76236C162.028 3.00312 162.705 2.41797 163.488 2.41797H163.483Z"/>
+                  <path d="M154.45 19.6628L155.741 13.5018L157.013 7.49561H156.621L153.144 8.67557L153.062 9.06728C154.687 8.72877 155.165 8.95605 154.827 10.5277L153.173 18.3523C151.35 20.0642 150.059 21.0749 148.487 21.0749C146.553 21.0749 145.542 19.7547 146.021 17.4866L148.153 7.50044H147.762L144.255 8.68041L144.173 9.07212C145.827 8.7336 146.277 8.96089 145.967 10.5326L144.454 17.7139C143.864 20.3785 145.213 22.3129 147.708 22.3129C149.362 22.3129 150.818 21.3892 153.057 18.9858L152.95 19.4935V19.5177H152.946L152.443 21.897H156.055L156.137 21.4714C154.624 21.3022 154.203 20.8524 154.454 19.6773L154.45 19.6628Z"/>
+                  <path d="M177.696 6.96871L178.828 1.60083H178.436L174.959 2.7808L174.877 3.17251C176.502 2.83399 176.98 3.09029 176.642 4.63295L175.66 9.2029C175.041 8.16318 173.697 7.49099 172.125 7.49099C168.309 7.49099 165.142 10.5183 164.33 14.3628C163.348 19.0198 164.949 22.2986 168.455 22.2986C170.64 22.2986 172.72 20.814 173.673 18.6813L173.421 19.9048L173 21.8779L176.613 21.8488L176.695 21.4571C175.181 21.2879 174.761 20.8381 175.012 19.663L177.691 6.96871H177.696ZM173.837 17.8399C172.996 19.721 171.201 21.2637 169.378 21.2637C166.433 21.2637 165.171 18.3186 166.012 14.3338C166.796 10.6295 169.04 8.27441 171.651 8.27441C174.437 8.27441 175.365 10.4844 174.998 12.4962L174.867 13.1055L173.842 17.8399H173.837Z"/>
+                </g>
+                <defs>
+                  <clipPath id="clip0_975_1209">
+                    <rect width="178.832" height="28" fill="white"/>
+                  </clipPath>
+                </defs>
+              </svg>
+            </a>
+          </span>
+        </div>
+      </div>
+      <div class="timestamp" id="startedAt"></div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Wallet Snapshot <span class="badge">clearinghouseState</span></h2>
+      <div id="marginSummary" class="kv-list"></div>
+      <div class="error" id="snapshotError"></div>
+    </section>
+
+    <section class="card" style="overflow: auto;">
+      <h2>Positions <span class="badge">assetPositions</span></h2>
+      <table>
+        <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Size</th>
+          <th>Direction</th>
+          <th>Entry Price</th>
+          <th>Value</th>
+          <th>Unrealized PnL</th>
+        </tr>
+        </thead>
+        <tbody id="positionsBody">
+        <tr><td colspan="6" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Performance <span class="badge">portfolio</span></h2>
+
+    <div class="chart-toolbar">
+      <button class="chart-range-btn" data-range="day">Day</button>
+      <button class="chart-range-btn" data-range="week">Week</button>
+      <button class="chart-range-btn" data-range="month">Month</button>
+      <button class="chart-range-btn active" data-range="allTime">All</button>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Equity <span class="spark-label">Account value ($)</span></h3>
+        <div class="chart-canvas-wrap">
+          <canvas id="equityChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>PnL <span class="spark-label">Net profit ($)</span></h3>
+        <div class="chart-canvas-wrap">
+          <canvas id="pnlChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Deposits <span class="spark-label">Net deposits ($)</span></h3>
+        <div class="chart-canvas-wrap">
+          <canvas id="depositsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-loading" id="portfolioLoading">Loading performance data…</div>
+    <div class="error" id="portfolioError"></div>
+  </section>
+
+  <p></p>
+
+  <div class="layout-two">
+    <section class="card">
+      <h2>Orders <span class="badge">orderUpdates</span></h2>
+
+      <div class="orders-tabs">
+        <button class="orders-tab-btn active" data-tab="live">Live</button>
+        <button class="orders-tab-btn" data-tab="history">History</button>
+      </div>
+
+      <div id="ordersLivePanel" class="tab-panel">
+        <div class="section-title">
+          <span>Open</span>
+          <small id="openOrdersCount">–</small>
+        </div>
+        <div style="max-height: 220px; overflow: auto; margin-bottom: .75rem;">
+          <table>
+            <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Time</th>
+              <th>Side</th>
+              <th>Asset</th>
+              <th>Size</th>
+              <th>Limit Price</th>
+              <th>Total</th>
+            </tr>
+            </thead>
+            <tbody id="openOrdersBody">
+            <tr><td colspan="7" class="muted">No open orders.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-title">
+          <span>Canceled</span>
+          <small id="canceledCount">–</small>
+        </div>
+        <div style="max-height: 160px; overflow: auto;">
+          <table>
+            <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Created</th>
+              <th>Canceled</th>
+              <th>Side</th>
+              <th>Asset</th>
+              <th>Size</th>
+            </tr>
+            </thead>
+            <tbody id="canceledOrdersBody">
+            <tr><td colspan="6" class="muted">No canceled orders yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="error" id="ordersError"></div>
+      </div>
+
+      <div id="ordersHistoryPanel" class="tab-panel hidden">
+        <div class="section-title">
+          <span>Historical (last 2000)</span>
+          <small id="historicalOrdersCount">–</small>
+        </div>
+
+        <div class="orders-filter-bar">
+          <div class="orders-filter-group">
+            <span class="orders-filter-label">Asset</span>
+            <input
+              id="historicalAssetFilter"
+              class="orders-filter-input"
+              type="text"
+              placeholder="e.g. ETH"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="orders-filter-group">
+            <span class="orders-filter-label">Side</span>
+            <select id="historicalSideFilter" class="orders-filter-select">
+              <option value="all">All</option>
+              <option value="B">Buy</option>
+              <option value="S">Sell</option>
+            </select>
+          </div>
+
+          <div class="orders-filter-group">
+            <span class="orders-filter-label">Status</span>
+            <select id="historicalStatusFilter" class="orders-filter-select">
+              <option value="all">All</option>
+              <option value="open">Open</option>
+              <option value="filled">Filled</option>
+              <option value="canceled">Canceled</option>
+              <option value="resting">Resting</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="max-height: 380px; overflow: auto;">
+          <table>
+            <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Time</th>
+              <th>Side</th>
+              <th>Asset</th>
+              <th>Size</th>
+              <th>Limit Price</th>
+              <th>Status</th>
+            </tr>
+            </thead>
+            <tbody id="historicalOrdersBody">
+            <tr><td colspan="7" class="muted">Loading historical orders…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Trades Stream <span class="badge">userEvents</span></h2>
+      <div style="max-height: 360px; overflow: auto;">
+        <table>
+          <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Time</th>
+            <th>Side</th>
+            <th>Asset</th>
+            <th>Size</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+          </thead>
+          <tbody id="fillsBody">
+          <tr><td colspan="7" class="muted">Waiting for fills…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="error" id="fillsError"></div>
+    </section>
+  </div>
+
+  <div>
+    <p class="footer">
+      <span class="footer-privacy">
+        Privacy: wallet addresses are public. This page does not require sign-in.
+        The last tracked wallet is stored in the URL (<code>?wallet=</code>) for sharing.
+      </span>
+      <br />
+
+      © Dr. Roshan Mahes
+      <a class="linkedin-badge"
+        href="https://www.linkedin.com/in/roshanmahes/"
+        data-tip="Roshan's LinkedIn"
+        target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+        </svg>
+      </a>,
+      Shreehari Bodas
+      <a class="linkedin-badge"
+        href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/"
+        data-tip="Shreehari's LinkedIn"
+        target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+        </svg>
+      </a>,
+      dr. Donato Maragno
+      <a class="linkedin-badge"
+        href="https://www.linkedin.com/in/donato-maragno/"
+        data-tip="Donato's LinkedIn"
+        target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+        </svg>
+      </a>.
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="module">
+  import * as hl from "https://esm.sh/jsr/@nktkas/hyperliquid";
+
+  const DEFAULT_WALLET = "0x0b1ace05eb9ef1c3a1951b763700ecad24f27741";
+
+  const MAX_FILL_ROWS = 100;
+  const PORTFOLIO_API_URL = "https://api.hyperliquid.xyz/info";
+
+  const walletInputEl = document.getElementById("walletInput");
+  const trackBtnEl = document.getElementById("trackBtn");
+
+  const statusDotEl = document.getElementById("statusDot");
+  const statusTextEl = document.getElementById("statusText");
+  const statusSpinnerEl = document.getElementById("statusSpinner");
+  const statusLogoEl = document.querySelector(".status-logo");
+  const startedAtEl = document.getElementById("startedAt");
+
+  const marginSummaryEl = document.getElementById("marginSummary");
+  const snapshotErrorEl = document.getElementById("snapshotError");
+
+  const positionsBodyEl = document.getElementById("positionsBody");
+
+  const openOrdersBodyEl = document.getElementById("openOrdersBody");
+  const openOrdersCountEl = document.getElementById("openOrdersCount");
+  const canceledOrdersBodyEl = document.getElementById("canceledOrdersBody");
+  const canceledCountEl = document.getElementById("canceledCount");
+  const ordersErrorEl = document.getElementById("ordersError");
+
+  const historicalOrdersBodyEl = document.getElementById("historicalOrdersBody");
+  const historicalOrdersCountEl = document.getElementById("historicalOrdersCount");
+
+  const ordersTabButtons = document.querySelectorAll(".orders-tab-btn");
+  const ordersLivePanelEl = document.getElementById("ordersLivePanel");
+  const ordersHistoryPanelEl = document.getElementById("ordersHistoryPanel");
+
+  const historicalSideFilterEl = document.getElementById("historicalSideFilter");
+  const historicalStatusFilterEl = document.getElementById("historicalStatusFilter");
+  const historicalAssetFilterEl = document.getElementById("historicalAssetFilter");
+
+  const fillsBodyEl = document.getElementById("fillsBody");
+  const fillsErrorEl = document.getElementById("fillsError");
+
+  const portfolioErrorEl = document.getElementById("portfolioError");
+  const portfolioLoadingEl = document.getElementById("portfolioLoading");
+  const rangeButtons = document.querySelectorAll(".chart-range-btn");
+
+  const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
+  const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
+  const depositsCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("depositsChart"));
+
+  const themeToggleBtn = document.getElementById("themeToggle");
+
+  // === URL + LAST WALLET (localStorage) helpers ===
+  const LAST_WALLET_KEY = "hypermonitor-last-wallet";
+
+  function saveLastWallet(wallet) {
+    try { localStorage.setItem(LAST_WALLET_KEY, wallet); } catch (e) {}
+  }
+
+  function getLastWallet() {
+    try { return (localStorage.getItem(LAST_WALLET_KEY) || "").trim(); } catch (e) { return ""; }
+  }
+
+  function setWalletInUrl(wallet, { replace = false } = {}) {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("wallet", wallet);
+      if (replace) history.replaceState({ wallet }, "", url.toString());
+      else history.pushState({ wallet }, "", url.toString());
+    } catch (e) {}
+  }
+
+  function getWalletFromUrl() {
+    try {
+      const url = new URL(window.location.href);
+      return (url.searchParams.get("wallet") || "").trim();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  // === STATE ===
+  let currentWallet = DEFAULT_WALLET;
+  const openOrders = new Map();
+  const canceledOrders = [];
+  const fills = [];
+
+  const historicalOrders = [];
+  let historicalOrdersLoaded = false;
+
+  let infoClient = null;
+  let subsClient = null;
+  let orderUpdatesSub = null;
+  let userEventsSub = null;
+
+  let currentAssetPositions = [];
+  const liveMids = new Map();
+  let allMidsSub = null;
+
+  let snapshotMarginSummary = null;
+  let snapshotWithdrawable = null;
+  let snapshotUpnlTotal = 0;
+  let lastComputedUpnlTotal = 0;
+  let lastComputedTotalNotional = 0;
+
+  let portfolioData = null;
+  let currentRangeKey = "allTime";
+  const portfolioCharts = { equity: null, pnl: null, deposits: null };
+
+  function updateSpinnerForTheme(theme) {
+    if (!statusSpinnerEl) return;
+    statusSpinnerEl.src =
+      theme === "light"
+        ? "https://hyperfoundation.org/landing/blob-dark.gif"
+        : "https://hyperfoundation.org/landing/blob_green.gif";
+  }
+
+  function setStatus(status, message) {
+    statusDotEl.classList.remove("connected", "error");
+
+    if (status === "connected") {
+      statusDotEl.classList.add("connected");
+      statusTextEl.textContent = message ?? "Connected to";
+      if (statusSpinnerEl) statusSpinnerEl.style.display = "none";
+      if (statusLogoEl) statusLogoEl.classList.remove("hidden");
+    } else if (status === "error") {
+      statusDotEl.classList.add("error");
+      statusTextEl.textContent = message ?? "Error";
+      if (statusSpinnerEl) statusSpinnerEl.style.display = "none";
+      if (statusLogoEl) statusLogoEl.classList.add("hidden");
+    } else {
+      statusTextEl.textContent = "";
+      if (statusSpinnerEl) statusSpinnerEl.style.display = "inline-block";
+      if (statusLogoEl) statusLogoEl.classList.add("hidden");
+    }
+  }
+
+  function fmtTime(ms) {
+    if (!ms && ms !== 0) return "";
+    const d = new Date(Number(ms));
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleString();
+  }
+
+  function fmtMoney(v, decimals = 2) {
+    const n = Number(v);
+    if (Number.isNaN(n)) return "";
+    return `$${n.toFixed(decimals)}`;
+  }
+
+  function formatSignedDollar(v, decimals = 2) {
+    const n = Number(v);
+    if (Number.isNaN(n)) return "";
+    const abs = Math.abs(n).toFixed(decimals);
+    return n < 0 ? "-$" + abs : "$" + abs;
+  }
+
+  function computeTotal(order) {
+    const sz = Number(order.sz ?? order.szi ?? 0);
+    const pxStr = order.px ?? order.limitPx;
+    const px = Number(pxStr ?? 0);
+    if (Number.isNaN(sz) || Number.isNaN(px)) return "";
+    return (sz * px).toFixed(2);
+  }
+
+  function sideLabel(side) { return side === "B" ? "BUY" : "SELL"; }
+  function sidePillClass(side) { return side === "B" ? "pill-buy" : "pill-sell"; }
+
+  function renderMarginSummary(summary, withdrawable) {
+    if (!summary) {
+      marginSummaryEl.innerHTML = "<span class='muted'>No margin summary.</span>";
+      return;
+    }
+
+    const rows = [
+      ["Account Value", fmtMoney(summary.accountValue)],
+      ["Total Notional", fmtMoney(summary.totalNtlPos)],
+      ["Total Raw USD", fmtMoney(summary.totalRawUsd)],
+      ["Margin Used", fmtMoney(summary.totalMarginUsed)],
+      ["Withdrawable", fmtMoney(withdrawable)],
+    ];
+
+    marginSummaryEl.innerHTML = rows
+      .map(([label, value]) => `
+        <div class="kv-label">${label}</div>
+        <div class="kv-value money">${value}</div>
+      `)
+      .join("");
+  }
+
+  function recomputeAndRenderMarginSummary() {
+    if (!snapshotMarginSummary) {
+      renderMarginSummary(null, snapshotWithdrawable);
+      return;
+    }
+
+    const base = snapshotMarginSummary;
+    const snapshotAV = Number(base.accountValue ?? 0);
+    const deltaUpnl = lastComputedUpnlTotal - snapshotUpnlTotal;
+    const liveAccountValue = snapshotAV + (Number.isNaN(deltaUpnl) ? 0 : deltaUpnl);
+
+    const summaryLive = {
+      ...base,
+      accountValue: liveAccountValue,
+      totalNtlPos: lastComputedTotalNotional || base.totalNtlPos,
+    };
+
+    renderMarginSummary(summaryLive, snapshotWithdrawable);
+  }
+
+  function renderPositions(assetPositions) {
+    currentAssetPositions = Array.isArray(assetPositions) ? assetPositions : [];
+    lastComputedUpnlTotal = 0;
+    lastComputedTotalNotional = 0;
+
+    if (!currentAssetPositions.length) {
+      positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>No open positions.</td></tr>";
+      recomputeAndRenderMarginSummary();
+      return;
+    }
+
+    positionsBodyEl.innerHTML = currentAssetPositions
+      .map((item) => {
+        const p = item.position;
+        const coin = p.coin;
+        const szi = Number(p.szi ?? 0);
+
+        const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
+        const dirColor = szi >= 0 ? "#4ade80" : "#fb7185";
+        const entryPx = Number(p.entryPx ?? 0);
+
+        const livePx = liveMids.get(coin);
+        let markPx = Number.isFinite(livePx) ? livePx : undefined;
+
+        const snapshotValue = Number(p.positionValue ?? 0);
+        if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
+          markPx = snapshotValue / szi;
+        }
+
+        let positionValue = snapshotValue;
+        if (markPx !== undefined && !Number.isNaN(markPx) && szi !== 0) {
+          positionValue = markPx * szi;
+        }
+
+        let upnl = Number(p.unrealizedPnl ?? 0);
+        if (markPx !== undefined && !Number.isNaN(markPx) && !Number.isNaN(entryPx) && szi !== 0) {
+          upnl = (markPx - entryPx) * szi;
+        }
+
+        if (!Number.isNaN(upnl)) lastComputedUpnlTotal += upnl;
+        const notional = Math.abs(positionValue);
+        if (!Number.isNaN(notional)) lastComputedTotalNotional += notional;
+
+        const upnlAbs = Math.abs(upnl);
+        const upnlSign = upnl >= 0 ? "+" : "-";
+        const formattedValue = formatSignedDollar(positionValue);
+
+        return `
+        <tr>
+          <td>${coin}</td>
+          <td class="money">${szi}</td>
+          <td>
+            <span class="pill" style="color:${dirColor};border-color:${dirColor}55;background:${dirColor}22;">
+              ${dir}
+            </span>
+          </td>
+          <td class="money">${fmtMoney(entryPx)}</td>
+          <td class="money">${formattedValue}</td>
+          <td class="money" style="color:${upnl >= 0 ? "#4ade80" : "#fb7185"};">
+            ${upnlSign}$${upnlAbs.toFixed(2)}
+          </td>
+        </tr>
+      `;
+      })
+      .join("");
+
+    recomputeAndRenderMarginSummary();
+  }
+
+  function computeSnapshotUpnlTotal(assetPositions) {
+    if (!Array.isArray(assetPositions)) return 0;
+    return assetPositions.reduce((sum, item) => {
+      const p = item.position;
+      const u = Number(p.unrealizedPnl ?? 0);
+      return sum + (Number.isNaN(u) ? 0 : u);
+    }, 0);
+  }
+
+  async function refreshPositionsAndMargin(wallet) {
+    try {
+      const clearing = await infoClient.clearinghouseState({ user: wallet });
+      const { marginSummary, withdrawable, assetPositions } = clearing;
+
+      snapshotMarginSummary = marginSummary || null;
+      snapshotWithdrawable = withdrawable;
+      snapshotUpnlTotal = computeSnapshotUpnlTotal(assetPositions);
+
+      renderPositions(assetPositions);
+    } catch (err) {
+      console.error("Refresh positions error", err);
+      snapshotErrorEl.textContent = "Failed to refresh positions: " + (err?.message || err);
+    }
+  }
+
+  function renderOpenOrders() {
+    const values = Array.from(openOrders.values()).sort((a, b) => (a.oid ?? 0) - (b.oid ?? 0));
+    openOrdersCountEl.textContent = values.length.toString();
+
+    if (values.length === 0) {
+      openOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No open orders.</td></tr>";
+      return;
+    }
+
+    openOrdersBodyEl.innerHTML = values
+      .map((order) => {
+        const created = fmtTime(order.timestamp);
+        const total = computeTotal(order);
+        const side = order.side ?? "?";
+        return `
+        <tr>
+          <td>${order.oid}</td>
+          <td><span class="timestamp">${created}</span></td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td>${order.coin}</td>
+          <td class="money">${order.sz}</td>
+          <td class="money">${fmtMoney(order.limitPx) ?? ""}</td>
+          <td class="money">${total ? "$" + total : ""}</td>
+        </tr>
+      `;
+      })
+      .join("");
+  }
+
+  function renderCanceledOrders() {
+    canceledCountEl.textContent = canceledOrders.length.toString();
+
+    if (canceledOrders.length === 0) {
+      canceledOrdersBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>No canceled orders yet.</td></tr>";
+      return;
+    }
+
+    canceledOrdersBodyEl.innerHTML = canceledOrders
+      .map((o) => {
+        const created = fmtTime(o.timestamp);
+        const canceledAt = fmtTime(o.statusTimestamp);
+        const side = o.side ?? "?";
+        return `
+        <tr class="flash-cancel">
+          <td>${o.oid}</td>
+          <td><span class="timestamp">${created}</span></td>
+          <td><span class="timestamp">${canceledAt}</span></td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td>${o.coin}</td>
+          <td class="money">${o.sz}</td>
+        </tr>
+      `;
+      })
+      .join("");
+  }
+
+  function renderFills() {
+    if (fills.length === 0) {
+      fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills...</td></tr>";
+      return;
+    }
+
+    fillsBodyEl.innerHTML = fills
+      .map((fill) => {
+        const t = fmtTime(fill.time);
+        const total = computeTotal(fill);
+        const side = fill.side ?? "?";
+        return `
+        <tr class="flash">
+          <td>${fill.oid}</td>
+          <td><span class="timestamp">${t}</span></td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td>${fill.coin}</td>
+          <td class="money">${fill.sz}</td>
+          <td class="money">${fmtMoney(fill.px) ?? ""}</td>
+          <td class="money">${total ? "$" + total : ""}</td>
+        </tr>
+      `;
+      })
+      .join("");
+  }
+
+  function normalizeHistoricalOrder(entry) {
+    const o = entry?.order ?? entry ?? {};
+    const status = entry?.status ?? o.status ?? "";
+    const statusTimestamp = entry?.statusTimestamp ?? o.statusTimestamp ?? o.timestamp ?? null;
+
+    return {
+      oid: o.oid,
+      coin: o.coin,
+      side: o.side,
+      limitPx: o.limitPx ?? o.px,
+      sz: o.origSz ?? o.sz,
+      timestamp: o.timestamp,
+      status,
+      statusTimestamp,
+      raw: entry,
+    };
+  }
+
+  function renderHistoricalOrders() {
+    if (!historicalOrdersBodyEl) return;
+
+    const totalCount = historicalOrders.length;
+    const sideFilter = historicalSideFilterEl?.value || "all";
+    const statusFilter = (historicalStatusFilterEl?.value || "all").toLowerCase();
+    const assetFilter = (historicalAssetFilterEl?.value || "").trim().toLowerCase();
+
+    const filtered = historicalOrders
+      .map(normalizeHistoricalOrder)
+      .filter((o) => {
+        const side = o.side ?? (o.isBuy ? "B" : "S");
+        const status = (o.status ?? "").toLowerCase();
+        const coin = (o.coin ?? "").toLowerCase();
+
+        if (sideFilter !== "all" && side !== sideFilter) return false;
+        if (statusFilter !== "all" && !status.includes(statusFilter)) return false;
+        if (assetFilter && !coin.includes(assetFilter)) return false;
+
+        return true;
+      });
+
+    if (historicalOrdersCountEl) {
+      if (historicalOrdersLoaded) historicalOrdersCountEl.textContent = `${filtered.length} / ${totalCount}`;
+      else historicalOrdersCountEl.textContent = "–";
+    }
+
+    if (filtered.length === 0) {
+      historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No orders match the current filters.</td></tr>";
+      return;
+    }
+
+    historicalOrdersBodyEl.innerHTML = filtered
+      .map((o) => {
+        const created = fmtTime(o.timestamp);
+        const side = o.side ?? (o.isBuy ? "B" : "S");
+        const status = o.status ?? "";
+
+        return `
+        <tr>
+          <td>${o.oid ?? ""}</td>
+          <td><span class="timestamp">${created}</span></td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td>${o.coin ?? ""}</td>
+          <td class="money">${o.sz ?? ""}</td>
+          <td class="money">${fmtMoney(o.limitPx) ?? ""}</td>
+          <td>${status}</td>
+        </tr>
+      `;
+      })
+      .join("");
+  }
+
+  async function loadHistoricalOrders(wallet) {
+    if (!historicalOrdersBodyEl) return;
+
+    historicalOrdersLoaded = false;
+    if (historicalOrdersCountEl) historicalOrdersCountEl.textContent = "–";
+    historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical orders…</td></tr>";
+
+    try {
+      const body = { type: "historicalOrders", user: wallet };
+
+      const res = await fetch(PORTFOLIO_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) throw new Error(`Historical orders error: ${res.status} ${res.statusText}`);
+
+      const data = await res.json();
+
+      historicalOrders.length = 0;
+      if (Array.isArray(data)) {
+        data.sort((a, b) => {
+          const na = normalizeHistoricalOrder(a);
+          const nb = normalizeHistoricalOrder(b);
+          return (nb.timestamp ?? 0) - (na.timestamp ?? 0);
+        });
+        historicalOrders.push(...data);
+      }
+
+      historicalOrdersLoaded = true;
+      renderHistoricalOrders();
+    } catch (err) {
+      console.error("Historical orders error", err);
+      historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Failed to load historical orders.</td></tr>";
+    }
+  }
+
+  function resetState() {
+    openOrders.clear();
+    canceledOrders.length = 0;
+    fills.length = 0;
+    currentAssetPositions = [];
+    liveMids.clear();
+    snapshotMarginSummary = null;
+    snapshotWithdrawable = null;
+    snapshotUpnlTotal = 0;
+    lastComputedUpnlTotal = 0;
+    lastComputedTotalNotional = 0;
+
+    historicalOrders.length = 0;
+    historicalOrdersLoaded = false;
+
+    openOrdersCountEl.textContent = "–";
+    canceledCountEl.textContent = "–";
+    if (historicalOrdersCountEl) historicalOrdersCountEl.textContent = "–";
+
+    ordersErrorEl.textContent = "";
+    fillsErrorEl.textContent = "";
+    snapshotErrorEl.textContent = "";
+
+    openOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No open orders.</td></tr>";
+    canceledOrdersBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>No canceled orders yet.</td></tr>";
+    fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills…</td></tr>";
+
+    if (historicalOrdersBodyEl) {
+      historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical orders…</td></tr>";
+    }
+
+    positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading…</td></tr>";
+    marginSummaryEl.innerHTML = "";
+  }
+
+  async function initClients() {
+    if (!infoClient) infoClient = new hl.InfoClient({ transport: new hl.HttpTransport() });
+    if (!subsClient) subsClient = new hl.SubscriptionClient({ transport: new hl.WebSocketTransport() });
+  }
+
+  async function ensurePriceStream() {
+    if (!subsClient || allMidsSub) return;
+    try {
+      allMidsSub = await subsClient.allMids((event) => {
+        let mids = event;
+        if (event && typeof event === "object") {
+          if ("data" in event && event.data) mids = event.data;
+          if (mids && typeof mids === "object" && "mids" in mids) mids = mids.mids;
+        }
+        if (!mids || typeof mids !== "object") return;
+
+        for (const [coin, midStr] of Object.entries(mids)) {
+          const px = Number(midStr);
+          if (!Number.isNaN(px)) liveMids.set(coin, px);
+        }
+
+        if (currentAssetPositions.length) renderPositions(currentAssetPositions);
+      });
+    } catch (err) {
+      console.error("allMids subscription error", err);
+    }
+  }
+
+  async function loadSnapshot(wallet) {
+    try {
+      snapshotErrorEl.textContent = "";
+      const clearing = await infoClient.clearinghouseState({ user: wallet });
+      const { marginSummary, withdrawable, assetPositions } = clearing;
+
+      snapshotMarginSummary = marginSummary || null;
+      snapshotWithdrawable = withdrawable;
+      snapshotUpnlTotal = computeSnapshotUpnlTotal(assetPositions);
+
+      renderPositions(assetPositions);
+
+      const existingOpen = await infoClient.openOrders({ user: wallet });
+      openOrders.clear();
+      existingOpen.forEach((order) => openOrders.set(order.oid, order));
+      renderOpenOrders();
+    } catch (err) {
+      console.error("Snapshot error", err);
+      snapshotErrorEl.textContent = "Failed to load initial snapshot: " + (err?.message || err);
+    }
+  }
+
+  async function startStreams(wallet) {
+    try {
+      ordersErrorEl.textContent = "";
+      fillsErrorEl.textContent = "";
+
+      if (orderUpdatesSub) {
+        try { await orderUpdatesSub.unsubscribe(); } catch (e) { console.warn("Error unsubscribing orderUpdates", e); }
+        orderUpdatesSub = null;
+      }
+      if (userEventsSub) {
+        try { await userEventsSub.unsubscribe(); } catch (e) { console.warn("Error unsubscribing userEvents", e); }
+        userEventsSub = null;
+      }
+
+      orderUpdatesSub = await subsClient.orderUpdates({ user: wallet }, (event) => {
+        try {
+          const updates = event?.data ?? event;
+          if (!Array.isArray(updates)) return;
+
+          updates.forEach((entry) => {
+            const status = entry.status;
+            const orderWrapper = entry.order;
+            const statusTimestamp = entry.statusTimestamp;
+            if (!orderWrapper) return;
+
+            const order = { ...orderWrapper, status, statusTimestamp };
+
+            if (status === "open") {
+              openOrders.set(order.oid, order);
+              renderOpenOrders();
+            } else if (status === "canceled") {
+              openOrders.delete(order.oid);
+              renderOpenOrders();
+              canceledOrders.unshift(order);
+              renderCanceledOrders();
+            }
+          });
+        } catch (err) {
+          console.error("orderUpdates handler error", err);
+          ordersErrorEl.textContent = "Error processing order updates: " + (err?.message || err);
+        }
+      });
+
+      userEventsSub = await subsClient.userEvents({ user: wallet }, (event) => {
+        try {
+          const data = event?.data ?? event;
+          const fillsArr = Array.isArray(data?.fills) ? data.fills : [];
+          if (fillsArr.length === 0) return;
+
+          fillsArr.forEach((fill) => fills.unshift(fill));
+          if (fills.length > MAX_FILL_ROWS) fills.length = MAX_FILL_ROWS;
+          renderFills();
+
+          if (currentWallet) refreshPositionsAndMargin(currentWallet);
+        } catch (err) {
+          console.error("userEvents handler error", err);
+          fillsErrorEl.textContent = "Error processing fills: " + (err?.message || err);
+        }
+      });
+
+      setStatus("connected", "Connected to");
+    } catch (err) {
+      console.error("WebSocket setup error", err);
+      setStatus("error", "WebSocket error");
+      ordersErrorEl.textContent = "Failed to start real-time streams: " + (err?.message || err);
+    }
+  }
+
+  function isValidAddress(addr) {
+    return /^0x[a-fA-F0-9]{40}$/.test(addr);
+  }
+
+  function resetPortfolioSection() {
+    portfolioData = null;
+    portfolioErrorEl.textContent = "";
+    portfolioLoadingEl.textContent = "Loading performance data…";
+    if (portfolioCharts.equity) {
+      portfolioCharts.equity.destroy();
+      portfolioCharts.pnl.destroy();
+      portfolioCharts.deposits.destroy();
+      portfolioCharts.equity = null;
+      portfolioCharts.pnl = null;
+      portfolioCharts.deposits = null;
+    }
+  }
+
+  async function fetchPortfolio(wallet) {
+    const body = { type: "portfolio", user: wallet };
+
+    const res = await fetch(PORTFOLIO_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) throw new Error(`Portfolio API error: ${res.status} ${res.statusText}`);
+
+    const raw = await res.json();
+
+    if (Array.isArray(raw)) {
+      const obj = {};
+      for (const [key, value] of raw) obj[key] = value;
+      return obj;
+    }
+
+    return raw;
+  }
+
+  function buildViewFromSection(section) {
+    if (!section) return null;
+    const equityHist = section.accountValueHistory || [];
+    const pnlHist = section.pnlHistory || [];
+    if (!equityHist.length || !pnlHist.length) return null;
+
+    const times = equityHist.map(([t]) => new Date(Number(t)));
+    const equity = equityHist.map(([, v]) => Number(v ?? 0));
+    const pnl = pnlHist.map(([, v]) => Number(v ?? 0));
+
+    const rawDeposits = equity.map((eq, i) => (eq - (pnl[i] ?? 0)));
+
+    const base = Number.isFinite(rawDeposits[0]) ? rawDeposits[0] : 0;
+    const deposits = rawDeposits.map((d) => Math.round((d - base) * 100) / 100);
+
+    return { times, equity, pnl, deposits };
+  }
+
+  function getPortfolioView(rangeKey) {
+    if (!portfolioData) return null;
+    const primary = portfolioData[rangeKey];
+    const fallback = portfolioData.allTime;
+    return buildViewFromSection(primary) || buildViewFromSection(fallback) || null;
+  }
+
+  function buildLabels(times, rangeKey) {
+    const showTimeOnly = rangeKey === "day";
+    return times.map((d) => {
+      if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+      if (showTimeOnly) return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+      return d.toLocaleDateString();
+    });
+  }
+
+  function getChartGridColor() {
+    return document.body.classList.contains("light")
+      ? "rgba(31,41,55,0.2)"
+      : "rgba(31,41,55,0.6)";
+  }
+
+  function createLineChart(ctx, label, data, color) {
+    return new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label,
+            data: data.values,
+            borderColor: color,
+            backgroundColor: color + "33",
+            pointRadius: 0,
+            borderWidth: 1.7,
+            tension: 0.25,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(15,23,42,0.5)",
+            borderColor: "rgba(148,163,184,0.5)",
+            borderWidth: 1,
+            titleColor: "#e5e7eb",
+            bodyColor: "#e5e7eb",
+            displayColors: false,
+            padding: 8,
+            cornerRadius: 6,
+            callbacks: {
+              title: (items) => (items && items.length ? (items[0].label || "") : ""),
+              label: (ctx) => {
+                const v = Number(ctx.parsed.y ?? 0);
+                const abs = Math.abs(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
+                return v < 0 ? `-$${abs}` : `$${abs}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
+          y: {
+            ticks: {
+              // ✅ -$1000 not $-1000
+              callback: (value) => {
+                const n = Number(value);
+                if (!Number.isFinite(n)) return "";
+                const abs = Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+                return n < 0 ? `-$${abs}` : `$${abs}`;
+              },
+              maxTicksLimit: 6,
+            },
+            grid: { color: getChartGridColor() },
+          },
+        },
+      },
+    });
+  }
+
+  function initPortfolioCharts(rangeKey) {
+    const view = getPortfolioView(rangeKey);
+    if (!view) {
+      portfolioLoadingEl.textContent = "";
+      portfolioErrorEl.textContent = "No performance data available for this wallet.";
+      return;
+    }
+
+    portfolioLoadingEl.textContent = "";
+    const labels = buildLabels(view.times, rangeKey);
+
+    portfolioCharts.equity = createLineChart(
+      equityCanvas.getContext("2d"),
+      "Equity",
+      { labels, values: view.equity },
+      "#38bdf8"
+    );
+
+    portfolioCharts.pnl = createLineChart(
+      pnlCanvas.getContext("2d"),
+      "PnL",
+      { labels, values: view.pnl },
+      "#f97373"
+    );
+
+    portfolioCharts.deposits = createLineChart(
+      depositsCanvas.getContext("2d"),
+      "Deposits",
+      { labels, values: view.deposits },
+      "#22c55e"
+    );
+  }
+
+  function updatePortfolioCharts(rangeKey) {
+    const view = getPortfolioView(rangeKey);
+    if (!view) {
+      portfolioErrorEl.textContent = "No performance data available for the selected range.";
+      return;
+    }
+    portfolioErrorEl.textContent = "";
+
+    const labels = buildLabels(view.times, rangeKey);
+    const { equity, pnl, deposits } = view;
+
+    const { equity: equityChart, pnl: pnlChart, deposits: depositsChart } = portfolioCharts;
+    if (!equityChart || !pnlChart || !depositsChart) {
+      initPortfolioCharts(rangeKey);
+      return;
+    }
+
+    equityChart.data.labels = labels;
+    equityChart.data.datasets[0].data = equity;
+    equityChart.update();
+
+    pnlChart.data.labels = labels;
+    pnlChart.data.datasets[0].data = pnl;
+    pnlChart.update();
+
+    depositsChart.data.labels = labels;
+    depositsChart.data.datasets[0].data = deposits;
+    depositsChart.update();
+  }
+
+  async function loadPortfolio(wallet) {
+    try {
+      portfolioErrorEl.textContent = "";
+      portfolioLoadingEl.textContent = "Loading performance data…";
+      portfolioData = await fetchPortfolio(wallet);
+      initPortfolioCharts(currentRangeKey);
+    } catch (err) {
+      console.error("Portfolio error", err);
+      portfolioLoadingEl.textContent = "";
+      portfolioErrorEl.textContent = "Failed to load performance data: " + (err?.message || err);
+    }
+  }
+
+  function updateChartTheme() {
+    const gridColor = getChartGridColor();
+    Object.values(portfolioCharts).forEach((chart) => {
+      if (!chart) return;
+      chart.options.scales.y.grid.color = gridColor;
+      chart.update();
+    });
+  }
+
+  function applyTheme(theme) {
+    const bodyEl = document.body;
+    if (theme === "light") {
+      bodyEl.classList.add("light");
+      themeToggleBtn.textContent = "☀️ Light";
+    } else {
+      bodyEl.classList.remove("light");
+      themeToggleBtn.textContent = "🌙 Dark";
+    }
+    try { localStorage.setItem("hypermonitor-theme", theme); } catch (e) {}
+    updateSpinnerForTheme(theme);
+    updateChartTheme();
+  }
+
+  function initTheme() {
+    let initial = "dark";
+    try {
+      const saved = localStorage.getItem("hypermonitor-theme");
+      if (saved === "light" || saved === "dark") initial = saved;
+    } catch (e) {}
+    applyTheme(initial);
+  }
+
+  // ✅ add optional options so boot can "replace" instead of "push"
+  async function trackWallet(wallet, { replaceUrl = false } = {}) {
+    wallet = wallet.trim();
+    if (!isValidAddress(wallet)) {
+      snapshotErrorEl.textContent = "Please enter a valid 0x wallet address (40 hex chars).";
+      return;
+    }
+
+    // ✅ persist both URL + localStorage
+    setWalletInUrl(wallet, { replace: replaceUrl });
+    saveLastWallet(wallet);
+
+    currentWallet = wallet;
+    startedAtEl.textContent = "Started: " + new Date().toLocaleString();
+    setStatus("connecting", "Connecting…");
+
+    resetState();
+    resetPortfolioSection();
+
+    trackBtnEl.disabled = true;
+    try {
+      await initClients();
+      await ensurePriceStream();
+      await loadSnapshot(currentWallet);
+      await startStreams(currentWallet);
+      await loadPortfolio(currentWallet);
+
+      if (ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
+        await loadHistoricalOrders(currentWallet);
+      }
+    } finally {
+      trackBtnEl.disabled = false;
+    }
+  }
+
+  (async function boot() {
+    initTheme();
+
+    // ✅ Prefer: URL wallet > last saved wallet > default
+    const urlWallet = getWalletFromUrl();
+    const savedWallet = getLastWallet();
+
+    const initialWallet =
+      (isValidAddress(urlWallet) && urlWallet) ||
+      (isValidAddress(savedWallet) && savedWallet) ||
+      DEFAULT_WALLET;
+
+    // ✅ show it in the input immediately
+    walletInputEl.value = initialWallet;
+
+    startedAtEl.textContent = "Started: " + new Date().toLocaleString();
+    setStatus("connecting", "Connecting…");
+
+    await initClients();
+    await ensurePriceStream();
+
+    // ✅ Replace URL on first load (so / becomes /?wallet=... without extra history)
+    await trackWallet(initialWallet, { replaceUrl: true });
+  })();
+
+  trackBtnEl.addEventListener("click", () => {
+    trackWallet(walletInputEl.value);
+  });
+
+  walletInputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") trackWallet(walletInputEl.value);
+  });
+
+  rangeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const range = btn.dataset.range;
+      currentRangeKey = range;
+
+      rangeButtons.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      if (portfolioData) updatePortfolioCharts(currentRangeKey);
+    });
+  });
+
+  themeToggleBtn.addEventListener("click", () => {
+    const isLight = document.body.classList.contains("light");
+    applyTheme(isLight ? "dark" : "light");
+  });
+
+  ordersTabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+
+      ordersTabButtons.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      if (tab === "history") {
+        ordersLivePanelEl.classList.add("hidden");
+        ordersHistoryPanelEl.classList.remove("hidden");
+
+        if (currentWallet) loadHistoricalOrders(currentWallet);
+      } else {
+        ordersHistoryPanelEl.classList.add("hidden");
+        ordersLivePanelEl.classList.remove("hidden");
+      }
+    });
+  });
+
+  if (historicalSideFilterEl) {
+    historicalSideFilterEl.addEventListener("change", () => {
+      if (historicalOrdersLoaded) renderHistoricalOrders();
+    });
+  }
+
+  if (historicalStatusFilterEl) {
+    historicalStatusFilterEl.addEventListener("change", () => {
+      if (historicalOrdersLoaded) renderHistoricalOrders();
+    });
+  }
+
+  if (historicalAssetFilterEl) {
+    historicalAssetFilterEl.addEventListener("input", () => {
+      if (historicalOrdersLoaded) renderHistoricalOrders();
+    });
+  }
+
+  // ✅ Back/Forward support (don’t push a new history entry)
+  window.addEventListener("popstate", () => {
+    const w = getWalletFromUrl();
+    if (isValidAddress(w) && w !== currentWallet) {
+      walletInputEl.value = w;
+      trackWallet(w, { replaceUrl: true });
+    }
+  });
+</script>
+</body>
+</html>
