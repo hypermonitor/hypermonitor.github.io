@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hypermonitor — Markets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Hypermonitor markets overview (Hyperliquid perps, incl. HIP-3)." />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+    <defs>
+      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+        <stop offset='0%25' stop-color='%2326d97f'/>
+        <stop offset='100%25' stop-color='%2338bdf8'/>
+      </linearGradient>
+    </defs>
+    <circle cx='32' cy='32' r='22' fill='url(%23g)'/>
+  </svg>"/>
+
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: dark;
+
+      --bg: #101014;
+      --card-bg: #17181f;
+      --accent: #26d97f;
+      --accent-2: #38bdf8;
+      --accent-soft: rgba(38, 217, 127, 0.18);
+      --danger: #f25f5c;
+      --muted: #a1a1b5;
+      --border: #262637;
+      --text-main: #f5f5ff;
+
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+      --radius: 0.9rem;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text-main); }
+
+    a { color: inherit; text-decoration: none; }
+    a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    #app { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+    /* ===== Top nav ===== */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .brand { display: inline-flex; align-items: center; gap: .55rem; }
+    .logo-dot {
+      width: .7rem; height: .7rem; border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+      flex-shrink: 0;
+    }
+    .brand-name {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      font-size: 1.35rem;
+      margin: 0;
+    }
+    .brand-name em { font-style: italic; }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      font-size: .8rem;
+      color: var(--muted);
+      padding: .35rem .65rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover { color: var(--text-main); border-color: var(--border); text-decoration: none; }
+
+    .nav-cta {
+      padding: .35rem .85rem;
+      border-radius: 999px;
+      border: 1px solid #1fa766;
+      background: var(--accent);
+      color: #050810;
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .nav-cta:hover { filter: brightness(1.05); text-decoration: none; }
+
+    .theme-toggle-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.7rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .theme-toggle-btn:hover { filter: brightness(1.07); }
+
+    /* ===== Page header area ===== */
+    .subhead{
+      display:grid;
+      grid-template-columns: 1fr minmax(360px, 560px) auto;
+      align-items:center;
+      gap:.75rem;
+      margin-bottom: 1rem;
+    }
+    .subhead-left{ min-width: 220px; }
+    .subhead-mid{ justify-self:center; width:100%; }
+    .subhead-right{ justify-self:end; }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.5rem;
+      align-items:center;
+      width:100%;
+      margin-top:0;
+    }
+
+    @media (max-width: 900px){
+      .subhead{
+        grid-template-columns: 1fr;
+        gap:.6rem;
+      }
+      .subhead-mid{ justify-self:stretch; }
+      .subhead-right{ justify-self:start; }
+      nav { justify-content: flex-start; }
+    }
+
+    .select {
+      padding: 0.35rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      outline: none;
+      flex: 0 0 auto;
+    }
+
+    /* Tokenized search input */
+    .tokenInputWrap {
+      flex: 1 1 360px;
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .35rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+    }
+    .token {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: 0.22rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      font-size: .78rem;
+      color: var(--text-main);
+      user-select: none;
+      white-space: nowrap;
+    }
+    .token .x {
+      width: 16px; height: 16px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      line-height: 1;
+      font-size: 12px;
+    }
+    .token .x:hover { color: var(--text-main); }
+    .tokenInput {
+      flex: 1 1 140px;
+      min-width: 120px;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      padding: 0.2rem 0.25rem;
+    }
+    .tokenHint {
+      width: 100%;
+      margin-top: .35rem;
+      font-size: .75rem;
+      color: var(--muted);
+      display: none;
+    }
+    .tokenInputWrap:focus-within { border-color: rgba(38,217,127,0.6); }
+
+    /* ===== Status pill (gif while loading + logo when connected) ===== */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.25rem 0.6rem; border-radius: 9999px;
+      font-size: 0.75rem; border: 1px solid var(--border);
+      background: #17181f; color: var(--text-main);
+      white-space: nowrap;
+    }
+    .status-dot {
+      width: 0.55rem; height: 0.55rem; border-radius: 999px;
+      background: #fbbf24; box-shadow: 0 0 4px rgba(251, 191, 36, 0.6);
+      flex-shrink: 0;
+    }
+    .status-dot.connected { background: var(--accent); box-shadow: 0 0 6px rgba(34, 197, 94, 0.7); }
+    .status-dot.error { background: var(--danger); box-shadow: 0 0 6px rgba(248, 113, 113, 0.7); }
+
+    .status-spinner {
+      width: 18px; height: 18px;
+      border-radius: 999px;
+      object-fit: contain;
+      display: none;
+      margin-left: 0.15rem;
+      flex-shrink: 0;
+    }
+
+    .status-logo { display: inline-flex; align-items: center; margin-left: 0.25rem; }
+    .status-logo.hidden { display: none; }
+    .status-logo svg { height: 12px; width: auto; }
+    body:not(.light) .status-logo { color: #97fde5; }
+    body.light .status-logo { color: #072722; }
+    .status-logo-link { display: inline-flex; align-items: center; text-decoration: none; color: inherit; cursor: pointer; }
+    .muted { color: var(--muted); }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card h2 { margin: 0 0 0.75rem; font-size: 1rem; display: flex; align-items: center; gap: .4rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead { background: #17181f; position: sticky; top: 0; z-index: 2; }
+    th, td {
+      padding: 0.45rem 0.55rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) { background: #14141c; }
+    tbody tr:hover { filter: brightness(1.05); cursor: pointer; }
+
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable span { color: var(--muted); font-weight: 600; margin-left: 0.25rem; }
+
+    .money { font-variant-numeric: tabular-nums; }
+    .pos { color: #4ade80; }
+    .neg { color: #f97373; }
+
+    .coinCell { display: flex; align-items: center; gap: .5rem; }
+    .coinIcon {
+      width: 18px; height: 18px; border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #0f0f16;
+      object-fit: cover;
+    }
+    .coinFallback {
+      width: 18px; height: 18px; border-radius: 999px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800;
+      border: 1px solid var(--border);
+      background: #0f0f16;
+      color: var(--muted);
+    }
+
+    .rankCell { width: 44px; color: var(--muted); }
+
+    .badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      margin-left: .35rem;
+      color: var(--muted);
+      background: rgba(0,0,0,0.15);
+      text-transform: lowercase;
+    }
+    .badge.hip3 { color: #fbbf24; text-transform: none; }
+
+    /* ===== Light theme ===== */
+    body.light {
+      background: #ffffff;
+      color: #0f172a;
+      color-scheme: light;
+    }
+    body.light #app { color: #0f172a; }
+    body.light .theme-toggle-btn { background: #ffffff; color: #0f172a; border-color: #d1d5db; }
+    body.light .nav-link { color: #475569; }
+    body.light .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+    }
+    body.light thead { background: #f9fafb; }
+    body.light th, body.light td { border-bottom: 1px solid #e5e7eb; }
+    body.light tbody tr:nth-child(even) { background: #f9fafb; }
+
+    body.light .tokenInputWrap,
+    body.light .select,
+    body.light .status-pill {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #0f172a;
+    }
+    body.light .token { background: #f8fafc; border-color: #e5e7eb; }
+    body.light .token .x { border-color: #e5e7eb; color: #64748b; }
+    body.light .tokenInput { color: #0f172a; }
+    body.light .muted { color: #64748b; }
+    body.light .badge { border-color: #e5e7eb; color: #64748b; background: #f8fafc; }
+    body.light tbody tr:hover { filter: brightness(1.02); }
+  </style>
+</head>
+
+<body>
+<div id="app">
+
+  <header>
+    <a class="brand" href="/" aria-label="Hypermonitor home">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <h1 class="brand-name">Hyper<em>monitor</em></h1>
+    </a>
+
+    <nav aria-label="Primary">
+      <a class="nav-link" href="/tracker.html">Tracker</a>
+      <a class="nav-link" href="/markets/overview">Markets</a>
+      <button id="themeToggle" class="theme-toggle-btn" type="button">☀️ Light</button>
+      <a class="nav-cta" href="/tracker.html">Open Tracker</a>
+    </nav>
+  </header>
+
+  <div class="subhead">
+    <div class="subhead-left">
+      <h1>Market Overview</h1>
+    </div>
+
+    <div class="subhead-mid">
+      <div class="toolbar">
+        <select id="category" class="select" title="Category filter">
+          <option value="All">All</option>
+          <option value="HIP-3">HIP-3</option>
+          <option value="AI">AI</option>
+          <option value="Layer 1">Layer 1</option>
+          <option value="Layer 2">Layer 2</option>
+          <option value="DeFi">DeFi</option>
+          <option value="Oracle">Oracle</option>
+          <option value="Gaming">Gaming</option>
+          <option value="Meme">Meme</option>
+        </select>
+
+        <div class="tokenInputWrap" id="tokenWrap" title="Type tickers and press Enter/Tab">
+          <input id="tokenInput" class="tokenInput" placeholder="Search tickers… (Enter/Tab to add)" autocomplete="off" />
+        </div>
+      </div>
+      <div id="tokenHint" class="tokenHint">Tip: Enter/Tab adds a ticker chip. Backspace removes the last chip.</div>
+    </div>
+
+    <div class="subhead-right">
+      <div class="status-pill" title="Hyperliquid connection">
+        <span id="wsDot" class="status-dot"></span>
+        <span id="wsText" class="muted"></span>
+
+        <img id="wsSpinner" class="status-spinner" alt="Connecting to Hyperliquid" />
+
+        <span id="wsLogo" class="status-logo hidden" aria-hidden="true">
+          <a href="https://hyperfoundation.org/" target="_blank" rel="noopener noreferrer" class="status-logo-link">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 179 28">
+                <g clip-path="url(#clip0_975_1209)" fill="currentColor">
+                  <path d="M31.8056 11.727C31.8346 14.3384 31.2881 16.8337 30.2146 19.2178C28.6816 22.6126 25.0063 25.3885 21.6501 22.4337C18.913 20.0254 18.4052 15.1363 14.3044 14.4206C8.87845 13.7629 8.74788 20.0544 5.20315 20.7653C1.2522 21.5681 -0.0583338 14.9235 -0.000302664 11.9059C0.0577284 8.88828 0.860492 4.64717 4.294 4.64717C8.24495 4.64717 8.51092 10.6292 13.5258 10.3052C18.4923 9.96669 18.5793 3.74285 21.8242 1.07826C24.6242 -1.22364 27.9175 0.464096 29.5665 3.23508C31.0947 5.79812 31.7669 8.80606 31.8007 11.727H31.8056Z"/>
+                  <path d="M46.7054 21.8777V1.68286H48.6204V10.4165H60.4297V1.68286H62.3157V21.8777H60.4297V12.0414H48.6204V21.8777H46.7054Z"/>
+                  <path d="M67.316 27.9999L69.9274 21.5004L64.2694 7.92114H66.2425L69.9565 17.1191C70.1692 17.68 70.4691 18.4248 70.8559 19.3533C70.914 19.2179 70.972 19.0679 71.03 18.9035C71.0881 18.7391 71.1461 18.5892 71.2041 18.4538C71.3202 18.2023 71.4217 17.9654 71.5088 17.7429C71.5958 17.5205 71.6781 17.3028 71.7554 17.0901L75.2373 7.92114H77.1233L69.2021 27.9999H67.316Z"/>
+                  <path d="M121.367 21.491L121.285 21.8827H115.593L115.675 21.491C117.247 21.3217 117.89 20.872 118.142 19.6969L121.338 4.63295C121.677 3.09029 121.198 2.83883 119.573 3.17251L119.655 2.7808L123.132 1.60083H123.524L119.679 19.692C119.428 20.872 119.849 21.3169 121.362 21.4861L121.367 21.491Z"/>
+                </g>
+              <defs>
+                <clipPath id="clip0_975_1209"><rect width="178.832" height="28" fill="white"/></clipPath>
+              </defs>
+            </svg>
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>Perp Markets</h2>
+
+    <div style="max-height: 70vh; overflow:auto; border-radius: .7rem; border:1px solid var(--border);">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-k="rank"># <span id="s_rank"></span></th>
+            <th class="sortable" data-k="name">Asset <span id="s_name"></span></th>
+            <th class="sortable" data-k="price">Price <span id="s_price"></span></th>
+            <th class="sortable" data-k="chg24h">24h % <span id="s_chg24h"></span></th>
+            <th class="sortable" data-k="dayNtlVlm">24h Vol (Ntl) <span id="s_dayNtlVlm"></span></th>
+            <th class="sortable" data-k="openInterest">Open Interest <span id="s_openInterest"></span></th>
+            <th class="sortable" data-k="funding">Funding <span id="s_funding"></span></th>
+            <th class="sortable" data-k="premium">Premium <span id="s_premium"></span></th>
+          </tr>
+        </thead>
+        <tbody id="body">
+          <tr><td colspan="8" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+  const INFO_URL = "https://api.hyperliquid.xyz/info";
+  const WS_URL = "wss://api.hyperliquid.xyz/ws";
+  const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
+
+  const markets = new Map();
+
+  // Live status counters (declared once)
+  let wsOpenCount = 0;
+  let wsTotalCount = 0;
+
+  // Boot gating for "Connected to Hyperliquid" state
+  let bootContextReady = false;
+  let bootWsReady = false;
+
+  // Logo cache (prevents repeated 404s on rerender)
+  const logoCache = new Map();
+
+  // Expose handlers for inline img onload/onerror
+  window.__logoOk = (rawKey, imgEl) => {
+    const entry = logoCache.get(rawKey);
+    if (!entry) return;
+    entry.state = "ok";
+    entry.okUrl = imgEl?.currentSrc || imgEl?.src || entry.urls?.[entry.idx];
+  };
+  window.__logoErr = (rawKey, imgEl, fallbackLetter) => {
+    const entry = logoCache.get(rawKey);
+    if (!entry) return;
+
+    const nextIdx = (entry.idx ?? 0) + 1;
+    if (entry.urls && nextIdx < entry.urls.length) {
+      entry.idx = nextIdx;
+      const nextUrl = entry.urls[nextIdx];
+      try {
+        if (imgEl && imgEl.src !== nextUrl) imgEl.src = nextUrl;
+      } catch {}
+      return;
+    }
+
+    entry.state = "bad";
+    try {
+      if (imgEl && imgEl.outerHTML) {
+        imgEl.outerHTML = `<span class="coinFallback">${fallbackLetter || "?"}</span>`;
+      }
+    } catch {}
+  };
+
+  // Categories (optional override via /categories.json)
+  let CATEGORY_BY_COIN = {};
+  async function loadCategoriesJson() {
+    try {
+      const res = await fetch("/categories.json", { cache: "no-store" });
+      if (!res.ok) return;
+      const json = await res.json();
+      CATEGORY_BY_COIN = json.categories ? json.categories : json;
+    } catch {}
+  }
+
+  function splitPrefixedName(raw) {
+    const s = String(raw || "").trim();
+    const idx = s.indexOf(":");
+    if (idx > 0 && idx < s.length - 1) {
+      return { displayDex: s.slice(0, idx), clean: s.slice(idx + 1) };
+    }
+    return { displayDex: "", clean: s };
+  }
+
+  function getCategory(dex, cleanName) {
+    if (CATEGORY_BY_COIN && CATEGORY_BY_COIN[cleanName]) return CATEGORY_BY_COIN[cleanName];
+    if (dex && dex !== "") return "HIP-3";
+    return "All";
+  }
+
+  // UI elements
+  const wsDot = document.getElementById("wsDot");
+  const wsText = document.getElementById("wsText");
+  const wsSpinner = document.getElementById("wsSpinner");
+  const wsLogo = document.getElementById("wsLogo");
+
+  const bodyEl = document.getElementById("body");
+  const categoryEl = document.getElementById("category");
+
+  const tokenWrap = document.getElementById("tokenWrap");
+  const tokenInput = document.getElementById("tokenInput");
+  const tokenHint = document.getElementById("tokenHint");
+
+  // UI state
+  let sortKey = "rank";
+  let sortDir = "asc";
+  let categoryFilter = "All";
+  const searchTokens = new Set();
+
+  function updateSpinnerForTheme(theme) {
+    if (!wsSpinner) return;
+    wsSpinner.src =
+      theme === "light"
+        ? "https://hyperfoundation.org/landing/blob-dark.gif"
+        : "https://hyperfoundation.org/landing/blob_green.gif";
+  }
+
+  function setConnectionState(state, message = "") {
+    // state: "connecting" | "connected" | "error"
+    wsDot.classList.remove("connected", "error");
+
+    if (state === "connected") {
+      wsDot.classList.add("connected");
+      wsText.textContent = message || "Connected to";
+      if (wsSpinner) wsSpinner.style.display = "none";
+      if (wsLogo) wsLogo.classList.remove("hidden");
+      return;
+    }
+
+    if (state === "error") {
+      wsDot.classList.add("error");
+      wsText.textContent = message || "Disconnected";
+      if (wsSpinner) wsSpinner.style.display = "none";
+      if (wsLogo) wsLogo.classList.add("hidden");
+      return;
+    }
+
+    // connecting
+    wsText.textContent = ""; // no "Live 1/6" etc.
+    if (wsSpinner) wsSpinner.style.display = "inline-block";
+    if (wsLogo) wsLogo.classList.add("hidden");
+  }
+
+  function maybeMarkConnected() {
+    if (bootContextReady && bootWsReady) {
+      setConnectionState("connected", "Connected to");
+    }
+  }
+
+  function n(v) { const x = Number(v); return Number.isFinite(x) ? x : null; }
+
+  function fmtNum(x, d = 2) {
+    const v = Number(x);
+    if (!Number.isFinite(v)) return "–";
+    return v.toLocaleString(undefined, { maximumFractionDigits: d, minimumFractionDigits: d });
+  }
+
+  function fmtCompact(x, d = 2) {
+    const v = Number(x);
+    if (!Number.isFinite(v)) return "–";
+    return v.toLocaleString(undefined, { notation: "compact", maximumFractionDigits: d });
+  }
+
+  function compute24hPct(m) {
+    const px = m.markPx ?? m.price;
+    const prev = m.prevDayPx;
+    if (!Number.isFinite(px) || !Number.isFinite(prev) || prev === 0) return null;
+    return ((px - prev) / prev) * 100;
+  }
+
+  function getIconCandidates(rawName, cleanName) {
+    const candidates = [];
+    if (rawName && rawName.includes(":")) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
+    if (cleanName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(cleanName)}.svg`);
+    return Array.from(new Set(candidates));
+  }
+
+  function ensureLogoCache(rawName, cleanName) {
+    if (logoCache.has(rawName)) return logoCache.get(rawName);
+    const urls = getIconCandidates(rawName, cleanName);
+    const entry = { state: "unknown", idx: 0, urls, okUrl: null };
+    logoCache.set(rawName, entry);
+    return entry;
+  }
+
+  function coinIconHtml(rawName, cleanName) {
+    const entry = ensureLogoCache(rawName, cleanName);
+    const letter = (cleanName?.[0] || rawName?.[0] || "?").toUpperCase();
+
+    if (entry.state === "bad" || !entry.urls.length) {
+      return `<span class="coinFallback">${letter}</span>`;
+    }
+
+    const src = (entry.state === "ok" && entry.okUrl) ? entry.okUrl : entry.urls[entry.idx || 0];
+    const safeKey = rawName.replace(/'/g, "\\'");
+
+    return `
+      <img
+        class="coinIcon"
+        src="${src}"
+        alt="${cleanName || rawName}"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        onload="window.__logoOk('${safeKey}', this)"
+        onerror="window.__logoErr('${safeKey}', this, '${letter}')"
+      />
+    `;
+  }
+
+  // Token UI
+  function renderTokenChips() {
+    tokenWrap.querySelectorAll(".token").forEach((el) => el.remove());
+
+    for (const t of searchTokens) {
+      const chip = document.createElement("span");
+      chip.className = "token";
+      chip.innerHTML = `<span>${t}</span><span class="x" title="Remove">×</span>`;
+      chip.querySelector(".x").addEventListener("click", (e) => {
+        e.stopPropagation();
+        searchTokens.delete(t);
+        renderTokenChips();
+        requestRender();
+      });
+      tokenWrap.insertBefore(chip, tokenInput);
+    }
+
+    tokenInput.placeholder = searchTokens.size ? "" : "Search tickers… (Enter/Tab to add)";
+    tokenHint.style.display = (searchTokens.size || tokenInput.value) ? "block" : "none";
+  }
+
+  function normalizeToken(s) {
+    return (s || "").trim().toUpperCase().replace(/[^A-Z0-9_.:-]/g, "");
+  }
+
+  function addTokenFromInput() {
+    const raw = tokenInput.value;
+    if (!raw.trim()) return;
+
+    const parts = raw.split(/[\s,]+/g).map(normalizeToken).filter(Boolean);
+    for (const p of parts) {
+      const { clean } = splitPrefixedName(p);
+      if (clean) searchTokens.add(clean.toUpperCase());
+    }
+
+    tokenInput.value = "";
+    renderTokenChips();
+    requestRender();
+  }
+
+  tokenWrap.addEventListener("click", () => tokenInput.focus());
+  tokenInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === "Tab") {
+      if (tokenInput.value.trim()) {
+        e.preventDefault();
+        addTokenFromInput();
+      }
+      return;
+    }
+
+    if (e.key === "Backspace" && !tokenInput.value && searchTokens.size) {
+      const last = Array.from(searchTokens).slice(-1)[0];
+      searchTokens.delete(last);
+      renderTokenChips();
+      requestRender();
+    }
+
+    if (e.key === "," && tokenInput.value.trim()) {
+      e.preventDefault();
+      addTokenFromInput();
+    }
+  });
+  tokenInput.addEventListener("blur", () => {
+    if (tokenInput.value.trim()) addTokenFromInput();
+  });
+
+  // Rank computation (global across all dexs)
+  function recomputeRanks() {
+    const arr = Array.from(markets.values());
+    arr.sort((a, b) => (Number(b.dayNtlVlm) || 0) - (Number(a.dayNtlVlm) || 0));
+    for (let i = 0; i < arr.length; i++) arr[i].rank = i + 1;
+  }
+
+  function sortRows(rows) {
+    const dir = sortDir === "asc" ? 1 : -1;
+
+    rows.sort((a, b) => {
+      if (sortKey === "name") return dir * String(a.name).localeCompare(String(b.name));
+      if (sortKey === "rank") return dir * ((a.rank ?? 1e9) - (b.rank ?? 1e9));
+
+      const av = (a[sortKey] ?? (sortKey === "chg24h" ? compute24hPct(a) : null));
+      const bv = (b[sortKey] ?? (sortKey === "chg24h" ? compute24hPct(b) : null));
+
+      const an = Number(av);
+      const bn = Number(bv);
+      const aBad = !Number.isFinite(an);
+      const bBad = !Number.isFinite(bn);
+      if (aBad && bBad) return 0;
+      if (aBad) return 1;
+      if (bBad) return -1;
+      return dir * (an - bn);
+    });
+
+    return rows;
+  }
+
+  // Render throttling
+  let renderQueued = false;
+  function requestRender() {
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => {
+      renderQueued = false;
+      render();
+    });
+  }
+
+  function matchesTokenFilter(cleanName) {
+    if (!searchTokens.size) {
+      const q = (tokenInput.value || "").trim().toLowerCase();
+      return !q || cleanName.toLowerCase().includes(q);
+    }
+    const upper = cleanName.toUpperCase();
+    for (const t of searchTokens) {
+      if (upper.includes(t)) return true;
+    }
+    return false;
+  }
+
+  function render() {
+    const rows = Array.from(markets.values())
+      .filter((m) => categoryFilter === "All" || (m.category === categoryFilter))
+      .filter((m) => matchesTokenFilter(m.name));
+
+    sortRows(rows);
+
+    if (!rows.length) {
+      bodyEl.innerHTML = `<tr><td colspan="8" class="muted">No matches.</td></tr>`;
+      return;
+    }
+
+    bodyEl.innerHTML = rows.map((m) => {
+      const px = m.markPx ?? m.price;
+      const chg = compute24hPct(m);
+      const chgCls = (chg ?? 0) >= 0 ? "pos" : "neg";
+
+      const hip3Badge = (m.category === "HIP-3") ? `<span class="badge hip3">HIP-3</span>` : "";
+      const dexBadge = (m.displayDex ? `<span class="badge">${m.displayDex}</span>` : "");
+
+      return `
+        <tr data-key="${m.key}" data-coin="${m.rawName}" data-dex="${m.dex}">
+          <td class="rankCell money">${m.rank ?? "–"}</td>
+          <td>
+            <div class="coinCell">
+              ${coinIconHtml(m.rawName, m.name)}
+              <strong>${m.name}</strong>
+              ${hip3Badge}
+              ${dexBadge}
+            </div>
+          </td>
+          <td class="money">${px == null ? "–" : "$" + fmtNum(px, px >= 1000 ? 2 : 4)}</td>
+          <td class="${chg == null ? "muted" : chgCls} money">
+            ${chg == null ? "–" : (chg >= 0 ? "+" : "") + fmtNum(chg, 2) + "%"}
+          </td>
+          <td class="money">${m.dayNtlVlm == null ? "–" : fmtCompact(m.dayNtlVlm, 2)}</td>
+          <td class="money">${m.openInterest == null || px == null ? "–" : fmtCompact(m.openInterest * px, 2)}</td>
+          <td class="money ${m.funding != null && m.funding < 0 ? "neg" : "pos"}">
+            ${m.funding == null ? "–" : fmtNum(m.funding * 100, 4) + "%"}
+          </td>
+          <td class="money">${m.premium == null ? "–" : fmtNum(m.premium * 100, 3) + "%"}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  bodyEl.addEventListener("click", (e) => {
+    const tr = e.target.closest("tr[data-key]");
+    if (!tr) return;
+    const rawName = tr.dataset.coin;
+    const dex = tr.dataset.dex || "";
+    window.location.href = `/terminal/${encodeURIComponent(rawName)}?dex=${encodeURIComponent(dex)}`;
+  });
+
+  function updateSortIndicators() {
+    document.querySelectorAll("th.sortable span").forEach((el) => (el.textContent = ""));
+    const id = `s_${sortKey}`;
+    const el = document.getElementById(id);
+    if (el) el.textContent = sortDir === "asc" ? "▲" : "▼";
+  }
+
+  document.querySelectorAll("th.sortable").forEach((th) => {
+    th.addEventListener("click", () => {
+      const k = th.dataset.k;
+      if (!k) return;
+      if (sortKey === k) sortDir = (sortDir === "asc" ? "desc" : "asc");
+      else {
+        sortKey = k;
+        sortDir = (k === "rank" || k === "name") ? "asc" : "desc";
+      }
+      updateSortIndicators();
+      requestRender();
+    });
+  });
+
+  categoryEl.addEventListener("change", () => {
+    categoryFilter = categoryEl.value;
+    requestRender();
+  });
+
+  tokenInput.addEventListener("input", () => {
+    if (!searchTokens.size) requestRender();
+  });
+
+  // Multi-dex support
+  function keyOf(dex, rawName) {
+    return `${dex || "MAIN"}:${rawName}`;
+  }
+
+  async function fetchPerpDexNames() {
+    try {
+      const res = await fetch(INFO_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "perpDexs" })
+      });
+      if (!res.ok) return [""];
+
+      const data = await res.json();
+      const names = (Array.isArray(data) ? data : [])
+        .map((x) => x?.name)
+        .filter((x) => typeof x === "string" && x.length > 0);
+
+      return ["", ...names.filter((n) => n !== "")];
+    } catch {
+      return [""];
+    }
+  }
+
+  let DEXS = [""];
+
+  async function refreshDexContext(dex) {
+    const res = await fetch(INFO_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "metaAndAssetCtxs", dex }),
+    });
+    if (!res.ok) throw new Error(`metaAndAssetCtxs failed for dex=${dex}: ${res.status} ${res.statusText}`);
+
+    const data = await res.json();
+    const universe = data?.[0]?.universe ?? [];
+    const ctxs = data?.[1] ?? [];
+
+    for (let i = 0; i < universe.length; i++) {
+      const u = universe[i];
+      const c = ctxs[i] || {};
+      const rawName = String(u?.name || "").trim();
+      if (!rawName) continue;
+
+      const { displayDex, clean } = splitPrefixedName(rawName);
+      const key = keyOf(dex, rawName);
+
+      const cur = markets.get(key) || {
+        key,
+        dex,
+        displayDex,
+        rawName,
+        name: clean,
+        category: getCategory(dex, clean),
+        rank: null,
+        price: null,
+        prevDayPx: null,
+        markPx: null,
+        dayNtlVlm: null,
+        openInterest: null,
+        funding: null,
+        premium: null,
+      };
+
+      cur.displayDex = displayDex;
+      cur.rawName = rawName;
+      cur.name = clean;
+      cur.category = getCategory(dex, clean);
+
+      // prepare logo cache once
+      ensureLogoCache(rawName, clean);
+
+      cur.markPx = n(c.markPx);
+      cur.prevDayPx = n(c.prevDayPx);
+      cur.dayNtlVlm = n(c.dayNtlVlm);
+      cur.openInterest = n(c.openInterest);
+      cur.funding = n(c.funding);
+      cur.premium = n(c.premium);
+
+      markets.set(key, cur);
+    }
+  }
+
+  async function refreshAllDexContexts() {
+    const tasks = DEXS.map((dex) => refreshDexContext(dex));
+    await Promise.allSettled(tasks);
+    recomputeRanks();
+  }
+
+  function connectAllMidsForDex(dex) {
+    wsTotalCount += 1;
+
+    const ws = new WebSocket(WS_URL);
+
+    ws.addEventListener("open", () => {
+      wsOpenCount += 1;
+      // mark ws ready as soon as we have at least one open socket
+      bootWsReady = true;
+      maybeMarkConnected();
+
+      ws.send(JSON.stringify({ method: "subscribe", subscription: { type: "allMids", dex } }));
+    });
+
+    ws.addEventListener("message", (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg?.channel !== "allMids") return;
+
+        const d = msg?.data || {};
+        for (const [k, v] of Object.entries(d)) {
+          if (k.startsWith("@")) continue;
+
+          const rawName = String(k);
+          const mid = n(v);
+
+          const key = keyOf(dex, rawName);
+          const cur = markets.get(key);
+          if (!cur) continue;
+          cur.price = mid;
+        }
+
+        requestRender();
+      } catch {}
+    });
+
+    ws.addEventListener("close", () => {
+      wsOpenCount = Math.max(0, wsOpenCount - 1);
+
+      // If everything is down, show error (and spinner will return on next connect attempt)
+      if (wsOpenCount === 0) {
+        bootWsReady = false;
+        setConnectionState("error", "Disconnected");
+      }
+
+      setTimeout(() => connectAllMidsForDex(dex), 800);
+    });
+
+    ws.addEventListener("error", () => {
+      try { ws.close(); } catch {}
+    });
+
+    return ws;
+  }
+
+  // ===== Theme toggle =====
+  const themeToggleBtn = document.getElementById("themeToggle");
+
+  function applyTheme(theme) {
+    if (theme === "light") {
+      document.body.classList.add("light");
+      themeToggleBtn.textContent = "☀️ Light";
+    } else {
+      document.body.classList.remove("light");
+      themeToggleBtn.textContent = "🌙 Dark";
+    }
+    updateSpinnerForTheme(theme);
+    try { localStorage.setItem("hypermonitor-theme", theme); } catch (e) {}
+  }
+
+  function initTheme() {
+    let initial = "dark";
+    try {
+      const saved = localStorage.getItem("hypermonitor-theme");
+      if (saved === "light" || saved === "dark") initial = saved;
+    } catch (e) {}
+    applyTheme(initial);
+  }
+
+  themeToggleBtn.addEventListener("click", () => {
+    const isLight = document.body.classList.contains("light");
+    applyTheme(isLight ? "dark" : "light");
+  });
+
+  initTheme();
+
+  // ===== Boot =====
+  updateSortIndicators();
+  renderTokenChips();
+
+  // start in loading state (gif)
+  setConnectionState("connecting");
+
+  await loadCategoriesJson();
+  DEXS = await fetchPerpDexNames();
+
+  try {
+    await refreshAllDexContexts();
+    bootContextReady = true;
+    maybeMarkConnected();
+    requestRender();
+  } catch (e) {
+    bootContextReady = false;
+    setConnectionState("error", "Context error");
+    bodyEl.innerHTML = `<tr><td colspan="8" class="muted">Context error: ${e?.message || e}</td></tr>`;
+  }
+
+  // connect websockets (per dex)
+  wsOpenCount = 0;
+  wsTotalCount = 0;
+  for (const dex of DEXS) connectAllMidsForDex(dex);
+
+  // periodic context refresh
+  setInterval(async () => {
+    try {
+      await refreshAllDexContexts();
+      bootContextReady = true;
+      maybeMarkConnected();
+      requestRender();
+    } catch {}
+  }, 15_000);
+</script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Terminal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    /* same styling tokens as your tracker.html :contentReference[oaicite:12]{index=12} */
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: dark;
+      --bg: #101014;
+      --card-bg: #17181f;
+      --accent: #26d97f;
+      --danger: #f25f5c;
+      --muted: #a1a1b5;
+      --border: #262637;
+      --text-main: #f5f5ff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text-main); }
+    #app { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+    header {
+      display:flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem;
+      align-items: center; margin-bottom: 1.25rem;
+    }
+    .leftTitle { display:flex; flex-direction: column; gap:.25rem; }
+    h1 { margin: 0; font-size: 1.6rem; font-family: Arial, "Helvetica Neue", sans-serif; font-weight: 400; display:flex; gap:.55rem; align-items:center; }
+    .logo-dot {
+      width: .7rem; height: .7rem; border-radius: 999px;
+      background: linear-gradient(135deg, #26d97f, #38bdf8);
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+    }
+    .muted { color: var(--muted); }
+
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.25rem 0.6rem; border-radius: 9999px;
+      font-size: 0.75rem; border: 1px solid var(--border);
+      background: #17181f; color: var(--text-main);
+    }
+    .status-dot {
+      width: 0.55rem; height: 0.55rem; border-radius: 999px;
+      background: #fbbf24;
+      box-shadow: 0 0 4px rgba(251, 191, 36, 0.6);
+    }
+    .status-dot.connected { background: var(--accent); box-shadow: 0 0 6px rgba(34, 197, 94, 0.7); }
+    .status-dot.error { background: var(--danger); box-shadow: 0 0 6px rgba(248, 113, 113, 0.7); }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 0.85rem;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+    .kv {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .25rem .75rem;
+      font-size: .85rem;
+      margin-top: .25rem;
+    }
+    .kv .k { color: var(--muted); }
+    .kv .v { text-align:right; font-variant-numeric: tabular-nums; }
+
+    .toolbar {
+      display:flex; flex-wrap: wrap; gap: .45rem; align-items: center;
+      margin-top: .65rem;
+    }
+    .btn {
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .btn.active { border-color: #1fa766; color: #1fa766; background: #101018; }
+
+    .chartWrap { height: 420px; border: 1px solid var(--border); border-radius: .75rem; overflow:hidden; margin-top:.75rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    thead { background: #17181f; position: sticky; top: 0; z-index: 1; }
+    th, td { padding: 0.4rem 0.5rem; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    tbody tr:nth-child(even) { background: #14141c; }
+    .money { font-variant-numeric: tabular-nums; }
+    .pos { color:#4ade80; } .neg { color:#f97373; }
+  </style>
+</head>
+
+<body>
+<div id="app">
+  <header>
+    <div class="leftTitle">
+      <h1><span class="logo-dot"></span><span id="title">Terminal</span></h1>
+      <div class="muted" id="subTitle">Streaming: candles • l2Book • trades</div>
+    </div>
+
+    <div class="status-pill">
+      <span id="wsDot" class="status-dot"></span>
+      <span id="wsText" class="muted">Connecting…</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;flex-wrap:wrap;">
+        <div>
+          <div class="muted" style="font-size:.85rem;">Market</div>
+          <div style="font-size:1.2rem;margin-top:.15rem;"><strong id="coinName">–</strong> Perp</div>
+        </div>
+        <div class="toolbar" aria-label="interval toolbar">
+          <button class="btn" data-ivl="1m">1m</button>
+          <button class="btn" data-ivl="5m">5m</button>
+          <button class="btn active" data-ivl="15m">15m</button>
+          <button class="btn" data-ivl="1h">1h</button>
+          <button class="btn" data-ivl="4h">4h</button>
+          <button class="btn" data-ivl="1d">1d</button>
+        </div>
+      </div>
+
+      <div class="kv" id="stats">
+        <div class="k">Price</div><div class="v money" id="s_price">–</div>
+        <div class="k">24h %</div><div class="v money" id="s_chg">–</div>
+        <div class="k">Funding</div><div class="v money" id="s_funding">–</div>
+        <div class="k">Open Interest</div><div class="v money" id="s_oi">–</div>
+        <div class="k">24h Vol (Ntl)</div><div class="v money" id="s_vol">–</div>
+        <div class="k">Premium</div><div class="v money" id="s_prem">–</div>
+      </div>
+
+      <div class="chartWrap" id="chart"></div>
+      <div class="muted" style="margin-top:.6rem;font-size:.78rem;">
+        Candles: snapshot via <code>type:"candleSnapshot"</code> + live <code>candle</code> stream. :contentReference[oaicite:13]{index=13}
+      </div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;">
+        <h2 style="margin:0;font-size:1rem;">Order Book</h2>
+        <div class="muted" style="font-size:.8rem;">L2</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr; gap:.75rem; margin-top:.75rem;">
+        <div style="max-height: 360px; overflow:auto; border-radius:.7rem; border:1px solid var(--border);">
+          <table>
+            <thead><tr><th>Bid</th><th class="money">Size</th></tr></thead>
+            <tbody id="bids"><tr><td colspan="2" class="muted">Waiting…</td></tr></tbody>
+          </table>
+        </div>
+        <div style="max-height: 360px; overflow:auto; border-radius:.7rem; border:1px solid var(--border);">
+          <table>
+            <thead><tr><th>Ask</th><th class="money">Size</th></tr></thead>
+            <tbody id="asks"><tr><td colspan="2" class="muted">Waiting…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-top:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;">
+          <h2 style="margin:0;font-size:1rem;">Trades</h2>
+          <div class="muted" style="font-size:.8rem;">tape</div>
+        </div>
+        <div style="max-height: 320px; overflow:auto; margin-top:.75rem; border-radius:.7rem; border:1px solid var(--border);">
+          <table>
+            <thead><tr><th>Time</th><th>Side</th><th class="money">Price</th><th class="money">Size</th></tr></thead>
+            <tbody id="trades"><tr><td colspan="4" class="muted">Waiting…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
+<script type="module">
+  const INFO_URL = "https://api.hyperliquid.xyz/info";
+  const WS_URL = "wss://api.hyperliquid.xyz/ws";
+
+  const wsDot = document.getElementById("wsDot");
+  const wsText = document.getElementById("wsText");
+
+  const coinNameEl = document.getElementById("coinName");
+  const titleEl = document.getElementById("title");
+
+  const sPrice = document.getElementById("s_price");
+  const sChg = document.getElementById("s_chg");
+  const sFunding = document.getElementById("s_funding");
+  const sOi = document.getElementById("s_oi");
+  const sVol = document.getElementById("s_vol");
+  const sPrem = document.getElementById("s_prem");
+
+  const bidsEl = document.getElementById("bids");
+  const asksEl = document.getElementById("asks");
+  const tradesEl = document.getElementById("trades");
+
+  const chartHost = document.getElementById("chart");
+
+  function setWsStatus(state, text) {
+    wsDot.classList.remove("connected", "error");
+    if (state === "connected") wsDot.classList.add("connected");
+    if (state === "error") wsDot.classList.add("error");
+    wsText.textContent = text;
+  }
+
+  function parseCoinFromUrl() {
+    // supports:
+    //  - /terminal/BTC
+    //  - /terminal.html?coin=BTC
+    const u = new URL(window.location.href);
+    const q = (u.searchParams.get("coin") || "").trim();
+    if (q) return q.toUpperCase();
+
+    const parts = u.pathname.split("/").filter(Boolean);
+    const last = parts[parts.length - 1] || "";
+    if (last.toLowerCase() === "terminal" || last.toLowerCase().endsWith(".html")) return "BTC";
+    return decodeURIComponent(last).toUpperCase();
+  }
+
+  function n(v) {
+    const x = Number(v);
+    return Number.isFinite(x) ? x : null;
+  }
+
+  function fmtNum(x, d = 2) {
+    const v = Number(x);
+    if (!Number.isFinite(v)) return "–";
+    return v.toLocaleString(undefined, { maximumFractionDigits: d, minimumFractionDigits: d });
+  }
+
+  function fmtCompact(x, d = 2) {
+    const v = Number(x);
+    if (!Number.isFinite(v)) return "–";
+    return v.toLocaleString(undefined, { notation: "compact", maximumFractionDigits: d });
+  }
+
+  const coin = parseCoinFromUrl();
+  coinNameEl.textContent = coin;
+  titleEl.textContent = `Terminal • ${coin}`;
+
+  // === Chart ===
+  let interval = "15m";
+  const MS = { "1m":60000, "3m":180000, "5m":300000, "15m":900000, "30m":1800000, "1h":3600000, "2h":7200000, "4h":14400000, "8h":28800000, "12h":43200000, "1d":86400000, "3d":259200000, "1w":604800000, "1M":2592000000 };
+
+  const chart = LightweightCharts.createChart(chartHost, {
+    width: chartHost.clientWidth,
+    height: chartHost.clientHeight,
+    layout: { background: { color: "rgba(0,0,0,0)" }, textColor: "#e5e7eb" },
+    grid: { vertLines: { color: "rgba(148,163,184,0.12)" }, horzLines: { color: "rgba(148,163,184,0.12)" } },
+    timeScale: { rightOffset: 2, borderColor: "rgba(148,163,184,0.12)" },
+    rightPriceScale: { borderColor: "rgba(148,163,184,0.12)" },
+    crosshair: { mode: 1 },
+  });
+
+  const candleSeries = chart.addCandlestickSeries({
+    upColor: "#4ade80", wickUpColor: "#4ade80",
+    downColor: "#f97373", wickDownColor: "#f97373",
+    borderVisible: false,
+  });
+
+  const ro = new ResizeObserver(() => chart.applyOptions({ width: chartHost.clientWidth, height: chartHost.clientHeight }));
+  ro.observe(chartHost);
+
+  async function fetchCandleSnapshot() {
+    const msPer = MS[interval] || 900000;
+    const end = Date.now();
+    const start = end - msPer * 240;
+
+    const res = await fetch(INFO_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "candleSnapshot", req: { coin, interval, startTime: start, endTime: end } }),
+    });
+    if (!res.ok) throw new Error(`candleSnapshot failed: ${res.status} ${res.statusText}`);
+    const data = await res.json();
+
+    const candles = (Array.isArray(data) ? data : []).map((c) => ({
+      time: Math.floor(Number(c.t) / 1000),
+      open: Number(c.o),
+      high: Number(c.h),
+      low: Number(c.l),
+      close: Number(c.c),
+    })).filter((c) => Number.isFinite(c.time) && Number.isFinite(c.open) && Number.isFinite(c.high) && Number.isFinite(c.low) && Number.isFinite(c.close))
+      .sort((a,b) => a.time - b.time);
+
+    candleSeries.setData(candles);
+  }
+
+  // === Context stats (metaAndAssetCtxs) ===
+  async function refreshContext() {
+    const res = await fetch(INFO_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "metaAndAssetCtxs" }),
+    });
+    if (!res.ok) throw new Error(`metaAndAssetCtxs failed: ${res.status} ${res.statusText}`);
+    const data = await res.json();
+
+    const universe = data?.[0]?.universe ?? [];
+    const ctxs = data?.[1] ?? [];
+
+    const idx = universe.findIndex((u) => String(u?.name).toUpperCase() === coin.toUpperCase());
+    if (idx < 0) throw new Error(`Coin not found in universe: ${coin}`);
+
+    const c = ctxs[idx] || {};
+    const markPx = n(c.markPx);
+    const prevDayPx = n(c.prevDayPx);
+    const funding = n(c.funding);
+    const premium = n(c.premium);
+    const dayNtlVlm = n(c.dayNtlVlm);
+    const openInterest = n(c.openInterest);
+
+    sPrice.textContent = markPx == null ? "–" : fmtNum(markPx, markPx >= 1000 ? 2 : 4);
+
+    if (markPx != null && prevDayPx != null && prevDayPx !== 0) {
+      const pct = ((markPx - prevDayPx) / prevDayPx) * 100;
+      sChg.textContent = (pct >= 0 ? "+" : "") + fmtNum(pct, 2) + "%";
+      sChg.className = "v money " + (pct >= 0 ? "pos" : "neg");
+    } else {
+      sChg.textContent = "–";
+      sChg.className = "v money muted";
+    }
+
+    sFunding.textContent = funding == null ? "–" : fmtNum(funding * 100, 4) + "%";
+    sFunding.className = "v money " + (funding != null && funding < 0 ? "neg" : "pos");
+
+    // show OI as notional (contracts * mark)
+    sOi.textContent = (openInterest == null || markPx == null) ? "–" : fmtCompact(openInterest * markPx, 2);
+
+    sVol.textContent = dayNtlVlm == null ? "–" : fmtCompact(dayNtlVlm, 2);
+    sPrem.textContent = premium == null ? "–" : fmtNum(premium * 100, 3) + "%";
+  }
+
+  // === WebSocket streams: candle, l2Book, trades ===
+  let ws = null;
+
+  function renderBookSide(el, levels, side) {
+    const rows = (levels || []).slice(0, 18).map((lv) => {
+      const px = n(lv?.px);
+      const sz = n(lv?.sz);
+      if (px == null || sz == null) return "";
+      return `<tr><td class="money ${side === "ask" ? "neg" : "pos"}">${fmtNum(px, px >= 1000 ? 2 : 4)}</td><td class="money">${fmtNum(sz, 4)}</td></tr>`;
+    }).filter(Boolean);
+
+    el.innerHTML = rows.length ? rows.join("") : `<tr><td colspan="2" class="muted">–</td></tr>`;
+  }
+
+  const MAX_TRADES = 120;
+  const tradeBuf = [];
+
+  function renderTrades() {
+    tradesEl.innerHTML = tradeBuf.slice(0, MAX_TRADES).map((t) => {
+      const time = new Date(Number(t.time) || Date.now()).toLocaleTimeString();
+      const side = (t.side === "B") ? "<span class='pos'>BUY</span>" : "<span class='neg'>SELL</span>";
+      const px = n(t.px);
+      const sz = n(t.sz);
+      return `<tr><td class="muted">${time}</td><td>${side}</td><td class="money">${px==null?"–":fmtNum(px, px>=1000?2:4)}</td><td class="money">${sz==null?"–":fmtNum(sz, 4)}</td></tr>`;
+    }).join("") || `<tr><td colspan="4" class="muted">Waiting…</td></tr>`;
+  }
+
+  function connectWs() {
+    ws = new WebSocket(WS_URL);
+
+    ws.addEventListener("open", () => {
+      setWsStatus("connected", "Live");
+
+      // subscriptions list :contentReference[oaicite:14]{index=14}
+      ws.send(JSON.stringify({ method: "subscribe", subscription: { type: "l2Book", coin } }));
+      ws.send(JSON.stringify({ method: "subscribe", subscription: { type: "trades", coin } }));
+      ws.send(JSON.stringify({ method: "subscribe", subscription: { type: "candle", coin, interval } }));
+    });
+
+    ws.addEventListener("message", (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        const ch = msg?.channel;
+        const d = msg?.data;
+
+        if (ch === "l2Book") {
+          // WsBook typically has levels/bids/asks in data (varies by client).
+          // Handle common shapes: { levels: [bids, asks] } or { bids:[], asks:[] }
+          const bids = d?.levels?.[0] || d?.bids || [];
+          const asks = d?.levels?.[1] || d?.asks || [];
+          renderBookSide(bidsEl, bids, "bid");
+          renderBookSide(asksEl, asks, "ask");
+          return;
+        }
+
+        if (ch === "trades") {
+          // WsTrade[] :contentReference[oaicite:15]{index=15}
+          const arr = Array.isArray(d) ? d : [];
+          for (const t of arr.reverse()) {
+            tradeBuf.unshift({
+              time: t?.time ?? t?.t ?? Date.now(),
+              side: t?.side ?? t?.s,
+              px: t?.px ?? t?.p,
+              sz: t?.sz ?? t?.q,
+            });
+          }
+          tradeBuf.splice(MAX_TRADES, tradeBuf.length - MAX_TRADES);
+          renderTrades();
+          return;
+        }
+
+        if (ch === "candle") {
+          // Candle[] live updates :contentReference[oaicite:16]{index=16}
+          const arr = Array.isArray(d) ? d : [];
+          for (const c of arr) {
+            const bar = {
+              time: Math.floor(Number(c.t) / 1000),
+              open: Number(c.o),
+              high: Number(c.h),
+              low: Number(c.l),
+              close: Number(c.c),
+            };
+            if (Number.isFinite(bar.time)) candleSeries.update(bar);
+          }
+          return;
+        }
+      } catch {}
+    });
+
+    ws.addEventListener("close", () => {
+      setWsStatus("error", "Disconnected (retrying…)");
+      setTimeout(connectWs, 800);
+    });
+
+    ws.addEventListener("error", () => {
+      setWsStatus("error", "WebSocket error");
+      try { ws.close(); } catch {}
+    });
+  }
+
+  function setIntervalButtons() {
+    document.querySelectorAll(".btn[data-ivl]").forEach((b) => {
+      b.addEventListener("click", async () => {
+        const ivl = b.dataset.ivl;
+        if (!ivl || ivl === interval) return;
+        interval = ivl;
+
+        document.querySelectorAll(".btn[data-ivl]").forEach((x) => x.classList.remove("active"));
+        b.classList.add("active");
+
+        // restart candle subscription by reconnecting WS (simple, robust)
+        try { ws?.close(); } catch {}
+
+        await fetchCandleSnapshot();
+        connectWs();
+      });
+    });
+  }
+
+  // Boot
+  setIntervalButtons();
+  await refreshContext();
+  await fetchCandleSnapshot();
+  connectWs();
+
+  // periodic stat refresh
+  setInterval(async () => {
+    try { await refreshContext(); } catch {}
+  }, 15_000);
+</script>
+</body>
+</html>
