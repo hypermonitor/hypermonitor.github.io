@@ -410,8 +410,8 @@
     .chart-range-btn:hover { border-color: rgba(148, 163, 184, 0.8); }
 
     .chart-range-btn.active {
-      border-color: #1fa766;
-      color: #1fa766;
+      border-color: #18bf98;
+      color: #18bf98;
     }
 
     .chart-grid {
@@ -495,7 +495,6 @@
     body.light .card {
       background: #ffffff;
       border: 1px solid #e5e7eb;
-      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
     }
 
     body.light .card h2 span.badge {
@@ -522,14 +521,13 @@
     body.light .chart-range-btn:hover { border-color: #d1d5db; }
 
     body.light .chart-range-btn.active {
-      border-color: #1fa766;
-      color: #1fa766;
+      border-color: #18bf98;
+      color: #18bf98;
     }
 
     body.light .chart-card {
       background: #ffffff;
       border: 1px solid #e5e7eb;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
     }
 
     body.light .chart-loading { color: #6b7280; }
@@ -655,8 +653,8 @@
     .orders-tab-btn:hover { border-color: rgba(148, 163, 184, 0.8); }
 
     .orders-tab-btn.active {
-      border-color: #1fa766;
-      color: #1fa766;
+      border-color: #18bf98;
+      color: #18bf98;
       background: #101018;
     }
 
@@ -669,8 +667,8 @@
     body.light .orders-tab-btn:hover { border-color: #d1d5db; }
 
     body.light .orders-tab-btn.active {
-      border-color: #1fa766;
-      color: #1fa766;
+      border-color: #18bf98;
+      color: #18bf98;
       background: #f9fafb;
     }
 
@@ -734,7 +732,7 @@
         <span class="logo-word logo-word-regular">Hyper<span class="logo-word logo-word-italic">monitor</span></span>
       </h1>
       <div class="tagline">
-        Track any Hyperliquid wallet: positions, orders, fills, and performance.
+        Track any Hyperliquid wallet. No wallet connection required.
       </div>
       <div class="wallet-input-row">
         <label for="walletInput">Wallet address:</label>
@@ -815,7 +813,7 @@
       <button class="chart-range-btn" data-range="day">Day</button>
       <button class="chart-range-btn" data-range="week">Week</button>
       <button class="chart-range-btn" data-range="month">Month</button>
-      <button class="chart-range-btn active" data-range="allTime">All</button>
+      <button class="chart-range-btn active" data-range="allTime">All Time</button>
     </div>
 
     <div class="chart-grid">
@@ -1202,8 +1200,8 @@
 
     const rows = [
       ["Account Value", fmtMoney(summary.accountValue)],
-      ["Total Notional", fmtMoney(summary.totalNtlPos)],
-      ["Total Raw USD", fmtMoney(summary.totalRawUsd)],
+      ["Total Notional Exposure", fmtMoney(summary.totalNtlPos)],
+      ["Total Collateral (USD)", fmtMoney(summary.totalRawUsd)],
       ["Margin Used", fmtMoney(summary.totalMarginUsed)],
       ["Withdrawable", fmtMoney(withdrawable)],
     ];
