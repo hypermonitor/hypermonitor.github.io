@@ -37,12 +37,12 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color-scheme: dark;
       --bg: #101014;
-      --card-bg: #17181f;
+      --card-bg: #101014cf;
       --accent: #26d97f;
       --accent-soft: rgba(38, 217, 127, 0.18);
       --danger: #f25f5c;
-      --muted: #a1a1b5;
-      --border: #262637;
+      --border: rgba(255,255,255,0.08);
+      --muted: rgba(245,245,255,0.62);
       --text-main: #f5f5ff;
     }
 
@@ -92,13 +92,13 @@
     }
     .wallet-input-row input:focus {
       border-color: #97fde5;
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      box-shadow: none;
     }
     .wallet-input-row button {
       padding: 0.35rem 0.9rem;
       border-radius: 999px;
-      border: 1px solid #1fa766;
-      background: #26d97f;
+      border: 1px solid #139e7d;
+      background: #18bf98;
       color: #050810;
       font-size: 0.8rem;
       font-weight: 600;
@@ -168,10 +168,9 @@
 
     .card {
       background: var(--card-bg);
-      border-radius: 0.85rem;
-      border: 1px solid var(--border);
-      padding: 1rem;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+      border: 0.1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem;
       position: relative;
       overflow: hidden;
     }
@@ -206,10 +205,10 @@
     th, td {
       padding: 0.35rem 0.45rem;
       text-align: left;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       white-space: nowrap;
     }
-    tbody tr:nth-child(even) { background: #14141c; }
+    tbody tr:nth-child(even) { background: transparent; }
 
     .pill {
       display: inline-flex;
@@ -247,11 +246,10 @@
 
     .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.75rem; margin-top: 0.5rem; }
     .chart-card {
-      background: #17181f; border-radius: 0.75rem; border: 1px solid var(--border);
+      border-radius: 0.75rem; border: 1px solid var(--border);
       padding: 0.6rem 0.75rem 0.75rem;
       position: relative; overflow: hidden;
       display: flex; flex-direction: column; min-height: 220px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
     }
     .chart-card h3 { margin: 0 0 0.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem; }
     .chart-card h3 span.spark-label { font-size: 0.7rem; color: var(--muted); font-weight: 400; }
@@ -303,9 +301,9 @@
     body.light .card h2 span.badge { border-color: #e5e7eb; color: #6b7280; }
     body.light .kv-label, body.light .muted, body.light .timestamp { color: #6b7280; }
     body.light table { color: #0f172a; }
-    body.light thead { background: #f9fafb; }
+    body.light thead { background: transparent; }
     body.light th, body.light td { border-bottom: 1px solid #e5e7eb; }
-    body.light tbody tr:nth-child(even) { background: #f9fafb; }
+    body.light tbody tr:nth-child(even) { background: transparent; }
     body.light .chart-range-btn { background: #ffffff; color: #6b7280; border-color: #e5e7eb; }
     body.light .chart-range-btn:hover { border-color: #d1d5db; }
     body.light .chart-range-btn.active { border-color: #1fa766; color: #1fa766; }
@@ -394,6 +392,7 @@
       font-size: 0.8rem;
       color: var(--muted);
     }
+
   </style>
 </head>
 

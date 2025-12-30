@@ -39,12 +39,12 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color-scheme: dark;
       --bg: #101014;
-      --card-bg: #17181f;
+      --card-bg: #101014cf;
       --accent: #26d97f;
       --accent-soft: rgba(38, 217, 127, 0.18);
       --danger: #f25f5c;
-      --muted: #a1a1b5;
-      --border: #262637;
+      --border: rgba(255,255,255,0.08);
+      --muted: rgba(245,245,255,0.62);
       --text-main: #f5f5ff;
     }
 
@@ -145,8 +145,8 @@
     .wallet-input-row button {
       padding: 0.35rem 0.9rem;
       border-radius: 999px;
-      border: 1px solid #1fa766;
-      background: #26d97f;
+      border: 1px solid #139e7d;
+      background: #18bf98;
       color: #050810;
       font-size: 0.8rem;
       font-weight: 600;
@@ -242,10 +242,9 @@
 
     .card {
       background: var(--card-bg);
-      border-radius: 0.85rem;
-      border: 1px solid var(--border);
+      border: 0.1px solid var(--border);
+      border-radius: 10px;
       padding: 1rem;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
       position: relative;
       overflow: hidden;
     }
@@ -413,7 +412,6 @@
     .chart-range-btn.active {
       border-color: #1fa766;
       color: #1fa766;
-      background: #101018;
     }
 
     .chart-grid {
@@ -424,7 +422,6 @@
     }
 
     .chart-card {
-      background: #17181f;
       border-radius: 0.75rem;
       border: 1px solid var(--border);
       padding: 0.6rem 0.75rem 0.75rem;
@@ -433,7 +430,6 @@
       display: flex;
       flex-direction: column;
       min-height: 220px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
     }
 
     .chart-card h3 {
@@ -608,6 +604,15 @@
 
     .linkedin-badge:hover::after { opacity: 1; }
 
+    footer {
+      margin-top: 1.2rem;
+      padding: 1rem 0 0;
+      border-top: 1px #262637;
+      color: #a1a1b5;
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+
     .status-logo {
       display: inline-flex;
       align-items: center;
@@ -715,6 +720,8 @@
       border-color: #e5e7eb;
       color: #0f172a;
     }
+
+    body.light footer { border-top-color: #e5e7eb; }
   </style>
 </head>
 
@@ -776,13 +783,13 @@
 
   <div class="grid">
     <section class="card">
-      <h2>Wallet Snapshot <span class="badge">clearinghouseState</span></h2>
+      <h2>Wallet Snapshot</h2>
       <div id="marginSummary" class="kv-list"></div>
       <div class="error" id="snapshotError"></div>
     </section>
 
     <section class="card" style="overflow: auto;">
-      <h2>Positions <span class="badge">assetPositions</span></h2>
+      <h2>Positions</h2>
       <table>
         <thead>
         <tr>
@@ -802,7 +809,7 @@
   </div>
 
   <section class="card">
-    <h2>Performance <span class="badge">portfolio</span></h2>
+    <h2>Performance</h2>
 
     <div class="chart-toolbar">
       <button class="chart-range-btn" data-range="day">Day</button>
@@ -813,21 +820,21 @@
 
     <div class="chart-grid">
       <div class="chart-card">
-        <h3>Equity <span class="spark-label">Account value ($)</span></h3>
+        <h3>Account Value</h3>
         <div class="chart-canvas-wrap">
           <canvas id="equityChart"></canvas>
         </div>
       </div>
 
       <div class="chart-card">
-        <h3>PnL <span class="spark-label">Net profit ($)</span></h3>
+        <h3>Profit & Loss</h3>
         <div class="chart-canvas-wrap">
           <canvas id="pnlChart"></canvas>
         </div>
       </div>
 
       <div class="chart-card">
-        <h3>Deposits <span class="spark-label">Net deposits ($)</span></h3>
+        <h3>Deposits & Withdrawals</h3>
         <div class="chart-canvas-wrap">
           <canvas id="depositsChart"></canvas>
         </div>
@@ -842,7 +849,7 @@
 
   <div class="layout-two">
     <section class="card">
-      <h2>Orders <span class="badge">orderUpdates</span></h2>
+      <h2>Orders</h2>
 
       <div class="orders-tabs">
         <button class="orders-tab-btn active" data-tab="live">Live</button>
@@ -959,7 +966,7 @@
     </section>
 
     <section class="card">
-      <h2>Trades Stream <span class="badge">userEvents</span></h2>
+      <h2>Trades Stream</h2>
       <div style="max-height: 360px; overflow: auto;">
         <table>
           <thead>
@@ -982,43 +989,39 @@
     </section>
   </div>
 
-  <div>
-    <p class="footer">
-      <span class="footer-privacy">
-        Privacy: wallet addresses are public. This page does not require sign-in.
-        The last tracked wallet is stored in the URL (<code>?wallet=</code>) for sharing.
-      </span>
-      <br />
-
-      © Dr. Roshan Mahes
-      <a class="linkedin-badge"
-        href="https://www.linkedin.com/in/roshanmahes/"
-        data-tip="Roshan's LinkedIn"
-        target="_blank" rel="noopener noreferrer">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-        </svg>
-      </a>,
-      Shreehari Bodas
-      <a class="linkedin-badge"
-        href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/"
-        data-tip="Shreehari's LinkedIn"
-        target="_blank" rel="noopener noreferrer">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-        </svg>
-      </a>,
-      dr. Donato Maragno
-      <a class="linkedin-badge"
-        href="https://www.linkedin.com/in/donato-maragno/"
-        data-tip="Donato's LinkedIn"
-        target="_blank" rel="noopener noreferrer">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-        </svg>
-      </a>.
-    </p>
-  </div>
+  <footer>
+    <div style="margin-top:0;">
+      <!-- TODO -->
+      <strong>Disclaimer:</strong> This website is for informational purposes only and does not constitute investment advice.
+    </div>
+    © Dr. Roshan Mahes
+    <a class="linkedin-badge"
+      href="https://www.linkedin.com/in/roshanmahes/"
+      data-tip="Roshan's LinkedIn"
+      target="_blank" rel="noopener noreferrer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+      </svg>
+    </a>,
+    Shreehari Bodas
+    <a class="linkedin-badge"
+      href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/"
+      data-tip="Shreehari's LinkedIn"
+      target="_blank" rel="noopener noreferrer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+      </svg>
+    </a>,
+    dr. Donato Maragno
+    <a class="linkedin-badge"
+      href="https://www.linkedin.com/in/donato-maragno/"
+      data-tip="Donato's LinkedIn"
+      target="_blank" rel="noopener noreferrer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+      </svg>
+    </a>.
+  </footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
