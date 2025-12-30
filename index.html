@@ -1397,7 +1397,7 @@
     lastComputedTotalNotional = 0;
 
     if (!currentAssetPositions.length) {
-      positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>No open positions.</td></tr>";
+      positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted desktop-only'>No open positions.</td></tr>";
       recomputeAndRenderMarginSummary();
       return;
     }
