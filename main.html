@@ -500,6 +500,96 @@
     body.light footer { border-top-color: #e5e7eb; }
     body.light .badge { border-color: #e5e7eb; color: #64748b; }
     body.light .muted { color: #64748b; }
+
+    /* === Tracker-style minimal overrides (paste at end) === */
+    :root{
+      --bg: #101014;
+      --card-bg: #101014cf;                 /* closer to bg (like tracker) */
+      --border: rgba(255,255,255,0.08);
+      --muted: rgba(245,245,255,0.62);
+      --text-main: #f5f5ff;
+
+      --shadow: none;                        /* kill global elevation */
+      --radius: 10px;                        /* match tracker cards */
+    }
+
+    /* Remove glow */
+    .logo-dot { box-shadow: none !important; }
+
+    /* Flatten hero: no shadows, no strong gradients */
+    .hero{
+      box-shadow: none !important;
+      border-radius: 10px;
+    }
+
+    /* Flatten everything that looks “card-on-card” */
+    .card,
+    .hero-card,
+    .feature,
+    .person{
+      box-shadow: none !important;
+      background: var(--card-bg) !important;
+      border-color: var(--border) !important;
+      border-radius: 10px;
+    }
+
+    /* Make hero-card/feature/person less “outlined panels” */
+    .hero-card,
+    .feature,
+    .person{
+      background: transparent !important;    /* looks more terminal */
+    }
+
+    /* Mini items: remove green fill; make them simple rows */
+    .mini-item{
+      background: transparent !important;
+      border: 1px solid var(--border) !important;
+    }
+
+    /* Pills: outline-only, no filled backgrounds */
+    .pill,
+    .pill-live,
+    .pill-soon{
+      background: transparent !important;
+    }
+
+    /* Tables: remove zebra; keep subtle separators */
+    thead{ background: transparent !important; }
+    tbody tr:nth-child(even){ background: transparent !important; }
+    th, td{ border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+
+    /* Buttons/inputs: keep flat, no “component shadow” */
+    .btn,
+    .theme-toggle-btn,
+    .nav-link{
+      box-shadow: none !important;
+    }
+
+    /* Nav CTA: slightly calmer */
+    .nav-cta{
+      border-color: rgba(31,167,102,0.55) !important;
+    }
+
+    /* Footer border (yours currently doesn’t render because border-top lacks 'solid') */
+    footer{
+      border-top: 1px solid var(--border) !important;
+    }
+
+    /* Light theme: also flat */
+    body.light .hero,
+    body.light .card,
+    body.light .hero-card,
+    body.light .feature,
+    body.light .person{
+      box-shadow: none !important;
+      background: #ffffff !important;
+      border-color: rgba(15,23,42,0.10) !important;
+    }
+    body.light thead{ background: transparent !important; }
+    body.light tbody tr:nth-child(even){ background: transparent !important; }
+    body.light th, body.light td{ border-bottom-color: rgba(15,23,42,0.10) !important; }
+    body.light footer{ border-top-color: rgba(15,23,42,0.10) !important; }
+
   </style>
 </head>
 
@@ -536,15 +626,14 @@
             Track them live. Build conviction.
           </h1>
           <p>
-            Hypermonitor helps you find well-performing wallets on Hyperliquid using transparent, research-grade metrics —
-            then monitor positions, orders, fills, and performance in real time.
+            Hypermonitor helps you find well-performing wallets on Hyperliquid using research-grade metrics.
+            Then you can monitor positions, orders, fills, and performance in real time.
           </p>
 
           <div class="hero-actions">
             <!-- TODO: set href to your tracker route -->
             <a class="btn btn-primary" href="/tracker.html" title="Start tracking a wallet">
-              ▶ Start tracking
-              <small>live</small>
+              Open wallet tracker
             </a>
 
             <!-- TODO: set href to your upcoming leaderboard page -->
@@ -611,7 +700,7 @@
     <section id="how" class="grid" aria-label="How it works">
       <div class="card">
         <h2>
-          <span class="left">How it works <span class="badge">overview</span></span>
+          <span class="left">How it works</span>
         </h2>
 
         <div style="display:grid; gap:.65rem;">
@@ -652,7 +741,7 @@
 
       <div class="card">
         <h2>
-          <span class="left">What you can do <span class="badge">roadmap</span></span>
+          <span class="left">What you can do</span>
         </h2>
 
         <div style="display:grid; gap:.65rem;">
@@ -695,7 +784,7 @@
     <!-- LEADERBOARD PREVIEW -->
     <section id="leaderboard" class="card" aria-label="Leaderboard preview">
       <h2>
-        <span class="left">Leaderboard <span class="badge">preview</span></span>
+        <span class="left">Leaderboard</span>
       </h2>
 
       <div class="muted" style="font-size:.82rem; margin-bottom:.65rem; line-height:1.4;">
@@ -763,12 +852,12 @@
     <!-- VAULTS -->
     <section id="vaults" class="grid" aria-label="Vaults">
       <div class="card">
-        <h2><span class="left">Vaults <span class="badge">curated</span></span></h2>
+        <h2><span class="left">Vaults</span></h2>
         <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
           We plan to offer curated vaults built from transparent rules and risk controls.
           This can be positioned as <strong>“curated strategies”</strong> rather than calling it a hedge fund.
           <br /><br />
-          <span class="muted">TODO: add your vault names, objectives, and risk constraints.</span>
+          <span class="muted">TODO: add vault names, objectives, and risk constraints.</span>
         </p>
 
         <div style="margin-top:.85rem; display:grid; gap:.55rem;">
@@ -790,11 +879,10 @@
       </div>
 
       <div class="card">
-        <h2><span class="left">For builders <span class="badge">API</span></span></h2>
+        <h2><span class="left">For builders</span></h2>
         <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
           If you want to integrate, we can expose ranked wallet datasets and real-time tracking endpoints.
           <br /><br />
-          <span class="muted">TODO: add API docs link.</span>
         </p>
 
         <div style="margin-top:.85rem; display:flex; gap:.5rem; flex-wrap:wrap;">
@@ -808,7 +896,7 @@
     <!-- TEAM -->
     <section id="team" class="card" aria-label="Who we are">
       <h2>
-        <span class="left">Who we are <span class="badge">team</span></span>
+        <span class="left">Who we are</span>
       </h2>
 
       <p class="muted" style="margin:0 0 .85rem; font-size:.86rem; line-height:1.55;">
@@ -885,7 +973,7 @@
     <!-- FAQ -->
     <section id="faq" class="grid" aria-label="FAQ">
       <div class="card">
-        <h2><span class="left">FAQ <span class="badge">basics</span></span></h2>
+        <h2><span class="left">FAQ</span></h2>
 
         <div style="display:grid; gap:.65rem;">
           <div class="feature">
@@ -919,9 +1007,9 @@
       </div>
 
       <div class="card">
-        <h2><span class="left">Get in touch <span class="badge">contact</span></span></h2>
+        <h2><span class="left">Get in touch</span></h2>
         <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
-          Want early access to leaderboard filters, alerts, or vaults? Reach out.
+          Want early access to leaderboard filters, alerts, or vaults? Contact us.
           <br /><br />
         </p>
 
