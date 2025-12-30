@@ -1344,7 +1344,7 @@
     return (sz * px).toFixed(2);
   }
 
-  function sideLabel(side) { return side === "B" ? "BUY" : "SELL"; }
+  function sideLabel(side) { return side === "B" ? "LONG" : "SHORT"; }
   function sidePillClass(side) { return side === "B" ? "pill-buy" : "pill-sell"; }
 
   function renderMarginSummary(summary, withdrawable) {
