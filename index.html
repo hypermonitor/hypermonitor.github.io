@@ -93,8 +93,30 @@
     }
 
     header h1 .logo-word { display: inline-block; }
-    header h1 .logo-word-regular { font-style: normal; }
+    header h1 .logo-word-regular { text-decoration: none ; color: white; }
     header h1 .logo-word-italic { font-style: italic; }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+    }
+
+    a.brand,
+    a.brand:visited,
+    a.brand:hover,
+    a.brand:active {
+      text-decoration: none !important;
+      color: inherit;
+    }
+
+    .brand-name {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      font-size: 1.35rem;
+      margin: 0;
+    }
 
     .wallet-controls {
       display: flex;
@@ -851,10 +873,12 @@
 <div id="app">
   <header>
     <div class="wallet-controls">
+      <a class="brand" href="main.html" aria-label="Hypermonitor home">
       <h1>
         <span class="logo-dot"></span>
-        <span class="logo-word logo-word-regular">Hyper<span class="logo-word logo-word-italic">monitor</span></span>
+        <span class="logo-word logo-word-regular">Hyper<em>monitor</em></span>
       </h1>
+      </a>
       <div class="tagline">
         Track any Hyperliquid wallet. No wallet connection required.
       </div>
