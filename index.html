@@ -1012,8 +1012,8 @@
             <tr>
               <th class="desktop-only">Order ID</th>
               <th class="desktop-only">Time</th>  
-              <th>Side</th>
               <th>Asset</th>
+              <th>Side</th>
               <th>Size</th>
               <th class="desktop-only">Limit Price</th>
               <th class="mobile-only">Price</th>
@@ -1037,8 +1037,8 @@
               <th class="desktop-only">Order ID</th>
               <th class="desktop-only">Created</th>
               <th class="desktop-only">Canceled</th>
-              <th>Side</th>
               <th>Asset</th>
+              <th>Side</th>
               <th>Size</th>
               <th class="mobile-only">Price</th>
             </tr>
@@ -1498,8 +1498,8 @@
         <tr>
           <td class="desktop-only">${order.oid}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
-          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td>${order.coin}</td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td class="money">${order.sz}</td>
           <td class="money">${fmtMoney(order.limitPx) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
@@ -1546,8 +1546,8 @@
             <span class="mobile-only timestamp">${canceledAtTime}</span>
             <span class="desktop-only timestamp">${canceledAtFull}</span>
           </td>
-          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td>${o.coin}</td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>  
           <td class="money">${o.sz}</td>
           <td class="mobile-only money">${fmtMoney(o.limitPx) ?? ""}</td>
         </tr>
