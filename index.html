@@ -720,6 +720,11 @@
     }
 
     body.light footer { border-top-color: #e5e7eb; }
+
+    .placeholder-row td {
+      border-bottom: 1px solid var(--border);
+      color: transparent; /* hides &nbsp; */
+    }
   </style>
 </head>
 
@@ -859,7 +864,7 @@
           <span>Open</span>
           <small id="openOrdersCount">–</small>
         </div>
-        <div style="max-height: 220px; overflow: auto; margin-bottom: .75rem;">
+        <div style="height: 160px; overflow: auto; margin-bottom: .75rem;">
           <table>
             <thead>
             <tr>
@@ -1332,17 +1337,14 @@
     const values = Array.from(openOrders.values()).sort((a, b) => (a.oid ?? 0) - (b.oid ?? 0));
     openOrdersCountEl.textContent = values.length.toString();
 
-    if (values.length === 0) {
-      openOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No open orders.</td></tr>";
-      return;
-    }
+    const MIN_ROWS = 4;
 
-    openOrdersBodyEl.innerHTML = values
-      .map((order) => {
-        const created = fmtTime(order.timestamp);
-        const total = computeTotal(order);
-        const side = order.side ?? "?";
-        return `
+    // Build real rows
+    const rows = values.map((order) => {
+      const created = fmtTime(order.timestamp);
+      const total = computeTotal(order);
+      const side = order.side ?? "?";
+      return `
         <tr>
           <td>${order.oid}</td>
           <td><span class="timestamp">${created}</span></td>
@@ -1353,8 +1355,23 @@
           <td class="money">${total ? "$" + total : ""}</td>
         </tr>
       `;
-      })
-      .join("");
+    });
+
+    // If none, show 1 “No open orders.” row, then pad to MIN_ROWS
+    if (rows.length === 0) {
+      rows.push(`<tr><td colspan="7" class="muted">No open orders.</td></tr>`);
+    }
+
+    // Pad with empty rows until we have MIN_ROWS visible rows
+    while (rows.length < MIN_ROWS) {
+      rows.push(`
+        <tr class="placeholder-row">
+          <td colspan="7">&nbsp;</td>
+        </tr>
+      `);
+    }
+
+    openOrdersBodyEl.innerHTML = rows.join("");
   }
 
   function renderCanceledOrders() {
