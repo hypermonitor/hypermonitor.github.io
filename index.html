@@ -93,7 +93,7 @@
     }
 
     header h1 .logo-word { display: inline-block; }
-    header h1 .logo-word-regular { text-decoration: none ; color: white; }
+    header h1 .logo-word-regular { text-decoration: none ; }
     header h1 .logo-word-italic { font-style: italic; }
 
     .brand {
@@ -849,6 +849,8 @@
       border-color: #e5e7eb;
       color: #0f172a;
     }
+    body.light .tagline { color: #0f172a; }
+    body.light .wallet-input-row label { color: #0f172a; }
 
     body.light footer { border-top-color: #e5e7eb; }
 
@@ -866,9 +868,9 @@
 
     .pill-action-btn {
       border-radius: 999px;
-      border: 1px solid #38bdf8;
-      background: rgba(56, 189, 248, 0.15);
-      color: #97fde5;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--muted);
       padding: 0.25rem 0.9rem;
       font-size: 0.78rem;
       cursor: pointer;
@@ -878,13 +880,15 @@
       gap: 0.35rem;
     }
 
-    .pill-action-btn:hover { filter: brightness(1.05); }
+    .pill-action-btn:hover { border-color: rgba(148, 163, 184, 0.8); }
 
     body.light .pill-action-btn {
-      background: rgba(56, 189, 248, 0.12);
-      color: #0f172a;
-      border-color: #38bdf8;
+      background: #ffffff;
+      color: #6b7280;
+      border-color: #e5e7eb;
     }
+
+    body.light .pill-action-btn:hover { border-color: #d1d5db; }
 
     .portfolio-modal {
       position: fixed;
@@ -906,6 +910,13 @@
       width: min(460px, 100%);
       padding: 1rem;
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+    }
+
+    body.light .portfolio-modal .modal-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: #e5e7eb;
+      color: #0f172a;
     }
 
     .modal-header {
@@ -932,6 +943,8 @@
     }
 
     .modal-close-btn:hover { color: #fff; }
+    body.light .modal-close-btn { color: #0f172a; }
+    body.light .modal-close-btn:hover { color: #111827; }
 
     .modal-body {
       display: grid;
@@ -963,6 +976,7 @@
     }
 
     .breakdown-label { color: var(--muted); }
+    body.light .breakdown-label { color: #0f172a; }
   </style>
 </head>
 
@@ -1034,7 +1048,7 @@
     <section class="card" style="overflow: auto;">
       <div class="section-title">
         <h2>Positions</h2>
-        <button id="positionsChartBtn" class="pill-action-btn">Portfolio doughnut</button>
+        <button id="positionsChartBtn" class="pill-action-btn">Chart</button>
       </div>
       <table>
         <thead>
@@ -1460,10 +1474,12 @@
   function fmtMoney(v, decimals = 2) {
     const n = Number(v);
     if (Number.isNaN(n)) return "";
-    return `$${n.toLocaleString(undefined, {
+    const sign = n < 0 ? "-" : "";
+    const abs = Math.abs(n).toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
-    })}`;
+    });
+    return `${sign}$${abs}`;
   }
 
   function formatSignedDollar(v, decimals = 2) {
