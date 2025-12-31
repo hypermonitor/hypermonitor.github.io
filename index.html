@@ -863,6 +863,106 @@
       .desktop-only { display: none !important; }
       .mobile-only { display: revert !important; }
     }
+
+    .pill-action-btn {
+      border-radius: 999px;
+      border: 1px solid #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+      color: #97fde5;
+      padding: 0.25rem 0.9rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .pill-action-btn:hover { filter: brightness(1.05); }
+
+    body.light .pill-action-btn {
+      background: rgba(56, 189, 248, 0.12);
+      color: #0f172a;
+      border-color: #38bdf8;
+    }
+
+    .portfolio-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 999;
+    }
+
+    .portfolio-modal.open { display: flex; }
+
+    .portfolio-modal .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: min(460px, 100%);
+      padding: 1rem;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .modal-close-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+
+    .modal-close-btn:hover { color: #fff; }
+
+    .modal-body {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .portfolio-doughnut-wrap {
+      width: 100%;
+      height: 260px;
+    }
+
+    .breakdown-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .breakdown-stat {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+      background: #0f172a33;
+    }
+
+    body.light .breakdown-stat {
+      background: #f8fafc;
+      border-color: #e5e7eb;
+    }
+
+    .breakdown-label { color: var(--muted); }
   </style>
 </head>
 
@@ -932,7 +1032,10 @@
     </section>
 
     <section class="card" style="overflow: auto;">
-      <h2>Positions</h2>
+      <div class="section-title">
+        <h2>Positions</h2>
+        <button id="positionsChartBtn" class="pill-action-btn">Portfolio doughnut</button>
+      </div>
       <table>
         <thead>
         <tr>
@@ -951,6 +1054,30 @@
         </tbody>
       </table>
     </section>
+  </div>
+
+  <div class="portfolio-modal" id="portfolioModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Portfolio breakdown</h3>
+        <button id="portfolioModalClose" class="modal-close-btn" aria-label="Close portfolio breakdown">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="portfolio-doughnut-wrap">
+          <canvas id="portfolioDoughnut"></canvas>
+        </div>
+        <div class="breakdown-stats">
+          <div class="breakdown-stat">
+            <div class="breakdown-label">Open positions value</div>
+            <div class="money" id="positionsValueStat">$0.00</div>
+          </div>
+          <div class="breakdown-stat">
+            <div class="breakdown-label">Withdrawable</div>
+            <div class="money" id="withdrawableValueStat">$0.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <section class="card">
@@ -1193,6 +1320,12 @@
   const snapshotErrorEl = document.getElementById("snapshotError");
 
   const positionsBodyEl = document.getElementById("positionsBody");
+  const positionsChartBtn = document.getElementById("positionsChartBtn");
+  const portfolioModalEl = document.getElementById("portfolioModal");
+  const portfolioModalCloseEl = document.getElementById("portfolioModalClose");
+  const portfolioDoughnutCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("portfolioDoughnut"));
+  const positionsValueStatEl = document.getElementById("positionsValueStat");
+  const withdrawableValueStatEl = document.getElementById("withdrawableValueStat");
 
   const openOrdersBodyEl = document.getElementById("openOrdersBody");
   const openOrdersCountEl = document.getElementById("openOrdersCount");
@@ -1280,6 +1413,7 @@
   let portfolioData = null;
   let currentRangeKey = "allTime";
   const portfolioCharts = { equity: null, pnl: null, deposits: null };
+  const portfolioBreakdownChart = { chart: null };
 
   function updateSpinnerForTheme(theme) {
     if (!statusSpinnerEl) return;
@@ -1326,14 +1460,29 @@
   function fmtMoney(v, decimals = 2) {
     const n = Number(v);
     if (Number.isNaN(n)) return "";
-    return `$${n.toFixed(decimals)}`;
+    return `$${n.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    })}`;
   }
 
   function formatSignedDollar(v, decimals = 2) {
     const n = Number(v);
     if (Number.isNaN(n)) return "";
-    const abs = Math.abs(n).toFixed(decimals);
+    const abs = Math.abs(n).toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
     return n < 0 ? "-$" + abs : "$" + abs;
+  }
+
+  function getTotalPositionsValue() {
+    return Number.isFinite(lastComputedTotalNotional) ? lastComputedTotalNotional : 0;
+  }
+
+  function getWithdrawableAmount() {
+    const w = Number(snapshotWithdrawable ?? 0);
+    return Number.isFinite(w) ? w : 0;
   }
 
   function computeTotal(order) {
@@ -1397,6 +1546,7 @@
     if (!currentAssetPositions.length) {
       positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted desktop-only'>No open positions.</td></tr>";
       recomputeAndRenderMarginSummary();
+      refreshBreakdownIfOpen();
       return;
     }
 
@@ -1456,6 +1606,7 @@
       .join("");
 
     recomputeAndRenderMarginSummary();
+    refreshBreakdownIfOpen();
   }
 
   function computeSnapshotUpnlTotal(assetPositions) {
@@ -1728,6 +1879,8 @@
 
     positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted desktop-only'>Loading…</td><td colspan='4' class='muted mobile-only'>Loading…</td></tr>";
     marginSummaryEl.innerHTML = "";
+
+    refreshBreakdownIfOpen();
   }
 
   async function initClients() {
@@ -1928,6 +2081,151 @@
       : "rgba(31,41,55,0.6)";
   }
 
+  function getChartTextColor() {
+    return document.body.classList.contains("light") ? "#0f172a" : "#e5e7eb";
+  }
+
+  function buildPositionBreakdown() {
+    if (!Array.isArray(currentAssetPositions) || currentAssetPositions.length === 0) return [];
+
+    return currentAssetPositions
+      .map((item) => {
+        const p = item.position;
+        const coin = p.coin;
+        const szi = Number(p.szi ?? 0);
+        if (!coin || !Number.isFinite(szi) || szi === 0) return null;
+
+        const entryPx = Number(p.entryPx ?? 0);
+        const livePx = liveMids.get(coin);
+        let markPx = Number.isFinite(livePx) ? livePx : undefined;
+
+        const snapshotValue = Number(p.positionValue ?? 0);
+        if ((markPx === undefined || Number.isNaN(markPx)) && !Number.isNaN(snapshotValue) && szi !== 0) {
+          markPx = snapshotValue / szi;
+        }
+
+        let positionValue = snapshotValue;
+        if (markPx !== undefined && !Number.isNaN(markPx) && szi !== 0) {
+          positionValue = markPx * szi;
+        } else if (Number.isFinite(entryPx) && szi !== 0) {
+          positionValue = entryPx * szi;
+        }
+
+        const valueAbs = Math.abs(positionValue);
+        if (!Number.isFinite(valueAbs) || valueAbs === 0) return null;
+
+        const dir = szi > 0 ? "LONG" : "SHORT";
+        return { label: `${coin} (${dir})`, value: valueAbs };
+      })
+      .filter(Boolean);
+  }
+
+  function updatePortfolioBreakdownChart() {
+    if (!portfolioDoughnutCanvas) return;
+
+    const positions = buildPositionBreakdown();
+    const positionsValue = positions.reduce((sum, p) => sum + (p?.value ?? 0), 0);
+    const withdrawableValue = Math.max(0, getWithdrawableAmount());
+
+    if (positionsValueStatEl) positionsValueStatEl.textContent = fmtMoney(positionsValue);
+    if (withdrawableValueStatEl) withdrawableValueStatEl.textContent = fmtMoney(withdrawableValue);
+
+    const rawSeries = [
+      ...positions,
+      { label: "Withdrawable", value: withdrawableValue },
+    ].filter((item) => Number.isFinite(item.value));
+
+    const dataValues = rawSeries.map((p) => Math.max(0, p.value));
+    const labels = rawSeries.map((p) => p.label);
+    const realValues = rawSeries.map((p) => p.value);
+
+    const allZero = dataValues.every((v) => v === 0);
+    const displayValues = allZero ? dataValues.map(() => 1) : dataValues;
+    const totalReal = realValues.reduce((sum, v) => sum + (Number.isFinite(v) ? Math.max(0, v) : 0), 0);
+
+    const palette = ["#38bdf8", "#26d97f", "#a78bfa", "#f472b6", "#facc15", "#fb7185", "#22d3ee", "#f59e0b"];
+    const colors = labels.map((_, i) => palette[i % palette.length]);
+    const textColor = getChartTextColor();
+    const tooltipBg = document.body.classList.contains("light") ? "rgba(15,23,42,0.85)" : "rgba(0,0,0,0.7)";
+
+    if (!portfolioBreakdownChart.chart) {
+      portfolioBreakdownChart.chart = new Chart(portfolioDoughnutCanvas.getContext("2d"), {
+        type: "doughnut",
+        data: {
+          labels,
+          datasets: [
+            {
+              data: displayValues,
+              realValues: realValues,
+              backgroundColor: colors,
+              borderColor: colors.map((c) => c + "99"),
+              borderWidth: 1,
+              hoverOffset: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "62%",
+          plugins: {
+            legend: { position: "bottom", labels: { color: textColor } },
+            tooltip: {
+              backgroundColor: tooltipBg,
+              borderColor: "rgba(148, 163, 184, 0.4)",
+              borderWidth: 1,
+              displayColors: false,
+              callbacks: {
+                label: (ctx) => {
+                  const real = ctx.dataset.realValues?.[ctx.dataIndex];
+                  const val = Number.isFinite(real) ? real : ctx.parsed;
+                  const pct = totalReal > 0 ? (Math.max(0, val) / totalReal) * 100 : 0;
+                  return `${ctx.label}: ${fmtMoney(val)} (${pct.toFixed(1)}%)`;
+                },
+              },
+            },
+          },
+        },
+      });
+    } else {
+      const chart = portfolioBreakdownChart.chart;
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = displayValues;
+      chart.data.datasets[0].realValues = realValues;
+      chart.data.datasets[0].backgroundColor = colors;
+      chart.data.datasets[0].borderColor = colors.map((c) => c + "99");
+      chart.options.plugins.legend.labels.color = textColor;
+      chart.options.plugins.tooltip.backgroundColor = tooltipBg;
+      chart.update();
+    }
+  }
+
+  function refreshBreakdownIfOpen() {
+    if (portfolioModalEl && portfolioModalEl.classList.contains("open")) {
+      updatePortfolioBreakdownChart();
+    }
+  }
+
+  function updateBreakdownTheme() {
+    if (!portfolioBreakdownChart.chart) return;
+    const textColor = getChartTextColor();
+    const tooltipBg = document.body.classList.contains("light") ? "rgba(15,23,42,0.85)" : "rgba(0,0,0,0.7)";
+    portfolioBreakdownChart.chart.options.plugins.legend.labels.color = textColor;
+    portfolioBreakdownChart.chart.options.plugins.tooltip.backgroundColor = tooltipBg;
+    portfolioBreakdownChart.chart.update();
+  }
+
+  function openPortfolioModal() {
+    if (!portfolioModalEl) return;
+    portfolioModalEl.classList.add("open");
+    updatePortfolioBreakdownChart();
+  }
+
+  function closePortfolioModal() {
+    if (!portfolioModalEl) return;
+    portfolioModalEl.classList.remove("open");
+  }
+
   function createLineChart(ctx, label, data, color) {
     return new Chart(ctx, {
       type: "line",
@@ -2087,6 +2385,7 @@
     try { localStorage.setItem("hypermonitor-theme", theme); } catch (e) {}
     updateSpinnerForTheme(theme);
     updateChartTheme();
+    updateBreakdownTheme();
   }
 
   function initTheme() {
@@ -2181,6 +2480,28 @@
   themeToggleBtn.addEventListener("click", () => {
     const isLight = document.body.classList.contains("light");
     applyTheme(isLight ? "dark" : "light");
+  });
+
+  if (positionsChartBtn) {
+    positionsChartBtn.addEventListener("click", () => {
+      openPortfolioModal();
+    });
+  }
+
+  if (portfolioModalCloseEl) {
+    portfolioModalCloseEl.addEventListener("click", closePortfolioModal);
+  }
+
+  if (portfolioModalEl) {
+    portfolioModalEl.addEventListener("click", (e) => {
+      if (e.target === portfolioModalEl) closePortfolioModal();
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && portfolioModalEl?.classList.contains("open")) {
+      closePortfolioModal();
+    }
   });
 
   ordersTabButtons.forEach((btn) => {
