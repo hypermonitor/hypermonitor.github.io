@@ -346,6 +346,8 @@
       white-space: nowrap;
     }
     tbody tr:nth-child(even) { background: #14141c; }
+    .row-link { cursor: pointer; }
+    .row-link:hover { background: rgba(38, 217, 127, 0.10) !important; }
 
     .pill {
       display: inline-flex;
@@ -788,8 +790,7 @@
       </h2>
 
       <div class="muted" style="font-size:.82rem; margin-bottom:.65rem; line-height:1.4;">
-        This is a placeholder leaderboard section. Replace the rows with your computed metrics and link each wallet to the tracker
-        (e.g., <span class="mono">/tracker.html?wallet=0x...</span>).
+        Live snapshot of the top wallets (all-time). Click a row to open the tracker for that wallet.
       </div>
 
       <div style="max-height: 340px; overflow: auto; border-radius: .75rem; border: 1px solid var(--border);">
@@ -797,46 +798,16 @@
           <thead>
             <tr>
               <th>#</th>
-              <th>Wallet</th>
-              <th>Window</th>
-              <th>Net PnL</th>
-              <th>Max DD</th>
-              <th>Consistency</th>
-              <th>Risk</th>
-              <th></th>
+              <th>Trader</th>
+              <th>Account Value</th>
+              <th>PnL</th>
+              <th>ROI</th>
+              <th>Volume</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- TODO: populate dynamically -->
+          <tbody id="leaderboardPreviewBody">
             <tr>
-              <td>1</td>
-              <td class="mono">0xTODO…</td>
-              <td>30d</td>
-              <td>$TODO</td>
-              <td>$TODO</td>
-              <td>TODO</td>
-              <td>TODO</td>
-              <td><a class="btn" style="padding:.25rem .6rem; font-size:.75rem;" href="/tracker.html?wallet=0xTODO">Track</a></td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td class="mono">0xTODO…</td>
-              <td>90d</td>
-              <td>$TODO</td>
-              <td>$TODO</td>
-              <td>TODO</td>
-              <td>TODO</td>
-              <td><a class="btn" style="padding:.25rem .6rem; font-size:.75rem;" href="/tracker.html?wallet=0xTODO">Track</a></td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td class="mono">0xTODO…</td>
-              <td>All</td>
-              <td>$TODO</td>
-              <td>$TODO</td>
-              <td>TODO</td>
-              <td>TODO</td>
-              <td><a class="btn" style="padding:.25rem .6rem; font-size:.75rem;" href="/tracker.html?wallet=0xTODO">Track</a></td>
+              <td colspan="6" class="muted">Loading…</td>
             </tr>
           </tbody>
         </table>
@@ -1064,6 +1035,145 @@
 
     // Footer year
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Leaderboard preview (first entries from leaderboard.html)
+    (function initLeaderboardPreview() {
+      const tbody = document.getElementById("leaderboardPreviewBody");
+      if (!tbody) return;
+
+      const LEADERBOARD_URL = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard";
+      const DEST_BASE = "https://www.hypermonitor.org/?wallet=";
+      const PREVIEW_LIMIT = 8;
+      const PREVIEW_WINDOW = "allTime";
+
+      const setStatus = (msg) => {
+        tbody.innerHTML = `<tr><td colspan="6" class="muted">${msg}</td></tr>`;
+      };
+
+      const fmtMoney = (v, decimals = 2) => {
+        const n = Number(v);
+        if (!Number.isFinite(n)) return "";
+        const sign = n < 0 ? "-" : "";
+        const abs = Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        return `${sign}$${abs}`;
+      };
+
+      const fmtPct = (v) => {
+        const n = Number(v);
+        if (!Number.isFinite(n)) return "";
+        const sign = n < 0 ? "-" : "";
+        const abs = Math.abs(n * 100).toLocaleString(undefined, { maximumFractionDigits: 2 });
+        return `${sign}${abs}%`;
+      };
+
+      const shortAddr = (addr) => {
+        if (!addr || typeof addr !== "string") return "";
+        if (addr.length <= 12) return addr;
+        return addr.slice(0, 6) + "…" + addr.slice(-4);
+      };
+
+      const perfForWindow = (row, windowKey) => {
+        const wp = row?.windowPerformances;
+        if (!Array.isArray(wp)) return null;
+        for (const entry of wp) {
+          if (Array.isArray(entry) && entry[0] === windowKey) return entry[1] || null;
+        }
+        return null;
+      };
+
+      const normalize = (rows) => {
+        return (rows || []).map((r, idx) => {
+          const address =
+            r?.ethAddress ||
+            r?.address ||
+            r?.user ||
+            r?.wallet ||
+            "";
+
+          const accountValue = Number(r?.accountValue ?? r?.account_value ?? NaN);
+
+          const p = perfForWindow(r, PREVIEW_WINDOW) || {};
+          const pnl = Number(p?.pnl ?? p?.pnlUsd ?? p?.pnl_usd ?? NaN);
+          const roi = Number(p?.roi ?? p?.return ?? NaN);
+          const volume = Number(p?.vlm ?? p?.vol ?? p?.tradeVolume ?? NaN);
+
+          return { rank: idx + 1, address, accountValue, pnl, roi, volume };
+        });
+      };
+
+      const render = (rows) => {
+        if (!rows.length) {
+          setStatus("No results.");
+          return;
+        }
+
+        tbody.innerHTML = rows.map(r => {
+          const addr = r.address || "";
+          const href = DEST_BASE + encodeURIComponent(addr);
+          const pnlColor = Number.isFinite(r.pnl) ? (r.pnl >= 0 ? "#4ade80" : "#fb7185") : "inherit";
+          const roiColor = Number.isFinite(r.roi) ? (r.roi >= 0 ? "#4ade80" : "#fb7185") : "inherit";
+
+          return `
+            <tr class="row-link" data-href="${href}" title="Open ${addr}">
+              <td class="mono">${r.rank}</td>
+              <td class="mono">${shortAddr(addr)}</td>
+              <td class="mono">${fmtMoney(r.accountValue)}</td>
+              <td class="mono" style="color:${pnlColor};">${Number.isFinite(r.pnl) ? fmtMoney(r.pnl) : ""}</td>
+              <td class="mono" style="color:${roiColor};">${Number.isFinite(r.roi) ? fmtPct(r.roi) : ""}</td>
+              <td class="mono">${Number.isFinite(r.volume) ? fmtMoney(r.volume, 0) : ""}</td>
+            </tr>
+          `;
+        }).join("");
+
+        tbody.querySelectorAll("tr[data-href]").forEach(tr => {
+          tr.addEventListener("click", () => {
+            const href = tr.getAttribute("data-href");
+            if (href) window.location.href = href;
+          });
+        });
+      };
+
+      const parseRows = (json) => {
+        if (Array.isArray(json)) return json;
+        if (json && typeof json === "object") {
+          if (Array.isArray(json.data)) return json.data;
+          if (Array.isArray(json.leaderboard)) return json.leaderboard;
+          if (Array.isArray(json.leaderboardRows)) return json.leaderboardRows;
+          if (json.result && Array.isArray(json.result)) return json.result;
+          if (json.payload && Array.isArray(json.payload)) return json.payload;
+        }
+        return null;
+      };
+
+      const loadLeaderboardPreview = async () => {
+        setStatus("Loading…");
+        try {
+          const res = await fetch(LEADERBOARD_URL, { cache: "no-store" });
+          const rawText = await res.text();
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status} ${res.statusText} — ${rawText.slice(0, 120)}`);
+          }
+
+          let json;
+          try {
+            json = JSON.parse(rawText);
+          } catch {
+            throw new Error(`Non-JSON response: ${rawText.slice(0, 120)}`);
+          }
+
+          const rawRows = parseRows(json);
+          if (!rawRows) throw new Error("Unexpected leaderboard response.");
+
+          const normalized = normalize(rawRows).slice(0, PREVIEW_LIMIT);
+          render(normalized);
+        } catch (e) {
+          console.error("Leaderboard preview failed:", e);
+          setStatus("Failed to load leaderboard preview.");
+        }
+      };
+
+      loadLeaderboardPreview();
+    })();
 
     initTheme();
   </script>
