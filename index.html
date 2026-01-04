@@ -1263,25 +1263,58 @@
 
     <section class="card trades-card">
       <h2>Trades Stream</h2>
-      <div style="max-height: 360px; overflow: auto;">
-        <table>
-          <thead>
-          <tr>
-            <th class="desktop-only">Order ID</th>
-            <th class="desktop-only">Time</th>
-            <th>Side</th>
-            <th>Asset</th>
-            <th>Size</th>
-            <th>Price</th>
-            <th class="desktop-only">Total</th>
-          </tr>
-          </thead>
-          <tbody id="fillsBody">
-          <tr><td colspan="7" class="muted">Waiting for fills…</td></tr>
-          </tbody>
-        </table>
+
+      <div class="orders-tabs">
+        <button class="orders-tab-btn fills-tab-btn active" data-tab="fills-live">Live</button>
+        <button class="orders-tab-btn fills-tab-btn" data-tab="fills-history">History</button>
       </div>
-      <div class="error" id="fillsError"></div>
+
+      <div id="fillsLivePanel" class="tab-panel">
+        <div style="max-height: 360px; overflow: auto;">
+          <table>
+            <thead>
+            <tr>
+              <th class="desktop-only">Order ID</th>
+              <th class="desktop-only">Time</th>
+              <th>Side</th>
+              <th>Asset</th>
+              <th>Size</th>
+              <th>Price</th>
+              <th class="desktop-only">Total</th>
+            </tr>
+            </thead>
+            <tbody id="fillsBody">
+            <tr><td colspan="7" class="muted">Waiting for fills…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="error" id="fillsError"></div>
+      </div>
+
+      <div id="fillsHistoryPanel" class="tab-panel hidden">
+        <div class="section-title">
+          <span>Historical</span>
+          <small id="historicalFillsCount">–</small>
+        </div>
+        <div style="max-height: 360px; overflow: auto;">
+          <table>
+            <thead>
+            <tr>
+              <th class="desktop-only">Order ID</th>
+              <th>Time</th>
+              <th>Side</th>
+              <th>Asset</th>
+              <th>Size</th>
+              <th>Price</th>
+              <th class="desktop-only">Total</th>
+            </tr>
+            </thead>
+            <tbody id="historicalFillsBody">
+            <tr><td colspan="7" class="muted">Loading historical fills…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -1368,6 +1401,11 @@
 
   const fillsBodyEl = document.getElementById("fillsBody");
   const fillsErrorEl = document.getElementById("fillsError");
+  const historicalFillsBodyEl = document.getElementById("historicalFillsBody");
+  const historicalFillsCountEl = document.getElementById("historicalFillsCount");
+  const fillsTabButtons = document.querySelectorAll(".fills-tab-btn");
+  const fillsLivePanelEl = document.getElementById("fillsLivePanel");
+  const fillsHistoryPanelEl = document.getElementById("fillsHistoryPanel");
 
   const portfolioErrorEl = document.getElementById("portfolioError");
   const portfolioLoadingEl = document.getElementById("portfolioLoading");
@@ -1418,6 +1456,8 @@
 
   const historicalOrders = [];
   let historicalOrdersLoaded = false;
+  const historicalFills = [];
+  let historicalFillsLoaded = false;
 
   let infoClient = null;
   let subsClient = null;
@@ -1768,6 +1808,37 @@
       .join("");
   }
 
+  function renderHistoricalFills() {
+    if (!historicalFillsBodyEl) return;
+
+    if (historicalFills.length === 0) {
+      historicalFillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No historical fills found.</td></tr>";
+      if (historicalFillsCountEl) historicalFillsCountEl.textContent = "0";
+      return;
+    }
+
+    historicalFillsBodyEl.innerHTML = historicalFills
+      .map((fill) => {
+        const t = fmtTimeOnly(fill.time ?? fill.timestamp);
+        const total = computeTotal(fill);
+        const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
+        return `
+        <tr>
+          <td class="desktop-only">${fill.oid ?? ""}</td>
+          <td><span class="timestamp">${t}</span></td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td>${fill.coin ?? ""}</td>
+          <td class="money">${fill.sz ?? ""}</td>
+          <td class="money">${fmtMoney(fill.px ?? fill.price) ?? ""}</td>
+          <td class="desktop-only money">${total ? "$" + total : ""}</td>
+        </tr>
+      `;
+      })
+      .join("");
+
+    if (historicalFillsCountEl) historicalFillsCountEl.textContent = `${historicalFills.length}`;
+  }
+
   function normalizeHistoricalOrder(entry) {
     const o = entry?.order ?? entry ?? {};
     const status = entry?.status ?? o.status ?? "";
@@ -1877,6 +1948,34 @@
     }
   }
 
+  async function loadHistoricalFills(wallet) {
+    if (!historicalFillsBodyEl) return;
+
+    historicalFillsLoaded = false;
+    if (historicalFillsCountEl) historicalFillsCountEl.textContent = "–";
+    historicalFillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical fills…</td></tr>";
+
+    try {
+      const fillsData = await infoClient.userFills({ user: wallet });
+
+      historicalFills.length = 0;
+      if (Array.isArray(fillsData)) {
+        fillsData
+          .sort((a, b) => (Number(b.time ?? b.timestamp ?? 0) - Number(a.time ?? a.timestamp ?? 0)))
+          .forEach((f) => historicalFills.push(f));
+      }
+
+      historicalFillsLoaded = true;
+      renderHistoricalFills();
+    } catch (err) {
+      console.error("Historical fills error", err);
+      if (historicalFillsBodyEl) {
+        historicalFillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Failed to load historical fills.</td></tr>";
+      }
+      if (fillsErrorEl) fillsErrorEl.textContent = "Failed to load historical fills: " + (err?.message || err);
+    }
+  }
+
   function resetState() {
     openOrders.clear();
     canceledOrders.length = 0;
@@ -1891,10 +1990,13 @@
 
     historicalOrders.length = 0;
     historicalOrdersLoaded = false;
+    historicalFills.length = 0;
+    historicalFillsLoaded = false;
 
     openOrdersCountEl.textContent = "–";
     canceledCountEl.textContent = "–";
     if (historicalOrdersCountEl) historicalOrdersCountEl.textContent = "–";
+    if (historicalFillsCountEl) historicalFillsCountEl.textContent = "–";
 
     ordersErrorEl.textContent = "";
     fillsErrorEl.textContent = "";
@@ -1906,6 +2008,9 @@
 
     if (historicalOrdersBodyEl) {
       historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical orders…</td></tr>";
+    }
+    if (historicalFillsBodyEl) {
+      historicalFillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical fills…</td></tr>";
     }
 
     positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted desktop-only'>Loading…</td><td colspan='4' class='muted mobile-only'>Loading…</td></tr>";
@@ -2458,6 +2563,9 @@
       if (ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalOrders(currentWallet);
       }
+      if (fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
+        await loadHistoricalFills(currentWallet);
+      }
     } finally {
       trackBtnEl.disabled = false;
     }
@@ -2550,6 +2658,24 @@
       } else {
         ordersHistoryPanelEl.classList.add("hidden");
         ordersLivePanelEl.classList.remove("hidden");
+      }
+    });
+  });
+
+  fillsTabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+
+      fillsTabButtons.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      if (tab === "fills-history") {
+        fillsLivePanelEl.classList.add("hidden");
+        fillsHistoryPanelEl.classList.remove("hidden");
+        if (currentWallet) loadHistoricalFills(currentWallet);
+      } else {
+        fillsHistoryPanelEl.classList.add("hidden");
+        fillsLivePanelEl.classList.remove("hidden");
       }
     });
   });
