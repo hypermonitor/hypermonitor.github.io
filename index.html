@@ -1324,7 +1324,7 @@
 
   <footer>
     <div style="margin-top:.1rem;">
-        © <span id="year"></span> Hypermonitor ·
+        © Hypermonitor ·
         Dr. Roshan Mahes
     <a class="linkedin-badge"
       href="https://www.linkedin.com/in/roshanmahes/"
@@ -1421,8 +1421,6 @@
   const depositsCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("depositsChart"));
 
   const themeToggleBtn = document.getElementById("themeToggle");
-
-  document.getElementById("year").textContent = new Date().getFullYear();
 
   // === URL + LAST WALLET (localStorage) helpers ===
   const LAST_WALLET_KEY = "hypermonitor-last-wallet";
@@ -1568,7 +1566,10 @@
     const pxStr = order.px ?? order.limitPx;
     const px = Number(pxStr ?? 0);
     if (Number.isNaN(sz) || Number.isNaN(px)) return "";
-    return (sz * px).toFixed(2);
+    return (sz * px).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   function sideLabel(side) { return side === "B" ? "LONG" : "SHORT"; }
@@ -2259,8 +2260,8 @@
         const valueAbs = Math.abs(positionValue);
         if (!Number.isFinite(valueAbs) || valueAbs === 0) return null;
 
-        const dir = szi > 0 ? "LONG" : "SHORT";
-        return { label: `${coin} (${dir})`, value: valueAbs };
+        const dirLabel = szi > 0 ? "" : " (short)";
+        return { label: `${coin}${dirLabel}`, value: valueAbs, coin };
       })
       .filter(Boolean);
   }
@@ -2288,8 +2289,20 @@
     const displayValues = allZero ? dataValues.map(() => 1) : dataValues;
     const totalReal = realValues.reduce((sum, v) => sum + (Number.isFinite(v) ? Math.max(0, v) : 0), 0);
 
+    const coinColors = {
+      BTC: "#f7931a",
+      ETH: "#1c3f91",
+      SOL: "#6f42c1",
+      BNB: "#f0b90b",
+      HYPE: "#0b5c2f",
+      LINK: "#2a5ada",
+    };
     const palette = ["#38bdf8", "#26d97f", "#a78bfa", "#f472b6", "#facc15", "#fb7185", "#22d3ee", "#f59e0b"];
-    const colors = labels.map((_, i) => palette[i % palette.length]);
+    const colors = rawSeries.map((item, i) => {
+      const coin = (item.coin || "").toUpperCase();
+      if (coin && coinColors[coin]) return coinColors[coin];
+      return palette[i % palette.length];
+    });
     const textColor = getChartTextColor();
     const tooltipBg = document.body.classList.contains("light") ? "rgba(15,23,42,0.85)" : "rgba(0,0,0,0.7)";
 
