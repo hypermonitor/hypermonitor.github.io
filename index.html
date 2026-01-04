@@ -479,7 +479,7 @@
 
     .layout-two {
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
@@ -977,6 +977,14 @@
 
     .breakdown-label { color: var(--muted); }
     body.light .breakdown-label { color: #0f172a; }
+
+    /* Trades table: slightly denser and allow the last column to wrap so it fits without scrolling */
+    .trades-card table { font-size: 0.78rem; }
+    .trades-card th, .trades-card td { padding: 0.3rem 0.35rem; }
+    .trades-card td.desktop-only.money:last-child {
+      white-space: normal;
+      word-break: break-word;
+    }
   </style>
 </head>
 
@@ -1253,7 +1261,7 @@
       </div>
     </section>
 
-    <section class="card">
+    <section class="card trades-card">
       <h2>Trades Stream</h2>
       <div style="max-height: 360px; overflow: auto;">
         <table>
