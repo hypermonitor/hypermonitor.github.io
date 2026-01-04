@@ -1146,8 +1146,8 @@
       <h2>Orders</h2>
 
       <div class="orders-tabs">
-        <button class="orders-tab-btn active" data-tab="live">Live</button>
-        <button class="orders-tab-btn" data-tab="history">History</button>
+        <button class="orders-tab-btn orders-only-tab-btn active" data-tab="live">Live</button>
+        <button class="orders-tab-btn orders-only-tab-btn" data-tab="history">History</button>
       </div>
 
       <div id="ordersLivePanel" class="tab-panel">
@@ -1262,7 +1262,7 @@
     </section>
 
     <section class="card trades-card">
-      <h2>Trades Stream</h2>
+      <h2>Trades</h2>
 
       <div class="orders-tabs">
         <button class="orders-tab-btn fills-tab-btn active" data-tab="fills-live">Live</button>
@@ -1270,6 +1270,10 @@
       </div>
 
       <div id="fillsLivePanel" class="tab-panel">
+        <div class="section-title">
+          <span>Live</span>
+          <small id="fillsCount">–</small>
+        </div>
         <div style="max-height: 360px; overflow: auto;">
           <table>
             <thead>
@@ -1391,7 +1395,7 @@
   const historicalOrdersBodyEl = document.getElementById("historicalOrdersBody");
   const historicalOrdersCountEl = document.getElementById("historicalOrdersCount");
 
-  const ordersTabButtons = document.querySelectorAll(".orders-tab-btn");
+  const ordersTabButtons = document.querySelectorAll(".orders-only-tab-btn");
   const ordersLivePanelEl = document.getElementById("ordersLivePanel");
   const ordersHistoryPanelEl = document.getElementById("ordersHistoryPanel");
 
@@ -1401,6 +1405,7 @@
 
   const fillsBodyEl = document.getElementById("fillsBody");
   const fillsErrorEl = document.getElementById("fillsError");
+  const fillsCountEl = document.getElementById("fillsCount");
   const historicalFillsBodyEl = document.getElementById("historicalFillsBody");
   const historicalFillsCountEl = document.getElementById("historicalFillsCount");
   const fillsTabButtons = document.querySelectorAll(".fills-tab-btn");
@@ -1782,6 +1787,7 @@
   function renderFills() {
     if (fills.length === 0) {
       fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills...</td></tr>";
+      if (fillsCountEl) fillsCountEl.textContent = "0";
       return;
     }
 
@@ -1806,6 +1812,8 @@
       `;
       })
       .join("");
+
+    if (fillsCountEl) fillsCountEl.textContent = `${fills.length}`;
   }
 
   function renderHistoricalFills() {
@@ -1997,6 +2005,7 @@
     canceledCountEl.textContent = "–";
     if (historicalOrdersCountEl) historicalOrdersCountEl.textContent = "–";
     if (historicalFillsCountEl) historicalFillsCountEl.textContent = "–";
+    if (fillsCountEl) fillsCountEl.textContent = "–";
 
     ordersErrorEl.textContent = "";
     fillsErrorEl.textContent = "";
