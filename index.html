@@ -1667,7 +1667,7 @@
 
     // Build real rows
     const rows = values.map((order) => {
-      const created = fmtTime(order.timestamp);
+      const created = fmtTimeOnly(order.timestamp);
       const total = computeTotal(order);
       const side = order.side ?? "?";
       return `
@@ -1710,8 +1710,7 @@
 
     canceledOrdersBodyEl.innerHTML = canceledOrders
       .map((o) => {
-        const created = fmtTime(o.timestamp);
-        const canceledAtFull = fmtTime(o.statusTimestamp);
+        const created = fmtTimeOnly(o.timestamp);
         const canceledAtTime = fmtTimeOnly(o.statusTimestamp);
         const side = o.side ?? "?";
         return `
@@ -1720,7 +1719,7 @@
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
           <td>
             <span class="mobile-only timestamp">${canceledAtTime}</span>
-            <span class="desktop-only timestamp">${canceledAtFull}</span>
+            <span class="desktop-only timestamp">${canceledAtTime}</span>
           </td>
           <td>${o.coin}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>  
@@ -1740,7 +1739,6 @@
 
     fillsBodyEl.innerHTML = fills
       .map((fill) => {
-        const tFull = fmtTime(fill.time);
         const tTime = fmtTimeOnly(fill.time);
         const total = computeTotal(fill);
         const side = fill.side ?? "?";
@@ -1749,7 +1747,7 @@
           <td class="desktop-only">${fill.oid}</td>
           <td>
             <span class="mobile-only timestamp">${tTime}</span>
-            <span class="desktop-only timestamp">${tFull}</span>
+            <span class="desktop-only timestamp">${tTime}</span>
           </td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td>${fill.coin}</td>
@@ -1814,7 +1812,7 @@
 
     historicalOrdersBodyEl.innerHTML = filtered
       .map((o) => {
-        const created = fmtTime(o.timestamp);
+        const created = fmtTimeOnly(o.timestamp);
         const side = o.side ?? (o.isBuy ? "B" : "S");
         const status = o.status ?? "";
 
