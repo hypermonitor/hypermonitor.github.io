@@ -102,20 +102,7 @@
       padding: 0.35rem 0.8rem;
       outline: none;
     }
-
-    .pill-btn {
-      cursor: pointer;
-      user-select: none;
-    }
-    .pill-btn:hover { filter: brightness(1.07); }
-
-    .pill-btn.primary {
-      border-color: #139e7d;
-      background: #18bf98;
-      color: #050810;
-      font-weight: 700;
-    }
-
+    
     .muted { color: var(--muted); }
     .money { font-variant-numeric: tabular-nums; }
 
@@ -221,10 +208,6 @@
             <option value="500">Top 500</option>
           </select>
         </div>
-
-        <div class="right-tools">
-          <button id="refreshBtn" class="pill-btn primary">Refresh</button>
-        </div>
       </div>
 
       <div style="overflow:auto; max-height: 70vh;">
@@ -244,10 +227,6 @@
           </tbody>
         </table>
       </div>
-
-      <div class="footer-note">
-        Data source: <span class="addr">stats-data.hyperliquid.xyz/Mainnet/leaderboard</span> (undocumented). 
-      </div>
     </section>
   </div>
 
@@ -258,7 +237,6 @@
 
     // ===== DOM =====
     const tbody = document.getElementById("tbody");
-    const refreshBtn = document.getElementById("refreshBtn");
     const searchInput = document.getElementById("searchInput");
     const limitSelect = document.getElementById("limitSelect");
     const windowSelect = document.getElementById("windowSelect");
@@ -409,7 +387,6 @@
 
     async function loadLeaderboard() {
         setStatus("", "Loading…");
-        refreshBtn.disabled = true;
 
         try {
             const res = await fetch(LEADERBOARD_URL, { cache: "no-store" });
@@ -457,14 +434,10 @@
             console.error("Leaderboard load failed:", e);
             setStatus("err", "Failed to load leaderboard");
             tbody.innerHTML = `<tr><td colspan="6" class="muted">Failed to load leaderboard. ${String(e?.message || e)}</td></tr>`;
-        } finally {
-            refreshBtn.disabled = false;
         }
         }
 
     // ===== EVENTS =====
-    refreshBtn.addEventListener("click", loadLeaderboard);
-
     searchInput.addEventListener("input", () => applyFiltersAndSort());
     limitSelect.addEventListener("change", () => applyFiltersAndSort());
 
