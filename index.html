@@ -465,6 +465,36 @@
     .kv-label { color: var(--muted); }
     .kv-value { text-align: right; }
 
+    .asset-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+    }
+
+    .coinIcon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .coinFallback {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--muted);
+      font-size: 0.65rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -1490,6 +1520,38 @@
 
   const themeToggleBtn = document.getElementById("themeToggle");
 
+  const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
+  const logoCache = new Map();
+
+  window.__logoOk = (rawKey, imgEl) => {
+    const entry = logoCache.get(rawKey);
+    if (!entry) return;
+    entry.state = "ok";
+    entry.okUrl = imgEl?.currentSrc || imgEl?.src || entry.urls?.[entry.idx];
+  };
+
+  window.__logoErr = (rawKey, imgEl, fallbackLetter) => {
+    const entry = logoCache.get(rawKey);
+    if (!entry) return;
+
+    const nextIdx = (entry.idx ?? 0) + 1;
+    if (entry.urls && nextIdx < entry.urls.length) {
+      entry.idx = nextIdx;
+      const nextUrl = entry.urls[nextIdx];
+      try {
+        if (imgEl && imgEl.src !== nextUrl) imgEl.src = nextUrl;
+      } catch {}
+      return;
+    }
+
+    entry.state = "bad";
+    try {
+      if (imgEl && imgEl.outerHTML) {
+        imgEl.outerHTML = `<span class="coinFallback">${fallbackLetter || "?"}</span>`;
+      }
+    } catch {}
+  };
+
   // === URL + LAST WALLET (localStorage) helpers ===
   const LAST_WALLET_KEY = "hypermonitor-last-wallet";
 
@@ -1645,6 +1707,51 @@
   function xmlEscape(v) {
     const s = v === null || v === undefined ? "" : String(v);
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&apos;");
+  }
+
+  function getIconCandidates(rawName, cleanName) {
+    const candidates = [];
+    if (rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
+    if (cleanName && cleanName !== rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(cleanName)}.svg`);
+    if (rawName && rawName.includes(":")) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
+    return Array.from(new Set(candidates));
+  }
+
+  function ensureLogoCache(rawName, cleanName) {
+    if (logoCache.has(rawName)) return logoCache.get(rawName);
+    const urls = getIconCandidates(rawName, cleanName);
+    const entry = { state: "unknown", idx: 0, urls, okUrl: null };
+    logoCache.set(rawName, entry);
+    return entry;
+  }
+
+  function coinIconHtml(rawName, cleanName) {
+    const entry = ensureLogoCache(rawName, cleanName);
+    const letter = (cleanName?.[0] || rawName?.[0] || "?").toUpperCase();
+
+    if (entry.state === "bad" || !entry.urls.length) {
+      return `<span class="coinFallback">${letter}</span>`;
+    }
+
+    const src = (entry.state === "ok" && entry.okUrl) ? entry.okUrl : entry.urls[entry.idx || 0];
+    const safeKey = rawName.replace(/'/g, "\\'");
+
+    return `
+      <img
+        class="coinIcon"
+        src="${src}"
+        alt="${cleanName || rawName}"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        onload="window.__logoOk('${safeKey}', this)"
+        onerror="window.__logoErr('${safeKey}', this, '${letter}')"
+      />
+    `;
+  }
+
+  function coinCellHtml(coin) {
+    const c = coin ?? "";
+    return `<span class="asset-cell">${coinIconHtml(c, c)}<span>${c}</span></span>`;
   }
 
   function getTotalPositionsValue() {
@@ -1803,7 +1910,7 @@
 
         return `
         <tr>
-          <td>${coin}</td>
+          <td class="asset-cell">${coinIconHtml(coin, coin)}<span>${coin}</span></td>
           <td>
             <span class="pill" style="color:${dirColor};border-color:${dirColor}55;background:${dirColor}22;">
               ${dir}
@@ -1864,7 +1971,7 @@
         <tr>
           <td class="desktop-only">${order.oid}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
-          <td>${order.coin}</td>
+          <td class="asset-cell">${coinIconHtml(order.coin, order.coin)}<span>${order.coin}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td class="money">${fmtSize(order.sz)}</td>
           <td class="money">${fmtLimitPrice(order.limitPx) ?? ""}</td>
@@ -1911,7 +2018,7 @@
             <span class="mobile-only timestamp">${canceledAtTime}</span>
             <span class="desktop-only timestamp">${canceledAtTime}</span>
           </td>
-          <td>${o.coin}</td>
+          <td class="asset-cell">${coinIconHtml(o.coin, o.coin)}<span>${o.coin}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>  
           <td class="money">${fmtSize(o.sz)}</td>
           <td class="mobile-only money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
@@ -1941,7 +2048,7 @@
             <span class="desktop-only timestamp">${tTime}</span>
           </td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td>${fill.coin}</td>
+          <td class="asset-cell">${coinIconHtml(fill.coin, fill.coin)}<span>${fill.coin}</span></td>
           <td class="money">${fmtSize(fill.sz)}</td>
           <td class="money">${fmtPrice(fill.px) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
@@ -1972,7 +2079,7 @@
           <td class="desktop-only">${fill.oid ?? ""}</td>
           <td><span class="timestamp">${t}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td>${fill.coin ?? ""}</td>
+          <td class="asset-cell">${coinIconHtml(fill.coin ?? "", fill.coin ?? "")}<span>${fill.coin ?? ""}</span></td>
           <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
           <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
@@ -2130,7 +2237,7 @@
   function buildSheets() {
     const generatedAt = fmtDateTime(Date.now());
     return [
-      { name: "Metadata", rows: [["Wallet", "Generated At"], [currentWallet || "", generatedAt]] },
+      { name: "Metadata", rows: [["Wallet", "Generated At", "Source"], [currentWallet || "", generatedAt, "https://hypermonitor.org/"]] },
       { name: "Portfolio Summary", rows: [["Metric", "Value"], ...buildPortfolioSummaryRows()] },
       {
         name: "Positions",
@@ -2420,7 +2527,7 @@
           <td>${o.oid ?? ""}</td>
           <td><span class="timestamp">${created}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td>${o.coin ?? ""}</td>
+          <td class="asset-cell">${coinIconHtml(o.coin ?? "", o.coin ?? "")}<span>${o.coin ?? ""}</span></td>
           <td class="money">${fmtSize(o.sz ?? o.size)}</td>
           <td class="money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
           <td>${status}</td>
