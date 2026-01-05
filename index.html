@@ -279,7 +279,7 @@
         display: none;
       }
 
-      /* Historical Orders: OrderID(1) Time(2) Side(3) Asset(4) Size(5) Limit(6) Status(7) */
+      /* Historical Orders: OrderID(1) Date/Time(2) Side(3) Asset(4) Size(5) Limit(6) Status(7) */
       #historicalOrdersBody td:nth-child(2),
       #historicalOrdersBody th:nth-child(2) {
         display: none;
@@ -1064,7 +1064,7 @@
           <th>Asset</th>
           <th>Side</th>
           <th>Size</th>
-          <th>Entry Price</th>
+          <th>Avg. Entry</th>
           <th>Value</th>
           <th class="mobile-only">PnL</th>
           <th class="desktop-only">Unrealized PnL</th>
@@ -1245,7 +1245,7 @@
             <thead>
             <tr>
               <th>Order ID</th>
-              <th>Time</th>
+              <th>Date / Time</th>
               <th>Side</th>
               <th>Asset</th>
               <th>Size</th>
@@ -1305,7 +1305,7 @@
             <thead>
             <tr>
               <th class="desktop-only">Order ID</th>
-              <th>Time</th>
+              <th>Date / Time</th>
               <th>Side</th>
               <th>Asset</th>
               <th>Size</th>
@@ -1524,6 +1524,15 @@
     return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   }
 
+  function fmtDateTime(ms) {
+    if (!ms && ms !== 0) return "";
+    const d = new Date(Number(ms));
+    if (Number.isNaN(d.getTime())) return "";
+    const date = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+    const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return `${date} ${time}`;
+  }
+
   function fmtMoney(v, decimals = 2) {
     const n = Number(v);
     if (Number.isNaN(n)) return "";
@@ -1550,6 +1559,13 @@
       maximumFractionDigits: decimals,
     });
     return n < 0 ? "-$" + abs : "$" + abs;
+  }
+
+  function fmtSize(v) {
+    if (v === null || v === undefined) return "";
+    const n = Number(v);
+    if (Number.isNaN(n)) return String(v);
+    return n.toLocaleString();
   }
 
   function getTotalPositionsValue() {
@@ -1673,7 +1689,7 @@
               ${dir}
             </span>
           </td>
-          <td class="money">${szi}</td>
+          <td class="money">${fmtSize(szi)}</td>
           <td class="money">${fmtMoney(entryPx)}</td>
           <td class="money">${formattedValue}</td>
           <td class="money" style="color:${upnl >= 0 ? "#4ade80" : "#fb7185"};">
@@ -1730,7 +1746,7 @@
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
           <td>${order.coin}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="money">${order.sz}</td>
+          <td class="money">${fmtSize(order.sz)}</td>
           <td class="money">${fmtLimitPrice(order.limitPx) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
         </tr>
@@ -1777,7 +1793,7 @@
           </td>
           <td>${o.coin}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>  
-          <td class="money">${o.sz}</td>
+          <td class="money">${fmtSize(o.sz)}</td>
           <td class="mobile-only money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
         </tr>
       `;
@@ -1806,7 +1822,7 @@
           </td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td>${fill.coin}</td>
-          <td class="money">${fill.sz}</td>
+          <td class="money">${fmtSize(fill.sz)}</td>
           <td class="money">${fmtMoney(fill.px) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
         </tr>
@@ -1828,7 +1844,7 @@
 
     historicalFillsBodyEl.innerHTML = historicalFills
       .map((fill) => {
-        const t = fmtTimeOnly(fill.time ?? fill.timestamp);
+        const t = fmtDateTime(fill.time ?? fill.timestamp);
         const total = computeTotal(fill);
         const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
         return `
@@ -1837,7 +1853,7 @@
           <td><span class="timestamp">${t}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td>${fill.coin ?? ""}</td>
-          <td class="money">${fill.sz ?? ""}</td>
+          <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
           <td class="money">${fmtMoney(fill.px ?? fill.price) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
         </tr>
@@ -1900,7 +1916,7 @@
 
     historicalOrdersBodyEl.innerHTML = filtered
       .map((o) => {
-        const created = fmtTimeOnly(o.timestamp);
+        const created = fmtDateTime(o.timestamp);
         const side = o.side ?? (o.isBuy ? "B" : "S");
         const status = o.status ?? "";
 
@@ -1910,7 +1926,7 @@
           <td><span class="timestamp">${created}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td>${o.coin ?? ""}</td>
-          <td class="money">${o.sz ?? ""}</td>
+          <td class="money">${fmtSize(o.sz ?? o.size)}</td>
           <td class="money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
           <td>${status}</td>
         </tr>
