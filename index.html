@@ -11,9 +11,9 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Hypermonitor" />
 
-  <meta property="og:image" content="https://cdnstatic.tencentcs.com/edgeone/pages/assets/1765821358918-2Psz.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+  <meta property="og:image" content="https://www.hypermonitor.org/images/hypermonitor-dot.svg" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
 
   <meta property="og:url" content="https://www.hypermonitor.org/" />
   <link rel="canonical" href="https://www.hypermonitor.org/" />
@@ -21,7 +21,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Hyperliquid wallet tracker" />
   <meta name="twitter:description" content="Track any Hyperliquid wallet: positions, orders, fills, and performance." />
-  <meta name="twitter:image" content="https://cdnstatic.tencentcs.com/edgeone/pages/assets/1765821358918-2Psz.png" />
+  <meta name="twitter:image" content="https://www.hypermonitor.org/images/hypermonitor-dot.svg" />
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
@@ -455,6 +455,17 @@
       }
     }
 
+    /* Stack snapshot + positions for mobile and landscape tablets */
+    @media (max-width: 900px), (max-width: 1100px) and (orientation: landscape) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .positions-card {
+        grid-column: span 1;
+        min-width: 100%;
+      }
+    }
+
     .kv-list {
       font-size: 0.85rem;
       display: grid;
@@ -466,24 +477,27 @@
     .kv-value { text-align: right; }
 
     .asset-cell {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
       white-space: nowrap;
+      line-height: 1.1;
     }
 
     .coinIcon {
-      width: 18px;
-      height: 18px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       object-fit: cover;
       background: var(--border);
       flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
     }
 
     .coinFallback {
-      width: 18px;
-      height: 18px;
+      width: 14px;
+      height: 14px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -493,6 +507,24 @@
       font-size: 0.65rem;
       font-weight: 700;
       flex-shrink: 0;
+    }
+
+    .position-row { cursor: pointer; }
+    .position-row:hover { background: rgba(56, 189, 248, 0.05); }
+
+    .chevron {
+      display: inline-block;
+      width: 0.6rem;
+      height: 0.6rem;
+      border-right: 1.6px solid var(--muted);
+      border-bottom: 1.6px solid var(--muted);
+      transform: rotate(45deg);
+      transition: transform 120ms ease, border-color 120ms ease;
+    }
+
+    .position-row.expanded .chevron {
+      transform: rotate(-135deg);
+      border-color: #18bf98;
     }
 
     .upnl-pos { color: #4ade80; }
@@ -1888,10 +1920,42 @@
     );
 
     for (const fill of sorted) {
-      const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
-      const sizeRaw = Number(fill.sz ?? fill.size ?? 0);
+      const sideRaw =
+        fill.side ??
+        (fill.isBuy !== undefined ? (fill.isBuy ? "B" : "S") : undefined) ??
+        fill.dir ??
+        fill.direction ??
+        "?";
+      const sideUpper = String(sideRaw).toUpperCase();
+      let side = "?";
+      if (sideUpper.startsWith("B") || sideUpper === "1" || sideUpper === "+1") side = "B";
+      else if (
+        sideUpper.startsWith("S") ||
+        sideUpper.startsWith("A") ||
+        sideUpper === "-1" ||
+        sideUpper === "SELL" ||
+        sideUpper === "SHORT"
+      )
+        side = "S";
+
+      const sizeCandidates = [fill.szi, fill.sz, fill.size, fill.qty, fill.quantity, fill.baseSz, fill.baseSize];
+      let sizeRaw = 0;
+      for (const cand of sizeCandidates) {
+        const n = Number(cand);
+        if (!Number.isNaN(n)) {
+          sizeRaw = n;
+          break;
+        }
+      }
+
+      // If side is unknown, infer from sign of size
+      if (side === "?") {
+        if (sizeRaw > 0) side = "B";
+        else if (sizeRaw < 0) side = "S";
+      }
+
       const px = Number(fill.px ?? fill.price ?? 0);
-      const signed = side === "B" ? sizeRaw : side === "S" ? -sizeRaw : 0;
+      const signed = side === "B" ? Math.abs(sizeRaw) : side === "S" ? -Math.abs(sizeRaw) : sizeRaw;
 
       netSize += Number.isFinite(signed) ? signed : 0;
 
@@ -1904,8 +1968,8 @@
       rows.push({
         time: fmtDateTime(fill.time ?? fill.timestamp),
         sideCode: side,
-        side: sideLabel(side),
-        size: fmtSignedSize(signed),
+        side: side === "B" ? "LONG" : side === "S" ? "SHORT" : sideLabel(side),
+        size: Math.abs(signed),
         price: fmtPrice(px),
         value: Number.isFinite(valueSigned) ? formatSignedDollar(valueSigned) : "",
         upnl: Number.isFinite(upnl) ? formatSignedDollarWithPlus(upnl) : "",
@@ -2143,8 +2207,14 @@
         }
 
         return `
-        <tr class="position-row" data-coin="${coin}">
-          <td class="asset-cell">${coinIconHtml(coin, coin)}<span>${coin}</span></td>
+        <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}">
+          <td>
+            <div class="asset-cell">
+              ${coinIconHtml(coin, coin)}
+              <span>${coin}</span>
+              <span class="chevron" aria-hidden="true"></span>
+            </div>
+          </td>
           <td>
             <span class="pill" style="color:${dirColor};border-color:${dirColor}55;background:${dirColor}22;">
               ${dir}
@@ -2304,7 +2374,14 @@
       return;
     }
 
-    historicalFillsBodyEl.innerHTML = historicalFills
+    const filtered = historicalFills.filter((fill) => {
+      const sz = Number(fill.sz ?? fill.size ?? 0);
+      const px = Number(fill.px ?? fill.price ?? 0);
+      const val = sz * px;
+      return !(Number.isFinite(val) && Math.abs(val) < 0.0000001);
+    });
+
+    historicalFillsBodyEl.innerHTML = filtered
       .map((fill) => {
         const t = fmtDateTime(fill.time ?? fill.timestamp);
         const total = computeTotal(fill);
@@ -2322,7 +2399,7 @@
       })
       .join("");
 
-    if (historicalFillsCountEl) historicalFillsCountEl.textContent = `${historicalFills.length}`;
+    if (historicalFillsCountEl) historicalFillsCountEl.textContent = `${filtered.length}`;
   }
 
   function normalizeHistoricalOrder(entry) {
@@ -2818,7 +2895,7 @@
     historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
 
     try {
-      const fillsData = await infoClient.userFills({ user: wallet });
+      const fillsData = await infoClient.userFills({ user: wallet, aggregateByTime: true });
 
       historicalFills.length = 0;
       if (Array.isArray(fillsData)) {
