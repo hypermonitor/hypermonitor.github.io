@@ -310,6 +310,45 @@
       gap: 0.5rem;
     }
 
+    .export-btn {
+      border: 1px solid var(--border);
+      background: #17181f;
+      padding: 0.2rem 0.35rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .export-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .export-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+    }
+
+    body.light .export-btn {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
     .theme-toggle-btn {
       border-radius: 999px;
       border: 1px solid var(--border);
@@ -366,7 +405,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
@@ -402,6 +441,18 @@
       border-radius: 999px;
       border: 1px solid var(--border);
       color: var(--muted);
+    }
+
+    .positions-card {
+      grid-column: span 2;
+      min-width: 640px;
+    }
+
+    @media (max-width: 900px) {
+      .positions-card {
+        grid-column: span 1;
+        min-width: 100%;
+      }
     }
 
     .kv-list {
@@ -500,6 +551,12 @@
     .section-title small {
       font-size: 0.75rem;
       color: var(--muted);
+    }
+
+    .section-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
     .tagline { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
@@ -1053,10 +1110,20 @@
       <div class="error" id="snapshotError"></div>
     </section>
 
-    <section class="card" style="overflow: auto;">
+    <section class="card positions-card" style="overflow: auto;">
       <div class="section-title">
         <h2>Positions</h2>
-        <button id="positionsChartBtn" class="pill-action-btn">Chart</button>
+        <div class="section-actions">
+          <button id="positionsChartBtn" class="pill-action-btn">Chart</button>
+          <button id="exportExcelBtn" class="export-btn" aria-label="Export Excel">
+            <svg class="export-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path d="M12 3v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 10l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 18h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span class="sr-only">Export Excel</span>
+          </button>
+        </div>
       </div>
       <table>
         <thead>
@@ -1249,7 +1316,7 @@
               <th>Side</th>
               <th>Asset</th>
               <th>Size</th>
-              <th>Limit Price</th>
+              <th>Price</th>
               <th>Status</th>
             </tr>
             </thead>
@@ -1415,6 +1482,7 @@
   const portfolioErrorEl = document.getElementById("portfolioError");
   const portfolioLoadingEl = document.getElementById("portfolioLoading");
   const rangeButtons = document.querySelectorAll(".chart-range-btn");
+  const exportExcelBtn = document.getElementById("exportExcelBtn");
 
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
@@ -1544,12 +1612,18 @@
     return `${sign}$${abs}`;
   }
 
-  function fmtLimitPrice(v) {
+  function fmtPrice(v) {
+    if (v === null || v === undefined) return "";
     const n = Number(v);
-    if (Number.isNaN(n)) return "";
-    const decimals = Number.isInteger(n) ? 0 : 2;
-    return fmtMoney(n, decimals);
+    if (Number.isNaN(n)) return String(v);
+    const formatted = n.toLocaleString(undefined, {
+      maximumFractionDigits: 20,
+      useGrouping: true,
+    });
+    return `$${formatted}`;
   }
+
+  function fmtLimitPrice(v) { return fmtPrice(v); }
 
   function formatSignedDollar(v, decimals = 2) {
     const n = Number(v);
@@ -1566,6 +1640,11 @@
     const n = Number(v);
     if (Number.isNaN(n)) return String(v);
     return n.toLocaleString();
+  }
+
+  function xmlEscape(v) {
+    const s = v === null || v === undefined ? "" : String(v);
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&apos;");
   }
 
   function getTotalPositionsValue() {
@@ -1590,6 +1669,47 @@
 
   function sideLabel(side) { return side === "B" ? "LONG" : "SHORT"; }
   function sidePillClass(side) { return side === "B" ? "pill-buy" : "pill-sell"; }
+
+  function buildPositionsRowsForExport() {
+    if (!Array.isArray(currentAssetPositions) || currentAssetPositions.length === 0) return [];
+
+    return currentAssetPositions.map((item) => {
+      const p = item.position || {};
+      const coin = p.coin ?? "";
+      const szi = Number(p.szi ?? 0);
+      const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
+      const entryPx = Number(p.entryPx ?? 0);
+
+      const livePx = liveMids.get(coin);
+      let markPx = Number.isFinite(livePx) ? livePx : undefined;
+
+      const snapshotValue = Number(p.positionValue ?? 0);
+      if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
+        markPx = snapshotValue / szi;
+      }
+
+      let positionValue = snapshotValue;
+      if (markPx !== undefined && !Number.isNaN(markPx) && szi !== 0) {
+        positionValue = markPx * szi;
+      } else if (Number.isFinite(entryPx) && szi !== 0) {
+        positionValue = entryPx * szi;
+      }
+
+      let upnl = Number(p.unrealizedPnl ?? 0);
+      if (markPx !== undefined && !Number.isNaN(markPx) && !Number.isNaN(entryPx) && szi !== 0) {
+        upnl = (markPx - entryPx) * szi;
+      }
+
+      return [
+        coin,
+        dir,
+        fmtSize(szi),
+        fmtPrice(entryPx),
+        fmtMoney(positionValue),
+        formatSignedDollar(upnl),
+      ];
+    });
+  }
 
   function renderMarginSummary(summary, withdrawable) {
     if (!summary) {
@@ -1690,7 +1810,7 @@
             </span>
           </td>
           <td class="money">${fmtSize(szi)}</td>
-          <td class="money">${fmtMoney(entryPx)}</td>
+          <td class="money">${fmtPrice(entryPx)}</td>
           <td class="money">${formattedValue}</td>
           <td class="money" style="color:${upnl >= 0 ? "#4ade80" : "#fb7185"};">
             ${upnlSign}$${upnlAbs.toFixed(2)}
@@ -1736,11 +1856,11 @@
     const MIN_ROWS = 4;
 
     // Build real rows
-    const rows = values.map((order) => {
-      const created = fmtTimeOnly(order.timestamp);
-      const total = computeTotal(order);
-      const side = order.side ?? "?";
-      return `
+      const rows = values.map((order) => {
+        const created = fmtTimeOnly(order.timestamp);
+        const total = computeTotal(order);
+        const side = order.side ?? "?";
+        return `
         <tr>
           <td class="desktop-only">${order.oid}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
@@ -1823,7 +1943,7 @@
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td>${fill.coin}</td>
           <td class="money">${fmtSize(fill.sz)}</td>
-          <td class="money">${fmtMoney(fill.px) ?? ""}</td>
+          <td class="money">${fmtPrice(fill.px) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
         </tr>
       `;
@@ -1854,7 +1974,7 @@
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td>${fill.coin ?? ""}</td>
           <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
-          <td class="money">${fmtMoney(fill.px ?? fill.price) ?? ""}</td>
+          <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
         </tr>
       `;
@@ -1880,6 +2000,381 @@
       statusTimestamp,
       raw: entry,
     };
+  }
+
+  function buildLiveOrdersRowsForExport() {
+    const values = Array.from(openOrders.values());
+    if (!values.length) return [];
+
+    return values
+      .sort((a, b) => (a.oid ?? 0) - (b.oid ?? 0))
+      .map((order) => {
+        const side = order.side ?? "?";
+        return [
+          order.oid ?? "",
+          fmtDateTime(order.timestamp),
+          sideLabel(side),
+          order.coin ?? "",
+          fmtSize(order.sz),
+          fmtLimitPrice(order.limitPx) ?? "",
+          computeTotal(order),
+        ];
+      });
+  }
+
+  function buildHistoricalOrdersRowsForExport() {
+    if (!Array.isArray(historicalOrders) || historicalOrders.length === 0) return [];
+    return historicalOrders.map((entry) => {
+      const o = normalizeHistoricalOrder(entry);
+      const side = o.side ?? (o.isBuy ? "B" : "S") ?? "?";
+      return [
+        o.oid ?? "",
+        fmtDateTime(o.timestamp),
+        sideLabel(side),
+        o.coin ?? "",
+        fmtSize(o.sz ?? o.size),
+        fmtLimitPrice(o.limitPx) ?? "",
+        o.status ?? "",
+      ];
+    });
+  }
+
+  function buildLiveFillsRowsForExport() {
+    if (!Array.isArray(fills) || fills.length === 0) return [];
+    return fills.map((fill) => {
+      const side = fill.side ?? "?";
+      return [
+        fill.oid ?? "",
+        fmtDateTime(fill.time ?? fill.timestamp),
+        sideLabel(side),
+        fill.coin ?? "",
+        fmtSize(fill.sz),
+        fmtPrice(fill.px) ?? "",
+        computeTotal(fill),
+      ];
+    });
+  }
+
+  function buildHistoricalFillsRowsForExport() {
+    if (!Array.isArray(historicalFills) || historicalFills.length === 0) return [];
+    return historicalFills.map((fill) => {
+      const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
+      return [
+        fill.oid ?? "",
+        fmtDateTime(fill.time ?? fill.timestamp),
+        sideLabel(side),
+        fill.coin ?? "",
+        fmtSize(fill.sz ?? fill.size),
+        fmtPrice(fill.px ?? fill.price) ?? "",
+        computeTotal(fill),
+      ];
+    });
+  }
+
+  function buildPortfolioSummaryRows() {
+    if (!snapshotMarginSummary) return [["Status", "Not loaded"]];
+
+    return [
+      ["Account Value", fmtMoney(snapshotMarginSummary.accountValue)],
+      ["Notional Exposure", fmtMoney(snapshotMarginSummary.totalNtlPos)],
+      ["Collateral", fmtMoney(snapshotMarginSummary.totalRawUsd)],
+      ["Margin Used", fmtMoney(snapshotMarginSummary.totalMarginUsed)],
+      ["Withdrawable", fmtMoney(snapshotWithdrawable)],
+    ];
+  }
+
+  async function ensureHistoricalDataLoaded() {
+    if (!currentWallet) return;
+    const tasks = [];
+    if (!historicalOrdersLoaded) tasks.push(loadHistoricalOrders(currentWallet));
+    if (!historicalFillsLoaded) tasks.push(loadHistoricalFills(currentWallet));
+    if (tasks.length) await Promise.all(tasks);
+  }
+
+  function toColumnName(idx) {
+    let n = idx + 1;
+    let name = "";
+    while (n > 0) {
+      const rem = (n - 1) % 26;
+      name = String.fromCharCode(65 + rem) + name;
+      n = Math.floor((n - 1) / 26);
+    }
+    return name;
+  }
+
+  function buildSheetXml(rows) {
+    const safeRows = (rows && rows.length ? rows : [["No data"]]).map((r) =>
+      Array.isArray(r) ? r : [r]
+    );
+
+    const rowXml = safeRows
+      .map((row, rowIdx) => {
+        const cells = row
+          .map((cell, colIdx) => {
+            const r = `${toColumnName(colIdx)}${rowIdx + 1}`;
+            return `<c r="${r}" t="inlineStr"><is><t>${xmlEscape(cell)}</t></is></c>`;
+          })
+          .join("");
+        return `<row r="${rowIdx + 1}">${cells}</row>`;
+      })
+      .join("");
+
+    return (
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+      `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">` +
+      `<sheetData>${rowXml}</sheetData>` +
+      `</worksheet>`
+    );
+  }
+
+  function buildSheets() {
+    const generatedAt = fmtDateTime(Date.now());
+    return [
+      { name: "Metadata", rows: [["Wallet", "Generated At"], [currentWallet || "", generatedAt]] },
+      { name: "Portfolio Summary", rows: [["Metric", "Value"], ...buildPortfolioSummaryRows()] },
+      {
+        name: "Positions",
+        rows: [
+          ["Asset", "Side", "Size", "Avg Entry", "Value", "Unrealized PnL"],
+          ...buildPositionsRowsForExport(),
+        ],
+      },
+      {
+        name: "Live Orders",
+        rows: [
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Total"],
+          ...buildLiveOrdersRowsForExport(),
+        ],
+      },
+      {
+        name: "Historical Orders",
+        rows: [
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Status"],
+          ...buildHistoricalOrdersRowsForExport(),
+        ],
+      },
+      {
+        name: "Live Trades",
+        rows: [
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Total"],
+          ...buildLiveFillsRowsForExport(),
+        ],
+      },
+      {
+        name: "Historical Trades",
+        rows: [
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Total"],
+          ...buildHistoricalFillsRowsForExport(),
+        ],
+      },
+    ];
+  }
+
+  function buildWorkbookXml(sheets) {
+    const sheetsXml = sheets
+      .map(
+        (sheet, idx) =>
+          `<sheet name="${xmlEscape(sheet.name)}" sheetId="${idx + 1}" r:id="rId${idx + 1}"/>`
+      )
+      .join("");
+
+    return (
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+      `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ` +
+      `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">` +
+      `<sheets>${sheetsXml}</sheets>` +
+      `</workbook>`
+    );
+  }
+
+  function buildWorkbookRels(sheets) {
+    const relsXml = sheets
+      .map(
+        (_sheet, idx) =>
+          `<Relationship Id="rId${idx + 1}" ` +
+          `Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" ` +
+          `Target="worksheets/sheet${idx + 1}.xml"/>`
+      )
+      .join("");
+
+    return (
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      relsXml +
+      `</Relationships>`
+    );
+  }
+
+  function buildRootRels() {
+    return (
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>` +
+      `</Relationships>`
+    );
+  }
+
+  function buildContentTypes(sheets) {
+    const sheetOverrides = sheets
+      .map(
+        (_sheet, idx) =>
+          `<Override PartName="/xl/worksheets/sheet${idx + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`
+      )
+      .join("");
+
+    return (
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+      `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+      `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+      `<Default Extension="xml" ContentType="application/xml"/>` +
+      `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>` +
+      sheetOverrides +
+      `</Types>`
+    );
+  }
+
+  const CRC_TABLE = (() => {
+    const table = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) {
+        c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      }
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32Uint8(data) {
+    let crc = 0xffffffff;
+    for (let i = 0; i < data.length; i++) {
+      crc = CRC_TABLE[(crc ^ data[i]) & 0xff] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xffffffff) >>> 0;
+  }
+
+  function createZip(files) {
+    const encoder = new TextEncoder();
+    let offset = 0;
+    const localChunks = [];
+    const centralChunks = [];
+
+    files.forEach((file) => {
+      const nameBytes = encoder.encode(file.path);
+      const dataBytes = typeof file.data === "string" ? encoder.encode(file.data) : file.data;
+      const crc = crc32Uint8(dataBytes);
+
+      const local = new Uint8Array(30 + nameBytes.length + dataBytes.length);
+      const lv = new DataView(local.buffer);
+      lv.setUint32(0, 0x04034b50, true);
+      lv.setUint16(4, 20, true); // version needed to extract
+      lv.setUint16(6, 0, true); // flags
+      lv.setUint16(8, 0, true); // compression (0 = store)
+      lv.setUint16(10, 0, true); // mod time
+      lv.setUint16(12, 0, true); // mod date
+      lv.setUint32(14, crc, true);
+      lv.setUint32(18, dataBytes.length, true); // compressed size
+      lv.setUint32(22, dataBytes.length, true); // uncompressed size
+      lv.setUint16(26, nameBytes.length, true);
+      lv.setUint16(28, 0, true); // extra length
+      local.set(nameBytes, 30);
+      local.set(dataBytes, 30 + nameBytes.length);
+      localChunks.push(local);
+
+      const central = new Uint8Array(46 + nameBytes.length);
+      const cv = new DataView(central.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 0x031e, true); // version made by
+      cv.setUint16(6, 20, true); // version needed
+      cv.setUint16(8, 0, true); // flags
+      cv.setUint16(10, 0, true); // compression
+      cv.setUint16(12, 0, true); // mod time
+      cv.setUint16(14, 0, true); // mod date
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, dataBytes.length, true);
+      cv.setUint32(24, dataBytes.length, true);
+      cv.setUint16(28, nameBytes.length, true);
+      cv.setUint16(30, 0, true); // extra length
+      cv.setUint16(32, 0, true); // file comment length
+      cv.setUint16(34, 0, true); // disk number start
+      cv.setUint16(36, 0, true); // internal file attrs
+      cv.setUint32(38, 0, true); // external file attrs
+      cv.setUint32(42, offset, true); // relative offset
+      central.set(nameBytes, 46);
+      centralChunks.push(central);
+
+      offset += local.length;
+    });
+
+    const centralSize = centralChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    const end = new Uint8Array(22);
+    const ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(4, 0, true); // disk number
+    ev.setUint16(6, 0, true); // central dir disk
+    ev.setUint16(8, files.length, true); // entries this disk
+    ev.setUint16(10, files.length, true); // total entries
+    ev.setUint32(12, centralSize, true); // central size
+    ev.setUint32(16, offset, true); // central offset
+    ev.setUint16(20, 0, true); // comment length
+
+    const totalSize = offset + centralSize + end.length;
+    const out = new Uint8Array(totalSize);
+
+    let pointer = 0;
+    localChunks.forEach((chunk) => {
+      out.set(chunk, pointer);
+      pointer += chunk.length;
+    });
+
+    let centralPointer = offset;
+    centralChunks.forEach((chunk) => {
+      out.set(chunk, centralPointer);
+      centralPointer += chunk.length;
+    });
+
+    out.set(end, centralPointer);
+    return out;
+  }
+
+  function buildXlsxFile() {
+    const sheets = buildSheets();
+    const sheetFiles = sheets.map((sheet, idx) => ({
+      path: `xl/worksheets/sheet${idx + 1}.xml`,
+      data: buildSheetXml(sheet.rows),
+    }));
+
+    const files = [
+      { path: "[Content_Types].xml", data: buildContentTypes(sheets) },
+      { path: "_rels/.rels", data: buildRootRels() },
+      { path: "xl/workbook.xml", data: buildWorkbookXml(sheets) },
+      { path: "xl/_rels/workbook.xml.rels", data: buildWorkbookRels(sheets) },
+      ...sheetFiles,
+    ];
+
+    return createZip(files);
+  }
+
+  async function triggerExcelDownload() {
+    try {
+      await ensureHistoricalDataLoaded();
+
+      const archive = buildXlsxFile();
+      const walletSlug = currentWallet || "wallet";
+      const filename = `hypermonitor-${walletSlug}.xlsx`;
+      const blob = new Blob([archive], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export error", err);
+      alert("Failed to export Excel. See console for details.");
+    }
   }
 
   function renderHistoricalOrders() {
@@ -2658,6 +3153,14 @@
     const isLight = document.body.classList.contains("light");
     applyTheme(isLight ? "dark" : "light");
   });
+
+  if (exportExcelBtn) {
+    exportExcelBtn.addEventListener("click", async () => {
+      exportExcelBtn.disabled = true;
+      await triggerExcelDownload();
+      exportExcelBtn.disabled = false;
+    });
+  }
 
   if (positionsChartBtn) {
     positionsChartBtn.addEventListener("click", () => {
