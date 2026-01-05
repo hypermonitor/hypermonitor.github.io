@@ -495,6 +495,50 @@
       flex-shrink: 0;
     }
 
+    .upnl-pos { color: #4ade80; }
+    .upnl-neg { color: #fb7185; }
+
+    .position-breakdown {
+      margin-top: 0.25rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem 0.5rem;
+    }
+
+    .position-subtable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    .position-subtable th,
+    .position-subtable td {
+      padding: 0.2rem 0.25rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .position-subtable th {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .position-subtable tr:last-child td {
+      border-bottom: none;
+    }
+
+    .position-subtable .money {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .position-breakdown-note {
+      margin-top: 0.25rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -1521,6 +1565,7 @@
 
   const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
   const logoCache = new Map();
+  const expandedPositions = new Set();
 
   window.__logoOk = (rawKey, imgEl) => {
     const entry = logoCache.get(rawKey);
@@ -1696,11 +1741,30 @@
     return n < 0 ? "-$" + abs : "$" + abs;
   }
 
+  function formatSignedDollarWithPlus(v, decimals = 2) {
+    const n = Number(v);
+    if (Number.isNaN(n)) return "";
+    const abs = Math.abs(n).toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    if (n > 0) return "+$" + abs;
+    if (n < 0) return "-$" + abs;
+    return "$" + abs;
+  }
+
   function fmtSize(v) {
     if (v === null || v === undefined) return "";
     const n = Number(v);
     if (Number.isNaN(n)) return String(v);
     return n.toLocaleString();
+  }
+
+  function fmtSignedSize(v) {
+    const n = Number(v);
+    if (Number.isNaN(n)) return "";
+    const sign = n > 0 ? "+" : n < 0 ? "-" : "";
+    return `${sign}${fmtSize(Math.abs(n))}`;
   }
 
   function xmlEscape(v) {
@@ -1751,6 +1815,114 @@
   function coinCellHtml(coin) {
     const c = coin ?? "";
     return `<span class="asset-cell">${coinIconHtml(c, c)}<span>${c}</span></span>`;
+  }
+
+  function normalizeCoin(coin) {
+    return (coin || "").toUpperCase();
+  }
+
+  function getMarkPriceForCoin(coin) {
+    const norm = normalizeCoin(coin);
+    if (!norm) return null;
+
+    const livePx = liveMids.get(norm) ?? liveMids.get(coin);
+    if (Number.isFinite(livePx)) return livePx;
+
+    const position = currentAssetPositions.find((item) => normalizeCoin(item?.position?.coin) === norm);
+    if (!position) return null;
+
+    const p = position.position;
+    const szi = Number(p.szi ?? 0);
+    const snapshotValue = Number(p.positionValue ?? 0);
+    if (Number.isFinite(snapshotValue) && szi) return snapshotValue / szi;
+
+    const entryPx = Number(p.entryPx ?? 0);
+    return Number.isFinite(entryPx) ? entryPx : null;
+  }
+
+  function getAllFillsForCoin(coin) {
+    const norm = normalizeCoin(coin);
+    if (!norm) return [];
+    const combined = [];
+    const pushFrom = (arr) => {
+      arr.forEach((f) => {
+        const c = normalizeCoin(f?.coin ?? f?.asset ?? "");
+        if (c === norm) combined.push(f);
+      });
+    };
+    pushFrom(historicalFills);
+    pushFrom(fills);
+
+    // Deduplicate by composite key
+    const seen = new Set();
+    const unique = [];
+    combined.forEach((f) => {
+      const key = [
+        normalizeCoin(f?.coin ?? f?.asset ?? ""),
+        f?.oid ?? "",
+        f?.time ?? f?.timestamp ?? "",
+        f?.side ?? (f?.isBuy ? "B" : "S"),
+        f?.sz ?? f?.size ?? "",
+        f?.px ?? f?.price ?? "",
+      ].join("|");
+      if (seen.has(key)) return;
+      seen.add(key);
+      unique.push(f);
+    });
+
+    return unique.sort((a, b) => Number(a.time ?? a.timestamp ?? 0) - Number(b.time ?? b.timestamp ?? 0));
+  }
+
+  function buildPositionFillDetails(coin, szi, markPx) {
+    const fillsForCoin = getAllFillsForCoin(coin);
+    const rows = [];
+    let netSize = 0;
+    let totalUpnl = 0;
+
+    const target = Number(szi) || 0;
+    const EPS = 1e-8;
+
+    // Start from most recent fill and walk back until we cover the current exposure
+    const sorted = [...fillsForCoin].sort(
+      (a, b) => Number(b.time ?? b.timestamp ?? 0) - Number(a.time ?? a.timestamp ?? 0)
+    );
+
+    for (const fill of sorted) {
+      const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
+      const sizeRaw = Number(fill.sz ?? fill.size ?? 0);
+      const px = Number(fill.px ?? fill.price ?? 0);
+      const signed = side === "B" ? sizeRaw : side === "S" ? -sizeRaw : 0;
+
+      netSize += Number.isFinite(signed) ? signed : 0;
+
+      const valueSigned = Number.isFinite(px) && Number.isFinite(signed) ? signed * px : null;
+      const upnl = Number.isFinite(markPx) && Number.isFinite(px) && Number.isFinite(signed)
+        ? (markPx - px) * signed
+        : null;
+      if (Number.isFinite(upnl)) totalUpnl += upnl;
+
+      rows.push({
+        time: fmtDateTime(fill.time ?? fill.timestamp),
+        sideCode: side,
+        side: sideLabel(side),
+        size: fmtSignedSize(signed),
+        price: fmtPrice(px),
+        value: Number.isFinite(valueSigned) ? formatSignedDollar(valueSigned) : "",
+        upnl: Number.isFinite(upnl) ? formatSignedDollarWithPlus(upnl) : "",
+        upnlRaw: Number.isFinite(upnl) ? upnl : null,
+      });
+
+      if (Math.abs(netSize - target) <= EPS) break;
+    }
+
+    const matches = Math.abs(netSize - target) <= EPS;
+
+    return {
+      rows,
+      netSize,
+      matches,
+      totalUpnl,
+    };
   }
 
   function getTotalPositionsValue() {
@@ -1903,12 +2075,75 @@
         const notional = Math.abs(positionValue);
         if (!Number.isNaN(notional)) lastComputedTotalNotional += notional;
 
-        const upnlAbs = Math.abs(upnl);
-        const upnlSign = upnl >= 0 ? "+" : "-";
+        const upnlFormatted = formatSignedDollarWithPlus(upnl);
         const formattedValue = formatSignedDollar(positionValue);
 
+        const isExpanded = expandedPositions.has(coin);
+        let breakdownHtml = "";
+        if (isExpanded) {
+          const mark = getMarkPriceForCoin(coin);
+          const breakdown = buildPositionFillDetails(coin, szi, mark);
+          const rowsHtml = breakdown.rows
+            .slice()
+            .reverse()
+            .map(
+              (r) => `
+              <tr>
+                <td class="timestamp">${r.time}</td>
+                <td><span class="pill ${sidePillClass(r.sideCode)}">${r.side}</span></td>
+                <td class="money">${r.size}</td>
+                <td class="money">${r.price}</td>
+                <td class="money">${r.value}</td>
+                <td class="money ${r.upnlRaw >= 0 ? "upnl-pos" : "upnl-neg"}">${r.upnl}</td>
+              </tr>
+            `
+            )
+            .join("");
+
+          breakdownHtml = `
+            <tr class="position-details">
+              <td colspan="7">
+                <div class="position-breakdown">
+                  <table class="position-subtable">
+                    <thead>
+                      <tr>
+                        <th>Execution Time</th>
+                        <th>Side</th>
+                        <th>Size</th>
+                        <th>Price</th>
+                        <th>Value</th>
+                        <th>Unrealized PnL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${rowsHtml || `<tr><td colspan="6" class="muted">Finding fills for this asset...</td></tr>`}
+                      <tr>
+                        <td><strong>Net size</strong></td>
+                        <td></td>
+                        <td class="money"><strong>${fmtSignedSize(breakdown.netSize)}</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td class="money ${breakdown.totalUpnl >= 0 ? "upnl-pos" : "upnl-neg"}">
+                          <strong>${Number.isFinite(breakdown.totalUpnl) ? formatSignedDollarWithPlus(breakdown.totalUpnl) : ""}</strong>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  ${
+                    breakdown.matches
+                      ? ""
+                      : `<div class="position-breakdown-note">Net from listed fills (${fmtSignedSize(
+                          breakdown.netSize
+                        )}) differs from current exposure (${fmtSignedSize(szi)}); history may be truncated.</div>`
+                  }
+                </div>
+              </td>
+            </tr>
+          `;
+        }
+
         return `
-        <tr>
+        <tr class="position-row" data-coin="${coin}">
           <td class="asset-cell">${coinIconHtml(coin, coin)}<span>${coin}</span></td>
           <td>
             <span class="pill" style="color:${dirColor};border-color:${dirColor}55;background:${dirColor}22;">
@@ -1918,10 +2153,11 @@
           <td class="money">${fmtSize(szi)}</td>
           <td class="money">${fmtPrice(entryPx)}</td>
           <td class="money">${formattedValue}</td>
-          <td class="money" style="color:${upnl >= 0 ? "#4ade80" : "#fb7185"};">
-            ${upnlSign}$${upnlAbs.toFixed(2)}
+          <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
+            ${upnlFormatted}
           </td>
         </tr>
+        ${breakdownHtml}
       `;
       })
       .join("");
@@ -3281,6 +3517,19 @@
   if (portfolioModalEl) {
     portfolioModalEl.addEventListener("click", (e) => {
       if (e.target === portfolioModalEl) closePortfolioModal();
+    });
+  }
+
+  if (positionsBodyEl) {
+    positionsBodyEl.addEventListener("click", async (e) => {
+      const row = e.target.closest(".position-row");
+      if (!row) return;
+      const coin = row.dataset.coin;
+      if (!coin) return;
+      if (!historicalFillsLoaded) await ensureHistoricalDataLoaded();
+      if (expandedPositions.has(coin)) expandedPositions.delete(coin);
+      else expandedPositions.add(coin);
+      renderPositions(currentAssetPositions);
     });
   }
 
