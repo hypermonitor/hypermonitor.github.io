@@ -1407,11 +1407,10 @@
               <th>Asset</th>
               <th>Size</th>
               <th>Price</th>
-              <th class="desktop-only">Total</th>
             </tr>
             </thead>
             <tbody id="historicalFillsBody">
-            <tr><td colspan="7" class="muted">Loading historical fills…</td></tr>
+            <tr><td colspan="6" class="muted">Loading historical fills…</td></tr>
             </tbody>
           </table>
         </div>
@@ -2064,7 +2063,7 @@
     if (!historicalFillsBodyEl) return;
 
     if (historicalFills.length === 0) {
-      historicalFillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No historical fills found.</td></tr>";
+      historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>No historical fills found.</td></tr>";
       if (historicalFillsCountEl) historicalFillsCountEl.textContent = "0";
       return;
     }
@@ -2082,7 +2081,6 @@
           <td class="asset-cell">${coinIconHtml(fill.coin ?? "", fill.coin ?? "")}<span>${fill.coin ?? ""}</span></td>
           <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
           <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
-          <td class="desktop-only money">${total ? "$" + total : ""}</td>
         </tr>
       `;
       })
@@ -2124,7 +2122,7 @@
           order.coin ?? "",
           fmtSize(order.sz),
           fmtLimitPrice(order.limitPx) ?? "",
-          computeTotal(order),
+          computeTotal(order) ? `$${computeTotal(order)}` : "",
         ];
       });
   }
@@ -2141,6 +2139,7 @@
         o.coin ?? "",
         fmtSize(o.sz ?? o.size),
         fmtLimitPrice(o.limitPx) ?? "",
+        computeTotal(o) ? `$${computeTotal(o)}` : "",
         o.status ?? "",
       ];
     });
@@ -2157,7 +2156,7 @@
         fill.coin ?? "",
         fmtSize(fill.sz),
         fmtPrice(fill.px) ?? "",
-        computeTotal(fill),
+        computeTotal(fill) ? `$${computeTotal(fill)}` : "",
       ];
     });
   }
@@ -2173,7 +2172,7 @@
         fill.coin ?? "",
         fmtSize(fill.sz ?? fill.size),
         fmtPrice(fill.px ?? fill.price) ?? "",
-        computeTotal(fill),
+        computeTotal(fill) ? `$${computeTotal(fill)}` : "",
       ];
     });
   }
@@ -2256,7 +2255,7 @@
       {
         name: "Historical Orders",
         rows: [
-          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Status"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Total", "Status"],
           ...buildHistoricalOrdersRowsForExport(),
         ],
       },
@@ -2580,7 +2579,7 @@
 
     historicalFillsLoaded = false;
     if (historicalFillsCountEl) historicalFillsCountEl.textContent = "–";
-    historicalFillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical fills…</td></tr>";
+    historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
 
     try {
       const fillsData = await infoClient.userFills({ user: wallet });
@@ -2597,7 +2596,7 @@
     } catch (err) {
       console.error("Historical fills error", err);
       if (historicalFillsBodyEl) {
-        historicalFillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Failed to load historical fills.</td></tr>";
+        historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Failed to load historical fills.</td></tr>";
       }
       if (fillsErrorEl) fillsErrorEl.textContent = "Failed to load historical fills: " + (err?.message || err);
     }
@@ -2638,7 +2637,7 @@
       historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical orders…</td></tr>";
     }
     if (historicalFillsBodyEl) {
-      historicalFillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical fills…</td></tr>";
+      historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
     }
 
     positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted desktop-only'>Loading…</td><td colspan='4' class='muted mobile-only'>Loading…</td></tr>";
