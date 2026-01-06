@@ -133,6 +133,22 @@
       display: none;
     }
 
+    /* Match main.html link styling (inline, underline on hover) */
+    a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0;
+      border: none;
+      background: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    a:hover { color: inherit; text-decoration: underline; }
+    body.light a { color: #475569; }
+    body.light a:hover { color: inherit; text-decoration: underline; }
+
     .wallet-input-row {
       display: flex;
       align-items: center;
@@ -1495,34 +1511,7 @@
 
   <footer>
     <div style="margin-top:.1rem;">
-        © Hypermonitor ·
-        Dr. Roshan Mahes
-    <a class="linkedin-badge"
-      href="https://www.linkedin.com/in/roshanmahes/"
-      data-tip="Mahes' LinkedIn"
-      target="_blank" rel="noopener noreferrer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-      </svg>
-    </a>,
-    Shreehari Bodas
-    <a class="linkedin-badge"
-      href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/"
-      data-tip="Bodas' LinkedIn"
-      target="_blank" rel="noopener noreferrer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-      </svg>
-    </a>,
-    Dr. Donato Maragno
-    <a class="linkedin-badge"
-      href="https://www.linkedin.com/in/donato-maragno/"
-      data-tip="Maragno's LinkedIn"
-      target="_blank" rel="noopener noreferrer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 4h-.02a1.5 1.5 0 1 1 .02 0ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-      </svg>
-    </a>.
+        © <span id="year"></span> <a href="/main.html">Hypermonitor</a>.
     </div>
   </footer>
 </div>
@@ -1598,6 +1587,8 @@
   const logoCache = new Map();
   const expandedPositions = new Set();
   const coinIdMap = new Map();
+
+  document.getElementById("year").textContent = new Date().getFullYear();
 
   window.__logoOk = (rawKey, imgEl) => {
     const entry = logoCache.get(rawKey);
