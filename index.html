@@ -477,27 +477,27 @@
     .kv-value { text-align: right; }
 
     .asset-cell {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 0.3rem;
       white-space: nowrap;
       line-height: 1.1;
+      height: 100%;
     }
 
     .coinIcon {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       object-fit: cover;
       background: var(--border);
       flex-shrink: 0;
-      display: inline-block;
-      vertical-align: middle;
+      display: block;
     }
 
     .coinFallback {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -1334,16 +1334,15 @@
             <tr>
               <th class="desktop-only">Order ID</th>
               <th class="desktop-only">Time</th>  
-              <th>Asset</th>
+              <th style="width: 20%;">Asset</th>
               <th>Side</th>
               <th>Size</th>
               <th class="desktop-only">Limit Price</th>
               <th class="mobile-only">Price</th>
-              <th class="desktop-only">Total</th>
             </tr>
             </thead>
             <tbody id="openOrdersBody">
-            <tr><td colspan="7" class="muted">No open orders.</td></tr>
+            <tr><td colspan="6" class="muted">No open orders.</td></tr>
             </tbody>
           </table>
         </div>
@@ -1598,6 +1597,7 @@
   const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
   const logoCache = new Map();
   const expandedPositions = new Set();
+  const coinIdMap = new Map();
 
   window.__logoOk = (rawKey, imgEl) => {
     const entry = logoCache.get(rawKey);
@@ -1785,6 +1785,37 @@
     return "$" + abs;
   }
 
+  function rememberCoinAlias(raw, resolved) {
+    if (!raw || !resolved) return;
+    const key = String(raw).trim();
+    const val = String(resolved).trim();
+    if (!key || !val) return;
+    coinIdMap.set(key, val);
+    if (key.startsWith("@")) coinIdMap.set(key.slice(1), val);
+  }
+
+  function resolveCoinName(raw, alt) {
+    const primary = (raw || "").trim();
+    const secondary = (alt || "").trim();
+
+    if (primary && secondary && primary !== secondary) {
+      rememberCoinAlias(primary, secondary);
+      rememberCoinAlias(secondary, primary);
+    }
+
+    if (primary.startsWith("@")) {
+      const lookup = coinIdMap.get(primary) || coinIdMap.get(primary.slice(1));
+      if (lookup) return lookup;
+      if (secondary && !secondary.startsWith("@")) return secondary;
+    }
+    if (secondary.startsWith("@")) {
+      const lookup = coinIdMap.get(secondary) || coinIdMap.get(secondary.slice(1));
+      if (lookup) return lookup;
+    }
+
+    return primary || secondary;
+  }
+
   function fmtSize(v) {
     if (v === null || v === undefined) return "";
     const n = Number(v);
@@ -1878,7 +1909,9 @@
     const combined = [];
     const pushFrom = (arr) => {
       arr.forEach((f) => {
-        const c = normalizeCoin(f?.coin ?? f?.asset ?? "");
+        const resolved = resolveCoinName(f?.coin ?? f?.asset ?? "", f?.asset ?? f?.symbol ?? f?.sym);
+        if (resolved) f.coin = resolved;
+        const c = normalizeCoin(resolved);
         if (c === norm) combined.push(f);
       });
     };
@@ -1969,7 +2002,7 @@
         time: fmtDateTime(fill.time ?? fill.timestamp),
         sideCode: side,
         side: side === "B" ? "LONG" : side === "S" ? "SHORT" : sideLabel(side),
-        size: Math.abs(signed),
+        size: fmtSize(Math.abs(signed)),
         price: fmtPrice(px),
         value: Number.isFinite(valueSigned) ? formatSignedDollar(valueSigned) : "",
         upnl: Number.isFinite(upnl) ? formatSignedDollarWithPlus(upnl) : "",
@@ -2268,33 +2301,32 @@
     const MIN_ROWS = 4;
 
     // Build real rows
-      const rows = values.map((order) => {
-        const created = fmtTimeOnly(order.timestamp);
-        const total = computeTotal(order);
-        const side = order.side ?? "?";
-        return `
+    const rows = values.map((order) => {
+      const created = fmtDateTime(order.timestamp);
+      const side = order.side ?? "?";
+      const coin = resolveCoinName(order.coin, order.asset);
+      return `
         <tr>
           <td class="desktop-only">${order.oid}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
-          <td class="asset-cell">${coinIconHtml(order.coin, order.coin)}<span>${order.coin}</span></td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td class="money">${fmtSize(order.sz)}</td>
           <td class="money">${fmtLimitPrice(order.limitPx) ?? ""}</td>
-          <td class="desktop-only money">${total ? "$" + total : ""}</td>
         </tr>
       `;
     });
 
     // If none, show 1 “No open orders.” row, then pad to MIN_ROWS
     if (rows.length === 0) {
-      rows.push(`<tr><td colspan="7" class="muted">No open orders.</td></tr>`);
+      rows.push(`<tr><td colspan="6" class="muted">No open orders.</td></tr>`);
     }
 
     // Pad with empty rows until we have MIN_ROWS visible rows
     while (rows.length < MIN_ROWS) {
       rows.push(`
         <tr class="placeholder-row">
-          <td colspan="7">&nbsp;</td>
+          <td colspan="6">&nbsp;</td>
         </tr>
       `);
     }
@@ -2312,10 +2344,11 @@
 
     canceledOrdersBodyEl.innerHTML = canceledOrders
       .map((o) => {
-        const created = fmtTimeOnly(o.timestamp);
-        const canceledAtTime = fmtTimeOnly(o.statusTimestamp);
-        const side = o.side ?? "?";
-        return `
+      const created = fmtTimeOnly(o.timestamp);
+      const canceledAtTime = fmtTimeOnly(o.statusTimestamp);
+      const side = o.side ?? "?";
+      const coin = resolveCoinName(o.coin, o.asset);
+      return `
         <tr class="flash-cancel">
           <td class="desktop-only">${o.oid}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
@@ -2323,7 +2356,7 @@
             <span class="mobile-only timestamp">${canceledAtTime}</span>
             <span class="desktop-only timestamp">${canceledAtTime}</span>
           </td>
-          <td class="asset-cell">${coinIconHtml(o.coin, o.coin)}<span>${o.coin}</span></td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>  
           <td class="money">${fmtSize(o.sz)}</td>
           <td class="mobile-only money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
