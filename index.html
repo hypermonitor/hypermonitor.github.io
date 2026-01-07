@@ -630,6 +630,17 @@
       border: 1px solid rgba(148, 163, 184, 0.4);
     }
 
+    .dex-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.05rem 0.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.65rem;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
     .pill-buy {
       color: #4ade80;
       border-color: rgba(34, 197, 94, 0.6);
@@ -1600,6 +1611,7 @@
   const logoCache = new Map();
   const expandedPositions = new Set();
   const coinIdMap = new Map();
+  let perpDexNames = null;
 
   document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -1658,6 +1670,55 @@
       return (url.searchParams.get("wallet") || "").trim();
     } catch (e) {
       return "";
+    }
+  }
+
+  async function getPerpDexNames() {
+    if (perpDexNames) return perpDexNames;
+    try {
+      const res = await fetch(PORTFOLIO_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "perpDexs" }),
+      });
+      if (!res.ok) throw new Error(`perpDexs error: ${res.status} ${res.statusText}`);
+      const data = await res.json();
+      const names = (Array.isArray(data) ? data : [])
+        .map((x) => x?.name)
+        .filter((x) => typeof x === "string" && x.length > 0);
+      perpDexNames = ["", ...names.filter((n) => n !== "")];
+    } catch (err) {
+      console.warn("Failed to load perp dex names", err);
+      perpDexNames = [""];
+    }
+    return perpDexNames;
+  }
+
+  async function fetchAdditionalDexPositions(wallet) {
+    try {
+      const dexNames = await getPerpDexNames();
+      const extraDexes = (dexNames || []).filter((d) => d);
+      if (extraDexes.length === 0) return [];
+
+      const results = [];
+      for (const dex of extraDexes) {
+        try {
+          const res = await fetch(PORTFOLIO_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: "clearinghouseState", user: wallet, dex }),
+          });
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (Array.isArray(data?.assetPositions)) results.push(...data.assetPositions);
+        } catch (err) {
+          console.warn("Additional dex positions error", err);
+        }
+      }
+      return results;
+    } catch (err) {
+      console.warn("Failed to fetch additional dex positions", err);
+      return [];
     }
   }
 
@@ -1879,6 +1940,15 @@
     `;
   }
 
+  function splitDexCoin(name) {
+    const s = String(name || "").trim();
+    const idx = s.indexOf(":");
+    if (idx > 0 && idx < s.length - 1) {
+      return { dex: s.slice(0, idx), base: s.slice(idx + 1) };
+    }
+    return { dex: "", base: s };
+  }
+
   function coinCellHtml(coin) {
     const c = coin ?? "";
     return `<span class="asset-cell">${coinIconHtml(c, c)}<span>${c}</span></span>`;
@@ -1888,20 +1958,40 @@
     return (coin || "").toUpperCase();
   }
 
+  function getLivePriceForCoin(raw) {
+    const { dex, base } = splitDexCoin(raw);
+    const candidates = [raw, base, normalizeCoin(raw), normalizeCoin(base)];
+    for (const key of candidates) {
+      if (!key) continue;
+      const px = liveMids.get(key);
+      if (Number.isFinite(px)) return px;
+    }
+    return undefined;
+  }
+
   function getMarkPriceForCoin(coin) {
     const norm = normalizeCoin(coin);
+    const { base } = splitDexCoin(coin);
+    const baseNorm = normalizeCoin(base);
     if (!norm) return null;
 
-    const livePx = liveMids.get(norm) ?? liveMids.get(coin);
+    const livePx =
+      liveMids.get(norm) ??
+      liveMids.get(coin) ??
+      liveMids.get(base) ??
+      liveMids.get(baseNorm);
     if (Number.isFinite(livePx)) return livePx;
 
-    const position = currentAssetPositions.find((item) => normalizeCoin(item?.position?.coin) === norm);
+    const position = currentAssetPositions.find((item) => {
+      const c = item?.position?.coin;
+      return normalizeCoin(c) === norm || normalizeCoin(splitDexCoin(c).base) === baseNorm;
+    });
     if (!position) return null;
 
     const p = position.position;
     const szi = Number(p.szi ?? 0);
     const snapshotValue = Number(p.positionValue ?? 0);
-    if (Number.isFinite(snapshotValue) && szi) return snapshotValue / szi;
+    if (Number.isFinite(snapshotValue) && szi) return Math.abs(snapshotValue) / Math.abs(szi);
 
     const entryPx = Number(p.entryPx ?? 0);
     return Number.isFinite(entryPx) ? entryPx : null;
@@ -2062,10 +2152,10 @@
       const livePx = liveMids.get(coin);
       let markPx = Number.isFinite(livePx) ? livePx : undefined;
 
-      const snapshotValue = Number(p.positionValue ?? 0);
-      if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
-        markPx = snapshotValue / szi;
-      }
+        const snapshotValue = Number(p.positionValue ?? 0);
+        if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
+          markPx = Math.abs(snapshotValue) / Math.abs(szi);
+        }
 
       let positionValue = snapshotValue;
       if (markPx !== undefined && !Number.isNaN(markPx) && szi !== 0) {
@@ -2148,18 +2238,20 @@
       .map((item) => {
         const p = item.position;
         const coin = p.coin;
+        const { dex: coinDex, base: coinBase } = splitDexCoin(coin);
+        const coinDisplayName = coinBase || coin;
         const szi = Number(p.szi ?? 0);
 
         const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
         const dirColor = szi >= 0 ? "#4ade80" : "#fb7185";
         const entryPx = Number(p.entryPx ?? 0);
 
-        const livePx = liveMids.get(coin);
+        const livePx = getLivePriceForCoin(coin);
         let markPx = Number.isFinite(livePx) ? livePx : undefined;
 
         const snapshotValue = Number(p.positionValue ?? 0);
         if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
-          markPx = snapshotValue / szi;
+          markPx = Math.abs(snapshotValue) / Math.abs(szi);
         }
 
         let positionValue = snapshotValue;
@@ -2250,8 +2342,9 @@
         <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}">
           <td>
             <div class="asset-cell">
-              ${coinIconHtml(coin, coin)}
-              <span>${coin}</span>
+              ${coinIconHtml(coin, coinDisplayName)}
+              <span>${coinDisplayName}</span>
+              ${coinDex ? `<span class="dex-tag">${coinDex}</span>` : ""}
               <span class="chevron" aria-hidden="true"></span>
             </div>
           </td>
@@ -2294,12 +2387,16 @@
     try {
       const clearing = await infoClient.clearinghouseState({ user: wallet });
       const { marginSummary, withdrawable, assetPositions } = clearing;
+      const extraPositions = await fetchAdditionalDexPositions(wallet);
+      const mergedPositions = Array.isArray(assetPositions)
+        ? [...assetPositions, ...extraPositions]
+        : [...extraPositions];
 
       snapshotMarginSummary = marginSummary || null;
       snapshotWithdrawable = withdrawable;
-      snapshotUpnlTotal = computeSnapshotUpnlTotal(assetPositions);
+      snapshotUpnlTotal = computeSnapshotUpnlTotal(mergedPositions);
 
-      renderPositions(assetPositions);
+      renderPositions(mergedPositions);
     } catch (err) {
       console.error("Refresh positions error", err);
       snapshotErrorEl.textContent = "Failed to refresh positions: " + (err?.message || err);
@@ -3037,12 +3134,16 @@
       snapshotErrorEl.textContent = "";
       const clearing = await infoClient.clearinghouseState({ user: wallet });
       const { marginSummary, withdrawable, assetPositions } = clearing;
+      const extraPositions = await fetchAdditionalDexPositions(wallet);
+      const mergedPositions = Array.isArray(assetPositions)
+        ? [...assetPositions, ...extraPositions]
+        : [...extraPositions];
 
       snapshotMarginSummary = marginSummary || null;
       snapshotWithdrawable = withdrawable;
-      snapshotUpnlTotal = computeSnapshotUpnlTotal(assetPositions);
+      snapshotUpnlTotal = computeSnapshotUpnlTotal(mergedPositions);
 
-      renderPositions(assetPositions);
+      renderPositions(mergedPositions);
 
       const existingOpen = await infoClient.openOrders({ user: wallet });
       openOrders.clear();
@@ -3213,16 +3314,17 @@
       .map((item) => {
         const p = item.position;
         const coin = p.coin;
+        const { base: coinBase } = splitDexCoin(coin);
         const szi = Number(p.szi ?? 0);
         if (!coin || !Number.isFinite(szi) || szi === 0) return null;
 
         const entryPx = Number(p.entryPx ?? 0);
-        const livePx = liveMids.get(coin);
+        const livePx = getLivePriceForCoin(coin);
         let markPx = Number.isFinite(livePx) ? livePx : undefined;
 
         const snapshotValue = Number(p.positionValue ?? 0);
         if ((markPx === undefined || Number.isNaN(markPx)) && !Number.isNaN(snapshotValue) && szi !== 0) {
-          markPx = snapshotValue / szi;
+          markPx = Math.abs(snapshotValue) / Math.abs(szi);
         }
 
         let positionValue = snapshotValue;
@@ -3236,7 +3338,8 @@
         if (!Number.isFinite(valueAbs) || valueAbs === 0) return null;
 
         const dirLabel = szi > 0 ? "" : " (short)";
-        return { label: `${coin}${dirLabel}`, value: valueAbs, coin };
+        const labelCoin = coinBase || coin;
+        return { label: `${labelCoin}${dirLabel}`, value: valueAbs, coin: labelCoin };
       })
       .filter(Boolean);
   }
