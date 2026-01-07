@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Terminal</title>
+  <link rel="icon" type="image/png" href="images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
@@ -28,11 +29,7 @@
     }
     .leftTitle { display:flex; flex-direction: column; gap:.25rem; }
     h1 { margin: 0; font-size: 1.6rem; font-family: Arial, "Helvetica Neue", sans-serif; font-weight: 400; display:flex; gap:.55rem; align-items:center; }
-    .logo-dot {
-      width: .7rem; height: .7rem; border-radius: 999px;
-      background: linear-gradient(135deg, #26d97f, #38bdf8);
-      box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
-    }
+    .logo-dot { display: none; }
     .muted { color: var(--muted); }
 
     .status-pill {
@@ -105,7 +102,7 @@
 <div id="app">
   <header>
     <div class="leftTitle">
-      <h1><span class="logo-dot"></span><span id="title">Terminal</span></h1>
+      <h1><img src="images/logo.png" alt="Hypermonitor logo" style="width: 1.6rem; height: 1.6rem; border-radius: 4px;" /><span id="title">Terminal</span></h1>
       <div class="muted" id="subTitle">Streaming: candles • l2Book • trades</div>
     </div>
 

@@ -23,16 +23,7 @@
   <meta name="twitter:description" content="Track any Hyperliquid wallet: positions, orders, fills, and performance." />
   <meta name="twitter:image" content="https://www.hypermonitor.org/images/hypermonitor-dot.svg" />
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
-  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
-    <defs>
-      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-        <stop offset='0%25' stop-color='%2326d97f'/>
-        <stop offset='100%25' stop-color='%2338bdf8'/>
-      </linearGradient>
-    </defs>
-    <circle cx='32' cy='32' r='22' fill='url(%23g)'/>
-  </svg>"/>
+  <link rel="icon" type="image/png" href="images/logo.png" />
 
   <style>
     :root {
@@ -1197,7 +1188,7 @@
     <div class="wallet-controls">
       <a class="brand" href="main.html" aria-label="Hypermonitor home">
       <h1>
-        <span class="logo-dot"></span>
+        <img src="images/logo.png" alt="Hypermonitor logo" style="width: 1.6rem; height: 1.6rem; border-radius: 4px;" />
         <span class="logo-word logo-word-regular">Hyper<em>monitor</em></span>
       </h1>
       </a>
@@ -2704,7 +2695,7 @@
       {
         name: "Positions",
         rows: [
-          ["Asset", "Side", "Size", "Avg Entry", "Value", "Unrealized PnL"],
+          ["Asset", "Side", "Size", "Avg Entry", "Notional", "Unrealized PnL"],
           ...buildPositionsRowsForExport(),
         ],
       },
