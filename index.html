@@ -1488,7 +1488,7 @@
               <th>Asset</th>
               <th>Size</th>
               <th>Price</th>
-              <th class="desktop-only">Total</th>
+              <th class="desktop-only">Notional</th>
             </tr>
             </thead>
             <tbody id="fillsBody">
@@ -2703,28 +2703,28 @@
       {
         name: "Live Orders",
         rows: [
-          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Total"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Notional"],
           ...buildLiveOrdersRowsForExport(),
         ],
       },
       {
         name: "Historical Orders",
         rows: [
-          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Total", "Status"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Notional", "Status"],
           ...buildHistoricalOrdersRowsForExport(),
         ],
       },
       {
         name: "Live Trades",
         rows: [
-          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Total"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Notional"],
           ...buildLiveFillsRowsForExport(),
         ],
       },
       {
         name: "Historical Trades",
         rows: [
-          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Total"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Notional"],
           ...buildHistoricalFillsRowsForExport(),
         ],
       },
@@ -3477,7 +3477,7 @@
             label,
             data: data.values,
             borderColor: color,
-            backgroundColor: color + "33",
+            backgroundColor: color + "2a",
             pointRadius: 0,
             borderWidth: 1.7,
             tension: 0.25,
@@ -3540,25 +3540,31 @@
     portfolioLoadingEl.textContent = "";
     const labels = buildLabels(view.times, rangeKey);
 
+    const colors = {
+      equity: "#8b5cf6",   // violet
+      pnl: "#f59e0b",      // amber
+      deposits: "#14b8a6", // teal
+    };
+
     portfolioCharts.equity = createLineChart(
       equityCanvas.getContext("2d"),
       "Equity",
       { labels, values: view.equity },
-      "#38bdf8"
+      colors.equity
     );
 
     portfolioCharts.pnl = createLineChart(
       pnlCanvas.getContext("2d"),
       "PnL",
       { labels, values: view.pnl },
-      "#f97373"
+      colors.pnl
     );
 
     portfolioCharts.deposits = createLineChart(
       depositsCanvas.getContext("2d"),
       "Deposits",
       { labels, values: view.deposits },
-      "#22c55e"
+      colors.deposits
     );
   }
 
