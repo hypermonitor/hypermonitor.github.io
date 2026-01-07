@@ -525,6 +525,19 @@
       flex-shrink: 0;
     }
 
+    .price-stack {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.15rem;
+      line-height: 1.2;
+    }
+
+    .price-stack .current-price {
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
     .position-row { cursor: pointer; }
     .position-row:hover { background: rgba(56, 189, 248, 0.05); }
 
@@ -1253,8 +1266,8 @@
           <th>Asset</th>
           <th>Side</th>
           <th>Size</th>
-          <th>Avg. Entry</th>
-          <th>Value</th>
+          <th>Price</th>
+          <th>Notional</th>
           <th class="mobile-only">PnL</th>
           <th class="desktop-only">Unrealized PnL</th>
         </tr>
@@ -2159,6 +2172,9 @@
           upnl = (markPx - entryPx) * szi;
         }
 
+        const currentPriceDisplay =
+          markPx !== undefined && !Number.isNaN(markPx) ? fmtPrice(markPx) : "–";
+
         if (!Number.isNaN(upnl)) lastComputedUpnlTotal += upnl;
         const notional = Math.abs(positionValue);
         if (!Number.isNaN(notional)) lastComputedTotalNotional += notional;
@@ -2245,7 +2261,12 @@
             </span>
           </td>
           <td class="money">${fmtSize(szi)}</td>
-          <td class="money">${fmtPrice(entryPx)}</td>
+          <td class="money">
+            <div class="price-stack">
+              <span class="current-price">Live: ${currentPriceDisplay}</span>
+              <span>Entry: ${fmtPrice(entryPx)}</span>
+            </div>
+          </td>
           <td class="money">${formattedValue}</td>
           <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
             ${upnlFormatted}
