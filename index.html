@@ -167,16 +167,16 @@
     }
 
     .wallet-input-row input:focus {
-      border-color: #97fde5;
+      border-color: #8a53ea;
       box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
     }
 
     .wallet-input-row button {
       padding: 0.35rem 0.9rem;
       border-radius: 999px;
-      border: 1px solid #139e7d;
-      background: #18bf98;
-      color: #050810;
+      border: 1px solid #7c3aed;
+      background: #8b5cf6;
+      color: #0b1020;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
@@ -318,20 +318,21 @@
     }
 
     .export-btn {
-      border: 1px solid var(--border);
-      background: #17181f;
+      border: 1px solid #334155;
+      background: #0f172a;
       padding: 0.2rem 0.35rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: var(--muted);
-      transition: opacity 120ms ease, transform 120ms ease;
+      color: #cbd5f5;
+      transition: opacity 120ms ease, transform 120ms ease, border-color 120ms ease;
     }
 
     .export-btn:hover {
-      opacity: 0.9;
+      opacity: 0.95;
       transform: translateY(-1px);
+      border-color: #475569;
     }
 
     .export-icon {
@@ -343,6 +344,7 @@
     body.light .export-btn {
       background: #ffffff;
       border-color: #e5e7eb;
+      color: #475569;
     }
 
     .sr-only {
@@ -358,18 +360,19 @@
 
     .theme-toggle-btn {
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #17181f;
-      color: var(--text-main);
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #cbd5f5;
       font-size: 0.75rem;
       padding: 0.25rem 0.7rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
+      transition: border-color 0.15s ease, transform 0.15s ease;
     }
 
-    .theme-toggle-btn:hover { filter: brightness(1.07); }
+    .theme-toggle-btn:hover { border-color: #475569; transform: translateY(-1px); }
 
     .status-pill {
       display: inline-flex;
@@ -620,6 +623,7 @@
       border-radius: 9999px;
       font-size: 0.7rem;
       border: 1px solid rgba(148, 163, 184, 0.4);
+      font-weight: 600;
     }
 
     .dex-tag {
@@ -634,15 +638,17 @@
     }
 
     .pill-buy {
-      color: #4ade80;
-      border-color: rgba(34, 197, 94, 0.6);
-      background: rgba(22, 163, 74, 0.12);
+      color: #16a34a;
+      border-color: rgba(22, 163, 74, 0.8);
+      background: rgba(22, 163, 74, 0.18);
+      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.2);
     }
 
     .pill-sell {
       color: #f97373;
       border-color: rgba(248, 113, 113, 0.6);
-      background: rgba(220, 38, 38, 0.12);
+      background: rgba(220, 38, 38, 0.18);
+      box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
     }
 
     .pill-new {
@@ -725,19 +731,20 @@
 
     .chart-range-btn {
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #17181f;
-      color: var(--muted);
-      padding: 0.2rem 0.8rem;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #cbd5f5;
+      padding: 0.2rem 0.85rem;
       cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .chart-range-btn:hover { border-color: rgba(148, 163, 184, 0.8); }
+    .chart-range-btn:hover { border-color: #475569; }
 
     .chart-range-btn.active {
-      border-color: #18bf98;
-      color: #18bf98;
+      border-color: #f59e0b;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
     }
 
     .chart-grid {
@@ -967,35 +974,35 @@
     .orders-tab-btn {
       padding: 0.2rem 0.8rem;
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #17181f;
-      color: var(--muted);
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #cbd5f5;
       cursor: pointer;
       white-space: nowrap;
       font-size: 0.75rem;
       transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .orders-tab-btn:hover { border-color: rgba(148, 163, 184, 0.8); }
+    .orders-tab-btn:hover { border-color: #475569; }
 
     .orders-tab-btn.active {
-      border-color: #18bf98;
-      color: #18bf98;
-      background: #101018;
+      border-color: #f59e0b;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
     }
 
     body.light .orders-tab-btn {
       background: #ffffff;
       border-color: #e5e7eb;
-      color: #6b7280;
+      color: #475569;
     }
 
     body.light .orders-tab-btn:hover { border-color: #d1d5db; }
 
     body.light .orders-tab-btn.active {
-      border-color: #18bf98;
-      color: #18bf98;
-      background: #f9fafb;
+      border-color: #f59e0b;
+      color: #b45309;
+      background: #fff7ed;
     }
 
     .tab-panel.hidden { display: none; }
@@ -1063,9 +1070,9 @@
 
     .pill-action-btn {
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #17181f;
-      color: var(--muted);
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #cbd5f5;
       padding: 0.25rem 0.9rem;
       font-size: 0.78rem;
       cursor: pointer;
@@ -1075,11 +1082,11 @@
       gap: 0.35rem;
     }
 
-    .pill-action-btn:hover { border-color: rgba(148, 163, 184, 0.8); }
+    .pill-action-btn:hover { border-color: #475569; }
 
     body.light .pill-action-btn {
       background: #ffffff;
-      color: #6b7280;
+      color: #475569;
       border-color: #e5e7eb;
     }
 
@@ -1199,7 +1206,10 @@
       <div class="wallet-input-row">
         <label for="walletInput">Wallet address:</label>
         <input id="walletInput" type="text" placeholder="0x..." autocomplete="off" />
-        <button id="trackBtn">Track</button>
+        <button id="trackBtn" aria-label="Track wallet">
+          <span class="sr-only">Track</span>
+          ⏎
+        </button>
       </div>
     </div>
 
