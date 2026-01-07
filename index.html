@@ -1700,22 +1700,24 @@
       const extraDexes = (dexNames || []).filter((d) => d);
       if (extraDexes.length === 0) return [];
 
-      const results = [];
-      for (const dex of extraDexes) {
+      const fetches = extraDexes.map(async (dex) => {
         try {
           const res = await fetch(PORTFOLIO_API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ type: "clearinghouseState", user: wallet, dex }),
           });
-          if (!res.ok) continue;
+          if (!res.ok) throw new Error(`dex ${dex} status ${res.status}`);
           const data = await res.json();
-          if (Array.isArray(data?.assetPositions)) results.push(...data.assetPositions);
+          return Array.isArray(data?.assetPositions) ? data.assetPositions : [];
         } catch (err) {
           console.warn("Additional dex positions error", err);
+          return [];
         }
-      }
-      return results;
+      });
+
+      const results = await Promise.all(fetches);
+      return results.flat();
     } catch (err) {
       console.warn("Failed to fetch additional dex positions", err);
       return [];
@@ -1820,7 +1822,7 @@
     const n = Number(v);
     if (Number.isNaN(n)) return String(v);
     const formatted = n.toLocaleString(undefined, {
-      maximumFractionDigits: 20,
+      maximumFractionDigits: 8,
       useGrouping: true,
     });
     return `$${formatted}`;
@@ -2388,16 +2390,21 @@
     try {
       const clearing = await infoClient.clearinghouseState({ user: wallet });
       const { marginSummary, withdrawable, assetPositions } = clearing;
-      const extraPositions = await fetchAdditionalDexPositions(wallet);
-      const mergedPositions = Array.isArray(assetPositions)
-        ? [...assetPositions, ...extraPositions]
-        : [...extraPositions];
+      const mergedPositions = Array.isArray(assetPositions) ? [...assetPositions] : [];
 
       snapshotMarginSummary = marginSummary || null;
       snapshotWithdrawable = withdrawable;
       snapshotUpnlTotal = computeSnapshotUpnlTotal(mergedPositions);
 
       renderPositions(mergedPositions);
+
+      // Fetch HIP-3/extra dex positions after main state
+      fetchAdditionalDexPositions(wallet).then((extraPositions) => {
+        if (!Array.isArray(extraPositions) || extraPositions.length === 0) return;
+        const combined = [...mergedPositions, ...extraPositions];
+        snapshotUpnlTotal = computeSnapshotUpnlTotal(combined);
+        renderPositions(combined);
+      });
     } catch (err) {
       console.error("Refresh positions error", err);
       snapshotErrorEl.textContent = "Failed to refresh positions: " + (err?.message || err);
@@ -3135,16 +3142,21 @@
       snapshotErrorEl.textContent = "";
       const clearing = await infoClient.clearinghouseState({ user: wallet });
       const { marginSummary, withdrawable, assetPositions } = clearing;
-      const extraPositions = await fetchAdditionalDexPositions(wallet);
-      const mergedPositions = Array.isArray(assetPositions)
-        ? [...assetPositions, ...extraPositions]
-        : [...extraPositions];
+      const mergedPositions = Array.isArray(assetPositions) ? [...assetPositions] : [];
 
       snapshotMarginSummary = marginSummary || null;
       snapshotWithdrawable = withdrawable;
       snapshotUpnlTotal = computeSnapshotUpnlTotal(mergedPositions);
 
       renderPositions(mergedPositions);
+
+      // Fetch HIP-3/extra dex positions after first paint
+      fetchAdditionalDexPositions(wallet).then((extraPositions) => {
+        if (!Array.isArray(extraPositions) || extraPositions.length === 0) return;
+        const combined = [...mergedPositions, ...extraPositions];
+        snapshotUpnlTotal = computeSnapshotUpnlTotal(combined);
+        renderPositions(combined);
+      });
 
       const existingOpen = await infoClient.openOrders({ user: wallet });
       openOrders.clear();
