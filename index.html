@@ -531,6 +531,7 @@
 
     .position-row { cursor: pointer; }
     .position-row:hover { background: rgba(56, 189, 248, 0.05); }
+    .position-row.loading { opacity: 0.6; cursor: progress; }
 
     .chevron {
       display: inline-block;
@@ -3753,12 +3754,14 @@
     positionsBodyEl.addEventListener("click", async (e) => {
       const row = e.target.closest(".position-row");
       if (!row) return;
+      row.classList.add("loading");
       const coin = row.dataset.coin;
       if (!coin) return;
       if (!historicalFillsLoaded) await ensureHistoricalDataLoaded();
       if (expandedPositions.has(coin)) expandedPositions.delete(coin);
       else expandedPositions.add(coin);
       renderPositions(currentAssetPositions);
+      requestAnimationFrame(() => row.classList.remove("loading"));
     });
   }
 
