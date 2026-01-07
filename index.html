@@ -2097,6 +2097,7 @@
         sideCode: side,
         side: side === "B" ? "LONG" : side === "S" ? "SHORT" : sideLabel(side),
         size: fmtSize(Math.abs(signed)),
+        sizeSigned: fmtSignedSize(signed),
         price: fmtPrice(px),
         value: Number.isFinite(valueSigned) ? formatSignedDollar(valueSigned) : "",
         upnl: Number.isFinite(upnl) ? formatSignedDollarWithPlus(upnl) : "",
@@ -2287,7 +2288,7 @@
               <tr>
                 <td class="timestamp">${r.time}</td>
                 <td><span class="pill ${sidePillClass(r.sideCode)}">${r.side}</span></td>
-                <td class="money">${r.size}</td>
+                <td class="money">${r.sizeSigned}</td>
                 <td class="money">${r.price}</td>
                 <td class="money">${r.value}</td>
                 <td class="money ${r.upnlRaw >= 0 ? "upnl-pos" : "upnl-neg"}">${r.upnl}</td>
