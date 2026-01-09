@@ -265,12 +265,87 @@
       gap: 1rem;
       align-items: stretch;
     }
+    .orbit {
+      position: relative;
+      width: 340px;
+      height: 340px;
+      border-radius: 999px;
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      background: radial-gradient(circle at 30% 30%, rgba(56,189,248,0.12), transparent 55%);
+      box-shadow: inset 0 0 30px rgba(139, 92, 246, 0.15);
+      flex: 0 0 auto;
+      pointer-events: none;
+    }
+    .orbit-float {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+    .orbit::after {
+      content: "";
+      position: absolute;
+      inset: 26px;
+      border-radius: 999px;
+      border: 1px dashed rgba(255,255,255,0.12);
+    }
+    .orb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #38bdf8;
+      box-shadow: 0 0 10px rgba(56,189,248,0.7);
+      transform-origin: -110px center;
+      animation-play-state: paused;
+    }
+    .orb.a { animation: orbit1 7s linear infinite; }
+    .orb.b {
+      width: 10px;
+      height: 10px;
+      background: #26d97f;
+      box-shadow: 0 0 10px rgba(38,217,127,0.7);
+      transform-origin: -140px center;
+      animation: orbit2 9s linear infinite;
+    }
+    .orb.c {
+      width: 8px;
+      height: 8px;
+      background: #8b5cf6;
+      box-shadow: 0 0 10px rgba(139,92,246,0.7);
+      transform-origin: -80px center;
+      animation: orbit3 6s linear infinite;
+    }
+    .orb.d {
+      width: 7px;
+      height: 7px;
+      background: #f59e0b;
+      box-shadow: 0 0 10px rgba(245,158,11,0.75);
+      transform-origin: -120px center;
+      animation: orbit4 8s linear infinite;
+    }
+    .orbit.is-active .orb { animation-play-state: running; }
+    @keyframes orbit1 { to { transform: rotate(360deg); } }
+    @keyframes orbit2 { to { transform: rotate(-360deg); } }
+    @keyframes orbit3 { to { transform: rotate(360deg); } }
+    @keyframes orbit4 { to { transform: rotate(-360deg); } }
 
     @media (max-width: 900px) {
       header { align-items: flex-start; }
       nav { justify-content: flex-start; }
       .team-grid { grid-template-columns: 1fr; }
       .two-col { grid-template-columns: 1fr; }
+      .orbit { width: 180px; height: 180px; }
+      .orbit-float {
+        right: 0;
+        top: 60%;
+        opacity: 0.4;
+        z-index: 0;
+      }
+      .hero-card { position: relative; z-index: 2; }
     }
     @media (max-width: 900px) and (orientation: portrait) {
       #app { padding: 0.9rem; }
@@ -873,6 +948,12 @@
           </ul>
         </aside>
       </div>
+      <div class="orbit orbit-float" aria-hidden="true">
+        <span class="orb a"></span>
+        <span class="orb b"></span>
+        <span class="orb c"></span>
+        <span class="orb d"></span>
+      </div>
     </section>
 
     <!-- HOW IT WORKS / FEATURES -->
@@ -1251,6 +1332,24 @@
       counters.forEach(el => io.observe(el));
     }
 
+    function initOrbit() {
+      const orbit = document.querySelector(".orbit");
+      if (!orbit) return;
+      if (prefersReduced) {
+        orbit.classList.add("is-active");
+        return;
+      }
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            orbit.classList.add("is-active");
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      io.observe(orbit);
+    }
+
     // Contact form success popup
     const contactForm = document.getElementById("contactForm");
     const contactStatus = document.getElementById("contactStatus");
@@ -1449,6 +1548,7 @@
 
     initScrollReveals();
     initCountUps();
+    initOrbit();
   </script>
 </body>
 </html>
