@@ -272,6 +272,21 @@
       .team-grid { grid-template-columns: 1fr; }
       .two-col { grid-template-columns: 1fr; }
     }
+    @media (max-width: 900px) and (orientation: portrait) {
+      #app { padding: 0.9rem; }
+      .bleed-inner { padding: 0 0.9rem; }
+      .grid { grid-template-columns: 1fr !important; }
+      .two-col { grid-template-columns: 1fr !important; }
+      .team-grid { grid-template-columns: 1fr !important; }
+      #leaderboard table { table-layout: fixed; width: 100%; }
+      #leaderboard th, #leaderboard td { white-space: nowrap; }
+      #leaderboard th:nth-child(3),
+      #leaderboard td:nth-child(3),
+      #leaderboard th:nth-child(4),
+      #leaderboard td:nth-child(4),
+      #leaderboard th:nth-child(6),
+      #leaderboard td:nth-child(6) { display: none; }
+    }
 
     .hero h1 {
       margin: 0 0 .35rem;
