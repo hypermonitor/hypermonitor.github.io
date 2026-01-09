@@ -35,6 +35,9 @@
       --card-bg: #101014cf;
       --accent: #26d97f;
       --accent-2: #38bdf8;
+      --accent-rgb: 38, 217, 127;
+      --accent-2-rgb: 56, 189, 248;
+      --cta-rgb: 139, 92, 246;
       --accent-soft: rgba(38, 217, 127, 0.18);
       --danger: #f25f5c;
       --muted: rgba(245,245,255,0.62);
@@ -43,15 +46,127 @@
 
       --shadow: none;
       --radius: 10px;
+      --ease: cubic-bezier(.2,.8,.2,1);
+      --ease2: cubic-bezier(.16,1,.3,1);
     }
 
     * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       margin: 0;
       padding: 0;
       background: var(--bg);
       color: var(--text-main);
+      font-size: 17px;
+      overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+    }
+
+    /* Animated background (from test2.html) */
+    .bg {
+      position: fixed; inset: 0; z-index: -3; pointer-events: none;
+      background:
+        radial-gradient(900px 520px at 10% 10%, rgba(var(--accent-rgb), 0.14), transparent 60%),
+        radial-gradient(900px 520px at 90% 15%, rgba(var(--accent-2-rgb), 0.12), transparent 60%),
+        radial-gradient(900px 520px at 50% 95%, rgba(var(--cta-rgb), 0.10), transparent 60%),
+        var(--bg);
+    }
+    .blob {
+      position: fixed;
+      width: 72vmax;
+      height: 52vmax;
+      border-radius: 999px;
+      filter: blur(44px);
+      opacity: .22;
+      z-index: -2;
+      pointer-events: none;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+      mix-blend-mode: screen;
+    }
+    .blob.one {
+      left: -18vmax;
+      top: -20vmax;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(var(--accent-2-rgb),.85), transparent 60%),
+        radial-gradient(circle at 65% 45%, rgba(var(--accent-rgb),.70), transparent 62%);
+      animation: drift1 7s var(--ease2) infinite alternate;
+    }
+    .blob.two {
+      right: -22vmax;
+      top: -18vmax;
+      opacity: .18;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(var(--cta-rgb),.75), transparent 60%),
+        radial-gradient(circle at 65% 45%, rgba(var(--accent-2-rgb),.60), transparent 62%);
+      animation: drift2 8.5s var(--ease2) infinite alternate;
+    }
+    .blob.three {
+      left: 10vmax;
+      bottom: -28vmax;
+      opacity: .16;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(var(--accent-rgb),.70), transparent 60%),
+        radial-gradient(circle at 65% 45%, rgba(var(--cta-rgb),.55), transparent 62%);
+      animation: drift3 10s var(--ease2) infinite alternate;
+    }
+    @keyframes drift1 {
+      from { transform: translate3d(0,0,0) scale(1); }
+      to   { transform: translate3d(18vmax, 12vmax,0) scale(1.08); }
+    }
+    @keyframes drift2 {
+      from { transform: translate3d(0,0,0) scale(1); }
+      to   { transform: translate3d(-20vmax, 14vmax,0) scale(1.10); }
+    }
+    @keyframes drift3 {
+      from { transform: translate3d(0,0,0) scale(1); }
+      to   { transform: translate3d(14vmax, -16vmax,0) scale(1.08); }
+    }
+    .shine {
+      position: fixed; inset: -25%;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(120deg, transparent 0%, rgba(245,245,255,.10) 40%, transparent 70%);
+      transform: translateX(-35%) rotate(12deg);
+      animation: sweep 6s linear infinite;
+      mix-blend-mode: overlay;
+      opacity: .85;
+    }
+    @keyframes sweep {
+      0% { transform: translateX(-45%) rotate(12deg); }
+      100% { transform: translateX(45%) rotate(12deg); }
+    }
+    .grain {
+      position: fixed; inset: -40%;
+      z-index: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      opacity: .10;
+      mix-blend-mode: overlay;
+      transform: translate3d(0,0,0);
+      animation: grainMove 2.2s steps(8) infinite;
+    }
+    @keyframes grainMove {
+      0% { transform: translate3d(-4%, -4%, 0); }
+      25% { transform: translate3d(4%, -2%, 0); }
+      50% { transform: translate3d(-3%, 4%, 0); }
+      75% { transform: translate3d(5%, 2%, 0); }
+      100% { transform: translate3d(3%, -4%, 0); }
+    }
+    body > *:not(.bg):not(.blob):not(.shine):not(.grain) {
+      position: relative;
+      z-index: 10;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .blob, .shine, .grain { animation: none !important; }
+    }
+
+    @media (max-width: 900px) {
+      body { scroll-snap-type: none; }
     }
 
     a {
@@ -62,13 +177,11 @@
       background: none;
     }
     a:hover { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
-    body.light a { color: #475569; }
-    body.light a:hover { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 
     #app {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 1.5rem;
+      padding: 1rem;
     }
 
     /* Top nav */
@@ -77,7 +190,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.75rem;
     }
 
     .brand {
@@ -90,11 +203,13 @@
       font-family: Arial, "Helvetica Neue", sans-serif;
       font-weight: 400;
       letter-spacing: 0.01em;
-      font-size: 1.35rem;
+      font-size: 1.85rem;
       margin: 0;
     }
+    .brand-name .hyper { color: #fff; }
 
     .brand-name em { font-style: italic; }
+    .brand-name em { color: #fff; }
 
     nav {
       display: flex;
@@ -105,7 +220,7 @@
     }
 
     .nav-link {
-      font-size: .8rem;
+      font-size: .9rem;
       color: var(--muted);
       padding: .35rem .65rem;
       border-radius: 999px;
@@ -119,7 +234,7 @@
       border: 1px solid #7c3aed;
       background: #8b5cf6;
       color: #0b1020;
-      font-size: .8rem;
+      font-size: .9rem;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
@@ -127,56 +242,63 @@
     }
     .nav-cta:hover { filter: brightness(1.05); text-decoration: none; }
 
-    .theme-toggle-btn {
-      border-radius: 999px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: #cbd5f5;
-      font-size: 0.75rem;
-      padding: 0.25rem 0.7rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-    .theme-toggle-btn:hover { filter: brightness(1.05); }
 
     /* Hero */
     .hero {
       position: relative;
       overflow: hidden;
       border-radius: calc(var(--radius) + .2rem);
-      border: 1px solid var(--border);
-      background: var(--card-bg);
-      box-shadow: var(--shadow);
-      padding: 1.35rem;
-      margin-bottom: 1rem;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      margin-bottom: 0;
+    }
+    .hero.snap-section {
+      display: flex;
+      align-items: center;
     }
 
     .hero-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
-      align-items: start;
+      align-items: stretch;
     }
 
     @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; }
       header { align-items: flex-start; }
       nav { justify-content: flex-start; }
+      .team-grid { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) and (orientation: portrait) {
+      #app { padding: 0.9rem; }
+      .bleed-inner { padding: 0 0.9rem; }
+      .grid { grid-template-columns: 1fr !important; }
+      .two-col { grid-template-columns: 1fr !important; }
+      .team-grid { grid-template-columns: 1fr !important; }
+      #leaderboard table { table-layout: fixed; width: 100%; }
+      #leaderboard th, #leaderboard td { white-space: nowrap; }
+      #leaderboard th:nth-child(3),
+      #leaderboard td:nth-child(3),
+      #leaderboard th:nth-child(4),
+      #leaderboard td:nth-child(4),
+      #leaderboard th:nth-child(6),
+      #leaderboard td:nth-child(6) { display: none; }
     }
 
     .hero h1 {
-      margin: 0 0 .5rem;
-      font-size: 2.05rem;
+      margin: 0 0 .35rem;
+      font-size: 2.4rem;
       line-height: 1.15;
       letter-spacing: -0.02em;
     }
 
     .hero p {
-      margin: 0 0 1rem;
+      margin: 0 0 0.65rem;
       color: var(--muted);
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       line-height: 1.5;
       max-width: 60ch;
     }
@@ -195,15 +317,21 @@
       gap: .45rem;
       padding: .55rem .95rem;
       border-radius: 999px;
-      font-size: .85rem;
+      font-size: .95rem;
       border: 1px solid #334155;
       background: #0f172a;
-      color: var(--text-main);
+      color: #cbd5f5;
       cursor: pointer;
       text-decoration: none;
       user-select: none;
+      transition: border-color 0.15s ease, transform 0.15s ease, filter 0.15s ease;
     }
-    .btn:hover { filter: brightness(1.06); text-decoration: none; }
+    .btn:hover {
+      border-color: #475569;
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      text-decoration: none;
+    }
 
     .btn-primary {
       border: 1px solid #7c3aed;
@@ -215,6 +343,12 @@
 
     .btn-ghost {
       background: transparent;
+      color: var(--muted);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover {
+      color: var(--text-main);
+      border-color: #475569;
     }
 
     .btn small {
@@ -225,9 +359,10 @@
     .hero-card {
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      background: var(--card-bg);
+      background: rgba(16,16,20,0.5);
       box-shadow: var(--shadow);
       padding: 1rem;
+      backdrop-filter: blur(12px);
     }
 
     .hero-card h3 {
@@ -243,7 +378,7 @@
       font-size: .65rem;
       padding: .05rem .35rem;
       border-radius: 999px;
-      border: 1px solid var(--border);
+      border: none;
       color: var(--muted);
       white-space: nowrap;
     }
@@ -263,12 +398,12 @@
       gap: .75rem;
       padding: .55rem .6rem;
       border-radius: .7rem;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
+      border: none;
+      background: transparent;
     }
 
     .mini-item strong { font-size: .8rem; }
-    .mini-item span { color: var(--muted); font-size: .75rem; }
+    .mini-item span { color: var(--muted); font-size: .85rem; }
 
     .spark {
       font-variant-numeric: tabular-nums;
@@ -282,27 +417,100 @@
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0 1rem;
+      gap: 0.7rem;
+      margin: 0.6rem 0 0.6rem;
+    }
+    .stack {
+      grid-template-columns: 1fr;
+      gap: 1.4rem;
+    }
+    .two-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .span-full {
+      grid-column: 1 / -1;
+    }
+    .center-stack {
+      display: flex;
+      flex-direction: column;
+    }
+    .center-vert {
+      display: flex;
+      align-items: center;
     }
 
     .card {
-      background: var(--card-bg);
+      background: transparent;
       border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 1rem;
-      box-shadow: var(--shadow);
+      border: none;
+      padding: 0;
+      box-shadow: none;
       position: relative;
       overflow: hidden;
+    }
+    .info-card {
+      background: rgba(16,16,20,0.38);
+      border: 1px solid var(--border);
+      padding: 1.1rem;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+    .info-card h2 {
+      margin-bottom: 0.5rem;
+    }
+    .card.glass-card {
+      background: rgba(16,16,20,0.5);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      backdrop-filter: blur(12px);
+    }
+    .bleed-panel {
+      position: relative;
+      overflow: visible;
+    }
+    .bleed-panel::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      top: 0;
+      bottom: 0;
+      background: rgba(16,16,20,0.5);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      z-index: -1;
+      backdrop-filter: blur(12px);
+    }
+    .bleed-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    .bleed-panel.purple-panel::before {
+      background: rgba(139, 92, 246, 0.05);
+      border-top: 1px solid rgba(139, 92, 246, 0.18);
+      border-bottom: 1px solid rgba(139, 92, 246, 0.18);
+      backdrop-filter: none;
+    }
+    .bleed-panel.light-panel::before {
+      background: rgba(255, 255, 255, 0.05);
+      border-top: 1px solid rgba(15, 23, 42, 0.18);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.18);
+      backdrop-filter: blur(10px);
     }
 
     .card h2 {
       margin: 0 0 0.75rem;
-      font-size: 1rem;
       display: flex;
       align-items: center;
       gap: .4rem;
       justify-content: space-between;
+    }
+    .section-title {
+      font-size: 1.6rem;
+      letter-spacing: -0.01em;
     }
 
     .card h2 .left {
@@ -318,10 +526,10 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
     }
     thead {
-      background: #17181f;
+      background: transparent;
       position: sticky;
       top: 0;
       z-index: 1;
@@ -329,10 +537,10 @@
     th, td {
       padding: 0.45rem 0.5rem;
       text-align: left;
-      border-bottom: 1px solid var(--border);
+      border-bottom: none;
       white-space: nowrap;
     }
-    tbody tr:nth-child(even) { background: #14141c; }
+    tbody tr:nth-child(even) { background: transparent; }
     .row-link { cursor: pointer; }
     .row-link:hover { background: rgba(38, 217, 127, 0.10) !important; }
 
@@ -355,8 +563,8 @@
       align-items: start;
       padding: .7rem .75rem;
       border-radius: .85rem;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
+      border: none;
+      background: transparent;
     }
 
     .feature .icon {
@@ -371,37 +579,86 @@
     }
     .feature h4 {
       margin: 0 0 .2rem;
-      font-size: .9rem;
+      font-size: 1.05rem;
     }
     .feature p {
       margin: 0;
       color: var(--muted);
-      font-size: .82rem;
+      font-size: .95rem;
       line-height: 1.4;
     }
+
+    /* Contact form */
+    .contact-form {
+      margin-top: 1rem;
+      display: grid;
+      gap: .65rem;
+      max-width: 560px;
+    }
+    .contact-form label {
+      font-size: .85rem;
+      color: var(--muted);
+    }
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: .6rem .7rem;
+      border-radius: .7rem;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: .95rem;
+      font-family: inherit;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: #8a53ea;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+    }
+    .contact-form textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .contact-actions {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .contact-status {
+      min-height: 1em;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .contact-status.is-success { color: #4ade80; }
+    .contact-status.is-error { color: #fb7185; }
+
+    /* Success popup */
 
     /* Team */
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: .8rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.6rem;
     }
 
     .person {
       display: flex;
-      gap: .75rem;
-      align-items: center;
+      flex-direction: column;
+      gap: .7rem;
+      align-items: flex-start;
       border-radius: .9rem;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
-      padding: .75rem;
+      border: none;
+      background: transparent;
+      padding: 0;
     }
 
     .avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
+      width: 220px;
+      height: 220px;
+      border-radius: 22px;
+      border: none;
       background: linear-gradient(135deg, rgba(38, 217, 127, 0.20), rgba(56, 189, 248, 0.20));
       overflow: hidden;
       flex-shrink: 0;
@@ -418,8 +675,10 @@
 
     .person h4 {
       margin: 0;
-      font-size: .9rem;
-      display: flex;
+      font-size: 1.1rem;
+    }
+    .person-name {
+      display: inline-flex;
       align-items: center;
       gap: .4rem;
       flex-wrap: wrap;
@@ -427,8 +686,19 @@
     .person p {
       margin: .15rem 0 0;
       color: var(--muted);
-      font-size: .78rem;
-      line-height: 1.35;
+      font-size: .95rem;
+      line-height: 1.4;
+    }
+    .person-role {
+      font-size: .88rem;
+      color: #cbd5f5;
+      font-weight: 600;
+    }
+    .person-details {
+      margin-top: .25rem;
+      font-size: .86rem;
+      color: var(--muted);
+      line-height: 1.4;
     }
 
     .linkedin-badge {
@@ -453,49 +723,34 @@
 
     /* Footer */
     footer {
-      margin-top: 1.2rem;
-      padding: 1rem 0 0;
-      border-top: 1px solid var(--border);
+      margin-top: 0;
+      padding: 0;
+      min-height: 0;
+      border-top: none;
       color: var(--muted);
       font-size: .78rem;
       line-height: 1.45;
+      position: relative;
     }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text-main); }
 
     /* Light theme */
-    body.light {
-      background: #ffffff;
-      color: #0f172a;
-      color-scheme: light;
+
+    /* Scroll snapping (mirrors test.html experience) */
+    .snap-section {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      min-height: 100vh;
+      padding: 44px 0;
     }
-    body.light #app { color: #0f172a; }
-    body.light .theme-toggle-btn { background: #ffffff; color: #0f172a; border-color: #d1d5db; }
-    body.light .nav-link { color: #475569; }
-    body.light .btn,
-    body.light .btn-ghost {
-      background: #ffffff;
-      color: #0f172a;
-      border-color: #e5e7eb;
+    .snap-section.tight-bottom {
+      padding-bottom: 0;
     }
-    body.light .hero,
-    body.light .card {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      box-shadow: none;
+    .snap-section.compact-section {
+      min-height: auto;
+      padding: 24px 0;
     }
-    body.light .hero-card,
-    body.light .feature,
-    body.light .person {
-      background: #ffffff;
-      border-color: #e5e7eb;
-      box-shadow: none;
-    }
-    body.light .mini-item { background: #ffffff; border-color: #e5e7eb; }
-    body.light thead { background: #f9fafb; }
-    body.light th, body.light td { border-bottom: 1px solid #e5e7eb; }
-    body.light tbody tr:nth-child(even) { background: #f9fafb; }
-    body.light footer { border-top-color: #e5e7eb; }
-    body.light .badge { border-color: #e5e7eb; color: #64748b; }
-    body.light .muted { color: #64748b; }
 
     /* Scroll reveal */
     .animate-on-scroll {
@@ -523,13 +778,21 @@
 </head>
 
 <body>
+  <!-- Animated background layers -->
+  <div class="bg" aria-hidden="true"></div>
+  <div class="blob one" aria-hidden="true"></div>
+  <div class="blob two" aria-hidden="true"></div>
+  <div class="blob three" aria-hidden="true"></div>
+  <div class="shine" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
   <div id="app">
 
     <!-- HEADER / NAV -->
     <header>
       <a class="brand" href="/" aria-label="Hypermonitor home">
-        <img src="images/logo.png" alt="Hypermonitor logo" style="width: 1.6rem; height: 1.6rem; border-radius: 4px;" />
-        <h1 class="brand-name">Hyper<em>monitor</em></h1>
+        <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.25rem; height: 2.25rem; border-radius: 6px;" />
+        <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
       </a>
 
       <nav aria-label="Primary">
@@ -538,15 +801,13 @@
         <a class="nav-link" href="/leaderboard.html">Leaderboard</a>
         <a class="nav-link" href="#vaults">Vaults</a>
         <a class="nav-link" href="#team">Who we are</a>
-        <button id="themeToggle" class="theme-toggle-btn" type="button">☀️ Light</button>
-
         <!-- TODO: set href to your tracker page -->
         <a class="nav-cta" href="/index.html">Open Tracker</a>
       </nav>
     </header>
 
     <!-- HERO -->
-    <section class="hero" aria-label="Hero">
+    <section class="hero snap-section" aria-label="Hero">
       <div class="hero-grid">
         <div>
           <h1>
@@ -619,335 +880,365 @@
     </section>
 
     <!-- HOW IT WORKS / FEATURES -->
-    <section id="how" class="grid" aria-label="How it works">
-      <div class="card">
-        <h2>
-          <span class="left">How it works</span>
-        </h2>
+    <section id="how" class="bleed-panel light-panel snap-section" aria-label="How it works">
+      <div class="bleed-inner">
+        <div class="grid two-col">
+          <div class="card info-card">
+            <h2 class="section-title">
+              <span class="left">How it works</span>
+            </h2>
 
-        <div style="display:grid; gap:.65rem;">
-          <div class="feature">
-            <div class="icon" aria-hidden="true">🔎</div>
-            <div>
-              <h4>Discover</h4>
-              <p>
-                Surface wallets by objective filters (PnL, drawdown, consistency, volatility, leverage, time-in-market) and some in-house metrics.
-              </p>
+            <div style="display:grid; gap:.65rem;">
+              <div class="feature">
+                <div class="icon" aria-hidden="true">🔎</div>
+                <div>
+                  <h4>Discover</h4>
+                  <p>
+                    Surface wallets by objective filters (PnL, drawdown, consistency, volatility, leverage, time-in-market) and some in-house metrics.
+                  </p>
+                </div>
+              </div>
+
+              <div class="feature">
+                <div class="icon" aria-hidden="true">🧠</div>
+                <div>
+                  <h4>Evaluate</h4>
+                  <p>
+                    See clean performance charts, risk stats, and trading behavior (holding time, concentration, win rate).
+                  </p>
+                </div>
+              </div>
+
+              <div class="feature">
+                <div class="icon" aria-hidden="true">⚡</div>
+                <div>
+                  <h4>Track in real time</h4>
+                  <p>
+                    Live positions, open orders, cancellations, and fills — plus portfolio history.
+                    Works with public wallet addresses.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="feature">
-            <div class="icon" aria-hidden="true">🧠</div>
-            <div>
-              <h4>Evaluate</h4>
-              <p>
-                See clean performance charts, risk stats, and trading behavior (holding time, concentration, win rate).
-              </p>
+          <div class="card info-card">
+            <h2 class="section-title">
+              <span class="left">What you can do</span>
+            </h2>
+
+            <div style="display:grid; gap:.65rem;">
+              <div class="feature">
+                <div class="icon" aria-hidden="true">📊</div>
+                <div>
+                  <h4>Rank wallets (Leaderboard)</h4>
+                  <p>
+                    Sort and filter by performance and risk.
+                  </p>
+                </div>
+              </div>
+
+              <div class="feature">
+                <div class="icon" aria-hidden="true">🔔</div>
+                <div>
+                  <h4>Alerts & watchlists</h4>
+                  <p>
+                    Get notified when a wallet opens/closes key positions or reaches risk thresholds.
+                  </p>
+                </div>
+              </div>
+
+              <div class="feature">
+                <div class="icon" aria-hidden="true">🏦</div>
+                <div>
+                  <h4>Curated vaults</h4>
+                  <p>
+                    Subscribe to vaults built from research-backed strategies.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="feature">
-            <div class="icon" aria-hidden="true">⚡</div>
-            <div>
-              <h4>Track in real time</h4>
-              <p>
-                Live positions, open orders, cancellations, and fills — plus portfolio history.
-                Works with public wallet addresses.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+          <div class="card info-card span-full" id="vaults" aria-label="Vaults">
+            <h2 class="section-title"><span class="left">Vaults</span></h2>
+            <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
+              We plan to offer curated vaults built from transparent rules and risk controls.
+              <br /><br />
+            </p>
 
-      <div class="card">
-        <h2>
-          <span class="left">What you can do</span>
-        </h2>
-
-        <div style="display:grid; gap:.65rem;">
-          <div class="feature">
-            <div class="icon" aria-hidden="true">📊</div>
-            <div>
-              <h4>Rank wallets (Leaderboard)</h4>
-              <p>
-                Sort and filter by performance and risk.
-              </p>
-            </div>
-          </div>
-
-          <div class="feature">
-            <div class="icon" aria-hidden="true">🔔</div>
-            <div>
-              <h4>Alerts & watchlists</h4>
-              <p>
-                Get notified when a wallet opens/closes key positions or reaches risk thresholds.
-              </p>
-            </div>
-          </div>
-
-          <div class="feature">
-            <div class="icon" aria-hidden="true">🏦</div>
-            <div>
-              <h4>Curated vaults</h4>
-              <p>
-                Subscribe to vaults built from research-backed strategies.
-              </p>
+            <div style="margin-top:.85rem; display:grid; gap:.55rem;">
+              <div class="feature">
+                <div class="icon" aria-hidden="true">🧩</div>
+                <div>
+                  <h4>Strategy templates</h4>
+                  <p>Market-neutral, momentum, mean reversion, algorithmic — with guardrails.</p>
+                </div>
+              </div>
+              <div class="feature">
+                <div class="icon" aria-hidden="true">🛡️</div>
+                <div>
+                  <h4>Risk controls</h4>
+                  <p>Position sizing, max leverage, stop logic, drawdown caps.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
+
 
     <!-- LEADERBOARD PREVIEW -->
-    <section id="leaderboard" class="card" aria-label="Leaderboard preview">
-      <h2>
-        <span class="left">Leaderboard</span>
-      </h2>
+    <section id="leaderboard" class="bleed-panel snap-section" aria-label="Leaderboard preview">
+      <div class="bleed-inner">
+        <h2 class="section-title">
+          <span class="left">Leaderboard</span>
+        </h2>
 
-      <div class="muted" style="font-size:.82rem; margin-bottom:.65rem; line-height:1.4;">
-        Live snapshot of the top wallets (all-time). Click a row to open the tracker for that wallet.
-      </div>
-
-      <div style="max-height: 340px; overflow: auto; border-radius: .75rem; border: 1px solid var(--border);">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Trader</th>
-              <th>Account Value</th>
-              <th>PnL</th>
-              <th>ROI</th>
-              <th>Volume</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboardPreviewBody">
-            <tr>
-              <td colspan="6" class="muted">Loading…</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div style="margin-top:.75rem; display:flex; gap:.5rem; flex-wrap:wrap;">
-        <!-- TODO: link to real pages -->
-        <a class="btn" href="/leaderboard.html">Open full leaderboard</a>
-        <a class="btn" href="/metrics.html">Read about metrics</a>
-      </div>
-    </section>
-
-    <!-- VAULTS -->
-    <section id="vaults" class="grid" aria-label="Vaults">
-      <div class="card">
-        <h2><span class="left">Vaults</span></h2>
-        <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
-          We plan to offer curated vaults built from transparent rules and risk controls.
-          <br /><br />
-        </p>
-
-        <div style="margin-top:.85rem; display:grid; gap:.55rem;">
-          <div class="feature">
-            <div class="icon" aria-hidden="true">🧩</div>
-            <div>
-              <h4>Strategy templates</h4>
-              <p>Market-neutral, momentum, mean reversion, algorithmic — with guardrails.</p>
-            </div>
-          </div>
-          <div class="feature">
-            <div class="icon" aria-hidden="true">🛡️</div>
-            <div>
-              <h4>Risk controls</h4>
-              <p>Position sizing, max leverage, stop logic, drawdown caps.</p>
-            </div>
-          </div>
+        <div class="muted" style="font-size:.82rem; margin-bottom:.65rem; line-height:1.4;">
+          Live snapshot of the top wallets (all-time). Click a row to open the tracker for that wallet.
         </div>
-      </div>
 
-      <div class="card">
-        <h2><span class="left">For builders</span></h2>
-        <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
-          If you want to integrate, we can expose ranked wallet datasets and real-time tracking endpoints.
-          <br /><br />
-        </p>
+        <div style="max-height: 720px; overflow: hidden; border-radius: .75rem; border: 1px solid var(--border);">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Trader</th>
+                <th>Account Value</th>
+                <th>PnL</th>
+                <th>ROI</th>
+                <th>Volume</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardPreviewBody">
+              <tr>
+                <td colspan="6" class="muted">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        <div style="margin-top:.85rem; display:flex; gap:.5rem; flex-wrap:wrap;">
-          <!-- TODO -->
-          <a class="btn" href="/docs.html">Docs</a>
-          <a class="btn" href="mailto:info@hypermonitor.org">Contact</a>
+        <div style="margin-top:.75rem; display:flex; gap:.5rem; flex-wrap:wrap;">
+          <!-- TODO: link to real pages -->
+          <a class="btn" href="/leaderboard.html">Open full leaderboard</a>
+          <a class="btn" href="/metrics.html">Read about metrics</a>
         </div>
       </div>
     </section>
 
     <!-- TEAM -->
-    <section id="team" class="card" aria-label="Who we are">
-      <h2>
-        <span class="left">Who we are</span>
-      </h2>
+    <section id="team" class="bleed-panel purple-panel snap-section tight-bottom center-vert" aria-label="Who we are">
+      <div class="bleed-inner">
+        <div class="card compact-section center-stack" aria-label="Who we are">
+          <h2 class="section-title">
+            <span class="left">Who we are</span>
+          </h2>
 
-      <p class="muted" style="margin:0 0 .85rem; font-size:.86rem; line-height:1.55;">
-        We build professional-grade analytics that give users a clear, real-time view of their financial positions and trading performance. 
-        Our mission is to turn complex market data into intuitive insights so traders can make smarter, more confident decisions.
-      </p>
+          <p class="muted" style="margin:0 0 .85rem; font-size:.86rem; line-height:1.55;">
+            We build professional-grade analytics that give users a clear, real-time view of their financial positions and trading performance. 
+            Our mission is to turn complex market data into intuitive insights so traders can make smarter, more confident decisions.
+          </p>
 
-      <div class="team-grid">
-        <!-- Person 1 -->
-        <div class="person">
-          <div class="avatar" aria-label="Photo: Roshan">
-            <img src="images/mahes.png" alt="Roshan Mahes" onerror="this.remove();" />
-          </div>
-          <div>
-            <h4>
-              Dr. Roshan Mahes
-              <a class="linkedin-badge" href="https://www.linkedin.com/in/roshanmahes/" target="_blank" rel="noopener noreferrer" aria-label="Roshan on LinkedIn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-                </svg>
-              </a>
-            </h4>
-            <p>
-              Product & Quantitative Research<br>
-              Data pipeline, performance metrics, portfolio analytics, platform development.
-            </p>
-          </div>
-        </div>
+          <div class="team-grid">
+            <!-- Person 1 -->
+            <div class="person">
+              <div class="avatar" aria-label="Photo: Roshan">
+                <img src="images/mahes.png" alt="Roshan Mahes" onerror="this.remove();" />
+              </div>
+              <div>
+                <div class="person-name">
+                  <h4>Dr. Roshan Mahes</h4>
+                  <a class="linkedin-badge" href="https://www.linkedin.com/in/roshanmahes/" target="_blank" rel="noopener noreferrer" aria-label="Roshan on LinkedIn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+                    </svg>
+                  </a>
+                </div>
+                <p>
+                  <span class="person-role">Product & Quantitative Research</span><br>
+                  <span class="person-details">Data pipeline, performance metrics, portfolio analytics, platform development.</span>
+                </p>
+              </div>
+            </div>
 
-        <!-- Person 2 -->
-        <div class="person">
-          <div class="avatar" aria-label="Photo: Shreehari">
-            <img src="images/bodas.png" alt="Shreehari Bodas" onerror="this.remove();" />
-          </div>
-          <div>
-            <h4>
-              Shreehari Bodas
-              <a class="linkedin-badge" href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/" target="_blank" rel="noopener noreferrer" aria-label="Shreehari on LinkedIn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-                </svg>
-              </a>
-            </h4>
-            <p>
-              Engineering & Quantitative Research<br>
-              Copy trading systems, real-time tracking, infrastructure.
-            </p>
-          </div>
-        </div>
+            <!-- Person 2 -->
+            <div class="person">
+              <div class="avatar" aria-label="Photo: Shreehari">
+                <img src="images/bodas.png" alt="Shreehari Bodas" onerror="this.remove();" />
+              </div>
+              <div>
+                <div class="person-name">
+                  <h4>Shreehari Bodas</h4>
+                  <a class="linkedin-badge" href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/" target="_blank" rel="noopener noreferrer" aria-label="Shreehari on LinkedIn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+                    </svg>
+                  </a>
+                </div>
+                <p>
+                  <span class="person-role">Engineering & Quantitative Research</span><br>
+                  <span class="person-details">Copy trading systems, real-time tracking, infrastructure.</span>
+                </p>
+              </div>
+            </div>
 
-        <!-- Person 3 -->
-        <div class="person">
-          <div class="avatar" aria-label="Photo: Donato">
-            <img src="images/maragno.png" alt="Donato Maragno" onerror="this.remove();" />
-          </div>
-          <div>
-            <h4>
-              Dr. Donato Maragno
-              <a class="linkedin-badge" href="https://www.linkedin.com/in/donato-maragno/" target="_blank" rel="noopener noreferrer" aria-label="Donato on LinkedIn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
-                </svg>
-              </a>
-            </h4>
-            <p>
-              Engineering & Quantitative Research<br>
-              Web app development, system design, performance metrics.
-            </p>
+            <!-- Person 3 -->
+            <div class="person">
+              <div class="avatar" aria-label="Photo: Donato">
+                <img src="images/maragno.png" alt="Donato Maragno" onerror="this.remove();" />
+              </div>
+              <div>
+                <div class="person-name">
+                  <h4>Dr. Donato Maragno</h4>
+                  <a class="linkedin-badge" href="https://www.linkedin.com/in/donato-maragno/" target="_blank" rel="noopener noreferrer" aria-label="Donato on LinkedIn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+                    </svg>
+                  </a>
+                </div>
+                <p>
+                  <span class="person-role">Engineering & Quantitative Research</span><br>
+                  <span class="person-details">Web app development, system design, performance metrics.</span>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="grid" aria-label="FAQ">
-      <div class="card">
-        <h2><span class="left">FAQ</span></h2>
+    <section id="faq" class="bleed-panel snap-section tight-bottom" aria-label="FAQ">
+      <div class="bleed-inner">
+        <div class="grid stack">
+          <div class="card info-card">
+            <h2 class="section-title"><span class="left">FAQ</span></h2>
 
-        <div style="display:grid; gap:.65rem;">
-          <div class="feature">
-            <div class="icon" aria-hidden="true">🧾</div>
-            <div>
-              <h4>Is this financial advice?</h4>
-              <p>No. Hypermonitor provides analytics and monitoring tools.</p>
+            <div style="display:grid; gap:.65rem;">
+              <div class="feature">
+                <div class="icon" aria-hidden="true">🧾</div>
+                <div>
+                  <h4>Is this financial advice?</h4>
+                  <p>No. Hypermonitor provides analytics and monitoring tools.</p>
+                </div>
+              </div>
+
+              <div class="feature">
+                <div class="icon" aria-hidden="true">🔐</div>
+                <div>
+                  <h4>Do I need to sign in?</h4>
+                  <p>
+                    You can track public wallets without signing in.
+                  </p>
+                </div>
+              </div>
+
+              <div class="feature">
+                <div class="icon" aria-hidden="true">⚙️</div>
+                <div>
+                  <h4>How are wallets ranked?</h4>
+                  <p>
+                    We collected and designed some powerful metrics, ranking each wallet.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="feature">
-            <div class="icon" aria-hidden="true">🔐</div>
-            <div>
-              <h4>Do I need to sign in?</h4>
-              <p>
-                You can track public wallets without signing in.
-              </p>
-            </div>
+          <div class="card" id="contact">
+            <h2 class="section-title"><span class="left">Get in touch</span></h2>
+            <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
+              Want early access to leaderboard filters, alerts, or vaults? Contact us.
+              <br /><br />
+            </p>
+
+            <form class="contact-form" id="contactForm" action="https://formspree.io/f/xvzzpakk" method="POST">
+              <div>
+                <label for="contactName">Name</label>
+                <input id="contactName" name="name" type="text" autocomplete="name" required />
+              </div>
+              <div>
+                <label for="contactEmail">Email</label>
+                <input id="contactEmail" name="email" type="email" autocomplete="email" required />
+              </div>
+              <div>
+                <label for="contactMessage">Message</label>
+                <textarea id="contactMessage" name="message" required></textarea>
+              </div>
+              <div class="contact-actions">
+                <button class="btn btn-primary" type="submit">Submit</button>
+                <span class="contact-status" id="contactStatus" aria-live="polite"></span>
+              </div>
+            </form>
           </div>
-
-          <div class="feature">
-            <div class="icon" aria-hidden="true">⚙️</div>
-            <div>
-              <h4>How are wallets ranked?</h4>
-              <p>
-                We collected and designed some powerful metrics, ranking each wallet.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2><span class="left">Get in touch</span></h2>
-        <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
-          Want early access to leaderboard filters, alerts, or vaults? Contact us.
-          <br /><br />
-        </p>
-
-        <div style="margin-top:.85rem; display:flex; gap:.5rem; flex-wrap:wrap;">
-          <a class="btn" href="mailto:info@hypermonitor.org">Email</a>
-          <a class="btn" href="https://x.com/HypermonitorX" target="_blank" rel="noopener noreferrer">X / Twitter</a>
         </div>
       </div>
     </section>
 
     <footer>
-      <div style="margin-top:.35rem;">
+      <div style="margin-top:0.35rem;">
         <!-- TODO -->
         <strong>Disclaimer:</strong> This website is for informational purposes only and does not constitute investment advice.
       </div>
       <div style="margin-top:.35rem;">
         © <span id="year"></span> Hypermonitor ·
         <!-- TODO -->
-        <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> ·
+        <a href="mailto:info@hypermonitor.org">Email</a> ·
+        <a href="https://x.com/HypermonitorX" target="_blank" rel="noopener noreferrer">X</a>
       </div>
     </footer>
 
   </div>
 
   <script>
-    // ===== Theme (matches your tracker UX) =====
-    const themeToggleBtn = document.getElementById("themeToggle");
-    function applyTheme(theme) {
-      if (theme === "light") {
-        document.body.classList.add("light");
-        themeToggleBtn.textContent = "☀️ Light";
-      } else {
-        document.body.classList.remove("light");
-        themeToggleBtn.textContent = "🌙 Dark";
-      }
-      try { localStorage.setItem("hypermonitor-theme", theme); } catch (e) {}
-    }
-
-    function initTheme() {
-      let initial = "dark";
-      try {
-        const saved = localStorage.getItem("hypermonitor-theme");
-        if (saved === "light" || saved === "dark") initial = saved;
-      } catch (e) {}
-      applyTheme(initial);
-    }
-
-    themeToggleBtn.addEventListener("click", () => {
-      const isLight = document.body.classList.contains("light");
-      applyTheme(isLight ? "dark" : "light");
+    // Smooth scroll for on-page links (mirrors test.html)
+    document.addEventListener("click", (e) => {
+      const anchor = e.target.closest('a[href^="#"]');
+      if (!anchor) return;
+      const id = anchor.getAttribute("href");
+      if (!id || id.length <= 1) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
     // Footer year
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Contact form success popup
+    const contactForm = document.getElementById("contactForm");
+    const contactStatus = document.getElementById("contactStatus");
+    if (contactForm) {
+      contactForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (contactStatus) {
+          contactStatus.textContent = "Sending...";
+          contactStatus.classList.remove("is-success", "is-error");
+        }
+        try {
+          const res = await fetch(contactForm.action, {
+            method: "POST",
+            headers: { "Accept": "application/json" },
+            body: new FormData(contactForm)
+          });
+          if (!res.ok) throw new Error("Form submit failed");
+          if (contactStatus) {
+            contactStatus.textContent = "Sent!";
+            contactStatus.classList.add("is-success");
+          }
+          contactForm.reset();
+        } catch (err) {
+          if (contactStatus) {
+            contactStatus.textContent = "Submit failed. Check the endpoint.";
+            contactStatus.classList.add("is-error");
+          }
+        }
+      });
+    }
 
     function initScrollReveals() {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -982,7 +1273,7 @@
 
       const LEADERBOARD_URL = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard";
       const DEST_BASE = "https://www.hypermonitor.org/?wallet=";
-      const PREVIEW_LIMIT = 8;
+      const PREVIEW_LIMIT = 16;
       const PREVIEW_WINDOW = "allTime";
 
       const setStatus = (msg) => {
@@ -1114,7 +1405,6 @@
       loadLeaderboardPreview();
     })();
 
-    initTheme();
     initScrollReveals();
   </script>
 </body>
