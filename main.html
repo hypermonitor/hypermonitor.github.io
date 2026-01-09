@@ -625,6 +625,10 @@
       gap: .5rem;
       flex-wrap: wrap;
       align-items: center;
+      margin-bottom: .4rem;
+    }
+    @media (max-width: 600px) {
+      .contact-actions { margin-bottom: .8rem; }
     }
     .contact-status {
       min-height: 1em;
@@ -834,7 +838,7 @@
             <span class="muted">Wallet tracking + real-time streams</span>
             &nbsp;&nbsp;·&nbsp;&nbsp;
             <span class="pill pill-soon">Coming</span>
-            <span class="muted">Leaderboard metrics, alerts, curated vaults</span>
+            <span class="muted">Leaderboard metrics, curated vaults</span>
           </div>
         </div>
 
@@ -850,21 +854,21 @@
                 <strong>Tracked wallets</strong><br />
                 <span>Live streams active</span>
               </div>
-              <div class="spark good">159,000+</div>
+              <div class="spark good count-up" data-count="159000" data-suffix="+">0</div>
             </li>
             <li class="mini-item">
               <div>
                 <strong>Wallets indexed</strong><br />
                 <span>Eligible for ranking</span>
               </div>
-              <div class="spark">28,000+</div>
+              <div class="spark count-up" data-count="28000" data-suffix="+">0</div>
             </li>
             <li class="mini-item">
               <div>
                 <strong>Vaults</strong><br />
                 <span>Curated strategies</span>
               </div>
-              <div class="spark">0</div>
+              <div class="spark count-up" data-count="0">0</div>
             </li>
           </ul>
         </aside>
@@ -1201,6 +1205,52 @@
     // Footer year
     document.getElementById("year").textContent = new Date().getFullYear();
 
+    // Count-up animation for preview numbers
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function formatCount(value) {
+      return Math.round(value).toLocaleString();
+    }
+    function animateCount(el) {
+      const target = Number(el.getAttribute("data-count"));
+      if (!Number.isFinite(target)) return;
+      const suffix = el.getAttribute("data-suffix") || "";
+      const start = performance.now();
+      const duration = 1100;
+
+      function tick(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const current = target * eased;
+        el.textContent = `${formatCount(current)}${suffix}`;
+        if (t < 1) requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+    function initCountUps() {
+      const counters = document.querySelectorAll(".count-up[data-count]");
+      if (!counters.length) return;
+      if (prefersReduced) {
+        counters.forEach(el => {
+          const target = Number(el.getAttribute("data-count")) || 0;
+          const suffix = el.getAttribute("data-suffix") || "";
+          el.textContent = `${formatCount(target)}${suffix}`;
+        });
+        return;
+      }
+
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animateCount(entry.target);
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.6 });
+
+      counters.forEach(el => io.observe(el));
+    }
+
     // Contact form success popup
     const contactForm = document.getElementById("contactForm");
     const contactStatus = document.getElementById("contactStatus");
@@ -1398,6 +1448,7 @@
     })();
 
     initScrollReveals();
+    initCountUps();
   </script>
 </body>
 </html>
