@@ -721,8 +721,8 @@
       border: 1px solid rgba(148, 163, 184, 0.4);
       color: var(--muted);
     }
-    .pill-live { color: #22c55e; border-color: rgba(34, 197, 94, 0.55); background: rgba(22, 163, 74, 0.12); }
-    .pill-soon { color: #facc15; border-color: rgba(250, 204, 21, 0.55); background: rgba(250, 204, 21, 0.10); }
+    .pill-live { color: #f59e0b; border-color: rgba(245, 158, 11, 0.7); background: rgba(245, 158, 11, 0.14); }
+    .pill-soon { color: #f59e0b; border-color: rgba(245, 158, 11, 0.7); background: rgba(245, 158, 11, 0.14); }
 
     /* Feature list */
     .feature {
@@ -1654,8 +1654,24 @@
       });
     }
 
+    const runWhenIdle = (fn, timeout = 1200) => {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(fn, { timeout });
+        return;
+      }
+      window.setTimeout(fn, Math.min(timeout, 800));
+    };
+
+    const runAfterLoad = (fn) => {
+      if (document.readyState === "complete") {
+        fn();
+        return;
+      }
+      window.addEventListener("load", fn, { once: true });
+    };
+
     // Leaderboard preview (first entries from leaderboard.html)
-    (function initLeaderboardPreview() {
+    function initLeaderboardPreview() {
       const tbody = document.getElementById("leaderboardPreviewBody");
       if (!tbody) return;
 
@@ -1791,13 +1807,25 @@
       };
 
       loadLeaderboardPreview();
-    })();
+    }
 
-    initScrollReveals();
-    initCountUps();
-    initOrbit();
-    initConstellation();
-    initPanelSnap();
+    const initCore = () => {
+      initScrollReveals();
+      initCountUps();
+      initOrbit();
+      initConstellation();
+      initPanelSnap();
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initCore, { once: true });
+    } else {
+      initCore();
+    }
+
+    runAfterLoad(() => {
+      runWhenIdle(initLeaderboardPreview);
+    });
   </script>
 </body>
 </html>
