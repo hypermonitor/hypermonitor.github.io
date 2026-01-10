@@ -1573,10 +1573,15 @@
 
     function initScrollReveals() {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const smallScreen = window.matchMedia("(max-width: 768px)").matches;
       const targets = Array.from(
         document.querySelectorAll(".hero, .hero-card, .card, .feature, .person, .mini-item")
       );
       if (!targets.length) return;
+      if (smallScreen) {
+        targets.forEach((el) => el.classList.add("is-visible"));
+        return;
+      }
       if (!("IntersectionObserver" in window)) {
         targets.forEach((el) => el.classList.add("is-visible"));
         return;
