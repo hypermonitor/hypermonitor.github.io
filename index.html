@@ -1577,6 +1577,10 @@
         document.querySelectorAll(".hero, .hero-card, .card, .feature, .person, .mini-item")
       );
       if (!targets.length) return;
+      if (!("IntersectionObserver" in window)) {
+        targets.forEach((el) => el.classList.add("is-visible"));
+        return;
+      }
 
       const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach((entry) => {
@@ -1585,7 +1589,7 @@
             obs.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.2 });
+      }, { threshold: 0.15, rootMargin: "0px 0px -10% 0px" });
 
       targets.forEach((el, idx) => {
         el.classList.add("animate-on-scroll");
@@ -1595,6 +1599,21 @@
         }
         observer.observe(el);
       });
+
+      const revealInView = () => {
+        const vh = window.innerHeight;
+        targets.forEach((el) => {
+          if (el.classList.contains("is-visible")) return;
+          const rect = el.getBoundingClientRect();
+          if (rect.bottom > 0 && rect.top < vh * 0.9) {
+            el.classList.add("is-visible");
+          }
+        });
+      };
+
+      requestAnimationFrame(revealInView);
+      window.setTimeout(revealInView, 500);
+      window.setTimeout(revealInView, 1400);
     }
 
     function initPanelSnap() {
