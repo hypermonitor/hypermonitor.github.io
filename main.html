@@ -346,6 +346,7 @@
         z-index: 0;
       }
       .hero-card { position: relative; z-index: 2; }
+      .constellation { opacity: 0.5; }
     }
     @media (max-width: 900px) and (orientation: portrait) {
       #app { padding: 0.9rem; }
@@ -512,6 +513,54 @@
     .center-vert {
       display: flex;
       align-items: center;
+    }
+    .constellation {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.7;
+      overflow: hidden;
+    }
+    .constellation svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .constellation line {
+      stroke: rgba(139, 92, 246, 0.45);
+      stroke-width: 1;
+      stroke-dasharray: 6 10;
+      animation: lineDrift 8s linear infinite;
+      animation-play-state: paused;
+    }
+    .constellation circle {
+      fill: rgba(56, 189, 248, 0.75);
+      filter: drop-shadow(0 0 6px rgba(56,189,248,0.7));
+      transform-origin: center;
+      animation: dotPulse 4.5s ease-in-out infinite, dotDrift 12s ease-in-out infinite;
+      animation-play-state: paused;
+    }
+    .constellation .c1 { fill: rgba(56, 189, 248, 0.9); filter: drop-shadow(0 0 6px rgba(56,189,248,0.7)); }
+    .constellation .c2 { fill: rgba(38, 217, 127, 0.9); filter: drop-shadow(0 0 6px rgba(38,217,127,0.7)); }
+    .constellation .c3 { fill: rgba(139, 92, 246, 0.9); filter: drop-shadow(0 0 6px rgba(139,92,246,0.7)); }
+    .constellation .c4 { fill: rgba(245, 158, 11, 0.9); filter: drop-shadow(0 0 6px rgba(245,158,11,0.7)); }
+    .constellation.is-active line,
+    .constellation.is-active circle { animation-play-state: running; }
+    @keyframes lineDrift {
+      0% { stroke-dashoffset: 0; opacity: 0.3; }
+      50% { opacity: 0.7; }
+      100% { stroke-dashoffset: -80; opacity: 0.3; }
+    }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    @keyframes dotDrift {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(4px, -3px); }
+      50% { transform: translate(-3px, 5px); }
+      75% { transform: translate(2px, 2px); }
     }
 
     .card {
@@ -1107,6 +1156,24 @@
 
     <!-- TEAM -->
     <section id="team" class="bleed-panel purple-panel snap-section tight-bottom center-vert" aria-label="Who we are">
+      <div class="constellation" aria-hidden="true">
+        <svg viewBox="0 0 1000 600" preserveAspectRatio="none">
+          <line x1="120" y1="140" x2="320" y2="220"></line>
+          <line x1="320" y1="220" x2="520" y2="140"></line>
+          <line x1="520" y1="140" x2="720" y2="260"></line>
+          <line x1="240" y1="360" x2="460" y2="300"></line>
+          <line x1="460" y1="300" x2="680" y2="380"></line>
+          <line x1="680" y1="380" x2="860" y2="300"></line>
+          <circle class="c1" cx="120" cy="140" r="5"></circle>
+          <circle class="c2" cx="320" cy="220" r="4"></circle>
+          <circle class="c3" cx="520" cy="140" r="5"></circle>
+          <circle class="c4" cx="720" cy="260" r="4"></circle>
+          <circle class="c2" cx="240" cy="360" r="4"></circle>
+          <circle class="c1" cx="460" cy="300" r="5"></circle>
+          <circle class="c4" cx="680" cy="380" r="4"></circle>
+          <circle class="c3" cx="860" cy="300" r="5"></circle>
+        </svg>
+      </div>
       <div class="bleed-inner">
         <div class="card compact-section center-stack" aria-label="Who we are">
           <h2 class="section-title">
@@ -1350,6 +1417,24 @@
       io.observe(orbit);
     }
 
+    function initConstellation() {
+      const constellation = document.querySelector(".constellation");
+      if (!constellation) return;
+      if (prefersReduced) {
+        constellation.classList.add("is-active");
+        return;
+      }
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            constellation.classList.add("is-active");
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      io.observe(constellation);
+    }
+
     // Contact form success popup
     const contactForm = document.getElementById("contactForm");
     const contactStatus = document.getElementById("contactStatus");
@@ -1549,6 +1634,7 @@
     initScrollReveals();
     initCountUps();
     initOrbit();
+    initConstellation();
   </script>
 </body>
 </html>
