@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy | Hypermonitor</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0c0c10;
+        --panel: #14141b;
+        --text: #f5f6fb;
+        --muted: #a8adbd;
+        --border: rgba(255,255,255,0.08);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "IBM Plex Sans", system-ui, sans-serif;
+        background: radial-gradient(circle at 20% 20%, #1a1830, var(--bg));
+        color: var(--text);
+        min-height: 100vh;
+      }
+      main {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 3.5rem 1.5rem 4rem;
+      }
+      header {
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        margin: 0 0 .4rem;
+        font-size: clamp(2rem, 3vw, 2.6rem);
+        letter-spacing: -0.02em;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+      }
+      ul {
+        margin: 0;
+        padding-left: 1.1rem;
+        line-height: 1.65;
+      }
+      li { margin: .5rem 0; }
+      a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      a:hover { color: var(--text); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <a href="/index.html">← Back to Hypermonitor</a>
+        <h1>Privacy</h1>
+        <p class="muted">Last updated: <span id="updated"></span></p>
+      </header>
+      <section class="card">
+        <p class="muted" style="margin:0 0 .85rem; line-height:1.65;">
+          We collect only the information you choose to provide, such as contact form submissions. We do not sell
+          personal data, and we use it solely to respond to inquiries and improve the service.
+        </p>
+        <ul class="muted">
+          <li>Contact form submissions may include your name, email, and message.</li>
+          <li>We use basic analytics to understand site usage and performance.</li>
+          <li>Data is stored securely and retained only as long as needed for the purposes described.</li>
+          <li>You can request deletion of your contact data by emailing info@hypermonitor.org.</li>
+        </ul>
+      </section>
+    </main>
+    <script>
+      document.getElementById("updated").textContent = new Date().toLocaleDateString();
+    </script>
+  </body>
+</html>
