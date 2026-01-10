@@ -1573,6 +1573,87 @@
       });
     }
 
+    function initPanelSnap() {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const finePointer = window.matchMedia("(pointer: fine)").matches;
+      if (!finePointer) return;
+
+      const panels = Array.from(document.querySelectorAll(".snap-section, footer"));
+      if (panels.length < 2) return;
+
+      let isLocked = false;
+      const lock = () => {
+        isLocked = true;
+        window.setTimeout(() => { isLocked = false; }, reduceMotion ? 350 : 650);
+      };
+
+      const getCurrentIndex = () => {
+        const y = window.scrollY;
+        let bestIndex = 0;
+        let bestDist = Infinity;
+        panels.forEach((panel, idx) => {
+          const dist = Math.abs(panel.offsetTop - y);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestIndex = idx;
+          }
+        });
+        return bestIndex;
+      };
+
+      const isEditableTarget = (target) => {
+        if (!target) return false;
+        return Boolean(
+          target.closest("input, textarea, select, [contenteditable=\"true\"]")
+        );
+      };
+
+      const isPanelVisible = (panel) => {
+        const rect = panel.getBoundingClientRect();
+        return rect.bottom > 0 && rect.top < window.innerHeight;
+      };
+
+      const scrollToIndex = (index) => {
+        if (index < 0 || index >= panels.length) return;
+        panels[index].scrollIntoView({
+          behavior: reduceMotion ? "auto" : "smooth",
+          block: "start"
+        });
+      };
+
+      window.addEventListener("wheel", (e) => {
+        if (isLocked) return;
+        if (e.ctrlKey || e.metaKey) return;
+        if (isEditableTarget(e.target)) return;
+        const delta = e.deltaY;
+        if (Math.abs(delta) < 6) return;
+        const current = getCurrentIndex();
+        const next = delta > 0 ? current + 1 : current - 1;
+        const nextPanel = panels[next];
+        if (!nextPanel || !isPanelVisible(nextPanel)) return;
+        e.preventDefault();
+        lock();
+        scrollToIndex(next);
+      }, { passive: false });
+
+      window.addEventListener("keydown", (e) => {
+        if (isLocked) return;
+        if (e.defaultPrevented) return;
+        if (isEditableTarget(e.target)) return;
+        let dir = 0;
+        if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
+        if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
+        if (!dir) return;
+        const current = getCurrentIndex();
+        const next = current + dir;
+        const nextPanel = panels[next];
+        if (!nextPanel || !isPanelVisible(nextPanel)) return;
+        e.preventDefault();
+        lock();
+        scrollToIndex(next);
+      });
+    }
+
     // Leaderboard preview (first entries from leaderboard.html)
     (function initLeaderboardPreview() {
       const tbody = document.getElementById("leaderboardPreviewBody");
@@ -1716,6 +1797,7 @@
     initCountUps();
     initOrbit();
     initConstellation();
+    initPanelSnap();
   </script>
 </body>
 </html>
