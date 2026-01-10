@@ -562,6 +562,17 @@
       50% { transform: translate(-3px, 5px); }
       75% { transform: translate(2px, 2px); }
     }
+    @keyframes iconPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(56, 189, 248, 0); }
+      50% { transform: scale(1.08); box-shadow: 0 0 14px rgba(56, 189, 248, 0.45); }
+    }
+    @keyframes driftDots {
+      0% { transform: translate3d(0, 0, 0); }
+      25% { transform: translate3d(28px, -18px, 0); }
+      50% { transform: translate3d(-22px, 34px, 0); }
+      75% { transform: translate3d(18px, 10px, 0); }
+      100% { transform: translate3d(-34px, -26px, 0); }
+    }
 
     .card {
       background: transparent;
@@ -578,6 +589,39 @@
       padding: 1.1rem;
       backdrop-filter: blur(12px);
       box-shadow: var(--shadow);
+    }
+    .info-card::before,
+    .info-card::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background-image:
+        radial-gradient(circle, rgba(245,245,255,0.06) 1px, transparent 2px),
+        radial-gradient(circle, rgba(139,92,246,0.08) 1px, transparent 2px);
+      background-size: 120px 120px, 160px 160px;
+      background-position: 0 0, 40px 60px;
+      opacity: 0.8;
+      z-index: 0;
+      pointer-events: none;
+      transform: translate3d(0,0,0);
+    }
+    .info-card::after {
+      opacity: 0.6;
+      animation: driftDots 18s linear infinite;
+    }
+    .info-card::before {
+      animation: driftDots 26s linear infinite reverse;
+    }
+    .info-card > * { position: relative; z-index: 1; }
+    .info-card.animate-on-scroll {
+      transition:
+        opacity 600ms ease,
+        transform 700ms var(--ease),
+        box-shadow 700ms var(--ease);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    }
+    .info-card.animate-on-scroll.is-visible {
+      box-shadow: 0 18px 44px rgba(0,0,0,0.32);
     }
     .info-card h2 {
       margin-bottom: 0.5rem;
@@ -700,6 +744,9 @@
       border: 1px solid rgba(56, 189, 248, 0.25);
       background: rgba(56, 189, 248, 0.09);
       flex-shrink: 0;
+    }
+    .feature.is-visible .icon {
+      animation: iconPulse 2.6s ease-in-out infinite;
     }
     .feature h4 {
       margin: 0 0 .2rem;
@@ -900,6 +947,7 @@
         transform: none !important;
         transition: none !important;
       }
+      .feature .icon { animation: none !important; }
     }
 
   </style>
@@ -951,7 +999,7 @@
           <div class="hero-actions">
             <!-- TODO: set href to your tracker route -->
             <a class="btn btn-primary" href="/index.html" title="Start tracking a wallet">
-              Open wallet tracker
+              Start Tracking
             </a>
 
             <!-- TODO: set href to your upcoming leaderboard page -->
