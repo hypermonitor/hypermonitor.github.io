@@ -815,6 +815,7 @@
       border: 1px solid rgba(148, 163, 184, 0.25);
       background:
         linear-gradient(120deg, rgba(15, 23, 42, 0.55), rgba(30, 41, 59, 0.18));
+      align-items: center;
       --tile-border: rgba(56, 189, 248, 0.35);
       --tile-tag: rgba(56, 189, 248, 0.85);
       --tile-icon-bg: rgba(56, 189, 248, 0.09);
@@ -878,7 +879,7 @@
       margin-top: 1rem;
       display: grid;
       gap: .65rem;
-      max-width: 560px;
+      max-width: 680px;
     }
     .contact-form label {
       font-size: .85rem;
@@ -902,7 +903,7 @@
       box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
     }
     .contact-form textarea {
-      min-height: 120px;
+      min-height: 96px;
       resize: vertical;
     }
     .contact-actions {
@@ -1462,11 +1463,11 @@
     <section id="faq" class="bleed-panel snap-section tight-bottom" aria-label="FAQ">
       <div class="bleed-inner">
         <div class="grid stack">
-          <div class="card info-card">
+          <div class="card info-card how-panel">
             <h2 class="section-title"><span class="left">FAQ</span></h2>
 
-            <div style="display:grid; gap:.65rem;">
-              <div class="feature">
+            <div class="feature-list">
+              <div class="feature feature-tile accent-sky">
                 <div class="icon" aria-hidden="true">🧾</div>
                 <div>
                   <h4>Is this financial advice?</h4>
@@ -1474,7 +1475,7 @@
                 </div>
               </div>
 
-              <div class="feature">
+              <div class="feature feature-tile accent-emerald">
                 <div class="icon" aria-hidden="true">🔐</div>
                 <div>
                   <h4>Do I need to sign in?</h4>
@@ -1484,7 +1485,7 @@
                 </div>
               </div>
 
-              <div class="feature">
+              <div class="feature feature-tile accent-violet">
                 <div class="icon" aria-hidden="true">⚙️</div>
                 <div>
                   <h4>How are wallets ranked?</h4>
