@@ -794,19 +794,86 @@
     }
     .how-grid { gap: 1rem; }
     .how-panel {
-      border: 1px solid rgba(15, 23, 42, 0.25);
-      background:
-        linear-gradient(135deg, rgba(12, 15, 24, 0.78), rgba(30, 41, 59, 0.22));
+      border: none;
+      background: transparent;
       box-shadow: none;
     }
     .how-panel.animate-on-scroll,
     .how-panel.animate-on-scroll.is-visible {
       box-shadow: none;
     }
+    #how {
+      position: relative;
+      overflow: hidden;
+    }
+    #how .bleed-inner {
+      position: relative;
+      z-index: 1;
+    }
     .section-lead {
       margin: 0 0 .8rem;
       font-size: .9rem;
       color: var(--muted);
+    }
+    .shimmer-field {
+      position: absolute;
+      inset: -20% 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 1;
+      background-image:
+        radial-gradient(circle, rgba(56, 189, 248, 0.7) 1px, transparent 2px),
+        radial-gradient(circle, rgba(139, 92, 246, 0.65) 1px, transparent 2px),
+        radial-gradient(circle, rgba(245, 158, 11, 0.6) 1px, transparent 2px),
+        radial-gradient(circle, rgba(38, 217, 127, 0.55) 1px, transparent 2px);
+      background-size: 90px 90px, 120px 120px, 160px 160px, 200px 200px;
+      background-position: 0 0, 40px 70px, 80px 30px;
+      animation: shimmerDrift 28s linear infinite;
+      filter: blur(0.15px);
+    }
+    .shimmer-field::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255, 255, 255, 0.95) 1px, transparent 2px),
+        radial-gradient(circle, rgba(255, 255, 255, 0.75) 1px, transparent 2px);
+      background-size: 180px 180px, 240px 240px;
+      background-position: 30px 20px, 140px 90px;
+      animation: shimmerTwinkle 6.5s ease-in-out infinite, shimmerDriftAlt 34s linear infinite;
+      opacity: 0.9;
+      mix-blend-mode: screen;
+    }
+    .shimmer-field::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255, 255, 255, 0.65) 1px, transparent 2px),
+        radial-gradient(circle, rgba(56, 189, 248, 0.5) 1px, transparent 2px);
+      background-size: 140px 140px, 220px 220px;
+      background-position: 10px 110px, 90px 10px;
+      animation: shimmerDriftDiag 30s linear infinite;
+      opacity: 0.75;
+    }
+    @keyframes shimmerDrift {
+      0% { transform: translate3d(0, 0, 0); background-position: 0 0, 40px 70px, 80px 30px, 120px 10px; }
+      50% { transform: translate3d(0, -35px, 0); background-position: 70px 50px, 90px 120px, 150px 80px, 180px 40px; }
+      100% { transform: translate3d(0, 0, 0); background-position: 0 0, 40px 70px, 80px 30px, 120px 10px; }
+    }
+    @keyframes shimmerDriftAlt {
+      0% { transform: translate3d(0, 0, 0); background-position: 30px 20px, 140px 90px; }
+      50% { transform: translate3d(0, 24px, 0); background-position: 90px 80px, 200px 150px; }
+      100% { transform: translate3d(0, 0, 0); background-position: 30px 20px, 140px 90px; }
+    }
+    @keyframes shimmerDriftDiag {
+      0% { transform: translate3d(0, 0, 0); background-position: 10px 110px, 90px 10px; }
+      50% { transform: translate3d(-25px, -15px, 0); background-position: 70px 50px, 150px 70px; }
+      100% { transform: translate3d(0, 0, 0); background-position: 10px 110px, 90px 10px; }
+    }
+    @keyframes shimmerTwinkle {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.8; }
     }
     .feature-list,
     .vault-grid {
@@ -1083,6 +1150,11 @@
         transition: none !important;
       }
       .feature .icon { animation: none !important; }
+      .shimmer-field,
+      .shimmer-field::before,
+      .shimmer-field::after {
+        animation: none !important;
+      }
     }
 
   </style>
@@ -1191,6 +1263,7 @@
 
     <!-- HOW IT WORKS / FEATURES -->
     <section id="how" class="bleed-panel light-panel snap-section" aria-label="How it works">
+      <div class="shimmer-field" aria-hidden="true"></div>
       <div class="bleed-inner">
         <div class="grid two-col how-grid">
           <div class="card info-card how-panel">
