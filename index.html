@@ -351,11 +351,20 @@
       transform-origin: -120px center;
       animation: orbit4 8s linear infinite;
     }
+    .orb.e {
+      width: 9px;
+      height: 9px;
+      background: #f43f5e;
+      box-shadow: 0 0 12px rgba(244,63,94,0.85);
+      transform-origin: -160px center;
+      animation: orbit5 11s ease-in-out infinite;
+    }
     .orbit.is-active .orb { animation-play-state: running; }
     @keyframes orbit1 { to { transform: rotate(360deg); } }
     @keyframes orbit2 { to { transform: rotate(-360deg); } }
     @keyframes orbit3 { to { transform: rotate(360deg); } }
     @keyframes orbit4 { to { transform: rotate(-360deg); } }
+    @keyframes orbit5 { to { transform: rotate(360deg); } }
 
     @media (max-width: 900px) {
       header { align-items: flex-start; }
@@ -783,6 +792,86 @@
       font-size: .95rem;
       line-height: 1.4;
     }
+    .how-grid { gap: 1rem; }
+    .how-panel {
+      border: 1px solid rgba(15, 23, 42, 0.25);
+      background:
+        linear-gradient(135deg, rgba(12, 15, 24, 0.78), rgba(30, 41, 59, 0.22));
+    }
+    .section-lead {
+      margin: 0 0 .8rem;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+    .feature-list,
+    .vault-grid {
+      display: grid;
+      gap: .85rem;
+    }
+    .vault-grid { margin-top: .85rem; }
+    .feature-tile {
+      padding: .85rem .9rem;
+      border-radius: .95rem;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background:
+        linear-gradient(120deg, rgba(15, 23, 42, 0.55), rgba(30, 41, 59, 0.18));
+      --tile-border: rgba(56, 189, 248, 0.35);
+      --tile-tag: rgba(56, 189, 248, 0.85);
+      --tile-icon-bg: rgba(56, 189, 248, 0.09);
+      transition: transform 350ms var(--ease), border-color 350ms var(--ease), box-shadow 350ms var(--ease);
+    }
+    .feature-tile:hover {
+      transform: translateY(-2px);
+      border-color: var(--tile-border);
+      box-shadow: 0 18px 32px rgba(15, 23, 42, 0.35);
+    }
+    .feature-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .62rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--tile-tag);
+      margin-bottom: .25rem;
+    }
+    .feature-tile .icon {
+      border-color: var(--tile-border);
+      background: var(--tile-icon-bg);
+    }
+    .feature-tile .icon {
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      border-width: 1px;
+      border-style: solid;
+    }
+    .accent-sky {
+      --tile-border: #38bdf8;
+      --tile-tag: #38bdf8;
+      --tile-icon-bg: radial-gradient(circle at top, rgba(56, 189, 248, 0.25), rgba(56, 189, 248, 0.05));
+    }
+    .accent-violet {
+      --tile-border: #8b5cf6;
+      --tile-tag: #8b5cf6;
+      --tile-icon-bg: radial-gradient(circle at top, rgba(139, 92, 246, 0.35), rgba(139, 92, 246, 0.08));
+    }
+    .accent-amber {
+      --tile-border: #f59e0b;
+      --tile-tag: #f59e0b;
+      --tile-icon-bg: radial-gradient(circle at top, rgba(245, 158, 11, 0.32), rgba(245, 158, 11, 0.08));
+    }
+    .accent-emerald {
+      --tile-border: #26d97f;
+      --tile-tag: #26d97f;
+      --tile-icon-bg: radial-gradient(circle at top, rgba(16, 185, 129, 0.32), rgba(16, 185, 129, 0.08));
+    }
+    .accent-rose {
+      --tile-border: #f43f5e;
+      --tile-tag: #f43f5e;
+      --tile-icon-bg: radial-gradient(circle at top, rgba(244, 63, 94, 0.32), rgba(244, 63, 94, 0.08));
+    }
+    .vault-note { margin: 0; font-size: .86rem; line-height: 1.55; }
 
     /* Contact form */
     .contact-form {
@@ -1075,61 +1164,69 @@
         <span class="orb b"></span>
         <span class="orb c"></span>
         <span class="orb d"></span>
+        <span class="orb e"></span>
       </div>
     </section>
 
     <!-- HOW IT WORKS / FEATURES -->
     <section id="how" class="bleed-panel light-panel snap-section" aria-label="How it works">
       <div class="bleed-inner">
-        <div class="grid two-col">
-          <div class="card info-card">
+        <div class="grid two-col how-grid">
+          <div class="card info-card how-panel">
             <h2 class="section-title">
               <span class="left">How it works</span>
             </h2>
 
-            <div style="display:grid; gap:.65rem;">
-              <div class="feature">
+            <p class="section-lead">A three-step flow from discovery to live tracking.</p>
+
+            <div class="feature-list">
+              <div class="feature feature-tile accent-sky">
                 <div class="icon" aria-hidden="true">🔎</div>
                 <div>
+                  <span class="feature-tag">Step 01</span>
                   <h4>Discover</h4>
                   <p>
-                    Surface wallets by objective filters (PnL, drawdown, consistency, volatility, leverage, time-in-market) and some in-house metrics.
+                    Identify wallets using objective filters and proprietary metrics.
                   </p>
                 </div>
               </div>
 
-              <div class="feature">
+              <div class="feature feature-tile accent-violet">
                 <div class="icon" aria-hidden="true">🧠</div>
                 <div>
+                  <span class="feature-tag">Step 02</span>
                   <h4>Evaluate</h4>
                   <p>
-                    See clean performance charts, risk stats, and trading behavior (holding time, concentration, win rate).
+                    See clean performance charts, risk stats, and trading behavior.
                   </p>
                 </div>
               </div>
 
-              <div class="feature">
+              <div class="feature feature-tile accent-amber">
                 <div class="icon" aria-hidden="true">⚡</div>
                 <div>
+                  <span class="feature-tag">Step 03</span>
                   <h4>Track in real time</h4>
                   <p>
-                    Live positions, open orders, cancellations, and fills — plus portfolio history.
-                    Works with public wallet addresses.
+                    Live positions, open orders, fills, and portfolio history.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="card info-card">
+          <div class="card info-card how-panel">
             <h2 class="section-title">
-              <span class="left">What you can do</span>
+              <span class="left">What you can do (Soon)</span>
             </h2>
 
-            <div style="display:grid; gap:.65rem;">
-              <div class="feature">
+            <p class="section-lead">A toolkit for ranking, alerts, and curated exposure.</p>
+
+            <div class="feature-list">
+              <div class="feature feature-tile accent-emerald">
                 <div class="icon" aria-hidden="true">📊</div>
                 <div>
+                  <span class="feature-tag">Capability 01</span>
                   <h4>Rank wallets (Leaderboard)</h4>
                   <p>
                     Sort and filter by performance and risk.
@@ -1137,19 +1234,21 @@
                 </div>
               </div>
 
-              <div class="feature">
+              <div class="feature feature-tile accent-rose">
                 <div class="icon" aria-hidden="true">🔔</div>
                 <div>
+                  <span class="feature-tag">Capability 02</span>
                   <h4>Alerts & watchlists</h4>
                   <p>
-                    Get notified when a wallet opens/closes key positions or reaches risk thresholds.
+                    Receive alerts for key position changes or risk thresholds.
                   </p>
                 </div>
               </div>
 
-              <div class="feature">
+              <div class="feature feature-tile accent-amber">
                 <div class="icon" aria-hidden="true">🏦</div>
                 <div>
+                  <span class="feature-tag">Capability 03</span>
                   <h4>Curated vaults</h4>
                   <p>
                     Subscribe to vaults built from research-backed strategies.
@@ -1159,24 +1258,25 @@
             </div>
           </div>
 
-          <div class="card info-card span-full" id="vaults" aria-label="Vaults">
-            <h2 class="section-title"><span class="left">Vaults</span></h2>
-            <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
+          <div class="card info-card span-full how-panel" id="vaults" aria-label="Vaults">
+            <h2 class="section-title"><span class="left">Vaults (Soon)</span></h2>
+            <p class="muted vault-note">
               We plan to offer curated vaults built from transparent rules and risk controls.
-              <br /><br />
             </p>
 
-            <div style="margin-top:.85rem; display:grid; gap:.55rem;">
-              <div class="feature">
+            <div class="vault-grid">
+              <div class="feature feature-tile accent-violet">
                 <div class="icon" aria-hidden="true">🧩</div>
                 <div>
+                  <span class="feature-tag">Blueprints</span>
                   <h4>Strategy templates</h4>
                   <p>Market-neutral, momentum, mean reversion, algorithmic — with guardrails.</p>
                 </div>
               </div>
-              <div class="feature">
+              <div class="feature feature-tile accent-sky">
                 <div class="icon" aria-hidden="true">🛡️</div>
                 <div>
+                  <span class="feature-tag">Controls</span>
                   <h4>Risk controls</h4>
                   <p>Position sizing, max leverage, stop logic, drawdown caps.</p>
                 </div>
