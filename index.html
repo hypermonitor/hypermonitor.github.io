@@ -797,6 +797,11 @@
       border: 1px solid rgba(15, 23, 42, 0.25);
       background:
         linear-gradient(135deg, rgba(12, 15, 24, 0.78), rgba(30, 41, 59, 0.22));
+      box-shadow: none;
+    }
+    .how-panel.animate-on-scroll,
+    .how-panel.animate-on-scroll.is-visible {
+      box-shadow: none;
     }
     .section-lead {
       margin: 0 0 .8rem;
@@ -1024,6 +1029,21 @@
     }
     footer a { color: var(--muted); }
     footer a:hover { color: var(--text-main); }
+    .x-logo,
+    .li-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+    }
+    .x-logo svg,
+    .li-logo svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
 
     /* Light theme */
 
@@ -1537,7 +1557,17 @@
         <!-- TODO -->
         <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> ·
         <a href="mailto:info@hypermonitor.org">Email</a> ·
-        <a href="https://x.com/HypermonitorX" target="_blank" rel="noopener noreferrer">X</a>
+        <a class="x-logo" href="https://x.com/HypermonitorX" target="_blank" rel="noopener noreferrer" aria-label="X">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18.9 3H21l-6.5 7.4L22 21h-6.2l-4.9-6.2L5.4 21H3.2l6.9-7.9L2 3h6.3l4.4 5.6L18.9 3zm-2.2 16.2h1.9L7.4 4.7H5.4l11.3 14.5z"/>
+          </svg>
+        </a>
+        ·
+        <a class="li-logo" href="https://www.linkedin.com/company/110154835" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z"/>
+          </svg>
+        </a>
       </div>
     </footer>
 
