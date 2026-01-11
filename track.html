@@ -854,8 +854,9 @@
     body.light .chart-range-btn:hover { border-color: #d1d5db; }
 
     body.light .chart-range-btn.active {
-      border-color: #18bf98;
-      color: #18bf98;
+      border-color: #f59e0b;
+      color: #b45309;
+      background: #fff7ed;
     }
 
     body.light .chart-card {
@@ -1215,7 +1216,7 @@
 
     <div class="header-right">
       <div class="header-right-top">
-        <button id="themeToggle" class="theme-toggle-btn">☀️ Light</button>
+        <button id="themeToggle" class="theme-toggle-btn">☀️</button>
         <div class="status-pill">
           <span id="statusDot" class="status-dot"></span>
           <span id="statusText"></span>
@@ -3634,10 +3635,10 @@
     const bodyEl = document.body;
     if (theme === "light") {
       bodyEl.classList.add("light");
-      themeToggleBtn.textContent = "☀️ Light";
+      themeToggleBtn.textContent = "☀️";
     } else {
       bodyEl.classList.remove("light");
-      themeToggleBtn.textContent = "🌙 Dark";
+      themeToggleBtn.textContent = "🌙";
     }
     try { localStorage.setItem("hypermonitor-theme", theme); } catch (e) {}
     updateSpinnerForTheme(theme);
