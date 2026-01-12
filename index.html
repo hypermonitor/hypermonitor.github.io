@@ -395,6 +395,7 @@
       header {
         flex-wrap: wrap;
         align-items: center;
+        border-radius: 18px;
       }
 
       .nav-toggle {
@@ -412,8 +413,22 @@
         justify-content: flex-start;
       }
 
+      nav a {
+        width: 100%;
+        padding: 0.65rem 0.1rem;
+      }
+
+      nav a + a {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
       header.nav-open nav {
         display: flex;
+      }
+
+      header.nav-open {
+        align-items: flex-start;
+        padding-bottom: 0.85rem;
       }
 
       header.nav-open .nav-toggle span {
