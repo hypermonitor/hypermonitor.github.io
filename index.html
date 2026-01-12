@@ -138,7 +138,7 @@
       z-index: 10;
       padding: 0.75rem 1rem;
       border-radius: 999px;
-      background: rgba(10, 10, 12, 0.7);
+      background: rgba(10, 10, 12, 0.25);
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
       backdrop-filter: blur(10px);
@@ -949,6 +949,10 @@
       padding: 0 1rem;
     }
 
+    #faq .grid {
+      justify-items: start;
+    }
+
     .bleed-panel.purple-panel::before {
       display: none;
     }
@@ -1165,6 +1169,9 @@
     #how {
       position: relative;
       overflow: hidden;
+      background: transparent;
+      border: none;
+      box-shadow: none;
     }
 
     #how .bleed-inner {
@@ -1593,7 +1600,7 @@
         <a class="nav-link" href="#team">Who we are</a>
         <!-- TODO: set href to your tracker page -->
         <a class="nav-cta"
-          href="https://www.hypermonitor.org/track?wallet=0x162cc7c861ebd0c06b3d72319201150482518185">Open Tracker</a>
+          href="https://www.hypermonitor.org/track">Open Tracker</a>
       </nav>
     </header>
 
@@ -1896,18 +1903,18 @@
 
       .feature-card:hover .image-glow {
         filter: grayscale(0%) opacity(1);
-        box-shadow: 0 0 60px rgba(100, 180, 255, 0.3), 0 0 120px rgba(150, 200, 255, 0.15);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.35), 0 0 120px rgba(255, 255, 255, 0.18);
       }
 
       .feature-card:first-child:hover .image-glow {
-        box-shadow: 0 0 60px rgba(150, 200, 255, 0.4), 0 0 120px rgba(200, 220, 255, 0.2);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.45), 0 0 120px rgba(255, 255, 255, 0.22);
       }
 
       .image-glow::before {
         content: "";
         position: absolute;
         inset: -50%;
-        background: radial-gradient(ellipse at center, rgba(150, 200, 255, 0.15) 0%, transparent 70%);
+        background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
         opacity: 0;
         transition: opacity 0.4s ease;
         pointer-events: none;
@@ -2074,7 +2081,7 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="bleed-panel snap-section tight-bottom compact-section" aria-label="FAQ">
+    <section id="faq" class="bleed-panel snap-section tight-bottom" aria-label="FAQ">
       <div class="bleed-inner">
         <div class="grid stack">
           <div class="card info-card how-panel">
