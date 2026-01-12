@@ -133,6 +133,15 @@
       justify-content: space-between;
       gap: 1rem;
       margin-bottom: 0.75rem;
+      position: sticky;
+      top: 1rem;
+      z-index: 10;
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      background: rgba(10, 10, 12, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(10px);
     }
 
     .brand {
@@ -1496,7 +1505,9 @@
     <!-- HERO -->
     <!-- HERO -->
     <section class="hero snap-section" aria-label="Hero">
-
+      <video class="hero-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+        <source src="images/home.mp4" type="video/mp4" />
+      </video>
       <div class="hero-content">
         <h1>
           Discover top <span class="highlight-blue">Hyperliquid wallets</span>.
@@ -1541,12 +1552,28 @@
         display: flex;
         align-items: center;
         overflow: hidden;
-        padding-top: 6rem;
+        padding-top: calc(6rem + var(--hero-overlap));
         /* Account for fixed header */
         background: #000000;
+        width: 100vw;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        --hero-video-offset: 0rem;
+        --hero-overlap: 4.5rem;
+        margin-top: calc(-1 * var(--hero-overlap));
       }
 
-      /* Video styles removed */
+      .hero-video {
+        position: absolute;
+        top: var(--hero-video-offset);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: calc(100% - var(--hero-video-offset));
+        object-fit: cover;
+        z-index: 1;
+      }
 
       .hero-content {
         position: relative;
