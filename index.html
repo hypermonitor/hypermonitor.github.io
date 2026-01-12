@@ -796,21 +796,24 @@
     }
     .how-card .feature-tile p {
       opacity: 0;
-      max-height: 0;
-      overflow: hidden;
-      transition: opacity 420ms var(--ease2), max-height 520ms var(--ease2);
+      visibility: hidden;
+      transition: opacity 420ms var(--ease2);
     }
     .how-card:hover .feature-tile p {
       opacity: 1;
-      max-height: 6rem;
+      visibility: visible;
     }
     .how-card-row {
       display: flex;
-      gap: 1rem;
+      --how-gap: 1rem;
+      --how-usable: calc(100% - (2 * var(--how-gap)));
+      --how-side: 0.22;
+      --how-main: 0.56;
+      gap: var(--how-gap);
       align-items: stretch;
     }
     .how-card {
-      flex: 1 1 0;
+      flex: 0 0 calc(var(--how-usable) / 3);
       min-width: 0;
       display: flex;
       flex-direction: column;
@@ -819,8 +822,8 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(148, 163, 184, 0.18);
       box-shadow: 0 16px 36px rgba(15, 23, 42, 0.28);
-      transition: flex-grow 10000ms var(--ease2), transform 10000ms var(--ease2), box-shadow 10000ms var(--ease2);
-      will-change: flex-grow, transform;
+      transition: flex-basis 2000ms ease-in-out, transform 600ms var(--ease2), box-shadow 600ms var(--ease2);
+      will-change: flex-basis, transform;
     }
     .how-card::before,
     .how-card::after {
@@ -841,8 +844,8 @@
       font-size: .95rem;
     }
     @media (hover: hover) and (min-width: 900px) {
-      .how-card-row:hover .how-card { flex-grow: 0.6; }
-      .how-card-row:hover .how-card:hover { flex-grow: 1.8; }
+      .how-card-row:hover .how-card { flex-basis: calc(var(--how-usable) * var(--how-side)); }
+      .how-card-row:hover .how-card:hover { flex-basis: calc(var(--how-usable) * var(--how-main)); }
     }
     @media (max-width: 900px) {
       .how-card-row { flex-direction: column; }
