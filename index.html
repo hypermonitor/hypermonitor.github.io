@@ -799,7 +799,7 @@
       visibility: hidden;
       transition: opacity 420ms var(--ease2);
     }
-    .how-card:hover .feature-tile p {
+    .how-card.is-active .feature-tile p {
       opacity: 1;
       visibility: visible;
     }
@@ -843,10 +843,8 @@
     .how-card .section-lead {
       font-size: .95rem;
     }
-    @media (hover: hover) and (min-width: 900px) {
-      .how-card-row:hover .how-card { flex-basis: calc(var(--how-usable) * var(--how-side)); }
-      .how-card-row:hover .how-card:hover { flex-basis: calc(var(--how-usable) * var(--how-main)); }
-    }
+    .how-card-row.has-active .how-card { flex-basis: calc(var(--how-usable) * var(--how-side)); }
+    .how-card-row.has-active .how-card.is-active { flex-basis: calc(var(--how-usable) * var(--how-main)); }
     @media (max-width: 900px) {
       .how-card-row { flex-direction: column; }
       .how-card { transform: none; }
@@ -1719,6 +1717,21 @@
       e.preventDefault();
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
+
+    const howRow = document.querySelector(".how-card-row");
+    if (howRow) {
+      const cards = Array.from(howRow.querySelectorAll(".how-card"));
+      const setActive = (card) => {
+        cards.forEach((item) => item.classList.toggle("is-active", item === card));
+        howRow.classList.add("has-active");
+      };
+      const defaultCard = cards[0];
+      if (defaultCard) setActive(defaultCard);
+      cards.forEach((card) => {
+        card.addEventListener("mouseenter", () => setActive(card));
+        card.addEventListener("focusin", () => setActive(card));
+      });
+    }
 
     // Footer year
     document.getElementById("year").textContent = new Date().getFullYear();
