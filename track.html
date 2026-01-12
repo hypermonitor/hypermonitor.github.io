@@ -639,6 +639,12 @@
       background: rgba(255, 255, 255, 0.03);
     }
 
+    .spot-tag {
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.6);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
     .pill-buy {
       color: #4ade80;
       border-color: rgba(22, 163, 74, 0.8);
@@ -1616,7 +1622,10 @@
   const logoCache = new Map();
   const expandedPositions = new Set();
   const coinIdMap = new Map();
+  const spotIdMetaMap = new Map();
   let perpDexNames = null;
+  let spotMetaPromise = null;
+  let logoRetryTimer = null;
 
   document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -1642,6 +1651,8 @@
     }
 
     entry.state = "bad";
+    entry.retryCount = (entry.retryCount || 0) + 1;
+    scheduleLogoRetry();
     try {
       if (imgEl && imgEl.outerHTML) {
         imgEl.outerHTML = `<span class="coinFallback">${fallbackLetter || "?"}</span>`;
@@ -1888,6 +1899,87 @@
     return primary || secondary;
   }
 
+  function buildTokenIndexMap(tokens) {
+    const map = new Map();
+    for (const t of tokens) {
+      if (t && typeof t.index !== "undefined" && typeof t.name !== "undefined") {
+        map.set(Number(t.index), String(t.name));
+      }
+    }
+    return map;
+  }
+
+  function deriveSpotPair(u, tokenByIndex) {
+    const name = String(u?.name ?? "");
+    if (name.includes("/")) {
+      const [base, quote] = name.split("/", 2);
+      return { pair: name, base, quote };
+    }
+    const toks = u?.tokens;
+    if (Array.isArray(toks) && toks.length >= 2) {
+      const base = tokenByIndex.get(Number(toks[0])) ?? `token${toks[0]}`;
+      const quote = tokenByIndex.get(Number(toks[1])) ?? `token${toks[1]}`;
+      return { pair: `${base}/${quote}`, base, quote };
+    }
+    return { pair: name || "UNKNOWN", base: "UNKNOWN", quote: "UNKNOWN" };
+  }
+
+  async function ensureSpotMeta() {
+    if (spotIdMetaMap.size) return;
+    if (spotMetaPromise) return spotMetaPromise;
+
+    spotMetaPromise = (async () => {
+      try {
+        const res = await fetch(PORTFOLIO_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "spotMeta" }),
+        });
+        if (!res.ok) throw new Error(`spotMeta error: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        const tokens = data?.tokens;
+        const universe = data?.universe;
+        if (!Array.isArray(tokens) || !Array.isArray(universe)) {
+          throw new Error("spotMeta response missing tokens/universe");
+        }
+        const tokenByIndex = buildTokenIndexMap(tokens);
+        universe
+          .filter((u) => u && typeof u.index !== "undefined")
+          .forEach((u) => {
+            const idx = Number(u.index);
+            const spotId = `@${idx}`;
+            const { pair, base, quote } = deriveSpotPair(u, tokenByIndex);
+            spotIdMetaMap.set(spotId, { base, quote, pair, isCanonical: Boolean(u.isCanonical) });
+            rememberCoinAlias(spotId, base);
+          });
+      } catch (err) {
+        console.warn("Failed to load spot meta", err);
+      } finally {
+        spotMetaPromise = null;
+      }
+    })();
+
+    return spotMetaPromise;
+  }
+
+  function formatSpotIdHtml(rawId) {
+    const key = String(rawId ?? "");
+    if (!key.startsWith("@")) return key;
+    const meta = spotIdMetaMap.get(key);
+    if (!meta?.base) return key;
+    return `<span class="spot-id">${meta.base}</span> <span class="dex-tag spot-tag">spot</span>`;
+  }
+
+  function resolveSpotDisplay(rawName) {
+    const key = String(rawName ?? "");
+    const meta = key.startsWith("@") ? spotIdMetaMap.get(key) : null;
+    return {
+      label: meta?.base || key,
+      iconKey: meta?.base || key,
+      isSpot: Boolean(meta?.base),
+    };
+  }
+
   function fmtSize(v) {
     if (v === null || v === undefined) return "";
     const n = Number(v);
@@ -1911,6 +2003,19 @@
     const candidates = [];
     if (rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
     if (cleanName && cleanName !== rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(cleanName)}.svg`);
+    const addUnprefixed = (name) => {
+      if (!name || name.length <= 1) return;
+      if (name[0] !== "U" && name[0] !== "u") return;
+      const unprefixed = name.slice(1);
+      if (!unprefixed) return;
+      candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(unprefixed)}.svg`);
+      const upper = unprefixed.toUpperCase();
+      if (upper !== unprefixed) {
+        candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
+      }
+    };
+    addUnprefixed(cleanName);
+    addUnprefixed(rawName);
     if (rawName && rawName.includes(":")) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
     return Array.from(new Set(candidates));
   }
@@ -1921,6 +2026,33 @@
     const entry = { state: "unknown", idx: 0, urls, okUrl: null };
     logoCache.set(rawName, entry);
     return entry;
+  }
+
+  function scheduleLogoRetry() {
+    if (logoRetryTimer) return;
+    logoRetryTimer = setTimeout(() => {
+      logoRetryTimer = null;
+      retryFailedLogos();
+    }, 3000);
+  }
+
+  function retryFailedLogos() {
+    let changed = false;
+    logoCache.forEach((entry) => {
+      if (entry.state !== "bad") return;
+      if ((entry.retryCount || 0) > 2) return;
+      entry.state = "unknown";
+      entry.idx = 0;
+      entry.okUrl = null;
+      changed = true;
+    });
+    if (!changed) return;
+    if (currentAssetPositions.length) renderPositions(currentAssetPositions);
+    renderOpenOrders();
+    renderCanceledOrders();
+    renderFills();
+    if (historicalOrdersLoaded) renderHistoricalOrders();
+    if (historicalFillsLoaded) renderHistoricalFills();
   }
 
   function coinIconHtml(rawName, cleanName) {
@@ -1958,7 +2090,9 @@
 
   function coinCellHtml(coin) {
     const c = coin ?? "";
-    return `<span class="asset-cell">${coinIconHtml(c, c)}<span>${c}</span></span>`;
+    const { label, iconKey, isSpot } = resolveSpotDisplay(c);
+    const spotTagHtml = isSpot ? `<span class="dex-tag spot-tag">spot</span>` : "";
+    return `<span class="asset-cell">${coinIconHtml(iconKey, label)}<span>${label}</span>${spotTagHtml}</span>`;
   }
 
   function normalizeCoin(coin) {
@@ -2248,6 +2382,8 @@
         const coin = p.coin;
         const { dex: coinDex, base: coinBase } = splitDexCoin(coin);
         const coinDisplayName = coinBase || coin;
+        const { label: spotLabel, iconKey, isSpot } = resolveSpotDisplay(coinDisplayName);
+        const spotTagHtml = isSpot ? `<span class="dex-tag spot-tag">spot</span>` : "";
         const szi = Number(p.szi ?? 0);
 
         const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
@@ -2350,8 +2486,9 @@
         <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}">
           <td>
             <div class="asset-cell">
-              ${coinIconHtml(coin, coinDisplayName)}
-              <span>${coinDisplayName}</span>
+              ${coinIconHtml(iconKey, spotLabel)}
+              <span>${spotLabel}</span>
+              ${spotTagHtml}
               ${coinDex ? `<span class="dex-tag">${coinDex}</span>` : ""}
               <span class="chevron" aria-hidden="true"></span>
             </div>
@@ -2427,9 +2564,10 @@
       const created = fmtDateTime(order.timestamp);
       const side = order.side ?? "?";
       const coin = resolveCoinName(order.coin, order.asset);
+      const orderIdHtml = formatSpotIdHtml(order.oid);
       return `
         <tr>
-          <td class="desktop-only">${order.oid}</td>
+          <td class="desktop-only">${orderIdHtml}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
           <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
@@ -2470,9 +2608,10 @@
       const canceledAtTime = fmtTimeOnly(o.statusTimestamp);
       const side = o.side ?? "?";
       const coin = resolveCoinName(o.coin, o.asset);
+      const orderIdHtml = formatSpotIdHtml(o.oid);
       return `
         <tr class="flash-cancel">
-          <td class="desktop-only">${o.oid}</td>
+          <td class="desktop-only">${orderIdHtml}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
           <td>
             <span class="mobile-only timestamp">${canceledAtTime}</span>
@@ -2500,15 +2639,17 @@
         const tTime = fmtTimeOnly(fill.time);
         const total = computeTotal(fill);
         const side = fill.side ?? "?";
+        const orderIdHtml = formatSpotIdHtml(fill.oid);
+        const coin = resolveCoinName(fill.coin, fill.asset ?? fill.symbol ?? fill.sym);
         return `
         <tr class="flash">
-          <td class="desktop-only">${fill.oid}</td>
+          <td class="desktop-only">${orderIdHtml}</td>
           <td>
             <span class="mobile-only timestamp">${tTime}</span>
             <span class="desktop-only timestamp">${tTime}</span>
           </td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinIconHtml(fill.coin, fill.coin)}<span>${fill.coin}</span></td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td class="money">${fmtSize(fill.sz)}</td>
           <td class="money">${fmtPrice(fill.px) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
@@ -2541,12 +2682,14 @@
         const t = fmtDateTime(fill.time ?? fill.timestamp);
         const total = computeTotal(fill);
         const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
+        const orderIdHtml = formatSpotIdHtml(fill.oid ?? "");
+        const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
         return `
         <tr>
-          <td class="desktop-only">${fill.oid ?? ""}</td>
+          <td class="desktop-only">${orderIdHtml}</td>
           <td><span class="timestamp">${t}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinIconHtml(fill.coin ?? "", fill.coin ?? "")}<span>${fill.coin ?? ""}</span></td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
           <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
         </tr>
@@ -2557,13 +2700,27 @@
     if (historicalFillsCountEl) historicalFillsCountEl.textContent = `${filtered.length}`;
   }
 
+  function pickOrderId(entry, order) {
+    return (
+      order?.oid ??
+      order?.orderId ??
+      order?.order_id ??
+      order?.id ??
+      entry?.oid ??
+      entry?.orderId ??
+      entry?.order_id ??
+      entry?.id ??
+      ""
+    );
+  }
+
   function normalizeHistoricalOrder(entry) {
     const o = entry?.order ?? entry ?? {};
     const status = entry?.status ?? o.status ?? "";
     const statusTimestamp = entry?.statusTimestamp ?? o.statusTimestamp ?? o.timestamp ?? null;
 
     return {
-      oid: o.oid,
+      oid: pickOrderId(entry, o),
       coin: o.coin,
       side: o.side,
       limitPx: o.limitPx ?? o.px,
@@ -2988,13 +3145,15 @@
         const created = fmtDateTime(o.timestamp);
         const side = o.side ?? (o.isBuy ? "B" : "S");
         const status = o.status ?? "";
+        const orderIdHtml = formatSpotIdHtml(o.oid ?? "");
+        const coin = resolveCoinName(o.coin ?? "", o.asset ?? o.symbol ?? o.sym);
 
         return `
         <tr>
-          <td>${o.oid ?? ""}</td>
+          <td>${orderIdHtml}</td>
           <td><span class="timestamp">${created}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinIconHtml(o.coin ?? "", o.coin ?? "")}<span>${o.coin ?? ""}</span></td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td class="money">${fmtSize(o.sz ?? o.size)}</td>
           <td class="money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
           <td>${status}</td>
@@ -3678,8 +3837,10 @@
 
     trackBtnEl.disabled = true;
     try {
+      const spotMetaTask = ensureSpotMeta();
       await initClients();
       await ensurePriceStream();
+      await spotMetaTask;
       await loadSnapshot(currentWallet);
       await startStreams(currentWallet);
       await loadPortfolio(currentWallet);
