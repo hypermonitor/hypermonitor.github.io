@@ -1519,6 +1519,7 @@
       min-height: auto;
       padding: 4rem 0;
       position: relative;
+      scroll-margin-top: 6.5rem;
     }
 
     .snap-section.tight-bottom {
@@ -1666,6 +1667,7 @@
         width: 100%;
         height: calc(100% - var(--hero-video-offset));
         object-fit: cover;
+        opacity: 0.6;
         z-index: 1;
       }
 
@@ -2481,7 +2483,7 @@
 
       const LEADERBOARD_URL = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard";
       const DEST_BASE = "https://www.hypermonitor.org/track?wallet=";
-      const PREVIEW_LIMIT = 16;
+      const PREVIEW_LIMIT = 10;
       const PREVIEW_WINDOW = "allTime";
 
       const setStatus = (msg) => {
