@@ -95,7 +95,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: var(--bg);
+      background: #0b0b10;
       color: var(--text-main);
       font-size: 16px;
       line-height: 1.6;
@@ -576,7 +576,7 @@
     }
 
     .row-link:hover {
-      background: rgba(38, 217, 127, 0.10) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
     }
 
     .pill {
@@ -642,6 +642,22 @@
       border: none;
       box-shadow: none;
     }
+
+    #leaderboard {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      min-height: 100vh;
+    }
+
+    #team {
+      background: rgba(0, 0, 0, 0.6);
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      min-height: 100vh;
+    }
+
 
     .feature-list {
       display: flex;
@@ -911,6 +927,20 @@
       padding-bottom: 2rem;
     }
 
+    .panel-section {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+
+    .panel-dark {
+      background: #0b0b10;
+    }
+
+    .panel-dark-alt {
+      background: #14141c;
+    }
+
     /* Scroll reveal */
     .animate-on-scroll {
       opacity: 0;
@@ -1156,7 +1186,7 @@
     </style>
 
     <!-- HOW IT WORKS / FEATURES -->
-    <section id="how" class="snap-section" aria-label="How it works">
+    <section id="how" class="snap-section panel-section panel-dark" aria-label="How it works">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
         <h2 style="font-size: 1.8rem; margin-bottom: 2rem; font-weight: 600;">How it works</h2>
 
@@ -1312,7 +1342,7 @@
 
 
     <!-- LEADERBOARD PREVIEW -->
-    <section id="leaderboard" class="bleed-panel snap-section" aria-label="Leaderboard preview">
+    <section id="leaderboard" class="bleed-panel snap-section panel-section panel-dark-alt" aria-label="Leaderboard preview">
       <div class="bleed-inner">
         <h2 class="section-title">
           <span class="left">Leaderboard</span>
@@ -1322,7 +1352,7 @@
           Live snapshot of the top wallets, provided by ASXN. Click a row to open the tracker for that wallet.
         </div>
 
-        <div style="max-height: 720px; overflow: hidden; border-radius: .75rem; border: 1px solid var(--border);">
+        <div class="leaderboard-table-wrap" style="max-height: 720px; overflow: hidden; border-radius: .75rem; border: 1px solid var(--border);">
           <table>
             <thead>
               <tr>
@@ -1351,7 +1381,7 @@
     </section>
 
     <!-- TEAM -->
-    <section id="team" class="bleed-panel purple-panel snap-section tight-bottom center-vert" aria-label="Who we are">
+    <section id="team" class="bleed-panel snap-section tight-bottom center-vert panel-section panel-dark-alt" aria-label="Who we are">
 
       <div class="bleed-inner">
         <div class="card compact-section center-stack" aria-label="Who we are">
@@ -1441,7 +1471,7 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="bleed-panel snap-section tight-bottom" aria-label="FAQ">
+    <section id="faq" class="bleed-panel snap-section tight-bottom panel-section panel-dark-alt" aria-label="FAQ">
       <div class="bleed-inner">
         <div class="grid stack">
           <div class="card info-card how-panel">
@@ -1504,7 +1534,7 @@
       </div>
     </section>
 
-    <footer>
+    <footer class="panel-section panel-dark">
       <div style="margin-top:0.35rem;">
         <!-- TODO -->
         <strong>Disclaimer:</strong> This website is for informational purposes only and does not constitute investment
