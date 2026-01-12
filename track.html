@@ -1626,14 +1626,18 @@
   let perpDexNames = null;
   let spotMetaPromise = null;
   let logoRetryTimer = null;
+  let logoRefreshTimer = null;
 
   document.getElementById("year").textContent = new Date().getFullYear();
 
   window.__logoOk = (rawKey, imgEl) => {
     const entry = logoCache.get(rawKey);
     if (!entry) return;
+    const nextUrl = imgEl?.currentSrc || imgEl?.src || entry.urls?.[entry.idx];
+    const wasOk = entry.state === "ok" && entry.okUrl === nextUrl;
     entry.state = "ok";
-    entry.okUrl = imgEl?.currentSrc || imgEl?.src || entry.urls?.[entry.idx];
+    entry.okUrl = nextUrl;
+    if (!wasOk) scheduleLogoRefresh();
   };
 
   window.__logoErr = (rawKey, imgEl, fallbackLetter) => {
@@ -2034,6 +2038,19 @@
       logoRetryTimer = null;
       retryFailedLogos();
     }, 3000);
+  }
+
+  function scheduleLogoRefresh() {
+    if (logoRefreshTimer) return;
+    logoRefreshTimer = setTimeout(() => {
+      logoRefreshTimer = null;
+      if (currentAssetPositions.length) renderPositions(currentAssetPositions);
+      renderOpenOrders();
+      renderCanceledOrders();
+      renderFills();
+      if (historicalOrdersLoaded) renderHistoricalOrders();
+      if (historicalFillsLoaded) renderHistoricalFills();
+    }, 120);
   }
 
   function retryFailedLogos() {
