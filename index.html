@@ -138,10 +138,10 @@
       z-index: 10;
       padding: 0.75rem 1rem;
       border-radius: 999px;
-      background: rgba(10, 10, 12, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 12, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
     }
 
     .brand {
@@ -227,9 +227,10 @@
 
     .nav-link {
       font-size: .9rem;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.85);
       padding: .35rem .65rem;
-      transition: color 0.15s ease;
+      transition: color 0.15s ease, text-shadow 0.15s ease;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
     }
 
     .nav-link:hover {
@@ -300,7 +301,7 @@
         padding: 0.65rem 0.1rem;
       }
 
-      nav a + a {
+      nav a+a {
         border-top: 1px solid rgba(255, 255, 255, 0.08);
       }
 
@@ -672,9 +673,8 @@
     .feature-tile {
       padding: .85rem .9rem;
       border-radius: .95rem;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      background:
-        linear-gradient(120deg, rgba(15, 23, 42, 0.55), rgba(30, 41, 59, 0.18));
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #041211;
       align-items: center;
       --tile-border: rgba(56, 189, 248, 0.35);
       --tile-tag: rgba(56, 189, 248, 0.85);
@@ -993,8 +993,7 @@
         <a class="nav-link" href="#vaults">Vaults</a>
         <a class="nav-link" href="#team">Who we are</a>
         <!-- TODO: set href to your tracker page -->
-        <a class="nav-cta"
-          href="https://www.hypermonitor.org/track">Open Tracker</a>
+        <a class="nav-cta" href="https://www.hypermonitor.org/track">Open Tracker</a>
       </nav>
     </header>
 
@@ -1006,13 +1005,13 @@
       </video>
       <div class="hero-content">
         <h1>
-          Discover top <span class="highlight-blue">Hyperliquid wallets</span>.
-          <br />
-          <span class="highlight-green">Track them live</span>. <span class="highlight-purple">Build conviction</span>.
+          Uncover top Hyperliquid wallets<br />
+          <span class="green-shade-2">Track live</span><br />
+          <span class="green-shade-3">Build conviction</span>
         </h1>
         <p>
-          Hypermonitor helps you find well-performing wallets on Hyperliquid using research-grade metrics.
-          Then you can monitor positions, orders, fills, and performance in real time.
+          Find elite traders using research-grade metrics. Monitor their positions, orders, and performance in
+          real-time.
         </p>
 
         <div class="hero-actions">
@@ -1031,11 +1030,9 @@
             <span class="muted-text">Leaderboard metrics, curated vaults</span>
           </div>
           <div class="stats-line">
-            <span class="stat-item"><strong>159,000+</strong> Tracked wallets</span>
+            <span class="stat-item"><strong>159K</strong> Tracked</span>
             <span class="separator">•</span>
-            <span class="stat-item"><strong>28,000+</strong> Wallets indexed</span>
-            <span class="separator">•</span>
-            <span class="stat-item"><strong>0</strong> Vaults</span>
+            <span class="stat-item"><strong>28K</strong> Indexed</span>
           </div>
         </div>
       </div>
@@ -1085,6 +1082,16 @@
         text-align: center;
         padding-top: 10vh;
         /* Visual spacing */
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.45) 100%);
+        pointer-events: none;
+        z-index: 2;
       }
 
       .hero h1 {
@@ -1099,23 +1106,32 @@
         text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       }
 
-      /* Highlight Gradients */
+      /* Highlight Colors */
+      .green-shade-1 {
+        color: #14532d;
+      }
+
+      .green-shade-2 {
+        color: #4ade80;
+      }
+
+      /* Emerald Green */
+      .green-shade-3 {
+        color: #2dd4bf;
+      }
+
+      /* Teal Green */
+
       .highlight-blue {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #38bdf8;
       }
 
       .highlight-green {
-        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #4ade80;
       }
 
       .highlight-purple {
-        background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #c084fc;
       }
 
       .hero p {
@@ -1123,9 +1139,10 @@
         font-size: 1.35rem;
         max-width: 750px;
         margin-bottom: 2.5rem;
-        color: rgba(255, 255, 255, 0.85);
+        color: rgba(255, 255, 255, 0.95);
         line-height: 1.6;
         font-weight: 400;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
       }
 
       .hero-status-lines {
@@ -1362,17 +1379,19 @@
 
 
     <!-- LEADERBOARD PREVIEW -->
-    <section id="leaderboard" class="bleed-panel snap-section panel-section panel-dark-alt" aria-label="Leaderboard preview">
+    <section id="leaderboard" class="bleed-panel snap-section panel-section" style="background-color: #062521;"
+      aria-label="Leaderboard preview">
       <div class="bleed-inner">
         <h2 class="section-title">
           <span class="left">Leaderboard</span>
         </h2>
 
-        <div class="muted" style="font-size:.82rem; margin-bottom:.65rem; line-height:1.4;">
+        <div class="muted" style="font-size:.82rem; margin-bottom:.65rem; line-height:1.4; color: #ccc;">
           Live snapshot of the top wallets, provided by ASXN. Click a row to open the tracker for that wallet.
         </div>
 
-        <div class="leaderboard-table-wrap" style="max-height: 720px; overflow: hidden; border-radius: .75rem; border: 1px solid var(--border);">
+        <div class="leaderboard-table-wrap"
+          style="max-height: 720px; overflow: hidden; border-radius: .75rem; border: 1px solid var(--border);">
           <table>
             <thead>
               <tr>
@@ -1401,7 +1420,8 @@
     </section>
 
     <!-- TEAM -->
-    <section id="team" class="bleed-panel snap-section tight-bottom center-vert panel-section panel-dark-alt" aria-label="Who we are">
+    <section id="team" class="bleed-panel snap-section tight-bottom center-vert panel-section panel-dark-alt"
+      aria-label="Who we are">
 
       <div class="bleed-inner">
         <div class="card compact-section center-stack" aria-label="Who we are">
@@ -1491,7 +1511,8 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="bleed-panel snap-section tight-bottom panel-section panel-dark-alt" aria-label="FAQ">
+    <section id="faq" class="bleed-panel snap-section tight-bottom panel-section" style="background-color: #062521;"
+      aria-label="FAQ">
       <div class="bleed-inner">
         <div class="grid stack">
           <div class="card info-card how-panel">
@@ -1849,7 +1870,7 @@
 
       const LEADERBOARD_URL = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard";
       const DEST_BASE = "https://www.hypermonitor.org/track?wallet=";
-      const PREVIEW_LIMIT = 10;
+      const PREVIEW_LIMIT = 15;
       const PREVIEW_WINDOW = "allTime";
 
       const setStatus = (msg) => {
@@ -1985,6 +2006,7 @@
       initScrollReveals();
       initCountUps();
       initPanelSnap();
+      initLeaderboardPreview();
     };
 
     if (document.readyState === "loading") {
@@ -1994,7 +2016,6 @@
     }
 
     runAfterLoad(() => {
-      runWhenIdle(initLeaderboardPreview);
     });
   </script>
 </body>
