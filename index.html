@@ -840,6 +840,8 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
     .person h4 {
@@ -1011,7 +1013,6 @@
         <!-- TODO: point these to your real pages -->
         <a class="nav-link" href="#how">How it works</a>
         <a class="nav-link" href="/leaderboard.html">Leaderboard</a>
-        <a class="nav-link" href="#vaults">Vaults</a>
         <a class="nav-link" href="#team">Who we are</a>
         <!-- TODO: set href to your tracker page -->
         <a class="nav-cta" href="https://www.hypermonitor.org/track">Open Tracker</a>
@@ -1291,7 +1292,7 @@
             </div>
             <div class="feature-card-image">
               <div class="image-glow">
-                <img src="images/discover.png" alt="Discover wallets" />
+                <img src="images/discover.png" alt="Discover wallets" draggable="false" />
               </div>
             </div>
           </div>
@@ -1304,7 +1305,7 @@
             </div>
             <div class="feature-card-image">
               <div class="image-glow">
-                <img src="images/evaluate.png" alt="Evaluate performance" />
+                <img src="images/evaluate.png" alt="Evaluate performance" draggable="false" />
               </div>
             </div>
           </div>
@@ -1317,7 +1318,7 @@
             </div>
             <div class="feature-card-image">
               <div class="image-glow">
-                <img src="images/track.png" alt="Track in real time" />
+                <img src="images/track.png" alt="Track in real time" draggable="false" />
               </div>
             </div>
           </div>
@@ -1414,6 +1415,8 @@
         /* Focus on top part of image */
         display: block;
         border-radius: 12px;
+        user-select: none;
+        -webkit-user-drag: none;
       }
 
       @media (max-width: 900px) {
@@ -1492,7 +1495,7 @@
             <!-- Person 1 -->
             <div class="person">
               <div class="avatar" aria-label="Photo: Roshan">
-                <img src="images/mahes.png" alt="Roshan Mahes" onerror="this.remove();" />
+                <img src="images/mahes.png" alt="Roshan Mahes" onerror="this.remove();" draggable="false" />
               </div>
               <div>
                 <div class="person-name">
@@ -1515,7 +1518,7 @@
             <!-- Person 2 -->
             <div class="person">
               <div class="avatar" aria-label="Photo: Shreehari">
-                <img src="images/bodas.png" alt="Shreehari Bodas" onerror="this.remove();" />
+                <img src="images/bodas.png" alt="Shreehari Bodas" onerror="this.remove();" draggable="false" />
               </div>
               <div>
                 <div class="person-name">
@@ -1538,7 +1541,7 @@
             <!-- Person 3 -->
             <div class="person">
               <div class="avatar" aria-label="Photo: Donato">
-                <img src="images/maragno.png" alt="Donato Maragno" onerror="this.remove();" />
+                <img src="images/maragno.png" alt="Donato Maragno" onerror="this.remove();" draggable="false" />
               </div>
               <div>
                 <div class="person-name">
