@@ -58,7 +58,8 @@
 
   <style>
     :root {
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--apple-font);
       color-scheme: dark;
 
       /* Deepmind-style palette */
@@ -156,23 +157,21 @@
     }
 
     .brand-name {
-      font-family: Arial, "Helvetica Neue", sans-serif;
-      font-weight: 400;
-      letter-spacing: 0.01em;
-      font-size: 1.35rem;
+      font-family: var(--apple-font);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      font-size: 1.25rem;
+      text-transform: uppercase;
       margin: 0;
-    }
-
-    .brand-name .hyper {
       color: #fff;
+      font-style: normal;
     }
 
+    .brand-name .hyper,
     .brand-name em {
-      font-style: italic;
-    }
-
-    .brand-name em {
-      color: #fff;
+      color: inherit !important;
+      font-style: inherit !important;
+      font-weight: inherit !important;
     }
 
     nav {
@@ -1006,8 +1005,11 @@
       <div class="hero-content">
         <h1>
           Uncover top Hyperliquid wallets<br />
-          <span class="green-shade-2">Track live</span><br />
-          <span class="green-shade-3">Build conviction</span>
+          <span class="hero-rotator">
+            <span class="rotator-item is-active green-shade-2">Track live</span>
+            <span class="rotator-item green-shade-3">Build conviction</span>
+            <span class="rotator-item" style="color: #2dd4bf;">Master the chain</span>
+          </span>
         </h1>
         <p>
           Find elite traders using research-grade metrics. Monitor their positions, orders, and performance in
@@ -1025,13 +1027,11 @@
           <div class="status-line">
             <span class="pill pill-live">Live</span>
             <span class="muted-text">Wallet tracking + real-time streams</span>
-            <span class="separator">·</span>
             <span class="pill pill-soon">Coming</span>
             <span class="muted-text">Leaderboard metrics, curated vaults</span>
           </div>
           <div class="stats-line">
             <span class="stat-item"><strong>159K</strong> Tracked</span>
-            <span class="separator">•</span>
             <span class="stat-item"><strong>28K</strong> Indexed</span>
           </div>
         </div>
@@ -1095,7 +1095,7 @@
       }
 
       .hero h1 {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-family: var(--apple-font);
         font-size: 5rem;
         font-weight: 800;
         line-height: 1.05;
@@ -1104,6 +1104,38 @@
         color: #fff;
         max-width: 1000px;
         text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .hero-rotator {
+        position: relative;
+        display: inline-block;
+        height: 1.1em;
+        vertical-align: bottom;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      .rotator-item {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      .rotator-item.is-active {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .rotator-item.is-leaving {
+        opacity: 0;
+        transform: translateY(-30px);
       }
 
       /* Highlight Colors */
@@ -1135,7 +1167,7 @@
       }
 
       .hero p {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: var(--apple-font);
         font-size: 1.35rem;
         max-width: 750px;
         margin-bottom: 2.5rem;
@@ -2007,7 +2039,27 @@
       initCountUps();
       initPanelSnap();
       initLeaderboardPreview();
+      initHeroRotator();
     };
+
+    function initHeroRotator() {
+      const items = document.querySelectorAll('.rotator-item');
+      if (items.length < 2) return;
+      let current = 0;
+
+      setInterval(() => {
+        const prev = items[current];
+        prev.classList.remove('is-active');
+        prev.classList.add('is-leaving');
+
+        setTimeout(() => {
+          prev.classList.remove('is-leaving');
+        }, 800);
+
+        current = (current + 1) % items.length;
+        items[current].classList.add('is-active');
+      }, 3500);
+    }
 
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", initCore, { once: true });
