@@ -60,6 +60,7 @@
     :root {
       --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
       font-family: var(--apple-font);
+      font-size: 1.05rem;
       color-scheme: dark;
 
       /* Deepmind-style palette */
@@ -542,7 +543,7 @@
     }
 
     .muted {
-      color: var(--muted);
+      color: #94a3b8;
     }
 
     .mono {
@@ -655,7 +656,7 @@
     }
 
     #team {
-      background: rgba(0, 0, 0, 0.6);
+      background: #0a332e;
       width: 100vw;
       margin-left: calc(50% - 50vw);
       margin-right: calc(50% - 50vw);
@@ -672,38 +673,22 @@
     .feature-tile {
       padding: .85rem .9rem;
       border-radius: .95rem;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      background: #041211;
+      border: none;
+      background: rgba(255, 255, 255, 0.02);
       align-items: center;
-      --tile-border: rgba(56, 189, 248, 0.35);
-      --tile-tag: rgba(56, 189, 248, 0.85);
-      --tile-icon-bg: rgba(56, 189, 248, 0.09);
-      transition: transform 350ms var(--ease), border-color 350ms var(--ease), box-shadow 350ms var(--ease);
+      --tile-border: #26d97f;
+      --tile-tag: #26d97f;
+      --tile-icon-bg: rgba(38, 217, 127, 0.08);
+      transition: transform 350ms var(--ease), background 350ms var(--ease);
     }
 
     .feature-tile:hover {
       transform: translateY(-2px);
-      border-color: var(--tile-border);
-      box-shadow: 0 18px 32px rgba(15, 23, 42, 0.35);
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: none;
     }
 
-    .accent-sky {
-      --tile-border: #38bdf8;
-      --tile-tag: #38bdf8;
-      --tile-icon-bg: radial-gradient(circle at top, rgba(56, 189, 248, 0.25), rgba(56, 189, 248, 0.05));
-    }
 
-    .accent-violet {
-      --tile-border: #8b5cf6;
-      --tile-tag: #8b5cf6;
-      --tile-icon-bg: radial-gradient(circle at top, rgba(139, 92, 246, 0.35), rgba(139, 92, 246, 0.08));
-    }
-
-    .accent-emerald {
-      --tile-border: #26d97f;
-      --tile-tag: #26d97f;
-      --tile-icon-bg: radial-gradient(circle at top, rgba(16, 185, 129, 0.32), rgba(16, 185, 129, 0.08));
-    }
 
     /* Contact form */
     .contact-form {
@@ -728,7 +713,7 @@
       padding: .6rem .7rem;
       border-radius: .7rem;
       border: 1px solid var(--border);
-      background: #17181f;
+      background: #05201e;
       color: var(--text-main);
       font-size: .95rem;
       font-family: inherit;
@@ -786,24 +771,38 @@
     .person {
       display: flex;
       flex-direction: column;
-      gap: .7rem;
+      gap: 1.25rem;
       align-items: flex-start;
-      border-radius: .9rem;
-      border: none;
-      background: transparent;
-      padding: 0;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 2rem;
+      transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+      height: 100%;
+    }
+
+    .person:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-5px);
     }
 
     .avatar {
-      width: 220px;
-      height: 220px;
-      border-radius: 22px;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 1.25rem;
       border: none;
-      background: linear-gradient(135deg, rgba(38, 217, 127, 0.20), rgba(56, 189, 248, 0.20));
+      background: linear-gradient(135deg, rgba(38, 217, 127, 0.1), rgba(56, 189, 248, 0.1));
       overflow: hidden;
       flex-shrink: 0;
       display: grid;
       place-items: center;
+      filter: grayscale(100%);
+      transition: filter 0.5s ease;
+    }
+
+    .person:hover .avatar {
+      filter: grayscale(0%);
     }
 
     .avatar img {
@@ -937,11 +936,13 @@
     }
 
     .panel-dark {
-      background: #0b0b10;
+      background: #0a332e;
+      /* Light Petrol */
     }
 
     .panel-dark-alt {
-      background: #14141c;
+      background: #062521;
+      /* Dark Petrol */
     }
 
     /* Scroll reveal */
@@ -1047,7 +1048,7 @@
         overflow: hidden;
         padding-top: calc(6rem + var(--hero-overlap) + 1rem);
         /* Account for fixed header */
-        background: #000000;
+        background: #041a18;
         width: 100vw;
         margin-left: calc(50% - 50vw);
         margin-right: calc(50% - 50vw);
@@ -1261,7 +1262,7 @@
 
         <div class="feature-cards">
           <!-- Card 1: Discover -->
-          <div class="feature-card">
+          <div class="feature-card is-active">
             <div class="feature-card-content">
               <h3>Discover</h3>
               <p>Identify wallets using objective filters and proprietary metrics. Find well-performing traders on
@@ -1311,7 +1312,7 @@
 
       .feature-card {
         flex: 1;
-        background: #1a1a1a;
+        background: #031a19;
         border: none;
         border-radius: 16px;
         padding: 1.75rem;
@@ -1321,7 +1322,7 @@
         min-height: 450px;
       }
 
-      .feature-card:hover {
+      .feature-card.is-active {
         flex: 1.6;
       }
 
@@ -1360,13 +1361,13 @@
         transition: filter 0.4s ease, box-shadow 0.4s ease;
       }
 
-      .feature-card:hover .image-glow {
+      .feature-card.is-active .image-glow {
         filter: grayscale(0%) opacity(1);
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.35), 0 0 120px rgba(255, 255, 255, 0.18);
+        box-shadow: none;
       }
 
-      .feature-card:first-child:hover .image-glow {
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.45), 0 0 120px rgba(255, 255, 255, 0.22);
+      .feature-card:first-child.is-active .image-glow {
+        box-shadow: none;
       }
 
       .image-glow::before {
@@ -1379,8 +1380,8 @@
         pointer-events: none;
       }
 
-      .feature-card:hover .image-glow::before {
-        opacity: 1;
+      .feature-card.is-active .image-glow::before {
+        opacity: 0;
       }
 
       .image-glow img {
@@ -1403,7 +1404,7 @@
           min-height: auto;
         }
 
-        .feature-card:hover {
+        .feature-card.is-active {
           flex: 1;
         }
       }
@@ -1457,11 +1458,9 @@
 
       <div class="bleed-inner">
         <div class="card compact-section center-stack" aria-label="Who we are">
-          <h2 class="section-title">
-            <span class="left">Who we are</span>
-          </h2>
+          <h2 class="section-title">Who we are</h2>
 
-          <p class="muted" style="margin:0 0 .85rem; font-size:.86rem; line-height:1.55;">
+          <p class="muted" style="margin-bottom: 2.5rem; max-width: 800px;">
             We build professional-grade analytics that give users a clear, real-time view of their financial positions
             and trading performance.
             Our mission is to turn complex market data into intuitive insights so traders can make smarter, more
@@ -1551,14 +1550,14 @@
             <h2 class="section-title"><span class="left">FAQ</span></h2>
 
             <div class="feature-list">
-              <div class="feature feature-tile accent-sky">
+              <div class="feature feature-tile">
                 <div>
                   <h4>Is this financial advice?</h4>
                   <p>No. Hypermonitor provides analytics and monitoring tools.</p>
                 </div>
               </div>
 
-              <div class="feature feature-tile accent-emerald">
+              <div class="feature feature-tile">
                 <div>
                   <h4>Do I need to sign in?</h4>
                   <p>
@@ -1567,7 +1566,7 @@
                 </div>
               </div>
 
-              <div class="feature feature-tile accent-violet">
+              <div class="feature feature-tile">
                 <div>
                   <h4>How are wallets ranked?</h4>
                   <p>
@@ -1797,6 +1796,8 @@
       window.setTimeout(revealInView, 500);
       window.setTimeout(revealInView, 1400);
     }
+
+
 
     function initPanelSnap() {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2034,10 +2035,21 @@
       loadLeaderboardPreview();
     }
 
+    function initFeatureCardInteraction() {
+      const cards = document.querySelectorAll(".feature-card");
+      cards.forEach(card => {
+        card.addEventListener("mouseenter", () => {
+          cards.forEach(c => c.classList.remove("is-active"));
+          card.classList.add("is-active");
+        });
+      });
+    }
+
     const initCore = () => {
       initScrollReveals();
       initCountUps();
       initPanelSnap();
+      initFeatureCardInteraction();
       initLeaderboardPreview();
       initHeroRotator();
     };
