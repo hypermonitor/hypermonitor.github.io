@@ -87,6 +87,7 @@
       --radius: 8px;
       /* Sharper corners */
       --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+      --section-spacing: 4.5rem;
     }
 
     * {
@@ -287,13 +288,7 @@
       border: none;
       background: transparent;
       box-shadow: none;
-      padding: 0;
       margin-bottom: 0;
-    }
-
-    .hero.snap-section {
-      display: block;
-      padding: 4rem 0;
     }
 
     @media (max-width: 900px) {
@@ -370,7 +365,7 @@
       }
 
       footer {
-        padding: 0 0.9rem;
+        padding: 1.5rem 1rem 1.5rem 1rem;
       }
 
       .grid {
@@ -465,7 +460,6 @@
       opacity: .85;
     }
 
-    /* Section layout */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -682,7 +676,14 @@
       width: 100vw;
       margin-left: calc(50% - 50vw);
       margin-right: calc(50% - 50vw);
-      min-height: 100vh;
+    }
+
+    #leaderboard .muted {
+      font-size: 0.9rem;
+    }
+
+    #leaderboard table {
+      font-size: 0.82rem;
     }
 
     #team {
@@ -690,7 +691,6 @@
       width: 100vw;
       margin-left: calc(50% - 50vw);
       margin-right: calc(50% - 50vw);
-      min-height: 100vh;
     }
 
 
@@ -912,9 +912,9 @@
     /* Footer */
     footer {
       margin-top: 0;
-      padding: 3rem 1rem;
-      min-height: 200px;
-      background: #1a1a1a !important;
+      padding: 2rem 1rem 1rem 3rem;
+      min-height: 140px;
+      background: #f3f3f3 !important;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       color: var(--muted);
       font-size: .78rem;
@@ -951,19 +951,6 @@
     }
 
     /* Light theme */
-
-    /* Scroll snapping (mirrors test.html experience) */
-    /* Scroll snapping removed */
-    .snap-section {
-      min-height: auto;
-      padding: 4rem 0;
-      position: relative;
-      scroll-margin-top: 6.5rem;
-    }
-
-    .snap-section.tight-bottom {
-      padding-bottom: 2rem;
-    }
 
     .panel-section {
       width: 100vw;
@@ -1033,7 +1020,7 @@
 
     <!-- HERO -->
     <!-- HERO -->
-    <section class="hero snap-section" aria-label="Hero">
+    <section class="hero" aria-label="Hero">
       <video class="hero-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
         <source src="images/home2.mp4" type="video/mp4" />
       </video>
@@ -1290,7 +1277,7 @@
     </style>
 
     <!-- HOW IT WORKS / FEATURES -->
-    <section id="how" class="snap-section panel-section panel-dark" aria-label="How it works">
+    <section id="how" class="panel-section panel-dark" aria-label="How it works">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
         <h2 style="font-size: 1.8rem; margin-bottom: 2rem; font-weight: 600;">How it works</h2>
 
@@ -1446,7 +1433,7 @@
 
 
     <!-- LEADERBOARD PREVIEW -->
-    <section id="leaderboard" class="bleed-panel snap-section panel-section" style="background-color: transparent;"
+    <section id="leaderboard" class="bleed-panel panel-section" style="background-color: transparent;"
       aria-label="Leaderboard preview">
       <div class="bleed-inner">
         <h2 class="section-title">
@@ -1487,7 +1474,7 @@
     </section>
 
     <!-- TEAM -->
-    <section id="team" class="bleed-panel snap-section tight-bottom center-vert panel-section panel-dark-alt"
+    <section id="team" class="bleed-panel center-vert panel-section panel-dark-alt"
       aria-label="Who we are">
 
       <div class="bleed-inner">
@@ -1576,7 +1563,7 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="bleed-panel snap-section tight-bottom panel-section" style="background-color: transparent;"
+    <section id="faq" class="bleed-panel panel-section" style="background-color: transparent;"
       aria-label="FAQ">
       <div class="bleed-inner">
         <div class="grid stack">
@@ -1833,87 +1820,6 @@
 
 
 
-    function initPanelSnap() {
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const finePointer = window.matchMedia("(pointer: fine)").matches;
-      if (!finePointer) return;
-
-      const panels = Array.from(document.querySelectorAll(".snap-section, footer"));
-      if (panels.length < 2) return;
-
-      let isLocked = false;
-      const lock = () => {
-        isLocked = true;
-        window.setTimeout(() => { isLocked = false; }, reduceMotion ? 350 : 650);
-      };
-
-      const getCurrentIndex = () => {
-        const y = window.scrollY;
-        let bestIndex = 0;
-        let bestDist = Infinity;
-        panels.forEach((panel, idx) => {
-          const dist = Math.abs(panel.offsetTop - y);
-          if (dist < bestDist) {
-            bestDist = dist;
-            bestIndex = idx;
-          }
-        });
-        return bestIndex;
-      };
-
-      const isEditableTarget = (target) => {
-        if (!target) return false;
-        return Boolean(
-          target.closest("input, textarea, select, [contenteditable=\"true\"]")
-        );
-      };
-
-      const isPanelVisible = (panel) => {
-        const rect = panel.getBoundingClientRect();
-        return rect.bottom > 0 && rect.top < window.innerHeight;
-      };
-
-      const scrollToIndex = (index) => {
-        if (index < 0 || index >= panels.length) return;
-        panels[index].scrollIntoView({
-          behavior: reduceMotion ? "auto" : "smooth",
-          block: "start"
-        });
-      };
-
-      window.addEventListener("wheel", (e) => {
-        if (isLocked) return;
-        if (e.ctrlKey || e.metaKey) return;
-        if (isEditableTarget(e.target)) return;
-        const delta = e.deltaY;
-        if (Math.abs(delta) < 6) return;
-        const current = getCurrentIndex();
-        const next = delta > 0 ? current + 1 : current - 1;
-        const nextPanel = panels[next];
-        if (!nextPanel || !isPanelVisible(nextPanel)) return;
-        e.preventDefault();
-        lock();
-        scrollToIndex(next);
-      }, { passive: false });
-
-      window.addEventListener("keydown", (e) => {
-        if (isLocked) return;
-        if (e.defaultPrevented) return;
-        if (isEditableTarget(e.target)) return;
-        let dir = 0;
-        if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
-        if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
-        if (!dir) return;
-        const current = getCurrentIndex();
-        const next = current + dir;
-        const nextPanel = panels[next];
-        if (!nextPanel || !isPanelVisible(nextPanel)) return;
-        e.preventDefault();
-        lock();
-        scrollToIndex(next);
-      });
-    }
-
     const runWhenIdle = (fn, timeout = 1200) => {
       if ("requestIdleCallback" in window) {
         window.requestIdleCallback(fn, { timeout });
@@ -1937,7 +1843,7 @@
 
       const LEADERBOARD_URL = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard";
       const DEST_BASE = "https://www.hypermonitor.org/track?wallet=";
-      const PREVIEW_LIMIT = 15;
+      const PREVIEW_LIMIT = 10;
       const PREVIEW_WINDOW = "allTime";
 
       const setStatus = (msg) => {
@@ -2082,7 +1988,6 @@
     const initCore = () => {
       initScrollReveals();
       initCountUps();
-      initPanelSnap();
       initFeatureCardInteraction();
       initLeaderboardPreview();
       initHeroRotator();
