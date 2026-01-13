@@ -54,13 +54,16 @@
     }
   </script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="images/logo.png" />
 
   <style>
     :root {
-      --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      --apple-font: 'Outfit', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
       font-family: var(--apple-font);
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       color-scheme: dark;
 
       /* Deepmind-style palette */
@@ -88,6 +91,7 @@
 
     * {
       box-sizing: border-box;
+      font-family: inherit;
     }
 
     html {
@@ -97,9 +101,9 @@
     body {
       margin: 0;
       padding: 0;
-      background: #0b0b10;
+      background: #0a0a0a;
       color: var(--text-main);
-      font-size: 16px;
+      font-size: 18px;
       line-height: 1.6;
       overflow-x: hidden;
     }
@@ -107,6 +111,24 @@
 
 
 
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Outfit', var(--apple-font);
+      font-weight: 600;
+      margin-top: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Outfit', var(--apple-font);
+      font-weight: 600;
+      margin-top: 0;
+    }
 
     a {
       color: #dcdddd;
@@ -158,10 +180,10 @@
     }
 
     .brand-name {
-      font-family: var(--apple-font);
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      font-size: 1.25rem;
+      font-family: 'Outfit', var(--apple-font);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 1.05rem;
       text-transform: uppercase;
       margin: 0;
       color: #fff;
@@ -544,8 +566,9 @@
     }
 
     .section-title {
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       letter-spacing: -0.01em;
+      font-weight: 600;
     }
 
     .card h2 .left {
@@ -555,7 +578,7 @@
     }
 
     .muted {
-      color: #94a3b8;
+      color: var(--muted);
     }
 
     .mono {
@@ -668,7 +691,7 @@
     }
 
     #team {
-      background: #0a332e;
+      background: transparent;
       width: 100vw;
       margin-left: calc(50% - 50vw);
       margin-right: calc(50% - 50vw);
@@ -839,21 +862,22 @@
     .person p {
       margin: .15rem 0 0;
       color: var(--muted);
-      font-size: .95rem;
-      line-height: 1.4;
+      font-size: 1rem;
+      line-height: 1.5;
     }
 
     .person-role {
-      font-size: .88rem;
-      color: #cbd5f5;
+      font-size: 1rem;
+      color: #fff;
       font-weight: 600;
+      opacity: 0.9;
     }
 
     .person-details {
       margin-top: .25rem;
-      font-size: .86rem;
+      font-size: 0.95rem;
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     .linkedin-badge {
@@ -876,16 +900,34 @@
       transition: fill 0.15s ease;
     }
 
+    body:not(.light) .linkedin-badge {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    body:not(.light) .linkedin-badge svg {
+      fill: #888;
+    }
+
+    body:not(.light) .linkedin-badge:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #888;
+    }
+
     /* Footer */
     footer {
       margin-top: 0;
-      padding: 0 1rem 0 1rem;
-      min-height: 0;
-      border-top: none;
+      padding: 3rem 1rem;
+      min-height: 200px;
+      background: #1a1a1a !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
       color: var(--muted);
       font-size: .78rem;
       line-height: 1.45;
       position: relative;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
     }
 
     footer a {
@@ -935,13 +977,11 @@
     }
 
     .panel-dark {
-      background: #0a332e;
-      /* Light Petrol */
+      background: transparent;
     }
 
     .panel-dark-alt {
-      background: #062521;
-      /* Dark Petrol */
+      background: transparent;
     }
 
     /* Scroll reveal */
@@ -976,7 +1016,7 @@
     <!-- HEADER / NAV -->
     <header>
       <a class="brand" href="/" aria-label="Hypermonitor home">
-        <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.357rem; height: 1.6rem; border-radius: 4px;" />
+        <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.8rem; height: auto; border-radius: 4px;" />
         <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
       </a>
 
@@ -1047,7 +1087,7 @@
         overflow: hidden;
         padding-top: calc(6rem + var(--hero-overlap) + 1rem);
         /* Account for fixed header */
-        background: #041a18;
+        background: transparent;
         width: 100vw;
         margin-left: calc(50% - 50vw);
         margin-right: calc(50% - 50vw);
@@ -1311,7 +1351,7 @@
 
       .feature-card {
         flex: 1;
-        background: #031a19;
+        background: #1a1a1a;
         border: none;
         border-radius: 16px;
         padding: 1.75rem;
@@ -1411,14 +1451,14 @@
 
 
     <!-- LEADERBOARD PREVIEW -->
-    <section id="leaderboard" class="bleed-panel snap-section panel-section" style="background-color: #062521;"
+    <section id="leaderboard" class="bleed-panel snap-section panel-section" style="background-color: transparent;"
       aria-label="Leaderboard preview">
       <div class="bleed-inner">
         <h2 class="section-title">
           <span class="left">Leaderboard</span>
         </h2>
 
-        <div class="muted" style="font-size:.82rem; margin-bottom:.65rem; line-height:1.4; color: #ccc;">
+        <div class="muted" style="margin-bottom:.65rem; line-height:1.6;">
           Live snapshot of the top wallets, provided by ASXN. Click a row to open the tracker for that wallet.
         </div>
 
@@ -1459,7 +1499,7 @@
         <div class="card compact-section center-stack" aria-label="Who we are">
           <h2 class="section-title">Who we are</h2>
 
-          <p class="muted" style="margin-bottom: 2.5rem; max-width: 800px;">
+          <p class="muted" style="margin-bottom: 2.5rem; max-width: 800px; line-height:1.6;">
             We build professional-grade analytics that give users a clear, real-time view of their financial positions
             and trading performance.
             Our mission is to turn complex market data into intuitive insights so traders can make smarter, more
@@ -1541,7 +1581,7 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="bleed-panel snap-section tight-bottom panel-section" style="background-color: #062521;"
+    <section id="faq" class="bleed-panel snap-section tight-bottom panel-section" style="background-color: transparent;"
       aria-label="FAQ">
       <div class="bleed-inner">
         <div class="grid stack">
