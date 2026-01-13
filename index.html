@@ -170,9 +170,14 @@
 
     .brand-name .hyper,
     .brand-name em {
-      color: inherit !important;
+      /* color: #ffffff !important; */
       font-style: inherit !important;
       font-weight: inherit !important;
+    }
+
+    .brand-name .hyper {
+      color: #74f0b2;
+      /* Hyper Green */
     }
 
     nav {
@@ -851,30 +856,17 @@
       justify-content: center;
       width: 16px;
       height: 16px;
-      border-radius: 4px;
       text-decoration: none;
       vertical-align: middle;
-      transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+      color: inherit;
+      transition: color 0.15s ease, opacity 0.15s ease;
     }
 
     .linkedin-badge svg {
-      width: 11px;
-      height: 11px;
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
       transition: fill 0.15s ease;
-    }
-
-    body:not(.light) .linkedin-badge {
-      background: rgba(10, 102, 194, 0.12);
-      border: 1px solid rgba(10, 102, 194, 0.35);
-    }
-
-    body:not(.light) .linkedin-badge svg {
-      fill: #3396ff;
-    }
-
-    body:not(.light) .linkedin-badge:hover {
-      background: rgba(10, 102, 194, 0.20);
-      border-color: #3396ff;
     }
 
     /* Footer */
