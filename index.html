@@ -960,6 +960,10 @@
       margin-right: calc(50% - 50vw);
     }
 
+    .section-gap {
+      margin-top: 4rem;
+    }
+
     .panel-dark {
       background: transparent;
     }
@@ -989,6 +993,12 @@
         opacity: 1 !important;
         transform: none !important;
         transition: none !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .section-gap {
+        margin-top: 2.5rem;
       }
     }
   </style>
@@ -1278,7 +1288,7 @@
     </style>
 
     <!-- HOW IT WORKS / FEATURES -->
-    <section id="how" class="panel-section panel-dark" aria-label="How it works">
+    <section id="how" class="panel-section panel-dark section-gap" aria-label="How it works">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
         <h2 style="font-size: 1.8rem; margin-bottom: 2rem; font-weight: 600;">How it works</h2>
 
@@ -1436,7 +1446,7 @@
 
 
     <!-- LEADERBOARD PREVIEW -->
-    <section id="leaderboard" class="bleed-panel panel-section" style="background-color: transparent;"
+    <section id="leaderboard" class="bleed-panel panel-section section-gap" style="background-color: transparent;"
       aria-label="Leaderboard preview">
       <div class="bleed-inner">
         <h2 class="section-title">
@@ -1477,7 +1487,7 @@
     </section>
 
     <!-- TEAM -->
-    <section id="team" class="bleed-panel center-vert panel-section panel-dark-alt"
+    <section id="team" class="bleed-panel center-vert panel-section panel-dark-alt section-gap"
       aria-label="Who we are">
 
       <div class="bleed-inner">
@@ -1533,7 +1543,7 @@
                 </div>
                 <p>
                   <span class="person-role">Engineering & Quantitative Research</span><br>
-                  <span class="person-details">Copy trading systems, real-time tracking, infrastructure.</span>
+                  <span class="person-details">Copy trading systems, Real-time tracking, Infrastructure.</span>
                 </p>
               </div>
             </div>
@@ -1556,7 +1566,7 @@
                 </div>
                 <p>
                   <span class="person-role">Engineering & Quantitative Research</span><br>
-                  <span class="person-details">System design, Web app development, performance metrics.</span>
+                  <span class="person-details">System design, Web app development, Performance metrics.</span>
                 </p>
               </div>
             </div>
@@ -1566,7 +1576,7 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="bleed-panel panel-section" style="background-color: transparent;"
+    <section id="faq" class="bleed-panel panel-section section-gap" style="background-color: transparent;"
       aria-label="FAQ">
       <div class="bleed-inner">
         <div class="grid stack">
