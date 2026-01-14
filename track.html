@@ -25,7 +25,11 @@
   <meta name="twitter:description" content="Track any Hyperliquid wallet: positions, orders, fills, and performance." />
   <meta name="twitter:image" content="https://www.hypermonitor.org/images/track.png" />
 
-  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="icon" type="image/png" href="images/favicon.png" />
 
   <style>
     :root {
@@ -65,30 +69,6 @@
       margin-bottom: 1.5rem;
     }
 
-    header h1 {
-      font-size: 1.8rem;
-      margin: 0 0 .4rem;
-      display: flex;
-      align-items: center;
-      gap: .55rem;
-      font-family: Arial, "Helvetica Neue", sans-serif;
-      font-weight: 400;
-      letter-spacing: 0.01em;
-    }
-
-    header h1 span.logo-dot {
-      width: .7rem;
-      height: .7rem;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #26d97f, #38bdf8);
-      box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
-      flex-shrink: 0;
-    }
-
-    header h1 .logo-word { display: inline-block; }
-    header h1 .logo-word-regular { text-decoration: none ; }
-    header h1 .logo-word-italic { font-style: italic; }
-
     .brand {
       display: inline-flex;
       align-items: center;
@@ -104,11 +84,20 @@
     }
 
     .brand-name {
-      font-family: Arial, "Helvetica Neue", sans-serif;
-      font-weight: 400;
-      letter-spacing: 0.01em;
-      font-size: 1.35rem;
+      font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 1.05rem;
+      text-transform: uppercase;
       margin: 0;
+      color: #fff;
+      font-style: normal;
+    }
+
+    .brand-name .hyper,
+    .brand-name em {
+      font-style: inherit !important;
+      font-weight: inherit !important;
     }
 
     .wallet-controls {
@@ -1204,10 +1193,8 @@
   <header>
     <div class="wallet-controls">
       <a class="brand" href="/" aria-label="Hypermonitor home">
-      <h1>
-        <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.357rem; height: 1.6rem; border-radius: 4px;" />
-        <span class="logo-word logo-word-regular">Hyper<em>monitor</em></span>
-      </h1>
+        <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.8rem; height: auto; border-radius: 4px;" />
+        <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
       </a>
       <div class="tagline">
         Track any Hyperliquid wallet. No wallet connection required.
