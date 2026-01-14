@@ -610,23 +610,32 @@
 
     .pill {
       display: inline-flex;
+      align-items: center;
       padding: 0.15rem 0.45rem;
       border-radius: 9999px;
-      font-size: 0.7rem;
-      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(148, 163, 184, 0.35);
       color: var(--muted);
+      background: rgba(148, 163, 184, 0.12);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(6px);
+      position: relative;
+      isolation: isolate;
     }
 
     .pill-live {
-      color: #f59e0b;
-      border-color: rgba(245, 158, 11, 0.7);
-      background: rgba(245, 158, 11, 0.14);
+      color: #4ade80;
+      border-color: rgba(74, 222, 128, 0.6);
+      background: linear-gradient(120deg, rgba(74, 222, 128, 0.25), rgba(16, 185, 129, 0.1));
     }
 
     .pill-soon {
-      color: #f59e0b;
-      border-color: rgba(245, 158, 11, 0.7);
-      background: rgba(245, 158, 11, 0.14);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.55);
+      background: linear-gradient(120deg, rgba(56, 189, 248, 0.24), rgba(14, 116, 144, 0.1));
     }
 
     /* Feature list */
@@ -1064,8 +1073,8 @@
             <span class="muted-text">Leaderboard metrics, curated vaults</span>
           </div>
           <div class="stats-line">
-            <span class="stat-item"><strong>159K</strong> Tracked</span>
-            <span class="stat-item"><strong>28K</strong> Indexed</span>
+            <span class="stat-item"><strong class="count-up" data-count="159" data-suffix="K">159K</strong> Tracked</span>
+            <span class="stat-item"><strong class="count-up" data-count="28" data-suffix="K">28K</strong> Indexed</span>
           </div>
         </div>
       </div>
@@ -1263,6 +1272,14 @@
       @media (max-width: 768px) {
         .hero h1 {
           font-size: 2.5rem;
+        }
+
+        .hero {
+          padding-top: calc(4.5rem + var(--hero-overlap));
+        }
+
+        .hero-content {
+          padding-top: 6vh;
         }
 
         .hero-status-lines {
