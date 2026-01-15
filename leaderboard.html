@@ -6,14 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Hyperliquid leaderboard dashboard" />
 
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="images/favicon.png" />
 
   <style>
     :root {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color-scheme: dark;
-      --bg: #101014;
-      --card-bg: #101014cf;
+      --bg: #0b0b0f;
+      --card-bg: rgba(12, 12, 16, 0.92);
       --accent: #26d97f;
       --danger: #f25f5c;
       --border: rgba(255,255,255,0.08);
@@ -22,8 +23,17 @@
     }
 
     * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; background: var(--bg); color: var(--text-main); }
-    #app { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
 
     header {
       display: flex;
@@ -34,33 +44,50 @@
       margin-bottom: 1.25rem;
     }
 
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+    }
+
     a.brand, a.brand:visited, a.brand:hover, a.brand:active {
       text-decoration: none !important;
       color: inherit;
     }
 
-    h1 {
-      font-size: 1.7rem;
-      margin: 0 0 .35rem;
-      display: flex;
-      align-items: center;
-      gap: .55rem;
-      font-family: Arial, "Helvetica Neue", sans-serif;
-      font-weight: 400;
-      letter-spacing: 0.01em;
+    .brand-name {
+      font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      margin: 0;
+      color: #fff;
+      font-style: normal;
+    }
+
+    .brand-name .hyper,
+    .brand-name em {
+      font-style: inherit !important;
+      font-weight: inherit !important;
     }
 
     .logo-dot { display: none; }
 
-    .tagline { font-size: 0.85rem; color: var(--muted); margin-top: .15rem; }
+    .tagline {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: .35rem;
+    }
 
     .card {
       background: var(--card-bg);
-      border: 0.1px solid var(--border);
-      border-radius: 10px;
-      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.1rem;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
     }
 
     .toolbar {
@@ -69,7 +96,7 @@
       gap: .5rem;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: .75rem;
+      margin-bottom: .85rem;
     }
 
     .left-tools, .right-tools {
@@ -81,35 +108,48 @@
 
     .pill-btn, .select, .input {
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #17181f;
+      border: 1px solid transparent;
+      background: rgba(17, 17, 17, 0.85);
       color: var(--text-main);
-      font-size: 0.8rem;
-      padding: 0.35rem 0.8rem;
+      font-size: 0.88rem;
+      padding: 0.5rem 1rem;
       outline: none;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .pill-btn:focus, .select:focus, .input:focus {
+      border-color: rgba(255, 255, 255, 0.85);
+      background: rgba(20, 20, 22, 0.9);
     }
     
     .muted { color: var(--muted); }
     .money { font-variant-numeric: tabular-nums; }
 
+    .leaderboard-table-wrap {
+      max-height: 70vh;
+      overflow: auto;
+      border-radius: .75rem;
+      border: 1px solid var(--border);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.82rem;
+      font-size: 0.9rem;
     }
     thead {
-      background: #17181f;
+      background: var(--card-bg);
       position: sticky;
       top: 0;
       z-index: 1;
     }
     th, td {
-      padding: 0.45rem 0.55rem;
+      padding: 0.45rem 0.5rem;
       text-align: left;
-      border-bottom: 1px solid var(--border);
+      border-bottom: none;
       white-space: nowrap;
     }
-    tbody tr:nth-child(even) { background: #14141c; }
+    tbody tr:nth-child(even) { background: transparent; }
 
     th.sortable { cursor: pointer; }
     th.sortable:hover { color: #97fde5; }
@@ -118,7 +158,7 @@
       cursor: pointer;
     }
     .row-link:hover {
-      background: rgba(38, 217, 127, 0.10) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
     }
 
     .addr {
@@ -129,12 +169,13 @@
       display: inline-flex;
       align-items: center;
       gap: .4rem;
-      padding: 0.25rem 0.6rem;
+      padding: 0.3rem 0.7rem;
       border-radius: 9999px;
       font-size: 0.78rem;
-      border: 1px solid var(--border);
-      background: #17181f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(17, 17, 17, 0.85);
       color: var(--text-main);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
     }
 
     .dot {
@@ -149,11 +190,67 @@
 
     .footer-note { margin-top: .75rem; font-size: .78rem; color: var(--muted); }
 
+    /* Footer (from track.html) */
+    footer {
+      margin-top: 0.2rem;
+      padding: 0.2rem 0 0;
+      border-top: 1px #262637;
+      color: #a1a1b5;
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0;
+      border: none;
+      background: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    footer a:hover {
+      color: inherit;
+      text-decoration: underline;
+    }
+
     @media (max-width: 700px) {
       #app { padding: 0.9rem; }
       th, td { padding: 0.35rem 0.4rem; }
       table { font-size: 0.75rem; }
       .hide-mobile { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .leaderboard-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        font-size: 0.78rem;
+      }
+
+      th,
+      td {
+        padding: 0.35rem 0.4rem;
+      }
+
+      th:first-child,
+      td:first-child {
+        width: 2.2rem;
+      }
+
+      th:nth-child(3),
+      td:nth-child(3),
+      th:nth-child(4),
+      td:nth-child(4),
+      th:nth-child(6),
+      td:nth-child(6) {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -163,12 +260,10 @@
     <header>
       <div>
         <a class="brand" href="/" aria-label="Hypermonitor home">
-          <h1>
-            <img src="images/logo.png" alt="Hypermonitor logo" style="width: 1.6rem; height: 1.6rem; border-radius: 4px;" />
-            <span>Hyper<em>monitor</em></span>
-          </h1>
+          <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.8rem; height: auto; border-radius: 4px;" />
+          <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
         </a>
-        <div class="tagline">Leaderboard dashboard — click a trader to open their wallet page.</div>
+        <div class="tagline">Live leaderboard. Tap a row to open the wallet.</div>
       </div>
 
       <div class="status" id="statusPill">
@@ -187,19 +282,19 @@
             <option value="allTime" selected>All Time</option>
           </select>
 
-          <input id="searchInput" class="input" style="min-width: 240px;"
+          <input id="searchInput" class="input" style="min-width: 420px;"
                  placeholder="Search address (0x…), or filter…" autocomplete="off" />
 
           <select id="limitSelect" class="select" title="Rows to show">
-            <option value="50">Top 50</option>
             <option value="100" selected>Top 100</option>
-            <option value="250">Top 250</option>
-            <option value="500">Top 500</option>
+            <option value="1000">Top 1000</option>
+            <option value="10000">Top 10000</option>
+            <option value="100000">All</option>
           </select>
         </div>
       </div>
 
-      <div style="overflow:auto; max-height: 70vh;">
+      <div class="leaderboard-table-wrap">
         <table>
           <thead>
             <tr>
@@ -217,6 +312,12 @@
         </table>
       </div>
     </section>
+
+    <footer>
+      <div style="margin-top:.1rem;">
+        © <span id="year"></span> <a href="/">Hypermonitor</a>.
+      </div>
+    </footer>
   </div>
 
   <script>
@@ -417,7 +518,7 @@
 
             rawRows = rows;
             viewRows = normalize(rawRows);
-            setStatus("ok", `Loaded ${rawRows.length} traders`);
+            setStatus("ok", `Loaded ${rawRows.length} wallets`);
             applyFiltersAndSort();
         } catch (e) {
             console.error("Leaderboard load failed:", e);
@@ -445,6 +546,10 @@
         applyFiltersAndSort();
       });
     });
+
+    // Footer year
+    const yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     // ===== BOOT =====
     loadLeaderboard();
