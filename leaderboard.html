@@ -130,15 +130,30 @@
       overflow: auto;
       border-radius: .75rem;
       border: 1px solid var(--border);
+      position: relative;
     }
     .leaderboard-table-wrap.loading {
+      --pulse-size: 220px;
       background-image: url("images/pulse.gif");
       background-repeat: no-repeat;
       background-position: center 45%;
-      background-size: 220px auto;
+      background-size: var(--pulse-size) auto;
     }
     .leaderboard-table-wrap.loading td {
       color: var(--muted);
+    }
+    .loading-overlay {
+      position: absolute;
+      left: 50%;
+      top: calc(45% + (var(--pulse-size) * 0.35));
+      transform: translate(-50%, -50%);
+      color: var(--muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+      display: none;
+    }
+    .leaderboard-table-wrap.loading .loading-overlay {
+      display: block;
     }
 
     table {
@@ -304,6 +319,7 @@
       </div>
 
       <div class="leaderboard-table-wrap loading" id="tableWrap">
+        <div class="loading-overlay" id="loadingOverlay">Loading…</div>
         <table>
           <thead>
             <tr>
@@ -376,7 +392,7 @@
       const rows = Array.from({ length: count }, () => (
         `<tr><td class="money">&nbsp;</td><td class="addr">&nbsp;</td><td class="money">&nbsp;</td><td class="money">&nbsp;</td><td class="money">&nbsp;</td><td class="money hide-mobile">&nbsp;</td></tr>`
       )).join("");
-      tbody.innerHTML = `<tr><td colspan="6" class="muted">Loading…</td></tr>${rows}`;
+      tbody.innerHTML = rows;
     }
 
     function setLoadingState(isLoading) {
