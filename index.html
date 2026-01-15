@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Hypermonitor — Hyperliquid Wallet & Trading Analytics Dashboards</title>
+  <title>Hypermonitor — Discover & Track Top Hyperliquid Wallets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description"
     content="Track Hyperliquid wallets in real time. Monitor positions, orders, fills, PnL, and performance with Hypermonitor." />
@@ -396,6 +396,32 @@
       }
     }
 
+    @media (max-width: 768px) {
+      #leaderboard .leaderboard-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #leaderboard table {
+        font-size: 0.78rem;
+      }
+
+      #leaderboard th,
+      #leaderboard td {
+        padding: 0.35rem 0.4rem;
+      }
+
+      #leaderboard th:first-child,
+      #leaderboard td:first-child {
+        width: 2.2rem;
+      }
+
+      #leaderboard th:nth-child(2),
+      #leaderboard td:nth-child(2) {
+        max-width: 8rem;
+      }
+    }
+
     .hero h1 {
       margin: 0 0 .35rem;
       font-size: 2.4rem;
@@ -452,6 +478,19 @@
     .btn-primary:hover {
       background: #ddd;
       color: #000;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      border-color: #2f2f2f;
+      background: #cfd2d4;
+      color: #111;
+      font-weight: 600;
+    }
+
+    .btn-secondary:hover {
+      background: #b7bbbf;
+      color: #111;
       text-decoration: none;
     }
 
@@ -685,6 +724,27 @@
       width: 100vw;
       margin-left: calc(50% - 50vw);
       margin-right: calc(50% - 50vw);
+    }
+
+    .leaderboard-footer-row td {
+      padding: 0.6rem 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .leaderboard-footer-link {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: inline-flex;
+      gap: 0.4rem;
+      align-items: center;
+      transition: color 0.15s ease;
+    }
+
+    .leaderboard-footer-link:hover {
+      color: var(--text-main);
     }
 
     #leaderboard .muted {
@@ -1501,14 +1561,16 @@
                 <td colspan="6" class="muted">Loading…</td>
               </tr>
             </tbody>
+            <tfoot>
+              <tr class="leaderboard-footer-row">
+                <td colspan="6">
+                  <a class="leaderboard-footer-link" href="/leaderboard.html">Open full leaderboard →</a>
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 
-        <div style="margin-top:.75rem; display:flex; gap:.5rem; flex-wrap:wrap;">
-          <!-- TODO: link to real pages -->
-          <a class="btn" href="/leaderboard.html">Open full leaderboard</a>
-          <!-- <a class="btn" href="/metrics.html">Read about metrics</a> -->
-        </div>
       </div>
     </section>
 
