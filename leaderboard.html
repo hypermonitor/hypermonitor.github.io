@@ -254,17 +254,36 @@
       }
 
       table {
+        table-layout: fixed;
+        width: 100%;
+      }
+
+      table {
         font-size: 0.78rem;
       }
 
       th,
       td {
         padding: 0.35rem 0.4rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       th:first-child,
       td:first-child {
         width: 2.2rem;
+      }
+
+      th:nth-child(2),
+      td:nth-child(2) {
+        width: 58%;
+      }
+
+      th:nth-child(5),
+      td:nth-child(5) {
+        width: 26%;
+        text-align: right;
       }
 
       th:nth-child(3),
