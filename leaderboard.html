@@ -131,6 +131,15 @@
       border-radius: .75rem;
       border: 1px solid var(--border);
     }
+    .leaderboard-table-wrap.loading {
+      background-image: url("images/pulse.gif");
+      background-repeat: no-repeat;
+      background-position: center 45%;
+      background-size: 220px auto;
+    }
+    .leaderboard-table-wrap.loading td {
+      color: var(--muted);
+    }
 
     table {
       width: 100%;
@@ -294,7 +303,7 @@
         </div>
       </div>
 
-      <div class="leaderboard-table-wrap">
+      <div class="leaderboard-table-wrap loading" id="tableWrap">
         <table>
           <thead>
             <tr>
@@ -308,6 +317,21 @@
           </thead>
           <tbody id="tbody">
             <tr><td colspan="6" class="muted">Loading…</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
+            <tr><td class="money">—</td><td class="addr">—</td><td class="money">—</td><td class="money">—</td><td class="money">—</td><td class="money hide-mobile">—</td></tr>
           </tbody>
         </table>
       </div>
@@ -330,6 +354,7 @@
     const searchInput = document.getElementById("searchInput");
     const limitSelect = document.getElementById("limitSelect");
     const windowSelect = document.getElementById("windowSelect");
+    const tableWrap = document.getElementById("tableWrap");
 
     const statusDot = document.getElementById("statusDot");
     const statusText = document.getElementById("statusText");
@@ -345,6 +370,18 @@
       if (kind === "ok") statusDot.classList.add("ok");
       if (kind === "err") statusDot.classList.add("err");
       statusText.textContent = msg || "";
+    }
+
+    function renderLoadingRows(count = 14) {
+      const rows = Array.from({ length: count }, () => (
+        `<tr><td class="money">&nbsp;</td><td class="addr">&nbsp;</td><td class="money">&nbsp;</td><td class="money">&nbsp;</td><td class="money">&nbsp;</td><td class="money hide-mobile">&nbsp;</td></tr>`
+      )).join("");
+      tbody.innerHTML = `<tr><td colspan="6" class="muted">Loading…</td></tr>${rows}`;
+    }
+
+    function setLoadingState(isLoading) {
+      if (tableWrap) tableWrap.classList.toggle("loading", isLoading);
+      if (isLoading) renderLoadingRows();
     }
 
     function fmtMoney(v, decimals = 2) {
@@ -477,6 +514,7 @@
 
     async function loadLeaderboard() {
         setStatus("", "Loading…");
+        setLoadingState(true);
 
         try {
             const res = await fetch(LEADERBOARD_URL, { cache: "no-store" });
@@ -519,10 +557,12 @@
             rawRows = rows;
             viewRows = normalize(rawRows);
             setStatus("ok", `Loaded ${rawRows.length} wallets`);
+            setLoadingState(false);
             applyFiltersAndSort();
         } catch (e) {
             console.error("Leaderboard load failed:", e);
             setStatus("err", "Failed to load leaderboard");
+            setLoadingState(false);
             tbody.innerHTML = `<tr><td colspan="6" class="muted">Failed to load leaderboard. ${String(e?.message || e)}</td></tr>`;
         }
         }
