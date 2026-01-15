@@ -478,12 +478,20 @@
     .kv-value { text-align: right; }
 
     .asset-cell {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 0.3rem;
       white-space: nowrap;
       line-height: 1.1;
-      height: 100%;
+    }
+
+    td.asset-cell {
+      display: table-cell;
+      vertical-align: middle;
+    }
+
+    td.asset-cell > .asset-cell {
+      display: inline-flex;
     }
 
     .coinIcon {
@@ -607,6 +615,7 @@
     }
 
     tbody tr:nth-child(even) { background: #14141c; }
+    tbody tr.loading-row { background: transparent; }
 
     .pill {
       display: inline-flex;
@@ -787,7 +796,42 @@
       height: 100% !important;
     }
 
-    .chart-loading { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
+    .chart-loading-wrap {
+      position: relative;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      --pulse-size: 220px;
+    }
+
+    .chart-loading-wrap.loading {
+      --pulse-size: 220px;
+      background-image: url("images/pulse.gif");
+      background-repeat: no-repeat;
+      background-position: center 45%;
+      background-size: var(--pulse-size) auto;
+    }
+
+    .chart-loading-wrap.loading .chart-grid {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .chart-loading {
+      position: absolute;
+      left: 50%;
+      top: calc(45% + (var(--pulse-size) * 0.35));
+      transform: translate(-50%, -50%);
+      font-size: 0.85rem;
+      color: var(--muted);
+      pointer-events: none;
+      display: none;
+      text-align: center;
+      width: 100%;
+    }
+
+    .chart-loading-wrap.loading .chart-loading {
+      display: block;
+    }
 
     body.light {
       background: #ffffff;
@@ -1250,7 +1294,7 @@
   <div class="grid">
     <section class="card">
       <h2>Account Overview</h2>
-      <div id="marginSummary" class="kv-list"></div>
+      <div id="marginSummary" class="kv-list"><span class="muted">Loading…</span></div>
       <div class="error" id="snapshotError"></div>
     </section>
 
@@ -1282,8 +1326,8 @@
         </tr>
         </thead>
         <tbody id="positionsBody">
-        <tr><td colspan="4" class="mobile-only muted">Loading…</td></tr>
-        <tr><td colspan="6" class="desktop-only muted">Loading…</td></tr>
+        <tr class="loading-row"><td colspan="4" class="mobile-only muted">Loading…</td></tr>
+        <tr class="loading-row"><td colspan="6" class="desktop-only muted">Loading…</td></tr>
         </tbody>
       </table>
     </section>
@@ -1323,30 +1367,32 @@
       <button class="chart-range-btn active" data-range="allTime">All Time</button>
     </div>
 
-    <div class="chart-grid">
-      <div class="chart-card">
-        <h3>Account Value</h3>
-        <div class="chart-canvas-wrap">
-          <canvas id="equityChart"></canvas>
+    <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Account Value</h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="equityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Profit & Loss</h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="pnlChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Deposits & Withdrawals</h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="depositsChart"></canvas>
+          </div>
         </div>
       </div>
 
-      <div class="chart-card">
-        <h3>Profit & Loss</h3>
-        <div class="chart-canvas-wrap">
-          <canvas id="pnlChart"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <h3>Deposits & Withdrawals</h3>
-        <div class="chart-canvas-wrap">
-          <canvas id="depositsChart"></canvas>
-        </div>
-      </div>
+      <div class="chart-loading" id="portfolioLoading">Loading performance data…</div>
     </div>
-
-    <div class="chart-loading" id="portfolioLoading">Loading performance data…</div>
     <div class="error" id="portfolioError"></div>
   </section>
 
@@ -1596,6 +1642,7 @@
 
   const portfolioErrorEl = document.getElementById("portfolioError");
   const portfolioLoadingEl = document.getElementById("portfolioLoading");
+  const portfolioLoadingWrapEl = document.getElementById("portfolioLoadingWrap");
   const rangeButtons = document.querySelectorAll(".chart-range-btn");
   const exportExcelBtn = document.getElementById("exportExcelBtn");
 
@@ -3271,8 +3318,8 @@
       historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
     }
 
-    positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted desktop-only'>Loading…</td><td colspan='4' class='muted mobile-only'>Loading…</td></tr>";
-    marginSummaryEl.innerHTML = "";
+    positionsBodyEl.innerHTML = "<tr class='loading-row'><td colspan='6' class='muted desktop-only'>Loading…</td><td colspan='4' class='muted mobile-only'>Loading…</td></tr>";
+    marginSummaryEl.innerHTML = "<span class='muted'>Loading…</span>";
 
     refreshBreakdownIfOpen();
   }
@@ -3408,10 +3455,19 @@
     return /^0x[a-fA-F0-9]{40}$/.test(addr);
   }
 
+  function setPortfolioLoadingState(isLoading, message) {
+    if (portfolioLoadingWrapEl) {
+      portfolioLoadingWrapEl.classList.toggle("loading", Boolean(isLoading));
+    }
+    if (portfolioLoadingEl) {
+      portfolioLoadingEl.textContent = message || "";
+    }
+  }
+
   function resetPortfolioSection() {
     portfolioData = null;
     portfolioErrorEl.textContent = "";
-    portfolioLoadingEl.textContent = "Loading performance data…";
+    setPortfolioLoadingState(true, "Loading performance data…");
     if (portfolioCharts.equity) {
       portfolioCharts.equity.destroy();
       portfolioCharts.pnl.destroy();
@@ -3708,12 +3764,12 @@
   function initPortfolioCharts(rangeKey) {
     const view = getPortfolioView(rangeKey);
     if (!view) {
-      portfolioLoadingEl.textContent = "";
+      setPortfolioLoadingState(false, "");
       portfolioErrorEl.textContent = "No performance data available for this wallet.";
       return;
     }
 
-    portfolioLoadingEl.textContent = "";
+    setPortfolioLoadingState(false, "");
     const labels = buildLabels(view.times, rangeKey);
 
     const colors = {
@@ -3777,12 +3833,12 @@
   async function loadPortfolio(wallet) {
     try {
       portfolioErrorEl.textContent = "";
-      portfolioLoadingEl.textContent = "Loading performance data…";
+      setPortfolioLoadingState(true, "Loading performance data…");
       portfolioData = await fetchPortfolio(wallet);
       initPortfolioCharts(currentRangeKey);
     } catch (err) {
       console.error("Portfolio error", err);
-      portfolioLoadingEl.textContent = "";
+      setPortfolioLoadingState(false, "");
       portfolioErrorEl.textContent = "Failed to load performance data: " + (err?.message || err);
     }
   }
