@@ -754,6 +754,29 @@
     #leaderboard table {
       font-size: 0.82rem;
     }
+    #leaderboard .leaderboard-table-wrap {
+      position: relative;
+    }
+    #leaderboard .leaderboard-table-wrap.loading {
+      --pulse-size: 220px;
+      background-image: url("images/pulse.gif");
+      background-repeat: no-repeat;
+      background-position: center 45%;
+      background-size: var(--pulse-size) auto;
+    }
+    #leaderboard .loading-overlay {
+      position: absolute;
+      left: 50%;
+      top: calc(45% + (var(--pulse-size) * 0.35));
+      transform: translate(-50%, -50%);
+      color: var(--muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+      display: none;
+    }
+    #leaderboard .leaderboard-table-wrap.loading .loading-overlay {
+      display: block;
+    }
 
     #team {
       background: transparent;
@@ -1543,8 +1566,9 @@
           Live snapshot of the top wallets, provided by ASXN. Click a row to open the tracker for that wallet.
         </div>
 
-        <div class="leaderboard-table-wrap"
+        <div class="leaderboard-table-wrap loading" id="leaderboardPreviewWrap"
           style="max-height: 720px; overflow: hidden; border-radius: .75rem; border: 1px solid var(--border);">
+          <div class="loading-overlay">Loading…</div>
           <table>
             <thead>
               <tr>
@@ -1557,9 +1581,16 @@
               </tr>
             </thead>
             <tbody id="leaderboardPreviewBody">
-              <tr>
-                <td colspan="6" class="muted">Loading…</td>
-              </tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
             </tbody>
             <tfoot>
               <tr class="leaderboard-footer-row">
@@ -1940,6 +1971,7 @@
     // Leaderboard preview (first entries from leaderboard.html)
     function initLeaderboardPreview() {
       const tbody = document.getElementById("leaderboardPreviewBody");
+      const tableWrap = document.getElementById("leaderboardPreviewWrap");
       if (!tbody) return;
 
       const LEADERBOARD_URL = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard";
@@ -1948,7 +1980,18 @@
       const PREVIEW_WINDOW = "allTime";
 
       const setStatus = (msg) => {
+        if (tableWrap) tableWrap.classList.remove("loading");
         tbody.innerHTML = `<tr><td colspan="6" class="muted">${msg}</td></tr>`;
+      };
+      const renderLoadingRows = (count = 10) => {
+        const rows = Array.from({ length: count }, () => (
+          `<tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>`
+        )).join("");
+        tbody.innerHTML = rows;
+      };
+      const setLoadingState = (isLoading) => {
+        if (tableWrap) tableWrap.classList.toggle("loading", isLoading);
+        if (isLoading) renderLoadingRows();
       };
 
       const fmtMoney = (v, decimals = 2) => {
@@ -2047,7 +2090,7 @@
       };
 
       const loadLeaderboardPreview = async () => {
-        setStatus("Loading…");
+        setLoadingState(true);
         try {
           const res = await fetch(LEADERBOARD_URL, { cache: "no-store" });
           const rawText = await res.text();
@@ -2066,6 +2109,7 @@
           if (!rawRows) throw new Error("Unexpected leaderboard response.");
 
           const normalized = normalize(rawRows).slice(0, PREVIEW_LIMIT);
+          setLoadingState(false);
           render(normalized);
         } catch (e) {
           console.error("Leaderboard preview failed:", e);
