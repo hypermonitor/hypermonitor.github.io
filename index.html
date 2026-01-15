@@ -1424,7 +1424,7 @@
           <div class="feature-card is-active">
             <div class="feature-card-content">
               <h3>Discover</h3>
-              <p>Identify wallets using objective filters and proprietary metrics. Find well-performing traders on
+              <p>Identify wallets using objective filters and metrics. Find well-performing traders on
                 Hyperliquid.</p>
             </div>
             <div class="feature-card-image">
@@ -1477,8 +1477,9 @@
         padding: 1.75rem;
         display: flex;
         flex-direction: column;
-        transition: flex 0.4s ease, transform 0.3s ease;
+        transition: flex 0.75s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.35s ease;
         min-height: 450px;
+        height: 450px;
       }
 
       .feature-card.is-active {
@@ -1501,6 +1502,17 @@
         color: #888;
         line-height: 1.6;
         margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .feature-card:hover p,
+      .feature-card:focus-within p {
+        -webkit-line-clamp: unset;
+        overflow: visible;
       }
 
       .feature-card-image {
@@ -1563,6 +1575,7 @@
 
         .feature-card {
           min-height: auto;
+          height: auto;
         }
 
         .feature-card.is-active {
