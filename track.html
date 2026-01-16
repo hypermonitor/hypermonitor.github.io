@@ -1391,7 +1391,7 @@
         </div>
       </div>
 
-      <div class="chart-loading" id="portfolioLoading">Loading performance graphs…</div>
+      <div class="chart-loading" id="portfolioLoading">Loading performance data…</div>
     </div>
     <div class="error" id="portfolioError"></div>
   </section>
@@ -3467,7 +3467,7 @@
   function resetPortfolioSection() {
     portfolioData = null;
     portfolioErrorEl.textContent = "";
-    setPortfolioLoadingState(true, "Loading performance data…");
+    setPortfolioLoadingState(true, "Loading performance graphs…");
     if (portfolioCharts.equity) {
       portfolioCharts.equity.destroy();
       portfolioCharts.pnl.destroy();
@@ -3833,7 +3833,7 @@
   async function loadPortfolio(wallet) {
     try {
       portfolioErrorEl.textContent = "";
-      setPortfolioLoadingState(true, "Loading performance data…");
+      setPortfolioLoadingState(true, "Loading performance graphs…");
       portfolioData = await fetchPortfolio(wallet);
       initPortfolioCharts(currentRangeKey);
     } catch (err) {
