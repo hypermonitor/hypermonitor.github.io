@@ -43,10 +43,6 @@
       --border: rgba(255,255,255,0.08);
       --muted: rgba(245,245,255,0.62);
       --text-main: #f5f5ff;
-      --glass: rgba(10, 10, 12, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --accent-blue: #0070f3;
-      --accent-cyan: #00b4d8;
     }
 
     * { box-sizing: border-box; }
@@ -62,14 +58,14 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 1.5rem;
-      padding-bottom: 4rem;
     }
 
     header {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      column-gap: 1rem;
-      align-items: start;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
       margin-bottom: 1.5rem;
     }
 
@@ -107,7 +103,7 @@
     .wallet-controls {
       display: flex;
       flex-direction: column;
-      gap: .6rem;
+      gap: .35rem;
       max-width: 680px;
       width: 100%;
     }
@@ -136,104 +132,57 @@
     body.light a:hover { color: inherit; text-decoration: underline; }
 
     .wallet-input-row {
-      display: grid;
-      grid-template-columns: 1fr 110px auto;
-      column-gap: 0.5rem;
-      row-gap: 0.35rem;
-      align-items: stretch;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
       width: 100%;
+      flex-wrap: wrap;
     }
 
-    .wallet-inputs-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+    .wallet-input-row label {
+      font-size: .8rem;
       color: var(--muted);
       white-space: nowrap;
     }
 
     .wallet-input-row input {
-      padding: 0.55rem 0.75rem;
-      border-radius: 12px;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      flex: 1 1 340px;
+      padding: 0.35rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
       color: var(--text-main);
-      font-size: 0.82rem;
-      height: 38px;
+      font-size: 0.8rem;
       outline: none;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
     .wallet-input-row input:focus {
-      border-color: rgba(0, 112, 243, 0.7);
-      box-shadow: 0 0 0 1px rgba(0, 112, 243, 0.35);
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35);
     }
 
-    .wallet-weight-input {
-      width: 86px;
-      text-align: right;
-    }
-
-    .wallet-inputs {
-      display: grid;
-      gap: 0.5rem;
-    }
-
-    .wallet-actions {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: flex-start;
-      margin-top: 0.2rem;
-    }
-
-    .wallet-track-btn {
-      padding: 0.5rem 1rem;
+    .wallet-input-row button {
+      padding: 0.35rem 0.9rem;
       border-radius: 999px;
-      border: none;
-      background: linear-gradient(120deg, var(--accent-blue), var(--accent-cyan));
-      color: #f8fafc;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      flex: 0 0 auto;
-      box-shadow: 0 10px 20px rgba(0, 112, 243, 0.35);
-      height: 38px;
-    }
-
-    .wallet-track-btn:hover:not(:disabled) { filter: brightness(1.05); }
-    .wallet-track-btn:disabled { opacity: 0.5; cursor: default; }
-
-    .wallet-input-row .wallet-icon-btn {
-      padding: 0.35rem 0.65rem;
-      border-radius: 10px;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
-      color: #e2e8f0;
+      border: 1px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
       flex: 0 0 auto;
-      height: 38px;
     }
 
-    .wallet-input-row .wallet-icon-btn:hover { color: #fff; border-color: rgba(255,255,255,0.25); }
-
-    .wallet-input-row .wallet-remove-btn {
-      border-color: rgba(248, 113, 113, 0.4);
-      color: #fca5a5;
-      background: rgba(248, 113, 113, 0.12);
-    }
+    .wallet-input-row button:hover:not(:disabled) { filter: brightness(1.05); }
+    .wallet-input-row button:disabled { opacity: 0.5; cursor: default; }
 
     @media (max-width: 600px) {
-      header { grid-template-columns: 1fr; }
-      .wallet-input-row { grid-template-columns: 1fr; }
-      .wallet-input-row input { width: 100%; }
+      .wallet-input-row { flex-direction: column; align-items: stretch; }
+      .wallet-input-row input { flex: 1 1 auto; width: 100%; }
       .wallet-input-row button { width: 100%; }
-      .wallet-actions { flex-direction: column; align-items: stretch; }
-      .wallet-weight-input { width: 100%; text-align: left; }
-      .header-right { align-items: flex-end; }
+      .header-right { width: 100%; align-items: flex-end; }
       .header-right-top { width: 100%; justify-content: flex-end; }
     }
 
@@ -351,8 +300,6 @@
       flex-direction: column;
       align-items: flex-end;
       gap: 0.25rem;
-      justify-self: end;
-      align-self: start;
     }
 
     .header-right-top {
@@ -466,12 +413,11 @@
 
     .card {
       background: var(--card-bg);
-      border: 1px solid rgba(148, 163, 184, 0.12);
+      border: 0.1px solid var(--border);
       border-radius: 10px;
       padding: 1rem;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
     }
 
     .card::before {
@@ -530,32 +476,6 @@
 
     .kv-label { color: var(--muted); }
     .kv-value { text-align: right; }
-
-    .overview-stack {
-      display: grid;
-      gap: 0.7rem;
-    }
-
-    .overview-item {
-      border: 1px solid var(--glass-border);
-      border-radius: 14px;
-      padding: 0.75rem 0.8rem;
-      background: rgba(10, 10, 12, 0.55);
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
-    }
-
-    .overview-wallet {
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.4rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
 
     .asset-cell {
       display: inline-flex;
@@ -938,18 +858,6 @@
       box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
     }
 
-    body.light .wallet-input-row .wallet-icon-btn {
-      background: #ffffff;
-      border-color: #d1d5db;
-      color: #475569;
-    }
-
-    body.light .wallet-input-row .wallet-remove-btn {
-      border-color: #fecaca;
-      color: #dc2626;
-      background: #fff5f5;
-    }
-
     body.light .status-pill {
       background: #ffffff;
       border-color: #e5e7eb;
@@ -963,8 +871,6 @@
       border: 1px solid #e5e7eb;
     }
 
-    body.light .card { box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08); }
-
     body.light .card h2 span.badge {
       border-color: #e5e7eb;
       color: #6b7280;
@@ -972,8 +878,6 @@
 
     body.light .kv-label { color: #6b7280; }
     body.light .muted { color: #6b7280; }
-    body.light .overview-item { background: #f8fafc; border-color: #e5e7eb; box-shadow: none; }
-    body.light .wallet-tag { border-color: #e5e7eb; color: #6b7280; }
 
     body.light table { color: #0f172a; }
     body.light thead { background: #f9fafb; }
@@ -1002,7 +906,6 @@
     }
 
     body.light .chart-loading { color: #6b7280; }
-
 
     .linkedin-badge {
       position: relative;
@@ -1326,188 +1229,6 @@
       white-space: normal;
       word-break: break-word;
     }
-
-    .price-footer {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 50;
-      background: rgba(10, 10, 12, 0.9);
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .price-footer-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0.45rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      flex-wrap: nowrap;
-    }
-
-    .price-logo {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      flex: 0 0 auto;
-    }
-
-    .price-hint {
-      font-size: 0.7rem;
-      color: var(--muted);
-      letter-spacing: 0.02em;
-      margin-right: 0.4rem;
-      flex: 0 0 auto;
-    }
-
-    .price-ticker {
-      flex: 1 1 auto;
-      overflow: hidden;
-      min-width: 0;
-    }
-
-    .price-track {
-      display: inline-flex;
-      align-items: center;
-      gap: 1.2rem;
-      white-space: nowrap;
-    }
-
-    .price-list {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-    }
-
-    .price-list.clone {
-      pointer-events: none;
-      display: none;
-    }
-
-    .price-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.78rem;
-      color: var(--text-main);
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      cursor: grab;
-    }
-
-    .price-item.dragging {
-      opacity: 0.5;
-      cursor: grabbing;
-    }
-
-    .price-item img,
-    .price-item .coinIcon {
-      width: 16px;
-      height: 16px;
-      border-radius: 999px;
-      object-fit: contain;
-      background: rgba(255, 255, 255, 0.06);
-      padding: 2px;
-    }
-
-    .price-item .coin-price {
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      font-variant-numeric: tabular-nums;
-      display: inline-block;
-      min-width: 6ch;
-      text-align: right;
-    }
-
-    .price-footer.rolling .price-list {
-      flex-wrap: nowrap;
-    }
-
-    .price-footer.rolling .price-list.clone {
-      display: inline-flex;
-    }
-
-    .price-footer.rolling .price-track {
-      animation: priceScroll 24s linear infinite;
-    }
-
-    @keyframes priceScroll {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
-    }
-
-    .price-controls {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-left: auto;
-    }
-
-    .price-input {
-      padding: 0.3rem 0.5rem;
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: rgba(10, 10, 12, 0.35);
-      color: var(--text-main);
-      font-size: 0.72rem;
-      outline: none;
-      width: 90px;
-      text-transform: uppercase;
-    }
-
-    .price-add-btn {
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: rgba(148, 163, 184, 0.12);
-      color: var(--text-main);
-      padding: 0.25rem 0.5rem;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      cursor: pointer;
-    }
-
-    .price-add-btn:hover { filter: brightness(1.1); }
-
-    body.light .price-footer {
-      background: rgba(255, 255, 255, 0.9);
-      border-top-color: #e5e7eb;
-      box-shadow: 0 -12px 24px rgba(15, 23, 42, 0.08);
-    }
-
-    body.light .price-item {
-      color: #0f172a;
-    }
-
-    body.light .price-input {
-      background: #ffffff;
-      border-color: #e5e7eb;
-      color: #0f172a;
-    }
-    body.light .price-add-btn {
-      border-color: #e5e7eb;
-      background: #f8fafc;
-      color: #0f172a;
-    }
-
-    .wallet-tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.12rem 0.4rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      color: var(--muted);
-      font-size: 0.55rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      background: rgba(148, 163, 184, 0.12);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      margin-left: 0.35rem;
-      white-space: nowrap;
-    }
   </style>
 </head>
 
@@ -1522,17 +1243,11 @@
       <div class="tagline">
         Track any Hyperliquid wallet. No wallet connection required.
       </div>
-      <div class="wallet-inputs-label">Wallet addresses</div>
-      <div class="wallet-inputs" id="walletInputs">
-        <div class="wallet-input-row" data-index="0">
-          <input id="walletInput0" class="wallet-input" type="text" placeholder="0x..." autocomplete="off" aria-label="Wallet address" />
-          <input id="walletWeight0" class="wallet-input wallet-weight-input" type="number" min="0" step="0.1" placeholder="Weight %" aria-label="Wallet weight percent" />
-          <button id="addWalletBtn" class="wallet-icon-btn" type="button" aria-label="Add wallet">+</button>
-        </div>
-      </div>
-      <div class="wallet-actions">
-        <button id="trackBtn" class="wallet-track-btn" aria-label="Track wallets">
-          <span class="sr-only">Track wallets</span>
+      <div class="wallet-input-row">
+        <label for="walletInput">Wallet address:</label>
+        <input id="walletInput" type="text" placeholder="0x..." autocomplete="off" />
+        <button id="trackBtn" aria-label="Track wallet">
+          <span class="sr-only">Track</span>
           ⏎
         </button>
       </div>
@@ -1579,7 +1294,7 @@
   <div class="grid">
     <section class="card">
       <h2>Account Overview</h2>
-      <div id="marginSummary"><span class="muted">Loading…</span></div>
+      <div id="marginSummary" class="kv-list"><span class="muted">Loading…</span></div>
       <div class="error" id="snapshotError"></div>
     </section>
 
@@ -1869,23 +1584,6 @@
   </footer>
 </div>
 
-<div class="price-footer" aria-label="Live prices">
-  <div class="price-footer-inner" id="priceFooter">
-    <img class="price-logo" src="images/logo.png" alt="Hypermonitor" />
-    <!-- <span class="price-hint">Live prices</span> -->
-    <div class="price-ticker" id="priceTicker">
-      <div class="price-track" id="priceTrack">
-        <div class="price-list" id="priceList"></div>
-        <div class="price-list clone" id="priceListClone" aria-hidden="true"></div>
-      </div>
-    </div>
-    <div class="price-controls">
-      <input id="priceAddInput" class="price-input" type="text" placeholder="Add coin" autocomplete="off" />
-      <button id="priceAddBtn" class="price-add-btn" type="button">Add</button>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="module">
@@ -1896,8 +1594,7 @@
   const MAX_FILL_ROWS = 100;
   const PORTFOLIO_API_URL = "https://api.hyperliquid.xyz/info";
 
-  const walletInputsEl = document.getElementById("walletInputs");
-  const addWalletBtnEl = document.getElementById("addWalletBtn");
+  const walletInputEl = document.getElementById("walletInput");
   const trackBtnEl = document.getElementById("trackBtn");
 
   const statusDotEl = document.getElementById("statusDot");
@@ -1916,14 +1613,6 @@
   const portfolioDoughnutCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("portfolioDoughnut"));
   const positionsValueStatEl = document.getElementById("positionsValueStat");
   const withdrawableValueStatEl = document.getElementById("withdrawableValueStat");
-  const priceFooterEl = document.getElementById("priceFooter");
-  const priceFooterWrapEl = document.querySelector(".price-footer");
-  const priceTickerEl = document.getElementById("priceTicker");
-  const priceTrackEl = document.getElementById("priceTrack");
-  const priceListEl = document.getElementById("priceList");
-  const priceListCloneEl = document.getElementById("priceListClone");
-  const priceAddInputEl = document.getElementById("priceAddInput");
-  const priceAddBtnEl = document.getElementById("priceAddBtn");
 
   const openOrdersBodyEl = document.getElementById("openOrdersBody");
   const openOrdersCountEl = document.getElementById("openOrdersCount");
@@ -1972,108 +1661,8 @@
   let spotMetaPromise = null;
   let logoRetryTimer = null;
   let logoRefreshTimer = null;
-  const FOOTER_COINS_KEY = "hypermonitor-footer-coins";
-  const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
-  const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
-  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE"];
-  let trackedFooterCoins = [...DEFAULT_FOOTER_COINS];
-  const coinNameCache = new Map();
-  const coinColorCache = new Map();
-  const coinColorPending = new Set();
-  const coinPriceDecimals = new Map();
-  const HYPERLIQUID_TICKERS = new Set(
-    [
-      "0G", "2Z", "AAVE", "ACE", "ADA", "AERO", "AI", "AI16Z", "AIXBT", "ALGO", "ALT", "ANIME", "APE", "APEX",
-      "APT", "AR", "ARB", "ARK", "ASTER", "ATOM", "AVAX", "AVNT", "AXS", "BABY", "BADGER", "BANANA", "BCH",
-      "BERA", "BIGTIME", "BIO", "BLAST", "BLUR", "BLZ", "BNB", "BNT", "BOME", "BRETT", "BSV", "BTC", "CAKE",
-      "CANTO", "CATI", "CC", "CELO", "CFX", "CHILLGUY", "COMP", "CRV", "CYBER", "DASH", "DOGE", "DOOD", "DOT",
-      "DYDX", "DYM", "EIGEN", "ENA", "ENS", "ETC", "ETH", "ETHFI", "FARTCOIN", "FET", "FIL", "FOGO", "FRIEND",
-      "FTM", "FTT", "FXS", "GALA", "GAS", "GMT", "GMX", "GOAT", "GRASS", "GRIFFAIN", "HBAR", "HEMI", "HMSTR",
-      "HPOS", "HYPE", "HYPER", "ICP", "ILV", "IMX", "INIT", "INJ", "IO", "IOTA", "IP", "JELLY", "JTO", "JUP",
-      "KAITO", "KAS", "LAUNCHCOIN", "LAYER", "LDO", "LINEA", "LINK", "LISTA", "LIT", "LOOM", "LTC", "MANTA",
-      "MATIC", "MAV", "MAVIA", "ME", "MEGA", "MELANIA", "MEME", "MERL", "MET", "MEW", "MINA", "MKR", "MNT",
-      "MON", "MOODENG", "MORPHO", "MOVE", "MYRO", "NEAR", "NEIROETH", "NEO", "NFTI", "NIL", "NOT", "NTRN",
-      "NXPC", "OGN", "OM", "OMNI", "ONDO", "OP", "ORBS", "ORDI", "OX", "PANDORA", "PAXG", "PENDLE", "PENGU",
-      "PEOPLE", "PIXEL", "PNUT", "POL", "POLYX", "POPCAT", "PROMPT", "PROVE", "PUMP", "PURR", "PYTH", "RDNT",
-      "RENDER", "REQ", "RESOLV", "REZ", "RLB", "RNDR", "RSR", "RUNE", "S", "SAGA", "SAND", "SCR", "SEI", "SHIA",
-      "SKY", "SNX", "SOL", "SOPH", "SPX", "STABLE", "STBL", "STG", "STRAX", "STRK", "STX", "SUI", "SUPER",
-      "SUSHI", "SYRUP", "TAO", "TIA", "TNSR", "TON", "TRB", "TRUMP", "TRX", "TST", "TURBO", "UMA", "UNI",
-      "UNIBOT", "USTC", "USUAL", "VINE", "VIRTUAL", "VVV", "W", "WCT", "WIF", "WLD", "WLFI", "XAI", "XLM",
-      "XMR", "XPL", "XRP", "YGG", "YZY", "ZEC", "ZEN", "ZEREBRO", "ZETA", "ZK", "ZORA", "ZRO", "KBONK",
-      "KDOGS", "KFLOKI", "KLUNC", "KNEIRO", "KPEPE", "KSHIB"
-    ].map((t) => t.toUpperCase())
-  );
 
   document.getElementById("year").textContent = new Date().getFullYear();
-
-  function loadFooterCoins() {
-    try {
-      const raw = localStorage.getItem(FOOTER_COINS_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length) {
-        trackedFooterCoins = parsed.map((c) => String(c).toUpperCase()).filter(Boolean);
-      }
-    } catch (e) {}
-  }
-
-  function saveFooterCoins() {
-    try {
-      localStorage.setItem(FOOTER_COINS_KEY, JSON.stringify(trackedFooterCoins));
-    } catch (e) {}
-  }
-
-  function loadCoinNameCache() {
-    try {
-      const raw = localStorage.getItem(COIN_NAME_CACHE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return;
-      Object.entries(parsed).forEach(([name, symbol]) => {
-        if (!name || !symbol) return;
-        coinNameCache.set(String(name), String(symbol));
-      });
-    } catch (e) {}
-  }
-
-  function saveCoinNameCache() {
-    try {
-      const obj = {};
-      coinNameCache.forEach((value, key) => {
-        obj[key] = value;
-      });
-      localStorage.setItem(COIN_NAME_CACHE_KEY, JSON.stringify(obj));
-    } catch (e) {}
-  }
-
-  function loadCoinColorCache() {
-    try {
-      const raw = localStorage.getItem(COIN_COLOR_CACHE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return;
-      Object.entries(parsed).forEach(([symbol, color]) => {
-        if (!symbol || !color) return;
-        coinColorCache.set(String(symbol).toUpperCase(), String(color));
-      });
-    } catch (e) {}
-  }
-
-  function saveCoinColorCache() {
-    try {
-      const obj = {};
-      coinColorCache.forEach((value, key) => {
-        obj[key] = value;
-      });
-      localStorage.setItem(COIN_COLOR_CACHE_KEY, JSON.stringify(obj));
-    } catch (e) {}
-  }
-
-  function formatWalletLabel(wallet) {
-    const w = String(wallet || "");
-    if (w.length <= 12) return w;
-    return `${w.slice(0, 6)}…${w.slice(-4)}`;
-  }
 
   window.__logoOk = (rawKey, imgEl) => {
     const entry = logoCache.get(rawKey);
@@ -2109,189 +1698,33 @@
     } catch {}
   };
 
-  // === URL + LAST WALLET(S) (localStorage) helpers ===
+  // === URL + LAST WALLET (localStorage) helpers ===
   const LAST_WALLET_KEY = "hypermonitor-last-wallet";
-  const LAST_WALLETS_KEY = "hypermonitor-last-wallets";
-  const WALLET_WEIGHTS_KEY = "hypermonitor-wallet-weights";
 
-  function normalizeWalletInput(value) {
-    return (value || "").trim();
+  function saveLastWallet(wallet) {
+    try { localStorage.setItem(LAST_WALLET_KEY, wallet); } catch (e) {}
   }
 
-  function normalizeWalletKey(value) {
-    return normalizeWalletInput(value).toLowerCase();
+  function getLastWallet() {
+    try { return (localStorage.getItem(LAST_WALLET_KEY) || "").trim(); } catch (e) { return ""; }
   }
 
-  function uniqueWallets(wallets) {
-    const deduped = [];
-    const seen = new Set();
-    wallets.forEach((w) => {
-      const norm = w.toLowerCase();
-      if (!norm || seen.has(norm)) return;
-      seen.add(norm);
-      deduped.push(w);
-    });
-    return deduped;
-  }
-
-  function saveLastWallets(wallets) {
-    try {
-      localStorage.setItem(LAST_WALLETS_KEY, JSON.stringify(wallets));
-      if (wallets[0]) localStorage.setItem(LAST_WALLET_KEY, wallets[0]);
-    } catch (e) {}
-  }
-
-  function getLastWallets() {
-    try {
-      const raw = localStorage.getItem(LAST_WALLETS_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed.map(normalizeWalletInput).filter(Boolean);
-      }
-    } catch (e) {}
-    try {
-      const single = (localStorage.getItem(LAST_WALLET_KEY) || "").trim();
-      return single ? [single] : [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function setWalletsInUrl(wallets, { replace = false } = {}) {
+  function setWalletInUrl(wallet, { replace = false } = {}) {
     try {
       const url = new URL(window.location.href);
-      if (wallets.length <= 1) {
-        url.searchParams.set("wallet", wallets[0] || "");
-        url.searchParams.delete("wallets");
-      } else {
-        url.searchParams.set("wallets", wallets.join(","));
-        url.searchParams.set("wallet", wallets[0] || "");
-      }
-      if (replace) history.replaceState({ wallets }, "", url.toString());
-      else history.pushState({ wallets }, "", url.toString());
+      url.searchParams.set("wallet", wallet);
+      if (replace) history.replaceState({ wallet }, "", url.toString());
+      else history.pushState({ wallet }, "", url.toString());
     } catch (e) {}
   }
 
-  function getWalletsFromUrl() {
+  function getWalletFromUrl() {
     try {
       const url = new URL(window.location.href);
-      const multi = (url.searchParams.get("wallets") || "").trim();
-      if (multi) {
-        return multi
-          .split(",")
-          .map((w) => w.trim())
-          .filter(Boolean);
-      }
-      const single = (url.searchParams.get("wallet") || "").trim();
-      return single ? [single] : [];
+      return (url.searchParams.get("wallet") || "").trim();
     } catch (e) {
-      return [];
+      return "";
     }
-  }
-
-  function getWalletInputEls() {
-    return Array.from(walletInputsEl?.querySelectorAll(".wallet-input:not(.wallet-weight-input)") || []);
-  }
-
-  function parseWeight(value) {
-    const n = Number(value);
-    return Number.isFinite(n) && n > 0 ? n : null;
-  }
-
-  function getWalletConfigFromInputs() {
-    const rows = Array.from(walletInputsEl?.querySelectorAll(".wallet-input-row") || []);
-    const values = [];
-    const weightsRaw = new Map();
-
-    rows.forEach((row) => {
-      const walletEl = row.querySelector(".wallet-input");
-      const weightEl = row.querySelector(".wallet-weight-input");
-      const wallet = normalizeWalletInput(walletEl?.value || "");
-      if (!wallet) return;
-      values.push(wallet);
-      const weight = parseWeight(weightEl?.value);
-      if (weight !== null) weightsRaw.set(normalizeWalletKey(wallet), weight);
-    });
-
-    const invalid = values.filter((w) => !isValidAddress(w));
-    if (invalid.length) {
-      snapshotErrorEl.textContent = "Please enter valid 0x wallet addresses (40 hex chars).";
-      return null;
-    }
-    const deduped = uniqueWallets(values);
-    if (!deduped.length) {
-      snapshotErrorEl.textContent = "Please enter at least one valid wallet address.";
-      return null;
-    }
-    snapshotErrorEl.textContent = "";
-    return { wallets: deduped, weightsRaw };
-  }
-
-  function saveWalletWeights(map) {
-    try {
-      const obj = {};
-      map.forEach((value, key) => {
-        obj[key] = value;
-      });
-      localStorage.setItem(WALLET_WEIGHTS_KEY, JSON.stringify(obj));
-    } catch (e) {}
-  }
-
-  function loadWalletWeights() {
-    try {
-      const raw = localStorage.getItem(WALLET_WEIGHTS_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return;
-      Object.entries(parsed).forEach(([wallet, weight]) => {
-        const n = Number(weight);
-        if (Number.isFinite(n) && n > 0) walletWeights.set(normalizeWalletKey(wallet), n);
-      });
-    } catch (e) {}
-  }
-
-  function addWalletInputRow(value = "") {
-    if (!walletInputsEl) return;
-    const idx = walletInputsEl.querySelectorAll(".wallet-input-row").length;
-    const row = document.createElement("div");
-    row.className = "wallet-input-row";
-    row.dataset.index = String(idx);
-
-    const inputId = `walletInput${idx}`;
-    row.innerHTML = `
-      <input id="${inputId}" class="wallet-input" type="text" placeholder="0x..." autocomplete="off" aria-label="Wallet address" />
-      <input class="wallet-input wallet-weight-input" type="number" min="0" step="0.1" placeholder="Weight %" aria-label="Wallet weight percent" />
-      <button class="wallet-icon-btn wallet-remove-btn" type="button" aria-label="Remove wallet">-</button>
-    `;
-    walletInputsEl.appendChild(row);
-    const inputEl = row.querySelector("input");
-    if (inputEl) inputEl.value = value;
-  }
-
-  function setWalletInputs(wallets) {
-    if (!walletInputsEl) return;
-    const rows = Array.from(walletInputsEl.querySelectorAll(".wallet-input-row"));
-    rows.slice(1).forEach((row) => row.remove());
-
-    const primaryInput = walletInputsEl.querySelector(".wallet-input");
-    if (primaryInput) primaryInput.value = wallets[0] || "";
-
-    (wallets || []).slice(1).forEach((wallet) => addWalletInputRow(wallet));
-
-    const primaryWeight = walletInputsEl.querySelector(".wallet-weight-input");
-    if (primaryWeight) {
-      const weight = walletWeights.get(normalizeWalletKey(wallets[0] || ""));
-      primaryWeight.value = weight ? String(weight) : "";
-    }
-
-    const extraRows = Array.from(walletInputsEl.querySelectorAll(".wallet-input-row")).slice(1);
-    extraRows.forEach((row) => {
-      const walletEl = row.querySelector(".wallet-input");
-      const weightEl = row.querySelector(".wallet-weight-input");
-      const wallet = normalizeWalletInput(walletEl?.value || "");
-      const weight = walletWeights.get(normalizeWalletKey(wallet));
-      if (weightEl) weightEl.value = weight ? String(weight) : "";
-    });
   }
 
   async function getPerpDexNames() {
@@ -2346,11 +1779,7 @@
   }
 
   // === STATE ===
-  let currentWallets = [DEFAULT_WALLET];
-  let primaryWallet = DEFAULT_WALLET;
-  const walletSnapshots = new Map();
-  const walletTotals = new Map();
-  const walletPositions = new Map();
+  let currentWallet = DEFAULT_WALLET;
   const openOrders = new Map();
   const canceledOrders = [];
   const fills = [];
@@ -2362,23 +1791,23 @@
 
   let infoClient = null;
   let subsClient = null;
-  const orderUpdatesSubs = new Map();
-  const userEventsSubs = new Map();
+  let orderUpdatesSub = null;
+  let userEventsSub = null;
 
   let currentAssetPositions = [];
   const liveMids = new Map();
   let allMidsSub = null;
 
+  let snapshotMarginSummary = null;
+  let snapshotWithdrawable = null;
+  let snapshotUpnlTotal = 0;
   let lastComputedUpnlTotal = 0;
   let lastComputedTotalNotional = 0;
 
-  const portfolioDataByWallet = new Map();
+  let portfolioData = null;
   let currentRangeKey = "allTime";
   const portfolioCharts = { equity: null, pnl: null, deposits: null };
   const portfolioBreakdownChart = { chart: null };
-  const WALLET_COLOR_PALETTE = ["#38bdf8", "#f59e0b", "#f472b6", "#22d3ee", "#a78bfa", "#34d399", "#f97316", "#60a5fa"];
-  const walletColorMap = new Map();
-  const walletWeights = new Map();
 
   function updateSpinnerForTheme(theme) {
     if (!statusSpinnerEl) return;
@@ -2448,18 +1877,6 @@
     if (Number.isNaN(n)) return String(v);
     const formatted = n.toLocaleString(undefined, {
       maximumFractionDigits: 8,
-      useGrouping: true,
-    });
-    return `$${formatted}`;
-  }
-
-  function fmtPriceFixed(v, decimals) {
-    if (v === null || v === undefined) return "";
-    const n = Number(v);
-    if (Number.isNaN(n)) return String(v);
-    const formatted = n.toLocaleString(undefined, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
       useGrouping: true,
     });
     return `$${formatted}`;
@@ -2620,13 +2037,6 @@
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&apos;");
   }
 
-  function walletTagHtml(wallet) {
-    if (!wallet || currentWallets.length <= 1) return "";
-    const safe = xmlEscape(wallet);
-    const label = xmlEscape(formatWalletLabel(wallet));
-    return `<span class="wallet-tag" title="${safe}">${label}</span>`;
-  }
-
   function getIconCandidates(rawName, cleanName) {
     const candidates = [];
     if (rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
@@ -2729,11 +2139,11 @@
     return { dex: "", base: s };
   }
 
-  function coinCellHtml(coin, wallet) {
+  function coinCellHtml(coin) {
     const c = coin ?? "";
     const { label, iconKey, isSpot } = resolveSpotDisplay(c);
     const spotTagHtml = isSpot ? `<span class="dex-tag spot-tag">spot</span>` : "";
-    return `<span class="asset-cell">${coinIconHtml(iconKey, label)}<span>${label}</span>${spotTagHtml}${walletTagHtml(wallet)}</span>`;
+    return `<span class="asset-cell">${coinIconHtml(iconKey, label)}<span>${label}</span>${spotTagHtml}</span>`;
   }
 
   function normalizeCoin(coin) {
@@ -2749,453 +2159,6 @@
       if (Number.isFinite(px)) return px;
     }
     return undefined;
-  }
-
-  async function extractDominantColorFromLogo(symbol) {
-    const upper = String(symbol || "").toUpperCase();
-    const iconUrl = `${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`;
-    try {
-      const res = await fetch(iconUrl);
-      if (!res.ok) return null;
-      const svgText = await res.text();
-      const matches = svgText.match(/#[0-9a-fA-F]{3,6}/g) || [];
-      if (!matches.length) return null;
-
-      const counts = new Map();
-      const normalizeHex = (hex) => {
-        const h = hex.replace("#", "");
-        if (h.length === 3) return `#${h[0]}${h[0]}${h[1]}${h[1]}${h[2]}${h[2]}`.toLowerCase();
-        return `#${h.padEnd(6, "0").slice(0, 6)}`.toLowerCase();
-      };
-      const brightness = (hex) => {
-        const h = normalizeHex(hex).slice(1);
-        const r = parseInt(h.slice(0, 2), 16);
-        const g = parseInt(h.slice(2, 4), 16);
-        const b = parseInt(h.slice(4, 6), 16);
-        return (r * 299 + g * 587 + b * 114) / 1000;
-      };
-
-      matches.forEach((hex) => {
-        const norm = normalizeHex(hex);
-        const b = brightness(norm);
-        if (b > 240 || b < 20) return;
-        counts.set(norm, (counts.get(norm) || 0) + 1);
-      });
-
-      let best = null;
-      let bestCount = 0;
-      counts.forEach((count, color) => {
-        if (count > bestCount) {
-          best = color;
-          bestCount = count;
-        }
-      });
-      return best;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function renderFooterPrices() {
-    if (!priceFooterEl) return;
-    if (!priceListEl || !priceListCloneEl) return;
-    const coinColors = {
-      "0G": "#b75fff",
-      "2Z": "#747474",
-      "AAVE": "#b6509e",
-      "ACE": "#aabbcc",
-      "ADA": "#0033ad",
-      "AERO": "#ebe8e1",
-      "AI": "#f45b5b",
-      "AI16Z": "#7c625f",
-      "AIXBT": "#ac77f0",
-      "ALGO": "#e5e7eb",
-      "ALT": "#8f96e8",
-      "ANIME": "#fdd274",
-      "APE": "#89d0ff",
-      "APEX": "#fed702",
-      "APT": "#e5e7eb",
-      "AR": "#222326",
-      "ARB": "#213147",
-      "ARK": "#f70000",
-      "ASTER": "#f4d4af",
-      "ATOM": "#b7b9c8",
-      "AVAX": "#e84142",
-      "AVNT": "#7e11fd",
-      "AXS": "#303030",
-      "BABY": "#7c8f86",
-      "BADGER": "#c1c1c3",
-      "BANANA": "#efcf8c",
-      "BCH": "#0ac18e",
-      "BERA": "#814625",
-      "BIGTIME": "#e5e7eb",
-      "BIO": "#324224",
-      "BLAST": "#fcfc03",
-      "BLUR": "#650901",
-      "BLZ": "#ff00ff",
-      "BNB": "#f0b90b",
-      "BNT": "#e5e7eb",
-      "BOME": "#50832b",
-      "BRETT": "#007c9e",
-      "BSV": "#eab300",
-      "BTC": "#f7931a",
-      "CAKE": "#633001",
-      "CANTO": "#303030",
-      "CATI": "#d4a44b",
-      "CC": "#f3ff97",
-      "CELO": "#fcff52",
-      "CFX": "#181818",
-      "CHILLGUY": "#435136",
-      "COMP": "#00d395",
-      "CRV": "#80ff77",
-      "CYBER": "#e5e7eb",
-      "DASH": "#303030",
-      "DOGE": "#cfb66c",
-      "DOOD": "#8c8c8c",
-      "DOT": "#e6007a",
-      "DYDX": "#6966ff",
-      "DYM": "#24201f",
-      "EIGEN": "#1a0c6d",
-      "ENA": "#3a3a3a",
-      "ENS": "#a0a8d4",
-      "ETC": "#3ab83a",
-      "ETH": "#8c8c8c",
-      "ETHFI": "#29bcfa",
-      "FARTCOIN": "#9b9b9b",
-      "FET": "#202944",
-      "FIL": "#0090ff",
-      "FOGO": "#303030",
-      "FRIEND": "#a3effd",
-      "FTM": "#1969ff",
-      "FTT": "#02a6c2",
-      "FXS": "#e5e7eb",
-      "GALA": "#e5e7eb",
-      "GAS": "#01e397",
-      "GMT": "#776942",
-      "GMX": "#03d1cf",
-      "GOAT": "#86958c",
-      "GRASS": "#acf601",
-      "GRIFFAIN": "#9ffa9f",
-      "HBAR": "#e5e7eb",
-      "HEMI": "#ff6a00",
-      "HMSTR": "#fea404",
-      "HPOS": "#bc1e2d",
-      "HYPE": "#97fce4",
-      "HYPER": "#dc6cc9",
-      "ICP": "#d74d59",
-      "ILV": "#500586",
-      "IMX": "#e5e7eb",
-      "INIT": "#898989",
-      "INJ": "#4d3dff",
-      "IO": "#e5e7eb",
-      "IOTA": "#e5e7eb",
-      "IP": "#ffe8ae",
-      "JELLY": "#514f4f",
-      "JTO": "#807f80",
-      "JUP": "#c7f284",
-      "KAITO": "#32ffdc",
-      "KAS": "#49eacb",
-      "LAUNCHCOIN": "#5ecc57",
-      "LAYER": "#2b6558",
-      "LDO": "#f89791",
-      "LINEA": "#61dfff",
-      "LINK": "#2a5ada",
-      "LISTA": "#201a8a",
-      "LIT": "#e5e7eb",
-      "LOOM": "#4bc0c8",
-      "LTC": "#345d9d",
-      "MANTA": "#29ccb9",
-      "MATIC": "#8247e5",
-      "MAV": "#780eff",
-      "MAVIA": "#1c54c2",
-      "ME": "#f30676",
-      "MEGA": "#19191a",
-      "MELANIA": "#939393",
-      "MEME": "#451834",
-      "MERL": "#2a2cbf",
-      "MET": "#f5bd00",
-      "MEW": "#ec1c24",
-      "MINA": "#2d2d2d",
-      "MKR": "#4fa89b",
-      "MNT": "#2ec1a1",
-      "MON": "#836ef9",
-      "MOODENG": "#1f5926",
-      "MORPHO": "#2470ff",
-      "MOVE": "#f1bb15",
-      "MYRO": "#303030",
-      "NEAR": "#e5e7eb",
-      "NEIROETH": "#b99f32",
-      "NEO": "#00e599",
-      "NFTI": "#29796e",
-      "NIL": "#e5e7eb",
-      "NOT": "#e5e7eb",
-      "NTRN": "#e5e7eb",
-      "NXPC": "#47f0c9",
-      "OGN": "#0074f0",
-      "OM": "#373535",
-      "OMNI": "#0564ff",
-      "ONDO": "#e5e7eb",
-      "OP": "#ff0420",
-      "ORBS": "#556195",
-      "ORDI": "#e5e7eb",
-      "OX": "#ffb7a5",
-      "PANDORA": "#9a9a9a",
-      "PAXG": "#ede70a",
-      "PENDLE": "#dedede",
-      "PENGU": "#575b5f",
-      "PEOPLE": "#303030",
-      "PIXEL": "#69bd00",
-      "PNUT": "#e1d2c8",
-      "POL": "#8247e5",
-      "POLYX": "#ff2e72",
-      "POPCAT": "#a49793",
-      "PROMPT": "#121b13",
-      "PROVE": "#fe11c5",
-      "PUMP": "#e8f2f1",
-      "PURR": "#88d4ee",
-      "PYTH": "#e5e7eb",
-      "RDNT": "#00ffaa",
-      "RENDER": "#cf1011",
-      "REQ": "#008c62",
-      "RESOLV": "#ffedd7",
-      "REZ": "#c4ff61",
-      "RLB": "#fea101",
-      "RNDR": "#cf1011",
-      "RSR": "#e5e7eb",
-      "RUNE": "#00ccff",
-      "S": "#e5e7eb",
-      "SAGA": "#e5e7eb",
-      "SAND": "#00adef",
-      "SCR": "#ebc28e",
-      "SEI": "#9d1f19",
-      "SHIA": "#361d0c",
-      "SKY": "#a273ff",
-      "SNX": "#00d1ff",
-      "SOL": "#00ffa3",
-      "SOPH": "#e5e7eb",
-      "SPX": "#d5a141",
-      "STABLE": "#e5e7eb",
-      "STBL": "#bb93e9",
-      "STG": "#a6a6a6",
-      "STRAX": "#21bbc0",
-      "STRK": "#ec796b",
-      "STX": "#5546ff",
-      "SUI": "#4ca3ff",
-      "SUPER": "#00eaea",
-      "SUSHI": "#03b8ff",
-      "SYRUP": "#fc784a",
-      "TAO": "#e5e7eb",
-      "TIA": "#7b2bf9",
-      "TNSR": "#404040",
-      "TON": "#0098ea",
-      "TRB": "#00ff8f",
-      "TRUMP": "#9a9a9a",
-      "TRX": "#ec0927",
-      "TST": "#eeb207",
-      "TURBO": "#cfab7f",
-      "UMA": "#ff4a4a",
-      "UNI": "#ff007a",
-      "UNIBOT": "#a13987",
-      "USTC": "#093dac",
-      "USUAL": "#e5e7eb",
-      "VINE": "#01bf8f",
-      "VIRTUAL": "#44bcc3",
-      "VVV": "#042d48",
-      "W": "#7168be",
-      "WCT": "#0c88f0",
-      "WIF": "#e5e7eb",
-      "WLD": "#e5e7eb",
-      "WLFI": "#eaac08",
-      "XAI": "#f30019",
-      "XLM": "#e5e7eb",
-      "XMR": "#f26822",
-      "XPL": "#e5e7eb",
-      "XRP": "#23292f",
-      "YGG": "#1d1f22",
-      "YZY": "#303030",
-      "ZEC": "#cf8724",
-      "ZEN": "#0e9de5",
-      "ZEREBRO": "#1b1b19",
-      "ZETA": "#005741",
-      "ZK": "#e5e7eb",
-      "ZORA": "#7f8ee9",
-      "ZRO": "#575757",
-      "KBONK": "#303030",
-      "KDOGS": "#303030",
-      "KFLOKI": "#303030",
-      "KLUNC": "#303030",
-      "KNEIRO": "#303030",
-      "KPEPE": "#303030",
-      "KSHIB": "#303030",
-    };
-
-    const existing = new Map(
-      Array.from(priceListEl.querySelectorAll(".price-item")).map((el) => [el.dataset.coin, el])
-    );
-    const desired = trackedFooterCoins.map((c) => c.toUpperCase());
-
-    existing.forEach((el, coin) => {
-      if (!desired.includes(coin)) el.remove();
-    });
-
-    desired.forEach((coin) => {
-      let item = existing.get(coin);
-      if (!item) {
-        item = document.createElement("span");
-        item.className = "price-item";
-        item.dataset.coin = coin;
-        item.setAttribute("draggable", "true");
-        item.innerHTML = `
-          ${coinIconHtml(coin, coin)}
-          <span class="coin-price">--</span>
-        `;
-        priceListEl.appendChild(item);
-      } else {
-        priceListEl.appendChild(item);
-      }
-    });
-
-    desired.forEach((coin) => {
-      const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
-      if (!item) return;
-      const priceEl = item.querySelector(".coin-price");
-      const price = getLivePriceForCoin(coin);
-      const color = coinColors[coin] || coinColorCache.get(coin) || "#e5e7eb";
-      if (priceEl) {
-        if (Number.isFinite(price)) {
-          let decimals = coinPriceDecimals.get(coin);
-          if (decimals === undefined) {
-            const abs = Math.abs(price);
-            if (abs >= 10000) decimals = 0;
-            else if (abs >= 1000) decimals = 1;
-            else if (abs >= 100) decimals = 2;
-            else if (abs >= 10) decimals = 3;
-            else if (abs >= 1) decimals = 4;
-            else if (abs >= 0.1) decimals = 5;
-            else if (abs >= 0.01) decimals = 6;
-            else decimals = 8;
-            coinPriceDecimals.set(coin, decimals);
-          }
-          priceEl.textContent = fmtPriceFixed(price, decimals);
-        } else {
-          priceEl.textContent = "--";
-        }
-        priceEl.style.color = color;
-      }
-    });
-
-    priceListCloneEl.innerHTML = priceListEl.innerHTML;
-    priceListCloneEl.querySelectorAll(".price-item").forEach((item) => {
-      item.removeAttribute("draggable");
-    });
-
-    requestAnimationFrame(updatePriceTickerRolling);
-
-    desired.forEach(async (coin) => {
-      if (coinColors[coin] || coinColorCache.has(coin) || coinColorPending.has(coin)) return;
-      coinColorPending.add(coin);
-      const color = await extractDominantColorFromLogo(coin);
-      coinColorPending.delete(coin);
-      if (!color) return;
-      coinColorCache.set(coin, color);
-      saveCoinColorCache();
-      const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
-      if (item) item.style.color = color;
-      const cloneItem = priceListCloneEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
-      if (cloneItem) cloneItem.style.color = color;
-    });
-  }
-
-  function updatePriceTickerRolling() {
-    if (!priceFooterWrapEl || !priceListEl || !priceTickerEl) return;
-    const items = priceListEl.querySelectorAll(".price-item");
-    if (!items.length) {
-      priceFooterWrapEl.classList.remove("rolling");
-      return;
-    }
-    const tops = new Set(Array.from(items).map((el) => el.offsetTop));
-    const isWrapped = tops.size > 1;
-    const isOverflow = priceListEl.scrollWidth > priceTickerEl.clientWidth + 4;
-    const forceRoll = items.length >= 10;
-    priceFooterWrapEl.classList.toggle("rolling", forceRoll || isWrapped || isOverflow);
-  }
-
-  async function resolveCoinSymbol(input) {
-    const cleaned = String(input || "").trim();
-    if (!cleaned) return null;
-    const lookup = cleaned.toLowerCase();
-    if (coinNameCache.has(lookup)) return coinNameCache.get(lookup);
-
-    const simple = lookup.replace(/[^a-z0-9]/g, "");
-    if (simple && simple === lookup && simple.length <= 6) {
-      return simple.toUpperCase();
-    }
-
-    try {
-      const res = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(cleaned)}`);
-      if (!res.ok) throw new Error("search failed");
-      const data = await res.json();
-      const first = data?.coins?.[0];
-      const symbol = first?.symbol ? String(first.symbol).toUpperCase() : null;
-      if (symbol) {
-        coinNameCache.set(lookup, symbol);
-        const name = first?.name ? String(first.name).toLowerCase() : "";
-        if (name) coinNameCache.set(name, symbol);
-        saveCoinNameCache();
-        return symbol;
-      }
-    } catch (e) {}
-
-    return cleaned.toUpperCase();
-  }
-
-  function getInputCandidateSymbol(input) {
-    const cleaned = String(input || "").trim();
-    if (!cleaned) return null;
-    const lookup = cleaned.toLowerCase();
-    if (coinNameCache.has(lookup)) return coinNameCache.get(lookup);
-    const simple = lookup.replace(/[^a-z0-9]/g, "");
-    if (simple && simple === lookup && simple.length <= 6) return simple.toUpperCase();
-    return cleaned.toUpperCase();
-  }
-
-  function updateFooterActionLabel() {
-    if (!priceAddBtnEl || !priceAddInputEl) return;
-    const candidate = getInputCandidateSymbol(priceAddInputEl.value);
-    if (candidate && trackedFooterCoins.includes(candidate.toUpperCase())) {
-      priceAddBtnEl.textContent = "Remove";
-    } else {
-      priceAddBtnEl.textContent = "Add";
-    }
-  }
-
-  async function addFooterCoin(raw) {
-    const symbol = await resolveCoinSymbol(raw);
-    if (!symbol) return;
-    const normalized = symbol.toUpperCase();
-    if (!HYPERLIQUID_TICKERS.has(normalized)) return;
-    if (trackedFooterCoins.includes(normalized)) return;
-    trackedFooterCoins.push(normalized);
-    saveFooterCoins();
-    renderFooterPrices();
-  }
-
-  function removeFooterCoin(symbol) {
-    trackedFooterCoins = trackedFooterCoins.filter((c) => c !== symbol);
-    saveFooterCoins();
-    renderFooterPrices();
-  }
-
-  async function toggleFooterCoin(raw) {
-    const symbol = await resolveCoinSymbol(raw);
-    if (!symbol) return;
-    const normalized = symbol.toUpperCase();
-    if (!HYPERLIQUID_TICKERS.has(normalized)) return;
-    if (trackedFooterCoins.includes(normalized)) {
-      removeFooterCoin(normalized);
-    } else {
-      addFooterCoin(normalized);
-    }
   }
 
   function getMarkPriceForCoin(coin) {
@@ -3226,16 +2189,12 @@
     return Number.isFinite(entryPx) ? entryPx : null;
   }
 
-  function getAllFillsForCoin(coin, wallet) {
+  function getAllFillsForCoin(coin) {
     const norm = normalizeCoin(coin);
     if (!norm) return [];
     const combined = [];
     const pushFrom = (arr) => {
       arr.forEach((f) => {
-        if (wallet) {
-          const fWallet = String(f?.wallet || "");
-          if (!fWallet || fWallet.toLowerCase() !== wallet.toLowerCase()) return;
-        }
         const resolved = resolveCoinName(f?.coin ?? f?.asset ?? "", f?.asset ?? f?.symbol ?? f?.sym);
         if (resolved) f.coin = resolved;
         const c = normalizeCoin(resolved);
@@ -3265,8 +2224,8 @@
     return unique.sort((a, b) => Number(a.time ?? a.timestamp ?? 0) - Number(b.time ?? b.timestamp ?? 0));
   }
 
-  function buildPositionFillDetails(coin, szi, markPx, wallet) {
-    const fillsForCoin = getAllFillsForCoin(coin, wallet);
+  function buildPositionFillDetails(coin, szi, markPx) {
+    const fillsForCoin = getAllFillsForCoin(coin);
     const rows = [];
     let netSize = 0;
     let totalUpnl = 0;
@@ -3351,17 +2310,12 @@
   }
 
   function getTotalPositionsValue() {
-    return Array.from(walletTotals.values()).reduce((sum, t) => {
-      const val = Number(t?.notionalTotal ?? 0);
-      return sum + (Number.isFinite(val) ? val : 0);
-    }, 0);
+    return Number.isFinite(lastComputedTotalNotional) ? lastComputedTotalNotional : 0;
   }
 
   function getWithdrawableAmount() {
-    return Array.from(walletSnapshots.values()).reduce((sum, snap) => {
-      const w = Number(snap?.withdrawable ?? 0);
-      return sum + (Number.isFinite(w) ? w : 0);
-    }, 0);
+    const w = Number(snapshotWithdrawable ?? 0);
+    return Number.isFinite(w) ? w : 0;
   }
 
   function computeTotal(order) {
@@ -3383,7 +2337,6 @@
 
     return currentAssetPositions.map((item) => {
       const p = item.position || {};
-      const wallet = item.wallet || primaryWallet;
       const coin = p.coin ?? "";
       const szi = Number(p.szi ?? 0);
       const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
@@ -3410,7 +2363,6 @@
       }
 
       return [
-        wallet,
         coin,
         dir,
         fmtSize(szi),
@@ -3421,96 +2373,52 @@
     });
   }
 
-  function renderMarginSummary(items) {
-    if (!Array.isArray(items) || items.length === 0) {
+  function renderMarginSummary(summary, withdrawable) {
+    if (!summary) {
       marginSummaryEl.innerHTML = "<span class='muted'>No margin summary.</span>";
       return;
     }
 
-    const weights = getNormalizedWeights(items.map((item) => item.wallet));
+    const rows = [
+      ["Account Value", fmtMoney(summary.accountValue)],
+      ["Notional Exposure", fmtMoney(summary.totalNtlPos)],
+      ["Collateral", fmtMoney(summary.totalRawUsd)],
+      ["Margin Used", fmtMoney(summary.totalMarginUsed)],
+      ["Withdrawable", fmtMoney(withdrawable)],
+    ];
 
-    marginSummaryEl.innerHTML = `
-      <div class="overview-stack">
-        ${items
-          .map((item, idx) => {
-            if (!item?.summary) {
-              return `
-                <div class="overview-item">
-                  <div class="overview-wallet" title="${xmlEscape(item.wallet || "")}">
-                    ${xmlEscape(formatWalletLabel(item.wallet || ""))}
-                    <span>${Math.round((weights[idx] || 0) * 100)}%</span>
-                  </div>
-                  <div class="muted">No margin summary.</div>
-                </div>
-              `;
-            }
-
-            const rows = [
-              ["Account Value", fmtMoney(item.summary.accountValue)],
-              ["Notional Exposure", fmtMoney(item.summary.totalNtlPos)],
-              ["Collateral", fmtMoney(item.summary.totalRawUsd)],
-              ["Margin Used", fmtMoney(item.summary.totalMarginUsed)],
-              ["Withdrawable", fmtMoney(item.withdrawable)],
-            ];
-
-            return `
-              <div class="overview-item">
-                <div class="overview-wallet" title="${xmlEscape(item.wallet || "")}">
-                  ${xmlEscape(formatWalletLabel(item.wallet || ""))}
-                  <span>${Math.round((weights[idx] || 0) * 100)}%</span>
-                </div>
-                <div class="kv-list">
-                  ${rows
-                    .map(
-                      ([label, value]) => `
-                        <div class="kv-label">${label}</div>
-                        <div class="kv-value money">${value}</div>
-                      `
-                    )
-                    .join("")}
-                </div>
-              </div>
-            `;
-          })
-          .join("")}
-      </div>
-    `;
+    marginSummaryEl.innerHTML = rows
+      .map(([label, value]) => `
+        <div class="kv-label">${label}</div>
+        <div class="kv-value money">${value}</div>
+      `)
+      .join("");
   }
 
   function recomputeAndRenderMarginSummary() {
-    if (!currentWallets.length) {
-      renderMarginSummary([]);
+    if (!snapshotMarginSummary) {
+      renderMarginSummary(null, snapshotWithdrawable);
       return;
     }
 
-    const items = currentWallets.map((wallet) => {
-      const snap = walletSnapshots.get(wallet) || {};
-      const totals = walletTotals.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
-      const base = snap.summary || null;
-      if (!base) {
-        return { wallet, summary: null, withdrawable: snap.withdrawable };
-      }
-      const snapshotAV = Number(base.accountValue ?? 0);
-      const deltaUpnl = (totals.upnlTotal ?? 0) - (snap.snapshotUpnlTotal ?? 0);
-      const liveAccountValue = snapshotAV + (Number.isNaN(deltaUpnl) ? 0 : deltaUpnl);
+    const base = snapshotMarginSummary;
+    const snapshotAV = Number(base.accountValue ?? 0);
+    const deltaUpnl = lastComputedUpnlTotal - snapshotUpnlTotal;
+    const liveAccountValue = snapshotAV + (Number.isNaN(deltaUpnl) ? 0 : deltaUpnl);
 
-      const summaryLive = {
-        ...base,
-        accountValue: liveAccountValue,
-        totalNtlPos: totals.notionalTotal || base.totalNtlPos,
-      };
+    const summaryLive = {
+      ...base,
+      accountValue: liveAccountValue,
+      totalNtlPos: lastComputedTotalNotional || base.totalNtlPos,
+    };
 
-      return { wallet, summary: summaryLive, withdrawable: snap.withdrawable };
-    });
-
-    renderMarginSummary(items);
+    renderMarginSummary(summaryLive, snapshotWithdrawable);
   }
 
   function renderPositions(assetPositions) {
     currentAssetPositions = Array.isArray(assetPositions) ? assetPositions : [];
     lastComputedUpnlTotal = 0;
     lastComputedTotalNotional = 0;
-    walletTotals.clear();
 
     if (!currentAssetPositions.length) {
       positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted desktop-only'>No open positions.</td></tr>";
@@ -3523,7 +2431,6 @@
       .map((item) => {
         const p = item.position;
         const coin = p.coin;
-        const wallet = item.wallet || primaryWallet;
         const { dex: coinDex, base: coinBase } = splitDexCoin(coin);
         const coinDisplayName = coinBase || coin;
         const { label: spotLabel, iconKey, isSpot } = resolveSpotDisplay(coinDisplayName);
@@ -3559,20 +2466,14 @@
         const notional = Math.abs(positionValue);
         if (!Number.isNaN(notional)) lastComputedTotalNotional += notional;
 
-        const totals = walletTotals.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
-        if (!Number.isNaN(upnl)) totals.upnlTotal += upnl;
-        if (!Number.isNaN(notional)) totals.notionalTotal += notional;
-        walletTotals.set(wallet, totals);
-
         const upnlFormatted = formatSignedDollarWithPlus(upnl);
         const formattedValue = formatSignedDollar(positionValue);
 
-        const positionKey = `${wallet}:${coin}`;
-        const isExpanded = expandedPositions.has(positionKey);
+        const isExpanded = expandedPositions.has(coin);
         let breakdownHtml = "";
         if (isExpanded) {
           const mark = getMarkPriceForCoin(coin);
-          const breakdown = buildPositionFillDetails(coin, szi, mark, wallet);
+          const breakdown = buildPositionFillDetails(coin, szi, mark);
           const rowsHtml = breakdown.rows
             .slice()
             .reverse()
@@ -3633,13 +2534,12 @@
         }
 
         return `
-        <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}" data-wallet="${wallet}">
+        <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}">
           <td>
             <div class="asset-cell">
               ${coinIconHtml(iconKey, spotLabel)}
               <span>${spotLabel}</span>
               ${spotTagHtml}
-              ${walletTagHtml(wallet)}
               ${coinDex ? `<span class="dex-tag">${coinDex}</span>` : ""}
               <span class="chevron" aria-hidden="true"></span>
             </div>
@@ -3679,44 +2579,24 @@
     }, 0);
   }
 
-  function setWalletPositions(wallet, positions) {
-    walletPositions.set(wallet, Array.isArray(positions) ? positions : []);
-    const combined = [];
-    walletPositions.forEach((vals) => {
-      if (Array.isArray(vals) && vals.length) combined.push(...vals);
-    });
-    renderPositions(combined);
-  }
-
   async function refreshPositionsAndMargin(wallet) {
     try {
       const clearing = await infoClient.clearinghouseState({ user: wallet });
       const { marginSummary, withdrawable, assetPositions } = clearing;
-      const mergedPositions = Array.isArray(assetPositions)
-        ? assetPositions.map((pos) => ({ ...pos, wallet }))
-        : [];
+      const mergedPositions = Array.isArray(assetPositions) ? [...assetPositions] : [];
 
-      walletSnapshots.set(wallet, {
-        summary: marginSummary || null,
-        withdrawable,
-        snapshotUpnlTotal: computeSnapshotUpnlTotal(mergedPositions),
-      });
+      snapshotMarginSummary = marginSummary || null;
+      snapshotWithdrawable = withdrawable;
+      snapshotUpnlTotal = computeSnapshotUpnlTotal(mergedPositions);
 
-      setWalletPositions(wallet, mergedPositions);
+      renderPositions(mergedPositions);
 
       // Fetch HIP-3/extra dex positions after main state
       fetchAdditionalDexPositions(wallet).then((extraPositions) => {
         if (!Array.isArray(extraPositions) || extraPositions.length === 0) return;
-        const combined = [
-          ...mergedPositions,
-          ...extraPositions.map((pos) => ({ ...pos, wallet })),
-        ];
-        walletSnapshots.set(wallet, {
-          summary: marginSummary || null,
-          withdrawable,
-          snapshotUpnlTotal: computeSnapshotUpnlTotal(combined),
-        });
-        setWalletPositions(wallet, combined);
+        const combined = [...mergedPositions, ...extraPositions];
+        snapshotUpnlTotal = computeSnapshotUpnlTotal(combined);
+        renderPositions(combined);
       });
     } catch (err) {
       console.error("Refresh positions error", err);
@@ -3725,7 +2605,7 @@
   }
 
   function renderOpenOrders() {
-    const values = Array.from(openOrders.values()).sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
+    const values = Array.from(openOrders.values()).sort((a, b) => (a.oid ?? 0) - (b.oid ?? 0));
     openOrdersCountEl.textContent = values.length.toString();
 
     const MIN_ROWS = 4;
@@ -3735,13 +2615,12 @@
       const created = fmtDateTime(order.timestamp);
       const side = order.side ?? "?";
       const coin = resolveCoinName(order.coin, order.asset);
-      const wallet = order.wallet || primaryWallet;
       const orderIdHtml = formatSpotIdHtml(order.oid);
       return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td class="money">${fmtSize(order.sz)}</td>
           <td class="money">${fmtLimitPrice(order.limitPx) ?? ""}</td>
@@ -3780,7 +2659,6 @@
       const canceledAtTime = fmtTimeOnly(o.statusTimestamp);
       const side = o.side ?? "?";
       const coin = resolveCoinName(o.coin, o.asset);
-      const wallet = o.wallet || primaryWallet;
       const orderIdHtml = formatSpotIdHtml(o.oid);
       return `
         <tr class="flash-cancel">
@@ -3790,7 +2668,7 @@
             <span class="mobile-only timestamp">${canceledAtTime}</span>
             <span class="desktop-only timestamp">${canceledAtTime}</span>
           </td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>  
           <td class="money">${fmtSize(o.sz)}</td>
           <td class="mobile-only money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
@@ -3814,7 +2692,6 @@
         const side = fill.side ?? "?";
         const orderIdHtml = formatSpotIdHtml(fill.oid);
         const coin = resolveCoinName(fill.coin, fill.asset ?? fill.symbol ?? fill.sym);
-        const wallet = fill.wallet || primaryWallet;
         return `
         <tr class="flash">
           <td class="desktop-only">${orderIdHtml}</td>
@@ -3823,7 +2700,7 @@
             <span class="desktop-only timestamp">${tTime}</span>
           </td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td class="money">${fmtSize(fill.sz)}</td>
           <td class="money">${fmtPrice(fill.px) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
@@ -3858,13 +2735,12 @@
         const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
         const orderIdHtml = formatSpotIdHtml(fill.oid ?? "");
         const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
-        const wallet = fill.wallet || primaryWallet;
         return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
           <td><span class="timestamp">${t}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
           <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
         </tr>
@@ -3895,7 +2771,6 @@
     const statusTimestamp = entry?.statusTimestamp ?? o.statusTimestamp ?? o.timestamp ?? null;
 
     return {
-      wallet: entry?.wallet ?? o.wallet ?? "",
       oid: pickOrderId(entry, o),
       coin: o.coin,
       side: o.side,
@@ -3913,11 +2788,10 @@
     if (!values.length) return [];
 
     return values
-      .sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0))
+      .sort((a, b) => (a.oid ?? 0) - (b.oid ?? 0))
       .map((order) => {
         const side = order.side ?? "?";
         return [
-          order.wallet || "",
           order.oid ?? "",
           fmtDateTime(order.timestamp),
           sideLabel(side),
@@ -3935,7 +2809,6 @@
       const o = normalizeHistoricalOrder(entry);
       const side = o.side ?? (o.isBuy ? "B" : "S") ?? "?";
       return [
-        o.wallet || "",
         o.oid ?? "",
         fmtDateTime(o.timestamp),
         sideLabel(side),
@@ -3953,7 +2826,6 @@
     return fills.map((fill) => {
       const side = fill.side ?? "?";
       return [
-        fill.wallet || "",
         fill.oid ?? "",
         fmtDateTime(fill.time ?? fill.timestamp),
         sideLabel(side),
@@ -3970,7 +2842,6 @@
     return historicalFills.map((fill) => {
       const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
       return [
-        fill.wallet || "",
         fill.oid ?? "",
         fmtDateTime(fill.time ?? fill.timestamp),
         sideLabel(side),
@@ -3983,39 +2854,22 @@
   }
 
   function buildPortfolioSummaryRows() {
-    if (!walletSnapshots.size) return [["Status", "Not loaded"]];
-
-    const totals = {
-      accountValue: 0,
-      totalNtlPos: 0,
-      totalRawUsd: 0,
-      totalMarginUsed: 0,
-      withdrawable: 0,
-    };
-
-    walletSnapshots.forEach((snap) => {
-      const summary = snap?.summary || {};
-      totals.accountValue += Number(summary.accountValue ?? 0) || 0;
-      totals.totalNtlPos += Number(summary.totalNtlPos ?? 0) || 0;
-      totals.totalRawUsd += Number(summary.totalRawUsd ?? 0) || 0;
-      totals.totalMarginUsed += Number(summary.totalMarginUsed ?? 0) || 0;
-      totals.withdrawable += Number(snap?.withdrawable ?? 0) || 0;
-    });
+    if (!snapshotMarginSummary) return [["Status", "Not loaded"]];
 
     return [
-      ["Account Value", fmtMoney(totals.accountValue)],
-      ["Notional Exposure", fmtMoney(totals.totalNtlPos)],
-      ["Collateral", fmtMoney(totals.totalRawUsd)],
-      ["Margin Used", fmtMoney(totals.totalMarginUsed)],
-      ["Withdrawable", fmtMoney(totals.withdrawable)],
+      ["Account Value", fmtMoney(snapshotMarginSummary.accountValue)],
+      ["Notional Exposure", fmtMoney(snapshotMarginSummary.totalNtlPos)],
+      ["Collateral", fmtMoney(snapshotMarginSummary.totalRawUsd)],
+      ["Margin Used", fmtMoney(snapshotMarginSummary.totalMarginUsed)],
+      ["Withdrawable", fmtMoney(snapshotWithdrawable)],
     ];
   }
 
   async function ensureHistoricalDataLoaded() {
-    if (!currentWallets.length) return;
+    if (!currentWallet) return;
     const tasks = [];
-    if (!historicalOrdersLoaded) tasks.push(loadHistoricalOrders(currentWallets));
-    if (!historicalFillsLoaded) tasks.push(loadHistoricalFills(currentWallets));
+    if (!historicalOrdersLoaded) tasks.push(loadHistoricalOrders(currentWallet));
+    if (!historicalFillsLoaded) tasks.push(loadHistoricalFills(currentWallet));
     if (tasks.length) await Promise.all(tasks);
   }
 
@@ -4057,42 +2911,41 @@
 
   function buildSheets() {
     const generatedAt = fmtDateTime(Date.now());
-    const walletListLabel = currentWallets.length ? currentWallets.join(", ") : "";
     return [
-      { name: "Metadata", rows: [["Wallets", "Generated At", "Source"], [walletListLabel, generatedAt, "https://hypermonitor.org/"]] },
+      { name: "Metadata", rows: [["Wallet", "Generated At", "Source"], [currentWallet || "", generatedAt, "https://hypermonitor.org/"]] },
       { name: "Portfolio Summary", rows: [["Metric", "Value"], ...buildPortfolioSummaryRows()] },
       {
         name: "Positions",
         rows: [
-          ["Wallet", "Asset", "Side", "Size", "Avg Entry", "Notional", "Unrealized PnL"],
+          ["Asset", "Side", "Size", "Avg Entry", "Notional", "Unrealized PnL"],
           ...buildPositionsRowsForExport(),
         ],
       },
       {
         name: "Live Orders",
         rows: [
-          ["Wallet", "Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Notional"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Notional"],
           ...buildLiveOrdersRowsForExport(),
         ],
       },
       {
         name: "Historical Orders",
         rows: [
-          ["Wallet", "Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Notional", "Status"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Notional", "Status"],
           ...buildHistoricalOrdersRowsForExport(),
         ],
       },
       {
         name: "Live Trades",
         rows: [
-          ["Wallet", "Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Notional"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Notional"],
           ...buildLiveFillsRowsForExport(),
         ],
       },
       {
         name: "Historical Trades",
         rows: [
-          ["Wallet", "Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Notional"],
+          ["Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Notional"],
           ...buildHistoricalFillsRowsForExport(),
         ],
       },
@@ -4289,7 +3142,7 @@
       await ensureHistoricalDataLoaded();
 
       const archive = buildXlsxFile();
-      const walletSlug = currentWallets.length === 1 ? currentWallets[0] : "multi-wallets";
+      const walletSlug = currentWallet || "wallet";
       const filename = `hypermonitor-${walletSlug}.xlsx`;
       const blob = new Blob([archive], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const url = URL.createObjectURL(blob);
@@ -4345,14 +3198,13 @@
         const status = o.status ?? "";
         const orderIdHtml = formatSpotIdHtml(o.oid ?? "");
         const coin = resolveCoinName(o.coin ?? "", o.asset ?? o.symbol ?? o.sym);
-        const wallet = o.wallet || primaryWallet;
 
         return `
         <tr>
           <td>${orderIdHtml}</td>
           <td><span class="timestamp">${created}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin)}</td>
           <td class="money">${fmtSize(o.sz ?? o.size)}</td>
           <td class="money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
           <td>${status}</td>
@@ -4362,48 +3214,34 @@
       .join("");
   }
 
-  async function loadHistoricalOrders(wallets = currentWallets) {
+  async function loadHistoricalOrders(wallet) {
     if (!historicalOrdersBodyEl) return;
-    const walletList = Array.isArray(wallets) ? wallets : [wallets];
-    if (!walletList.length) return;
 
     historicalOrdersLoaded = false;
     if (historicalOrdersCountEl) historicalOrdersCountEl.textContent = "–";
     historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical orders…</td></tr>";
 
     try {
-      const all = [];
-      for (const wallet of walletList) {
-        try {
-          const body = { type: "historicalOrders", user: wallet };
-          const res = await fetch(PORTFOLIO_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          });
+      const body = { type: "historicalOrders", user: wallet };
 
-          if (!res.ok) throw new Error(`Historical orders error: ${res.status} ${res.statusText}`);
+      const res = await fetch(PORTFOLIO_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            data.forEach((entry) => {
-              if (entry && typeof entry === "object") entry.wallet = wallet;
-            });
-            all.push(...data);
-          }
-        } catch (err) {
-          console.error(`Historical orders error for ${wallet}`, err);
-        }
-      }
+      if (!res.ok) throw new Error(`Historical orders error: ${res.status} ${res.statusText}`);
+
+      const data = await res.json();
 
       historicalOrders.length = 0;
-      if (all.length) {
-        all.sort((a, b) => {
+      if (Array.isArray(data)) {
+        data.sort((a, b) => {
           const na = normalizeHistoricalOrder(a);
           const nb = normalizeHistoricalOrder(b);
           return (nb.timestamp ?? 0) - (na.timestamp ?? 0);
         });
-        historicalOrders.push(...all);
+        historicalOrders.push(...data);
       }
 
       historicalOrdersLoaded = true;
@@ -4414,34 +3252,19 @@
     }
   }
 
-  async function loadHistoricalFills(wallets = currentWallets) {
+  async function loadHistoricalFills(wallet) {
     if (!historicalFillsBodyEl) return;
-    const walletList = Array.isArray(wallets) ? wallets : [wallets];
-    if (!walletList.length) return;
 
     historicalFillsLoaded = false;
     if (historicalFillsCountEl) historicalFillsCountEl.textContent = "–";
     historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
 
     try {
-      const all = [];
-      for (const wallet of walletList) {
-        try {
-          const fillsData = await infoClient.userFills({ user: wallet, aggregateByTime: true });
-          if (Array.isArray(fillsData)) {
-            fillsData.forEach((f) => {
-              if (f && typeof f === "object") f.wallet = wallet;
-            });
-            all.push(...fillsData);
-          }
-        } catch (err) {
-          console.error(`Historical fills error for ${wallet}`, err);
-        }
-      }
+      const fillsData = await infoClient.userFills({ user: wallet, aggregateByTime: true });
 
       historicalFills.length = 0;
-      if (Array.isArray(all)) {
-        all
+      if (Array.isArray(fillsData)) {
+        fillsData
           .sort((a, b) => (Number(b.time ?? b.timestamp ?? 0) - Number(a.time ?? a.timestamp ?? 0)))
           .forEach((f) => historicalFills.push(f));
       }
@@ -4458,15 +3281,14 @@
   }
 
   function resetState() {
-    walletSnapshots.clear();
-    walletTotals.clear();
-    walletPositions.clear();
     openOrders.clear();
     canceledOrders.length = 0;
     fills.length = 0;
     currentAssetPositions = [];
-    expandedPositions.clear();
     liveMids.clear();
+    snapshotMarginSummary = null;
+    snapshotWithdrawable = null;
+    snapshotUpnlTotal = 0;
     lastComputedUpnlTotal = 0;
     lastComputedTotalNotional = 0;
 
@@ -4523,8 +3345,6 @@
           if (!Number.isNaN(px)) liveMids.set(coin, px);
         }
 
-        renderFooterPrices();
-
         if (currentAssetPositions.length) renderPositions(currentAssetPositions);
       });
     } catch (err) {
@@ -4537,38 +3357,25 @@
       snapshotErrorEl.textContent = "";
       const clearing = await infoClient.clearinghouseState({ user: wallet });
       const { marginSummary, withdrawable, assetPositions } = clearing;
-      const mergedPositions = Array.isArray(assetPositions)
-        ? assetPositions.map((pos) => ({ ...pos, wallet }))
-        : [];
+      const mergedPositions = Array.isArray(assetPositions) ? [...assetPositions] : [];
 
-      walletSnapshots.set(wallet, {
-        summary: marginSummary || null,
-        withdrawable,
-        snapshotUpnlTotal: computeSnapshotUpnlTotal(mergedPositions),
-      });
+      snapshotMarginSummary = marginSummary || null;
+      snapshotWithdrawable = withdrawable;
+      snapshotUpnlTotal = computeSnapshotUpnlTotal(mergedPositions);
 
-      setWalletPositions(wallet, mergedPositions);
+      renderPositions(mergedPositions);
 
       // Fetch HIP-3/extra dex positions after first paint
       fetchAdditionalDexPositions(wallet).then((extraPositions) => {
         if (!Array.isArray(extraPositions) || extraPositions.length === 0) return;
-        const combined = [
-          ...mergedPositions,
-          ...extraPositions.map((pos) => ({ ...pos, wallet })),
-        ];
-        walletSnapshots.set(wallet, {
-          summary: marginSummary || null,
-          withdrawable,
-          snapshotUpnlTotal: computeSnapshotUpnlTotal(combined),
-        });
-        setWalletPositions(wallet, combined);
+        const combined = [...mergedPositions, ...extraPositions];
+        snapshotUpnlTotal = computeSnapshotUpnlTotal(combined);
+        renderPositions(combined);
       });
 
       const existingOpen = await infoClient.openOrders({ user: wallet });
-      existingOpen.forEach((order) => {
-        const key = `${wallet}:${order.oid}`;
-        openOrders.set(key, { ...order, wallet });
-      });
+      openOrders.clear();
+      existingOpen.forEach((order) => openOrders.set(order.oid, order));
       renderOpenOrders();
     } catch (err) {
       console.error("Snapshot error", err);
@@ -4576,76 +3383,65 @@
     }
   }
 
-  async function startStreams(wallets = currentWallets) {
+  async function startStreams(wallet) {
     try {
       ordersErrorEl.textContent = "";
       fillsErrorEl.textContent = "";
-      const walletList = Array.isArray(wallets) ? wallets : [wallets];
 
-      for (const sub of orderUpdatesSubs.values()) {
-        try { await sub.unsubscribe(); } catch (e) { console.warn("Error unsubscribing orderUpdates", e); }
+      if (orderUpdatesSub) {
+        try { await orderUpdatesSub.unsubscribe(); } catch (e) { console.warn("Error unsubscribing orderUpdates", e); }
+        orderUpdatesSub = null;
       }
-      for (const sub of userEventsSubs.values()) {
-        try { await sub.unsubscribe(); } catch (e) { console.warn("Error unsubscribing userEvents", e); }
+      if (userEventsSub) {
+        try { await userEventsSub.unsubscribe(); } catch (e) { console.warn("Error unsubscribing userEvents", e); }
+        userEventsSub = null;
       }
-      orderUpdatesSubs.clear();
-      userEventsSubs.clear();
 
-      await Promise.all(
-        walletList.map(async (wallet) => {
-          const orderSub = await subsClient.orderUpdates({ user: wallet }, (event) => {
-            try {
-              const updates = event?.data ?? event;
-              if (!Array.isArray(updates)) return;
+      orderUpdatesSub = await subsClient.orderUpdates({ user: wallet }, (event) => {
+        try {
+          const updates = event?.data ?? event;
+          if (!Array.isArray(updates)) return;
 
-              updates.forEach((entry) => {
-                const status = entry.status;
-                const orderWrapper = entry.order;
-                const statusTimestamp = entry.statusTimestamp;
-                if (!orderWrapper) return;
+          updates.forEach((entry) => {
+            const status = entry.status;
+            const orderWrapper = entry.order;
+            const statusTimestamp = entry.statusTimestamp;
+            if (!orderWrapper) return;
 
-                const order = { ...orderWrapper, status, statusTimestamp, wallet };
-                const key = `${wallet}:${order.oid}`;
+            const order = { ...orderWrapper, status, statusTimestamp };
 
-                if (status === "open") {
-                  openOrders.set(key, order);
-                  renderOpenOrders();
-                } else if (status === "canceled") {
-                  openOrders.delete(key);
-                  renderOpenOrders();
-                  canceledOrders.unshift(order);
-                  renderCanceledOrders();
-                }
-              });
-            } catch (err) {
-              console.error("orderUpdates handler error", err);
-              ordersErrorEl.textContent = "Error processing order updates: " + (err?.message || err);
+            if (status === "open") {
+              openOrders.set(order.oid, order);
+              renderOpenOrders();
+            } else if (status === "canceled") {
+              openOrders.delete(order.oid);
+              renderOpenOrders();
+              canceledOrders.unshift(order);
+              renderCanceledOrders();
             }
           });
-          orderUpdatesSubs.set(wallet, orderSub);
+        } catch (err) {
+          console.error("orderUpdates handler error", err);
+          ordersErrorEl.textContent = "Error processing order updates: " + (err?.message || err);
+        }
+      });
 
-          const userSub = await subsClient.userEvents({ user: wallet }, (event) => {
-            try {
-              const data = event?.data ?? event;
-              const fillsArr = Array.isArray(data?.fills) ? data.fills : [];
-              if (fillsArr.length === 0) return;
+      userEventsSub = await subsClient.userEvents({ user: wallet }, (event) => {
+        try {
+          const data = event?.data ?? event;
+          const fillsArr = Array.isArray(data?.fills) ? data.fills : [];
+          if (fillsArr.length === 0) return;
 
-              fillsArr.forEach((fill) => {
-                const enriched = { ...fill, wallet };
-                fills.unshift(enriched);
-              });
-              if (fills.length > MAX_FILL_ROWS) fills.length = MAX_FILL_ROWS;
-              renderFills();
+          fillsArr.forEach((fill) => fills.unshift(fill));
+          if (fills.length > MAX_FILL_ROWS) fills.length = MAX_FILL_ROWS;
+          renderFills();
 
-              refreshPositionsAndMargin(wallet);
-            } catch (err) {
-              console.error("userEvents handler error", err);
-              fillsErrorEl.textContent = "Error processing fills: " + (err?.message || err);
-            }
-          });
-          userEventsSubs.set(wallet, userSub);
-        })
-      );
+          if (currentWallet) refreshPositionsAndMargin(currentWallet);
+        } catch (err) {
+          console.error("userEvents handler error", err);
+          fillsErrorEl.textContent = "Error processing fills: " + (err?.message || err);
+        }
+      });
 
       setStatus("connected", "Connected to");
     } catch (err) {
@@ -4669,7 +3465,7 @@
   }
 
   function resetPortfolioSection() {
-    portfolioDataByWallet.clear();
+    portfolioData = null;
     portfolioErrorEl.textContent = "";
     setPortfolioLoadingState(true, "Loading performance graphs…");
     if (portfolioCharts.equity) {
@@ -4722,12 +3518,10 @@
     return { times, equity, pnl, deposits };
   }
 
-  function getPortfolioView(rangeKey, wallet) {
-    if (!portfolioDataByWallet.size) return null;
-    const data = portfolioDataByWallet.get(wallet);
-    if (!data) return null;
-    const primary = data[rangeKey];
-    const fallback = data.allTime;
+  function getPortfolioView(rangeKey) {
+    if (!portfolioData) return null;
+    const primary = portfolioData[rangeKey];
+    const fallback = portfolioData.allTime;
     return buildViewFromSection(primary) || buildViewFromSection(fallback) || null;
   }
 
@@ -4748,31 +3542,6 @@
 
   function getChartTextColor() {
     return document.body.classList.contains("light") ? "#0f172a" : "#e5e7eb";
-  }
-
-  function getWalletColor(wallet) {
-    if (!walletColorMap.has(wallet)) {
-      const color = WALLET_COLOR_PALETTE[walletColorMap.size % WALLET_COLOR_PALETTE.length];
-      walletColorMap.set(wallet, color);
-    }
-    return walletColorMap.get(wallet);
-  }
-
-  function getNormalizedWeights(wallets) {
-    if (!wallets.length) return [];
-    const raw = wallets.map((w) => walletWeights.get(normalizeWalletKey(w)));
-    const hasAny = raw.some((w) => Number.isFinite(w));
-    if (!hasAny) {
-      const equal = 1 / wallets.length;
-      return wallets.map(() => equal);
-    }
-    const weights = raw.map((w) => (Number.isFinite(w) ? w : 0));
-    const sum = weights.reduce((a, b) => a + b, 0);
-    if (sum <= 0) {
-      const equal = 1 / wallets.length;
-      return wallets.map(() => equal);
-    }
-    return weights.map((w) => w / sum);
   }
 
   function buildPositionBreakdown() {
@@ -4919,52 +3688,6 @@
     portfolioBreakdownChart.chart.update();
   }
 
-  function getWalletViews(rangeKey) {
-    return currentWallets
-      .map((wallet) => {
-        const view = getPortfolioView(rangeKey, wallet);
-        return view ? { wallet, view } : null;
-      })
-      .filter(Boolean);
-  }
-
-  function buildWalletDatasets(views, labels, key, colorOverride) {
-    return views.map(({ wallet, view }) => {
-      const color = colorOverride || getWalletColor(wallet);
-      const values = Array.isArray(view?.[key]) ? view[key] : [];
-      return {
-        label: formatWalletLabel(wallet),
-        data: values.slice(0, labels.length),
-        borderColor: color,
-        backgroundColor: color + "2a",
-        pointRadius: 0,
-        borderWidth: 1.7,
-        tension: 0.25,
-      };
-    });
-  }
-
-  function buildWeightedSeries(views, labels, key) {
-    if (views.length < 2) return null;
-    const weights = getNormalizedWeights(views.map((v) => v.wallet));
-    const values = labels.map((_, idx) => {
-      return views.reduce((sum, entry, entryIdx) => {
-        const series = entry.view?.[key] || [];
-        const val = Number(series[idx] ?? 0);
-        return sum + (Number.isFinite(val) ? val * weights[entryIdx] : 0);
-      }, 0);
-    });
-    return {
-      label: "Weighted",
-      data: values,
-      borderColor: "#f8fafc",
-      backgroundColor: "rgba(248, 250, 252, 0.08)",
-      pointRadius: 0,
-      borderWidth: 2.4,
-      tension: 0.25,
-    };
-  }
-
   function openPortfolioModal() {
     if (!portfolioModalEl) return;
     portfolioModalEl.classList.add("open");
@@ -4976,19 +3699,29 @@
     portfolioModalEl.classList.remove("open");
   }
 
-  function createLineChart(ctx, labels, datasets) {
+  function createLineChart(ctx, label, data, color) {
     return new Chart(ctx, {
       type: "line",
       data: {
-        labels,
-        datasets,
+        labels: data.labels,
+        datasets: [
+          {
+            label,
+            data: data.values,
+            borderColor: color,
+            backgroundColor: color + "2a",
+            pointRadius: 0,
+            borderWidth: 1.7,
+            tension: 0.25,
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { display: datasets.length > 1, labels: { color: getChartTextColor() } },
+          legend: { display: false },
           tooltip: {
             backgroundColor: "rgba(15,23,42,0.5)",
             borderColor: "rgba(148,163,184,0.5)",
@@ -5029,76 +3762,54 @@
   }
 
   function initPortfolioCharts(rangeKey) {
-    const views = getWalletViews(rangeKey);
-    if (!views.length) {
+    const view = getPortfolioView(rangeKey);
+    if (!view) {
       setPortfolioLoadingState(false, "");
-      portfolioErrorEl.textContent = "No performance data available for the selected wallets.";
+      portfolioErrorEl.textContent = "No performance data available for this wallet.";
       return;
     }
 
     setPortfolioLoadingState(false, "");
-    const labels = buildLabels(views[0].view.times, rangeKey);
-    const singleWallet = views.length === 1;
-    const singleColors = { equity: "#8b5cf6", pnl: "#f59e0b", deposits: "#14b8a6" };
+    const labels = buildLabels(view.times, rangeKey);
 
-    const weightedEquity = buildWeightedSeries(views, labels, "equity");
-    const weightedPnl = buildWeightedSeries(views, labels, "pnl");
-    const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
+    const colors = {
+      equity: "#8b5cf6",   // violet
+      pnl: "#f59e0b",      // amber
+      deposits: "#14b8a6", // teal
+    };
 
     portfolioCharts.equity = createLineChart(
       equityCanvas.getContext("2d"),
-      labels,
-      [
-        ...(weightedEquity ? [weightedEquity] : []),
-        ...buildWalletDatasets(views, labels, "equity", singleWallet ? singleColors.equity : null),
-      ]
+      "Equity",
+      { labels, values: view.equity },
+      colors.equity
     );
 
     portfolioCharts.pnl = createLineChart(
       pnlCanvas.getContext("2d"),
-      labels,
-      [
-        ...(weightedPnl ? [weightedPnl] : []),
-        ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
-      ]
+      "PnL",
+      { labels, values: view.pnl },
+      colors.pnl
     );
 
     portfolioCharts.deposits = createLineChart(
       depositsCanvas.getContext("2d"),
-      labels,
-      [
-        ...(weightedDeposits ? [weightedDeposits] : []),
-        ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
-      ]
+      "Deposits",
+      { labels, values: view.deposits },
+      colors.deposits
     );
   }
 
   function updatePortfolioCharts(rangeKey) {
-    const views = getWalletViews(rangeKey);
-    if (!views.length) {
+    const view = getPortfolioView(rangeKey);
+    if (!view) {
       portfolioErrorEl.textContent = "No performance data available for the selected range.";
       return;
     }
     portfolioErrorEl.textContent = "";
 
-    const labels = buildLabels(views[0].view.times, rangeKey);
-    const singleWallet = views.length === 1;
-    const singleColors = { equity: "#8b5cf6", pnl: "#f59e0b", deposits: "#14b8a6" };
-    const weightedEquity = buildWeightedSeries(views, labels, "equity");
-    const weightedPnl = buildWeightedSeries(views, labels, "pnl");
-    const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
-    const equityDatasets = [
-      ...(weightedEquity ? [weightedEquity] : []),
-      ...buildWalletDatasets(views, labels, "equity", singleWallet ? singleColors.equity : null),
-    ];
-    const pnlDatasets = [
-      ...(weightedPnl ? [weightedPnl] : []),
-      ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
-    ];
-    const depositsDatasets = [
-      ...(weightedDeposits ? [weightedDeposits] : []),
-      ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
-    ];
+    const labels = buildLabels(view.times, rangeKey);
+    const { equity, pnl, deposits } = view;
 
     const { equity: equityChart, pnl: pnlChart, deposits: depositsChart } = portfolioCharts;
     if (!equityChart || !pnlChart || !depositsChart) {
@@ -5107,45 +3818,23 @@
     }
 
     equityChart.data.labels = labels;
-    equityChart.data.datasets = equityDatasets;
-    if (equityChart.options.plugins?.legend) {
-      equityChart.options.plugins.legend.display = equityDatasets.length > 1;
-    }
+    equityChart.data.datasets[0].data = equity;
     equityChart.update();
 
     pnlChart.data.labels = labels;
-    pnlChart.data.datasets = pnlDatasets;
-    if (pnlChart.options.plugins?.legend) {
-      pnlChart.options.plugins.legend.display = pnlDatasets.length > 1;
-    }
+    pnlChart.data.datasets[0].data = pnl;
     pnlChart.update();
 
     depositsChart.data.labels = labels;
-    depositsChart.data.datasets = depositsDatasets;
-    if (depositsChart.options.plugins?.legend) {
-      depositsChart.options.plugins.legend.display = depositsDatasets.length > 1;
-    }
+    depositsChart.data.datasets[0].data = deposits;
     depositsChart.update();
   }
 
-  async function loadPortfolio(wallets = currentWallets) {
+  async function loadPortfolio(wallet) {
     try {
       portfolioErrorEl.textContent = "";
       setPortfolioLoadingState(true, "Loading performance graphs…");
-      portfolioDataByWallet.clear();
-      const walletList = Array.isArray(wallets) ? wallets : [wallets];
-
-      await Promise.all(
-        walletList.map(async (wallet) => {
-          try {
-            const data = await fetchPortfolio(wallet);
-            portfolioDataByWallet.set(wallet, data);
-          } catch (err) {
-            console.error(`Portfolio error for ${wallet}`, err);
-          }
-        })
-      );
-
+      portfolioData = await fetchPortfolio(wallet);
       initPortfolioCharts(currentRangeKey);
     } catch (err) {
       console.error("Portfolio error", err);
@@ -5156,13 +3845,9 @@
 
   function updateChartTheme() {
     const gridColor = getChartGridColor();
-    const textColor = getChartTextColor();
     Object.values(portfolioCharts).forEach((chart) => {
       if (!chart) return;
       chart.options.scales.y.grid.color = gridColor;
-      if (chart.options.plugins?.legend?.labels) {
-        chart.options.plugins.legend.labels.color = textColor;
-      }
       chart.update();
     });
   }
@@ -5192,30 +3877,18 @@
   }
 
   // ✅ add optional options so boot can "replace" instead of "push"
-  async function trackWallets(config, { replaceUrl = false } = {}) {
-    const wallets = config?.wallets || [];
-    const weightsRaw = config?.weightsRaw || null;
-    const walletList = uniqueWallets((wallets || []).map(normalizeWalletInput)).filter(isValidAddress);
-    if (!walletList.length) {
-      snapshotErrorEl.textContent = "Please enter at least one valid 0x wallet address (40 hex chars).";
+  async function trackWallet(wallet, { replaceUrl = false } = {}) {
+    wallet = wallet.trim();
+    if (!isValidAddress(wallet)) {
+      snapshotErrorEl.textContent = "Please enter a valid 0x wallet address (40 hex chars).";
       return;
     }
 
-    if (weightsRaw) {
-      walletWeights.clear();
-      walletList.forEach((wallet) => {
-        const weight = weightsRaw.get(normalizeWalletKey(wallet));
-        if (Number.isFinite(weight) && weight > 0) walletWeights.set(normalizeWalletKey(wallet), weight);
-      });
-      saveWalletWeights(walletWeights);
-    }
-
     // ✅ persist both URL + localStorage
-    setWalletsInUrl(walletList, { replace: replaceUrl });
-    saveLastWallets(walletList);
+    setWalletInUrl(wallet, { replace: replaceUrl });
+    saveLastWallet(wallet);
 
-    currentWallets = walletList;
-    primaryWallet = walletList[0];
+    currentWallet = wallet;
     startedAtEl.textContent = "Started: " + new Date().toLocaleString();
     setStatus("connecting", "Connecting…");
 
@@ -5228,15 +3901,15 @@
       await initClients();
       await ensurePriceStream();
       await spotMetaTask;
-      await Promise.all(walletList.map((wallet) => loadSnapshot(wallet)));
-      await startStreams(walletList);
-      await loadPortfolio(walletList);
+      await loadSnapshot(currentWallet);
+      await startStreams(currentWallet);
+      await loadPortfolio(currentWallet);
 
       if (ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
-        await loadHistoricalOrders(walletList);
+        await loadHistoricalOrders(currentWallet);
       }
       if (fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
-        await loadHistoricalFills(walletList);
+        await loadHistoricalFills(currentWallet);
       }
     } finally {
       trackBtnEl.disabled = false;
@@ -5245,132 +3918,36 @@
 
   (async function boot() {
     initTheme();
-    loadWalletWeights();
-    loadFooterCoins();
-    loadCoinNameCache();
-    loadCoinColorCache();
 
     // ✅ Prefer: URL wallet > last saved wallet > default
-    const urlWallets = uniqueWallets((getWalletsFromUrl() || []).filter(isValidAddress));
-    const savedWallets = uniqueWallets((getLastWallets() || []).filter(isValidAddress));
+    const urlWallet = getWalletFromUrl();
+    const savedWallet = getLastWallet();
 
-    const initialWallets =
-      (urlWallets.length && urlWallets) ||
-      (savedWallets.length && savedWallets) ||
-      [DEFAULT_WALLET];
+    const initialWallet =
+      (isValidAddress(urlWallet) && urlWallet) ||
+      (isValidAddress(savedWallet) && savedWallet) ||
+      DEFAULT_WALLET;
 
-    // ✅ show them in the inputs immediately
-    setWalletInputs(initialWallets);
+    // ✅ show it in the input immediately
+    walletInputEl.value = initialWallet;
 
     startedAtEl.textContent = "Started: " + new Date().toLocaleString();
     setStatus("connecting", "Connecting…");
 
     await initClients();
     await ensurePriceStream();
-    renderFooterPrices();
-    updateFooterActionLabel();
 
     // ✅ Replace URL on first load (so / becomes /?wallet=... without extra history)
-    await trackWallets({ wallets: initialWallets }, { replaceUrl: true });
+    await trackWallet(initialWallet, { replaceUrl: true });
   })();
 
   trackBtnEl.addEventListener("click", () => {
-    const config = getWalletConfigFromInputs();
-    if (config) trackWallets(config);
+    trackWallet(walletInputEl.value);
   });
 
-  if (walletInputsEl) {
-    walletInputsEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && e.target.classList.contains("wallet-input")) {
-        const config = getWalletConfigFromInputs();
-        if (config) trackWallets(config);
-      }
-    });
-
-    walletInputsEl.addEventListener("click", (e) => {
-      const removeBtn = e.target.closest(".wallet-remove-btn");
-      if (removeBtn) {
-        const row = removeBtn.closest(".wallet-input-row");
-        if (row) row.remove();
-      }
-    });
-  }
-
-  if (priceAddBtnEl) {
-    priceAddBtnEl.addEventListener("click", async () => {
-      const value = priceAddInputEl?.value || "";
-      await toggleFooterCoin(value);
-      if (priceAddInputEl) priceAddInputEl.value = "";
-      updateFooterActionLabel();
-    });
-  }
-
-  if (priceAddInputEl) {
-    priceAddInputEl.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter") {
-        await toggleFooterCoin(priceAddInputEl.value);
-        priceAddInputEl.value = "";
-        updateFooterActionLabel();
-      }
-    });
-
-    priceAddInputEl.addEventListener("input", updateFooterActionLabel);
-  }
-
-  if (priceListEl) {
-    let draggingCoin = null;
-
-    priceListEl.addEventListener("dragstart", (e) => {
-      const item = e.target.closest(".price-item");
-      if (!item) return;
-      draggingCoin = item.dataset.coin;
-      item.classList.add("dragging");
-      e.dataTransfer.effectAllowed = "move";
-      try { e.dataTransfer.setData("text/plain", draggingCoin); } catch (err) {}
-    });
-
-    priceListEl.addEventListener("dragend", (e) => {
-      const item = e.target.closest(".price-item");
-      if (item) item.classList.remove("dragging");
-      draggingCoin = null;
-    });
-
-    priceListEl.addEventListener("dragover", (e) => {
-      const item = e.target.closest(".price-item");
-      if (!item) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-    });
-
-    priceListEl.addEventListener("drop", (e) => {
-      const item = e.target.closest(".price-item");
-      if (!item || !draggingCoin) return;
-      e.preventDefault();
-      const targetCoin = item.dataset.coin;
-      if (!targetCoin || targetCoin === draggingCoin) return;
-
-      const next = trackedFooterCoins.filter((c) => c !== draggingCoin);
-      const targetIndex = next.indexOf(targetCoin);
-      if (targetIndex === -1) return;
-      next.splice(targetIndex, 0, draggingCoin);
-      trackedFooterCoins = next;
-      saveFooterCoins();
-      renderFooterPrices();
-    });
-  }
-
-  window.addEventListener("resize", () => {
-    updatePriceTickerRolling();
+  walletInputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") trackWallet(walletInputEl.value);
   });
-
-  if (addWalletBtnEl) {
-    addWalletBtnEl.addEventListener("click", () => {
-      addWalletInputRow("");
-      const inputs = getWalletInputEls();
-      const last = inputs[inputs.length - 1];
-      if (last) last.focus();
-    });
-  }
 
   rangeButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -5380,7 +3957,7 @@
       rangeButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
-      if (portfolioDataByWallet.size) updatePortfolioCharts(currentRangeKey);
+      if (portfolioData) updatePortfolioCharts(currentRangeKey);
     });
   });
 
@@ -5419,12 +3996,10 @@
       if (!row) return;
       row.classList.add("loading");
       const coin = row.dataset.coin;
-      const wallet = row.dataset.wallet || primaryWallet;
       if (!coin) return;
       if (!historicalFillsLoaded) await ensureHistoricalDataLoaded();
-      const positionKey = `${wallet}:${coin}`;
-      if (expandedPositions.has(positionKey)) expandedPositions.delete(positionKey);
-      else expandedPositions.add(positionKey);
+      if (expandedPositions.has(coin)) expandedPositions.delete(coin);
+      else expandedPositions.add(coin);
       renderPositions(currentAssetPositions);
       requestAnimationFrame(() => row.classList.remove("loading"));
     });
@@ -5447,7 +4022,7 @@
         ordersLivePanelEl.classList.add("hidden");
         ordersHistoryPanelEl.classList.remove("hidden");
 
-        if (currentWallets.length) loadHistoricalOrders(currentWallets);
+        if (currentWallet) loadHistoricalOrders(currentWallet);
       } else {
         ordersHistoryPanelEl.classList.add("hidden");
         ordersLivePanelEl.classList.remove("hidden");
@@ -5465,7 +4040,7 @@
       if (tab === "fills-history") {
         fillsLivePanelEl.classList.add("hidden");
         fillsHistoryPanelEl.classList.remove("hidden");
-        if (currentWallets.length) loadHistoricalFills(currentWallets);
+        if (currentWallet) loadHistoricalFills(currentWallet);
       } else {
         fillsHistoryPanelEl.classList.add("hidden");
         fillsLivePanelEl.classList.remove("hidden");
@@ -5493,10 +4068,10 @@
 
   // ✅ Back/Forward support (don’t push a new history entry)
   window.addEventListener("popstate", () => {
-    const wallets = uniqueWallets((getWalletsFromUrl() || []).filter(isValidAddress));
-    if (wallets.length && wallets.join("|") !== currentWallets.join("|")) {
-      setWalletInputs(wallets);
-      trackWallets({ wallets }, { replaceUrl: true });
+    const w = getWalletFromUrl();
+    if (isValidAddress(w) && w !== currentWallet) {
+      walletInputEl.value = w;
+      trackWallet(w, { replaceUrl: true });
     }
   });
 </script>
