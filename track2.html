@@ -1346,7 +1346,35 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+    }
+
+    .price-logo {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      flex: 0 0 auto;
+    }
+
+    .price-hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      margin-right: 0.4rem;
+      flex: 0 0 auto;
+    }
+
+    .price-ticker {
+      flex: 1 1 auto;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .price-track {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.2rem;
+      white-space: nowrap;
     }
 
     .price-list {
@@ -1354,6 +1382,11 @@
       align-items: center;
       gap: 0.8rem;
       flex-wrap: wrap;
+    }
+
+    .price-list.clone {
+      pointer-events: none;
+      display: none;
     }
 
     .price-item {
@@ -1385,6 +1418,27 @@
     .price-item .coin-price {
       font-weight: 600;
       letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      display: inline-block;
+      min-width: 6ch;
+      text-align: right;
+    }
+
+    .price-footer.rolling .price-list {
+      flex-wrap: nowrap;
+    }
+
+    .price-footer.rolling .price-list.clone {
+      display: inline-flex;
+    }
+
+    .price-footer.rolling .price-track {
+      animation: priceScroll 24s linear infinite;
+    }
+
+    @keyframes priceScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
     }
 
     .price-controls {
@@ -1817,7 +1871,14 @@
 
 <div class="price-footer" aria-label="Live prices">
   <div class="price-footer-inner" id="priceFooter">
-    <div class="price-list" id="priceList"></div>
+    <img class="price-logo" src="images/logo.png" alt="Hypermonitor" />
+    <!-- <span class="price-hint">Live prices</span> -->
+    <div class="price-ticker" id="priceTicker">
+      <div class="price-track" id="priceTrack">
+        <div class="price-list" id="priceList"></div>
+        <div class="price-list clone" id="priceListClone" aria-hidden="true"></div>
+      </div>
+    </div>
     <div class="price-controls">
       <input id="priceAddInput" class="price-input" type="text" placeholder="Add coin" autocomplete="off" />
       <button id="priceAddBtn" class="price-add-btn" type="button">Add</button>
@@ -1856,7 +1917,11 @@
   const positionsValueStatEl = document.getElementById("positionsValueStat");
   const withdrawableValueStatEl = document.getElementById("withdrawableValueStat");
   const priceFooterEl = document.getElementById("priceFooter");
+  const priceFooterWrapEl = document.querySelector(".price-footer");
+  const priceTickerEl = document.getElementById("priceTicker");
+  const priceTrackEl = document.getElementById("priceTrack");
   const priceListEl = document.getElementById("priceList");
+  const priceListCloneEl = document.getElementById("priceListClone");
   const priceAddInputEl = document.getElementById("priceAddInput");
   const priceAddBtnEl = document.getElementById("priceAddBtn");
 
@@ -1915,6 +1980,7 @@
   const coinNameCache = new Map();
   const coinColorCache = new Map();
   const coinColorPending = new Set();
+  const coinPriceDecimals = new Map();
   const HYPERLIQUID_TICKERS = new Set(
     [
       "0G", "2Z", "AAVE", "ACE", "ADA", "AERO", "AI", "AI16Z", "AIXBT", "ALGO", "ALT", "ANIME", "APE", "APEX",
@@ -2387,6 +2453,18 @@
     return `$${formatted}`;
   }
 
+  function fmtPriceFixed(v, decimals) {
+    if (v === null || v === undefined) return "";
+    const n = Number(v);
+    if (Number.isNaN(n)) return String(v);
+    const formatted = n.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+      useGrouping: true,
+    });
+    return `$${formatted}`;
+  }
+
   function fmtLimitPrice(v) { return fmtPrice(v); }
 
   function formatSignedDollar(v, decimals = 2) {
@@ -2720,7 +2798,7 @@
 
   function renderFooterPrices() {
     if (!priceFooterEl) return;
-    if (!priceListEl) return;
+    if (!priceListEl || !priceListCloneEl) return;
     const coinColors = {
       "0G": "#b75fff",
       "2Z": "#747474",
@@ -2984,10 +3062,34 @@
       const price = getLivePriceForCoin(coin);
       const color = coinColors[coin] || coinColorCache.get(coin) || "#e5e7eb";
       if (priceEl) {
-        priceEl.textContent = Number.isFinite(price) ? fmtPrice(price) : "--";
+        if (Number.isFinite(price)) {
+          let decimals = coinPriceDecimals.get(coin);
+          if (decimals === undefined) {
+            const abs = Math.abs(price);
+            if (abs >= 10000) decimals = 0;
+            else if (abs >= 1000) decimals = 1;
+            else if (abs >= 100) decimals = 2;
+            else if (abs >= 10) decimals = 3;
+            else if (abs >= 1) decimals = 4;
+            else if (abs >= 0.1) decimals = 5;
+            else if (abs >= 0.01) decimals = 6;
+            else decimals = 8;
+            coinPriceDecimals.set(coin, decimals);
+          }
+          priceEl.textContent = fmtPriceFixed(price, decimals);
+        } else {
+          priceEl.textContent = "--";
+        }
         priceEl.style.color = color;
       }
     });
+
+    priceListCloneEl.innerHTML = priceListEl.innerHTML;
+    priceListCloneEl.querySelectorAll(".price-item").forEach((item) => {
+      item.removeAttribute("draggable");
+    });
+
+    requestAnimationFrame(updatePriceTickerRolling);
 
     desired.forEach(async (coin) => {
       if (coinColors[coin] || coinColorCache.has(coin) || coinColorPending.has(coin)) return;
@@ -2999,7 +3101,23 @@
       saveCoinColorCache();
       const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
       if (item) item.style.color = color;
+      const cloneItem = priceListCloneEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
+      if (cloneItem) cloneItem.style.color = color;
     });
+  }
+
+  function updatePriceTickerRolling() {
+    if (!priceFooterWrapEl || !priceListEl || !priceTickerEl) return;
+    const items = priceListEl.querySelectorAll(".price-item");
+    if (!items.length) {
+      priceFooterWrapEl.classList.remove("rolling");
+      return;
+    }
+    const tops = new Set(Array.from(items).map((el) => el.offsetTop));
+    const isWrapped = tops.size > 1;
+    const isOverflow = priceListEl.scrollWidth > priceTickerEl.clientWidth + 4;
+    const forceRoll = items.length >= 10;
+    priceFooterWrapEl.classList.toggle("rolling", forceRoll || isWrapped || isOverflow);
   }
 
   async function resolveCoinSymbol(input) {
@@ -5240,6 +5358,10 @@
       renderFooterPrices();
     });
   }
+
+  window.addEventListener("resize", () => {
+    updatePriceTickerRolling();
+  });
 
   if (addWalletBtnEl) {
     addWalletBtnEl.addEventListener("click", () => {
