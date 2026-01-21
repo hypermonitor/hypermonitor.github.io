@@ -165,8 +165,8 @@
     }
 
     .wallet-input-row input:focus {
-      border-color: rgba(0, 112, 243, 0.7);
-      box-shadow: 0 0 0 1px rgba(0, 112, 243, 0.35);
+      border-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
     }
 
     .wallet-inputs {
@@ -174,29 +174,41 @@
       gap: 0.5rem;
     }
 
+    .wallet-inputs-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.5rem;
+      align-items: start;
+      width: 100%;
+    }
+
     .wallet-actions {
       display: flex;
       gap: 0.5rem;
       justify-content: flex-start;
-      margin-top: 0.2rem;
+      margin-top: 0;
+      align-self: start;
     }
 
     .wallet-track-btn {
-      padding: 0.5rem 1rem;
+      padding: 0.45rem 0.8rem;
       border-radius: 999px;
-      border: none;
-      background: linear-gradient(120deg, var(--accent-blue), var(--accent-cyan));
-      color: #f8fafc;
-      font-size: 0.78rem;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
       flex: 0 0 auto;
-      box-shadow: 0 10px 20px rgba(0, 112, 243, 0.35);
+      box-shadow: none;
       height: 38px;
     }
 
-    .wallet-track-btn:hover:not(:disabled) { filter: brightness(1.05); }
+    .wallet-track-btn:hover:not(:disabled) {
+      color: #f8fafc;
+      border-color: rgba(255,255,255,0.22);
+    }
     .wallet-track-btn:disabled { opacity: 0.5; cursor: default; }
 
     .wallet-input-row .wallet-icon-btn {
@@ -209,6 +221,9 @@
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
+      width: 38px;
+      min-width: 38px;
+      text-align: center;
       flex: 0 0 auto;
       height: 38px;
     }
@@ -224,9 +239,11 @@
     @media (max-width: 600px) {
       header { grid-template-columns: 1fr; }
       .wallet-input-row { grid-template-columns: 1fr; }
+      .wallet-inputs-row { grid-template-columns: 1fr; }
       .wallet-input-row input { width: 100%; }
       .wallet-input-row button { width: 100%; }
       .wallet-actions { flex-direction: column; align-items: stretch; }
+      .wallet-actions .wallet-track-btn { width: 100%; }
       .header-right { align-items: flex-end; }
       .header-right-top { width: 100%; justify-content: flex-end; }
     }
@@ -1486,6 +1503,11 @@
       background: #f8fafc;
       color: #0f172a;
     }
+    body.light .wallet-track-btn {
+      border-color: #e5e7eb;
+      background: #f8fafc;
+      color: #475569;
+    }
 
     .wallet-tag {
       display: inline-flex;
@@ -1517,17 +1539,19 @@
         Track any Hyperliquid wallet. No wallet connection required.
       </div>
       <div class="wallet-inputs-label">Wallet addresses</div>
-      <div class="wallet-inputs" id="walletInputs">
-        <div class="wallet-input-row" data-index="0">
-          <input id="walletInput0" class="wallet-input" type="text" placeholder="0x..." autocomplete="off" aria-label="Wallet address" />
-          <button id="addWalletBtn" class="wallet-icon-btn" type="button" aria-label="Add wallet">+</button>
+      <div class="wallet-inputs-row">
+        <div class="wallet-inputs" id="walletInputs">
+          <div class="wallet-input-row" data-index="0">
+            <input id="walletInput0" class="wallet-input" type="text" placeholder="0x..." autocomplete="off" aria-label="Wallet address" />
+            <button id="addWalletBtn" class="wallet-icon-btn" type="button" aria-label="Add wallet">+</button>
+          </div>
         </div>
-      </div>
-      <div class="wallet-actions">
-        <button id="trackBtn" class="wallet-track-btn" aria-label="Track wallets">
-          <span class="sr-only">Track wallets</span>
-          ⏎
-        </button>
+        <div class="wallet-actions">
+          <button id="trackBtn" class="wallet-track-btn" aria-label="Track wallets">
+            <span class="sr-only">Track wallets</span>
+            ⏎
+          </button>
+        </div>
       </div>
     </div>
 
@@ -3466,6 +3490,7 @@
         const { dex: coinDex, base: coinBase } = splitDexCoin(coin);
         const coinDisplayName = coinBase || coin;
         const { label: spotLabel, iconKey, isSpot } = resolveSpotDisplay(coinDisplayName);
+        const iconKeyForLogo = coinDex ? `${coinDex}:${spotLabel}` : iconKey;
         const spotTagHtml = isSpot ? `<span class="dex-tag spot-tag">spot</span>` : "";
         const szi = Number(p.szi ?? 0);
 
@@ -3575,7 +3600,7 @@
         <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}" data-wallet="${wallet}">
           <td>
             <div class="asset-cell">
-              ${coinIconHtml(iconKey, spotLabel)}
+              ${coinIconHtml(iconKeyForLogo, spotLabel)}
               <span>${spotLabel}</span>
               ${spotTagHtml}
               ${walletTagHtml(wallet)}
