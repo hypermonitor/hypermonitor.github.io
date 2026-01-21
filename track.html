@@ -114,14 +114,14 @@
 
     .wallet-line {
       font-size: .85rem;
-      color: var(--muted);
+      color: #e2e8f0;
       word-break: break-all;
       display: none;
     }
 
     /* Match main.html link styling (inline, underline on hover) */
     a {
-      color: var(--muted);
+      color: #e2e8f0;
       text-decoration: none;
       padding: 0;
       border: none;
@@ -828,20 +828,26 @@
 
     .chart-range-btn {
       border-radius: 999px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: #cbd5f5;
-      padding: 0.2rem 0.85rem;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      padding: 0.3rem 0.85rem;
       cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+      font-weight: 600;
+      font-size: 0.75rem;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     }
 
-    .chart-range-btn:hover { border-color: #475569; }
+    .chart-range-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      color: #f8fafc;
+      background: rgba(18, 18, 24, 0.6);
+    }
 
     .chart-range-btn.active {
-      border-color: #f59e0b;
-      color: #f59e0b;
-      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(255,255,255,0.45);
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .chart-grid {
@@ -995,16 +1001,16 @@
 
     body.light .chart-range-btn {
       background: #ffffff;
-      color: #6b7280;
+      color: #475569;
       border-color: #e5e7eb;
     }
 
     body.light .chart-range-btn:hover { border-color: #d1d5db; }
 
     body.light .chart-range-btn.active {
-      border-color: #f59e0b;
-      color: #b45309;
-      background: #fff7ed;
+      border-color: #cbd5f5;
+      color: #0f172a;
+      background: #f8fafc;
     }
 
     body.light .chart-card {
@@ -1122,23 +1128,28 @@
     }
 
     .orders-tab-btn {
-      padding: 0.2rem 0.8rem;
+      padding: 0.3rem 0.85rem;
       border-radius: 999px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: #cbd5f5;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
       cursor: pointer;
       white-space: nowrap;
       font-size: 0.75rem;
-      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+      font-weight: 600;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     }
 
-    .orders-tab-btn:hover { border-color: #475569; }
+    .orders-tab-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      color: #f8fafc;
+      background: rgba(18, 18, 24, 0.6);
+    }
 
     .orders-tab-btn.active {
-      border-color: #f59e0b;
-      color: #f59e0b;
-      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(255,255,255,0.45);
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.08);
     }
 
     body.light .orders-tab-btn {
@@ -1150,9 +1161,9 @@
     body.light .orders-tab-btn:hover { border-color: #d1d5db; }
 
     body.light .orders-tab-btn.active {
-      border-color: #f59e0b;
-      color: #b45309;
-      background: #fff7ed;
+      border-color: #cbd5f5;
+      color: #0f172a;
+      background: #f8fafc;
     }
 
     .tab-panel.hidden { display: none; }
