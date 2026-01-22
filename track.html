@@ -254,10 +254,10 @@
 
     @media (max-width: 600px) {
       header { grid-template-columns: 1fr; }
-      .wallet-input-row { grid-template-columns: 1fr; }
+      .wallet-input-row { grid-template-columns: minmax(0, 1fr) auto; }
       .wallet-inputs-row { grid-template-columns: 1fr; }
       .wallet-input-row input { width: 100%; }
-      .wallet-input-row button { width: 100%; }
+      .wallet-input-row .wallet-icon-btn { width: 38px; }
       .wallet-actions { flex-direction: column; align-items: stretch; }
       .wallet-actions .wallet-track-btn { width: 100%; }
       .header-right { align-items: flex-end; }
