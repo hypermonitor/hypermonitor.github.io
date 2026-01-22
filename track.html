@@ -2049,12 +2049,16 @@
   const FOOTER_COINS_KEY = "hypermonitor-footer-coins";
   const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
   const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
-  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE"];
+  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "US500", "GOLD", "SILVER", "MSTR", "NVDA"];
   let trackedFooterCoins = [...DEFAULT_FOOTER_COINS];
   const coinNameCache = new Map();
   const coinColorCache = new Map();
   const coinColorPending = new Set();
   const coinPriceDecimals = new Map();
+  const lastFooterPrices = new Map();
+  const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl"];
+  const manualMidCoins = new Set();
+  let manualMidTimer = null;
   const HYPERLIQUID_TICKERS = new Set(
     [
       "0G", "2Z", "AAVE", "ACE", "ADA", "AERO", "AI", "AI16Z", "AIXBT", "ALGO", "ALT", "ANIME", "APE", "APEX",
@@ -2086,7 +2090,7 @@
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length) {
-        trackedFooterCoins = parsed.map((c) => String(c).toUpperCase()).filter(Boolean);
+        trackedFooterCoins = parsed.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
       }
     } catch (e) {}
   }
@@ -2128,7 +2132,7 @@
       if (!parsed || typeof parsed !== "object") return;
       Object.entries(parsed).forEach(([symbol, color]) => {
         if (!symbol || !color) return;
-        coinColorCache.set(String(symbol).toUpperCase(), String(color));
+        coinColorCache.set(normalizeFooterCoinValue(symbol), String(color));
       });
     } catch (e) {}
   }
@@ -2760,6 +2764,32 @@
     return (coin || "").toUpperCase();
   }
 
+  function normalizeFooterCoinValue(value) {
+    const cleaned = String(value || "").trim();
+    if (!cleaned) return "";
+    const { dex, base } = splitDexCoin(cleaned);
+    if (dex) return `${dex.toLowerCase()}:${String(base || "").toUpperCase()}`;
+    return cleaned.toUpperCase();
+  }
+
+  function getFooterBase(coin) {
+    const { base } = splitDexCoin(coin);
+    return String(base || "").toUpperCase();
+  }
+
+  function formatPrefixedCoin(prefix, base) {
+    return `${prefix}:${String(base || "").toUpperCase()}`;
+  }
+
+  function getPrefixedCandidates(base) {
+    return NON_CRYPTO_PREFIXES.map((prefix) => formatPrefixedCoin(prefix, base));
+  }
+
+  function findTrackedFooterCoinByBase(base) {
+    const normBase = String(base || "").toUpperCase();
+    return trackedFooterCoins.find((coin) => getFooterBase(coin) === normBase) || null;
+  }
+
   function getLivePriceForCoin(raw) {
     const { dex, base } = splitDexCoin(raw);
     const candidates = [raw, base, normalizeCoin(raw), normalizeCoin(base)];
@@ -2771,9 +2801,180 @@
     return undefined;
   }
 
+  function ensureManualMidTimer() {
+    if (manualMidTimer || manualMidCoins.size === 0) return;
+    manualMidTimer = setInterval(() => {
+      refreshManualMids();
+    }, 12000);
+  }
+
+  function stopManualMidTimerIfIdle() {
+    if (!manualMidTimer) return;
+    if (manualMidCoins.size > 0) return;
+    clearInterval(manualMidTimer);
+    manualMidTimer = null;
+  }
+
+  async function fetchL2BookMid(coin) {
+    try {
+      const res = await fetch(PORTFOLIO_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "l2Book", coin }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const levels = data?.levels;
+      if (!Array.isArray(levels) || levels.length < 2) return null;
+      const getPx = (entry) => {
+        if (!entry) return null;
+        if (typeof entry.px !== "undefined") return Number(entry.px);
+        if (Array.isArray(entry)) return Number(entry[0]);
+        return null;
+      };
+      const bestBid = getPx(levels[0]?.[0]);
+      const bestAsk = getPx(levels[1]?.[0]);
+      if (!Number.isFinite(bestBid) || !Number.isFinite(bestAsk)) return null;
+      return (bestBid + bestAsk) / 2;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function refreshManualMids() {
+    const coins = Array.from(manualMidCoins);
+    if (!coins.length) {
+      stopManualMidTimerIfIdle();
+      return;
+    }
+    const updates = await Promise.all(coins.map((coin) => fetchL2BookMid(coin)));
+    updates.forEach((mid, idx) => {
+      const coin = coins[idx];
+      if (!Number.isFinite(mid)) return;
+      liveMids.set(coin, mid);
+    });
+    renderFooterPrices();
+    if (currentAssetPositions.length) renderPositions(currentAssetPositions);
+  }
+
+  async function primeManualMidsForFooter() {
+    const manualCoins = trackedFooterCoins.filter((coin) => coin.includes(":"));
+    if (!manualCoins.length) return;
+    manualCoins.forEach((coin) => manualMidCoins.add(coin));
+    ensureManualMidTimer();
+    await refreshManualMids();
+  }
+
+  async function sanitizeFooterCoins() {
+    const next = [];
+    const seenBases = new Set();
+    for (const raw of trackedFooterCoins) {
+      const normalized = normalizeFooterCoinValue(raw);
+      const base = getFooterBase(normalized);
+      if (!base || seenBases.has(base)) continue;
+      if (normalized.includes(":") || HYPERLIQUID_TICKERS.has(base)) {
+        next.push(normalized);
+        seenBases.add(base);
+        continue;
+      }
+      // eslint-disable-next-line no-await-in-loop
+      const baseResult = await evaluateFooterCandidate(base);
+      if (baseResult) {
+        next.push(baseResult.coinKey);
+        seenBases.add(base);
+        continue;
+      }
+      let added = false;
+      for (const prefixed of getPrefixedCandidates(base)) {
+        // eslint-disable-next-line no-await-in-loop
+        const prefixedResult = await evaluateFooterCandidate(prefixed);
+        if (prefixedResult) {
+          next.push(prefixedResult.coinKey);
+          seenBases.add(base);
+          added = true;
+          break;
+        }
+      }
+      if (!added) {
+        // Drop coins that have no logo and no price data.
+      }
+    }
+    trackedFooterCoins = next;
+    saveFooterCoins();
+  }
+
+  function rememberLogoOk(rawKey, okUrl) {
+    const entry = ensureLogoCache(rawKey, rawKey);
+    entry.state = "ok";
+    entry.idx = 0;
+    entry.okUrl = okUrl;
+    entry.urls = [okUrl];
+  }
+
+  function checkLogoUrl(url) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      let done = false;
+      const finish = (ok) => {
+        if (done) return;
+        done = true;
+        resolve(ok);
+      };
+      const timer = setTimeout(() => finish(false), 3000);
+      img.onload = () => {
+        clearTimeout(timer);
+        finish(true);
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        finish(false);
+      };
+      img.referrerPolicy = "no-referrer";
+      img.src = url;
+    });
+  }
+
+  async function findAvailableLogoUrl(rawName) {
+    const candidates = getIconCandidates(rawName, rawName);
+    for (const url of candidates) {
+      // eslint-disable-next-line no-await-in-loop
+      const ok = await checkLogoUrl(url);
+      if (ok) return url;
+    }
+    return null;
+  }
+
+  async function evaluateFooterCandidate(coinKey) {
+    const existing = getLivePriceForCoin(coinKey);
+    let mid = Number.isFinite(existing) ? existing : null;
+    let logoUrl = null;
+    if (Number.isFinite(existing) && coinKey.includes(":")) {
+      manualMidCoins.add(coinKey);
+      ensureManualMidTimer();
+    }
+    if (!Number.isFinite(existing)) {
+      logoUrl = await findAvailableLogoUrl(coinKey);
+      if (logoUrl) rememberLogoOk(coinKey, logoUrl);
+      mid = await fetchL2BookMid(coinKey);
+      if (Number.isFinite(mid)) {
+        liveMids.set(coinKey, mid);
+        manualMidCoins.add(coinKey);
+        ensureManualMidTimer();
+      }
+    }
+    if (!logoUrl && Number.isFinite(existing)) {
+      return { coinKey, hasLogo: false, hasPrice: true };
+    }
+    if (logoUrl || Number.isFinite(mid)) {
+      return { coinKey, hasLogo: Boolean(logoUrl), hasPrice: Number.isFinite(mid) || Number.isFinite(existing) };
+    }
+    return null;
+  }
+
   async function extractDominantColorFromLogo(symbol) {
-    const upper = String(symbol || "").toUpperCase();
-    const iconUrl = `${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`;
+    const normalized = normalizeFooterCoinValue(symbol);
+    if (!normalized) return null;
+    const iconUrl = `${COIN_ICON_BASE}${encodeURIComponent(normalized)}.svg`;
     try {
       const res = await fetch(iconUrl);
       if (!res.ok) return null;
@@ -3052,7 +3253,7 @@
     const existing = new Map(
       Array.from(priceListEl.querySelectorAll(".price-item")).map((el) => [el.dataset.coin, el])
     );
-    const desired = trackedFooterCoins.map((c) => c.toUpperCase());
+    const desired = trackedFooterCoins.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
 
     existing.forEach((el, coin) => {
       if (!desired.includes(coin)) el.remove();
@@ -3096,9 +3297,11 @@
             else decimals = 8;
             coinPriceDecimals.set(coin, decimals);
           }
-          priceEl.textContent = fmtPriceFixed(price, decimals);
+          const formatted = fmtPriceFixed(price, decimals);
+          priceEl.textContent = formatted;
+          lastFooterPrices.set(coin, formatted);
         } else {
-          priceEl.textContent = "--";
+          priceEl.textContent = lastFooterPrices.get(coin) || "--";
         }
         priceEl.style.color = color;
       }
@@ -3117,7 +3320,7 @@
       const color = await extractDominantColorFromLogo(coin);
       coinColorPending.delete(coin);
       if (!color) return;
-      coinColorCache.set(coin, color);
+      coinColorCache.set(normalizeFooterCoinValue(coin), color);
       saveCoinColorCache();
       const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
       if (item) item.style.color = color;
@@ -3143,6 +3346,7 @@
   async function resolveCoinSymbol(input) {
     const cleaned = String(input || "").trim();
     if (!cleaned) return null;
+    if (cleaned.includes(":")) return normalizeFooterCoinValue(cleaned);
     const lookup = cleaned.toLowerCase();
     if (coinNameCache.has(lookup)) return coinNameCache.get(lookup);
 
@@ -3172,6 +3376,7 @@
   function getInputCandidateSymbol(input) {
     const cleaned = String(input || "").trim();
     if (!cleaned) return null;
+    if (cleaned.includes(":")) return normalizeFooterCoinValue(cleaned);
     const lookup = cleaned.toLowerCase();
     if (coinNameCache.has(lookup)) return coinNameCache.get(lookup);
     const simple = lookup.replace(/[^a-z0-9]/g, "");
@@ -3182,7 +3387,7 @@
   function updateFooterActionLabel() {
     if (!priceAddBtnEl || !priceAddInputEl) return;
     const candidate = getInputCandidateSymbol(priceAddInputEl.value);
-    if (candidate && trackedFooterCoins.includes(candidate.toUpperCase())) {
+    if (candidate && findTrackedFooterCoinByBase(getFooterBase(candidate))) {
       priceAddBtnEl.textContent = "Remove";
     } else {
       priceAddBtnEl.textContent = "Add";
@@ -3192,16 +3397,37 @@
   async function addFooterCoin(raw) {
     const symbol = await resolveCoinSymbol(raw);
     if (!symbol) return;
-    const normalized = symbol.toUpperCase();
-    if (!HYPERLIQUID_TICKERS.has(normalized)) return;
-    if (trackedFooterCoins.includes(normalized)) return;
-    trackedFooterCoins.push(normalized);
-    saveFooterCoins();
-    renderFooterPrices();
+    const normalized = normalizeFooterCoinValue(symbol);
+    const base = getFooterBase(normalized);
+    if (!base) return;
+    if (findTrackedFooterCoinByBase(base)) return;
+
+    const baseResult = await evaluateFooterCandidate(base);
+    if (baseResult) {
+      trackedFooterCoins.push(baseResult.coinKey);
+      saveFooterCoins();
+      renderFooterPrices();
+      return;
+    }
+
+    for (const prefixed of getPrefixedCandidates(base)) {
+      // eslint-disable-next-line no-await-in-loop
+      const prefixedResult = await evaluateFooterCandidate(prefixed);
+      if (prefixedResult) {
+        trackedFooterCoins.push(prefixedResult.coinKey);
+        saveFooterCoins();
+        renderFooterPrices();
+        return;
+      }
+    }
   }
 
   function removeFooterCoin(symbol) {
     trackedFooterCoins = trackedFooterCoins.filter((c) => c !== symbol);
+    manualMidCoins.delete(symbol);
+    liveMids.delete(symbol);
+    coinPriceDecimals.delete(symbol);
+    stopManualMidTimerIfIdle();
     saveFooterCoins();
     renderFooterPrices();
   }
@@ -3209,10 +3435,12 @@
   async function toggleFooterCoin(raw) {
     const symbol = await resolveCoinSymbol(raw);
     if (!symbol) return;
-    const normalized = symbol.toUpperCase();
-    if (!HYPERLIQUID_TICKERS.has(normalized)) return;
-    if (trackedFooterCoins.includes(normalized)) {
-      removeFooterCoin(normalized);
+    const normalized = normalizeFooterCoinValue(symbol);
+    const base = getFooterBase(normalized);
+    if (!base) return;
+    const existing = findTrackedFooterCoinByBase(base);
+    if (existing) {
+      removeFooterCoin(existing);
     } else {
       addFooterCoin(normalized);
     }
@@ -5266,6 +5494,8 @@
 
     await initClients();
     await ensurePriceStream();
+    await sanitizeFooterCoins();
+    await primeManualMidsForFooter();
     renderFooterPrices();
     updateFooterActionLabel();
 
