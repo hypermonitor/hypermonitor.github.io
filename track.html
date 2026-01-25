@@ -939,7 +939,7 @@
       --pulse-size: 220px;
       background-image: url("images/pulse.gif");
       background-repeat: no-repeat;
-      background-position: center 45%;
+      background-position: center 50%;
       background-size: var(--pulse-size) auto;
     }
 
@@ -948,10 +948,16 @@
       pointer-events: none;
     }
 
+    .chart-loading-wrap.loading .metrics-card {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+
     .chart-loading {
       position: absolute;
       left: 50%;
-      top: calc(45% + (var(--pulse-size) * 0.35));
+      top: calc(50% + (var(--pulse-size) * 0.35));
       transform: translate(-50%, -50%);
       font-size: 0.85rem;
       color: var(--muted);
@@ -1390,8 +1396,12 @@
 
     .metrics-card {
       margin-top: 0.65rem;
-      border-top: 1px solid var(--border);
       padding-top: 0.5rem;
+    }
+
+    .metrics-card.loading {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .metrics-grid {
@@ -1429,11 +1439,10 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 0.65rem 0.75rem;
-      background: rgba(15, 23, 42, 0.28);
+      background: transparent;
     }
 
     body.light .metric {
-      background: #f8fafc;
       border-color: #e5e7eb;
     }
 
@@ -1816,7 +1825,8 @@
       </button>
     </div>
 
-    <div class="metrics-card collapsed" id="metricsCard">
+    <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
+      <div class="metrics-card collapsed loading" id="metricsCard">
       <div class="metrics-grid">
         <div class="metric">
           <div class="metric-label">Total PnL (Portfolio)</div>
@@ -1864,14 +1874,9 @@
           <div class="metric-sub">Gains / losses</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Trades / Day</div>
-          <div class="metric-value" id="metricTradesPerDay">-</div>
-          <div class="metric-sub">Executed fills per day</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Orders / Day</div>
-          <div class="metric-value" id="metricOrdersPerDay">-</div>
-          <div class="metric-sub">Submitted orders per day</div>
+        <div class="metric-label">Orders (Trades) / Day</div>
+          <div class="metric-value" id="metricOrdersTradesPerDay">-</div>
+          <div class="metric-sub">Submitted (executed) per day</div>
         </div>
         <div class="metric">
           <div class="metric-label">Active Days Ratio</div>
@@ -1904,9 +1909,9 @@
           <div class="metric-sub">Std dev / mean</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Total Exposure Time</div>
-          <div class="metric-value" id="metricTotalExposure">-</div>
-          <div class="metric-sub">Sum of closed holding time</div>
+          <div class="metric-label">Days Active</div>
+          <div class="metric-value" id="metricActiveDaysCount">-</div>
+          <div class="metric-sub">Days with at least 1 trade</div>
         </div>
         <div class="metric">
           <div class="metric-label">Median Holding Time</div>
@@ -1959,9 +1964,7 @@
           <div class="metric-sub">Regression intercept</div>
         </div>
       </div>
-    </div>
-
-    <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
+      </div>
       <div class="chart-grid">
         <div class="chart-card">
           <h3>Account Value</h3>
@@ -2278,16 +2281,15 @@
   const metricRealizedPnlEl = document.getElementById("metricRealizedPnl");
   const metricWinRateEl = document.getElementById("metricWinRate");
   const metricProfitFactorEl = document.getElementById("metricProfitFactor");
-  const metricTradesPerDayEl = document.getElementById("metricTradesPerDay");
-  const metricOrdersPerDayEl = document.getElementById("metricOrdersPerDay");
+  const metricOrdersTradesPerDayEl = document.getElementById("metricOrdersTradesPerDay");
   const metricActiveDaysEl = document.getElementById("metricActiveDays");
+  const metricActiveDaysCountEl = document.getElementById("metricActiveDaysCount");
   const metricProductCountEl = document.getElementById("metricProductCount");
   const metricTopProductShareEl = document.getElementById("metricTopProductShare");
   const metricTopProductNoteEl = document.getElementById("metricTopProductNote");
   const metricHerfindahlEl = document.getElementById("metricHerfindahl");
   const metricAvgNotionalEl = document.getElementById("metricAvgNotional");
   const metricNotionalCvEl = document.getElementById("metricNotionalCv");
-  const metricTotalExposureEl = document.getElementById("metricTotalExposure");
   const metricMedianHoldingEl = document.getElementById("metricMedianHolding");
   const metricSideBiasEl = document.getElementById("metricSideBias");
   const metricAggressivenessEl = document.getElementById("metricAggressiveness");
@@ -5247,6 +5249,9 @@
     if (portfolioLoadingEl) {
       portfolioLoadingEl.textContent = message || "";
     }
+    if (metricsCardEl) {
+      metricsCardEl.classList.toggle("loading", Boolean(isLoading));
+    }
   }
 
   function resetPortfolioSection() {
@@ -5827,7 +5832,8 @@
     const tradeDays = new Set(tradeTimes.map(getLocalDayKey).filter(Boolean));
     const tradesPerDay = observedDays ? fillsForStats.length / observedDays : null;
     const ordersPerDay = observedDays ? ordersForStats.length / observedDays : null;
-    const activeDaysRatio = observedDays ? tradeDays.size / observedDays : null;
+    const activeDaysCount = tradeDays.size;
+    const activeDaysRatio = observedDays ? activeDaysCount / observedDays : null;
 
     const productNotional = new Map();
     const productSet = new Set();
@@ -5917,6 +5923,7 @@
     return {
       tradesPerDay,
       ordersPerDay,
+      activeDaysCount,
       activeDaysRatio,
       productCount: productSet.size || null,
       topProductShare,
@@ -5947,15 +5954,14 @@
       metricRealizedPnlEl,
       metricWinRateEl,
       metricProfitFactorEl,
-      metricTradesPerDayEl,
-      metricOrdersPerDayEl,
+      metricOrdersTradesPerDayEl,
       metricActiveDaysEl,
+      metricActiveDaysCountEl,
       metricProductCountEl,
       metricTopProductShareEl,
       metricHerfindahlEl,
       metricAvgNotionalEl,
       metricNotionalCvEl,
-      metricTotalExposureEl,
       metricMedianHoldingEl,
       metricSideBiasEl,
       metricAggressivenessEl,
@@ -5998,10 +6004,11 @@
     }
   }
 
-  function setMetricScaledColor(el, value, min = 0, max = 1) {
+  function setMetricScaledColor(el, value, min = 0, max = 1, invert = false) {
     if (!el) return;
     const clamped = Math.max(min, Math.min(max, value));
-    const t = max === min ? 0 : (clamped - min) / (max - min);
+    const raw = max === min ? 0 : (clamped - min) / (max - min);
+    const t = invert ? 1 - raw : raw;
     const red = Math.round(242 + (38 - 242) * t);
     const green = Math.round(95 + (217 - 95) * t);
     const blue = Math.round(92 + (127 - 92) * t);
@@ -6449,6 +6456,19 @@
     setMetricValue(metricPnlStabilityEl, metrics.pnlStability !== null ? formatRatio(metrics.pnlStability, 2) : "-", null);
     setMetricValue(metricSkillPersistenceEl, metrics.skillPersistence !== null ? formatRatio(metrics.skillPersistence, 2) : "-", null);
 
+    if (Number.isFinite(metrics.maxDrawdown)) {
+      setMetricScaledColor(metricMaxDrawdownEl, metrics.maxDrawdown, 0, 2);
+    }
+    if (Number.isFinite(metrics.sharpe)) {
+      setMetricScaledColor(metricSharpeEl, metrics.sharpe, -1, 2);
+    }
+    if (Number.isFinite(metrics.pnlStability)) {
+      setMetricScaledColor(metricPnlStabilityEl, metrics.pnlStability, 0, 2, true);
+    }
+    if (Number.isFinite(metrics.skillPersistence)) {
+      setMetricScaledColor(metricSkillPersistenceEl, metrics.skillPersistence, -1, 1);
+    }
+
     if (tradeMetrics) {
       setMetricValue(metricRealizedPnlEl, formatSignedDollarWithPlus(tradeMetrics.realizedPnl), tradeMetrics.realizedPnl);
       setMetricValue(metricWinRateEl, formatPercent(tradeMetrics.winRate), null);
@@ -6462,9 +6482,17 @@
             ? formatRatio(tradeMetrics.profitFactor, 2)
             : "-";
       setMetricValue(metricProfitFactorEl, profitFactorText, null);
-      setMetricValue(metricTradesPerDayEl, formatNumber(tradeMetrics.tradesPerDay, 2), null);
-      setMetricValue(metricOrdersPerDayEl, formatNumber(tradeMetrics.ordersPerDay, 2), null);
+      if (Number.isFinite(tradeMetrics.profitFactor)) {
+        setMetricScaledColor(metricProfitFactorEl, tradeMetrics.profitFactor, 0, 3);
+      }
+      const ordersPerDayText = formatNumber(tradeMetrics.ordersPerDay, 2) || "-";
+      const tradesPerDayText = formatNumber(tradeMetrics.tradesPerDay, 2) || "-";
+      setMetricValue(metricOrdersTradesPerDayEl, `${ordersPerDayText} (${tradesPerDayText})`, null);
       setMetricValue(metricActiveDaysEl, formatPercent(tradeMetrics.activeDaysRatio), null);
+      if (Number.isFinite(tradeMetrics.activeDaysRatio)) {
+        setMetricScaledColor(metricActiveDaysEl, tradeMetrics.activeDaysRatio, 0, 1);
+      }
+      setMetricValue(metricActiveDaysCountEl, Number.isFinite(tradeMetrics.activeDaysCount) ? String(tradeMetrics.activeDaysCount) : "-", null);
       setMetricValue(metricProductCountEl, tradeMetrics.productCount !== null ? String(tradeMetrics.productCount) : "-", null);
       setMetricValue(metricTopProductShareEl, formatPercent(tradeMetrics.topProductShare), null);
       if (metricTopProductNoteEl) {
@@ -6473,20 +6501,27 @@
           : "Share of notional";
       }
       setMetricValue(metricHerfindahlEl, tradeMetrics.herfindahl !== null ? formatRatio(tradeMetrics.herfindahl, 3) : "-", null);
+      if (Number.isFinite(tradeMetrics.herfindahl)) {
+        setMetricScaledColor(metricHerfindahlEl, tradeMetrics.herfindahl, 0, 1, true);
+      }
       setMetricValue(metricAvgNotionalEl, tradeMetrics.avgNotional !== null ? fmtMoney(tradeMetrics.avgNotional, 2) : "-", null);
       setMetricValue(metricNotionalCvEl, tradeMetrics.notionalCv !== null ? formatRatio(tradeMetrics.notionalCv, 2) : "-", null);
-      setMetricValue(metricTotalExposureEl, formatDuration(tradeMetrics.totalExposureTime), null);
+      if (Number.isFinite(tradeMetrics.notionalCv)) {
+        setMetricScaledColor(metricNotionalCvEl, tradeMetrics.notionalCv, 0, 2, true);
+      }
       setMetricValue(metricMedianHoldingEl, formatDuration(tradeMetrics.medianHoldingTime), null);
       setMetricValue(metricSideBiasEl, formatSignedPercent(tradeMetrics.sideBias), null);
       setMetricValue(metricAggressivenessEl, formatPercent(tradeMetrics.aggressiveness), null);
       setMetricValue(metricCancelRatioEl, formatPercent(tradeMetrics.cancelRatio), null);
+      if (Number.isFinite(tradeMetrics.cancelRatio)) {
+        setMetricScaledColor(metricCancelRatioEl, tradeMetrics.cancelRatio, 0, 1, true);
+      }
       setMetricValue(metricReactionSpeedEl, formatDuration(tradeMetrics.reactionSpeed), null);
     } else {
       setMetricValue(metricRealizedPnlEl, "-", null);
       setMetricValue(metricWinRateEl, "-", null);
       setMetricValue(metricProfitFactorEl, "-", null);
-      setMetricValue(metricTradesPerDayEl, "-", null);
-      setMetricValue(metricOrdersPerDayEl, "-", null);
+      setMetricValue(metricOrdersTradesPerDayEl, "-", null);
       setMetricValue(metricActiveDaysEl, "-", null);
       setMetricValue(metricProductCountEl, "-", null);
       setMetricValue(metricTopProductShareEl, "-", null);
@@ -6494,7 +6529,7 @@
       setMetricValue(metricHerfindahlEl, "-", null);
       setMetricValue(metricAvgNotionalEl, "-", null);
       setMetricValue(metricNotionalCvEl, "-", null);
-      setMetricValue(metricTotalExposureEl, "-", null);
+      setMetricValue(metricActiveDaysCountEl, "-", null);
       setMetricValue(metricMedianHoldingEl, "-", null);
       setMetricValue(metricSideBiasEl, "-", null);
       setMetricValue(metricAggressivenessEl, "-", null);
