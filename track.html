@@ -1889,11 +1889,6 @@
           <div class="metric-sub">Unique traded products</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Top Product Share</div>
-          <div class="metric-value" id="metricTopProductShare">-</div>
-          <div class="metric-sub" id="metricTopProductNote">Share of notional</div>
-        </div>
-        <div class="metric">
           <div class="metric-label">Volume Concentration</div>
           <div class="metric-value" id="metricHerfindahl">-</div>
           <div class="metric-sub">Herfindahl index</div>
@@ -1902,11 +1897,6 @@
           <div class="metric-label">Avg Trade Notional</div>
           <div class="metric-value" id="metricAvgNotional">-</div>
           <div class="metric-sub">Mean |price * size|</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Notional CV</div>
-          <div class="metric-value" id="metricNotionalCv">-</div>
-          <div class="metric-sub">Std dev / mean</div>
         </div>
         <div class="metric">
           <div class="metric-label">Days Active</div>
@@ -1954,14 +1944,9 @@
           <div class="metric-sub">Vs benchmark (BTC)</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Beta</div>
-          <div class="metric-value" id="metricBeta">-</div>
+          <div class="metric-label">Beta & Alpha</div>
+          <div class="metric-value" id="metricBetaAlpha">-</div>
           <div class="metric-sub">PnL vs BTC</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Alpha</div>
-          <div class="metric-value" id="metricAlpha">-</div>
-          <div class="metric-sub">Regression intercept</div>
         </div>
       </div>
       </div>
@@ -2285,11 +2270,8 @@
   const metricActiveDaysEl = document.getElementById("metricActiveDays");
   const metricActiveDaysCountEl = document.getElementById("metricActiveDaysCount");
   const metricProductCountEl = document.getElementById("metricProductCount");
-  const metricTopProductShareEl = document.getElementById("metricTopProductShare");
-  const metricTopProductNoteEl = document.getElementById("metricTopProductNote");
   const metricHerfindahlEl = document.getElementById("metricHerfindahl");
   const metricAvgNotionalEl = document.getElementById("metricAvgNotional");
-  const metricNotionalCvEl = document.getElementById("metricNotionalCv");
   const metricMedianHoldingEl = document.getElementById("metricMedianHolding");
   const metricSideBiasEl = document.getElementById("metricSideBias");
   const metricAggressivenessEl = document.getElementById("metricAggressiveness");
@@ -2299,8 +2281,7 @@
   const metricPnlStabilityEl = document.getElementById("metricPnlStability");
   const metricSkillPersistenceEl = document.getElementById("metricSkillPersistence");
   const metricExcessPnlEl = document.getElementById("metricExcessPnl");
-  const metricBetaEl = document.getElementById("metricBeta");
-  const metricAlphaEl = document.getElementById("metricAlpha");
+  const metricBetaAlphaEl = document.getElementById("metricBetaAlpha");
 
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
@@ -5958,10 +5939,8 @@
       metricActiveDaysEl,
       metricActiveDaysCountEl,
       metricProductCountEl,
-      metricTopProductShareEl,
       metricHerfindahlEl,
       metricAvgNotionalEl,
-      metricNotionalCvEl,
       metricMedianHoldingEl,
       metricSideBiasEl,
       metricAggressivenessEl,
@@ -5970,8 +5949,7 @@
       metricPnlStabilityEl,
       metricSkillPersistenceEl,
       metricExcessPnlEl,
-      metricBetaEl,
-      metricAlphaEl,
+      metricBetaAlphaEl,
     ];
     placeholders.forEach((el) => {
       if (!el) return;
@@ -5980,7 +5958,6 @@
       el.style.color = "";
     });
     if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = "-";
-    if (metricTopProductNoteEl) metricTopProductNoteEl.textContent = "Share of notional";
   }
 
   function getRangeLabel(rangeKey) {
@@ -6013,6 +5990,18 @@
     const green = Math.round(95 + (217 - 95) * t);
     const blue = Math.round(92 + (127 - 92) * t);
     el.style.color = `rgb(${red}, ${green}, ${blue})`;
+  }
+
+  function getScaledColor(value, min = 0, max = 1, invert = false) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "inherit";
+    const clamped = Math.max(min, Math.min(max, n));
+    const raw = max === min ? 0 : (clamped - min) / (max - min);
+    const t = invert ? 1 - raw : raw;
+    const red = Math.round(242 + (38 - 242) * t);
+    const green = Math.round(95 + (217 - 95) * t);
+    const blue = Math.round(92 + (127 - 92) * t);
+    return `rgb(${red}, ${green}, ${blue})`;
   }
 
   function getMetricsSource(rangeKey) {
@@ -6381,8 +6370,7 @@
   async function updateBenchmarkMetrics(rangeKey, view, totalPnl, baseEquity, rangeWindow) {
     const requestId = ++benchmarkRequestId;
     setMetricValue(metricExcessPnlEl, "Loading...", null);
-    setMetricValue(metricBetaEl, "Loading...", null);
-    setMetricValue(metricAlphaEl, "Loading...", null);
+    setMetricValue(metricBetaAlphaEl, "Loading...", null);
 
     try {
       const priceSeries = await fetchBitcoinHistory(rangeKey, rangeWindow?.start, rangeWindow?.end);
@@ -6391,8 +6379,7 @@
       const walletSeries = buildWalletReturnSeries(view, baseEquity);
       if (!walletSeries || !walletSeries.length) {
         setMetricValue(metricExcessPnlEl, "N/A", null);
-        setMetricValue(metricBetaEl, "N/A", null);
-        setMetricValue(metricAlphaEl, "N/A", null);
+        setMetricValue(metricBetaAlphaEl, "N/A", null);
         return;
       }
 
@@ -6400,8 +6387,7 @@
       const stats = computeBetaAlpha(walletSeries, benchmarkSeries);
       if (!stats) {
         setMetricValue(metricExcessPnlEl, "N/A", null);
-        setMetricValue(metricBetaEl, "N/A", null);
-        setMetricValue(metricAlphaEl, "N/A", null);
+        setMetricValue(metricBetaAlphaEl, "N/A", null);
         return;
       }
 
@@ -6414,13 +6400,17 @@
       const excessPnl = Number.isFinite(benchmarkPnl) ? totalPnl - benchmarkPnl : null;
 
       setMetricValue(metricExcessPnlEl, Number.isFinite(excessPnl) ? formatSignedDollarWithPlus(excessPnl) : "N/A", excessPnl);
-      setMetricValue(metricBetaEl, formatRatio(stats.beta, 2), stats.beta);
-      setMetricValue(metricAlphaEl, formatRatio(stats.alpha, 2), stats.alpha);
+      if (metricBetaAlphaEl) {
+        metricBetaAlphaEl.classList.remove("positive", "negative");
+        metricBetaAlphaEl.style.color = "";
+        const betaSpan = `<span style="color:${getScaledColor(stats.beta, 0, 2)}">${formatRatio(stats.beta, 2)}</span>`;
+        const alphaSpan = `<span style="color:${getScaledColor(stats.alpha, -1, 1)}">${formatRatio(stats.alpha, 2)}</span>`;
+        metricBetaAlphaEl.innerHTML = `β: ${betaSpan}, α: ${alphaSpan}`;
+      }
     } catch (err) {
       console.error("Benchmark metrics error", err);
       setMetricValue(metricExcessPnlEl, "N/A", null);
-      setMetricValue(metricBetaEl, "N/A", null);
-      setMetricValue(metricAlphaEl, "N/A", null);
+      setMetricValue(metricBetaAlphaEl, "N/A", null);
     }
   }
 
@@ -6494,21 +6484,11 @@
       }
       setMetricValue(metricActiveDaysCountEl, Number.isFinite(tradeMetrics.activeDaysCount) ? String(tradeMetrics.activeDaysCount) : "-", null);
       setMetricValue(metricProductCountEl, tradeMetrics.productCount !== null ? String(tradeMetrics.productCount) : "-", null);
-      setMetricValue(metricTopProductShareEl, formatPercent(tradeMetrics.topProductShare), null);
-      if (metricTopProductNoteEl) {
-        metricTopProductNoteEl.textContent = tradeMetrics.topProduct
-          ? `Share of notional (${tradeMetrics.topProduct})`
-          : "Share of notional";
-      }
       setMetricValue(metricHerfindahlEl, tradeMetrics.herfindahl !== null ? formatRatio(tradeMetrics.herfindahl, 3) : "-", null);
       if (Number.isFinite(tradeMetrics.herfindahl)) {
         setMetricScaledColor(metricHerfindahlEl, tradeMetrics.herfindahl, 0, 1, true);
       }
       setMetricValue(metricAvgNotionalEl, tradeMetrics.avgNotional !== null ? fmtMoney(tradeMetrics.avgNotional, 2) : "-", null);
-      setMetricValue(metricNotionalCvEl, tradeMetrics.notionalCv !== null ? formatRatio(tradeMetrics.notionalCv, 2) : "-", null);
-      if (Number.isFinite(tradeMetrics.notionalCv)) {
-        setMetricScaledColor(metricNotionalCvEl, tradeMetrics.notionalCv, 0, 2, true);
-      }
       setMetricValue(metricMedianHoldingEl, formatDuration(tradeMetrics.medianHoldingTime), null);
       setMetricValue(metricSideBiasEl, formatSignedPercent(tradeMetrics.sideBias), null);
       setMetricValue(metricAggressivenessEl, formatPercent(tradeMetrics.aggressiveness), null);
@@ -6524,11 +6504,8 @@
       setMetricValue(metricOrdersTradesPerDayEl, "-", null);
       setMetricValue(metricActiveDaysEl, "-", null);
       setMetricValue(metricProductCountEl, "-", null);
-      setMetricValue(metricTopProductShareEl, "-", null);
-      if (metricTopProductNoteEl) metricTopProductNoteEl.textContent = "Share of notional";
       setMetricValue(metricHerfindahlEl, "-", null);
       setMetricValue(metricAvgNotionalEl, "-", null);
-      setMetricValue(metricNotionalCvEl, "-", null);
       setMetricValue(metricActiveDaysCountEl, "-", null);
       setMetricValue(metricMedianHoldingEl, "-", null);
       setMetricValue(metricSideBiasEl, "-", null);
