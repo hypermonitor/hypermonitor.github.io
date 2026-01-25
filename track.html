@@ -849,6 +849,18 @@
       font-size: 0.8rem;
     }
 
+    .chart-toolbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .chart-toolbar-row .chart-toolbar {
+      margin-bottom: 0;
+    }
+
     .chart-range-btn {
       border-radius: 999px;
       border: 1px solid var(--glass-border);
@@ -1376,6 +1388,78 @@
     .breakdown-label { color: var(--muted); }
     body.light .breakdown-label { color: #0f172a; }
 
+    .metrics-card {
+      margin-top: 0.65rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.5rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .metrics-card.collapsed .metrics-grid {
+      max-height: 92px;
+      overflow: hidden;
+    }
+
+    .metrics-toggle {
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      line-height: 1;
+      min-width: 32px;
+    }
+
+    .metrics-toggle:hover { color: #f8fafc; border-color: rgba(255,255,255,0.22); }
+    body.light .metrics-toggle {
+      background: #f8fafc;
+      color: #334155;
+      border-color: #d1d5db;
+    }
+
+    .metric {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
+      background: rgba(15, 23, 42, 0.28);
+    }
+
+    body.light .metric {
+      background: #f8fafc;
+      border-color: #e5e7eb;
+    }
+
+    .metric-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .metric-value {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 0.35rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-value.positive { color: var(--accent); }
+    .metric-value.negative { color: var(--danger); }
+
+    .metric-sub {
+      margin-top: 0.25rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
     /* Trades table: slightly denser and allow the last column to wrap so it fits without scrolling */
     .trades-card table { font-size: 0.78rem; }
     .trades-card th, .trades-card td { padding: 0.3rem 0.35rem; }
@@ -1719,11 +1803,162 @@
   <section class="card">
     <h2>Performance</h2>
 
-    <div class="chart-toolbar">
-      <button class="chart-range-btn" data-range="day">Day</button>
-      <button class="chart-range-btn" data-range="week">Week</button>
-      <button class="chart-range-btn" data-range="month">Month</button>
-      <button class="chart-range-btn active" data-range="allTime">All Time</button>
+    <div class="chart-toolbar-row">
+      <div class="chart-toolbar">
+        <button class="chart-range-btn" data-range="day">Day</button>
+        <button class="chart-range-btn" data-range="week">Week</button>
+        <button class="chart-range-btn" data-range="month">Month</button>
+        <button class="chart-range-btn active" data-range="allTime">All Time</button>
+      </div>
+      <button class="metrics-toggle" id="metricsToggle" type="button" aria-expanded="false">
+        <span class="sr-only">Toggle metrics</span>
+        <span aria-hidden="true">▾</span>
+      </button>
+    </div>
+
+    <div class="metrics-card collapsed" id="metricsCard">
+      <div class="metrics-grid">
+        <div class="metric">
+          <div class="metric-label">Total PnL (Portfolio)</div>
+          <div class="metric-value" id="metricTotalPnl">-</div>
+          <div class="metric-sub">PnL change over range</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Return</div>
+          <div class="metric-value" id="metricReturn">-</div>
+          <div class="metric-sub">PnL vs initial account value</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Max Drawdown</div>
+          <div class="metric-value" id="metricMaxDrawdown">-</div>
+          <div class="metric-sub">Peak-to-trough vs initial</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Sharpe (PnL)</div>
+          <div class="metric-value" id="metricSharpe">-</div>
+          <div class="metric-sub">Mean / stdev of PnL deltas</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">PnL Volatility</div>
+          <div class="metric-value" id="metricVolatility">-</div>
+          <div class="metric-sub">Stdev of PnL deltas</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Best Interval</div>
+          <div class="metric-value" id="metricBestInterval">-</div>
+          <div class="metric-sub">Largest positive delta</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Realized PnL (Fills)</div>
+          <div class="metric-value" id="metricRealizedPnl">-</div>
+          <div class="metric-sub">From matched closed positions</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Win Rate</div>
+          <div class="metric-value" id="metricWinRate">-</div>
+          <div class="metric-sub">Closed positions with profit</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Profit Factor</div>
+          <div class="metric-value" id="metricProfitFactor">-</div>
+          <div class="metric-sub">Gains / losses</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Trades / Day</div>
+          <div class="metric-value" id="metricTradesPerDay">-</div>
+          <div class="metric-sub">Executed fills per day</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Orders / Day</div>
+          <div class="metric-value" id="metricOrdersPerDay">-</div>
+          <div class="metric-sub">Submitted orders per day</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Active Days Ratio</div>
+          <div class="metric-value" id="metricActiveDays">-</div>
+          <div class="metric-sub">Days with trades / observed</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Product Count</div>
+          <div class="metric-value" id="metricProductCount">-</div>
+          <div class="metric-sub">Unique traded products</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Top Product Share</div>
+          <div class="metric-value" id="metricTopProductShare">-</div>
+          <div class="metric-sub" id="metricTopProductNote">Share of notional</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Volume Concentration</div>
+          <div class="metric-value" id="metricHerfindahl">-</div>
+          <div class="metric-sub">Herfindahl index</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Avg Trade Notional</div>
+          <div class="metric-value" id="metricAvgNotional">-</div>
+          <div class="metric-sub">Mean |price * size|</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Notional CV</div>
+          <div class="metric-value" id="metricNotionalCv">-</div>
+          <div class="metric-sub">Std dev / mean</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Total Exposure Time</div>
+          <div class="metric-value" id="metricTotalExposure">-</div>
+          <div class="metric-sub">Sum of closed holding time</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Median Holding Time</div>
+          <div class="metric-value" id="metricMedianHolding">-</div>
+          <div class="metric-sub">Typical position duration</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Buy-Sell Imbalance</div>
+          <div class="metric-value" id="metricSideBias">-</div>
+          <div class="metric-sub">Notional bias</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Order Aggressiveness</div>
+          <div class="metric-value" id="metricAggressiveness">-</div>
+          <div class="metric-sub">Market orders / total</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Cancel Ratio</div>
+          <div class="metric-value" id="metricCancelRatio">-</div>
+          <div class="metric-sub">Canceled / submitted</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Reaction Speed</div>
+          <div class="metric-value" id="metricReactionSpeed">-</div>
+          <div class="metric-sub">Order submit to fill</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">PnL Stability</div>
+          <div class="metric-value" id="metricPnlStability">-</div>
+          <div class="metric-sub">Weekly CV</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Skill Persistence</div>
+          <div class="metric-value" id="metricSkillPersistence">-</div>
+          <div class="metric-sub">Weekly autocorr</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Excess PnL</div>
+          <div class="metric-value" id="metricExcessPnl">-</div>
+          <div class="metric-sub">Vs benchmark (BTC)</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Beta</div>
+          <div class="metric-value" id="metricBeta">-</div>
+          <div class="metric-sub">PnL vs BTC</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Alpha</div>
+          <div class="metric-value" id="metricAlpha">-</div>
+          <div class="metric-sub">Regression intercept</div>
+        </div>
+      </div>
     </div>
 
     <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
@@ -2030,6 +2265,40 @@
   const portfolioLoadingWrapEl = document.getElementById("portfolioLoadingWrap");
   const rangeButtons = document.querySelectorAll(".chart-range-btn");
   const exportExcelBtn = document.getElementById("exportExcelBtn");
+  const metricsCardEl = document.getElementById("metricsCard");
+  const metricsToggleEl = document.getElementById("metricsToggle");
+  const metricsWalletLabelEl = document.getElementById("metricsWalletLabel");
+  const metricsRangeLabelEl = document.getElementById("metricsRangeLabel");
+  const metricTotalPnlEl = document.getElementById("metricTotalPnl");
+  const metricReturnEl = document.getElementById("metricReturn");
+  const metricMaxDrawdownEl = document.getElementById("metricMaxDrawdown");
+  const metricSharpeEl = document.getElementById("metricSharpe");
+  const metricVolatilityEl = document.getElementById("metricVolatility");
+  const metricBestIntervalEl = document.getElementById("metricBestInterval");
+  const metricRealizedPnlEl = document.getElementById("metricRealizedPnl");
+  const metricWinRateEl = document.getElementById("metricWinRate");
+  const metricProfitFactorEl = document.getElementById("metricProfitFactor");
+  const metricTradesPerDayEl = document.getElementById("metricTradesPerDay");
+  const metricOrdersPerDayEl = document.getElementById("metricOrdersPerDay");
+  const metricActiveDaysEl = document.getElementById("metricActiveDays");
+  const metricProductCountEl = document.getElementById("metricProductCount");
+  const metricTopProductShareEl = document.getElementById("metricTopProductShare");
+  const metricTopProductNoteEl = document.getElementById("metricTopProductNote");
+  const metricHerfindahlEl = document.getElementById("metricHerfindahl");
+  const metricAvgNotionalEl = document.getElementById("metricAvgNotional");
+  const metricNotionalCvEl = document.getElementById("metricNotionalCv");
+  const metricTotalExposureEl = document.getElementById("metricTotalExposure");
+  const metricMedianHoldingEl = document.getElementById("metricMedianHolding");
+  const metricSideBiasEl = document.getElementById("metricSideBias");
+  const metricAggressivenessEl = document.getElementById("metricAggressiveness");
+  const metricCancelRatioEl = document.getElementById("metricCancelRatio");
+  const metricReactionSpeedEl = document.getElementById("metricReactionSpeed");
+  const metricSlippageEl = document.getElementById("metricSlippage");
+  const metricPnlStabilityEl = document.getElementById("metricPnlStability");
+  const metricSkillPersistenceEl = document.getElementById("metricSkillPersistence");
+  const metricExcessPnlEl = document.getElementById("metricExcessPnl");
+  const metricBetaEl = document.getElementById("metricBeta");
+  const metricAlphaEl = document.getElementById("metricAlpha");
 
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
@@ -2511,6 +2780,66 @@
     if (n > 0) return "+$" + abs;
     if (n < 0) return "-$" + abs;
     return "$" + abs;
+  }
+
+  function formatSignedPercent(value, decimals = 2) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    const pct = n * 100;
+    const abs = Math.abs(pct).toFixed(decimals);
+    if (pct > 0) return `+${abs}%`;
+    if (pct < 0) return `-${abs}%`;
+    return `${abs}%`;
+  }
+
+  function formatPercent(value, decimals = 2) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    return `${(n * 100).toFixed(decimals)}%`;
+  }
+
+  function formatNumber(value, decimals = 2) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    return n.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+  }
+
+  function formatRatio(value, decimals = 2) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    return n.toFixed(decimals);
+  }
+
+  function formatDuration(ms) {
+    const n = Number(ms);
+    if (!Number.isFinite(n) || n <= 0) return "";
+    const totalSeconds = Math.floor(n / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${totalSeconds}s`;
+  }
+
+  function normalizeTimestamp(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    if (n < 1e12) return n * 1000;
+    return n;
+  }
+
+  function getLocalDayKey(ms) {
+    const d = new Date(ms);
+    if (Number.isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
   }
 
   function rememberCoinAlias(raw, resolved) {
@@ -4657,6 +4986,7 @@
 
       historicalOrdersLoaded = true;
       renderHistoricalOrders();
+      updatePerformanceMetrics(currentRangeKey);
     } catch (err) {
       console.error("Historical orders error", err);
       historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Failed to load historical orders.</td></tr>";
@@ -4697,6 +5027,7 @@
 
       historicalFillsLoaded = true;
       renderHistoricalFills();
+      updatePerformanceMetrics(currentRangeKey);
     } catch (err) {
       console.error("Historical fills error", err);
       if (historicalFillsBodyEl) {
@@ -4885,6 +5216,7 @@
               });
               if (fills.length > MAX_FILL_ROWS) fills.length = MAX_FILL_ROWS;
               renderFills();
+              updatePerformanceMetrics(currentRangeKey);
 
               refreshPositionsAndMargin(wallet);
             } catch (err) {
@@ -4921,6 +5253,7 @@
     portfolioDataByWallet.clear();
     portfolioErrorEl.textContent = "";
     setPortfolioLoadingState(true, "Loading performance graphs…");
+    clearPerformanceMetrics();
     if (portfolioCharts.equity) {
       portfolioCharts.equity.destroy();
       portfolioCharts.pnl.destroy();
@@ -4968,7 +5301,7 @@
     const base = Number.isFinite(rawDeposits[0]) ? rawDeposits[0] : 0;
     const deposits = rawDeposits.map((d) => Math.round((d - base) * 100) / 100);
 
-    return { times, equity, pnl, deposits };
+    return { times, equity, pnl, deposits, rawDeposits };
   }
 
   function getPortfolioView(rangeKey, wallet) {
@@ -5203,6 +5536,978 @@
     };
   }
 
+  function detectOrderType(order) {
+    const rawType = order?.orderType ?? order?.type ?? order?.order_type;
+    if (typeof rawType === "string") {
+      const lower = rawType.toLowerCase();
+      if (lower.includes("market")) return "market";
+      if (lower.includes("limit")) return "limit";
+    }
+    if (rawType && typeof rawType === "object") {
+      const t = rawType.t ?? rawType.type ?? rawType.orderType;
+      if (typeof t === "string") {
+        const lower = t.toLowerCase();
+        if (lower.includes("market")) return "market";
+        if (lower.includes("limit")) return "limit";
+      }
+      if (rawType.isMarket === true) return "market";
+    }
+    const tif = order?.tif ?? order?.timeInForce;
+    if (typeof tif === "string" && tif.toLowerCase().includes("ioc")) return "market";
+    return "";
+  }
+
+  function normalizeFillForMetrics(fill) {
+    if (!fill || typeof fill !== "object") return null;
+    const time = normalizeTimestamp(fill.time ?? fill.timestamp);
+    if (!time) return null;
+    const sideRaw =
+      fill.side ??
+      (fill.isBuy !== undefined ? (fill.isBuy ? "B" : "S") : undefined) ??
+      fill.dir ??
+      fill.direction ??
+      "";
+    const sideUpper = String(sideRaw).toUpperCase();
+    let side = "";
+    if (sideUpper.startsWith("B") || sideUpper === "1" || sideUpper === "+1") side = "B";
+    else if (sideUpper.startsWith("S") || sideUpper.startsWith("A") || sideUpper === "-1") side = "S";
+
+    const sizeCandidates = [
+      fill.szi,
+      fill.sz,
+      fill.size,
+      fill.qty,
+      fill.quantity,
+      fill.baseSz,
+      fill.baseSize,
+    ];
+    let size = 0;
+    for (const cand of sizeCandidates) {
+      const n = Number(cand);
+      if (!Number.isNaN(n)) {
+        size = n;
+        break;
+      }
+    }
+
+    if (!side) {
+      if (size > 0) side = "B";
+      if (size < 0) side = "S";
+    }
+
+    const price = Number(fill.px ?? fill.price ?? 0);
+    const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
+    const wallet = fill.wallet || primaryWallet;
+    const oid = fill.oid ?? fill.orderId ?? fill.order_id ?? "";
+
+    return {
+      time,
+      side,
+      size: Math.abs(size),
+      price: Number.isFinite(price) ? price : null,
+      coin,
+      wallet,
+      oid,
+    };
+  }
+
+  function normalizeOrderObject(order, overrides = {}) {
+    if (!order || typeof order !== "object") return null;
+    const timestamp = normalizeTimestamp(overrides.timestamp ?? order.timestamp);
+    const status = String(overrides.status ?? order.status ?? "").toLowerCase();
+    const side = order.side ?? (order.isBuy ? "B" : "S") ?? "";
+    const coin = resolveCoinName(order.coin ?? "", order.asset ?? order.symbol ?? order.sym);
+    return {
+      wallet: overrides.wallet ?? order.wallet ?? "",
+      oid: pickOrderId(null, order) || "",
+      timestamp,
+      status,
+      side,
+      coin,
+      type: detectOrderType(order),
+    };
+  }
+
+  function normalizeHistoricalOrderForMetrics(entry) {
+    const normalized = normalizeHistoricalOrder(entry);
+    const raw = normalized.raw?.order ?? normalized.raw ?? entry?.order ?? entry ?? {};
+    return normalizeOrderObject(raw, {
+      wallet: normalized.wallet ?? raw.wallet ?? "",
+      status: normalized.status ?? raw.status ?? "",
+      timestamp: normalized.timestamp ?? raw.timestamp,
+    });
+  }
+
+  function getAllFillsForMetrics({ walletSet, startTime, endTime } = {}) {
+    const combined = [];
+    const pushFrom = (arr) => {
+      if (!Array.isArray(arr)) return;
+      arr.forEach((fill) => {
+        const normalized = normalizeFillForMetrics(fill);
+        if (normalized) combined.push(normalized);
+      });
+    };
+    pushFrom(historicalFills);
+    pushFrom(fills);
+
+    const seen = new Set();
+    const unique = [];
+    combined.forEach((f) => {
+      if (walletSet && f.wallet && !walletSet.has(String(f.wallet).toLowerCase())) return;
+      if (Number.isFinite(startTime) && f.time < startTime) return;
+      if (Number.isFinite(endTime) && f.time > endTime) return;
+      const key = [
+        f.wallet || "",
+        f.oid || "",
+        f.time,
+        f.side,
+        f.size,
+        f.price,
+        f.coin || "",
+      ].join("|");
+      if (seen.has(key)) return;
+      seen.add(key);
+      unique.push(f);
+    });
+
+    return unique.sort((a, b) => a.time - b.time);
+  }
+
+  function getAllOrdersForMetrics({ walletSet, startTime, endTime } = {}) {
+    const combined = [];
+    if (Array.isArray(historicalOrders)) {
+      historicalOrders.forEach((entry) => {
+        const normalized = normalizeHistoricalOrderForMetrics(entry);
+        if (normalized) combined.push(normalized);
+      });
+    }
+
+    openOrders.forEach((order) => {
+      const normalized = normalizeOrderObject(order, {
+        wallet: order.wallet ?? "",
+        status: order.status ?? "open",
+      });
+      if (normalized) combined.push(normalized);
+    });
+
+    canceledOrders.forEach((order) => {
+      const normalized = normalizeOrderObject(order, {
+        wallet: order.wallet ?? "",
+        status: order.status ?? "canceled",
+        timestamp: order.statusTimestamp ?? order.timestamp,
+      });
+      if (normalized) combined.push(normalized);
+    });
+
+    const seen = new Set();
+    const unique = [];
+    combined.forEach((o) => {
+      const walletKey = o.wallet ? String(o.wallet).toLowerCase() : "";
+      if (walletSet && walletKey && !walletSet.has(walletKey)) return;
+      if (Number.isFinite(startTime) && Number.isFinite(o.timestamp) && o.timestamp < startTime) return;
+      if (Number.isFinite(endTime) && Number.isFinite(o.timestamp) && o.timestamp > endTime) return;
+      const key = [
+        o.wallet || "",
+        o.oid || "",
+        o.timestamp ?? "",
+        o.status,
+      ].join("|");
+      if (seen.has(key)) return;
+      seen.add(key);
+      unique.push(o);
+    });
+
+    return unique.sort((a, b) => (a.timestamp ?? 0) - (b.timestamp ?? 0));
+  }
+
+  function computeObservedDays(times) {
+    if (!Array.isArray(times) || times.length === 0) return 0;
+    const valid = times.filter((t) => Number.isFinite(t));
+    if (!valid.length) return 0;
+    const min = Math.min(...valid);
+    const max = Math.max(...valid);
+    const diff = Math.max(0, max - min);
+    return Math.max(1, Math.floor(diff / 86400000) + 1);
+  }
+
+  function computeMedian(values) {
+    if (!Array.isArray(values) || values.length === 0) return null;
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 === 0) return (sorted[mid - 1] + sorted[mid]) / 2;
+    return sorted[mid];
+  }
+
+  function computeHoldingStats(fillsForStats) {
+    const lotsByCoin = new Map();
+    const holdingTimes = [];
+    let realizedPnl = 0;
+    let wins = 0;
+    let closedCount = 0;
+    let sumPositive = 0;
+    let sumNegative = 0;
+
+    const sorted = [...fillsForStats].sort((a, b) => a.time - b.time);
+    sorted.forEach((fill) => {
+      const side = fill.side;
+      const size = Number(fill.size ?? 0);
+      const price = Number(fill.price ?? 0);
+      if (!side || !Number.isFinite(size) || size <= 0 || !Number.isFinite(price)) return;
+      const coin = fill.coin || "";
+      const time = Number(fill.time ?? 0);
+      if (!Number.isFinite(time)) return;
+
+      const sideSign = side === "B" ? 1 : side === "S" ? -1 : 0;
+      if (!sideSign) return;
+
+      const key = coin || "__unknown__";
+      const lots = lotsByCoin.get(key) || [];
+      let remaining = size;
+
+      while (remaining > 0 && lots.length > 0 && lots[0].sideSign !== sideSign) {
+        const lot = lots[0];
+        const matchSize = Math.min(remaining, lot.size);
+        const duration = Math.max(0, time - lot.time);
+        holdingTimes.push(duration);
+        const pnl = (price - lot.price) * matchSize * lot.sideSign;
+        realizedPnl += pnl;
+        if (pnl > 0) {
+          wins += 1;
+          sumPositive += pnl;
+        } else if (pnl < 0) {
+          sumNegative += pnl;
+        }
+        closedCount += 1;
+
+        lot.size -= matchSize;
+        remaining -= matchSize;
+        if (lot.size <= 0) lots.shift();
+      }
+
+      if (remaining > 0) {
+        lots.push({ sideSign, size: remaining, price, time });
+      }
+
+      lotsByCoin.set(key, lots);
+    });
+
+    const totalExposureTime = holdingTimes.reduce((sum, v) => sum + v, 0);
+    const medianHoldingTime = computeMedian(holdingTimes);
+    const winRate = closedCount ? wins / closedCount : null;
+    const profitFactor =
+      sumNegative < 0
+        ? sumPositive / Math.abs(sumNegative)
+        : sumPositive > 0
+          ? Infinity
+          : null;
+
+    return {
+      realizedPnl,
+      winRate,
+      profitFactor,
+      totalExposureTime,
+      medianHoldingTime,
+      closedCount,
+    };
+  }
+
+  function computeTradeOrderMetrics({ startTime, endTime, walletSet } = {}) {
+    const fillsForStats = getAllFillsForMetrics({ walletSet, startTime, endTime });
+    const ordersForStats = getAllOrdersForMetrics({ walletSet, startTime, endTime });
+
+    if (!fillsForStats.length && !ordersForStats.length) return null;
+
+    const tradeTimes = fillsForStats.map((f) => f.time).filter(Number.isFinite);
+    const orderTimes = ordersForStats.map((o) => o.timestamp).filter(Number.isFinite);
+    let observedDays = computeObservedDays(tradeTimes.length ? tradeTimes : orderTimes);
+    if (Number.isFinite(startTime) && Number.isFinite(endTime) && endTime >= startTime) {
+      observedDays = Math.max(1, Math.floor((endTime - startTime) / 86400000) + 1);
+    }
+
+    const tradeDays = new Set(tradeTimes.map(getLocalDayKey).filter(Boolean));
+    const tradesPerDay = observedDays ? fillsForStats.length / observedDays : null;
+    const ordersPerDay = observedDays ? ordersForStats.length / observedDays : null;
+    const activeDaysRatio = observedDays ? tradeDays.size / observedDays : null;
+
+    const productNotional = new Map();
+    const productSet = new Set();
+    const notionals = [];
+    let buyNotional = 0;
+    let sellNotional = 0;
+
+    fillsForStats.forEach((fill) => {
+      const price = Number(fill.price ?? 0);
+      const size = Number(fill.size ?? 0);
+      if (!Number.isFinite(price) || !Number.isFinite(size) || size <= 0) return;
+      const notional = Math.abs(price * size);
+      if (!Number.isFinite(notional)) return;
+      const coin = fill.coin || "";
+      if (coin) productSet.add(coin);
+      notionals.push(notional);
+      if (coin) productNotional.set(coin, (productNotional.get(coin) || 0) + notional);
+      if (fill.side === "B") buyNotional += notional;
+      if (fill.side === "S") sellNotional += notional;
+    });
+
+    const totalNotional = notionals.reduce((sum, v) => sum + v, 0);
+    let topProduct = null;
+    let topProductShare = null;
+    if (totalNotional > 0) {
+      productNotional.forEach((value, coin) => {
+        const share = value / totalNotional;
+        if (topProductShare === null || share > topProductShare) {
+          topProductShare = share;
+          topProduct = coin;
+        }
+      });
+    }
+
+    let herfindahl = null;
+    if (totalNotional > 0 && productNotional.size) {
+      herfindahl = 0;
+      productNotional.forEach((value) => {
+        const share = value / totalNotional;
+        herfindahl += share * share;
+      });
+    }
+
+    const avgNotional = notionals.length ? totalNotional / notionals.length : null;
+    let notionalCv = null;
+    if (avgNotional && notionals.length) {
+      const variance = notionals.reduce((sum, v) => sum + Math.pow(v - avgNotional, 2), 0) / notionals.length;
+      const stddev = Math.sqrt(variance);
+      notionalCv = avgNotional ? stddev / avgNotional : null;
+    }
+
+    const sideBiasTotal = buyNotional + sellNotional;
+    const sideBias = sideBiasTotal > 0 ? (buyNotional - sellNotional) / sideBiasTotal : null;
+
+    const canceledCount = ordersForStats.filter((o) => String(o.status || "").includes("cancel")).length;
+    const totalOrders = ordersForStats.length;
+    const cancelRatio = totalOrders ? canceledCount / totalOrders : null;
+
+    const knownTypeOrders = ordersForStats.filter((o) => o.type);
+    const marketOrders = knownTypeOrders.filter((o) => o.type === "market").length;
+    const aggressiveness =
+      knownTypeOrders.length > 0 ? marketOrders / totalOrders : null;
+
+    const orderTimeIndex = new Map();
+    ordersForStats.forEach((order) => {
+      if (!order.oid || !Number.isFinite(order.timestamp)) return;
+      const existing = orderTimeIndex.get(order.oid);
+      if (!existing || order.timestamp < existing) orderTimeIndex.set(order.oid, order.timestamp);
+    });
+
+    const reactionTimes = [];
+    fillsForStats.forEach((fill) => {
+      if (!fill.oid) return;
+      const submitTime = orderTimeIndex.get(fill.oid);
+      if (!Number.isFinite(submitTime)) return;
+      const delta = fill.time - submitTime;
+      if (Number.isFinite(delta) && delta >= 0) reactionTimes.push(delta);
+    });
+
+    const reactionSpeed =
+      reactionTimes.length > 0
+        ? reactionTimes.reduce((sum, v) => sum + v, 0) / reactionTimes.length
+        : null;
+
+    const holdingStats = computeHoldingStats(fillsForStats);
+
+    return {
+      tradesPerDay,
+      ordersPerDay,
+      activeDaysRatio,
+      productCount: productSet.size || null,
+      topProductShare,
+      topProduct,
+      herfindahl,
+      avgNotional,
+      notionalCv,
+      totalExposureTime: holdingStats.totalExposureTime,
+      medianHoldingTime: holdingStats.medianHoldingTime,
+      realizedPnl: holdingStats.realizedPnl,
+      winRate: holdingStats.winRate,
+      profitFactor: holdingStats.profitFactor,
+      sideBias,
+      aggressiveness,
+      cancelRatio,
+      reactionSpeed,
+    };
+  }
+
+  function clearPerformanceMetrics() {
+    const placeholders = [
+      metricTotalPnlEl,
+      metricReturnEl,
+      metricMaxDrawdownEl,
+      metricSharpeEl,
+      metricVolatilityEl,
+      metricBestIntervalEl,
+      metricRealizedPnlEl,
+      metricWinRateEl,
+      metricProfitFactorEl,
+      metricTradesPerDayEl,
+      metricOrdersPerDayEl,
+      metricActiveDaysEl,
+      metricProductCountEl,
+      metricTopProductShareEl,
+      metricHerfindahlEl,
+      metricAvgNotionalEl,
+      metricNotionalCvEl,
+      metricTotalExposureEl,
+      metricMedianHoldingEl,
+      metricSideBiasEl,
+      metricAggressivenessEl,
+      metricCancelRatioEl,
+      metricReactionSpeedEl,
+      metricPnlStabilityEl,
+      metricSkillPersistenceEl,
+      metricExcessPnlEl,
+      metricBetaEl,
+      metricAlphaEl,
+    ];
+    placeholders.forEach((el) => {
+      if (!el) return;
+      el.textContent = "-";
+      el.classList.remove("positive", "negative");
+      el.style.color = "";
+    });
+    if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = "-";
+    if (metricTopProductNoteEl) metricTopProductNoteEl.textContent = "Share of notional";
+  }
+
+  function getRangeLabel(rangeKey) {
+    const labels = {
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      allTime: "All Time",
+    };
+    return labels[rangeKey] || "All Time";
+  }
+
+  function setMetricValue(el, text, valueForTone) {
+    if (!el) return;
+    el.textContent = text || "-";
+    el.classList.remove("positive", "negative");
+    el.style.color = "";
+    if (Number.isFinite(valueForTone)) {
+      if (valueForTone > 0) el.classList.add("positive");
+      if (valueForTone < 0) el.classList.add("negative");
+    }
+  }
+
+  function setMetricScaledColor(el, value, min = 0, max = 1) {
+    if (!el) return;
+    const clamped = Math.max(min, Math.min(max, value));
+    const t = max === min ? 0 : (clamped - min) / (max - min);
+    const red = Math.round(242 + (38 - 242) * t);
+    const green = Math.round(95 + (217 - 95) * t);
+    const blue = Math.round(92 + (127 - 92) * t);
+    el.style.color = `rgb(${red}, ${green}, ${blue})`;
+  }
+
+  function getMetricsSource(rangeKey) {
+    const views = getWalletViews(rangeKey);
+    if (!views.length) return null;
+    if (views.length === 1) {
+      return { label: formatWalletLabel(views[0].wallet), view: views[0].view };
+    }
+    const labels = buildLabels(views[0].view.times, rangeKey);
+    const weightedEquity = buildWeightedSeries(views, labels, "equity");
+    const weightedPnl = buildWeightedSeries(views, labels, "pnl");
+    return {
+      label: "Weighted",
+      view: {
+        times: views[0].view.times,
+        equity: weightedEquity?.data || views[0].view.equity,
+        pnl: weightedPnl?.data || views[0].view.pnl,
+      },
+    };
+  }
+
+  function computeWeeklyPnlDeltas(times, pnl) {
+    if (!Array.isArray(times) || !Array.isArray(pnl) || times.length !== pnl.length) return [];
+    const buckets = new Map();
+    for (let i = 0; i < times.length; i += 1) {
+      const time = normalizeTimestamp(times[i]);
+      const value = Number(pnl[i]);
+      if (!Number.isFinite(time) || !Number.isFinite(value)) continue;
+      const weekIndex = Math.floor(time / 604800000);
+      const bucket = buckets.get(weekIndex) || { firstTime: time, lastTime: time, first: value, last: value };
+      if (time < bucket.firstTime) {
+        bucket.firstTime = time;
+        bucket.first = value;
+      }
+      if (time > bucket.lastTime) {
+        bucket.lastTime = time;
+        bucket.last = value;
+      }
+      buckets.set(weekIndex, bucket);
+    }
+    return Array.from(buckets.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([, bucket]) => bucket.last - bucket.first);
+  }
+
+  function computeCorrelation(seriesA, seriesB) {
+    if (!Array.isArray(seriesA) || !Array.isArray(seriesB)) return null;
+    if (seriesA.length !== seriesB.length || seriesA.length < 2) return null;
+    const n = seriesA.length;
+    const meanA = seriesA.reduce((sum, v) => sum + v, 0) / n;
+    const meanB = seriesB.reduce((sum, v) => sum + v, 0) / n;
+    let cov = 0;
+    let varA = 0;
+    let varB = 0;
+    for (let i = 0; i < n; i += 1) {
+      const da = seriesA[i] - meanA;
+      const db = seriesB[i] - meanB;
+      cov += da * db;
+      varA += da * da;
+      varB += db * db;
+    }
+    if (!varA || !varB) return null;
+    return cov / Math.sqrt(varA * varB);
+  }
+
+  function computePerformanceMetrics(view) {
+    const equity = Array.isArray(view?.equity) ? view.equity : [];
+    const pnl = Array.isArray(view?.pnl) ? view.pnl : [];
+    const rawDeposits = Array.isArray(view?.rawDeposits) ? view.rawDeposits : [];
+    const times = Array.isArray(view?.times) ? view.times : [];
+    if (equity.length < 2 || pnl.length < 2) return null;
+
+    const pnlStart = Number(pnl[0]);
+    const pnlEnd = Number(pnl[pnl.length - 1]);
+    const totalPnl = pnlEnd - pnlStart;
+    const depositsBase = Number.isFinite(rawDeposits[0]) ? rawDeposits[0] : 0;
+    let totalDeposits = Number.isFinite(depositsBase) && depositsBase > 0 ? depositsBase : 0;
+    for (let i = 1; i < rawDeposits.length; i += 1) {
+      const prev = Number(rawDeposits[i - 1]);
+      const curr = Number(rawDeposits[i]);
+      if (!Number.isFinite(prev) || !Number.isFinite(curr)) continue;
+      const delta = curr - prev;
+      if (delta > 0) totalDeposits += delta;
+    }
+
+    const baseEquity = totalDeposits > 0 ? totalDeposits : Number(equity[0]);
+    const baseDenom = baseEquity ? Math.abs(baseEquity) : null;
+    const returnPct = baseDenom ? totalPnl / baseDenom : null;
+
+    let peak = -Infinity;
+    let maxDrawdownAbs = 0;
+    pnl.forEach((val) => {
+      const v = Number(val);
+      if (!Number.isFinite(v)) return;
+      const equityFromInitial = Number.isFinite(baseEquity) ? baseEquity + (v - pnlStart) : v;
+      if (equityFromInitial > peak) peak = equityFromInitial;
+      const drawdown = peak - equityFromInitial;
+      if (drawdown > maxDrawdownAbs) maxDrawdownAbs = drawdown;
+    });
+    const maxDrawdown = baseDenom ? maxDrawdownAbs / baseDenom : null;
+
+    const deltas = [];
+    for (let i = 1; i < pnl.length; i += 1) {
+      const prev = Number(pnl[i - 1]);
+      const curr = Number(pnl[i]);
+      if (!Number.isFinite(prev) || !Number.isFinite(curr)) continue;
+      deltas.push(curr - prev);
+    }
+    if (!deltas.length) return null;
+
+    const mean = deltas.reduce((sum, v) => sum + v, 0) / deltas.length;
+    const variance = deltas.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / deltas.length;
+    const volatility = Math.sqrt(variance);
+    const sharpe = volatility ? mean / volatility : null;
+    const bestInterval = Math.max(...deltas);
+
+    const weeklyDeltas = computeWeeklyPnlDeltas(times, pnl);
+    let pnlStability = null;
+    if (weeklyDeltas.length) {
+      const weeklyMean = weeklyDeltas.reduce((sum, v) => sum + v, 0) / weeklyDeltas.length;
+      const weeklyVar = weeklyDeltas.reduce((sum, v) => sum + Math.pow(v - weeklyMean, 2), 0) / weeklyDeltas.length;
+      const weeklyStd = Math.sqrt(weeklyVar);
+      const denom = Math.abs(weeklyMean);
+      pnlStability = denom ? weeklyStd / denom : null;
+    }
+
+    let skillPersistence = null;
+    if (weeklyDeltas.length >= 2) {
+      const a = weeklyDeltas.slice(0, -1);
+      const b = weeklyDeltas.slice(1);
+      skillPersistence = computeCorrelation(a, b);
+    }
+
+    return {
+      totalPnl,
+      returnPct,
+      maxDrawdown,
+      sharpe,
+      volatility,
+      bestInterval,
+      pnlStability,
+      skillPersistence,
+      baseEquity,
+      pnlStart,
+    };
+  }
+
+  function getMetricsRangeWindow(view, rangeKey) {
+    const times = Array.isArray(view?.times) ? view.times : [];
+    if (!times.length) return { start: null, end: null };
+    const msTimes = times
+      .map((t) => (t instanceof Date ? t.getTime() : normalizeTimestamp(t)))
+      .filter(Number.isFinite);
+    if (!msTimes.length) return { start: null, end: null };
+    const end = Date.now();
+    if (rangeKey === "day") return { start: end - 86400000, end };
+    if (rangeKey === "week") return { start: end - 7 * 86400000, end };
+    if (rangeKey === "month") return { start: end - 30 * 86400000, end };
+    return { start: Math.min(...msTimes), end };
+  }
+
+  function getRangeDays(rangeKey) {
+    if (rangeKey === "day") return 1;
+    if (rangeKey === "week") return 7;
+    if (rangeKey === "month") return 30;
+    return "max";
+  }
+
+  const benchmarkCache = new Map();
+  let benchmarkRequestId = 0;
+
+  async function fetchJsonWithTimeout(url, timeoutMs = 8000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(id);
+    }
+  }
+
+  function getBinanceInterval(rangeKey) {
+    if (rangeKey === "day") return "1h";
+    if (rangeKey === "week") return "4h";
+    if (rangeKey === "month") return "1d";
+    return "1d";
+  }
+
+  function getBinanceLimit(rangeKey) {
+    if (rangeKey === "day") return 48;
+    if (rangeKey === "week") return 200;
+    if (rangeKey === "month") return 400;
+    return 1000;
+  }
+
+  async function fetchBitcoinHistory(rangeKey, startTime, endTime) {
+    const days = getRangeDays(rangeKey);
+    const cacheKey = `${rangeKey}:${days}:${Number(startTime) || "na"}:${Number(endTime) || "na"}`;
+    if (benchmarkCache.has(cacheKey)) return benchmarkCache.get(cacheKey);
+
+    const sources = [
+      {
+        name: "binance",
+        fetch: async () => {
+          const interval = getBinanceInterval(rangeKey);
+          const limit = getBinanceLimit(rangeKey);
+          const fetchChunk = async (start, end) => {
+            const params = new URLSearchParams({
+              symbol: "BTCUSDT",
+              interval,
+              limit: String(limit),
+            });
+            if (Number.isFinite(start)) params.set("startTime", String(start));
+            if (Number.isFinite(end)) params.set("endTime", String(end));
+            const url = `https://api.binance.com/api/v3/klines?${params.toString()}`;
+            const data = await fetchJsonWithTimeout(url);
+            if (!Array.isArray(data)) return [];
+            return data
+              .map((row) => [Number(row?.[0]), Number(row?.[4])])
+              .filter(([t, p]) => Number.isFinite(t) && Number.isFinite(p));
+          };
+
+          if (rangeKey !== "allTime") {
+            return await fetchChunk();
+          }
+
+          const all = [];
+          let fetchStart = Number.isFinite(startTime) ? startTime : null;
+          const fetchEnd = Number.isFinite(endTime) ? endTime : null;
+          let safety = 0;
+          while (fetchStart !== null && fetchEnd !== null && fetchStart < fetchEnd && safety < 6) {
+            // eslint-disable-next-line no-await-in-loop
+            const chunk = await fetchChunk(fetchStart, fetchEnd);
+            if (!chunk.length) break;
+            all.push(...chunk);
+            const lastTime = chunk[chunk.length - 1][0];
+            if (!Number.isFinite(lastTime) || lastTime <= fetchStart) break;
+            fetchStart = lastTime + 1;
+            safety += 1;
+          }
+          return all.length ? all : await fetchChunk();
+        },
+      },
+      {
+        name: "coinbase",
+        fetch: async () => {
+          const granularity = rangeKey === "day" ? 3600 : rangeKey === "week" ? 14400 : 86400;
+          const url = `https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=${granularity}`;
+          const data = await fetchJsonWithTimeout(url);
+          if (!Array.isArray(data)) return [];
+          return data
+            .map((row) => [Number(row?.[0]) * 1000, Number(row?.[4])])
+            .filter(([t, p]) => Number.isFinite(t) && Number.isFinite(p));
+        },
+      },
+    ];
+
+    let lastError = null;
+    for (const source of sources) {
+      try {
+        const result = await source.fetch();
+        if (result && result.length) {
+          benchmarkCache.set(cacheKey, result);
+          return result;
+        }
+      } catch (err) {
+        lastError = err;
+        console.warn(`BTC benchmark source failed: ${source.name}`, err);
+      }
+    }
+
+    if (lastError) throw lastError;
+    return [];
+  }
+
+  function resolveBetaBaseEquity(view) {
+    const baseEquity = Number(view?.baseEquity ?? 0);
+    if (Number.isFinite(baseEquity) && baseEquity !== 0) return baseEquity;
+    const equity = Array.isArray(view?.equity) ? view.equity : [];
+    const fallback = equity.find((v) => Number.isFinite(v) && v !== 0);
+    return Number.isFinite(fallback) ? Number(fallback) : null;
+  }
+
+  function buildWalletReturnSeries(view, baseEquityOverride) {
+    const pnl = Array.isArray(view?.pnl) ? view.pnl : [];
+    const times = Array.isArray(view?.times) ? view.times : [];
+    if (!pnl.length || pnl.length !== times.length) return null;
+    const overrideOk = Number.isFinite(baseEquityOverride) && baseEquityOverride !== 0;
+    const baseEquity = overrideOk ? baseEquityOverride : resolveBetaBaseEquity(view);
+    const denom = baseEquity ? Math.abs(baseEquity) : null;
+    if (!denom) return null;
+
+    const series = [];
+    for (let i = 1; i < pnl.length; i += 1) {
+      const prev = Number(pnl[i - 1]);
+      const curr = Number(pnl[i]);
+      const time = times[i] instanceof Date ? times[i].getTime() : normalizeTimestamp(times[i]);
+      const prevTime = times[i - 1] instanceof Date ? times[i - 1].getTime() : normalizeTimestamp(times[i - 1]);
+      if (!Number.isFinite(prev) || !Number.isFinite(curr) || !Number.isFinite(time) || !Number.isFinite(prevTime)) continue;
+      series.push({ time, prevTime, value: (curr - prev) / denom });
+    }
+    return series;
+  }
+
+  function findNearestPrice(priceSeries, time) {
+    if (!priceSeries.length) return null;
+    let left = 0;
+    let right = priceSeries.length - 1;
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      const midTime = priceSeries[mid][0];
+      if (midTime === time) return priceSeries[mid][1];
+      if (midTime < time) left = mid + 1;
+      else right = mid - 1;
+    }
+    const leftItem = priceSeries[left];
+    const rightItem = priceSeries[right];
+    if (!leftItem) return rightItem ? rightItem[1] : null;
+    if (!rightItem) return leftItem[1];
+    return Math.abs(leftItem[0] - time) < Math.abs(rightItem[0] - time) ? leftItem[1] : rightItem[1];
+  }
+
+  function buildBenchmarkReturnSeries(priceSeries, walletSeries) {
+    if (!walletSeries || !walletSeries.length) return null;
+    const benchmark = [];
+    for (let i = 0; i < walletSeries.length; i += 1) {
+      const time = walletSeries[i].time;
+      const prevTime = walletSeries[i].prevTime;
+      const prevPrice = findNearestPrice(priceSeries, prevTime);
+      const price = findNearestPrice(priceSeries, time);
+      if (!Number.isFinite(prevPrice) || !Number.isFinite(price) || prevPrice === 0) continue;
+      benchmark.push({ time, value: (price - prevPrice) / prevPrice });
+    }
+    return benchmark.length ? benchmark : null;
+  }
+
+  function computeBetaAlpha(walletSeries, benchmarkSeries) {
+    if (!walletSeries || !benchmarkSeries) return null;
+    const pairs = [];
+    const benchByTime = new Map(benchmarkSeries.map((b) => [b.time, b.value]));
+    walletSeries.forEach((w) => {
+      const b = benchByTime.get(w.time);
+      if (Number.isFinite(w.value) && Number.isFinite(b)) pairs.push([w.value, b]);
+    });
+    if (pairs.length < 2) return null;
+    const walletVals = pairs.map((p) => p[0]);
+    const benchVals = pairs.map((p) => p[1]);
+    const meanWallet = walletVals.reduce((s, v) => s + v, 0) / walletVals.length;
+    const meanBench = benchVals.reduce((s, v) => s + v, 0) / benchVals.length;
+    let cov = 0;
+    let varBench = 0;
+    for (let i = 0; i < pairs.length; i += 1) {
+      const dw = walletVals[i] - meanWallet;
+      const db = benchVals[i] - meanBench;
+      cov += dw * db;
+      varBench += db * db;
+    }
+    if (!varBench) return null;
+    const beta = cov / varBench;
+    const alpha = meanWallet - beta * meanBench;
+    return { beta, alpha, meanBench };
+  }
+
+  async function updateBenchmarkMetrics(rangeKey, view, totalPnl, baseEquity, rangeWindow) {
+    const requestId = ++benchmarkRequestId;
+    setMetricValue(metricExcessPnlEl, "Loading...", null);
+    setMetricValue(metricBetaEl, "Loading...", null);
+    setMetricValue(metricAlphaEl, "Loading...", null);
+
+    try {
+      const priceSeries = await fetchBitcoinHistory(rangeKey, rangeWindow?.start, rangeWindow?.end);
+      if (requestId !== benchmarkRequestId) return;
+
+      const walletSeries = buildWalletReturnSeries(view, baseEquity);
+      if (!walletSeries || !walletSeries.length) {
+        setMetricValue(metricExcessPnlEl, "N/A", null);
+        setMetricValue(metricBetaEl, "N/A", null);
+        setMetricValue(metricAlphaEl, "N/A", null);
+        return;
+      }
+
+      const benchmarkSeries = buildBenchmarkReturnSeries(priceSeries, walletSeries);
+      const stats = computeBetaAlpha(walletSeries, benchmarkSeries);
+      if (!stats) {
+        setMetricValue(metricExcessPnlEl, "N/A", null);
+        setMetricValue(metricBetaEl, "N/A", null);
+        setMetricValue(metricAlphaEl, "N/A", null);
+        return;
+      }
+
+      const benchmarkSum = benchmarkSeries
+        ? benchmarkSeries.reduce((sum, item) => sum + (Number.isFinite(item.value) ? item.value : 0), 0)
+        : null;
+      const benchmarkPnl = Number.isFinite(baseEquity) && Number.isFinite(benchmarkSum)
+        ? baseEquity * benchmarkSum
+        : null;
+      const excessPnl = Number.isFinite(benchmarkPnl) ? totalPnl - benchmarkPnl : null;
+
+      setMetricValue(metricExcessPnlEl, Number.isFinite(excessPnl) ? formatSignedDollarWithPlus(excessPnl) : "N/A", excessPnl);
+      setMetricValue(metricBetaEl, formatRatio(stats.beta, 2), stats.beta);
+      setMetricValue(metricAlphaEl, formatRatio(stats.alpha, 2), stats.alpha);
+    } catch (err) {
+      console.error("Benchmark metrics error", err);
+      setMetricValue(metricExcessPnlEl, "N/A", null);
+      setMetricValue(metricBetaEl, "N/A", null);
+      setMetricValue(metricAlphaEl, "N/A", null);
+    }
+  }
+
+  function updatePerformanceMetrics(rangeKey) {
+    if (metricsRangeLabelEl) metricsRangeLabelEl.textContent = getRangeLabel(rangeKey);
+
+    const source = getMetricsSource(rangeKey);
+    if (!source) {
+      clearPerformanceMetrics();
+      return;
+    }
+    if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = source.label || "-";
+
+    const metrics = computePerformanceMetrics(source.view);
+    const rangeWindow = getMetricsRangeWindow(source.view, rangeKey);
+    const walletSet = new Set(currentWallets.map((w) => String(w).toLowerCase()));
+    const tradeMetrics = computeTradeOrderMetrics({
+      startTime: rangeWindow.start,
+      endTime: rangeWindow.end,
+      walletSet,
+    });
+    if (!metrics) {
+      clearPerformanceMetrics();
+      return;
+    }
+
+    setMetricValue(metricTotalPnlEl, formatSignedDollarWithPlus(metrics.totalPnl), metrics.totalPnl);
+    setMetricValue(metricReturnEl, formatSignedPercent(metrics.returnPct), metrics.returnPct);
+    setMetricValue(metricMaxDrawdownEl, formatPercent(metrics.maxDrawdown), null);
+    setMetricValue(metricSharpeEl, metrics.sharpe !== null ? formatRatio(metrics.sharpe, 2) : "-", metrics.sharpe);
+    setMetricValue(metricVolatilityEl, fmtMoney(metrics.volatility, 2), null);
+    setMetricValue(metricBestIntervalEl, formatSignedDollarWithPlus(metrics.bestInterval), metrics.bestInterval);
+    setMetricValue(metricPnlStabilityEl, metrics.pnlStability !== null ? formatRatio(metrics.pnlStability, 2) : "-", null);
+    setMetricValue(metricSkillPersistenceEl, metrics.skillPersistence !== null ? formatRatio(metrics.skillPersistence, 2) : "-", null);
+
+    if (tradeMetrics) {
+      setMetricValue(metricRealizedPnlEl, formatSignedDollarWithPlus(tradeMetrics.realizedPnl), tradeMetrics.realizedPnl);
+      setMetricValue(metricWinRateEl, formatPercent(tradeMetrics.winRate), null);
+      if (Number.isFinite(tradeMetrics.winRate)) {
+        setMetricScaledColor(metricWinRateEl, tradeMetrics.winRate, 0, 1);
+      }
+      const profitFactorText =
+        tradeMetrics.profitFactor === Infinity
+          ? "Inf"
+          : tradeMetrics.profitFactor !== null
+            ? formatRatio(tradeMetrics.profitFactor, 2)
+            : "-";
+      setMetricValue(metricProfitFactorEl, profitFactorText, null);
+      setMetricValue(metricTradesPerDayEl, formatNumber(tradeMetrics.tradesPerDay, 2), null);
+      setMetricValue(metricOrdersPerDayEl, formatNumber(tradeMetrics.ordersPerDay, 2), null);
+      setMetricValue(metricActiveDaysEl, formatPercent(tradeMetrics.activeDaysRatio), null);
+      setMetricValue(metricProductCountEl, tradeMetrics.productCount !== null ? String(tradeMetrics.productCount) : "-", null);
+      setMetricValue(metricTopProductShareEl, formatPercent(tradeMetrics.topProductShare), null);
+      if (metricTopProductNoteEl) {
+        metricTopProductNoteEl.textContent = tradeMetrics.topProduct
+          ? `Share of notional (${tradeMetrics.topProduct})`
+          : "Share of notional";
+      }
+      setMetricValue(metricHerfindahlEl, tradeMetrics.herfindahl !== null ? formatRatio(tradeMetrics.herfindahl, 3) : "-", null);
+      setMetricValue(metricAvgNotionalEl, tradeMetrics.avgNotional !== null ? fmtMoney(tradeMetrics.avgNotional, 2) : "-", null);
+      setMetricValue(metricNotionalCvEl, tradeMetrics.notionalCv !== null ? formatRatio(tradeMetrics.notionalCv, 2) : "-", null);
+      setMetricValue(metricTotalExposureEl, formatDuration(tradeMetrics.totalExposureTime), null);
+      setMetricValue(metricMedianHoldingEl, formatDuration(tradeMetrics.medianHoldingTime), null);
+      setMetricValue(metricSideBiasEl, formatSignedPercent(tradeMetrics.sideBias), null);
+      setMetricValue(metricAggressivenessEl, formatPercent(tradeMetrics.aggressiveness), null);
+      setMetricValue(metricCancelRatioEl, formatPercent(tradeMetrics.cancelRatio), null);
+      setMetricValue(metricReactionSpeedEl, formatDuration(tradeMetrics.reactionSpeed), null);
+    } else {
+      setMetricValue(metricRealizedPnlEl, "-", null);
+      setMetricValue(metricWinRateEl, "-", null);
+      setMetricValue(metricProfitFactorEl, "-", null);
+      setMetricValue(metricTradesPerDayEl, "-", null);
+      setMetricValue(metricOrdersPerDayEl, "-", null);
+      setMetricValue(metricActiveDaysEl, "-", null);
+      setMetricValue(metricProductCountEl, "-", null);
+      setMetricValue(metricTopProductShareEl, "-", null);
+      if (metricTopProductNoteEl) metricTopProductNoteEl.textContent = "Share of notional";
+      setMetricValue(metricHerfindahlEl, "-", null);
+      setMetricValue(metricAvgNotionalEl, "-", null);
+      setMetricValue(metricNotionalCvEl, "-", null);
+      setMetricValue(metricTotalExposureEl, "-", null);
+      setMetricValue(metricMedianHoldingEl, "-", null);
+      setMetricValue(metricSideBiasEl, "-", null);
+      setMetricValue(metricAggressivenessEl, "-", null);
+      setMetricValue(metricCancelRatioEl, "-", null);
+      setMetricValue(metricReactionSpeedEl, "-", null);
+    }
+
+    updateBenchmarkMetrics(rangeKey, {
+      ...source.view,
+      baseEquity: metrics.baseEquity,
+    }, metrics.totalPnl, metrics.baseEquity, rangeWindow);
+  }
+
   function openPortfolioModal() {
     if (!portfolioModalEl) return;
     portfolioModalEl.classList.add("open");
@@ -5271,6 +6576,7 @@
     if (!views.length) {
       setPortfolioLoadingState(false, "");
       portfolioErrorEl.textContent = "No performance data available for the selected wallets.";
+      clearPerformanceMetrics();
       return;
     }
 
@@ -5309,12 +6615,14 @@
         ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
       ]
     );
+    updatePerformanceMetrics(rangeKey);
   }
 
   function updatePortfolioCharts(rangeKey) {
     const views = getWalletViews(rangeKey);
     if (!views.length) {
       portfolioErrorEl.textContent = "No performance data available for the selected range.";
+      clearPerformanceMetrics();
       return;
     }
     portfolioErrorEl.textContent = "";
@@ -5364,6 +6672,7 @@
       depositsChart.options.plugins.legend.display = depositsDatasets.length > 1;
     }
     depositsChart.update();
+    updatePerformanceMetrics(rangeKey);
   }
 
   async function loadPortfolio(wallets = currentWallets) {
@@ -5459,6 +6768,7 @@
       await Promise.all(walletList.map((wallet) => loadSnapshot(wallet)));
       await startStreams(walletList);
       await loadPortfolio(walletList);
+      await ensureHistoricalDataLoaded();
 
       if (ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalOrders(walletList);
@@ -5609,9 +6919,22 @@
       rangeButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
-      if (portfolioDataByWallet.size) updatePortfolioCharts(currentRangeKey);
+      if (portfolioDataByWallet.size) {
+        updatePortfolioCharts(currentRangeKey);
+      } else {
+        updatePerformanceMetrics(currentRangeKey);
+      }
     });
   });
+
+  if (metricsToggleEl && metricsCardEl) {
+    metricsToggleEl.addEventListener("click", () => {
+      const isCollapsed = metricsCardEl.classList.toggle("collapsed");
+      const icon = metricsToggleEl.querySelector("[aria-hidden='true']");
+      if (icon) icon.textContent = isCollapsed ? "▾" : "▴";
+      metricsToggleEl.setAttribute("aria-expanded", String(!isCollapsed));
+    });
+  }
 
   themeToggleBtn.addEventListener("click", () => {
     const isLight = document.body.classList.contains("light");
