@@ -931,7 +931,7 @@
     .chart-loading-wrap {
       position: relative;
       border-radius: 0.75rem;
-      overflow: hidden;
+      overflow: visible;
       --pulse-size: 220px;
     }
 
@@ -941,6 +941,7 @@
       background-repeat: no-repeat;
       background-position: center 50%;
       background-size: var(--pulse-size) auto;
+      overflow: hidden;
     }
 
     .chart-loading-wrap.loading .chart-grid {
@@ -1440,6 +1441,12 @@
       border-radius: 12px;
       padding: 0.65rem 0.75rem;
       background: transparent;
+      overflow: visible;
+      cursor: pointer;
+    }
+
+    .metrics-grid {
+      overflow: visible;
     }
 
     body.light .metric {
@@ -1451,6 +1458,8 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--muted);
+      position: relative;
+      cursor: inherit;
     }
 
     .metric-value {
@@ -1467,6 +1476,68 @@
       margin-top: 0.25rem;
       font-size: 0.7rem;
       color: var(--muted);
+    }
+
+    body.light .metric-label,
+    body.light .metric-sub {
+      color: #64748b;
+    }
+
+    .metric-tooltip {
+      position: fixed;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.7);
+      color: #f1f5f9;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 8px;
+      padding: 0.4rem 0.55rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      white-space: normal;
+      width: max-content;
+      max-width: 240px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+      display: none;
+      pointer-events: none;
+    }
+
+    .metric-tooltip.show {
+      display: block;
+    }
+
+    .metric-tooltip::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border-style: solid;
+    }
+
+    .metric-tooltip[data-placement="top"]::after {
+      bottom: -6px;
+      border-width: 6px 6px 0 6px;
+      border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
+    }
+
+    .metric-tooltip[data-placement="bottom"]::after {
+      top: -6px;
+      border-width: 0 6px 6px 6px;
+      border-color: transparent transparent rgba(0, 0, 0, 0.7) transparent;
+    }
+
+    body.light .metric-tooltip {
+      background: rgba(15, 23, 42, 0.85);
+      border-color: rgba(15, 23, 42, 0.4);
+      color: #f8fafc;
+    }
+
+    body.light .metric-tooltip[data-placement="top"]::after {
+      border-color: rgba(15, 23, 42, 0.85) transparent transparent transparent;
+    }
+
+    body.light .metric-tooltip[data-placement="bottom"]::after {
+      border-color: transparent transparent rgba(15, 23, 42, 0.85) transparent;
     }
 
     /* Trades table: slightly denser and allow the last column to wrap so it fits without scrolling */
@@ -1829,122 +1900,122 @@
       <div class="metrics-card collapsed loading" id="metricsCard">
       <div class="metrics-grid">
         <div class="metric">
-          <div class="metric-label">Total PnL (Portfolio)</div>
+          <div class="metric-label" title="Net change in portfolio PnL over the selected range." data-tooltip="Net change in portfolio PnL over the selected range.">Total PnL (Portfolio)</div>
           <div class="metric-value" id="metricTotalPnl">-</div>
           <div class="metric-sub">PnL change over range</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Return</div>
+          <div class="metric-label" title="PnL change divided by total deposits in the range." data-tooltip="PnL change divided by total deposits in the range.">Return</div>
           <div class="metric-value" id="metricReturn">-</div>
           <div class="metric-sub">PnL vs initial account value</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Max Drawdown</div>
+          <div class="metric-label" title="Largest peak-to-trough drop vs deposit baseline." data-tooltip="Largest peak-to-trough drop vs deposit baseline.">Max Drawdown</div>
           <div class="metric-value" id="metricMaxDrawdown">-</div>
           <div class="metric-sub">Peak-to-trough vs initial</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Sharpe (PnL)</div>
+          <div class="metric-label" title="Average PnL change divided by its volatility." data-tooltip="Average PnL change divided by its volatility.">Sharpe (PnL)</div>
           <div class="metric-value" id="metricSharpe">-</div>
           <div class="metric-sub">Mean / stdev of PnL deltas</div>
         </div>
         <div class="metric">
-          <div class="metric-label">PnL Volatility</div>
+          <div class="metric-label" title="Standard deviation of PnL changes." data-tooltip="Standard deviation of PnL changes.">PnL Volatility</div>
           <div class="metric-value" id="metricVolatility">-</div>
           <div class="metric-sub">Stdev of PnL deltas</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Best Interval</div>
+          <div class="metric-label" title="Largest positive PnL change between adjacent points." data-tooltip="Largest positive PnL change between adjacent points.">Best Interval</div>
           <div class="metric-value" id="metricBestInterval">-</div>
           <div class="metric-sub">Largest positive delta</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Realized PnL (Fills)</div>
+          <div class="metric-label" title="Realized PnL from matched closed positions." data-tooltip="Realized PnL from matched closed positions.">Realized PnL (Fills)</div>
           <div class="metric-value" id="metricRealizedPnl">-</div>
           <div class="metric-sub">From matched closed positions</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Win Rate</div>
+          <div class="metric-label" title="Share of closed positions that were profitable." data-tooltip="Share of closed positions that were profitable.">Win Rate</div>
           <div class="metric-value" id="metricWinRate">-</div>
           <div class="metric-sub">Closed positions with profit</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Profit Factor</div>
+          <div class="metric-label" title="Total gains divided by total losses on closed positions." data-tooltip="Total gains divided by total losses on closed positions.">Profit Factor</div>
           <div class="metric-value" id="metricProfitFactor">-</div>
           <div class="metric-sub">Gains / losses</div>
         </div>
         <div class="metric">
-        <div class="metric-label">Orders (Trades) / Day</div>
+        <div class="metric-label" title="Average submitted orders and executed trades per day." data-tooltip="Average submitted orders and executed trades per day.">Orders (Trades) / Day</div>
           <div class="metric-value" id="metricOrdersTradesPerDay">-</div>
           <div class="metric-sub">Submitted (executed) per day</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Active Days Ratio</div>
+          <div class="metric-label" title="Days with at least one trade divided by observed days." data-tooltip="Days with at least one trade divided by observed days.">Active Days Ratio</div>
           <div class="metric-value" id="metricActiveDays">-</div>
           <div class="metric-sub">Days with trades / observed</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Product Count</div>
+          <div class="metric-label" title="Number of unique products traded." data-tooltip="Number of unique products traded.">Product Count</div>
           <div class="metric-value" id="metricProductCount">-</div>
           <div class="metric-sub">Unique traded products</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Volume Concentration</div>
+          <div class="metric-label" title="Herfindahl index of notional by product (higher = more concentrated)." data-tooltip="Herfindahl index of notional by product (higher = more concentrated).">Volume Concentration</div>
           <div class="metric-value" id="metricHerfindahl">-</div>
           <div class="metric-sub">Herfindahl index</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Avg Trade Notional</div>
+          <div class="metric-label" title="Average absolute price times size per trade." data-tooltip="Average absolute price times size per trade.">Avg Trade Notional</div>
           <div class="metric-value" id="metricAvgNotional">-</div>
           <div class="metric-sub">Mean |price * size|</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Days Active</div>
+          <div class="metric-label" title="Count of days with at least one trade." data-tooltip="Count of days with at least one trade.">Days Active</div>
           <div class="metric-value" id="metricActiveDaysCount">-</div>
           <div class="metric-sub">Days with at least 1 trade</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Median Holding Time</div>
+          <div class="metric-label" title="Median holding duration for closed positions." data-tooltip="Median holding duration for closed positions.">Median Holding Time</div>
           <div class="metric-value" id="metricMedianHolding">-</div>
           <div class="metric-sub">Typical position duration</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Buy-Sell Imbalance</div>
+          <div class="metric-label" title="Notional buy minus sell, normalized by total notional." data-tooltip="Notional buy minus sell, normalized by total notional.">Buy-Sell Imbalance</div>
           <div class="metric-value" id="metricSideBias">-</div>
           <div class="metric-sub">Notional bias</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Order Aggressiveness</div>
+          <div class="metric-label" title="Share of market orders among all orders." data-tooltip="Share of market orders among all orders.">Order Aggressiveness</div>
           <div class="metric-value" id="metricAggressiveness">-</div>
           <div class="metric-sub">Market orders / total</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Cancel Ratio</div>
+          <div class="metric-label" title="Canceled orders divided by total submitted orders." data-tooltip="Canceled orders divided by total submitted orders.">Cancel Ratio</div>
           <div class="metric-value" id="metricCancelRatio">-</div>
           <div class="metric-sub">Canceled / submitted</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Reaction Speed</div>
+          <div class="metric-label" title="Average time from order submission to fill." data-tooltip="Average time from order submission to fill.">Reaction Speed</div>
           <div class="metric-value" id="metricReactionSpeed">-</div>
           <div class="metric-sub">Order submit to fill</div>
         </div>
         <div class="metric">
-          <div class="metric-label">PnL Stability</div>
+          <div class="metric-label" title="Weekly PnL volatility relative to weekly mean." data-tooltip="Weekly PnL volatility relative to weekly mean.">PnL Stability</div>
           <div class="metric-value" id="metricPnlStability">-</div>
           <div class="metric-sub">Weekly CV</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Skill Persistence</div>
+          <div class="metric-label" title="Autocorrelation of weekly PnL." data-tooltip="Autocorrelation of weekly PnL.">Skill Persistence</div>
           <div class="metric-value" id="metricSkillPersistence">-</div>
-          <div class="metric-sub">Weekly autocorr</div>
+          <div class="metric-sub">Weekly autocorrelation</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Excess PnL</div>
+          <div class="metric-label" title="PnL minus a BTC benchmark over the same window." data-tooltip="PnL minus a BTC benchmark over the same window.">Excess PnL</div>
           <div class="metric-value" id="metricExcessPnl">-</div>
           <div class="metric-sub">Vs benchmark (BTC)</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Beta & Alpha</div>
+          <div class="metric-label" title="Sensitivity to BTC (beta) and regression intercept (alpha)." data-tooltip="Sensitivity to BTC (beta) and regression intercept (alpha).">Beta & Alpha</div>
           <div class="metric-value" id="metricBetaAlpha">-</div>
           <div class="metric-sub">PnL vs BTC</div>
         </div>
@@ -1977,6 +2048,8 @@
     </div>
     <div class="error" id="portfolioError"></div>
   </section>
+
+  <div class="metric-tooltip" id="metricTooltip" role="tooltip" aria-hidden="true"></div>
 
   <p></p>
 
@@ -6483,6 +6556,9 @@
         setMetricScaledColor(metricActiveDaysEl, tradeMetrics.activeDaysRatio, 0, 1);
       }
       setMetricValue(metricActiveDaysCountEl, Number.isFinite(tradeMetrics.activeDaysCount) ? String(tradeMetrics.activeDaysCount) : "-", null);
+      if (Number.isFinite(tradeMetrics.activeDaysCount)) {
+        setMetricScaledColor(metricActiveDaysCountEl, tradeMetrics.activeDaysCount, 0, 200);
+      }
       setMetricValue(metricProductCountEl, tradeMetrics.productCount !== null ? String(tradeMetrics.productCount) : "-", null);
       setMetricValue(metricHerfindahlEl, tradeMetrics.herfindahl !== null ? formatRatio(tradeMetrics.herfindahl, 3) : "-", null);
       if (Number.isFinite(tradeMetrics.herfindahl)) {
@@ -6947,6 +7023,69 @@
       metricsToggleEl.setAttribute("aria-expanded", String(!isCollapsed));
     });
   }
+
+  const metricTooltipEl = document.getElementById("metricTooltip");
+  let activeMetricTooltip = null;
+
+  function hideMetricTooltip() {
+    if (!metricTooltipEl) return;
+    metricTooltipEl.classList.remove("show");
+    metricTooltipEl.setAttribute("aria-hidden", "true");
+    activeMetricTooltip = null;
+  }
+
+  function showMetricTooltip(metric) {
+    if (!metricTooltipEl) return;
+    const label = metric.querySelector(".metric-label[data-tooltip]");
+    const text = label?.dataset?.tooltip || label?.getAttribute("title");
+    if (!text) return;
+    metricTooltipEl.textContent = text;
+    metricTooltipEl.classList.add("show");
+    metricTooltipEl.setAttribute("aria-hidden", "false");
+    metricTooltipEl.style.visibility = "hidden";
+    metricTooltipEl.style.left = "0px";
+    metricTooltipEl.style.top = "0px";
+
+    const rect = metric.getBoundingClientRect();
+    const tooltipRect = metricTooltipEl.getBoundingClientRect();
+    const padding = 8;
+    let placement = "top";
+    let top = rect.top - tooltipRect.height - 10;
+    if (top < padding) {
+      top = rect.bottom + 10;
+      placement = "bottom";
+    }
+    let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+    left = Math.max(padding, Math.min(left, window.innerWidth - tooltipRect.width - padding));
+
+    metricTooltipEl.dataset.placement = placement;
+    metricTooltipEl.style.left = `${Math.round(left)}px`;
+    metricTooltipEl.style.top = `${Math.round(top)}px`;
+    metricTooltipEl.style.visibility = "visible";
+    activeMetricTooltip = metric;
+  }
+
+  if (metricsCardEl) {
+    metricsCardEl.addEventListener("click", (event) => {
+      const metric = event.target.closest(".metric");
+      if (!metric || !metricsCardEl.contains(metric)) return;
+      if (activeMetricTooltip === metric) {
+        hideMetricTooltip();
+        return;
+      }
+      showMetricTooltip(metric);
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    if (metricsCardEl && metricsCardEl.contains(event.target)) return;
+    if (metricTooltipEl && metricTooltipEl.contains(event.target)) return;
+    hideMetricTooltip();
+  });
+
+  window.addEventListener("scroll", () => {
+    if (activeMetricTooltip) hideMetricTooltip();
+  });
 
   themeToggleBtn.addEventListener("click", () => {
     const isLight = document.body.classList.contains("light");
