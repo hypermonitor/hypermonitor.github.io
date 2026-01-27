@@ -2458,6 +2458,9 @@
   const themeToggleBtn = document.getElementById("themeToggle");
 
   const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
+  const SPECIAL_LOGOS = new Map([
+    ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
+  ]);
   const logoCache = new Map();
   const expandedPositions = new Set();
   const coinIdMap = new Map();
@@ -3133,6 +3136,8 @@
 
   function getIconCandidates(rawName, cleanName) {
     const candidates = [];
+    const specialLogo = getSpecialLogoUrl(rawName, cleanName);
+    if (specialLogo) candidates.push(specialLogo);
     if (rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
     if (cleanName && cleanName !== rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(cleanName)}.svg`);
     const addUnprefixed = (name) => {
@@ -3150,6 +3155,20 @@
     addUnprefixed(rawName);
     if (rawName && rawName.includes(":")) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
     return Array.from(new Set(candidates));
+  }
+
+  function getSpecialLogoUrl(rawName, cleanName) {
+    const keys = [cleanName, rawName];
+    for (const key of keys) {
+      if (!key) continue;
+      const upper = String(key).trim().toUpperCase();
+      if (SPECIAL_LOGOS.has(upper)) return SPECIAL_LOGOS.get(upper);
+      if (upper.includes(":")) {
+        const base = upper.split(":").pop();
+        if (SPECIAL_LOGOS.has(base)) return SPECIAL_LOGOS.get(base);
+      }
+    }
+    return null;
   }
 
   function ensureLogoCache(rawName, cleanName) {
