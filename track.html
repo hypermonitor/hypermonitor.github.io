@@ -2469,14 +2469,14 @@
   const FOOTER_COINS_KEY = "hypermonitor-footer-coins";
   const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
   const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
-  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "US500", "GOLD", "SILVER", "MSTR", "NVDA"];
+  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "USA500", "GOLD", "SILVER", "MSTR", "NVDA"];
   let trackedFooterCoins = [...DEFAULT_FOOTER_COINS];
   const coinNameCache = new Map();
   const coinColorCache = new Map();
   const coinColorPending = new Set();
   const coinPriceDecimals = new Map();
   const lastFooterPrices = new Map();
-  const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl"];
+  const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl", "cash"];
   const manualMidCoins = new Set();
   let manualMidTimer = null;
   const HYPERLIQUID_TICKERS = new Set(
