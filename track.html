@@ -2781,7 +2781,7 @@
 <div class="share-modal" id="pnlShareModal" aria-hidden="true">
   <div class="share-card">
     <div class="share-header">
-      <strong>Share PnL</strong>
+      <strong>Share Asset Performance</strong>
       <button class="share-btn" id="shareModalClose" type="button">Close</button>
     </div>
     <div class="share-preview">
@@ -3718,6 +3718,14 @@
     return `${w.slice(0, 6)}…${w.slice(-4)}`;
   }
 
+  function getShareCoinLogoUrl(rawCoin) {
+    const normalized = normalizeFooterCoinValue(rawCoin);
+    if (!normalized) return null;
+    const special = getSpecialLogoUrl(normalized, normalized);
+    if (special) return special;
+    return `${COIN_ICON_BASE}${encodeURIComponent(normalized)}.svg`;
+  }
+
   function drawRoundedRect(ctx, x, y, w, h, r) {
     const radius = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -3729,6 +3737,13 @@
     ctx.closePath();
   }
 
+  function parseSignedMoney(value) {
+    const str = String(value || "");
+    const cleaned = str.replace(/[^0-9.-]/g, "");
+    const num = Number(cleaned);
+    return Number.isFinite(num) ? num : null;
+  }
+
   async function buildPnlShareImage(data) {
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
@@ -3736,11 +3751,49 @@
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
+    const pnlValue = parseSignedMoney(data.upnl);
+    const accent = pnlValue !== null && pnlValue < 0 ? "#fb7185" : "#4ade80";
+    const logoAccent = pnlValue !== null && pnlValue < 0 ? "#fb7185" : "#97fde5";
+
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#0b0b0f");
-    gradient.addColorStop(1, "#121826");
+    gradient.addColorStop(1, "#0e141c");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Soft glow blobs to match site aesthetic
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = logoAccent;
+    ctx.beginPath();
+    ctx.arc(820, 420, 220, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = "#1f2937";
+    ctx.beginPath();
+    ctx.arc(680, 760, 260, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Diagonal waves
+    ctx.strokeStyle = logoAccent === "#97fde5" ? "rgba(151, 253, 229, 0.12)" : "rgba(251, 113, 133, 0.12)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 14; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(420, 220 + i * 40);
+      ctx.bezierCurveTo(620, 140 + i * 42, 840, 180 + i * 38, 1040, 120 + i * 34);
+      ctx.stroke();
+    }
+
+    // Accent ring + dot
+    ctx.strokeStyle = logoAccent;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(830, 520, 80, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = logoAccent;
+    ctx.beginPath();
+    ctx.arc(830, 520, 8, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.fillStyle = "rgba(255,255,255,0.06)";
     drawRoundedRect(ctx, 40, 40, 1000, 1270, 28);
@@ -3748,6 +3801,7 @@
 
     const canDrawLogo = window.location?.protocol !== "file:";
     let logo = null;
+    let coinLogo = null;
     if (canDrawLogo) {
       logo = new Image();
       const logoSrc = "images/logo.png";
@@ -3756,49 +3810,87 @@
         logo.onerror = resolve;
         logo.src = logoSrc;
       });
+
+      const coinLogoUrl = getShareCoinLogoUrl(data.coin);
+      if (coinLogoUrl) {
+        coinLogo = new Image();
+        await new Promise((resolve) => {
+          coinLogo.onload = resolve;
+          coinLogo.onerror = resolve;
+          coinLogo.src = coinLogoUrl;
+        });
+      }
     }
 
     ctx.textBaseline = "top";
     if (logo && logo.width) {
-      ctx.drawImage(logo, 90, 88, 64, 64);
+      ctx.drawImage(logo, 90, 78, 80, 80);
     }
     ctx.fillStyle = "#ffffff";
     ctx.font = "700 52px Outfit, sans-serif";
-    ctx.fillText("HYPERMONITOR", 170, 88);
+    ctx.fillText("HYPERMONITOR", 180, 92);
 
     ctx.fillStyle = "rgba(245,245,255,0.8)";
     ctx.font = "500 28px Outfit, sans-serif";
     ctx.fillText(formatShortWallet(data.wallet), 90, 180);
 
+    if (coinLogo && coinLogo.width) {
+      ctx.drawImage(coinLogo, 90, 252, 40, 40);
+    }
+
     ctx.fillStyle = "#ffffff";
     ctx.font = "600 36px Outfit, sans-serif";
-    ctx.fillText(`${data.asset || ""} · ${data.direction || ""}`, 90, 240);
+    ctx.fillText(`${data.asset || ""}`, 140, 248);
+
+    if (data.direction) {
+      const pillText = data.direction;
+      ctx.font = "600 26px Outfit, sans-serif";
+      const pillWidth = ctx.measureText(pillText).width + 30;
+      const pillHeight = 40;
+      const pillX = 90;
+      const pillY = 308;
+      const pillColor = data.direction.startsWith("SHORT") ? "#fb7185" : "#4ade80";
+      ctx.fillStyle = pillColor + "33";
+      drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 20);
+      ctx.fill();
+      ctx.strokeStyle = pillColor + "88";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = pillColor;
+      ctx.fillText(pillText, pillX + 16, pillY + 6);
+    }
+
+    if (data.roe) {
+      ctx.fillStyle = accent;
+      ctx.font = "700 86px Outfit, sans-serif";
+      ctx.fillText(data.roe, 90, 360);
+    }
 
     ctx.fillStyle = "rgba(245,245,255,0.7)";
     ctx.font = "500 26px Outfit, sans-serif";
-    ctx.fillText("Unrealized PNL (USD)", 90, 330);
+    ctx.fillText("Unrealized PNL (USD)", 90, 470);
 
     ctx.fillStyle = "#ffffff";
-    ctx.font = "700 64px Outfit, sans-serif";
-    ctx.fillText(data.upnl || "", 90, 370);
-
-    ctx.fillStyle = "rgba(245,245,255,0.7)";
-    ctx.font = "500 26px Outfit, sans-serif";
-    ctx.fillText("Entry Price", 90, 510);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "600 36px Outfit, sans-serif";
-    ctx.fillText(data.entry || "", 90, 550);
+    ctx.font = "700 48px Outfit, sans-serif";
+    ctx.fillText(data.upnl || "", 90, 510);
 
     ctx.fillStyle = "rgba(245,245,255,0.7)";
     ctx.font = "500 26px Outfit, sans-serif";
-    ctx.fillText("Current Price", 90, 630);
+    ctx.fillText("Entry Price", 90, 620);
     ctx.fillStyle = "#ffffff";
     ctx.font = "600 36px Outfit, sans-serif";
-    ctx.fillText(data.current || "", 90, 670);
+    ctx.fillText(data.entry || "", 90, 660);
+
+    ctx.fillStyle = "rgba(245,245,255,0.7)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText("Current Price", 90, 740);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 36px Outfit, sans-serif";
+    ctx.fillText(data.current || "", 90, 780);
 
     ctx.fillStyle = "rgba(245,245,255,0.6)";
     ctx.font = "500 26px Outfit, sans-serif";
-    ctx.fillText("http://hypermonitor.org/", 90, 1240);
+    ctx.fillText("https://hypermonitor.org/", 90, 1240);
 
     try {
       return canvas.toDataURL("image/png");
@@ -5691,8 +5783,10 @@
                 <button class="pnl-share-btn" type="button" title="Share PnL" aria-label="Share PnL"
                   data-wallet="${xmlEscape(wallet)}"
                   data-asset="${xmlEscape(spotLabel)}"
+                  data-coin="${xmlEscape(coin)}"
                   data-direction="${dir}${leverageDisplay ? ` ${leverageDisplay}` : ""}"
                   data-upnl="${upnlFormatted}"
+                  data-roe="${upnlPercentDisplay}"
                   data-entry="${entryPriceDisplay}"
                   data-current="${currentPriceDisplay}">
                   ⤴
@@ -9084,8 +9178,10 @@
     const payload = {
       wallet: shareBtn.dataset.wallet || "",
       asset: shareBtn.dataset.asset || "",
+      coin: shareBtn.dataset.coin || "",
       direction: shareBtn.dataset.direction || "",
       upnl: shareBtn.dataset.upnl || "",
+      roe: shareBtn.dataset.roe || "",
       entry: shareBtn.dataset.entry || "",
       current: shareBtn.dataset.current || "",
     };
@@ -9158,7 +9254,7 @@
   if (shareXBtnEl) {
     shareXBtnEl.addEventListener("click", async () => {
       const text = "Discover Hypermonitor";
-      const url = "http://hypermonitor.org/";
+      const url = "https://hypermonitor.org/";
       if (sharePreviewImgEl?.src) {
         try {
           const res = await fetch(sharePreviewImgEl.src);
