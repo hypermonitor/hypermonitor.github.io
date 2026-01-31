@@ -774,6 +774,26 @@
       font-size: 0.72rem;
     }
 
+    .size-stack {
+      align-items: flex-start;
+    }
+
+    .size-main {
+      font-weight: 600;
+    }
+
+    .size-ticker {
+      font-size: 0.72rem;
+      color: inherit;
+      opacity: 0.7;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .size-cell {
+      text-align: left;
+    }
+
     .position-row { cursor: pointer; }
     .position-row:hover { background: rgba(56, 189, 248, 0.05); }
     .position-row.loading { opacity: 0.6; cursor: progress; }
@@ -1492,6 +1512,12 @@
     .liq-distance.liq-danger .liq-bar span { background: var(--danger); }
     .liq-distance.liq-warn .liq-bar span { background: #f59e0b; }
     .liq-distance.liq-safe .liq-bar span { background: var(--accent); }
+    .liq-distance.liq-high {
+      box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35);
+      border-radius: 8px;
+      padding: 0.2rem 0.3rem;
+      background: rgba(245, 158, 11, 0.08);
+    }
 
     .liq-meta {
       display: flex;
@@ -1514,6 +1540,14 @@
       font-size: 0.7rem;
       color: var(--muted);
       letter-spacing: 0.02em;
+    }
+
+    .liq-flag {
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #fbbf24;
+      margin-left: 0.35rem;
     }
 
     .placeholder-row td {
@@ -1907,8 +1941,13 @@
       text-align: right;
     }
 
-    .funding-pos { color: var(--danger); }
-    .funding-neg { color: var(--accent); }
+    .notional-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .funding-pos { color: #4ade80; }
+    .funding-neg { color: #fb7185; }
 
     .price-footer.rolling .price-list {
       flex-wrap: nowrap;
@@ -2159,16 +2198,29 @@
           <th>Side</th>
           <th>Size</th>
           <th>Price</th>
-          <th>Notional</th>
-          <th class="desktop-only">Funding</th>
-          <th class="desktop-only">Liq Distance</th>
-          <th class="mobile-only">PnL</th>
           <th class="desktop-only">Unrealized PnL</th>
+          <th class="desktop-only">Liq Distance</th>
+          <th class="desktop-only">Funding</th>
+          <th class="mobile-only">PnL</th>
         </tr>
         </thead>
         <tbody id="positionsBody">
-        <tr class="loading-row mobile-only"><td colspan="4" class="muted">Loading…</td></tr>
-        <tr class="loading-row desktop-only"><td colspan="8" class="muted">Loading…</td></tr>
+        <tr class="loading-row mobile-only">
+          <td class="muted">Loading…</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr class="loading-row desktop-only">
+          <td class="muted">Loading…</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
         </tbody>
       </table>
     </section>
@@ -2723,6 +2775,7 @@
   const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
   const SPECIAL_LOGOS = new Map([
     ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
+    ["COPPER", "https://s3-symbol-logo.tradingview.com/metal/copper--600.png"],
   ]);
   const logoCache = new Map();
   const expandedPositions = new Set();
@@ -2858,6 +2911,18 @@
   window.__logoErr = (rawKey, imgEl, fallbackLetter) => {
     const entry = logoCache.get(rawKey);
     if (!entry) return;
+
+    if (window.location?.protocol === "file:") {
+      entry.state = "bad";
+      entry.permaFail = true;
+      entry.retryCount = 999;
+      try {
+        if (imgEl && imgEl.outerHTML) {
+          imgEl.outerHTML = `<span class="coinFallback">${fallbackLetter || "?"}</span>`;
+        }
+      } catch {}
+      return;
+    }
 
     const nextIdx = (entry.idx ?? 0) + 1;
     if (entry.urls && nextIdx < entry.urls.length) {
@@ -3325,7 +3390,7 @@
   function fundingToneClass(value) {
     const n = Number(value);
     if (!Number.isFinite(n) || n === 0) return "";
-    return n > 0 ? "funding-pos" : "funding-neg";
+    return n < 0 ? "funding-pos" : "funding-neg";
   }
 
   function getPriceDecimals(value) {
@@ -3377,7 +3442,7 @@
   }
 
   function getPositionsColspan() {
-    return window.matchMedia("(max-width: 600px)").matches ? 4 : 8;
+    return window.matchMedia("(max-width: 600px)").matches ? 4 : 7;
   }
 
   function formatSignedPercent(value, decimals = 2) {
@@ -3615,11 +3680,11 @@
     return null;
   }
 
-  function ensureLogoCache(rawName, cleanName) {
-    if (logoCache.has(rawName)) return logoCache.get(rawName);
+  function ensureLogoCache(rawKey, rawName, cleanName) {
+    if (logoCache.has(rawKey)) return logoCache.get(rawKey);
     const urls = getIconCandidates(rawName, cleanName);
     const entry = { state: "unknown", idx: 0, urls, okUrl: null };
-    logoCache.set(rawName, entry);
+    logoCache.set(rawKey, entry);
     return entry;
   }
 
@@ -3648,6 +3713,7 @@
     let changed = false;
     logoCache.forEach((entry) => {
       if (entry.state !== "bad") return;
+      if (entry.permaFail) return;
       if ((entry.retryCount || 0) > 2) return;
       entry.state = "unknown";
       entry.idx = 0;
@@ -3664,7 +3730,8 @@
   }
 
   function coinIconHtml(rawName, cleanName) {
-    const entry = ensureLogoCache(rawName, cleanName);
+    const logoKey = normalizeLogoKey(rawName || cleanName);
+    const entry = ensureLogoCache(logoKey, rawName, cleanName);
     const letter = (cleanName?.[0] || rawName?.[0] || "?").toUpperCase();
 
     if (entry.state === "bad" || !entry.urls.length) {
@@ -3672,7 +3739,7 @@
     }
 
     const src = (entry.state === "ok" && entry.okUrl) ? entry.okUrl : entry.urls[entry.idx || 0];
-    const safeKey = rawName.replace(/'/g, "\\'");
+    const safeKey = logoKey.replace(/'/g, "\\'");
 
     return `
       <img
@@ -3888,6 +3955,14 @@
     return upper;
   }
 
+  function normalizeLogoKey(value) {
+    const cleaned = String(value || "").trim();
+    if (!cleaned) return "";
+    const { dex, base } = splitDexCoin(cleaned);
+    if (dex) return `${dex.toLowerCase()}:${String(base || "").toUpperCase()}`;
+    return cleaned.toUpperCase();
+  }
+
   function getFooterBase(coin) {
     const { base } = splitDexCoin(coin);
     return String(base || "").toUpperCase();
@@ -4020,7 +4095,8 @@
   }
 
   function rememberLogoOk(rawKey, okUrl) {
-    const entry = ensureLogoCache(rawKey, rawKey);
+    const normalized = normalizeLogoKey(rawKey);
+    const entry = ensureLogoCache(normalized, rawKey, rawKey);
     entry.state = "ok";
     entry.idx = 0;
     entry.okUrl = okUrl;
@@ -4088,6 +4164,7 @@
   }
 
   async function extractDominantColorFromLogo(symbol) {
+    if (window.location?.protocol === "file:") return null;
     const normalized = normalizeFooterCoinValue(symbol);
     if (!normalized) return null;
     const iconUrl = `${COIN_ICON_BASE}${encodeURIComponent(normalized)}.svg`;
@@ -5017,18 +5094,23 @@
             ? Math.max(0, Math.min(1, liqDistanceRaw))
             : 0
           : null;
+        const liqDistanceDisplay =
+          liqDistanceClamped === null ? null : Math.max(0, Math.min(1, 1 - liqDistanceClamped));
         const liqDistanceClass =
-          liqDistanceClamped === null
+          liqDistanceDisplay === null
             ? ""
-            : liqDistanceClamped <= 0.25
+            : liqDistanceDisplay <= 0.25
               ? "liq-danger"
-              : liqDistanceClamped <= 0.5
+              : liqDistanceDisplay <= 0.5
                 ? "liq-warn"
-                : "liq-safe";
-        const liqDistancePct = liqDistanceClamped === null ? "–" : formatPercent(liqDistanceClamped, 0);
-        const liqDistanceWidth = liqDistanceClamped === null ? 0 : Math.round(liqDistanceClamped * 100);
-        const liqHue = liqDistanceClamped === null ? 120 : Math.round((1 - liqDistanceClamped) * 120);
+                : liqDistanceDisplay >= 0.9
+                  ? "liq-high"
+                  : "liq-safe";
+        const liqDistancePct = liqDistanceDisplay === null ? "–" : formatPercent(liqDistanceDisplay, 0);
+        const liqDistanceWidth = liqDistanceDisplay === null ? 0 : Math.round(liqDistanceDisplay * 100);
+        const liqHue = liqDistanceDisplay === null ? 120 : Math.round((1 - liqDistanceDisplay) * 120);
         const liqPriceDisplay = isPerp ? (hasLiq ? formatLiqPrice(liqValue, entryPx, markPx) : "$0") : "–";
+        const liqHighFlag = liqDistanceDisplay !== null && liqDistanceDisplay >= 0.9 ? `<span class="liq-flag">HIGH</span>` : "";
         const liqDistanceHtml =
           isPerp
             ? `
@@ -5037,7 +5119,7 @@
                   <span style="width:${liqDistanceWidth}%;background-color:hsl(${liqHue} 70% 55%);"></span>
                 </div>
                 <div class="liq-meta">
-                  <span class="liq-pct">${liqDistancePct}</span>
+                  <span class="liq-pct">${liqDistancePct}${liqHighFlag}</span>
                   <span class="liq-price">${liqPriceDisplay}</span>
                 </div>
               </div>
@@ -5126,19 +5208,23 @@
               ${dir}${leverageDisplay ? ` ${leverageDisplay}` : ""}
             </span>
           </td>
-          <td class="money">${fmtSize(szi)}</td>
+          <td class="money size-cell">
+            <div class="price-stack size-stack">
+              <span class="notional-sub">${formattedValue}</span>
+              <span class="size-main">${fmtSize(szi)} <span class="size-ticker">${spotLabel}</span></span>
+            </div>
+          </td>
           <td class="money">
             <div class="price-stack">
               <span class="current-price">Live: ${currentPriceDisplay}</span>
               <span>Entry: ${entryPriceDisplay}</span>
             </div>
           </td>
-          <td class="money">${formattedValue}</td>
-          <td class="money desktop-only ${fundingClass}">${fundingDisplay}</td>
-          <td class="desktop-only">${liqDistanceHtml}</td>
           <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
             ${upnlFormatted}
           </td>
+          <td class="desktop-only">${liqDistanceHtml}</td>
+          <td class="money desktop-only ${fundingClass}">${fundingDisplay}</td>
         </tr>
         ${breakdownHtml}
       `;
