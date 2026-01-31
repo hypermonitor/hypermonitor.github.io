@@ -3851,15 +3851,14 @@
     ctx.fillStyle = "#ffffff";
     ctx.font = "700 52px Outfit, sans-serif";
     const title = "HYPERMONITOR";
-    const titleMetrics = ctx.measureText(title);
     const titleY = 92;
-    const titleCenterY = titleY + (titleMetrics.actualBoundingBoxAscent - titleMetrics.actualBoundingBoxDescent) / 2;
+    const titleCenterY = titleY + 26;
     if (logo && logo.width) {
-      const logoSize = 96;
+      const logoSize = 88;
       const logoY = titleCenterY - logoSize / 2;
       ctx.drawImage(logo, 90, logoY, logoSize, logoSize);
     }
-    ctx.fillText(title, 200, titleY);
+    ctx.fillText(title, 190, titleY);
 
     ctx.fillStyle = "rgba(245,245,255,0.8)";
     ctx.font = "500 28px Outfit, sans-serif";
@@ -3869,9 +3868,8 @@
     ctx.font = "600 36px Outfit, sans-serif";
     const assetText = `${data.asset || ""}`;
     const assetY = 248;
-    const assetMetrics = ctx.measureText(assetText);
-    const assetCenterY = assetY + (assetMetrics.actualBoundingBoxAscent - assetMetrics.actualBoundingBoxDescent) / 2;
-    const coinSize = 44;
+    const assetCenterY = assetY + 18;
+    const coinSize = 40;
     const coinY = assetCenterY - coinSize / 2;
     if (coinLogo && coinLogo.width) {
       ctx.drawImage(coinLogo, 90, coinY, coinSize, coinSize);
@@ -3886,7 +3884,7 @@
       ctx.font = "600 36px Outfit, sans-serif";
     }
     ctx.fillStyle = "#ffffff";
-    ctx.fillText(assetText, 150, assetY);
+    ctx.fillText(assetText, 145, assetY);
 
     if (data.spot === "true") {
       const label = "SPOT";
