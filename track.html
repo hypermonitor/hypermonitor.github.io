@@ -59,8 +59,8 @@
     }
 
     #app {
-      max-width: 1440px;
-      width: min(1440px, 80vw);
+      max-width: 1520px;
+      width: min(1520px, 86vw);
       margin: 0 auto;
       padding: 1.5rem;
       padding-bottom: 4rem;
@@ -1466,6 +1466,56 @@
 
     body.light footer { border-top-color: #e5e7eb; }
 
+    .liq-distance {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 110px;
+    }
+
+    .liq-bar {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .liq-bar span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .liq-distance.liq-danger .liq-bar span { background: var(--danger); }
+    .liq-distance.liq-warn .liq-bar span { background: #f59e0b; }
+    .liq-distance.liq-safe .liq-bar span { background: var(--accent); }
+
+    .liq-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .liq-pct {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .liq-price {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
     .placeholder-row td {
       border-bottom: 1px solid var(--border);
       color: transparent; /* hides &nbsp; */
@@ -1764,8 +1814,8 @@
     }
 
     .price-footer-inner {
-      max-width: 1440px;
-      width: min(1440px, 80vw);
+      max-width: 1520px;
+      width: min(1520px, 86vw);
       margin: 0 auto;
       padding: 0.15rem 1.2rem;
       display: flex;
@@ -2074,7 +2124,7 @@
           <th>Price</th>
           <th>Notional</th>
           <th class="desktop-only">Funding</th>
-          <th class="desktop-only">Liq Price</th>
+          <th class="desktop-only">Liq Distance</th>
           <th class="mobile-only">PnL</th>
           <th class="desktop-only">Unrealized PnL</th>
         </tr>
@@ -3256,6 +3306,25 @@
     const markDecimals = getPriceDecimals(markPx);
     const refDecimals = Number.isFinite(entryDecimals) ? entryDecimals : markDecimals;
     return formatPriceWithMaxDecimals(n, refDecimals);
+  }
+
+  function computeLiqDistanceRatio(entryPx, markPx, liqPx, size) {
+    const entry = Number(entryPx);
+    const mark = Number(markPx);
+    const liq = Number(liqPx);
+    const szi = Number(size);
+    if (!Number.isFinite(entry) || !Number.isFinite(mark) || !Number.isFinite(liq) || !Number.isFinite(szi)) return null;
+    if (szi > 0) {
+      const denom = entry - liq;
+      if (!(denom > 0)) return null;
+      return (mark - liq) / denom;
+    }
+    if (szi < 0) {
+      const denom = liq - entry;
+      if (!(denom > 0)) return null;
+      return (liq - mark) / denom;
+    }
+    return null;
   }
 
   function getPositionsColspan() {
@@ -4860,7 +4929,39 @@
         const liqValue = p.liqPx ?? p.liquidationPx ?? p.liquidationPrice ?? p.liqPrice;
         const fundingDisplay = isPerp ? formatFunding(fundingValue) : "–";
         const fundingClass = isPerp ? fundingToneClass(fundingValue) : "";
-        const liqDisplay = isPerp ? formatLiqPrice(liqValue, entryPx, markPx) : "–";
+        const hasLiq = Number.isFinite(Number(liqValue)) && Number(liqValue) !== 0;
+        const liqDistanceRaw = isPerp ? computeLiqDistanceRatio(entryPx, markPx, liqValue, szi) : null;
+        const liqDistanceClamped = isPerp
+          ? Number.isFinite(liqDistanceRaw)
+            ? Math.max(0, Math.min(1, liqDistanceRaw))
+            : 0
+          : null;
+        const liqDistanceClass =
+          liqDistanceClamped === null
+            ? ""
+            : liqDistanceClamped <= 0.25
+              ? "liq-danger"
+              : liqDistanceClamped <= 0.5
+                ? "liq-warn"
+                : "liq-safe";
+        const liqDistancePct = liqDistanceClamped === null ? "–" : formatPercent(liqDistanceClamped, 0);
+        const liqDistanceWidth = liqDistanceClamped === null ? 0 : Math.round(liqDistanceClamped * 100);
+        const liqHue = liqDistanceClamped === null ? 120 : Math.round((1 - liqDistanceClamped) * 120);
+        const liqPriceDisplay = isPerp ? (hasLiq ? formatLiqPrice(liqValue, entryPx, markPx) : "$0") : "–";
+        const liqDistanceHtml =
+          isPerp
+            ? `
+              <div class="liq-distance ${liqDistanceClass}">
+                <div class="liq-bar" role="img" aria-label="Distance to liquidation ${liqDistancePct}">
+                  <span style="width:${liqDistanceWidth}%;background-color:hsl(${liqHue} 70% 55%);"></span>
+                </div>
+                <div class="liq-meta">
+                  <span class="liq-pct">${liqDistancePct}</span>
+                  <span class="liq-price">${liqPriceDisplay}</span>
+                </div>
+              </div>
+            `
+            : "–";
 
         const positionKey = `${item.marketType || "perp"}:${wallet}:${coin}`;
         const isExpanded = expandedPositions.has(positionKey);
@@ -4953,7 +5054,7 @@
           </td>
           <td class="money">${formattedValue}</td>
           <td class="money desktop-only ${fundingClass}">${fundingDisplay}</td>
-          <td class="money desktop-only">${liqDisplay}</td>
+          <td class="desktop-only">${liqDistanceHtml}</td>
           <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
             ${upnlFormatted}
           </td>
