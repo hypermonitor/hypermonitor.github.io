@@ -59,7 +59,8 @@
     }
 
     #app {
-      max-width: 1200px;
+      max-width: 1440px;
+      width: min(1440px, 80vw);
       margin: 0 auto;
       padding: 1.5rem;
       padding-bottom: 4rem;
@@ -1724,9 +1725,10 @@
     }
 
     .price-footer-inner {
-      max-width: 1200px;
+      max-width: 1440px;
+      width: min(1440px, 80vw);
       margin: 0 auto;
-      padding: 0.15rem 1.5rem;
+      padding: 0.15rem 1.2rem;
       display: flex;
       align-items: center;
       gap: 0.6rem;
@@ -1807,6 +1809,9 @@
       min-width: 6ch;
       text-align: right;
     }
+
+    .funding-pos { color: var(--danger); }
+    .funding-neg { color: var(--accent); }
 
     .price-footer.rolling .price-list {
       flex-wrap: nowrap;
@@ -2023,13 +2028,15 @@
           <th>Size</th>
           <th>Price</th>
           <th>Notional</th>
+          <th class="desktop-only">Funding</th>
+          <th class="desktop-only">Liq Price</th>
           <th class="mobile-only">PnL</th>
           <th class="desktop-only">Unrealized PnL</th>
         </tr>
         </thead>
         <tbody id="positionsBody">
-        <tr class="loading-row"><td colspan="4" class="mobile-only muted">Loading…</td></tr>
-        <tr class="loading-row"><td colspan="6" class="desktop-only muted">Loading…</td></tr>
+        <tr class="loading-row"><td colspan="6" class="mobile-only muted">Loading…</td></tr>
+        <tr class="loading-row"><td colspan="8" class="desktop-only muted">Loading…</td></tr>
         </tbody>
       </table>
     </section>
@@ -3158,6 +3165,54 @@
     return "$" + abs;
   }
 
+  function formatLeverage(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n === 0) return "–";
+    const rounded = Number.isInteger(n) ? n.toFixed(0) : n.toFixed(1);
+    return `${rounded}X`;
+  }
+
+  function formatFunding(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n === 0) return "–";
+    return formatSignedDollarWithPlus(-n);
+  }
+
+  function fundingToneClass(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n === 0) return "";
+    return n > 0 ? "funding-pos" : "funding-neg";
+  }
+
+  function getPriceDecimals(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    const str = n.toLocaleString(undefined, { maximumFractionDigits: 8, useGrouping: false });
+    const dot = str.indexOf(".");
+    if (dot === -1) return 0;
+    return Math.min(8, str.length - dot - 1);
+  }
+
+  function formatPriceWithMaxDecimals(value, maxDecimals) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    const decimals = Number.isFinite(maxDecimals) ? Math.max(0, Math.min(8, maxDecimals)) : 8;
+    const formatted = n.toLocaleString(undefined, {
+      maximumFractionDigits: decimals,
+      useGrouping: true,
+    });
+    return `$${formatted}`;
+  }
+
+  function formatLiqPrice(value, entryPx, markPx) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n === 0) return "–";
+    const entryDecimals = getPriceDecimals(entryPx);
+    const markDecimals = getPriceDecimals(markPx);
+    const refDecimals = Number.isFinite(entryDecimals) ? entryDecimals : markDecimals;
+    return formatPriceWithMaxDecimals(n, refDecimals);
+  }
+
   function formatSignedPercent(value, decimals = 2) {
     const n = Number(value);
     if (!Number.isFinite(n)) return "";
@@ -4231,7 +4286,7 @@
     const tops = new Set(Array.from(items).map((el) => el.offsetTop));
     const isWrapped = tops.size > 1;
     const isOverflow = priceListEl.scrollWidth > priceTickerEl.clientWidth + 4;
-    const forceRoll = items.length >= 10;
+    const forceRoll = items.length >= 12;
     priceFooterWrapEl.classList.toggle("rolling", forceRoll || isWrapped || isOverflow);
   }
 
@@ -4684,7 +4739,7 @@
     walletTotals.clear();
 
     if (!currentAssetPositions.length) {
-      positionsBodyEl.innerHTML = "<tr><td colspan='6' class='muted desktop-only'>No open positions.</td></tr>";
+      positionsBodyEl.innerHTML = "<tr><td colspan='8' class='muted desktop-only'>No open positions.</td></tr>";
       recomputeAndRenderMarginSummary();
       refreshBreakdownIfOpen();
       return;
@@ -4741,6 +4796,21 @@
 
         const upnlFormatted = formatSignedDollarWithPlus(upnl);
         const formattedValue = formatSignedDollar(positionValue);
+        const isPerp = item.marketType !== "spot";
+        const leverageValue = p.leverage?.value ?? p.leverage ?? p.lever ?? p.leverageValue;
+        const leverageDisplay = isPerp ? formatLeverage(leverageValue) : "";
+        const fundingValue =
+          (p.cumFunding && typeof p.cumFunding === "object"
+            ? p.cumFunding.sinceOpen ?? p.cumFunding.sinceChange ?? p.cumFunding.allTime
+            : p.cumFunding) ??
+          p.funding ??
+          p.fundingPaid ??
+          p.cumFundingUsd ??
+          p.cumFundingUSDC;
+        const liqValue = p.liqPx ?? p.liquidationPx ?? p.liquidationPrice ?? p.liqPrice;
+        const fundingDisplay = isPerp ? formatFunding(fundingValue) : "–";
+        const fundingClass = isPerp ? fundingToneClass(fundingValue) : "";
+        const liqDisplay = isPerp ? formatLiqPrice(liqValue, entryPx, markPx) : "–";
 
         const positionKey = `${item.marketType || "perp"}:${wallet}:${coin}`;
         const isExpanded = expandedPositions.has(positionKey);
@@ -4767,7 +4837,7 @@
 
           breakdownHtml = `
             <tr class="position-details">
-              <td colspan="7">
+              <td colspan="8">
                 <div class="position-breakdown">
                   <table class="position-subtable">
                     <thead>
@@ -4821,7 +4891,7 @@
           </td>
           <td>
             <span class="pill" style="color:${dirColor};border-color:${dirColor}55;background:${dirColor}22;">
-              ${dir}
+              ${dir}${leverageDisplay ? ` ${leverageDisplay}` : ""}
             </span>
           </td>
           <td class="money">${fmtSize(szi)}</td>
@@ -4832,6 +4902,8 @@
             </div>
           </td>
           <td class="money">${formattedValue}</td>
+          <td class="money desktop-only ${fundingClass}">${fundingDisplay}</td>
+          <td class="money desktop-only">${liqDisplay}</td>
           <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
             ${upnlFormatted}
           </td>
@@ -5729,7 +5801,7 @@
       historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
     }
 
-    positionsBodyEl.innerHTML = "<tr class='loading-row'><td colspan='6' class='muted desktop-only'>Loading…</td><td colspan='4' class='muted mobile-only'>Loading…</td></tr>";
+    positionsBodyEl.innerHTML = "<tr class='loading-row'><td colspan='8' class='muted desktop-only'>Loading…</td><td colspan='6' class='muted mobile-only'>Loading…</td></tr>";
     marginSummaryEl.innerHTML = "<span class='muted'>Loading…</span>";
 
     refreshBreakdownIfOpen();
@@ -7386,7 +7458,10 @@
           },
         },
         scales: {
-          x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
+          x: {
+            ticks: { maxTicksLimit: 6, minRotation: 25, maxRotation: 25 },
+            grid: { display: false },
+          },
           y: {
             ticks: {
               // ✅ -$1000 not $-1000
@@ -7832,14 +7907,18 @@
   }
 
   if (metricsCardEl) {
-    metricsCardEl.addEventListener("click", (event) => {
+    metricsCardEl.addEventListener("mouseover", (event) => {
       const metric = event.target.closest(".metric");
       if (!metric || !metricsCardEl.contains(metric)) return;
-      if (activeMetricTooltip === metric) {
-        hideMetricTooltip();
-        return;
-      }
-      showMetricTooltip(metric);
+      if (activeMetricTooltip !== metric) showMetricTooltip(metric);
+    });
+
+    metricsCardEl.addEventListener("mouseout", (event) => {
+      const metric = event.target.closest(".metric");
+      if (!metric) return;
+      const related = event.relatedTarget;
+      if (metric.contains(related)) return;
+      hideMetricTooltip();
     });
   }
 
