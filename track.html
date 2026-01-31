@@ -1000,6 +1000,13 @@
       gap: 0.35rem;
     }
 
+    @media (max-width: 720px) {
+      .positions-card .section-actions {
+        margin-left: auto;
+        justify-content: flex-end;
+      }
+    }
+
     .tagline { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
     .error { margin-top: .5rem; font-size: .75rem; color: #fecaca; }
     .timestamp { font-size: 0.75rem; color: var(--muted); }
@@ -1994,6 +2001,18 @@
     .position-row:hover .pnl-share-btn,
     .pnl-share-btn:focus-visible {
       opacity: 1;
+    }
+
+    .pnl-cell {
+      position: relative;
+    }
+
+    .pnl-share-btn.centered {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 0;
     }
 
     .pnl-share-btn:hover {
@@ -5843,29 +5862,27 @@
           <td class="desktop-only">
             <span class="timestamp">${ageDisplay}</span>
           </td>
-          <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
+          <td class="money pnl-cell ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
             <div class="price-stack">
               <span>${upnlFormatted}</span>
-              <span class="notional-sub roe-sub">
-                ${upnlPercentDisplay || ""}
-                <button class="pnl-share-btn" type="button" title="Share PnL" aria-label="Share PnL"
-                  data-wallet="${xmlEscape(wallet)}"
-                  data-asset="${xmlEscape(spotLabel)}"
-                  data-coin="${xmlEscape(coin)}"
-                  data-spot="${isSpot ? "true" : "false"}"
-                  data-direction="${dir}${leverageDisplay ? ` ${leverageDisplay}` : ""}"
-                  data-upnl="${upnlFormatted}"
-                  data-roe="${upnlPercentDisplay}"
-                  data-entry="${entryPriceDisplay}"
-                  data-current="${currentPriceDisplay}">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:10px;height:10px;">
-                    <path d="M14 3h7v7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M10 14L21 3" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-              </span>
+              <span class="notional-sub roe-sub">${upnlPercentDisplay || ""}</span>
             </div>
+            <button class="pnl-share-btn centered" type="button" title="Share PnL" aria-label="Share PnL"
+              data-wallet="${xmlEscape(wallet)}"
+              data-asset="${xmlEscape(spotLabel)}"
+              data-coin="${xmlEscape(coin)}"
+              data-spot="${isSpot ? "true" : "false"}"
+              data-direction="${dir}${leverageDisplay ? ` ${leverageDisplay}` : ""}"
+              data-upnl="${upnlFormatted}"
+              data-roe="${upnlPercentDisplay}"
+              data-entry="${entryPriceDisplay}"
+              data-current="${currentPriceDisplay}">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:10px;height:10px;">
+                <path d="M14 3h7v7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 14L21 3" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </td>
           <td class="desktop-only">${liqDistanceHtml}</td>
           <td class="money desktop-only ${fundingClass}">${fundingDisplay}</td>
