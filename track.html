@@ -1971,23 +1971,33 @@
 
     .pnl-share-btn {
       margin-left: 0.35rem;
-      border: none;
-      background: rgba(255, 255, 255, 0.08);
-      color: inherit;
-      border-radius: 8px;
-      width: 22px;
-      height: 22px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      border-radius: 999px;
+      width: 16px;
+      height: 16px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       padding: 0;
       pointer-events: auto;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+    }
+
+    .position-row:hover .pnl-share-btn,
+    .pnl-share-btn:focus-visible {
+      opacity: 1;
     }
 
     .pnl-share-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(18, 18, 24, 0.6);
+      color: #f8fafc;
     }
 
     .share-modal {
@@ -3841,6 +3851,23 @@
     ctx.fillStyle = "#ffffff";
     ctx.font = "600 36px Outfit, sans-serif";
     ctx.fillText(`${data.asset || ""}`, 140, 248);
+
+    if (data.spot === "true") {
+      const label = "SPOT";
+      ctx.font = "600 22px Outfit, sans-serif";
+      const pillW = ctx.measureText(label).width + 22;
+      const pillH = 32;
+      const pillX = 320;
+      const pillY = 254;
+      ctx.fillStyle = "rgba(0, 112, 243, 0.2)";
+      drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 16);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(0, 112, 243, 0.65)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = "#0070f3";
+      ctx.fillText(label, pillX + 11, pillY + 5);
+    }
 
     if (data.direction) {
       const pillText = data.direction;
@@ -5778,21 +5805,26 @@
           </td>
           <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
             <div class="price-stack">
-              <span>
-                ${upnlFormatted}
+              <span>${upnlFormatted}</span>
+              <span class="notional-sub roe-sub">
+                ${upnlPercentDisplay || ""}
                 <button class="pnl-share-btn" type="button" title="Share PnL" aria-label="Share PnL"
                   data-wallet="${xmlEscape(wallet)}"
                   data-asset="${xmlEscape(spotLabel)}"
                   data-coin="${xmlEscape(coin)}"
+                  data-spot="${isSpot ? "true" : "false"}"
                   data-direction="${dir}${leverageDisplay ? ` ${leverageDisplay}` : ""}"
                   data-upnl="${upnlFormatted}"
                   data-roe="${upnlPercentDisplay}"
                   data-entry="${entryPriceDisplay}"
                   data-current="${currentPriceDisplay}">
-                  ⤴
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:10px;height:10px;">
+                    <path d="M14 3h7v7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 14L21 3" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </button>
               </span>
-              <span class="notional-sub roe-sub">${upnlPercentDisplay || ""}</span>
             </div>
           </td>
           <td class="desktop-only">${liqDistanceHtml}</td>
@@ -9179,6 +9211,7 @@
       wallet: shareBtn.dataset.wallet || "",
       asset: shareBtn.dataset.asset || "",
       coin: shareBtn.dataset.coin || "",
+      spot: shareBtn.dataset.spot || "false",
       direction: shareBtn.dataset.direction || "",
       upnl: shareBtn.dataset.upnl || "",
       roe: shareBtn.dataset.roe || "",
