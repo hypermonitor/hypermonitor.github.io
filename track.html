@@ -3857,7 +3857,7 @@
     const titleCenterY = titleY + 26;
     if (logo && logo.width) {
       const logoSize = 88;
-      const logoY = titleCenterY - logoSize / 2 + 4;
+      const logoY = titleCenterY - logoSize / 2 - 4;
       ctx.drawImage(logo, 90, logoY, logoSize, logoSize);
     }
     ctx.fillText(title, 190, titleY);
@@ -3872,7 +3872,7 @@
     const assetY = 248;
     const assetCenterY = assetY + 18;
     const coinSize = 40;
-    const coinY = assetCenterY - coinSize / 2 + 4;
+    const coinY = assetCenterY - coinSize / 2 - 4;
     if (coinLogo && coinLogo.width) {
       ctx.drawImage(coinLogo, 90, coinY, coinSize, coinSize);
     } else {
