@@ -3736,6 +3736,17 @@
     return `${COIN_ICON_BASE}${encodeURIComponent(normalized)}.svg`;
   }
 
+  function isSameOriginAsset(url) {
+    if (!url) return false;
+    if (url.startsWith("images/") || url.startsWith("./") || url.startsWith("/")) return true;
+    try {
+      const parsed = new URL(url, window.location.href);
+      return parsed.origin === window.location.origin;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function drawRoundedRect(ctx, x, y, w, h, r) {
     const radius = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -3822,7 +3833,7 @@
       });
 
       const coinLogoUrl = getShareCoinLogoUrl(data.coin);
-      if (coinLogoUrl) {
+      if (coinLogoUrl && isSameOriginAsset(coinLogoUrl)) {
         coinLogo = new Image();
         await new Promise((resolve) => {
           coinLogo.onload = resolve;
@@ -3846,6 +3857,14 @@
 
     if (coinLogo && coinLogo.width) {
       ctx.drawImage(coinLogo, 90, 252, 40, 40);
+    } else {
+      const letter = (data.asset || "?").slice(0, 1).toUpperCase();
+      ctx.fillStyle = "rgba(151, 253, 229, 0.2)";
+      drawRoundedRect(ctx, 90, 252, 40, 40, 12);
+      ctx.fill();
+      ctx.fillStyle = "#97fde5";
+      ctx.font = "700 20px Outfit, sans-serif";
+      ctx.fillText(letter, 102, 260);
     }
 
     ctx.fillStyle = "#ffffff";
