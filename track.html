@@ -3857,7 +3857,7 @@
     const titleCenterY = titleY + 26;
     if (logo && logo.width) {
       const logoSize = 88;
-      const logoY = titleCenterY - logoSize / 2 - 4;
+      const logoY = titleCenterY - logoSize / 2 - 2;
       ctx.drawImage(logo, 90, logoY, logoSize, logoSize);
     }
     ctx.fillText(title, 190, titleY);
@@ -3931,7 +3931,7 @@
 
     ctx.fillStyle = "rgba(245,245,255,0.7)";
     ctx.font = "500 26px Outfit, sans-serif";
-    ctx.fillText("Unrealized PNL (USD)", 90, 470);
+    ctx.fillText("Unrealized PnL", 90, 470);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "700 48px Outfit, sans-serif";
