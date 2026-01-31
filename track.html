@@ -2214,7 +2214,7 @@
         <tr>
           <th class="sortable" data-sort="asset">Asset</th>
           <th class="sortable" data-sort="side">Side</th>
-          <th class="sortable" data-sort="size">Size / Notional</th>
+          <th class="sortable" data-sort="size">Size</th>
           <th class="sortable" data-sort="price">Price</th>
           <th class="desktop-only sortable" data-sort="upnl">Unrealized PnL</th>
           <th class="desktop-only sortable" data-sort="liq">Liq Distance</th>
@@ -5229,10 +5229,18 @@
         if (!Number.isNaN(notional)) totals.notionalTotal += notional;
         walletTotals.set(wallet, totals);
 
-        const upnlFormatted = formatSignedDollarWithPlus(upnl);
-        const formattedValue = formatSignedDollar(positionValue);
         const isPerp = item.marketType !== "spot";
         const leverageValue = p.leverage?.value ?? p.leverage ?? p.lever ?? p.leverageValue;
+        const upnlFormatted = formatSignedDollarWithPlus(upnl);
+        const entryNotional = Number.isFinite(entryPx) && szi !== 0 ? Math.abs(entryPx * szi) : null;
+        const leverageNum = Number(leverageValue);
+        const initialMargin =
+          isPerp && Number.isFinite(entryNotional) && entryNotional !== 0 && Number.isFinite(leverageNum) && leverageNum > 0
+            ? entryNotional / leverageNum
+            : null;
+        const upnlPercent = Number.isFinite(initialMargin) && initialMargin !== 0 ? upnl / initialMargin : null;
+        const upnlPercentDisplay = upnlPercent === null ? "" : formatSignedPercent(upnlPercent, 2);
+        const formattedValue = formatSignedDollar(positionValue);
         const leverageDisplay = isPerp ? formatLeverage(leverageValue) : "";
         const fundingValue =
           (p.cumFunding && typeof p.cumFunding === "object"
@@ -5254,21 +5262,23 @@
           : null;
         const liqDistanceDisplay =
           liqDistanceClamped === null ? null : Math.max(0, Math.min(1, 1 - liqDistanceClamped));
+        const liqDistanceDisplaySafe = !hasLiq && isPerp ? 0 : liqDistanceDisplay;
         const liqDistanceClass =
-          liqDistanceDisplay === null
+          liqDistanceDisplaySafe === null
             ? ""
-            : liqDistanceDisplay <= 0.25
+            : liqDistanceDisplaySafe <= 0.25
               ? "liq-danger"
-              : liqDistanceDisplay <= 0.5
+              : liqDistanceDisplaySafe <= 0.5
                 ? "liq-warn"
-                : liqDistanceDisplay >= 0.9
+                : liqDistanceDisplaySafe >= 0.9
                   ? "liq-high"
                   : "liq-safe";
-        const liqDistancePct = liqDistanceDisplay === null ? "–" : formatPercent(liqDistanceDisplay, 0);
-        const liqDistanceWidth = liqDistanceDisplay === null ? 0 : Math.round(liqDistanceDisplay * 100);
-        const liqHue = liqDistanceDisplay === null ? 120 : Math.round((1 - liqDistanceDisplay) * 120);
+        const liqDistancePct = liqDistanceDisplaySafe === null ? "–" : formatPercent(liqDistanceDisplaySafe, 0);
+        const liqDistanceWidth = liqDistanceDisplaySafe === null ? 0 : Math.round(liqDistanceDisplaySafe * 100);
+        const liqHue = liqDistanceDisplaySafe === null ? 120 : Math.round((1 - liqDistanceDisplaySafe) * 120);
         const liqPriceDisplay = isPerp ? (hasLiq ? formatLiqPrice(liqValue, entryPx, markPx) : "$0") : "–";
-        const liqHighFlag = liqDistanceDisplay !== null && liqDistanceDisplay >= 0.9 ? `<span class="liq-flag">HIGH</span>` : "";
+        const liqHighFlag =
+          liqDistanceDisplaySafe !== null && liqDistanceDisplaySafe >= 0.9 ? `<span class="liq-flag">HIGH</span>` : "";
         const liqDistanceHtml =
           isPerp
             ? `
@@ -5379,7 +5389,10 @@
             </div>
           </td>
           <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
-            ${upnlFormatted}
+            <div class="price-stack">
+              <span class="notional-sub">${upnlPercentDisplay ? `ROE: ${upnlPercentDisplay}` : ""}</span>
+              <span>${upnlFormatted}</span>
+            </div>
           </td>
           <td class="desktop-only">${liqDistanceHtml}</td>
           <td class="money desktop-only ${fundingClass}">${fundingDisplay}</td>
