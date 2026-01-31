@@ -1969,6 +1969,100 @@
       opacity: 0.7;
     }
 
+    .pnl-share-btn {
+      margin-left: 0.35rem;
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: inherit;
+      border-radius: 8px;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 0;
+      pointer-events: auto;
+    }
+
+    .pnl-share-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .share-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 12, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .share-modal.open { display: flex; }
+
+    .share-card {
+      width: min(520px, 92vw);
+      background: rgba(12, 12, 16, 0.96);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .share-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+
+    .share-preview {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0b0b0f;
+      overflow: hidden;
+    }
+
+    .share-preview img {
+      width: 100%;
+      display: block;
+    }
+
+    .share-actions {
+      margin-top: 0.8rem;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .share-btn {
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .share-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(18, 18, 24, 0.6);
+      color: #f8fafc;
+    }
+
+    body.light .share-btn {
+      background: #ffffff;
+      color: #475569;
+      border-color: #e5e7eb;
+    }
+
     .funding-pos { color: #4ade80; }
     .funding-neg { color: #fb7185; }
 
@@ -2684,6 +2778,23 @@
   <button class="price-context-item" type="button" data-action="remove" data-requires-coin="true">Remove from bar</button>
 </div>
 
+<div class="share-modal" id="pnlShareModal" aria-hidden="true">
+  <div class="share-card">
+    <div class="share-header">
+      <strong>Share PnL</strong>
+      <button class="share-btn" id="shareModalClose" type="button">Close</button>
+    </div>
+    <div class="share-preview">
+      <img id="sharePreviewImg" alt="PnL share preview" />
+    </div>
+    <div class="share-actions">
+      <button class="share-btn" id="shareSaveBtn" type="button">Save image</button>
+      <button class="share-btn" id="shareXBtn" type="button">Share on X</button>
+      <button class="share-btn" id="shareNativeBtn" type="button">Share</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="module">
@@ -2794,6 +2905,13 @@
   const metricSkillPersistenceEl = document.getElementById("metricSkillPersistence");
   const metricExcessPnlEl = document.getElementById("metricExcessPnl");
   const metricBetaAlphaEl = document.getElementById("metricBetaAlpha");
+
+  const pnlShareModalEl = document.getElementById("pnlShareModal");
+  const sharePreviewImgEl = document.getElementById("sharePreviewImg");
+  const shareSaveBtnEl = document.getElementById("shareSaveBtn");
+  const shareXBtnEl = document.getElementById("shareXBtn");
+  const shareNativeBtnEl = document.getElementById("shareNativeBtn");
+  const shareModalCloseEl = document.getElementById("shareModalClose");
 
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
@@ -3592,6 +3710,115 @@
     }
     const diff = a - b;
     return dir === "asc" ? diff : -diff;
+  }
+
+  function formatShortWallet(value) {
+    const w = String(value || "");
+    if (w.length <= 10) return w;
+    return `${w.slice(0, 6)}…${w.slice(-4)}`;
+  }
+
+  function drawRoundedRect(ctx, x, y, w, h, r) {
+    const radius = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + w, y, x + w, y + h, radius);
+    ctx.arcTo(x + w, y + h, x, y + h, radius);
+    ctx.arcTo(x, y + h, x, y, radius);
+    ctx.arcTo(x, y, x + w, y, radius);
+    ctx.closePath();
+  }
+
+  async function buildPnlShareImage(data) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1350;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#0b0b0f");
+    gradient.addColorStop(1, "#121826");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    drawRoundedRect(ctx, 40, 40, 1000, 1270, 28);
+    ctx.fill();
+
+    const canDrawLogo = window.location?.protocol !== "file:";
+    let logo = null;
+    if (canDrawLogo) {
+      logo = new Image();
+      const logoSrc = "images/logo.png";
+      await new Promise((resolve) => {
+        logo.onload = resolve;
+        logo.onerror = resolve;
+        logo.src = logoSrc;
+      });
+    }
+
+    ctx.textBaseline = "top";
+    if (logo && logo.width) {
+      ctx.drawImage(logo, 90, 88, 64, 64);
+    }
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 52px Outfit, sans-serif";
+    ctx.fillText("HYPERMONITOR", 170, 88);
+
+    ctx.fillStyle = "rgba(245,245,255,0.8)";
+    ctx.font = "500 28px Outfit, sans-serif";
+    ctx.fillText(formatShortWallet(data.wallet), 90, 180);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 36px Outfit, sans-serif";
+    ctx.fillText(`${data.asset || ""} · ${data.direction || ""}`, 90, 240);
+
+    ctx.fillStyle = "rgba(245,245,255,0.7)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText("Unrealized PNL (USD)", 90, 330);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 64px Outfit, sans-serif";
+    ctx.fillText(data.upnl || "", 90, 370);
+
+    ctx.fillStyle = "rgba(245,245,255,0.7)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText("Entry Price", 90, 510);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 36px Outfit, sans-serif";
+    ctx.fillText(data.entry || "", 90, 550);
+
+    ctx.fillStyle = "rgba(245,245,255,0.7)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText("Current Price", 90, 630);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 36px Outfit, sans-serif";
+    ctx.fillText(data.current || "", 90, 670);
+
+    ctx.fillStyle = "rgba(245,245,255,0.6)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText("http://hypermonitor.org/", 90, 1240);
+
+    try {
+      return canvas.toDataURL("image/png");
+    } catch (err) {
+      console.error("Share image export failed", err);
+      return null;
+    }
+  }
+
+  function openPnlShareModal(dataUrl) {
+    if (!pnlShareModalEl || !sharePreviewImgEl) return;
+    sharePreviewImgEl.src = dataUrl || "";
+    pnlShareModalEl.classList.add("open");
+    pnlShareModalEl.setAttribute("aria-hidden", "false");
+  }
+
+  function closePnlShareModal() {
+    if (!pnlShareModalEl) return;
+    pnlShareModalEl.classList.remove("open");
+    pnlShareModalEl.setAttribute("aria-hidden", "true");
   }
 
   function computePositionAgeMs(coin, szi, wallet) {
@@ -5459,7 +5686,18 @@
           </td>
           <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
             <div class="price-stack">
-              <span>${upnlFormatted}</span>
+              <span>
+                ${upnlFormatted}
+                <button class="pnl-share-btn" type="button" title="Share PnL" aria-label="Share PnL"
+                  data-wallet="${xmlEscape(wallet)}"
+                  data-asset="${xmlEscape(spotLabel)}"
+                  data-direction="${dir}${leverageDisplay ? ` ${leverageDisplay}` : ""}"
+                  data-upnl="${upnlFormatted}"
+                  data-entry="${entryPriceDisplay}"
+                  data-current="${currentPriceDisplay}">
+                  ⤴
+                </button>
+              </span>
               <span class="notional-sub roe-sub">${upnlPercentDisplay || ""}</span>
             </div>
           </td>
@@ -8842,8 +9080,34 @@
     });
   }
 
+  async function handlePnlShareClick(shareBtn) {
+    const payload = {
+      wallet: shareBtn.dataset.wallet || "",
+      asset: shareBtn.dataset.asset || "",
+      direction: shareBtn.dataset.direction || "",
+      upnl: shareBtn.dataset.upnl || "",
+      entry: shareBtn.dataset.entry || "",
+      current: shareBtn.dataset.current || "",
+    };
+    const dataUrl = await buildPnlShareImage(payload);
+    if (dataUrl) {
+      openPnlShareModal(dataUrl);
+    } else {
+      console.error("Share image generation failed");
+    }
+  }
+
+  document.addEventListener("click", async (e) => {
+    const shareBtn = e.target.closest(".pnl-share-btn");
+    if (!shareBtn) return;
+    e.stopPropagation();
+    await handlePnlShareClick(shareBtn);
+  });
+
   if (positionsBodyEl) {
     positionsBodyEl.addEventListener("click", async (e) => {
+      const shareBtn = e.target.closest(".pnl-share-btn");
+      if (shareBtn) return;
       const row = e.target.closest(".position-row");
       if (!row) return;
       row.classList.add("loading");
@@ -8864,7 +9128,81 @@
     if (e.key === "Escape" && portfolioModalEl?.classList.contains("open")) {
       closePortfolioModal();
     }
+    if (e.key === "Escape" && pnlShareModalEl?.classList.contains("open")) {
+      closePnlShareModal();
+    }
   });
+
+  if (shareModalCloseEl) {
+    shareModalCloseEl.addEventListener("click", () => closePnlShareModal());
+  }
+
+  if (pnlShareModalEl) {
+    pnlShareModalEl.addEventListener("click", (e) => {
+      if (e.target === pnlShareModalEl) closePnlShareModal();
+    });
+  }
+
+  if (shareSaveBtnEl) {
+    shareSaveBtnEl.addEventListener("click", () => {
+      if (!sharePreviewImgEl?.src) return;
+      const link = document.createElement("a");
+      link.href = sharePreviewImgEl.src;
+      link.download = "hypermonitor-pnl.png";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
+  }
+
+  if (shareXBtnEl) {
+    shareXBtnEl.addEventListener("click", async () => {
+      const text = "Discover Hypermonitor";
+      const url = "http://hypermonitor.org/";
+      if (sharePreviewImgEl?.src) {
+        try {
+          const res = await fetch(sharePreviewImgEl.src);
+          const blob = await res.blob();
+          const file = new File([blob], "hypermonitor-pnl.png", { type: "image/png" });
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], text, title: "Hypermonitor PnL" });
+            return;
+          }
+        } catch (err) {
+          console.error("X share failed", err);
+        }
+      }
+      const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(intent, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  if (shareNativeBtnEl) {
+    shareNativeBtnEl.addEventListener("click", async () => {
+      if (!sharePreviewImgEl?.src) return;
+      try {
+        const res = await fetch(sharePreviewImgEl.src);
+        const blob = await res.blob();
+        const file = new File([blob], "hypermonitor-pnl.png", { type: "image/png" });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            text: "Discover Hypermonitor",
+            title: "Hypermonitor PnL",
+          });
+        } else {
+          const link = document.createElement("a");
+          link.href = sharePreviewImgEl.src;
+          link.download = "hypermonitor-pnl.png";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+      } catch (err) {
+        console.error("Share failed", err);
+      }
+    });
+  }
 
   ordersTabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
