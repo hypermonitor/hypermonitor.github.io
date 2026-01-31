@@ -3735,7 +3735,9 @@
     if (special) return special;
     const { base } = splitDexCoin(normalized);
     const local = String(base || normalized).replace("/", "_");
-    return `images/coins/${encodeURIComponent(local)}.svg`;
+    const pngOnly = new Set(["USA500", "COPPER"]);
+    const ext = pngOnly.has(local) ? "png" : "svg";
+    return `images/coins/${encodeURIComponent(local)}.${ext}`;
   }
 
   function isSameOriginAsset(url) {
@@ -3846,32 +3848,45 @@
     }
 
     ctx.textBaseline = "top";
-    if (logo && logo.width) {
-      ctx.drawImage(logo, 90, 78, 80, 80);
-    }
     ctx.fillStyle = "#ffffff";
     ctx.font = "700 52px Outfit, sans-serif";
-    ctx.fillText("HYPERMONITOR", 180, 92);
+    const title = "HYPERMONITOR";
+    const titleMetrics = ctx.measureText(title);
+    const titleY = 92;
+    const titleCenterY = titleY + (titleMetrics.actualBoundingBoxAscent - titleMetrics.actualBoundingBoxDescent) / 2;
+    if (logo && logo.width) {
+      const logoSize = 96;
+      const logoY = titleCenterY - logoSize / 2;
+      ctx.drawImage(logo, 90, logoY, logoSize, logoSize);
+    }
+    ctx.fillText(title, 200, titleY);
 
     ctx.fillStyle = "rgba(245,245,255,0.8)";
     ctx.font = "500 28px Outfit, sans-serif";
     ctx.fillText(formatShortWallet(data.wallet), 90, 180);
 
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 36px Outfit, sans-serif";
+    const assetText = `${data.asset || ""}`;
+    const assetY = 248;
+    const assetMetrics = ctx.measureText(assetText);
+    const assetCenterY = assetY + (assetMetrics.actualBoundingBoxAscent - assetMetrics.actualBoundingBoxDescent) / 2;
+    const coinSize = 44;
+    const coinY = assetCenterY - coinSize / 2;
     if (coinLogo && coinLogo.width) {
-      ctx.drawImage(coinLogo, 90, 252, 40, 40);
+      ctx.drawImage(coinLogo, 90, coinY, coinSize, coinSize);
     } else {
       const letter = (data.asset || "?").slice(0, 1).toUpperCase();
       ctx.fillStyle = "rgba(151, 253, 229, 0.2)";
-      drawRoundedRect(ctx, 90, 252, 40, 40, 12);
+      drawRoundedRect(ctx, 90, coinY, coinSize, coinSize, 12);
       ctx.fill();
       ctx.fillStyle = "#97fde5";
       ctx.font = "700 20px Outfit, sans-serif";
-      ctx.fillText(letter, 102, 260);
+      ctx.fillText(letter, 90 + 12, coinY + 8);
+      ctx.font = "600 36px Outfit, sans-serif";
     }
-
     ctx.fillStyle = "#ffffff";
-    ctx.font = "600 36px Outfit, sans-serif";
-    ctx.fillText(`${data.asset || ""}`, 140, 248);
+    ctx.fillText(assetText, 150, assetY);
 
     if (data.spot === "true") {
       const label = "SPOT";
@@ -4738,7 +4753,9 @@
     const normalized = normalizeFooterCoinValue(symbol);
     if (!normalized) return null;
     const { base } = splitDexCoin(normalized);
-    const iconUrl = `images/coins/${encodeURIComponent(String(base || normalized).replace("/", "_"))}.svg`;
+    const local = String(base || normalized).replace("/", "_");
+    if (local === "USA500" || local === "COPPER") return null;
+    const iconUrl = `images/coins/${encodeURIComponent(local)}.svg`;
     if (!isSameOriginAsset(iconUrl)) return null;
     try {
       const res = await fetch(iconUrl);
