@@ -66,6 +66,12 @@
       padding-bottom: 4rem;
     }
 
+    @media (max-width: 720px) {
+      #app {
+        width: 96vw;
+      }
+    }
+
     header {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -354,8 +360,8 @@
       .wallet-input-row .wallet-icon-btn { width: 38px; }
       .wallet-actions { flex-direction: column; align-items: stretch; }
       .wallet-actions .wallet-track-btn { width: 100%; }
-      .header-right { align-items: flex-end; }
-      .header-right-top { width: 100%; justify-content: flex-end; }
+      .header-right { align-items: flex-end; margin-top: 0.6rem; }
+      .header-right-top { width: 100%; justify-content: flex-end; gap: 0.6rem; }
     }
 
     @media (max-width: 600px) {
@@ -390,8 +396,8 @@
     }
 
     @media (max-width: 600px) {
-      .header-right { align-items: stretch; }
-      .header-right-top { justify-content: space-between; }
+      .header-right { align-items: stretch; margin-top: 0.6rem; }
+      .header-right-top { justify-content: space-between; gap: 0.6rem; }
       .status-pill { flex: 1; justify-content: center; }
     }
 
@@ -421,6 +427,15 @@
       /* if you want even denser timestamps */
       .timestamp { font-size: 0.68rem; }
 
+      .position-subtable {
+        table-layout: auto;
+      }
+
+      .position-subtable th,
+      .position-subtable td {
+        white-space: normal;
+      }
+
       /* --- Positions table: hide less critical columns --- */
       /* columns: Asset(1) Size(2) Direction(3) Entry(4) Value(5) uPnL(6) */
       .grid section.card table th:nth-child(4),
@@ -428,6 +443,21 @@
       .grid section.card table th:nth-child(5),
       .grid section.card table td:nth-child(5) {
         display: none; /* hide Entry Price + Value on phones */
+      }
+
+      .positions-card table {
+        table-layout: auto;
+      }
+
+      .positions-card th,
+      .positions-card td {
+        overflow: visible;
+        text-overflow: unset;
+      }
+
+      .positions-card td:nth-child(2),
+      .positions-card th:nth-child(2) {
+        white-space: nowrap;
       }
 
       /* --- Orders / Fills tables: hide time + total (usually widest) --- */
@@ -631,6 +661,11 @@
       min-width: 640px;
     }
 
+    .positions-card table {
+      width: 100%;
+      min-width: 100%;
+    }
+
     @media (max-width: 900px) {
       .positions-card {
         grid-column: span 1;
@@ -767,6 +802,10 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 0.4rem 0.5rem;
+    }
+
+    .position-details td {
+      width: 100%;
     }
 
     .position-subtable {
@@ -1735,6 +1774,12 @@
       flex-wrap: nowrap;
     }
 
+    @media (max-width: 720px) {
+      .price-footer-inner {
+        width: 96vw;
+      }
+    }
+
     .price-logo {
       width: 28px;
       height: 28px;
@@ -2035,8 +2080,8 @@
         </tr>
         </thead>
         <tbody id="positionsBody">
-        <tr class="loading-row"><td colspan="6" class="mobile-only muted">Loading…</td></tr>
-        <tr class="loading-row"><td colspan="8" class="desktop-only muted">Loading…</td></tr>
+        <tr class="loading-row mobile-only"><td colspan="4" class="muted">Loading…</td></tr>
+        <tr class="loading-row desktop-only"><td colspan="8" class="muted">Loading…</td></tr>
         </tbody>
       </table>
     </section>
@@ -3211,6 +3256,10 @@
     const markDecimals = getPriceDecimals(markPx);
     const refDecimals = Number.isFinite(entryDecimals) ? entryDecimals : markDecimals;
     return formatPriceWithMaxDecimals(n, refDecimals);
+  }
+
+  function getPositionsColspan() {
+    return window.matchMedia("(max-width: 600px)").matches ? 4 : 8;
   }
 
   function formatSignedPercent(value, decimals = 2) {
@@ -4737,9 +4786,10 @@
     lastComputedTotalNotional = 0;
     const walletTotals = getActiveTotals();
     walletTotals.clear();
+    const positionsColspan = getPositionsColspan();
 
     if (!currentAssetPositions.length) {
-      positionsBodyEl.innerHTML = "<tr><td colspan='8' class='muted desktop-only'>No open positions.</td></tr>";
+      positionsBodyEl.innerHTML = `<tr><td colspan='${positionsColspan}' class='muted'>No open positions.</td></tr>`;
       recomputeAndRenderMarginSummary();
       refreshBreakdownIfOpen();
       return;
@@ -4837,7 +4887,7 @@
 
           breakdownHtml = `
             <tr class="position-details">
-              <td colspan="8">
+              <td colspan="${positionsColspan}">
                 <div class="position-breakdown">
                   <table class="position-subtable">
                     <thead>
@@ -5801,7 +5851,8 @@
       historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
     }
 
-    positionsBodyEl.innerHTML = "<tr class='loading-row'><td colspan='8' class='muted desktop-only'>Loading…</td><td colspan='6' class='muted mobile-only'>Loading…</td></tr>";
+    const positionsColspan = getPositionsColspan();
+    positionsBodyEl.innerHTML = `<tr class='loading-row'><td colspan='${positionsColspan}' class='muted'>Loading…</td></tr>`;
     marginSummaryEl.innerHTML = "<span class='muted'>Loading…</span>";
 
     refreshBreakdownIfOpen();
