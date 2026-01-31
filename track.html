@@ -1879,10 +1879,12 @@
       font-weight: 400;
       letter-spacing: 0.02em;
       cursor: grab;
+      transition: transform 0.2s ease, opacity 0.2s ease;
     }
 
     .price-item.dragging {
-      opacity: 0.5;
+      opacity: 0.6;
+      transform: scale(0.96);
       cursor: grabbing;
     }
 
@@ -1918,6 +1920,41 @@
 
     .price-footer.rolling .price-track {
       animation: priceScroll 24s linear infinite;
+    }
+
+    .price-context-menu {
+      position: fixed;
+      z-index: 220;
+      min-width: 150px;
+      background: rgba(12, 12, 16, 0.95);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 0.25rem;
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .price-context-menu.show { display: block; }
+
+    .price-context-menu[data-has-coin="false"] .price-context-item[data-requires-coin="true"] {
+      display: none;
+    }
+
+    .price-context-item {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text-main);
+      text-align: left;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .price-context-item:hover {
+      background: rgba(255, 255, 255, 0.08);
     }
 
     @keyframes priceScroll {
@@ -2563,6 +2600,11 @@
     </div>
   </div>
 </div>
+<div class="price-context-menu" id="priceContextMenu" role="menu" aria-hidden="true">
+  <button class="price-context-item" type="button" data-action="pin" data-requires-coin="true">Pin left</button>
+  <button class="price-context-item" type="button" data-action="reset">Reset list</button>
+  <button class="price-context-item" type="button" data-action="remove" data-requires-coin="true">Remove from bar</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -2607,6 +2649,7 @@
   const priceListCloneEl = document.getElementById("priceListClone");
   const priceAddInputEl = document.getElementById("priceAddInput");
   const priceAddBtnEl = document.getElementById("priceAddBtn");
+  const priceContextMenuEl = document.getElementById("priceContextMenu");
 
   const openOrdersBodyEl = document.getElementById("openOrdersBody");
   const openOrdersCountEl = document.getElementById("openOrdersCount");
@@ -2692,7 +2735,7 @@
   const FOOTER_COINS_KEY = "hypermonitor-footer-coins";
   const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
   const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
-  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "USA500", "GOLD", "SILVER", "MSTR", "NVDA"];
+  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "cash:USA500", "xyz:GOLD", "xyz:SILVER", "xyz:MSTR", "xyz:NVDA"];
   let trackedFooterCoins = [...DEFAULT_FOOTER_COINS];
   const coinNameCache = new Map();
   const coinColorCache = new Map();
@@ -2742,6 +2785,12 @@
     try {
       localStorage.setItem(FOOTER_COINS_KEY, JSON.stringify(trackedFooterCoins));
     } catch (e) {}
+  }
+
+  function resetFooterCoins() {
+    trackedFooterCoins = [...DEFAULT_FOOTER_COINS];
+    saveFooterCoins();
+    renderFooterPrices();
   }
 
   function loadCoinNameCache() {
@@ -3834,7 +3883,9 @@
     if (!cleaned) return "";
     const { dex, base } = splitDexCoin(cleaned);
     if (dex) return `${dex.toLowerCase()}:${String(base || "").toUpperCase()}`;
-    return cleaned.toUpperCase();
+    const upper = cleaned.toUpperCase();
+    if (upper === "USA500") return "cash:USA500";
+    return upper;
   }
 
   function getFooterBase(coin) {
@@ -4346,7 +4397,13 @@
       if (!item) return;
       const priceEl = item.querySelector(".coin-price");
       const price = getLivePriceForCoin(coin);
-      const color = coinColors[coin] || coinColorCache.get(coin) || "#e5e7eb";
+      const base = getFooterBase(coin);
+      const color =
+        coinColors[coin] ||
+        coinColors[base] ||
+        coinColorCache.get(coin) ||
+        coinColorCache.get(base) ||
+        "#e5e7eb";
       if (priceEl) {
         if (Number.isFinite(price)) {
           let decimals = coinPriceDecimals.get(coin);
@@ -4457,6 +4514,30 @@
     } else {
       priceAddBtnEl.textContent = "Add";
     }
+  }
+
+  let priceContextCoin = null;
+
+  function hidePriceContextMenu() {
+    if (!priceContextMenuEl) return;
+    priceContextMenuEl.classList.remove("show");
+    priceContextMenuEl.setAttribute("aria-hidden", "true");
+    priceContextMenuEl.setAttribute("data-has-coin", "false");
+    priceContextCoin = null;
+  }
+
+  function showPriceContextMenu(x, y, coin) {
+    if (!priceContextMenuEl) return;
+    priceContextCoin = coin || null;
+    priceContextMenuEl.classList.add("show");
+    priceContextMenuEl.setAttribute("aria-hidden", "false");
+    priceContextMenuEl.setAttribute("data-has-coin", coin ? "true" : "false");
+    const rect = priceContextMenuEl.getBoundingClientRect();
+    const padding = 8;
+    const left = Math.min(x, window.innerWidth - rect.width - padding);
+    const top = Math.min(y, window.innerHeight - rect.height - padding);
+    priceContextMenuEl.style.left = `${Math.max(padding, left)}px`;
+    priceContextMenuEl.style.top = `${Math.max(padding, top)}px`;
   }
 
   async function addFooterCoin(raw) {
@@ -7939,11 +8020,49 @@
 
   if (priceListEl) {
     let draggingCoin = null;
+    let draggingEl = null;
+    let lastDragOrder = null;
+
+    const commitFooterOrder = (order) => {
+      const ordered = Array.isArray(order)
+        ? order
+        : Array.from(priceListEl.querySelectorAll(".price-item"))
+            .map((el) => el.dataset.coin)
+            .filter(Boolean);
+      if (!ordered.length) return;
+      trackedFooterCoins = ordered;
+      saveFooterCoins();
+      renderFooterPrices();
+    };
+
+    const commitFooterOrderFromDom = () => {
+      const ordered = Array.from(priceListEl.querySelectorAll(".price-item"))
+        .map((el) => el.dataset.coin)
+        .filter(Boolean);
+      commitFooterOrder(ordered);
+    };
+
+    const getDragAfterElement = (container, x) => {
+      const items = Array.from(container.querySelectorAll(".price-item:not(.dragging)"));
+      let closest = null;
+      let closestOffset = Number.NEGATIVE_INFINITY;
+      items.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        const offset = x - rect.left - rect.width / 2;
+        if (offset < 0 && offset > closestOffset) {
+          closestOffset = offset;
+          closest = item;
+        }
+      });
+      return closest;
+    };
 
     priceListEl.addEventListener("dragstart", (e) => {
       const item = e.target.closest(".price-item");
       if (!item) return;
       draggingCoin = item.dataset.coin;
+      draggingEl = item;
+      lastDragOrder = null;
       item.classList.add("dragging");
       e.dataTransfer.effectAllowed = "move";
       try { e.dataTransfer.setData("text/plain", draggingCoin); } catch (err) {}
@@ -7952,32 +8071,86 @@
     priceListEl.addEventListener("dragend", (e) => {
       const item = e.target.closest(".price-item");
       if (item) item.classList.remove("dragging");
+      commitFooterOrder(lastDragOrder);
       draggingCoin = null;
+      draggingEl = null;
+      lastDragOrder = null;
     });
 
     priceListEl.addEventListener("dragover", (e) => {
-      const item = e.target.closest(".price-item");
-      if (!item) return;
+      if (!draggingEl) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
+      const after = getDragAfterElement(priceListEl, e.clientX);
+      if (after === draggingEl) return;
+      if (after == null) {
+        priceListEl.appendChild(draggingEl);
+      } else {
+        priceListEl.insertBefore(draggingEl, after);
+      }
+      lastDragOrder = Array.from(priceListEl.querySelectorAll(".price-item"))
+        .map((el) => el.dataset.coin)
+        .filter(Boolean);
     });
 
     priceListEl.addEventListener("drop", (e) => {
       const item = e.target.closest(".price-item");
       if (!item || !draggingCoin) return;
       e.preventDefault();
-      const targetCoin = item.dataset.coin;
-      if (!targetCoin || targetCoin === draggingCoin) return;
-
-      const next = trackedFooterCoins.filter((c) => c !== draggingCoin);
-      const targetIndex = next.indexOf(targetCoin);
-      if (targetIndex === -1) return;
-      next.splice(targetIndex, 0, draggingCoin);
-      trackedFooterCoins = next;
-      saveFooterCoins();
-      renderFooterPrices();
+      commitFooterOrderFromDom();
     });
   }
+
+  if (priceFooterWrapEl) {
+    priceFooterWrapEl.addEventListener("contextmenu", (e) => {
+      if (
+        e.target.closest(".price-controls") ||
+        e.target.closest(".price-input") ||
+        e.target.closest(".price-add-btn") ||
+        e.target.closest(".price-logo")
+      ) {
+        return;
+      }
+      const item = e.target.closest(".price-item");
+      e.preventDefault();
+      showPriceContextMenu(e.clientX, e.clientY, item ? item.dataset.coin : null);
+    });
+  }
+
+  if (priceContextMenuEl) {
+    priceContextMenuEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const action = btn.dataset.action;
+      if (action === "remove" && priceContextCoin) {
+        removeFooterCoin(priceContextCoin);
+      } else if (action === "pin" && priceContextCoin) {
+        const next = trackedFooterCoins.filter((c) => c !== priceContextCoin);
+        next.unshift(priceContextCoin);
+        trackedFooterCoins = next;
+        saveFooterCoins();
+        renderFooterPrices();
+      } else if (action === "reset") {
+        if (window.confirm("Reset the bottom bar to the default coins?")) {
+          resetFooterCoins();
+        }
+      }
+      hidePriceContextMenu();
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!priceContextMenuEl || !priceContextMenuEl.classList.contains("show")) return;
+    if (e.target.closest("#priceContextMenu")) return;
+    hidePriceContextMenu();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") hidePriceContextMenu();
+  });
+
+  window.addEventListener("resize", hidePriceContextMenu);
+  window.addEventListener("scroll", hidePriceContextMenu, true);
 
   window.addEventListener("resize", () => {
     updatePriceTickerRolling();
