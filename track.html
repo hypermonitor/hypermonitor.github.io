@@ -460,6 +460,24 @@
         white-space: nowrap;
       }
 
+      .positions-card th.sortable,
+      .table-sortable th.sortable {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .table-sortable th.sortable[data-sort-dir="asc"]::after,
+      .table-sortable th.sortable[data-sort-dir="desc"]::after {
+        content: "";
+      }
+
+      .positions-card .sort-indicator {
+        margin-left: 0.25rem;
+        font-size: 0.5rem;
+        letter-spacing: 0.02em;
+        opacity: 0.9;
+      }
+
       /* --- Orders / Fills tables: hide time + total (usually widest) --- */
       /* Open Orders: OrderID(1) Time(2) Side(3) Asset(4) Size(5) Limit(6) Total(7) */
       #openOrdersBody td:nth-child(1),
@@ -2194,14 +2212,14 @@
       <table>
         <thead>
         <tr>
-          <th>Asset</th>
-          <th>Side</th>
-          <th>Size</th>
-          <th>Price</th>
-          <th class="desktop-only">Unrealized PnL</th>
-          <th class="desktop-only">Liq Distance</th>
-          <th class="desktop-only">Funding</th>
-          <th class="mobile-only">PnL</th>
+          <th class="sortable" data-sort="asset">Asset</th>
+          <th class="sortable" data-sort="side">Side</th>
+          <th class="sortable" data-sort="size">Size / Notional</th>
+          <th class="sortable" data-sort="price">Price</th>
+          <th class="desktop-only sortable" data-sort="upnl">Unrealized PnL</th>
+          <th class="desktop-only sortable" data-sort="liq">Liq Distance</th>
+          <th class="desktop-only sortable" data-sort="funding">Funding</th>
+          <th class="mobile-only sortable" data-sort="upnl">PnL</th>
         </tr>
         </thead>
         <tbody id="positionsBody">
@@ -2537,16 +2555,16 @@
         </div>
 
         <div style="max-height: 380px; overflow: auto;">
-          <table>
+          <table class="table-sortable">
             <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Date / Time</th>
-              <th>Side</th>
-              <th>Asset</th>
-              <th>Size</th>
-              <th>Price</th>
-              <th>Status</th>
+              <th class="sortable" data-sort="orderId">Order ID</th>
+              <th class="sortable" data-sort="time">Date / Time</th>
+              <th class="sortable" data-sort="side">Side</th>
+              <th class="sortable" data-sort="asset">Asset</th>
+              <th class="sortable" data-sort="size">Size</th>
+              <th class="sortable" data-sort="price">Price</th>
+              <th class="sortable" data-sort="status">Status</th>
             </tr>
             </thead>
             <tbody id="historicalOrdersBody">
@@ -2609,15 +2627,15 @@
           <small id="historicalFillsCount">–</small>
         </div>
         <div style="max-height: 360px; overflow: auto;">
-          <table>
+          <table class="table-sortable">
             <thead>
             <tr>
-              <th class="desktop-only">Order ID</th>
-              <th>Date / Time</th>
-              <th>Side</th>
-              <th>Asset</th>
-              <th>Size</th>
-              <th>Price</th>
+              <th class="desktop-only sortable" data-sort="orderId">Order ID</th>
+              <th class="sortable" data-sort="time">Date / Time</th>
+              <th class="sortable" data-sort="side">Side</th>
+              <th class="sortable" data-sort="asset">Asset</th>
+              <th class="sortable" data-sort="size">Size</th>
+              <th class="sortable" data-sort="price">Price</th>
             </tr>
             </thead>
             <tbody id="historicalFillsBody">
@@ -2702,6 +2720,9 @@
   const priceAddInputEl = document.getElementById("priceAddInput");
   const priceAddBtnEl = document.getElementById("priceAddBtn");
   const priceContextMenuEl = document.getElementById("priceContextMenu");
+  const positionsHeaderEls = Array.from(document.querySelectorAll(".positions-card thead th[data-sort]"));
+  const historicalOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersHistoryPanel thead th[data-sort]"));
+  const historicalFillsHeaderEls = Array.from(document.querySelectorAll("#fillsHistoryPanel thead th[data-sort]"));
 
   const openOrdersBodyEl = document.getElementById("openOrdersBody");
   const openOrdersCountEl = document.getElementById("openOrdersCount");
@@ -2779,6 +2800,9 @@
   ]);
   const logoCache = new Map();
   const expandedPositions = new Set();
+  let currentPositionsSort = { key: "asset", dir: "asc" };
+  let currentHistoricalOrdersSort = { key: "time", dir: "desc" };
+  let currentHistoricalFillsSort = { key: "time", dir: "desc" };
   const coinIdMap = new Map();
   const spotIdMetaMap = new Map();
   let perpDexNames = null;
@@ -3443,6 +3467,121 @@
 
   function getPositionsColspan() {
     return window.matchMedia("(max-width: 600px)").matches ? 4 : 7;
+  }
+
+  function getPositionsSortDefaultDir(key) {
+    return key === "asset" || key === "side" ? "asc" : "desc";
+  }
+
+  function updatePositionsSortHeaders() {
+    if (!positionsHeaderEls.length) return;
+    positionsHeaderEls.forEach((th) => {
+      let indicator = th.querySelector(".sort-indicator");
+      if (!indicator) {
+        indicator = document.createElement("span");
+        indicator.className = "sort-indicator";
+        th.appendChild(indicator);
+      }
+      if (th.dataset.sort === currentPositionsSort?.key) {
+        th.setAttribute("data-sort-dir", currentPositionsSort.dir);
+        indicator.textContent = currentPositionsSort.dir === "asc" ? " ↑" : " ↓";
+      } else {
+        th.removeAttribute("data-sort-dir");
+        indicator.textContent = "";
+      }
+    });
+  }
+
+  function updateTableSortHeaders(headerEls, sortState) {
+    if (!headerEls.length) return;
+    headerEls.forEach((th) => {
+      let indicator = th.querySelector(".sort-indicator");
+      if (!indicator) {
+        indicator = document.createElement("span");
+        indicator.className = "sort-indicator";
+        th.appendChild(indicator);
+      }
+      if (th.dataset.sort === sortState?.key) {
+        th.setAttribute("data-sort-dir", sortState.dir);
+        indicator.textContent = sortState.dir === "asc" ? " ↑" : " ↓";
+      } else {
+        th.removeAttribute("data-sort-dir");
+        indicator.textContent = "";
+      }
+    });
+  }
+
+  function getGenericSortDefaultDir(key) {
+    return ["asset", "side", "status", "orderId"].includes(key) ? "asc" : "desc";
+  }
+
+  function getPositionSortMetrics(item) {
+    const p = item?.position || {};
+    const coin = p.coin || "";
+    const { dex: coinDex, base: coinBase } = splitDexCoin(coin);
+    const coinDisplayName = coinBase || coin;
+    const { label: spotLabel } = resolveSpotDisplay(coinDisplayName);
+    const szi = Number(p.szi ?? 0);
+    const entryPx = Number(p.entryPx ?? 0);
+    const livePx = getLivePriceForCoin(coin);
+    let markPx = Number.isFinite(livePx) ? livePx : undefined;
+    const snapshotValue = Number(p.positionValue ?? 0);
+    if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
+      markPx = Math.abs(snapshotValue) / Math.abs(szi);
+    }
+    let positionValue = snapshotValue;
+    if (markPx !== undefined && !Number.isNaN(markPx) && szi !== 0) {
+      positionValue = markPx * szi;
+    }
+    let upnl = Number(p.unrealizedPnl ?? 0);
+    if (markPx !== undefined && !Number.isNaN(markPx) && !Number.isNaN(entryPx) && szi !== 0) {
+      upnl = (markPx - entryPx) * szi;
+    }
+    const notional = Math.abs(Number(positionValue ?? 0));
+    const isPerp = item?.marketType !== "spot";
+    const fundingValue =
+      (p.cumFunding && typeof p.cumFunding === "object"
+        ? p.cumFunding.sinceOpen ?? p.cumFunding.sinceChange ?? p.cumFunding.allTime
+        : p.cumFunding) ??
+      p.funding ??
+      p.fundingPaid ??
+      p.cumFundingUsd ??
+      p.cumFundingUSDC;
+    const fundingDisplayValue = Number.isFinite(Number(fundingValue)) ? -Number(fundingValue) : null;
+    const liqValue = p.liqPx ?? p.liquidationPx ?? p.liquidationPrice ?? p.liqPrice;
+    const liqDistanceRaw = isPerp ? computeLiqDistanceRatio(entryPx, markPx, liqValue, szi) : null;
+    const liqDistanceClamped = isPerp
+      ? Number.isFinite(liqDistanceRaw)
+        ? Math.max(0, Math.min(1, liqDistanceRaw))
+        : 0
+      : null;
+    const liqDistanceDisplay =
+      liqDistanceClamped === null ? null : Math.max(0, Math.min(1, 1 - liqDistanceClamped));
+    const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
+    return {
+      asset: (spotLabel || coinDisplayName || coin || "").toUpperCase(),
+      side: dir,
+      size: Math.abs(szi),
+      price: Number.isFinite(markPx) ? markPx : null,
+      notional: Number.isFinite(notional) ? notional : null,
+      upnl: Number.isFinite(upnl) ? upnl : null,
+      funding: Number.isFinite(fundingDisplayValue) ? fundingDisplayValue : null,
+      liq: Number.isFinite(liqDistanceDisplay) ? liqDistanceDisplay : null,
+    };
+  }
+
+  function comparePositionSort(a, b, dir) {
+    const aEmpty = a === null || a === undefined || (typeof a === "number" && Number.isNaN(a));
+    const bEmpty = b === null || b === undefined || (typeof b === "number" && Number.isNaN(b));
+    if (aEmpty && bEmpty) return 0;
+    if (aEmpty) return 1;
+    if (bEmpty) return -1;
+    if (typeof a === "string" || typeof b === "string") {
+      const cmp = String(a).localeCompare(String(b));
+      return dir === "asc" ? cmp : -cmp;
+    }
+    const diff = a - b;
+    return dir === "asc" ? diff : -diff;
   }
 
   function formatSignedPercent(value, decimals = 2) {
@@ -5014,6 +5153,7 @@
     const walletTotals = getActiveTotals();
     walletTotals.clear();
     const positionsColspan = getPositionsColspan();
+    updatePositionsSortHeaders();
 
     if (!currentAssetPositions.length) {
       positionsBodyEl.innerHTML = `<tr><td colspan='${positionsColspan}' class='muted'>No open positions.</td></tr>`;
@@ -5022,7 +5162,25 @@
       return;
     }
 
-    positionsBodyEl.innerHTML = currentAssetPositions
+    let positionsToRender = currentAssetPositions.slice();
+    if (currentPositionsSort?.key) {
+      const metricsMap = new Map();
+      const keyFor = (item) => `${item.marketType || "perp"}:${item.wallet || ""}:${item.position?.coin || ""}`;
+      const getMetrics = (item) => {
+        const key = keyFor(item);
+        if (!metricsMap.has(key)) metricsMap.set(key, getPositionSortMetrics(item));
+        return metricsMap.get(key);
+      };
+      const sortKey = currentPositionsSort.key;
+      const sortDir = currentPositionsSort.dir;
+      positionsToRender.sort((a, b) => {
+        const ma = getMetrics(a);
+        const mb = getMetrics(b);
+        return comparePositionSort(ma?.[sortKey], mb?.[sortKey], sortDir);
+      });
+    }
+
+    positionsBodyEl.innerHTML = positionsToRender
       .map((item) => {
         const p = item.position;
         const coin = p.coin;
@@ -5458,7 +5616,37 @@
       return !(Number.isFinite(val) && Math.abs(val) < 0.0000001);
     });
 
-    historicalFillsBodyEl.innerHTML = filtered
+    updateTableSortHeaders(historicalFillsHeaderEls, currentHistoricalFillsSort);
+    const sorted = filtered.slice();
+    if (currentHistoricalFillsSort?.key) {
+      const sortKey = currentHistoricalFillsSort.key;
+      const sortDir = currentHistoricalFillsSort.dir;
+      sorted.sort((a, b) => {
+        const aCoin = resolveCoinName(a.coin ?? "", a.asset ?? a.symbol ?? a.sym);
+        const bCoin = resolveCoinName(b.coin ?? "", b.asset ?? b.symbol ?? b.sym);
+        const aSide = a.side ?? (a.isBuy ? "B" : "S") ?? "";
+        const bSide = b.side ?? (b.isBuy ? "B" : "S") ?? "";
+        const aMetrics = {
+          orderId: String(a.oid ?? ""),
+          time: Number(a.time ?? a.timestamp ?? 0),
+          side: aSide,
+          asset: String(aCoin ?? "").toUpperCase(),
+          size: Number(a.sz ?? a.size ?? 0),
+          price: Number(a.px ?? a.price ?? 0),
+        };
+        const bMetrics = {
+          orderId: String(b.oid ?? ""),
+          time: Number(b.time ?? b.timestamp ?? 0),
+          side: bSide,
+          asset: String(bCoin ?? "").toUpperCase(),
+          size: Number(b.sz ?? b.size ?? 0),
+          price: Number(b.px ?? b.price ?? 0),
+        };
+        return comparePositionSort(aMetrics[sortKey], bMetrics[sortKey], sortDir);
+      });
+    }
+
+    historicalFillsBodyEl.innerHTML = sorted
       .map((fill) => {
         const t = fmtDateTime(fill.time ?? fill.timestamp);
         const total = computeTotal(fill);
@@ -5950,7 +6138,41 @@
       return;
     }
 
-    historicalOrdersBodyEl.innerHTML = filtered
+    updateTableSortHeaders(historicalOrdersHeaderEls, currentHistoricalOrdersSort);
+    const sorted = filtered.slice();
+    if (currentHistoricalOrdersSort?.key) {
+      const sortKey = currentHistoricalOrdersSort.key;
+      const sortDir = currentHistoricalOrdersSort.dir;
+      sorted.sort((a, b) => {
+        const aCoin = resolveCoinName(a.coin ?? "", a.asset ?? a.symbol ?? a.sym);
+        const bCoin = resolveCoinName(b.coin ?? "", b.asset ?? b.symbol ?? b.sym);
+        const aSide = a.side ?? (a.isBuy ? "B" : "S") ?? "";
+        const bSide = b.side ?? (b.isBuy ? "B" : "S") ?? "";
+        const aStatus = String(a.status ?? "").toUpperCase();
+        const bStatus = String(b.status ?? "").toUpperCase();
+        const aMetrics = {
+          orderId: String(a.oid ?? ""),
+          time: Number(a.timestamp ?? 0),
+          side: aSide,
+          asset: String(aCoin ?? "").toUpperCase(),
+          size: Number(a.sz ?? a.size ?? 0),
+          price: Number(a.limitPx ?? a.px ?? 0),
+          status: aStatus,
+        };
+        const bMetrics = {
+          orderId: String(b.oid ?? ""),
+          time: Number(b.timestamp ?? 0),
+          side: bSide,
+          asset: String(bCoin ?? "").toUpperCase(),
+          size: Number(b.sz ?? b.size ?? 0),
+          price: Number(b.limitPx ?? b.px ?? 0),
+          status: bStatus,
+        };
+        return comparePositionSort(aMetrics[sortKey], bMetrics[sortKey], sortDir);
+      });
+    }
+
+    historicalOrdersBodyEl.innerHTML = sorted
       .map((o) => {
         const created = fmtDateTime(o.timestamp);
         const side = o.side ?? (o.isBuy ? "B" : "S");
@@ -8185,6 +8407,57 @@
       e.preventDefault();
       commitFooterOrderFromDom();
     });
+  }
+
+  if (positionsHeaderEls.length) {
+    positionsHeaderEls.forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (!key) return;
+        if (currentPositionsSort?.key === key) {
+          currentPositionsSort.dir = currentPositionsSort.dir === "asc" ? "desc" : "asc";
+        } else {
+          currentPositionsSort = { key, dir: getPositionsSortDefaultDir(key) };
+        }
+        updatePositionsSortHeaders();
+        renderPositions(currentAssetPositions);
+      });
+    });
+    updatePositionsSortHeaders();
+  }
+
+  if (historicalOrdersHeaderEls.length) {
+    historicalOrdersHeaderEls.forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (!key) return;
+        if (currentHistoricalOrdersSort?.key === key) {
+          currentHistoricalOrdersSort.dir = currentHistoricalOrdersSort.dir === "asc" ? "desc" : "asc";
+        } else {
+          currentHistoricalOrdersSort = { key, dir: getGenericSortDefaultDir(key) };
+        }
+        updateTableSortHeaders(historicalOrdersHeaderEls, currentHistoricalOrdersSort);
+        renderHistoricalOrders();
+      });
+    });
+    updateTableSortHeaders(historicalOrdersHeaderEls, currentHistoricalOrdersSort);
+  }
+
+  if (historicalFillsHeaderEls.length) {
+    historicalFillsHeaderEls.forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (!key) return;
+        if (currentHistoricalFillsSort?.key === key) {
+          currentHistoricalFillsSort.dir = currentHistoricalFillsSort.dir === "asc" ? "desc" : "asc";
+        } else {
+          currentHistoricalFillsSort = { key, dir: getGenericSortDefaultDir(key) };
+        }
+        updateTableSortHeaders(historicalFillsHeaderEls, currentHistoricalFillsSort);
+        renderHistoricalFills();
+      });
+    });
+    updateTableSortHeaders(historicalFillsHeaderEls, currentHistoricalFillsSort);
   }
 
   if (priceFooterWrapEl) {
