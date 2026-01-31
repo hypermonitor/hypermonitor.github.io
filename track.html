@@ -190,6 +190,99 @@
       align-self: start;
     }
 
+    .market-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: -0.05rem;
+      flex-wrap: wrap;
+    }
+
+    .market-toggle-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .market-toggle.no-label .market-toggle-label {
+      display: none;
+    }
+
+    .market-toggle .orders-tabs {
+      margin: 0;
+      padding: 0.2rem 0.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      gap: 0.2rem;
+      justify-content: center;
+      width: fit-content;
+      max-width: 100%;
+      position: relative;
+      overflow: visible;
+    }
+
+    .market-toggle .orders-tab-btn {
+      border-color: transparent;
+      background: transparent;
+      position: relative;
+      z-index: 2;
+    }
+
+    .market-toggle .orders-tab-btn.active {
+      border-color: transparent;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .market-toggle-indicator {
+      position: absolute;
+      top: 0.2rem;
+      bottom: 0.2rem;
+      left: 0;
+      width: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.45);
+      transition: transform 220ms ease, width 220ms ease;
+      z-index: 1;
+    }
+
+    body.light .market-toggle .orders-tabs {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .market-toggle .orders-tab-btn.active {
+      border-color: transparent;
+      background: #f8fafc;
+    }
+
+    body.light .market-toggle-indicator {
+      background: #f8fafc;
+      border-color: #cbd5f5;
+    }
+
+    .section-mode {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-left: 0.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .spot-performance-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+    }
+
+    .is-hidden {
+      display: none !important;
+    }
+
     .wallet-track-btn {
       padding: 0.45rem 0.8rem;
       border-radius: 999px;
@@ -810,6 +903,10 @@
       align-items: center;
       justify-content: space-between;
       gap: .5rem;
+    }
+
+    .section-title h2 {
+      margin: 0;
     }
 
     .section-title small {
@@ -1882,7 +1979,18 @@
 
   <div class="grid">
     <section class="card">
-      <h2>Account Overview</h2>
+      <div class="section-title">
+        <h2>Account Overview</h2>
+        <span class="market-toggle no-label" role="group" aria-label="Market type">
+          <span class="market-toggle-label">Market</span>
+          <span class="orders-tabs" role="tablist">
+            <span class="market-toggle-indicator" aria-hidden="true"></span>
+            <button class="orders-tab-btn market-tab-btn active" data-market="perp" type="button" aria-pressed="true">Perps</button>
+            <button class="orders-tab-btn market-tab-btn" data-market="spot" type="button" aria-pressed="false">Spot</button>
+            <button class="orders-tab-btn market-tab-btn" data-market="all" type="button" aria-pressed="false">All</button>
+          </span>
+        </span>
+      </div>
       <div id="marginSummary"><span class="muted">Loading…</span></div>
       <div class="error" id="snapshotError"></div>
     </section>
@@ -2092,7 +2200,7 @@
         </div>
       </div>
       </div>
-      <div class="chart-grid">
+      <div class="chart-grid" id="portfolioCharts">
         <div class="chart-card">
           <h3>Account Value</h3>
           <div class="chart-canvas-wrap">
@@ -2113,6 +2221,9 @@
             <canvas id="depositsChart"></canvas>
           </div>
         </div>
+      </div>
+      <div class="spot-performance-note is-hidden" id="spotPerformanceNote">
+        Spot charts are derived from total account value minus perps.
       </div>
 
       <div class="chart-loading" id="portfolioLoading">Loading performance data…</div>
@@ -2364,6 +2475,11 @@
   const walletInputsEl = document.getElementById("walletInputs");
   const addWalletBtnEl = document.getElementById("addWalletBtn");
   const trackBtnEl = document.getElementById("trackBtn");
+  const marketToggleButtons = document.querySelectorAll(".market-tab-btn");
+  const marketToggleIndicatorEl = document.querySelector(".market-toggle-indicator");
+  const accountModeLabelEl = document.getElementById("accountModeLabel");
+  const positionsModeLabelEl = document.getElementById("positionsModeLabel");
+  const performanceModeLabelEl = document.getElementById("performanceModeLabel");
 
   const statusDotEl = document.getElementById("statusDot");
   const statusTextEl = document.getElementById("statusText");
@@ -2419,6 +2535,8 @@
   const portfolioErrorEl = document.getElementById("portfolioError");
   const portfolioLoadingEl = document.getElementById("portfolioLoading");
   const portfolioLoadingWrapEl = document.getElementById("portfolioLoadingWrap");
+  const portfolioChartsEl = document.getElementById("portfolioCharts");
+  const spotPerformanceNoteEl = document.getElementById("spotPerformanceNote");
   const rangeButtons = document.querySelectorAll(".chart-range-btn");
   const exportExcelBtn = document.getElementById("exportExcelBtn");
   const metricsCardEl = document.getElementById("metricsCard");
@@ -2793,12 +2911,115 @@
     }
   }
 
+  function getStablecoinPriceFallback(coin) {
+    const base = String(coin || "").toUpperCase();
+    const stable = ["USDC", "USDT", "USDE", "USDT0", "USDS"];
+    return stable.includes(base) ? 1 : null;
+  }
+
+  function normalizeSpotBalances(rawBalances, wallet) {
+    if (!Array.isArray(rawBalances)) return [];
+    const positions = [];
+    rawBalances.forEach((bal) => {
+      if (!bal || typeof bal !== "object") return;
+      const rawCoin = bal.coin ?? bal.asset ?? bal.symbol ?? bal.token ?? bal.name ?? "";
+      const coin = String(rawCoin || "").trim();
+      if (!coin) return;
+
+      let total = Number(bal.total ?? bal.balance ?? bal.size ?? bal.qty ?? bal.amount ?? bal.available ?? bal.hold);
+      if (!Number.isFinite(total)) {
+        const avail = Number(bal.available ?? 0);
+        const hold = Number(bal.hold ?? 0);
+        if (Number.isFinite(avail) || Number.isFinite(hold)) total = (Number.isFinite(avail) ? avail : 0) + (Number.isFinite(hold) ? hold : 0);
+      }
+      if (!Number.isFinite(total) || Math.abs(total) < 1e-12) return;
+
+      const entryPx = Number(bal.entryPx ?? bal.entryPrice ?? 0);
+      const explicitValue = Number(bal.valueUsd ?? bal.usdValue ?? bal.notional ?? bal.value ?? bal.value_usd);
+      let markPx = getLivePriceForCoin(coin);
+      if (!Number.isFinite(markPx)) {
+        const fallback = getStablecoinPriceFallback(coin);
+        if (Number.isFinite(fallback)) markPx = fallback;
+      }
+      const positionValue = Number.isFinite(explicitValue)
+        ? explicitValue
+        : Number.isFinite(markPx)
+          ? markPx * total
+          : 0;
+
+      positions.push({
+        wallet,
+        marketType: "spot",
+        position: {
+          coin,
+          szi: total,
+          entryPx: Number.isFinite(entryPx) ? entryPx : 0,
+          positionValue,
+          unrealizedPnl: 0,
+        },
+      });
+    });
+    return positions;
+  }
+
+  async function fetchSpotState(wallet) {
+    const payloads = [
+      { type: "spotUserState", user: wallet },
+      { type: "spotClearinghouseState", user: wallet },
+    ];
+
+    for (const body of payloads) {
+      try {
+        const res = await fetch(PORTFOLIO_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const balances =
+          data?.balances ??
+          data?.spotBalances ??
+          data?.assets ??
+          data?.state?.balances ??
+          data?.state?.assets;
+        if (Array.isArray(balances)) return { balances, raw: data };
+      } catch (err) {
+        console.warn("Spot state fetch failed", err);
+      }
+    }
+    return null;
+  }
+
+  function buildSpotSummary(positions) {
+    const totals = {
+      accountValue: 0,
+      totalNtlPos: 0,
+      totalRawUsd: 0,
+      totalMarginUsed: 0,
+      withdrawable: 0,
+    };
+    let stableCash = 0;
+    positions.forEach((item) => {
+      const coin = item?.position?.coin ?? "";
+      const value = Number(item?.position?.positionValue ?? 0);
+      if (!Number.isFinite(value)) return;
+      totals.accountValue += value;
+      totals.totalNtlPos += Math.abs(value);
+      totals.totalRawUsd += value;
+      const fallback = getStablecoinPriceFallback(coin);
+      if (fallback === 1) stableCash += value;
+    });
+    totals.withdrawable = stableCash;
+    return totals;
+  }
+
   // === STATE ===
   let currentWallets = [DEFAULT_WALLET];
   let primaryWallet = DEFAULT_WALLET;
-  const walletSnapshots = new Map();
-  const walletTotals = new Map();
-  const walletPositions = new Map();
+  const walletSnapshotsByType = { perp: new Map(), spot: new Map() };
+  const walletTotalsByType = { perp: new Map(), spot: new Map() };
+  const walletPositionsByType = { perp: new Map(), spot: new Map() };
   const openOrders = new Map();
   const canceledOrders = [];
   const fills = [];
@@ -2814,6 +3035,7 @@
   const userEventsSubs = new Map();
 
   let currentAssetPositions = [];
+  let currentMarketType = "perp";
   const liveMids = new Map();
   let allMidsSub = null;
 
@@ -3252,10 +3474,181 @@
     return { dex: "", base: s };
   }
 
-  function coinCellHtml(coin, wallet) {
+  function isSpotKey(raw) {
+    return String(raw || "").trim().startsWith("@");
+  }
+
+  function getMarketTypeFromCoin(raw) {
+    return isSpotKey(raw) ? "spot" : "perp";
+  }
+
+  function entryMatchesMarketType(entry, marketType = currentMarketType) {
+    if (marketType === "all") return true;
+    const explicit = entry?.marketType;
+    if (explicit) return explicit === marketType;
+    const rawCoin =
+      entry?.coin ??
+      entry?.asset ??
+      entry?.symbol ??
+      entry?.sym ??
+      entry?.order?.coin ??
+      entry?.order?.asset ??
+      entry?.order?.symbol ??
+      entry?.order?.sym ??
+      "";
+    return getMarketTypeFromCoin(rawCoin) === marketType;
+  }
+
+  function filterEntriesByMarketType(list, marketType = currentMarketType) {
+    if (!Array.isArray(list)) return [];
+    return list.filter((entry) => entryMatchesMarketType(entry, marketType));
+  }
+
+  function combineSnapshotForWallet(wallet) {
+    const perp = walletSnapshotsByType.perp.get(wallet) || {};
+    const spot = walletSnapshotsByType.spot.get(wallet) || {};
+    const perpSummary = perp.summary || null;
+    const spotSummary = spot.summary || null;
+
+    if (!perpSummary && !spotSummary) {
+      return { summary: null, withdrawable: 0, snapshotUpnlTotal: 0 };
+    }
+
+    const combinedSummary = {
+      accountValue: Number(perpSummary?.accountValue ?? 0) + Number(spotSummary?.accountValue ?? 0),
+      totalNtlPos: Number(perpSummary?.totalNtlPos ?? 0) + Number(spotSummary?.totalNtlPos ?? 0),
+      totalRawUsd: Number(perpSummary?.totalRawUsd ?? 0) + Number(spotSummary?.totalRawUsd ?? 0),
+      totalMarginUsed: Number(perpSummary?.totalMarginUsed ?? 0) + Number(spotSummary?.totalMarginUsed ?? 0),
+    };
+
+    return {
+      summary: combinedSummary,
+      withdrawable: Number(perp?.withdrawable ?? 0) + Number(spot?.withdrawable ?? 0),
+      snapshotUpnlTotal: Number(perp?.snapshotUpnlTotal ?? 0) + Number(spot?.snapshotUpnlTotal ?? 0),
+    };
+  }
+
+  function getActiveSnapshots() {
+    if (currentMarketType !== "all") return walletSnapshotsByType[currentMarketType];
+    const combined = new Map();
+    currentWallets.forEach((wallet) => {
+      combined.set(wallet, combineSnapshotForWallet(wallet));
+    });
+    return combined;
+  }
+
+  function combineTotalsForWallet(wallet) {
+    const perp = walletTotalsByType.perp.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
+    const spot = walletTotalsByType.spot.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
+    return {
+      upnlTotal: Number(perp.upnlTotal ?? 0) + Number(spot.upnlTotal ?? 0),
+      notionalTotal: Number(perp.notionalTotal ?? 0) + Number(spot.notionalTotal ?? 0),
+    };
+  }
+
+  function getActiveTotals() {
+    if (currentMarketType !== "all") return walletTotalsByType[currentMarketType];
+    const combined = new Map();
+    currentWallets.forEach((wallet) => {
+      combined.set(wallet, combineTotalsForWallet(wallet));
+    });
+    return combined;
+  }
+
+  function getActivePositionsMap() {
+    return walletPositionsByType[currentMarketType];
+  }
+
+  function combinePositionsByType(type) {
+    const combined = [];
+    const map = walletPositionsByType[type];
+    if (!map) return combined;
+    map.forEach((vals) => {
+      if (Array.isArray(vals) && vals.length) combined.push(...vals);
+    });
+    return combined;
+  }
+
+  function getPositionsForMarketType(type) {
+    if (type === "all") {
+      return [
+        ...combinePositionsByType("perp"),
+        ...combinePositionsByType("spot"),
+      ];
+    }
+    return combinePositionsByType(type);
+  }
+
+  function updateMarketLabels() {
+    const label =
+      currentMarketType === "spot"
+        ? "Spot"
+        : currentMarketType === "all"
+          ? "All"
+          : "Perps";
+    if (accountModeLabelEl) accountModeLabelEl.textContent = label;
+    if (positionsModeLabelEl) positionsModeLabelEl.textContent = label;
+    if (performanceModeLabelEl) performanceModeLabelEl.textContent = label;
+  }
+
+  function updateMarketToggleButtons() {
+    marketToggleButtons.forEach((btn) => {
+      const isActive = btn.dataset.market === currentMarketType;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+    updateMarketToggleIndicator();
+  }
+
+  function updateMarketToggleIndicator() {
+    if (!marketToggleIndicatorEl) return;
+    const active = document.querySelector(".market-tab-btn.active");
+    if (!active) return;
+    const parent = active.parentElement;
+    if (!parent) return;
+    const parentRect = parent.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    const left = activeRect.left - parentRect.left;
+    marketToggleIndicatorEl.style.width = `${activeRect.width}px`;
+    marketToggleIndicatorEl.style.transform = `translateX(${left}px)`;
+  }
+
+  function updatePerformanceVisibility() {
+    if (portfolioChartsEl) portfolioChartsEl.classList.remove("is-hidden");
+    if (spotPerformanceNoteEl) {
+      spotPerformanceNoteEl.classList.toggle("is-hidden", currentMarketType !== "spot");
+    }
+  }
+
+  function applyMarketFilter() {
+    renderPositions(getPositionsForMarketType(currentMarketType));
+    renderOpenOrders();
+    renderCanceledOrders();
+    renderFills();
+    if (historicalOrdersLoaded) renderHistoricalOrders();
+    if (historicalFillsLoaded) renderHistoricalFills();
+    if (portfolioDataByWallet.size) {
+      updatePortfolioCharts(currentRangeKey);
+    }
+    updatePerformanceMetrics(currentRangeKey);
+    updatePerformanceVisibility();
+  }
+
+  async function setMarketType(nextType) {
+    if (!nextType || nextType === currentMarketType) return;
+    currentMarketType = nextType;
+    updateMarketLabels();
+    updateMarketToggleButtons();
+    if (currentMarketType === "spot" || currentMarketType === "all") {
+      await refreshSpotForWallets(currentWallets);
+    }
+    applyMarketFilter();
+  }
+
+  function coinCellHtml(coin, wallet, forceSpot = false) {
     const c = coin ?? "";
     const { label, iconKey, isSpot } = resolveSpotDisplay(c);
-    const spotTagHtml = isSpot ? `<span class="dex-tag spot-tag">spot</span>` : "";
+    const spotTagHtml = (forceSpot || isSpot) ? `<span class="dex-tag spot-tag">spot</span>` : "";
     return `<span class="asset-cell">${coinIconHtml(iconKey, label)}<span>${label}</span>${spotTagHtml}${walletTagHtml(wallet)}</span>`;
   }
 
@@ -3973,12 +4366,13 @@
     return Number.isFinite(entryPx) ? entryPx : null;
   }
 
-  function getAllFillsForCoin(coin, wallet) {
+  function getAllFillsForCoin(coin, wallet, marketType = currentMarketType) {
     const norm = normalizeCoin(coin);
     if (!norm) return [];
     const combined = [];
     const pushFrom = (arr) => {
       arr.forEach((f) => {
+        if (marketType && !entryMatchesMarketType(f, marketType)) return;
         if (wallet) {
           const fWallet = String(f?.wallet || "");
           if (!fWallet || fWallet.toLowerCase() !== wallet.toLowerCase()) return;
@@ -4013,7 +4407,7 @@
   }
 
   function buildPositionFillDetails(coin, szi, markPx, wallet) {
-    const fillsForCoin = getAllFillsForCoin(coin, wallet);
+    const fillsForCoin = getAllFillsForCoin(coin, wallet, currentMarketType);
     const rows = [];
     let netSize = 0;
     let totalUpnl = 0;
@@ -4098,14 +4492,16 @@
   }
 
   function getTotalPositionsValue() {
-    return Array.from(walletTotals.values()).reduce((sum, t) => {
+    const totals = getActiveTotals();
+    return Array.from(totals.values()).reduce((sum, t) => {
       const val = Number(t?.notionalTotal ?? 0);
       return sum + (Number.isFinite(val) ? val : 0);
     }, 0);
   }
 
   function getWithdrawableAmount() {
-    return Array.from(walletSnapshots.values()).reduce((sum, snap) => {
+    const snapshots = getActiveSnapshots();
+    return Array.from(snapshots.values()).reduce((sum, snap) => {
       const w = Number(snap?.withdrawable ?? 0);
       return sum + (Number.isFinite(w) ? w : 0);
     }, 0);
@@ -4230,9 +4626,36 @@
       return;
     }
 
+    const snapshots = getActiveSnapshots();
+    let totalsMap = getActiveTotals();
+
+    if (currentMarketType === "all") {
+      const totals = new Map();
+      currentAssetPositions.forEach((item) => {
+        const wallet = item.wallet || primaryWallet;
+        const p = item.position || {};
+        const szi = Number(p.szi ?? 0);
+        if (!Number.isFinite(szi) || szi === 0) return;
+        const snapshotValue = Number(p.positionValue ?? 0);
+        const entryPx = Number(p.entryPx ?? 0);
+        let positionValue = snapshotValue;
+        if (!Number.isNaN(entryPx) && szi !== 0 && (!Number.isFinite(positionValue) || positionValue === 0)) {
+          positionValue = entryPx * szi;
+        }
+        let upnl = Number(p.unrealizedPnl ?? 0);
+        if (!Number.isFinite(upnl)) upnl = 0;
+        const notional = Math.abs(Number(positionValue ?? 0));
+        const agg = totals.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
+        agg.upnlTotal += upnl;
+        if (Number.isFinite(notional)) agg.notionalTotal += notional;
+        totals.set(wallet, agg);
+      });
+      totalsMap = totals;
+    }
+
     const items = currentWallets.map((wallet) => {
-      const snap = walletSnapshots.get(wallet) || {};
-      const totals = walletTotals.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
+      const snap = snapshots.get(wallet) || {};
+      const totals = totalsMap.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
       const base = snap.summary || null;
       if (!base) {
         return { wallet, summary: null, withdrawable: snap.withdrawable };
@@ -4257,6 +4680,7 @@
     currentAssetPositions = Array.isArray(assetPositions) ? assetPositions : [];
     lastComputedUpnlTotal = 0;
     lastComputedTotalNotional = 0;
+    const walletTotals = getActiveTotals();
     walletTotals.clear();
 
     if (!currentAssetPositions.length) {
@@ -4273,8 +4697,9 @@
         const wallet = item.wallet || primaryWallet;
         const { dex: coinDex, base: coinBase } = splitDexCoin(coin);
         const coinDisplayName = coinBase || coin;
-        const { label: spotLabel, iconKey, isSpot } = resolveSpotDisplay(coinDisplayName);
+        const { label: spotLabel, iconKey, isSpot: isSpotMeta } = resolveSpotDisplay(coinDisplayName);
         const iconKeyForLogo = coinDex ? `${coinDex}:${spotLabel}` : iconKey;
+        const isSpot = item.marketType === "spot" || isSpotMeta;
         const spotTagHtml = isSpot ? `<span class="dex-tag spot-tag">spot</span>` : "";
         const szi = Number(p.szi ?? 0);
 
@@ -4302,6 +4727,8 @@
 
         const currentPriceDisplay =
           markPx !== undefined && !Number.isNaN(markPx) ? fmtPrice(markPx) : "–";
+        const entryPriceDisplay =
+          Number.isFinite(entryPx) && entryPx !== 0 ? fmtPrice(entryPx) : "–";
 
         if (!Number.isNaN(upnl)) lastComputedUpnlTotal += upnl;
         const notional = Math.abs(positionValue);
@@ -4315,7 +4742,7 @@
         const upnlFormatted = formatSignedDollarWithPlus(upnl);
         const formattedValue = formatSignedDollar(positionValue);
 
-        const positionKey = `${wallet}:${coin}`;
+        const positionKey = `${item.marketType || "perp"}:${wallet}:${coin}`;
         const isExpanded = expandedPositions.has(positionKey);
         let breakdownHtml = "";
         if (isExpanded) {
@@ -4381,7 +4808,7 @@
         }
 
         return `
-        <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}" data-wallet="${wallet}">
+        <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}" data-wallet="${wallet}" data-market="${item.marketType || "perp"}">
           <td>
             <div class="asset-cell">
               ${coinIconHtml(iconKeyForLogo, spotLabel)}
@@ -4401,7 +4828,7 @@
           <td class="money">
             <div class="price-stack">
               <span class="current-price">Live: ${currentPriceDisplay}</span>
-              <span>Entry: ${fmtPrice(entryPx)}</span>
+              <span>Entry: ${entryPriceDisplay}</span>
             </div>
           </td>
           <td class="money">${formattedValue}</td>
@@ -4427,13 +4854,13 @@
     }, 0);
   }
 
-  function setWalletPositions(wallet, positions) {
-    walletPositions.set(wallet, Array.isArray(positions) ? positions : []);
-    const combined = [];
-    walletPositions.forEach((vals) => {
-      if (Array.isArray(vals) && vals.length) combined.push(...vals);
-    });
-    renderPositions(combined);
+  function setWalletPositions(marketType, wallet, positions) {
+    const map = walletPositionsByType[marketType];
+    if (!map) return;
+    map.set(wallet, Array.isArray(positions) ? positions : []);
+    if (marketType === currentMarketType || currentMarketType === "all") {
+      renderPositions(getPositionsForMarketType(currentMarketType));
+    }
   }
 
   async function refreshPositionsAndMargin(wallet) {
@@ -4441,30 +4868,30 @@
       const clearing = await infoClient.clearinghouseState({ user: wallet });
       const { marginSummary, withdrawable, assetPositions } = clearing;
       const mergedPositions = Array.isArray(assetPositions)
-        ? assetPositions.map((pos) => ({ ...pos, wallet }))
+        ? assetPositions.map((pos) => ({ ...pos, wallet, marketType: "perp" }))
         : [];
 
-      walletSnapshots.set(wallet, {
+      walletSnapshotsByType.perp.set(wallet, {
         summary: marginSummary || null,
         withdrawable,
         snapshotUpnlTotal: computeSnapshotUpnlTotal(mergedPositions),
       });
 
-      setWalletPositions(wallet, mergedPositions);
+      setWalletPositions("perp", wallet, mergedPositions);
 
       // Fetch HIP-3/extra dex positions after main state
       fetchAdditionalDexPositions(wallet).then((extraPositions) => {
         if (!Array.isArray(extraPositions) || extraPositions.length === 0) return;
         const combined = [
           ...mergedPositions,
-          ...extraPositions.map((pos) => ({ ...pos, wallet })),
+          ...extraPositions.map((pos) => ({ ...pos, wallet, marketType: "perp" })),
         ];
-        walletSnapshots.set(wallet, {
+        walletSnapshotsByType.perp.set(wallet, {
           summary: marginSummary || null,
           withdrawable,
           snapshotUpnlTotal: computeSnapshotUpnlTotal(combined),
         });
-        setWalletPositions(wallet, combined);
+        setWalletPositions("perp", wallet, combined);
       });
     } catch (err) {
       console.error("Refresh positions error", err);
@@ -4472,8 +4899,44 @@
     }
   }
 
+  async function refreshSpotPositionsAndSummary(wallet) {
+    try {
+      const spotState = await fetchSpotState(wallet);
+      if (!spotState) {
+        walletSnapshotsByType.spot.set(wallet, { summary: null, withdrawable: 0, snapshotUpnlTotal: 0 });
+        setWalletPositions("spot", wallet, []);
+        return;
+      }
+      const spotPositions = normalizeSpotBalances(spotState.balances, wallet);
+      const summary = buildSpotSummary(spotPositions);
+      walletSnapshotsByType.spot.set(wallet, {
+        summary: {
+          accountValue: summary.accountValue,
+          totalNtlPos: summary.totalNtlPos,
+          totalRawUsd: summary.totalRawUsd,
+          totalMarginUsed: summary.totalMarginUsed,
+        },
+        withdrawable: summary.withdrawable,
+        snapshotUpnlTotal: 0,
+      });
+      setWalletPositions("spot", wallet, spotPositions);
+    } catch (err) {
+      console.error("Spot refresh error", err);
+      if (currentMarketType === "spot") {
+        snapshotErrorEl.textContent = "Failed to refresh spot balances: " + (err?.message || err);
+      }
+    }
+  }
+
+  async function refreshSpotForWallets(wallets = currentWallets) {
+    const walletList = Array.isArray(wallets) ? wallets : [wallets];
+    if (!walletList.length) return;
+    await Promise.all(walletList.map((wallet) => refreshSpotPositionsAndSummary(wallet)));
+  }
+
   function renderOpenOrders() {
-    const values = Array.from(openOrders.values()).sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
+    const values = filterEntriesByMarketType(Array.from(openOrders.values()))
+      .sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
     openOrdersCountEl.textContent = values.length.toString();
 
     const MIN_ROWS = 4;
@@ -4484,12 +4947,13 @@
       const side = order.side ?? "?";
       const coin = resolveCoinName(order.coin, order.asset);
       const wallet = order.wallet || primaryWallet;
+      const forceSpot = entryMatchesMarketType(order, "spot");
       const orderIdHtml = formatSpotIdHtml(order.oid);
       return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td class="money">${fmtSize(order.sz)}</td>
           <td class="money">${fmtLimitPrice(order.limitPx) ?? ""}</td>
@@ -4515,20 +4979,22 @@
   }
 
   function renderCanceledOrders() {
-    canceledCountEl.textContent = canceledOrders.length.toString();
+    const filtered = filterEntriesByMarketType(canceledOrders);
+    canceledCountEl.textContent = filtered.length.toString();
 
-    if (canceledOrders.length === 0) {
+    if (filtered.length === 0) {
       canceledOrdersBodyEl.innerHTML = "<tr><td colspan='4' class='muted'>No canceled orders yet.</td></tr>";
       return;
     }
 
-    canceledOrdersBodyEl.innerHTML = canceledOrders
+    canceledOrdersBodyEl.innerHTML = filtered
       .map((o) => {
       const created = fmtTimeOnly(o.timestamp);
       const canceledAtTime = fmtTimeOnly(o.statusTimestamp);
       const side = o.side ?? "?";
       const coin = resolveCoinName(o.coin, o.asset);
       const wallet = o.wallet || primaryWallet;
+      const forceSpot = entryMatchesMarketType(o, "spot");
       const orderIdHtml = formatSpotIdHtml(o.oid);
       return `
         <tr class="flash-cancel">
@@ -4538,7 +5004,7 @@
             <span class="mobile-only timestamp">${canceledAtTime}</span>
             <span class="desktop-only timestamp">${canceledAtTime}</span>
           </td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>  
           <td class="money">${fmtSize(o.sz)}</td>
           <td class="mobile-only money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
@@ -4549,13 +5015,14 @@
   }
 
   function renderFills() {
-    if (fills.length === 0) {
+    const filtered = filterEntriesByMarketType(fills);
+    if (filtered.length === 0) {
       fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills...</td></tr>";
       if (fillsCountEl) fillsCountEl.textContent = "0";
       return;
     }
 
-    fillsBodyEl.innerHTML = fills
+    fillsBodyEl.innerHTML = filtered
       .map((fill) => {
         const tTime = fmtTimeOnly(fill.time);
         const total = computeTotal(fill);
@@ -4563,6 +5030,7 @@
         const orderIdHtml = formatSpotIdHtml(fill.oid);
         const coin = resolveCoinName(fill.coin, fill.asset ?? fill.symbol ?? fill.sym);
         const wallet = fill.wallet || primaryWallet;
+        const forceSpot = entryMatchesMarketType(fill, "spot");
         return `
         <tr class="flash">
           <td class="desktop-only">${orderIdHtml}</td>
@@ -4571,7 +5039,7 @@
             <span class="desktop-only timestamp">${tTime}</span>
           </td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td class="money">${fmtSize(fill.sz)}</td>
           <td class="money">${fmtPrice(fill.px) ?? ""}</td>
           <td class="desktop-only money">${total ? "$" + total : ""}</td>
@@ -4580,19 +5048,20 @@
       })
       .join("");
 
-    if (fillsCountEl) fillsCountEl.textContent = `${fills.length}`;
+    if (fillsCountEl) fillsCountEl.textContent = `${filtered.length}`;
   }
 
   function renderHistoricalFills() {
     if (!historicalFillsBodyEl) return;
 
-    if (historicalFills.length === 0) {
+    const marketFiltered = filterEntriesByMarketType(historicalFills);
+    if (marketFiltered.length === 0) {
       historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>No historical fills found.</td></tr>";
       if (historicalFillsCountEl) historicalFillsCountEl.textContent = "0";
       return;
     }
 
-    const filtered = historicalFills.filter((fill) => {
+    const filtered = marketFiltered.filter((fill) => {
       const sz = Number(fill.sz ?? fill.size ?? 0);
       const px = Number(fill.px ?? fill.price ?? 0);
       const val = sz * px;
@@ -4607,12 +5076,13 @@
         const orderIdHtml = formatSpotIdHtml(fill.oid ?? "");
         const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
         const wallet = fill.wallet || primaryWallet;
+        const forceSpot = entryMatchesMarketType(fill, "spot");
         return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
           <td><span class="timestamp">${t}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
           <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
         </tr>
@@ -4657,7 +5127,7 @@
   }
 
   function buildLiveOrdersRowsForExport() {
-    const values = Array.from(openOrders.values());
+    const values = filterEntriesByMarketType(Array.from(openOrders.values()));
     if (!values.length) return [];
 
     return values
@@ -4679,7 +5149,7 @@
 
   function buildHistoricalOrdersRowsForExport() {
     if (!Array.isArray(historicalOrders) || historicalOrders.length === 0) return [];
-    return historicalOrders.map((entry) => {
+    return historicalOrders.filter((entry) => entryMatchesMarketType(entry)).map((entry) => {
       const o = normalizeHistoricalOrder(entry);
       const side = o.side ?? (o.isBuy ? "B" : "S") ?? "?";
       return [
@@ -4697,8 +5167,9 @@
   }
 
   function buildLiveFillsRowsForExport() {
-    if (!Array.isArray(fills) || fills.length === 0) return [];
-    return fills.map((fill) => {
+    const filtered = filterEntriesByMarketType(fills);
+    if (!filtered.length) return [];
+    return filtered.map((fill) => {
       const side = fill.side ?? "?";
       return [
         fill.wallet || "",
@@ -4714,8 +5185,9 @@
   }
 
   function buildHistoricalFillsRowsForExport() {
-    if (!Array.isArray(historicalFills) || historicalFills.length === 0) return [];
-    return historicalFills.map((fill) => {
+    const filtered = filterEntriesByMarketType(historicalFills);
+    if (!filtered.length) return [];
+    return filtered.map((fill) => {
       const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
       return [
         fill.wallet || "",
@@ -4731,7 +5203,8 @@
   }
 
   function buildPortfolioSummaryRows() {
-    if (!walletSnapshots.size) return [["Status", "Not loaded"]];
+    const snapshots = getActiveSnapshots();
+    if (!snapshots.size) return [["Status", "Not loaded"]];
 
     const totals = {
       accountValue: 0,
@@ -4741,7 +5214,7 @@
       withdrawable: 0,
     };
 
-    walletSnapshots.forEach((snap) => {
+    snapshots.forEach((snap) => {
       const summary = snap?.summary || {};
       totals.accountValue += Number(summary.accountValue ?? 0) || 0;
       totals.totalNtlPos += Number(summary.totalNtlPos ?? 0) || 0;
@@ -5057,12 +5530,13 @@
   function renderHistoricalOrders() {
     if (!historicalOrdersBodyEl) return;
 
-    const totalCount = historicalOrders.length;
+    const marketFiltered = historicalOrders.filter((entry) => entryMatchesMarketType(entry));
+    const totalCount = marketFiltered.length;
     const sideFilter = historicalSideFilterEl?.value || "all";
     const statusFilter = (historicalStatusFilterEl?.value || "all").toLowerCase();
     const assetFilter = (historicalAssetFilterEl?.value || "").trim().toLowerCase();
 
-    const filtered = historicalOrders
+    const filtered = marketFiltered
       .map(normalizeHistoricalOrder)
       .filter((o) => {
         const side = o.side ?? (o.isBuy ? "B" : "S");
@@ -5094,13 +5568,14 @@
         const orderIdHtml = formatSpotIdHtml(o.oid ?? "");
         const coin = resolveCoinName(o.coin ?? "", o.asset ?? o.symbol ?? o.sym);
         const wallet = o.wallet || primaryWallet;
+        const forceSpot = entryMatchesMarketType(o, "spot");
 
         return `
         <tr>
           <td>${orderIdHtml}</td>
           <td><span class="timestamp">${created}</span></td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
-          <td class="asset-cell">${coinCellHtml(coin, wallet)}</td>
+          <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td class="money">${fmtSize(o.sz ?? o.size)}</td>
           <td class="money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
           <td>${status}</td>
@@ -5135,7 +5610,11 @@
           const data = await res.json();
           if (Array.isArray(data)) {
             data.forEach((entry) => {
-              if (entry && typeof entry === "object") entry.wallet = wallet;
+              if (entry && typeof entry === "object") {
+                entry.wallet = wallet;
+                const rawCoin = entry?.coin ?? entry?.order?.coin ?? entry?.order?.asset ?? entry?.order?.symbol ?? entry?.order?.sym ?? "";
+                if (rawCoin) entry.marketType = getMarketTypeFromCoin(rawCoin);
+              }
             });
             all.push(...data);
           }
@@ -5179,7 +5658,11 @@
           const fillsData = await infoClient.userFills({ user: wallet, aggregateByTime: true });
           if (Array.isArray(fillsData)) {
             fillsData.forEach((f) => {
-              if (f && typeof f === "object") f.wallet = wallet;
+              if (f && typeof f === "object") {
+                f.wallet = wallet;
+                const rawCoin = f.coin ?? f.asset ?? f.symbol ?? f.sym ?? "";
+                if (rawCoin) f.marketType = getMarketTypeFromCoin(rawCoin);
+              }
             });
             all.push(...fillsData);
           }
@@ -5208,9 +5691,9 @@
   }
 
   function resetState() {
-    walletSnapshots.clear();
-    walletTotals.clear();
-    walletPositions.clear();
+    Object.values(walletSnapshotsByType).forEach((map) => map.clear());
+    Object.values(walletTotalsByType).forEach((map) => map.clear());
+    Object.values(walletPositionsByType).forEach((map) => map.clear());
     openOrders.clear();
     canceledOrders.length = 0;
     fills.length = 0;
@@ -5288,36 +5771,37 @@
       const clearing = await infoClient.clearinghouseState({ user: wallet });
       const { marginSummary, withdrawable, assetPositions } = clearing;
       const mergedPositions = Array.isArray(assetPositions)
-        ? assetPositions.map((pos) => ({ ...pos, wallet }))
+        ? assetPositions.map((pos) => ({ ...pos, wallet, marketType: "perp" }))
         : [];
 
-      walletSnapshots.set(wallet, {
+      walletSnapshotsByType.perp.set(wallet, {
         summary: marginSummary || null,
         withdrawable,
         snapshotUpnlTotal: computeSnapshotUpnlTotal(mergedPositions),
       });
 
-      setWalletPositions(wallet, mergedPositions);
+      setWalletPositions("perp", wallet, mergedPositions);
 
       // Fetch HIP-3/extra dex positions after first paint
       fetchAdditionalDexPositions(wallet).then((extraPositions) => {
         if (!Array.isArray(extraPositions) || extraPositions.length === 0) return;
         const combined = [
           ...mergedPositions,
-          ...extraPositions.map((pos) => ({ ...pos, wallet })),
+          ...extraPositions.map((pos) => ({ ...pos, wallet, marketType: "perp" })),
         ];
-        walletSnapshots.set(wallet, {
+        walletSnapshotsByType.perp.set(wallet, {
           summary: marginSummary || null,
           withdrawable,
           snapshotUpnlTotal: computeSnapshotUpnlTotal(combined),
         });
-        setWalletPositions(wallet, combined);
+        setWalletPositions("perp", wallet, combined);
       });
 
       const existingOpen = await infoClient.openOrders({ user: wallet });
       existingOpen.forEach((order) => {
         const key = `${wallet}:${order.oid}`;
-        openOrders.set(key, { ...order, wallet });
+        const rawCoin = order.coin ?? order.asset ?? order.symbol ?? order.sym ?? "";
+        openOrders.set(key, { ...order, wallet, marketType: getMarketTypeFromCoin(rawCoin) });
       });
       renderOpenOrders();
     } catch (err) {
@@ -5354,7 +5838,8 @@
                 const statusTimestamp = entry.statusTimestamp;
                 if (!orderWrapper) return;
 
-                const order = { ...orderWrapper, status, statusTimestamp, wallet };
+                const rawCoin = orderWrapper?.coin ?? orderWrapper?.asset ?? orderWrapper?.symbol ?? orderWrapper?.sym ?? "";
+                const order = { ...orderWrapper, status, statusTimestamp, wallet, marketType: getMarketTypeFromCoin(rawCoin) };
                 const key = `${wallet}:${order.oid}`;
 
                 if (status === "open") {
@@ -5381,7 +5866,8 @@
               if (fillsArr.length === 0) return;
 
               fillsArr.forEach((fill) => {
-                const enriched = { ...fill, wallet };
+                const rawCoin = fill.coin ?? fill.asset ?? fill.symbol ?? fill.sym ?? "";
+                const enriched = { ...fill, wallet, marketType: getMarketTypeFromCoin(rawCoin) };
                 fills.unshift(enriched);
               });
               if (fills.length > MAX_FILL_ROWS) fills.length = MAX_FILL_ROWS;
@@ -5389,6 +5875,9 @@
               updatePerformanceMetrics(currentRangeKey);
 
               refreshPositionsAndMargin(wallet);
+              if (currentMarketType === "spot") {
+                refreshSpotPositionsAndSummary(wallet);
+              }
             } catch (err) {
               console.error("userEvents handler error", err);
               fillsErrorEl.textContent = "Error processing fills: " + (err?.message || err);
@@ -5477,12 +5966,62 @@
     return { times, equity, pnl, deposits, rawDeposits };
   }
 
-  function getPortfolioView(rangeKey, wallet) {
+  function toPerpKey(rangeKey) {
+    if (!rangeKey) return "";
+    return "perp" + rangeKey.charAt(0).toUpperCase() + rangeKey.slice(1);
+  }
+
+  function deriveSpotHistory(allHist, perpHist) {
+    if (!Array.isArray(allHist) || !Array.isArray(perpHist)) return [];
+    const perpMap = new Map(
+      perpHist
+        .map(([t, v]) => [Number(t), Number(v ?? 0)])
+        .filter(([t]) => Number.isFinite(t))
+    );
+    return allHist
+      .map(([t, v]) => {
+        const time = Number(t);
+        const allVal = Number(v ?? 0);
+        if (!Number.isFinite(time) || !Number.isFinite(allVal)) return null;
+        const perpVal = perpMap.get(time) ?? 0;
+        return [time, allVal - perpVal];
+      })
+      .filter(Boolean);
+  }
+
+  function deriveSpotSection(allSection, perpSection) {
+    if (!allSection || !perpSection) return null;
+    const accountValueHistory = deriveSpotHistory(
+      allSection.accountValueHistory || [],
+      perpSection.accountValueHistory || []
+    );
+    const pnlHistory = deriveSpotHistory(
+      allSection.pnlHistory || [],
+      perpSection.pnlHistory || []
+    );
+    if (!accountValueHistory.length || !pnlHistory.length) return null;
+    return { accountValueHistory, pnlHistory };
+  }
+
+  function getPortfolioSection(data, rangeKey, marketType = currentMarketType) {
+    if (!data) return null;
+    const allKey = rangeKey;
+    const perpKey = toPerpKey(rangeKey);
+    const allSection = data?.[allKey] || data?.allTime || null;
+    const perpSection = data?.[perpKey] || data?.perpAllTime || data?.perpAll || null;
+
+    if (marketType === "all") return allSection || perpSection || null;
+    if (marketType === "perp") return perpSection || allSection || null;
+    if (marketType === "spot") return deriveSpotSection(allSection, perpSection);
+    return allSection || null;
+  }
+
+  function getPortfolioView(rangeKey, wallet, marketType = currentMarketType) {
     if (!portfolioDataByWallet.size) return null;
     const data = portfolioDataByWallet.get(wallet);
     if (!data) return null;
-    const primary = data[rangeKey];
-    const fallback = data.allTime;
+    const primary = getPortfolioSection(data, rangeKey, marketType);
+    const fallback = getPortfolioSection(data, "allTime", marketType);
     return buildViewFromSection(primary) || buildViewFromSection(fallback) || null;
   }
 
@@ -5663,10 +6202,10 @@
     portfolioBreakdownChart.chart.update();
   }
 
-  function getWalletViews(rangeKey) {
+  function getWalletViews(rangeKey, marketType = currentMarketType) {
     return currentWallets
       .map((wallet) => {
-        const view = getPortfolioView(rangeKey, wallet);
+        const view = getPortfolioView(rangeKey, wallet, marketType);
         return view ? { wallet, view } : null;
       })
       .filter(Boolean);
@@ -5769,7 +6308,8 @@
     }
 
     const price = Number(fill.px ?? fill.price ?? 0);
-    const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
+    const rawCoin = fill.coin ?? fill.asset ?? fill.symbol ?? fill.sym ?? "";
+    const coin = resolveCoinName(rawCoin, fill.asset ?? fill.symbol ?? fill.sym);
     const wallet = fill.wallet || primaryWallet;
     const oid = fill.oid ?? fill.orderId ?? fill.order_id ?? "";
 
@@ -5779,6 +6319,7 @@
       size: Math.abs(size),
       price: Number.isFinite(price) ? price : null,
       coin,
+      marketType: getMarketTypeFromCoin(rawCoin),
       wallet,
       oid,
     };
@@ -5789,7 +6330,8 @@
     const timestamp = normalizeTimestamp(overrides.timestamp ?? order.timestamp);
     const status = String(overrides.status ?? order.status ?? "").toLowerCase();
     const side = order.side ?? (order.isBuy ? "B" : "S") ?? "";
-    const coin = resolveCoinName(order.coin ?? "", order.asset ?? order.symbol ?? order.sym);
+    const rawCoin = order.coin ?? order.asset ?? order.symbol ?? order.sym ?? "";
+    const coin = resolveCoinName(rawCoin, order.asset ?? order.symbol ?? order.sym);
     return {
       wallet: overrides.wallet ?? order.wallet ?? "",
       oid: pickOrderId(null, order) || "",
@@ -5797,6 +6339,7 @@
       status,
       side,
       coin,
+      marketType: getMarketTypeFromCoin(rawCoin),
       type: detectOrderType(order),
     };
   }
@@ -5811,7 +6354,7 @@
     });
   }
 
-  function getAllFillsForMetrics({ walletSet, startTime, endTime } = {}) {
+  function getAllFillsForMetrics({ walletSet, startTime, endTime, marketType = currentMarketType } = {}) {
     const combined = [];
     const pushFrom = (arr) => {
       if (!Array.isArray(arr)) return;
@@ -5826,6 +6369,7 @@
     const seen = new Set();
     const unique = [];
     combined.forEach((f) => {
+      if (marketType && marketType !== "all" && f.marketType && f.marketType !== marketType) return;
       if (walletSet && f.wallet && !walletSet.has(String(f.wallet).toLowerCase())) return;
       if (Number.isFinite(startTime) && f.time < startTime) return;
       if (Number.isFinite(endTime) && f.time > endTime) return;
@@ -5846,7 +6390,7 @@
     return unique.sort((a, b) => a.time - b.time);
   }
 
-  function getAllOrdersForMetrics({ walletSet, startTime, endTime } = {}) {
+  function getAllOrdersForMetrics({ walletSet, startTime, endTime, marketType = currentMarketType } = {}) {
     const combined = [];
     if (Array.isArray(historicalOrders)) {
       historicalOrders.forEach((entry) => {
@@ -5875,6 +6419,7 @@
     const seen = new Set();
     const unique = [];
     combined.forEach((o) => {
+      if (marketType && marketType !== "all" && o.marketType && o.marketType !== marketType) return;
       const walletKey = o.wallet ? String(o.wallet).toLowerCase() : "";
       if (walletSet && walletKey && !walletSet.has(walletKey)) return;
       if (Number.isFinite(startTime) && Number.isFinite(o.timestamp) && o.timestamp < startTime) return;
@@ -5984,9 +6529,9 @@
     };
   }
 
-  function computeTradeOrderMetrics({ startTime, endTime, walletSet } = {}) {
-    const fillsForStats = getAllFillsForMetrics({ walletSet, startTime, endTime });
-    const ordersForStats = getAllOrdersForMetrics({ walletSet, startTime, endTime });
+  function computeTradeOrderMetrics({ startTime, endTime, walletSet, marketType = currentMarketType } = {}) {
+    const fillsForStats = getAllFillsForMetrics({ walletSet, startTime, endTime, marketType });
+    const ordersForStats = getAllOrdersForMetrics({ walletSet, startTime, endTime, marketType });
 
     if (!fillsForStats.length && !ordersForStats.length) return null;
 
@@ -6147,6 +6692,19 @@
     if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = "-";
   }
 
+  function setPortfolioMetricsUnavailable() {
+    setMetricValue(metricTotalPnlEl, "N/A", null);
+    setMetricValue(metricReturnEl, "N/A", null);
+    setMetricValue(metricMaxDrawdownEl, "N/A", null);
+    setMetricValue(metricSharpeEl, "N/A", null);
+    setMetricValue(metricVolatilityEl, "N/A", null);
+    setMetricValue(metricBestIntervalEl, "N/A", null);
+    setMetricValue(metricPnlStabilityEl, "N/A", null);
+    setMetricValue(metricSkillPersistenceEl, "N/A", null);
+    setMetricValue(metricExcessPnlEl, "N/A", null);
+    setMetricValue(metricBetaAlphaEl, "N/A", null);
+  }
+
   function getRangeLabel(rangeKey) {
     const labels = {
       day: "Day",
@@ -6192,7 +6750,7 @@
   }
 
   function getMetricsSource(rangeKey) {
-    const views = getWalletViews(rangeKey);
+    const views = getWalletViews(rangeKey, currentMarketType);
     if (!views.length) return null;
     if (views.length === 1) {
       return { label: formatWalletLabel(views[0].wallet), view: views[0].view };
@@ -6348,6 +6906,14 @@
     if (rangeKey === "week") return { start: end - 7 * 86400000, end };
     if (rangeKey === "month") return { start: end - 30 * 86400000, end };
     return { start: Math.min(...msTimes), end };
+  }
+
+  function getRangeWindowForKey(rangeKey) {
+    const end = Date.now();
+    if (rangeKey === "day") return { start: end - 86400000, end };
+    if (rangeKey === "week") return { start: end - 7 * 86400000, end };
+    if (rangeKey === "month") return { start: end - 30 * 86400000, end };
+    return { start: null, end };
   }
 
   function getRangeDays(rangeKey) {
@@ -6606,10 +7172,76 @@
 
     const source = getMetricsSource(rangeKey);
     if (!source) {
-      clearPerformanceMetrics();
+      if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = "-";
+      const rangeWindow = getRangeWindowForKey(rangeKey);
+      const walletSet = new Set(currentWallets.map((w) => String(w).toLowerCase()));
+      const tradeMetrics = computeTradeOrderMetrics({
+        startTime: rangeWindow.start,
+        endTime: rangeWindow.end,
+        walletSet,
+        marketType: currentMarketType,
+      });
+      setPortfolioMetricsUnavailable();
+      if (tradeMetrics) {
+        setMetricValue(metricRealizedPnlEl, formatSignedDollarWithPlus(tradeMetrics.realizedPnl), tradeMetrics.realizedPnl);
+        setMetricValue(metricWinRateEl, formatPercent(tradeMetrics.winRate), null);
+        if (Number.isFinite(tradeMetrics.winRate)) {
+          setMetricScaledColor(metricWinRateEl, tradeMetrics.winRate, 0, 1);
+        }
+        const profitFactorText =
+          tradeMetrics.profitFactor === Infinity
+            ? "Inf"
+            : tradeMetrics.profitFactor !== null
+              ? formatRatio(tradeMetrics.profitFactor, 2)
+              : "-";
+        setMetricValue(metricProfitFactorEl, profitFactorText, null);
+        if (Number.isFinite(tradeMetrics.profitFactor)) {
+          setMetricScaledColor(metricProfitFactorEl, tradeMetrics.profitFactor, 0, 3);
+        }
+        const ordersPerDayText = formatNumber(tradeMetrics.ordersPerDay, 2) || "-";
+        const tradesPerDayText = formatNumber(tradeMetrics.tradesPerDay, 2) || "-";
+        setMetricValue(metricOrdersTradesPerDayEl, `${ordersPerDayText} (${tradesPerDayText})`, null);
+        setMetricValue(metricActiveDaysEl, formatPercent(tradeMetrics.activeDaysRatio), null);
+        if (Number.isFinite(tradeMetrics.activeDaysRatio)) {
+          setMetricScaledColor(metricActiveDaysEl, tradeMetrics.activeDaysRatio, 0, 1);
+        }
+        setMetricValue(metricActiveDaysCountEl, Number.isFinite(tradeMetrics.activeDaysCount) ? String(tradeMetrics.activeDaysCount) : "-", null);
+        if (Number.isFinite(tradeMetrics.activeDaysCount)) {
+          setMetricScaledColor(metricActiveDaysCountEl, tradeMetrics.activeDaysCount, 0, 200);
+        }
+        setMetricValue(metricProductCountEl, tradeMetrics.productCount !== null ? String(tradeMetrics.productCount) : "-", null);
+        setMetricValue(metricHerfindahlEl, tradeMetrics.herfindahl !== null ? formatRatio(tradeMetrics.herfindahl, 3) : "-", null);
+        if (Number.isFinite(tradeMetrics.herfindahl)) {
+          setMetricScaledColor(metricHerfindahlEl, tradeMetrics.herfindahl, 0, 1, true);
+        }
+        setMetricValue(metricAvgNotionalEl, tradeMetrics.avgNotional !== null ? fmtMoney(tradeMetrics.avgNotional, 2) : "-", null);
+        setMetricValue(metricMedianHoldingEl, formatDuration(tradeMetrics.medianHoldingTime), null);
+        setMetricValue(metricSideBiasEl, formatSignedPercent(tradeMetrics.sideBias), null);
+        setMetricValue(metricAggressivenessEl, formatPercent(tradeMetrics.aggressiveness), null);
+        setMetricValue(metricCancelRatioEl, formatPercent(tradeMetrics.cancelRatio), null);
+        if (Number.isFinite(tradeMetrics.cancelRatio)) {
+          setMetricScaledColor(metricCancelRatioEl, tradeMetrics.cancelRatio, 0, 1, true);
+        }
+        setMetricValue(metricReactionSpeedEl, formatDuration(tradeMetrics.reactionSpeed), null);
+      } else {
+        setMetricValue(metricRealizedPnlEl, "-", null);
+        setMetricValue(metricWinRateEl, "-", null);
+        setMetricValue(metricProfitFactorEl, "-", null);
+        setMetricValue(metricOrdersTradesPerDayEl, "-", null);
+        setMetricValue(metricActiveDaysEl, "-", null);
+        setMetricValue(metricProductCountEl, "-", null);
+        setMetricValue(metricHerfindahlEl, "-", null);
+        setMetricValue(metricAvgNotionalEl, "-", null);
+        setMetricValue(metricActiveDaysCountEl, "-", null);
+        setMetricValue(metricMedianHoldingEl, "-", null);
+        setMetricValue(metricSideBiasEl, "-", null);
+        setMetricValue(metricAggressivenessEl, "-", null);
+        setMetricValue(metricCancelRatioEl, "-", null);
+        setMetricValue(metricReactionSpeedEl, "-", null);
+      }
       return;
     }
-    if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = source.label || "-";
+    if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = source?.label || "-";
 
     const metrics = computePerformanceMetrics(source.view);
     const rangeWindow = getMetricsRangeWindow(source.view, rangeKey);
@@ -6618,32 +7250,30 @@
       startTime: rangeWindow.start,
       endTime: rangeWindow.end,
       walletSet,
+      marketType: currentMarketType,
     });
-    if (!metrics) {
-      clearPerformanceMetrics();
-      return;
-    }
+    if (metrics) {
+      setMetricValue(metricTotalPnlEl, formatSignedDollarWithPlus(metrics.totalPnl), metrics.totalPnl);
+      setMetricValue(metricReturnEl, formatSignedPercent(metrics.returnPct), metrics.returnPct);
+      setMetricValue(metricMaxDrawdownEl, formatPercent(metrics.maxDrawdown), null);
+      setMetricValue(metricSharpeEl, metrics.sharpe !== null ? formatRatio(metrics.sharpe, 2) : "-", metrics.sharpe);
+      setMetricValue(metricVolatilityEl, fmtMoney(metrics.volatility, 2), null);
+      setMetricValue(metricBestIntervalEl, formatSignedDollarWithPlus(metrics.bestInterval), metrics.bestInterval);
+      setMetricValue(metricPnlStabilityEl, metrics.pnlStability !== null ? formatRatio(metrics.pnlStability, 2) : "-", null);
+      setMetricValue(metricSkillPersistenceEl, metrics.skillPersistence !== null ? formatRatio(metrics.skillPersistence, 2) : "-", null);
 
-    setMetricValue(metricTotalPnlEl, formatSignedDollarWithPlus(metrics.totalPnl), metrics.totalPnl);
-    setMetricValue(metricReturnEl, formatSignedPercent(metrics.returnPct), metrics.returnPct);
-    setMetricValue(metricMaxDrawdownEl, formatPercent(metrics.maxDrawdown), null);
-    setMetricValue(metricSharpeEl, metrics.sharpe !== null ? formatRatio(metrics.sharpe, 2) : "-", metrics.sharpe);
-    setMetricValue(metricVolatilityEl, fmtMoney(metrics.volatility, 2), null);
-    setMetricValue(metricBestIntervalEl, formatSignedDollarWithPlus(metrics.bestInterval), metrics.bestInterval);
-    setMetricValue(metricPnlStabilityEl, metrics.pnlStability !== null ? formatRatio(metrics.pnlStability, 2) : "-", null);
-    setMetricValue(metricSkillPersistenceEl, metrics.skillPersistence !== null ? formatRatio(metrics.skillPersistence, 2) : "-", null);
-
-    if (Number.isFinite(metrics.maxDrawdown)) {
-      setMetricScaledColor(metricMaxDrawdownEl, metrics.maxDrawdown, 0, 2);
-    }
-    if (Number.isFinite(metrics.sharpe)) {
-      setMetricScaledColor(metricSharpeEl, metrics.sharpe, -1, 2);
-    }
-    if (Number.isFinite(metrics.pnlStability)) {
-      setMetricScaledColor(metricPnlStabilityEl, metrics.pnlStability, 0, 2, true);
-    }
-    if (Number.isFinite(metrics.skillPersistence)) {
-      setMetricScaledColor(metricSkillPersistenceEl, metrics.skillPersistence, -1, 1);
+      if (Number.isFinite(metrics.maxDrawdown)) {
+        setMetricScaledColor(metricMaxDrawdownEl, metrics.maxDrawdown, 0, 2);
+      }
+      if (Number.isFinite(metrics.sharpe)) {
+        setMetricScaledColor(metricSharpeEl, metrics.sharpe, -1, 2);
+      }
+      if (Number.isFinite(metrics.pnlStability)) {
+        setMetricScaledColor(metricPnlStabilityEl, metrics.pnlStability, 0, 2, true);
+      }
+      if (Number.isFinite(metrics.skillPersistence)) {
+        setMetricScaledColor(metricSkillPersistenceEl, metrics.skillPersistence, -1, 1);
+      }
     }
 
     if (tradeMetrics) {
@@ -6704,10 +7334,12 @@
       setMetricValue(metricReactionSpeedEl, "-", null);
     }
 
-    updateBenchmarkMetrics(rangeKey, {
-      ...source.view,
-      baseEquity: metrics.baseEquity,
-    }, metrics.totalPnl, metrics.baseEquity, rangeWindow);
+    if (metrics && source) {
+      updateBenchmarkMetrics(rangeKey, {
+        ...source.view,
+        baseEquity: metrics.baseEquity,
+      }, metrics.totalPnl, metrics.baseEquity, rangeWindow);
+    }
   }
 
   function openPortfolioModal() {
@@ -6774,11 +7406,11 @@
   }
 
   function initPortfolioCharts(rangeKey) {
-    const views = getWalletViews(rangeKey);
+    const views = getWalletViews(rangeKey, currentMarketType);
     if (!views.length) {
       setPortfolioLoadingState(false, "");
       portfolioErrorEl.textContent = "No performance data available for the selected wallets.";
-      clearPerformanceMetrics();
+      if (currentMarketType === "perp") clearPerformanceMetrics();
       return;
     }
 
@@ -6821,10 +7453,10 @@
   }
 
   function updatePortfolioCharts(rangeKey) {
-    const views = getWalletViews(rangeKey);
+    const views = getWalletViews(rangeKey, currentMarketType);
     if (!views.length) {
       portfolioErrorEl.textContent = "No performance data available for the selected range.";
-      clearPerformanceMetrics();
+      if (currentMarketType === "perp") clearPerformanceMetrics();
       return;
     }
     portfolioErrorEl.textContent = "";
@@ -6967,6 +7599,7 @@
       await initClients();
       await ensurePriceStream();
       await spotMetaTask;
+      const spotLoadTask = refreshSpotForWallets(walletList);
       await Promise.all(walletList.map((wallet) => loadSnapshot(wallet)));
       await startStreams(walletList);
       await loadPortfolio(walletList);
@@ -6978,6 +7611,9 @@
       if (fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalFills(walletList);
       }
+      if (currentMarketType === "spot") {
+        await spotLoadTask;
+      }
     } finally {
       trackBtnEl.disabled = false;
     }
@@ -6985,6 +7621,9 @@
 
   (async function boot() {
     initTheme();
+    updateMarketLabels();
+    updateMarketToggleButtons();
+    updatePerformanceVisibility();
     loadFooterCoins();
     loadCoinNameCache();
     loadCoinColorCache();
@@ -7013,11 +7652,24 @@
 
     // ✅ Replace URL on first load (so / becomes /?wallet=... without extra history)
     await trackWallets({ wallets: initialWallets }, { replaceUrl: true });
+    updateMarketToggleIndicator();
   })();
 
   trackBtnEl.addEventListener("click", () => {
     const config = getWalletConfigFromInputs();
     if (config) trackWallets(config);
+  });
+
+  marketToggleButtons.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const next = btn.dataset.market;
+      await setMarketType(next);
+      updateMarketToggleIndicator();
+    });
+  });
+
+  window.addEventListener("resize", () => {
+    updateMarketToggleIndicator();
   });
 
   if (walletInputsEl) {
@@ -7237,9 +7889,10 @@
       row.classList.add("loading");
       const coin = row.dataset.coin;
       const wallet = row.dataset.wallet || primaryWallet;
+      const market = row.dataset.market || currentMarketType;
       if (!coin) return;
       if (!historicalFillsLoaded) await ensureHistoricalDataLoaded();
-      const positionKey = `${wallet}:${coin}`;
+      const positionKey = `${market}:${wallet}:${coin}`;
       if (expandedPositions.has(positionKey)) expandedPositions.delete(positionKey);
       else expandedPositions.add(positionKey);
       renderPositions(currentAssetPositions);
