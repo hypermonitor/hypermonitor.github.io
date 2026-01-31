@@ -3733,7 +3733,9 @@
     if (!normalized) return null;
     const special = getSpecialLogoUrl(normalized, normalized);
     if (special) return special;
-    return `${COIN_ICON_BASE}${encodeURIComponent(normalized)}.svg`;
+    const { base } = splitDexCoin(normalized);
+    const local = String(base || normalized).replace("/", "_");
+    return `images/coins/${encodeURIComponent(local)}.svg`;
   }
 
   function isSameOriginAsset(url) {
@@ -4735,7 +4737,8 @@
     if (window.location?.protocol === "file:") return null;
     const normalized = normalizeFooterCoinValue(symbol);
     if (!normalized) return null;
-    const iconUrl = `${COIN_ICON_BASE}${encodeURIComponent(normalized)}.svg`;
+    const { base } = splitDexCoin(normalized);
+    const iconUrl = `images/coins/${encodeURIComponent(String(base || normalized).replace("/", "_"))}.svg`;
     if (!isSameOriginAsset(iconUrl)) return null;
     try {
       const res = await fetch(iconUrl);
