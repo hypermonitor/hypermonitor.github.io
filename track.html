@@ -1964,6 +1964,11 @@
       color: var(--muted);
     }
 
+    .roe-sub {
+      color: inherit;
+      opacity: 0.7;
+    }
+
     .funding-pos { color: #4ade80; }
     .funding-neg { color: #fb7185; }
 
@@ -2216,6 +2221,7 @@
           <th class="sortable" data-sort="side">Side</th>
           <th class="sortable" data-sort="size">Size</th>
           <th class="sortable" data-sort="price">Price</th>
+          <th class="desktop-only sortable" data-sort="age">Age</th>
           <th class="desktop-only sortable" data-sort="upnl">Unrealized PnL</th>
           <th class="desktop-only sortable" data-sort="liq">Liq Distance</th>
           <th class="desktop-only sortable" data-sort="funding">Funding</th>
@@ -2232,6 +2238,7 @@
         </tr>
         <tr class="loading-row desktop-only">
           <td class="muted">Loading…</td>
+          <td></td>
           <td></td>
           <td></td>
           <td></td>
@@ -2636,6 +2643,7 @@
               <th class="sortable" data-sort="asset">Asset</th>
               <th class="sortable" data-sort="size">Size</th>
               <th class="sortable" data-sort="price">Price</th>
+              <th class="sortable" data-sort="pnl">Closed PnL</th>
             </tr>
             </thead>
             <tbody id="historicalFillsBody">
@@ -3466,7 +3474,7 @@
   }
 
   function getPositionsColspan() {
-    return window.matchMedia("(max-width: 600px)").matches ? 4 : 7;
+    return window.matchMedia("(max-width: 600px)").matches ? 4 : 8;
   }
 
   function getPositionsSortDefaultDir(key) {
@@ -3558,6 +3566,7 @@
     const liqDistanceDisplay =
       liqDistanceClamped === null ? null : Math.max(0, Math.min(1, 1 - liqDistanceClamped));
     const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
+    const ageMs = computePositionAgeMs(coin, szi, item?.wallet || primaryWallet);
     return {
       asset: (spotLabel || coinDisplayName || coin || "").toUpperCase(),
       side: dir,
@@ -3567,6 +3576,7 @@
       upnl: Number.isFinite(upnl) ? upnl : null,
       funding: Number.isFinite(fundingDisplayValue) ? fundingDisplayValue : null,
       liq: Number.isFinite(liqDistanceDisplay) ? liqDistanceDisplay : null,
+      age: Number.isFinite(ageMs) ? ageMs : null,
     };
   }
 
@@ -3582,6 +3592,60 @@
     }
     const diff = a - b;
     return dir === "asc" ? diff : -diff;
+  }
+
+  function computePositionAgeMs(coin, szi, wallet) {
+    const target = Number(szi) || 0;
+    if (target === 0) return null;
+    const fillsForCoin = getAllFillsForCoin(coin, wallet, currentMarketType);
+    if (!fillsForCoin.length) return null;
+    const sorted = [...fillsForCoin].sort(
+      (a, b) => Number(b.time ?? b.timestamp ?? 0) - Number(a.time ?? a.timestamp ?? 0)
+    );
+    let netSize = 0;
+    let oldestTime = null;
+    const EPS = 1e-8;
+    for (const fill of sorted) {
+      const sideRaw =
+        fill.side ??
+        (fill.isBuy !== undefined ? (fill.isBuy ? "B" : "S") : undefined) ??
+        fill.dir ??
+        fill.direction ??
+        "?";
+      const sideUpper = String(sideRaw).toUpperCase();
+      let side = "?";
+      if (sideUpper.startsWith("B") || sideUpper === "1" || sideUpper === "+1") side = "B";
+      else if (
+        sideUpper.startsWith("S") ||
+        sideUpper.startsWith("A") ||
+        sideUpper === "-1" ||
+        sideUpper === "SELL" ||
+        sideUpper === "SHORT"
+      )
+        side = "S";
+      const sizeCandidates = [fill.szi, fill.sz, fill.size, fill.qty, fill.quantity, fill.baseSz, fill.baseSize];
+      let sizeRaw = 0;
+      for (const cand of sizeCandidates) {
+        const n = Number(cand);
+        if (!Number.isNaN(n)) {
+          sizeRaw = n;
+          break;
+        }
+      }
+      if (side === "?") {
+        if (sizeRaw > 0) side = "B";
+        else if (sizeRaw < 0) side = "S";
+      }
+      const signed = side === "B" ? Math.abs(sizeRaw) : side === "S" ? -Math.abs(sizeRaw) : sizeRaw;
+      netSize += Number.isFinite(signed) ? signed : 0;
+      const rawTime = Number(fill.time ?? fill.timestamp ?? 0);
+      const normalized = normalizeTimestamp(rawTime);
+      if (Number.isFinite(normalized)) oldestTime = normalized;
+      if (Math.abs(netSize - target) <= EPS) break;
+    }
+    if (!Number.isFinite(oldestTime)) return null;
+    const age = Date.now() - oldestTime;
+    return Number.isFinite(age) && age >= 0 ? age : null;
   }
 
   function formatSignedPercent(value, decimals = 2) {
@@ -5231,6 +5295,8 @@
 
         const isPerp = item.marketType !== "spot";
         const leverageValue = p.leverage?.value ?? p.leverage ?? p.lever ?? p.leverageValue;
+        const ageMs = computePositionAgeMs(coin, szi, wallet);
+        const ageDisplay = Number.isFinite(ageMs) ? formatDuration(ageMs) : "–";
         const upnlFormatted = formatSignedDollarWithPlus(upnl);
         const entryNotional = Number.isFinite(entryPx) && szi !== 0 ? Math.abs(entryPx * szi) : null;
         const leverageNum = Number(leverageValue);
@@ -5388,10 +5454,13 @@
               <span>Entry: ${entryPriceDisplay}</span>
             </div>
           </td>
+          <td class="desktop-only">
+            <span class="timestamp">${ageDisplay}</span>
+          </td>
           <td class="money ${upnl >= 0 ? "upnl-pos" : "upnl-neg"}">
             <div class="price-stack">
-              <span class="notional-sub">${upnlPercentDisplay ? `ROE: ${upnlPercentDisplay}` : ""}</span>
               <span>${upnlFormatted}</span>
+              <span class="notional-sub roe-sub">${upnlPercentDisplay || ""}</span>
             </div>
           </td>
           <td class="desktop-only">${liqDistanceHtml}</td>
@@ -5629,6 +5698,50 @@
       return !(Number.isFinite(val) && Math.abs(val) < 0.0000001);
     });
 
+    let historicalFillsClosedPnl = null;
+    if (!historicalFillsClosedPnl) {
+      const closedPnlMap = new Map();
+      const sortedForPnl = [...marketFiltered].sort(
+        (a, b) => Number(a.time ?? a.timestamp ?? 0) - Number(b.time ?? b.timestamp ?? 0)
+      );
+      const positionByCoin = new Map();
+
+      sortedForPnl.forEach((fill) => {
+        const { sideSign, sizeAbs } = getFillSideAndSize(fill);
+        const price = Number(fill.px ?? fill.price ?? 0);
+        if (!sideSign || !Number.isFinite(sizeAbs) || sizeAbs <= 0 || !Number.isFinite(price)) return;
+        const rawCoin = fill.coin ?? fill.asset ?? fill.symbol ?? fill.sym ?? "";
+        const coin = resolveCoinName(rawCoin, fill.asset ?? fill.symbol ?? fill.sym) || rawCoin || "";
+        if (!coin) return;
+
+        const lots = positionByCoin.get(coin) || [];
+        let remaining = sizeAbs;
+        let realized = 0;
+
+        while (remaining > 0 && lots.length > 0 && lots[0].sideSign !== sideSign) {
+          const lot = lots[0];
+          const matchSize = Math.min(remaining, lot.size);
+          const pnl = (price - lot.price) * matchSize * lot.sideSign;
+          realized += pnl;
+          lot.size -= matchSize;
+          remaining -= matchSize;
+          if (lot.size <= 0) lots.shift();
+        }
+
+        if (remaining > 0) {
+          lots.push({ sideSign, size: remaining, price });
+        }
+
+        positionByCoin.set(coin, lots);
+
+        if (realized !== 0) {
+          closedPnlMap.set(fill, realized);
+        }
+      });
+
+      historicalFillsClosedPnl = closedPnlMap;
+    }
+
     updateTableSortHeaders(historicalFillsHeaderEls, currentHistoricalFillsSort);
     const sorted = filtered.slice();
     if (currentHistoricalFillsSort?.key) {
@@ -5639,6 +5752,8 @@
         const bCoin = resolveCoinName(b.coin ?? "", b.asset ?? b.symbol ?? b.sym);
         const aSide = a.side ?? (a.isBuy ? "B" : "S") ?? "";
         const bSide = b.side ?? (b.isBuy ? "B" : "S") ?? "";
+        const aPnl = historicalFillsClosedPnl?.get(a);
+        const bPnl = historicalFillsClosedPnl?.get(b);
         const aMetrics = {
           orderId: String(a.oid ?? ""),
           time: Number(a.time ?? a.timestamp ?? 0),
@@ -5646,6 +5761,7 @@
           asset: String(aCoin ?? "").toUpperCase(),
           size: Number(a.sz ?? a.size ?? 0),
           price: Number(a.px ?? a.price ?? 0),
+          pnl: Number.isFinite(aPnl) ? aPnl : null,
         };
         const bMetrics = {
           orderId: String(b.oid ?? ""),
@@ -5654,6 +5770,7 @@
           asset: String(bCoin ?? "").toUpperCase(),
           size: Number(b.sz ?? b.size ?? 0),
           price: Number(b.px ?? b.price ?? 0),
+          pnl: Number.isFinite(bPnl) ? bPnl : null,
         };
         return comparePositionSort(aMetrics[sortKey], bMetrics[sortKey], sortDir);
       });
@@ -5668,6 +5785,8 @@
         const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
         const wallet = fill.wallet || primaryWallet;
         const forceSpot = entryMatchesMarketType(fill, "spot");
+        const closedPnl = historicalFillsClosedPnl?.get(fill);
+        const closedPnlDisplay = Number.isFinite(closedPnl) ? formatSignedDollarWithPlus(closedPnl) : "";
         return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
@@ -5676,6 +5795,9 @@
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
           <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
+          <td class="money ${Number.isFinite(closedPnl) ? (closedPnl >= 0 ? "upnl-pos" : "upnl-neg") : ""}">
+            ${closedPnlDisplay}
+          </td>
         </tr>
       `;
       })
@@ -7082,8 +7204,48 @@
     return sorted[mid];
   }
 
+  function getFillSideAndSize(fill) {
+    const sideRaw =
+      fill.side ??
+      (fill.isBuy !== undefined ? (fill.isBuy ? "B" : "S") : undefined) ??
+      fill.dir ??
+      fill.direction ??
+      "?";
+    const sideUpper = String(sideRaw).toUpperCase();
+    let side = "?";
+    if (sideUpper.startsWith("B") || sideUpper === "1" || sideUpper === "+1") side = "B";
+    else if (
+      sideUpper.startsWith("S") ||
+      sideUpper.startsWith("A") ||
+      sideUpper === "-1" ||
+      sideUpper === "SELL" ||
+      sideUpper === "SHORT"
+    )
+      side = "S";
+
+    const sizeCandidates = [fill.szi, fill.sz, fill.size, fill.qty, fill.quantity, fill.baseSz, fill.baseSize];
+    let sizeRaw = 0;
+    for (const cand of sizeCandidates) {
+      const n = Number(cand);
+      if (!Number.isNaN(n)) {
+        sizeRaw = n;
+        break;
+      }
+    }
+
+    if (side === "?") {
+      if (sizeRaw > 0) side = "B";
+      else if (sizeRaw < 0) side = "S";
+    }
+
+    const sizeAbs = Math.abs(sizeRaw);
+    const sideSign = side === "B" ? 1 : side === "S" ? -1 : 0;
+    return { side, sideSign, sizeAbs };
+  }
+
   function computeHoldingStats(fillsForStats) {
     const lotsByCoin = new Map();
+    const lifecyclePnlByCoin = new Map();
     const holdingTimes = [];
     let realizedPnl = 0;
     let wins = 0;
@@ -7093,20 +7255,18 @@
 
     const sorted = [...fillsForStats].sort((a, b) => a.time - b.time);
     sorted.forEach((fill) => {
-      const side = fill.side;
-      const size = Number(fill.size ?? 0);
+      const { sideSign, sizeAbs } = getFillSideAndSize(fill);
       const price = Number(fill.price ?? 0);
-      if (!side || !Number.isFinite(size) || size <= 0 || !Number.isFinite(price)) return;
+      if (!sideSign || !Number.isFinite(sizeAbs) || sizeAbs <= 0 || !Number.isFinite(price)) return;
       const coin = fill.coin || "";
       const time = Number(fill.time ?? 0);
       if (!Number.isFinite(time)) return;
 
-      const sideSign = side === "B" ? 1 : side === "S" ? -1 : 0;
-      if (!sideSign) return;
-
       const key = coin || "__unknown__";
       const lots = lotsByCoin.get(key) || [];
-      let remaining = size;
+      let remaining = sizeAbs;
+      let matchedAny = false;
+      let lifecyclePnl = lifecyclePnlByCoin.get(key) || 0;
 
       while (remaining > 0 && lots.length > 0 && lots[0].sideSign !== sideSign) {
         const lot = lots[0];
@@ -7115,17 +7275,27 @@
         holdingTimes.push(duration);
         const pnl = (price - lot.price) * matchSize * lot.sideSign;
         realizedPnl += pnl;
+        lifecyclePnl += pnl;
+        matchedAny = true;
         if (pnl > 0) {
-          wins += 1;
           sumPositive += pnl;
         } else if (pnl < 0) {
           sumNegative += pnl;
         }
-        closedCount += 1;
 
         lot.size -= matchSize;
         remaining -= matchSize;
         if (lot.size <= 0) lots.shift();
+      }
+
+      if (matchedAny && lots.length === 0) {
+        if (lifecyclePnl > 0) {
+          wins += 1;
+          closedCount += 1;
+        } else if (lifecyclePnl < 0) {
+          closedCount += 1;
+        }
+        lifecyclePnl = 0;
       }
 
       if (remaining > 0) {
@@ -7133,6 +7303,7 @@
       }
 
       lotsByCoin.set(key, lots);
+      lifecyclePnlByCoin.set(key, lifecyclePnl);
     });
 
     const totalExposureTime = holdingTimes.reduce((sum, v) => sum + v, 0);
@@ -7152,6 +7323,7 @@
       totalExposureTime,
       medianHoldingTime,
       closedCount,
+      wins,
     };
   }
 
@@ -7275,6 +7447,8 @@
       realizedPnl: holdingStats.realizedPnl,
       winRate: holdingStats.winRate,
       profitFactor: holdingStats.profitFactor,
+      wins: holdingStats.wins,
+      closedCount: holdingStats.closedCount,
       sideBias,
       aggressiveness,
       cancelRatio,
@@ -7810,7 +7984,12 @@
       setPortfolioMetricsUnavailable();
       if (tradeMetrics) {
         setMetricValue(metricRealizedPnlEl, formatSignedDollarWithPlus(tradeMetrics.realizedPnl), tradeMetrics.realizedPnl);
-        setMetricValue(metricWinRateEl, formatPercent(tradeMetrics.winRate), null);
+        const winRatePct = formatPercent(tradeMetrics.winRate);
+        const winRateSuffix =
+          Number.isFinite(tradeMetrics.wins) && Number.isFinite(tradeMetrics.closedCount)
+            ? ` (${tradeMetrics.wins}/${tradeMetrics.closedCount})`
+            : "";
+        setMetricValue(metricWinRateEl, `${winRatePct}${winRateSuffix}`, null);
         if (Number.isFinite(tradeMetrics.winRate)) {
           setMetricScaledColor(metricWinRateEl, tradeMetrics.winRate, 0, 1);
         }
@@ -7904,7 +8083,12 @@
 
     if (tradeMetrics) {
       setMetricValue(metricRealizedPnlEl, formatSignedDollarWithPlus(tradeMetrics.realizedPnl), tradeMetrics.realizedPnl);
-      setMetricValue(metricWinRateEl, formatPercent(tradeMetrics.winRate), null);
+      const winRatePct = formatPercent(tradeMetrics.winRate);
+      const winRateSuffix =
+        Number.isFinite(tradeMetrics.wins) && Number.isFinite(tradeMetrics.closedCount)
+          ? ` (${tradeMetrics.wins}/${tradeMetrics.closedCount})`
+          : "";
+      setMetricValue(metricWinRateEl, `${winRatePct}${winRateSuffix}`, null);
       if (Number.isFinite(tradeMetrics.winRate)) {
         setMetricScaledColor(metricWinRateEl, tradeMetrics.winRate, 0, 1);
       }
