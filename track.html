@@ -2254,7 +2254,7 @@
       </div>
       <div class="chart-grid" id="portfolioCharts">
         <div class="chart-card">
-          <h3>Account Value</h3>
+          <h3>Equity</h3>
           <div class="chart-canvas-wrap">
             <canvas id="equityChart"></canvas>
           </div>
@@ -4693,7 +4693,7 @@
             }
 
             const rows = [
-              ["Account Value", fmtMoney(item.summary.accountValue)],
+              ["Equity", fmtMoney(item.summary.accountValue)],
               ["Notional Exposure", fmtMoney(item.summary.totalNtlPos)],
               ["Collateral", fmtMoney(item.summary.totalRawUsd)],
               ["Margin Used", fmtMoney(item.summary.totalMarginUsed)],
@@ -5346,7 +5346,7 @@
     });
 
     return [
-      ["Account Value", fmtMoney(totals.accountValue)],
+      ["Equity", fmtMoney(totals.accountValue)],
       ["Notional Exposure", fmtMoney(totals.totalNtlPos)],
       ["Collateral", fmtMoney(totals.totalRawUsd)],
       ["Margin Used", fmtMoney(totals.totalMarginUsed)],
@@ -6256,7 +6256,7 @@
       return palette[i % palette.length];
     });
     const textColor = getChartTextColor();
-    const tooltipBg = document.body.classList.contains("light") ? "rgba(15,23,42,0.85)" : "rgba(0,0,0,0.7)";
+    const tooltipBg = "rgba(0,0,0,0.7)";
 
     if (!portfolioBreakdownChart.chart) {
       portfolioBreakdownChart.chart = new Chart(portfolioDoughnutCanvas.getContext("2d"), {
@@ -6319,7 +6319,7 @@
   function updateBreakdownTheme() {
     if (!portfolioBreakdownChart.chart) return;
     const textColor = getChartTextColor();
-    const tooltipBg = document.body.classList.contains("light") ? "rgba(15,23,42,0.85)" : "rgba(0,0,0,0.7)";
+    const tooltipBg = "rgba(0,0,0,0.7)";
     portfolioBreakdownChart.chart.options.plugins.legend.labels.color = textColor;
     portfolioBreakdownChart.chart.options.plugins.tooltip.backgroundColor = tooltipBg;
     portfolioBreakdownChart.chart.update();
@@ -7490,7 +7490,7 @@
         plugins: {
           legend: { display: datasets.length > 1, labels: { color: getChartTextColor() } },
           tooltip: {
-            backgroundColor: "rgba(15,23,42,0.5)",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
             borderColor: "rgba(148,163,184,0.5)",
             borderWidth: 1,
             titleColor: "#e5e7eb",
