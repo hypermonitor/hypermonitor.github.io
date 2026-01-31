@@ -4736,6 +4736,7 @@
     const normalized = normalizeFooterCoinValue(symbol);
     if (!normalized) return null;
     const iconUrl = `${COIN_ICON_BASE}${encodeURIComponent(normalized)}.svg`;
+    if (!isSameOriginAsset(iconUrl)) return null;
     try {
       const res = await fetch(iconUrl);
       if (!res.ok) return null;
