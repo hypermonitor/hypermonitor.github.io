@@ -1045,6 +1045,22 @@
       margin-bottom: 0;
     }
 
+    .chart-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .performance-share-btn {
+      padding: 0.25rem 0.7rem;
+      font-size: 0.7rem;
+    }
+
+    .performance-share-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .chart-range-btn {
       border-radius: 999px;
       border: 1px solid var(--glass-border);
@@ -2410,10 +2426,15 @@
         <button class="chart-range-btn" data-range="month">Month</button>
         <button class="chart-range-btn active" data-range="allTime">All Time</button>
       </div>
-      <button class="metrics-toggle" id="metricsToggle" type="button" aria-expanded="false">
-        <span class="sr-only">Toggle metrics</span>
-        <span aria-hidden="true">▾</span>
-      </button>
+      <div class="chart-actions">
+        <button class="metrics-toggle performance-share-btn" id="performanceShareBtn" type="button" aria-label="Share performance">
+          <span aria-hidden="true">Share</span>
+        </button>
+        <button class="metrics-toggle" id="metricsToggle" type="button" aria-expanded="false">
+          <span class="sr-only">Toggle metrics</span>
+          <span aria-hidden="true">▾</span>
+        </button>
+      </div>
     </div>
 
     <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
@@ -2812,7 +2833,7 @@
 <div class="share-modal" id="pnlShareModal" aria-hidden="true">
   <div class="share-card">
     <div class="share-header">
-      <strong>Share Asset Performance</strong>
+      <strong id="shareModalTitle">Share Asset Performance</strong>
       <button class="share-btn" id="shareModalClose" type="button">Close</button>
     </div>
     <div class="share-preview">
@@ -2914,6 +2935,7 @@
   const exportExcelBtn = document.getElementById("exportExcelBtn");
   const metricsCardEl = document.getElementById("metricsCard");
   const metricsToggleEl = document.getElementById("metricsToggle");
+  const performanceShareBtnEl = document.getElementById("performanceShareBtn");
   const metricsWalletLabelEl = document.getElementById("metricsWalletLabel");
   const metricsRangeLabelEl = document.getElementById("metricsRangeLabel");
   const metricTotalPnlEl = document.getElementById("metricTotalPnl");
@@ -2943,6 +2965,7 @@
   const metricBetaAlphaEl = document.getElementById("metricBetaAlpha");
 
   const pnlShareModalEl = document.getElementById("pnlShareModal");
+  const shareModalTitleEl = document.getElementById("shareModalTitle");
   const sharePreviewImgEl = document.getElementById("sharePreviewImg");
   const shareSaveBtnEl = document.getElementById("shareSaveBtn");
   const shareXBtnEl = document.getElementById("shareXBtn");
@@ -3795,6 +3818,40 @@
     return Number.isFinite(num) ? num : null;
   }
 
+  const DEFAULT_SHARE_META = {
+    modalTitle: "Share Asset Performance",
+    filename: "hypermonitor-pnl.png",
+    title: "Hypermonitor PnL",
+    text: "Discover Hypermonitor",
+  };
+  let activeShareMeta = { ...DEFAULT_SHARE_META };
+
+  function setShareMeta(next) {
+    activeShareMeta = { ...DEFAULT_SHARE_META, ...(next || {}) };
+    if (shareModalTitleEl) {
+      shareModalTitleEl.textContent = activeShareMeta.modalTitle || DEFAULT_SHARE_META.modalTitle;
+    }
+  }
+
+  function slugifyLabel(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+
+  function formatShareWalletLabel(value) {
+    const label = String(value || "").trim();
+    if (!label) return "-";
+    if (/^0x[a-fA-F0-9]{8,}$/.test(label)) return formatShortWallet(label);
+    return label;
+  }
+
+  function getMetricText(el) {
+    return (el?.textContent || "-").trim() || "-";
+  }
+
   async function buildPnlShareImage(data) {
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
@@ -3987,8 +4044,197 @@
     }
   }
 
-  function openPnlShareModal(dataUrl) {
+  async function buildPerformanceShareImage() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 1400;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    const rangeLabel = getRangeLabel(currentRangeKey);
+    const rangeNaturalLabel =
+      rangeLabel === "Day"
+        ? "Daily"
+        : rangeLabel === "Week"
+          ? "Weekly"
+          : rangeLabel === "Month"
+            ? "Monthly"
+            : "All time";
+    const rangeSlug = slugifyLabel(rangeLabel);
+    const source = getMetricsSource(currentRangeKey);
+    const primaryWalletLabel = formatShareWalletLabel(primaryWallet || "");
+    const walletLabel =
+      currentWallets.length > 1
+        ? `Wallets (${currentWallets.length}) · ${primaryWalletLabel}`
+        : `${primaryWalletLabel}`;
+    const marketLabel = currentMarketType === "spot" ? "Spot" : "Perps";
+
+    const totalPnlText = getMetricText(metricTotalPnlEl);
+    const returnText = getMetricText(metricReturnEl);
+    const maxDrawdownText = getMetricText(metricMaxDrawdownEl);
+    const sharpeText = getMetricText(metricSharpeEl);
+    const volatilityText = getMetricText(metricVolatilityEl);
+    const bestIntervalText = getMetricText(metricBestIntervalEl);
+
+    const pnlValue = parseSignedMoney(totalPnlText);
+    const accent = pnlValue !== null && pnlValue < 0 ? "#fb7185" : "#4ade80";
+    const accentSoft = pnlValue !== null && pnlValue < 0 ? "rgba(251, 113, 133, 0.18)" : "rgba(74, 222, 128, 0.18)";
+
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#0b0b0f");
+    gradient.addColorStop(1, "#0e141c");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = accent;
+    ctx.beginPath();
+    ctx.arc(920, 420, 240, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = "#1f2937";
+    ctx.beginPath();
+    ctx.arc(760, 840, 280, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.strokeStyle = pnlValue !== null && pnlValue < 0 ? "rgba(251, 113, 133, 0.12)" : "rgba(151, 253, 229, 0.12)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 14; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(420, 220 + i * 40);
+      ctx.bezierCurveTo(620, 140 + i * 42, 840, 180 + i * 38, 1040, 120 + i * 34);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    drawRoundedRect(ctx, 40, 40, 1120, 1320, 28);
+    ctx.fill();
+
+    const canDrawLogo = window.location?.protocol !== "file:";
+    let logo = null;
+    if (canDrawLogo) {
+      logo = new Image();
+      const logoSrc = "images/logo.png";
+      await new Promise((resolve) => {
+        logo.onload = resolve;
+        logo.onerror = resolve;
+        logo.src = logoSrc;
+      });
+    }
+
+    if (logo && logo.width) {
+      ctx.save();
+      ctx.globalAlpha = 0.06;
+      const logoSize = 220;
+      const logoX = 920 - logoSize / 2;
+      const logoY = 420 - logoSize / 2;
+      ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+      ctx.restore();
+    }
+
+    ctx.textBaseline = "top";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 52px Outfit, sans-serif";
+    const title = "HYPERMONITOR";
+    const titleY = 86;
+    const titleCenterY = titleY + 26;
+    if (logo && logo.width) {
+      const logoSize = 88;
+      const logoY = titleCenterY - logoSize / 2 - 2;
+      ctx.drawImage(logo, 90, logoY, logoSize, logoSize);
+    }
+    ctx.fillText(title, 190, titleY);
+
+    ctx.fillStyle = "rgba(245,245,255,0.8)";
+    ctx.font = "500 28px Outfit, sans-serif";
+    ctx.fillText(`${rangeNaturalLabel} performance`, 90, 182);
+
+    ctx.fillStyle = "rgba(245,245,255,0.7)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText(walletLabel, 90, 222);
+
+    const pillY = 250;
+    ctx.font = "600 22px Outfit, sans-serif";
+    const pillText = marketLabel.toUpperCase();
+    const pillW = ctx.measureText(pillText).width + 24;
+    ctx.fillStyle = accentSoft;
+    drawRoundedRect(ctx, 90, pillY, pillW, 34, 17);
+    ctx.fill();
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = accent;
+    ctx.fillText(pillText, 102, pillY + 6);
+
+    const returnValue = Number(String(returnText).replace(/[^0-9.+-]/g, ""));
+    const returnAccent = Number.isFinite(returnValue) ? (returnValue < 0 ? "#fb7185" : "#4ade80") : "#ffffff";
+
+    ctx.fillStyle = returnAccent;
+    ctx.font = "700 92px Outfit, sans-serif";
+    ctx.fillText(returnText, 90, 320);
+
+    ctx.fillStyle = "rgba(245,245,255,0.7)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText("Return", 90, 430);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 60px Outfit, sans-serif";
+    ctx.fillText(totalPnlText, 90, 470);
+
+    ctx.fillStyle = "rgba(245,245,255,0.7)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText("Total PnL", 90, 550);
+
+    const cards = [
+      { label: "Max Drawdown", value: maxDrawdownText },
+      { label: "Sharpe (PnL)", value: sharpeText },
+      { label: "Volatility", value: volatilityText },
+      { label: "Best Interval", value: bestIntervalText },
+    ];
+    const cardW = 490;
+    const cardH = 140;
+    const cardX = 90;
+    const cardY = 660;
+    const cardGap = 40;
+
+    cards.forEach((card, index) => {
+      const col = index % 2;
+      const row = Math.floor(index / 2);
+      const x = cardX + col * (cardW + cardGap);
+      const y = cardY + row * (cardH + 30);
+      ctx.fillStyle = "rgba(255,255,255,0.06)";
+      drawRoundedRect(ctx, x, y, cardW, cardH, 18);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(245,245,255,0.7)";
+      ctx.font = "600 22px Outfit, sans-serif";
+      ctx.fillText(card.label.toUpperCase(), x + 22, y + 18);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "600 36px Outfit, sans-serif";
+      ctx.fillText(card.value, x + 22, y + 62);
+    });
+
+    ctx.fillStyle = "rgba(245,245,255,0.6)";
+    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.fillText("https://hypermonitor.org/", 90, 1280);
+
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      return { dataUrl, rangeSlug };
+    } catch (err) {
+      console.error("Performance share export failed", err);
+      return null;
+    }
+  }
+
+  function openPnlShareModal(dataUrl, meta) {
     if (!pnlShareModalEl || !sharePreviewImgEl) return;
+    setShareMeta(meta);
     sharePreviewImgEl.src = dataUrl || "";
     pnlShareModalEl.classList.add("open");
     pnlShareModalEl.setAttribute("aria-hidden", "false");
@@ -9282,10 +9528,42 @@
     };
     const dataUrl = await buildPnlShareImage(payload);
     if (dataUrl) {
-      openPnlShareModal(dataUrl);
+      openPnlShareModal(dataUrl, {
+        modalTitle: "Share Asset Performance",
+        filename: "hypermonitor-pnl.png",
+        title: "Hypermonitor PnL",
+        text: "Discover Hypermonitor",
+      });
     } else {
       console.error("Share image generation failed");
     }
+  }
+
+  async function handlePerformanceShareClick() {
+    const result = await buildPerformanceShareImage();
+    if (!result || !result.dataUrl) {
+      console.error("Performance share image generation failed");
+      return;
+    }
+    const rangeLabel = getRangeLabel(currentRangeKey);
+    const rangeSlug = result.rangeSlug || slugifyLabel(rangeLabel) || "all-time";
+    openPnlShareModal(result.dataUrl, {
+      modalTitle: `Share Performance (${rangeLabel})`,
+      filename: `hypermonitor-performance-${rangeSlug}.png`,
+      title: "Hypermonitor Performance",
+      text: `Hypermonitor performance · ${rangeLabel}`,
+    });
+  }
+
+  if (performanceShareBtnEl) {
+    performanceShareBtnEl.addEventListener("click", async () => {
+      performanceShareBtnEl.disabled = true;
+      try {
+        await handlePerformanceShareClick();
+      } finally {
+        performanceShareBtnEl.disabled = false;
+      }
+    });
   }
 
   document.addEventListener("click", async (e) => {
@@ -9339,7 +9617,7 @@
       if (!sharePreviewImgEl?.src) return;
       const link = document.createElement("a");
       link.href = sharePreviewImgEl.src;
-      link.download = "hypermonitor-pnl.png";
+      link.download = activeShareMeta.filename || "hypermonitor-pnl.png";
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -9348,15 +9626,15 @@
 
   if (shareXBtnEl) {
     shareXBtnEl.addEventListener("click", async () => {
-      const text = "Discover Hypermonitor";
+      const text = activeShareMeta.text || "Discover Hypermonitor";
       const url = "https://hypermonitor.org/";
       if (sharePreviewImgEl?.src) {
         try {
           const res = await fetch(sharePreviewImgEl.src);
           const blob = await res.blob();
-          const file = new File([blob], "hypermonitor-pnl.png", { type: "image/png" });
+          const file = new File([blob], activeShareMeta.filename || "hypermonitor-pnl.png", { type: "image/png" });
           if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], text, title: "Hypermonitor PnL" });
+            await navigator.share({ files: [file], text, title: activeShareMeta.title || "Hypermonitor PnL" });
             return;
           }
         } catch (err) {
@@ -9374,17 +9652,17 @@
       try {
         const res = await fetch(sharePreviewImgEl.src);
         const blob = await res.blob();
-        const file = new File([blob], "hypermonitor-pnl.png", { type: "image/png" });
+        const file = new File([blob], activeShareMeta.filename || "hypermonitor-pnl.png", { type: "image/png" });
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            text: "Discover Hypermonitor",
-            title: "Hypermonitor PnL",
+            text: activeShareMeta.text || "Discover Hypermonitor",
+            title: activeShareMeta.title || "Hypermonitor PnL",
           });
         } else {
           const link = document.createElement("a");
           link.href = sharePreviewImgEl.src;
-          link.download = "hypermonitor-pnl.png";
+          link.download = activeShareMeta.filename || "hypermonitor-pnl.png";
           document.body.appendChild(link);
           link.click();
           link.remove();
