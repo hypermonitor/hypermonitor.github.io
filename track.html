@@ -4075,6 +4075,8 @@
     const sharpeText = getMetricText(metricSharpeEl);
     const volatilityText = getMetricText(metricVolatilityEl);
     const bestIntervalText = getMetricText(metricBestIntervalEl);
+    const winRateText = getMetricText(metricWinRateEl);
+    const ordersPerDayText = getMetricText(metricOrdersTradesPerDayEl);
 
     const pnlValue = parseSignedMoney(totalPnlText);
     const accent = pnlValue !== null && pnlValue < 0 ? "#fb7185" : "#4ade80";
@@ -4125,8 +4127,8 @@
 
     if (logo && logo.width) {
       ctx.save();
-      ctx.globalAlpha = 0.06;
-      const logoSize = 220;
+      ctx.globalAlpha = 0.1;
+      const logoSize = 260;
       const logoX = 920 - logoSize / 2;
       const logoY = 420 - logoSize / 2;
       ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
@@ -4148,42 +4150,46 @@
 
     ctx.fillStyle = "rgba(245,245,255,0.8)";
     ctx.font = "500 28px Outfit, sans-serif";
-    ctx.fillText(`${rangeNaturalLabel} performance`, 90, 182);
-
     ctx.fillStyle = "rgba(245,245,255,0.7)";
-    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.font = "500 28px Outfit, sans-serif";
     ctx.fillText(walletLabel, 90, 222);
 
-    const pillY = 250;
-    ctx.font = "600 22px Outfit, sans-serif";
+    const pillY = 254;
+    const rangeText = `${rangeNaturalLabel} performance`;
+    ctx.fillStyle = "rgba(245,245,255,0.8)";
+    ctx.font = "500 30px Outfit, sans-serif";
+    ctx.fillText(rangeText, 90, pillY + 2);
+    const rangeW = ctx.measureText(rangeText).width;
+
+    ctx.font = "600 24px Outfit, sans-serif";
     const pillText = marketLabel.toUpperCase();
     const pillW = ctx.measureText(pillText).width + 24;
+    const pillX = 90 + rangeW + 18;
     ctx.fillStyle = accentSoft;
-    drawRoundedRect(ctx, 90, pillY, pillW, 34, 17);
+    drawRoundedRect(ctx, pillX, pillY, pillW, 36, 18);
     ctx.fill();
     ctx.strokeStyle = accent;
     ctx.lineWidth = 1.5;
     ctx.stroke();
     ctx.fillStyle = accent;
-    ctx.fillText(pillText, 102, pillY + 6);
-
+    ctx.fillText(pillText, pillX + 12, pillY + 6);
     const returnValue = Number(String(returnText).replace(/[^0-9.+-]/g, ""));
     const returnAccent = Number.isFinite(returnValue) ? (returnValue < 0 ? "#fb7185" : "#4ade80") : "#ffffff";
 
     ctx.fillStyle = returnAccent;
-    ctx.font = "700 92px Outfit, sans-serif";
+    ctx.font = "700 98px Outfit, sans-serif";
     ctx.fillText(returnText, 90, 320);
 
     ctx.fillStyle = "rgba(245,245,255,0.7)";
-    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.font = "500 28px Outfit, sans-serif";
     ctx.fillText("Return", 90, 430);
 
     ctx.fillStyle = "#ffffff";
-    ctx.font = "700 60px Outfit, sans-serif";
+    ctx.font = "700 64px Outfit, sans-serif";
     ctx.fillText(totalPnlText, 90, 470);
 
     ctx.fillStyle = "rgba(245,245,255,0.7)";
-    ctx.font = "500 26px Outfit, sans-serif";
+    ctx.font = "500 28px Outfit, sans-serif";
     ctx.fillText("Total PnL", 90, 550);
 
     const cards = [
@@ -4191,6 +4197,8 @@
       { label: "Sharpe (PnL)", value: sharpeText },
       { label: "Volatility", value: volatilityText },
       { label: "Best Interval", value: bestIntervalText },
+      { label: "Win Rate", value: winRateText },
+      { label: "Orders / Day", value: ordersPerDayText },
     ];
     const cardW = 490;
     const cardH = 140;
@@ -4211,11 +4219,11 @@
       ctx.stroke();
 
       ctx.fillStyle = "rgba(245,245,255,0.7)";
-      ctx.font = "600 22px Outfit, sans-serif";
+      ctx.font = "600 24px Outfit, sans-serif";
       ctx.fillText(card.label.toUpperCase(), x + 22, y + 18);
 
       ctx.fillStyle = "#ffffff";
-      ctx.font = "600 36px Outfit, sans-serif";
+      ctx.font = "600 38px Outfit, sans-serif";
       ctx.fillText(card.value, x + 22, y + 62);
     });
 
@@ -5334,12 +5342,14 @@
       const priceEl = item.querySelector(".coin-price");
       const price = getLivePriceForCoin(coin);
       const base = getFooterBase(coin);
-      const color =
+      const isLightTheme = document.body.classList.contains("light");
+      let color =
         coinColors[coin] ||
         coinColors[base] ||
         coinColorCache.get(coin) ||
         coinColorCache.get(base) ||
         "#e5e7eb";
+      if (isLightTheme && isColorTooLight(color)) color = "#0f172a";
       if (priceEl) {
         if (Number.isFinite(price)) {
           let decimals = coinPriceDecimals.get(coin);
@@ -5378,12 +5388,14 @@
       const color = await extractDominantColorFromLogo(coin);
       coinColorPending.delete(coin);
       if (!color) return;
+      const isLightTheme = document.body.classList.contains("light");
+      const displayColor = isLightTheme && isColorTooLight(color) ? "#0f172a" : color;
       coinColorCache.set(normalizeFooterCoinValue(coin), color);
       saveCoinColorCache();
       const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
-      if (item) item.style.color = color;
+      if (item) item.style.color = displayColor;
       const cloneItem = priceListCloneEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
-      if (cloneItem) cloneItem.style.color = color;
+      if (cloneItem) cloneItem.style.color = displayColor;
     });
   }
 
@@ -8219,6 +8231,32 @@
     const green = Math.round(95 + (217 - 95) * t);
     const blue = Math.round(92 + (127 - 92) * t);
     return `rgb(${red}, ${green}, ${blue})`;
+  }
+
+  function parseColorToRgb(color) {
+    if (!color) return null;
+    const raw = String(color).trim();
+    const hexMatch = raw.match(/^#([a-f0-9]{6})$/i);
+    if (hexMatch) {
+      const hex = hexMatch[1];
+      const r = parseInt(hex.slice(0, 2), 16);
+      const g = parseInt(hex.slice(2, 4), 16);
+      const b = parseInt(hex.slice(4, 6), 16);
+      return { r, g, b };
+    }
+    const rgbMatch = raw.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+    if (rgbMatch) {
+      return { r: Number(rgbMatch[1]), g: Number(rgbMatch[2]), b: Number(rgbMatch[3]) };
+    }
+    return null;
+  }
+
+  function isColorTooLight(color) {
+    const rgb = parseColorToRgb(color);
+    if (!rgb) return false;
+    const { r, g, b } = rgb;
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    return luminance > 0.82;
   }
 
   function getMetricsSource(rangeKey) {
