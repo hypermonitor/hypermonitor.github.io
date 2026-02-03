@@ -1052,12 +1052,14 @@
     }
 
     .performance-share-btn {
-      padding: 0.25rem 0.7rem;
-      font-size: 0.7rem;
+      width: 16px;
+      height: 16px;
+      font-size: 0.6rem;
+      padding: 0;
     }
 
     .performance-share-btn:disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
@@ -2427,8 +2429,8 @@
         <button class="chart-range-btn active" data-range="allTime">All Time</button>
       </div>
       <div class="chart-actions">
-        <button class="metrics-toggle performance-share-btn" id="performanceShareBtn" type="button" aria-label="Share performance">
-          <span aria-hidden="true">Share</span>
+        <button class="pnl-share-btn performance-share-btn" id="performanceShareBtn" type="button" title="Share performance" aria-label="Share performance">
+          ⤴
         </button>
         <button class="metrics-toggle" id="metricsToggle" type="button" aria-expanded="false">
           <span class="sr-only">Toggle metrics</span>
@@ -3845,6 +3847,10 @@
     return (el?.textContent || "-").trim() || "-";
   }
 
+  function stripWholeDecimals(text) {
+    return String(text || "").replace(/\b(\d[\d,]*)\.00\b/g, "$1");
+  }
+
   async function buildPnlShareImage(data) {
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
@@ -4069,7 +4075,7 @@
     const volatilityText = getMetricText(metricVolatilityEl);
     const bestIntervalText = getMetricText(metricBestIntervalEl);
     const winRateText = getMetricText(metricWinRateEl);
-    const ordersPerDayText = getMetricText(metricOrdersTradesPerDayEl);
+    const ordersPerDayText = stripWholeDecimals(getMetricText(metricOrdersTradesPerDayEl));
 
     const pnlValue = parseSignedMoney(totalPnlText);
     const accent = pnlValue !== null && pnlValue < 0 ? "#fb7185" : "#4ade80";
@@ -4145,7 +4151,7 @@
     ctx.font = "500 28px Outfit, sans-serif";
     ctx.fillStyle = "rgba(245,245,255,0.7)";
     ctx.font = "500 28px Outfit, sans-serif";
-    ctx.fillText(walletLabel, 90, 222);
+    ctx.fillText(walletLabel, 90, 180);
 
     const pillY = 254;
     const rangeText = `${rangeNaturalLabel} performance`;
@@ -4187,7 +4193,7 @@
       { label: "Volatility", value: volatilityText },
       { label: "Best Interval", value: bestIntervalText },
       { label: "Win Rate", value: winRateText },
-      { label: "Orders / Day", value: ordersPerDayText },
+      { label: "Orders (Trades) Per Day", value: ordersPerDayText },
     ];
     const cardW = 490;
     const cardH = 140;
