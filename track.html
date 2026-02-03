@@ -1051,13 +1051,6 @@
       gap: 0.4rem;
     }
 
-    .performance-share-btn {
-      width: 16px;
-      height: 16px;
-      font-size: 0.6rem;
-      padding: 0;
-    }
-
     .performance-share-btn:disabled {
       opacity: 0.4;
       cursor: not-allowed;
@@ -2429,8 +2422,12 @@
         <button class="chart-range-btn active" data-range="allTime">All Time</button>
       </div>
       <div class="chart-actions">
-        <button class="pnl-share-btn performance-share-btn" id="performanceShareBtn" type="button" title="Share performance" aria-label="Share performance">
-          ⤴
+        <button class="pill-action-btn performance-share-btn" id="performanceShareBtn" type="button" title="Share performance" aria-label="Share performance">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:10px;height:10px;">
+            <path d="M14 3h7v7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 14L21 3" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
         <button class="metrics-toggle" id="metricsToggle" type="button" aria-expanded="false">
           <span class="sr-only">Toggle metrics</span>
@@ -4031,6 +4028,24 @@
     ctx.font = "600 36px Outfit, sans-serif";
     ctx.fillText(data.current || "", 90, 780);
 
+    const qrSize = 125;
+    const qrX = canvas.width - qrSize - 90;
+    const qrY = 1160;
+    if (data.wallet) {
+      const qrUrl = `https://www.hypermonitor.org/track?wallet=${encodeURIComponent(data.wallet)}`;
+      drawQrCode(ctx, qrUrl, qrX, qrY, qrSize);
+      ctx.fillStyle = "rgba(245,245,255,0.85)";
+      ctx.font = "600 28px Outfit, sans-serif";
+      const qrCaptionLine1 = "Scan to track";
+      const qrCaptionLine2 = "performance:";
+      const line1Width = ctx.measureText(qrCaptionLine1).width;
+      const line2Width = ctx.measureText(qrCaptionLine2).width;
+      const captionX = qrX - Math.max(line1Width, line2Width) - 22;
+      const captionY = qrY + qrSize / 2 - 28;
+      ctx.fillText(qrCaptionLine1, captionX, captionY);
+      ctx.fillText(qrCaptionLine2, captionX, captionY + 32);
+    }
+
     ctx.fillStyle = "rgba(245,245,255,0.6)";
     ctx.font = "500 26px Outfit, sans-serif";
     ctx.fillText("https://hypermonitor.org/", 90, 1240);
@@ -4222,14 +4237,26 @@
       ctx.fillText(card.value, x + 22, y + 62);
     });
 
-    const qrSize = 170;
+    const statsEndY = cardY + 2 * (cardH + 30) + cardH;
+    const qrSize = 125;
     const qrX = canvas.width - qrSize - 90;
-    const qrY = 1180;
+    const qrY = statsEndY + 40;
     const qrWallet = primaryWallet || "";
     if (qrWallet) {
       const qrUrl = `https://www.hypermonitor.org/track?wallet=${encodeURIComponent(qrWallet)}`;
       drawQrCode(ctx, qrUrl, qrX, qrY, qrSize);
     }
+
+    ctx.fillStyle = "rgba(245,245,255,0.85)";
+    ctx.font = "600 28px Outfit, sans-serif";
+    const qrCaptionLine1 = "Scan to track";
+    const qrCaptionLine2 = "performance:";
+    const line1Width = ctx.measureText(qrCaptionLine1).width;
+    const line2Width = ctx.measureText(qrCaptionLine2).width;
+    const captionX = qrX - Math.max(line1Width, line2Width) - 22;
+    const captionY = qrY + qrSize / 2 - 28;
+    ctx.fillText(qrCaptionLine1, captionX, captionY);
+    ctx.fillText(qrCaptionLine2, captionX, captionY + 32);
 
     ctx.fillStyle = "rgba(245,245,255,0.6)";
     ctx.font = "500 26px Outfit, sans-serif";
@@ -8265,7 +8292,7 @@
 
   // Minimal QR generator adapted from qrcode-generator (MIT).
   function createQrCode(text) {
-    const qr = qrcode(0, "L");
+    const qr = qrcode(6, "L");
     qr.addData(text);
     qr.make();
     return qr;
@@ -8280,12 +8307,7 @@
       const offsetX = x + Math.floor((size - qrSize) / 2);
       const offsetY = y + Math.floor((size - qrSize) / 2);
       ctx.save();
-      ctx.fillStyle = "#0b0b0f";
-      drawRoundedRect(ctx, x - 10, y - 10, size + 20, size + 20, 14);
-      ctx.fill();
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(x, y, size, size);
-      ctx.fillStyle = "#0b0b0f";
+      ctx.fillStyle = "rgba(245,245,255,0.7)";
       for (let row = 0; row < count; row += 1) {
         for (let col = 0; col < count; col += 1) {
           if (qr.isDark(row, col)) {
