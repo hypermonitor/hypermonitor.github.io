@@ -1979,6 +1979,29 @@
       text-align: right;
     }
 
+    .price-item .coin-change {
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      display: inline-block;
+      min-width: 7ch;
+      text-align: right;
+      color: var(--muted);
+      margin-left: -0.2rem;
+    }
+
+    .price-item .coin-change.upnl-pos {
+      color: rgba(74, 222, 128, 0.85);
+    }
+
+    .price-item .coin-change.upnl-neg {
+      color: rgba(251, 113, 133, 0.85);
+    }
+
+    .price-footer.hide-change .coin-change {
+      display: none;
+    }
+
     .notional-sub {
       font-size: 0.72rem;
       color: var(--muted);
@@ -2153,6 +2176,50 @@
 
     .price-context-item:hover {
       background: rgba(255, 255, 255, 0.08);
+    }
+
+    .price-context-sep {
+      height: 1px;
+      background: rgba(148, 163, 184, 0.2);
+      margin: 0.25rem 0.1rem;
+    }
+
+    .price-context-menu.hide-change-options [data-action="change-range"],
+    .price-context-menu.hide-change-options .price-context-submenu,
+    .price-context-menu.hide-change-options .price-context-sep {
+      display: none;
+    }
+
+    .price-context-group {
+      position: relative;
+      padding-right: 6px;
+    }
+
+    .price-context-submenu {
+      position: absolute;
+      top: auto;
+      bottom: 0;
+      left: 100%;
+      margin-left: -2px;
+      min-width: 150px;
+      background: rgba(12, 12, 16, 0.95);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 0.25rem;
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .price-context-group:hover .price-context-submenu,
+    .price-context-group:focus-within .price-context-submenu {
+      display: block;
+    }
+
+    .price-context-item[data-has-submenu="true"]::after {
+      content: "›";
+      float: right;
+      color: rgba(148, 163, 184, 0.7);
     }
 
     @keyframes priceScroll {
@@ -2827,6 +2894,16 @@
   <button class="price-context-item" type="button" data-action="pin" data-requires-coin="true">Pin left</button>
   <button class="price-context-item" type="button" data-action="reset">Reset list</button>
   <button class="price-context-item" type="button" data-action="remove" data-requires-coin="true">Remove from bar</button>
+  <div class="price-context-sep" role="separator" aria-hidden="true"></div>
+  <div class="price-context-group">
+    <button class="price-context-item" type="button" data-action="toggle-change" data-has-submenu="true">Show % change</button>
+    <div class="price-context-submenu" aria-label="Percent change range">
+      <button class="price-context-item" type="button" data-action="change-range" data-range="5m">5 min</button>
+      <button class="price-context-item" type="button" data-action="change-range" data-range="1h">1 hr</button>
+      <button class="price-context-item" type="button" data-action="change-range" data-range="1d">1 day</button>
+      <button class="price-context-item" type="button" data-action="change-range" data-range="1w">1 week</button>
+    </div>
+  </div>
 </div>
 
 <div class="share-modal" id="pnlShareModal" aria-hidden="true">
@@ -3032,6 +3109,27 @@
       if (Array.isArray(parsed) && parsed.length) {
         trackedFooterCoins = parsed.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
       }
+    } catch (e) {}
+  }
+
+  function loadFooterChangePrefs() {
+    try {
+      const raw = localStorage.getItem(FOOTER_CHANGE_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (typeof parsed?.enabled === "boolean") footerChangeEnabled = parsed.enabled;
+      if (typeof parsed?.range === "string" && FOOTER_CHANGE_RANGES[parsed.range]) {
+        footerChangeRange = parsed.range;
+      }
+    } catch (e) {}
+  }
+
+  function saveFooterChangePrefs() {
+    try {
+      localStorage.setItem(
+        FOOTER_CHANGE_STORAGE_KEY,
+        JSON.stringify({ enabled: footerChangeEnabled, range: footerChangeRange })
+      );
     } catch (e) {}
   }
 
@@ -3455,6 +3553,17 @@
   let currentMarketType = "perp";
   const liveMids = new Map();
   let allMidsSub = null;
+  const footerChangePcts = new Map();
+  let footerChangeTimer = null;
+  let footerChangeEnabled = true;
+  let footerChangeRange = "1d";
+  const FOOTER_CHANGE_STORAGE_KEY = "hypermonitor-footer-change";
+  const FOOTER_CHANGE_RANGES = {
+    "5m": { label: "5 min", interval: "5m", ms: 5 * 60 * 1000 },
+    "1h": { label: "1 hr", interval: "1h", ms: 60 * 60 * 1000 },
+    "1d": { label: "1 day", interval: "1d", ms: 24 * 60 * 60 * 1000 },
+    "1w": { label: "1 week", interval: "1w", ms: 7 * 24 * 60 * 60 * 1000 },
+  };
 
   let lastComputedUpnlTotal = 0;
   let lastComputedTotalNotional = 0;
@@ -4886,6 +4995,161 @@
     return undefined;
   }
 
+  function getFooterChangePct(raw) {
+    const coin = String(raw || "").toUpperCase();
+    if (footerChangePcts.has(coin)) return footerChangePcts.get(coin);
+    const base = getFooterBase(coin);
+    if (footerChangePcts.has(base)) return footerChangePcts.get(base);
+    return null;
+  }
+
+  async function fetchChangeFromCandles(rawCoin, rangeKey) {
+    const coin = String(rawCoin || "").trim();
+    const range = FOOTER_CHANGE_RANGES[rangeKey] || FOOTER_CHANGE_RANGES["1d"];
+    if (!coin || !range) return null;
+    const end = Date.now();
+    const start = end - range.ms * 4;
+    const res = await fetch(PORTFOLIO_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "candleSnapshot", req: { coin, interval: range.interval, startTime: start, endTime: end } }),
+    });
+    if (!res.ok) throw new Error(`candleSnapshot error: ${res.status} ${res.statusText}`);
+    const data = await res.json();
+    const candles = (Array.isArray(data) ? data : [])
+      .map((c) => ({
+        time: Number(c.t),
+        open: Number(c.o),
+        close: Number(c.c),
+      }))
+      .filter((c) => Number.isFinite(c.time) && Number.isFinite(c.open) && Number.isFinite(c.close))
+      .sort((a, b) => a.time - b.time);
+    if (candles.length >= 2) {
+      const prev = candles[candles.length - 2].close;
+      const last = candles[candles.length - 1].close;
+      if (Number.isFinite(prev) && prev !== 0 && Number.isFinite(last)) return (last - prev) / prev;
+    }
+    if (candles.length === 1) {
+      const prev = candles[0].open;
+      const last = candles[0].close;
+      if (Number.isFinite(prev) && prev !== 0 && Number.isFinite(last)) return (last - prev) / prev;
+    }
+    return null;
+  }
+
+  async function refreshFooterChanges() {
+    try {
+      if (!footerChangeEnabled) {
+        footerChangePcts.clear();
+        renderFooterPrices();
+        return;
+      }
+
+      const dexes = new Set();
+      trackedFooterCoins.forEach((coin) => {
+        const { dex } = splitDexCoin(coin);
+        if (!dex) return;
+        const low = dex.toLowerCase();
+        if (NON_CRYPTO_PREFIXES.includes(low)) return;
+        dexes.add(dex);
+      });
+
+      const fetchCtxs = async (dex = "") => {
+        const payload = dex ? { type: "metaAndAssetCtxs", dex } : { type: "metaAndAssetCtxs" };
+        const res = await fetch(PORTFOLIO_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`metaAndAssetCtxs error: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        return {
+          dex,
+          universe: Array.isArray(data) ? data?.[0]?.universe : data?.meta?.universe,
+          assetCtxs: Array.isArray(data) ? data[1] : data?.assetCtxs,
+        };
+      };
+
+      footerChangePcts.clear();
+
+      if (footerChangeRange === "1d") {
+        const results = await Promise.allSettled([fetchCtxs(), ...Array.from(dexes).map((d) => fetchCtxs(d))]);
+        results.forEach((res) => {
+          if (res.status !== "fulfilled") return;
+          const { dex, universe, assetCtxs } = res.value || {};
+          if (!Array.isArray(assetCtxs)) return;
+          assetCtxs.forEach((ctx, idx) => {
+            if (!ctx || typeof ctx !== "object") return;
+            const fallbackName = Array.isArray(universe) ? universe[idx]?.name : "";
+            const coinRaw = String(ctx.coin ?? ctx.symbol ?? ctx.asset ?? fallbackName ?? "");
+            const coin = coinRaw.toUpperCase();
+            if (!coin) return;
+            const mark = Number(ctx.markPx ?? ctx.mark ?? ctx.midPx ?? ctx.mid ?? ctx.px);
+            const prev = Number(ctx.prevDayPx ?? ctx.prevDay ?? ctx.prevPx ?? ctx.openPx);
+            if (!Number.isFinite(mark) || !Number.isFinite(prev) || prev === 0) return;
+            footerChangePcts.set(coin, (mark - prev) / prev);
+            if (dex) {
+              const key = `${String(dex).toUpperCase()}:${coin}`;
+              footerChangePcts.set(key, (mark - prev) / prev);
+            }
+          });
+        });
+      }
+
+      const missing = trackedFooterCoins
+        .map((c) => normalizeFooterCoinValue(c))
+        .filter(Boolean)
+        .filter((coin) => !Number.isFinite(getFooterChangePct(coin)));
+
+      await Promise.allSettled(
+        missing.map(async (coin) => {
+          try {
+            let change = await fetchChangeFromCandles(coin, footerChangeRange);
+            if (!Number.isFinite(change) && coin.includes(":")) {
+              const base = getFooterBase(coin);
+              if (base) change = await fetchChangeFromCandles(base, footerChangeRange);
+            }
+            if (!Number.isFinite(change)) return;
+            const upper = String(coin).toUpperCase();
+            footerChangePcts.set(upper, change);
+            const base = getFooterBase(coin);
+            if (base) footerChangePcts.set(base, change);
+          } catch (err) {
+            console.warn("Footer candle fallback failed", coin, err);
+          }
+        })
+      );
+
+      renderFooterPrices();
+    } catch (err) {
+      console.warn("Footer 24h change fetch failed", err);
+    }
+  }
+
+  function ensureFooterChangeTimer() {
+    if (footerChangeTimer) return;
+    footerChangeTimer = setInterval(refreshFooterChanges, 60000);
+  }
+
+  function applyFooterChangeVisibility() {
+    if (!priceFooterWrapEl) return;
+    priceFooterWrapEl.classList.toggle("hide-change", !footerChangeEnabled);
+  }
+
+  function updateFooterChangeMenu() {
+    if (!priceContextMenuEl) return;
+    const toggleBtn = priceContextMenuEl.querySelector('[data-action="toggle-change"]');
+    if (toggleBtn) {
+      toggleBtn.textContent = `Show % change: ${footerChangeEnabled ? "On" : "Off"}`;
+    }
+    priceContextMenuEl.classList.toggle("hide-change-options", !footerChangeEnabled);
+    priceContextMenuEl.querySelectorAll('[data-action="change-range"]').forEach((btn) => {
+      const range = btn.getAttribute("data-range");
+      const label = FOOTER_CHANGE_RANGES[range]?.label || btn.textContent.trim();
+      btn.textContent = `${footerChangeRange === range ? "✓ " : ""}${label}`;
+    });
+  }
+
   function ensureManualMidTimer() {
     if (manualMidTimer || manualMidCoins.size === 0) return;
     manualMidTimer = setInterval(() => {
@@ -5360,6 +5624,7 @@
         item.innerHTML = `
           ${coinIconHtml(coin, coin)}
           <span class="coin-price">--</span>
+          <span class="coin-change">(--%)</span>
         `;
         priceListEl.appendChild(item);
       } else {
@@ -5371,6 +5636,7 @@
       const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
       if (!item) return;
       const priceEl = item.querySelector(".coin-price");
+      const changeEl = item.querySelector(".coin-change");
       const price = getLivePriceForCoin(coin);
       const base = getFooterBase(coin);
       const isLightTheme = document.body.classList.contains("light");
@@ -5403,6 +5669,23 @@
           priceEl.textContent = lastFooterPrices.get(coin) || "--";
         }
         priceEl.style.color = color;
+      }
+
+      if (changeEl) {
+        if (!footerChangeEnabled) {
+          changeEl.textContent = "";
+          changeEl.classList.remove("upnl-pos", "upnl-neg");
+          return;
+        }
+        const changePct = getFooterChangePct(coin);
+        if (Number.isFinite(changePct)) {
+          changeEl.textContent = `(${formatSignedPercent(changePct, 2)})`;
+          changeEl.classList.toggle("upnl-pos", changePct > 0);
+          changeEl.classList.toggle("upnl-neg", changePct < 0);
+        } else {
+          changeEl.textContent = "(--%)";
+          changeEl.classList.remove("upnl-pos", "upnl-neg");
+        }
       }
     });
 
@@ -5511,6 +5794,7 @@
     priceContextMenuEl.classList.add("show");
     priceContextMenuEl.setAttribute("aria-hidden", "false");
     priceContextMenuEl.setAttribute("data-has-coin", coin ? "true" : "false");
+    updateFooterChangeMenu();
     const rect = priceContextMenuEl.getBoundingClientRect();
     const padding = 8;
     const left = Math.min(x, window.innerWidth - rect.width - padding);
@@ -9773,6 +10057,7 @@
     updateMarketToggleButtons();
     updatePerformanceVisibility();
     loadFooterCoins();
+    loadFooterChangePrefs();
     loadCoinNameCache();
     loadCoinColorCache();
 
@@ -9793,6 +10078,9 @@
 
     await initClients();
     await ensurePriceStream();
+    applyFooterChangeVisibility();
+    await refreshFooterChanges();
+    ensureFooterChangeTimer();
     await sanitizeFooterCoins();
     await primeManualMidsForFooter();
     renderFooterPrices();
@@ -10024,6 +10312,20 @@
       } else if (action === "reset") {
         if (window.confirm("Reset the bottom bar to the default coins?")) {
           resetFooterCoins();
+        }
+      } else if (action === "toggle-change") {
+        footerChangeEnabled = !footerChangeEnabled;
+        saveFooterChangePrefs();
+        applyFooterChangeVisibility();
+        updateFooterChangeMenu();
+        refreshFooterChanges();
+      } else if (action === "change-range") {
+        const range = btn.dataset.range;
+        if (range && FOOTER_CHANGE_RANGES[range]) {
+          footerChangeRange = range;
+          saveFooterChangePrefs();
+          updateFooterChangeMenu();
+          refreshFooterChanges();
         }
       }
       hidePriceContextMenu();
