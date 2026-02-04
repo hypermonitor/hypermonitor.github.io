@@ -1987,7 +1987,7 @@
       min-width: 7ch;
       text-align: right;
       color: var(--muted);
-      margin-left: -0.2rem;
+      margin-left: -0.25rem;
     }
 
     .price-item .coin-change.upnl-pos {
@@ -3554,6 +3554,7 @@
   const liveMids = new Map();
   let allMidsSub = null;
   const footerChangePcts = new Map();
+  const footerChangeRefs = new Map();
   let footerChangeTimer = null;
   let footerChangeEnabled = true;
   let footerChangeRange = "1d";
@@ -4979,6 +4980,12 @@
     return NON_CRYPTO_PREFIXES.map((prefix) => formatPrefixedCoin(prefix, base));
   }
 
+  function isNonCryptoPrefixed(coin) {
+    const { dex } = splitDexCoin(coin);
+    if (!dex) return false;
+    return NON_CRYPTO_PREFIXES.includes(String(dex).toLowerCase());
+  }
+
   function findTrackedFooterCoinByBase(base) {
     const normBase = String(base || "").toUpperCase();
     return trackedFooterCoins.find((coin) => getFooterBase(coin) === normBase) || null;
@@ -4997,10 +5004,20 @@
 
   function getFooterChangePct(raw) {
     const coin = String(raw || "").toUpperCase();
-    if (footerChangePcts.has(coin)) return footerChangePcts.get(coin);
     const base = getFooterBase(coin);
-    if (footerChangePcts.has(base)) return footerChangePcts.get(base);
-    return null;
+    const key = footerChangeRefs.has(coin) ? coin : footerChangeRefs.has(base) ? base : null;
+    if (!key) {
+      if (footerChangePcts.has(coin)) return footerChangePcts.get(coin);
+      if (footerChangePcts.has(base)) return footerChangePcts.get(base);
+      return null;
+    }
+    const ref = footerChangeRefs.get(key);
+    const prev = Number(ref?.prev);
+    if (!Number.isFinite(prev) || prev === 0) return null;
+    const live = getLivePriceForCoin(coin);
+    const last = Number.isFinite(live) ? live : Number(ref?.last);
+    if (!Number.isFinite(last)) return null;
+    return (last - prev) / prev;
   }
 
   async function fetchChangeFromCandles(rawCoin, rangeKey) {
@@ -5027,12 +5044,12 @@
     if (candles.length >= 2) {
       const prev = candles[candles.length - 2].close;
       const last = candles[candles.length - 1].close;
-      if (Number.isFinite(prev) && prev !== 0 && Number.isFinite(last)) return (last - prev) / prev;
+      if (Number.isFinite(prev) && prev !== 0 && Number.isFinite(last)) return { prev, last };
     }
     if (candles.length === 1) {
       const prev = candles[0].open;
       const last = candles[0].close;
-      if (Number.isFinite(prev) && prev !== 0 && Number.isFinite(last)) return (last - prev) / prev;
+      if (Number.isFinite(prev) && prev !== 0 && Number.isFinite(last)) return { prev, last };
     }
     return null;
   }
@@ -5071,6 +5088,7 @@
       };
 
       footerChangePcts.clear();
+      footerChangeRefs.clear();
 
       if (footerChangeRange === "1d") {
         const results = await Promise.allSettled([fetchCtxs(), ...Array.from(dexes).map((d) => fetchCtxs(d))]);
@@ -5087,10 +5105,10 @@
             const mark = Number(ctx.markPx ?? ctx.mark ?? ctx.midPx ?? ctx.mid ?? ctx.px);
             const prev = Number(ctx.prevDayPx ?? ctx.prevDay ?? ctx.prevPx ?? ctx.openPx);
             if (!Number.isFinite(mark) || !Number.isFinite(prev) || prev === 0) return;
-            footerChangePcts.set(coin, (mark - prev) / prev);
+            footerChangeRefs.set(coin, { prev, last: mark });
             if (dex) {
               const key = `${String(dex).toUpperCase()}:${coin}`;
-              footerChangePcts.set(key, (mark - prev) / prev);
+              footerChangeRefs.set(key, { prev, last: mark });
             }
           });
         });
@@ -5105,15 +5123,15 @@
         missing.map(async (coin) => {
           try {
             let change = await fetchChangeFromCandles(coin, footerChangeRange);
-            if (!Number.isFinite(change) && coin.includes(":")) {
+            if ((!change || !Number.isFinite(change.prev)) && coin.includes(":")) {
               const base = getFooterBase(coin);
               if (base) change = await fetchChangeFromCandles(base, footerChangeRange);
             }
-            if (!Number.isFinite(change)) return;
+            if (!change || !Number.isFinite(change.prev)) return;
             const upper = String(coin).toUpperCase();
-            footerChangePcts.set(upper, change);
+            footerChangeRefs.set(upper, change);
             const base = getFooterBase(coin);
-            if (base) footerChangePcts.set(base, change);
+            if (base) footerChangeRefs.set(base, change);
           } catch (err) {
             console.warn("Footer candle fallback failed", coin, err);
           }
@@ -5646,7 +5664,11 @@
         coinColorCache.get(coin) ||
         coinColorCache.get(base) ||
         "#e5e7eb";
-      if (isLightTheme && isColorTooLight(color)) color = "#0f172a";
+      if (isNonCryptoPrefixed(coin)) {
+        color = isLightTheme ? "#0f172a" : "#e5e7eb";
+      } else if (isLightTheme && isColorTooLight(color)) {
+        color = "#0f172a";
+      }
       if (priceEl) {
         if (Number.isFinite(price)) {
           let decimals = coinPriceDecimals.get(coin);
