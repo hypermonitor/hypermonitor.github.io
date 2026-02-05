@@ -47,6 +47,8 @@
       --glass-border: rgba(255, 255, 255, 0.12);
       --accent-blue: #0070f3;
       --accent-cyan: #00b4d8;
+      --control-height: 32px;
+      --switch-height: 30px;
     }
 
     * { box-sizing: border-box; }
@@ -549,7 +551,7 @@
 
     .market-toggle .orders-tabs {
       margin: 0;
-      padding: 0.2rem 0.35rem;
+      padding: 2px;
       border-radius: 999px;
       border: 1px solid var(--glass-border);
       background: rgba(10, 10, 12, 0.45);
@@ -559,6 +561,7 @@
       max-width: 100%;
       position: relative;
       overflow: visible;
+      height: var(--switch-height);
     }
 
     .market-toggle .orders-tab-btn {
@@ -566,6 +569,7 @@
       background: transparent;
       position: relative;
       z-index: 2;
+      height: 100%;
     }
 
     .market-toggle .orders-tab-btn.active {
@@ -909,8 +913,8 @@
       background: rgba(10, 10, 12, 0.45);
       color: #e2e8f0;
       font-size: 0.75rem;
-      padding: 0.3rem 0.7rem;
-      height: 28px;
+      padding: 0 0.7rem;
+      height: 30px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -919,7 +923,7 @@
     }
 
     .favorites-panel-btn {
-      padding: 0.3rem 0.7rem;
+      padding: 0 0.7rem;
       line-height: 1;
     }
 
@@ -934,12 +938,13 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      padding: 0.3rem 0.7rem;
+      padding: 0 0.7rem;
       border-radius: 9999px;
       font-size: 0.75rem;
       border: 1px solid var(--glass-border);
       background: rgba(10, 10, 12, 0.45);
       color: #e2e8f0;
+      height: 30px;
     }
 
     .status-dot {
@@ -1379,10 +1384,69 @@
       margin-bottom: 0;
     }
 
+    .performance-title {
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .performance-toolbar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.5rem;
+    }
+
     .chart-actions {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
+    }
+
+    .range-toggle {
+      margin: 0;
+      padding: 2px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      gap: 0.2rem;
+      display: inline-flex;
+      align-items: stretch;
+      justify-content: center;
+      width: fit-content;
+      max-width: 100%;
+      position: relative;
+      overflow: visible;
+      height: var(--switch-height);
+    }
+
+    .range-toggle .chart-range-btn {
+      border-color: transparent;
+      background: transparent;
+      position: relative;
+      z-index: 2;
+    }
+
+    .range-toggle .chart-range-btn.active {
+      border-color: transparent;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .range-toggle-indicator {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      left: 0;
+      width: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.45);
+      z-index: 1;
+      opacity: 0;
+      transition: transform 220ms ease, width 220ms ease, opacity 120ms ease;
+    }
+
+    .range-toggle.ready .range-toggle-indicator {
+      opacity: 1;
     }
 
     .performance-share-btn:disabled {
@@ -1392,14 +1456,15 @@
 
     .chart-range-btn {
       border-radius: 999px;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      border: 1px solid transparent;
+      background: transparent;
       color: var(--muted);
-      padding: 0.3rem 0.85rem;
+      padding: 0 0.85rem;
       cursor: pointer;
       font-weight: 600;
       font-size: 0.75rem;
       transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      height: 100%;
     }
 
     .chart-range-btn:hover {
@@ -1409,9 +1474,8 @@
     }
 
     .chart-range-btn.active {
-      border-color: rgba(255,255,255,0.45);
+      border-color: transparent;
       color: #f8fafc;
-      background: rgba(255, 255, 255, 0.08);
     }
 
     .chart-grid {
@@ -1572,17 +1636,29 @@
     body.light .timestamp { color: #6b7280; }
 
     body.light .chart-range-btn {
-      background: #ffffff;
+      background: transparent;
       color: #475569;
-      border-color: #e5e7eb;
+      border-color: transparent;
     }
 
     body.light .chart-range-btn:hover { border-color: #d1d5db; }
 
     body.light .chart-range-btn.active {
-      border-color: #cbd5f5;
       color: #0f172a;
+    }
+
+    body.light .range-toggle {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .range-toggle .chart-range-btn.active {
       background: #f8fafc;
+    }
+
+    body.light .range-toggle-indicator {
+      background: #f8fafc;
+      border-color: #cbd5f5;
     }
 
     body.light .chart-card {
@@ -1706,6 +1782,53 @@
       font-size: 0.8rem;
     }
 
+    .orders-tabs.switch {
+      margin: 0.2rem 0 0.6rem;
+      padding: 2px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      gap: 0.2rem;
+      align-items: stretch;
+      justify-content: center;
+      width: fit-content;
+      max-width: 100%;
+      position: relative;
+      overflow: visible;
+      height: var(--switch-height);
+    }
+
+    .orders-tabs.switch .orders-tab-btn {
+      border-color: transparent;
+      background: transparent;
+      position: relative;
+      z-index: 2;
+      height: 100%;
+    }
+
+    .orders-tabs.switch .orders-tab-btn.active {
+      border-color: transparent;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .orders-tabs-indicator {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      left: 0;
+      width: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.45);
+      z-index: 1;
+      opacity: 0;
+      transition: transform 220ms ease, width 220ms ease, opacity 120ms ease;
+    }
+
+    .orders-tabs.switch.ready .orders-tabs-indicator {
+      opacity: 1;
+    }
+
     .orders-tab-btn {
       padding: 0.3rem 0.85rem;
       border-radius: 999px;
@@ -1809,6 +1932,20 @@
       border-color: #cbd5f5;
       color: #0f172a;
       background: #f8fafc;
+    }
+
+    body.light .orders-tabs.switch {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .orders-tabs.switch .orders-tab-btn.active {
+      background: #f8fafc;
+    }
+
+    body.light .orders-tabs-indicator {
+      background: #f8fafc;
+      border-color: #cbd5f5;
     }
 
     .tab-panel.hidden { display: none; }
@@ -1956,7 +2093,7 @@
       border: 1px solid var(--glass-border);
       background: rgba(10, 10, 12, 0.45);
       color: #e2e8f0;
-      padding: 0.3rem 0.9rem;
+      padding: 0 0.9rem;
       font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
@@ -1964,6 +2101,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+      height: var(--control-height);
     }
 
     .pill-action-btn:hover {
@@ -2097,12 +2235,16 @@
       background: rgba(10, 10, 12, 0.45);
       color: var(--muted);
       border-radius: 999px;
-      padding: 0.2rem 0.55rem;
+      padding: 0 0.55rem;
       font-size: 0.7rem;
       font-weight: 600;
       cursor: pointer;
       line-height: 1;
       min-width: 32px;
+      height: var(--control-height);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .metrics-toggle:hover { color: #f8fafc; border-color: rgba(255,255,255,0.22); }
@@ -2110,6 +2252,13 @@
       background: #f8fafc;
       color: #334155;
       border-color: #d1d5db;
+    }
+
+    .positions-card .pill-action-btn,
+    .positions-card .export-btn,
+    .performance-title .pill-action-btn,
+    .performance-title .metrics-toggle {
+      height: 25px;
     }
 
     .metric {
@@ -2900,16 +3049,20 @@
   </div>
 
   <section class="card">
-    <h2>Performance</h2>
-
-    <div class="chart-toolbar-row">
-      <div class="chart-toolbar">
-        <button class="chart-range-btn" data-range="day">Day</button>
-        <button class="chart-range-btn" data-range="week">Week</button>
-        <button class="chart-range-btn" data-range="month">Month</button>
-        <button class="chart-range-btn active" data-range="allTime">All Time</button>
+    <div class="section-title performance-title">
+      <h2>Performance</h2>
+      <div class="performance-toolbar is-hidden" id="performanceToolbar">
+        <div class="chart-toolbar">
+          <span class="range-toggle" role="tablist" aria-label="Performance range">
+            <span class="range-toggle-indicator" aria-hidden="true"></span>
+            <button class="chart-range-btn" data-range="day">Day</button>
+            <button class="chart-range-btn" data-range="week">Week</button>
+            <button class="chart-range-btn" data-range="month">Month</button>
+            <button class="chart-range-btn active" data-range="allTime">All</button>
+          </span>
+        </div>
       </div>
-      <div class="chart-actions">
+      <div class="chart-actions is-hidden" id="performanceActions">
         <button class="pill-action-btn performance-share-btn" id="performanceShareBtn" type="button" title="Share performance" aria-label="Share performance">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:10px;height:10px;">
             <path d="M14 3h7v7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -3088,7 +3241,8 @@
     <section class="card">
       <h2>Orders</h2>
 
-      <div class="orders-tabs">
+      <div class="orders-tabs switch" id="ordersTabs">
+        <span class="orders-tabs-indicator" aria-hidden="true"></span>
         <button class="orders-tab-btn orders-only-tab-btn active" data-tab="live" aria-label="Live">
           <span class="live-dot" aria-hidden="true"></span>
           <span>Live</span>
@@ -3218,7 +3372,8 @@
     <section class="card trades-card">
       <h2>Trades</h2>
 
-      <div class="orders-tabs">
+      <div class="orders-tabs switch" id="fillsTabs">
+        <span class="orders-tabs-indicator" aria-hidden="true"></span>
         <button class="orders-tab-btn fills-tab-btn active" data-tab="fills-live" aria-label="Live">
           <span class="live-dot" aria-hidden="true"></span>
           <span>Live</span>
@@ -3372,6 +3527,7 @@
   const trackBtnEl = document.getElementById("trackBtn");
   const marketToggleButtons = document.querySelectorAll(".market-tab-btn");
   const marketToggleIndicatorEl = document.querySelector(".market-toggle-indicator");
+  const rangeToggleIndicatorEl = document.querySelector(".range-toggle-indicator");
   const accountModeLabelEl = document.getElementById("accountModeLabel");
   const positionsModeLabelEl = document.getElementById("positionsModeLabel");
   const performanceModeLabelEl = document.getElementById("performanceModeLabel");
@@ -3424,6 +3580,7 @@
   const ordersTabButtons = document.querySelectorAll(".orders-only-tab-btn");
   const ordersLivePanelEl = document.getElementById("ordersLivePanel");
   const ordersHistoryPanelEl = document.getElementById("ordersHistoryPanel");
+  const ordersTabsEl = document.getElementById("ordersTabs");
 
   const historicalSideFilterEl = document.getElementById("historicalSideFilter");
   const historicalStatusFilterEl = document.getElementById("historicalStatusFilter");
@@ -3437,11 +3594,14 @@
   const fillsTabButtons = document.querySelectorAll(".fills-tab-btn");
   const fillsLivePanelEl = document.getElementById("fillsLivePanel");
   const fillsHistoryPanelEl = document.getElementById("fillsHistoryPanel");
+  const fillsTabsEl = document.getElementById("fillsTabs");
 
   const portfolioErrorEl = document.getElementById("portfolioError");
   const portfolioLoadingEl = document.getElementById("portfolioLoading");
   const portfolioLoadingWrapEl = document.getElementById("portfolioLoadingWrap");
   const portfolioChartsEl = document.getElementById("portfolioCharts");
+  const performanceToolbarEl = document.getElementById("performanceToolbar");
+  const performanceActionsEl = document.getElementById("performanceActions");
   const spotPerformanceNoteEl = document.getElementById("spotPerformanceNote");
   const rangeButtons = document.querySelectorAll(".chart-range-btn");
   const exportExcelBtn = document.getElementById("exportExcelBtn");
@@ -5544,6 +5704,33 @@
     const left = activeRect.left - parentRect.left;
     marketToggleIndicatorEl.style.width = `${activeRect.width}px`;
     marketToggleIndicatorEl.style.transform = `translateX(${left}px)`;
+  }
+
+  function updateRangeToggleIndicator() {
+    if (!rangeToggleIndicatorEl) return;
+    const active = document.querySelector(".chart-range-btn.active");
+    if (!active) return;
+    const parent = active.parentElement;
+    if (!parent) return;
+    const parentRect = parent.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    const left = activeRect.left - parentRect.left;
+    rangeToggleIndicatorEl.style.width = `${activeRect.width}px`;
+    rangeToggleIndicatorEl.style.transform = `translateX(${left}px)`;
+    parent.classList.add("ready");
+  }
+
+  function updateTabSwitchIndicator(container) {
+    if (!container) return;
+    const indicator = container.querySelector(".orders-tabs-indicator");
+    const active = container.querySelector(".orders-tab-btn.active");
+    if (!indicator || !active) return;
+    const parentRect = container.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    const left = activeRect.left - parentRect.left;
+    indicator.style.width = `${activeRect.width}px`;
+    indicator.style.transform = `translateX(${left}px)`;
+    container.classList.add("ready");
   }
 
   function updatePerformanceVisibility() {
@@ -8312,6 +8499,12 @@
     if (portfolioLoadingWrapEl) {
       portfolioLoadingWrapEl.classList.toggle("loading", Boolean(isLoading));
     }
+    if (performanceToolbarEl) {
+      performanceToolbarEl.classList.toggle("is-hidden", Boolean(isLoading));
+    }
+    if (performanceActionsEl) {
+      performanceActionsEl.classList.toggle("is-hidden", Boolean(isLoading));
+    }
     if (portfolioLoadingEl) {
       portfolioLoadingEl.textContent = message || "";
     }
@@ -10754,6 +10947,9 @@
     // ✅ Replace URL on first load (so / becomes /?wallet=... without extra history)
     await trackWallets({ wallets: initialWallets }, { replaceUrl: true });
     updateMarketToggleIndicator();
+    updateRangeToggleIndicator();
+    updateTabSwitchIndicator(ordersTabsEl);
+    updateTabSwitchIndicator(fillsTabsEl);
   })();
 
   trackBtnEl.addEventListener("click", () => {
@@ -10771,6 +10967,9 @@
 
   window.addEventListener("resize", () => {
     updateMarketToggleIndicator();
+    updateRangeToggleIndicator();
+    updateTabSwitchIndicator(ordersTabsEl);
+    updateTabSwitchIndicator(fillsTabsEl);
   });
 
   if (walletInputsEl) {
@@ -11140,6 +11339,7 @@
 
       rangeButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
+      updateRangeToggleIndicator();
 
       if (portfolioDataByWallet.size) {
         updatePortfolioCharts(currentRangeKey);
@@ -11398,6 +11598,7 @@
 
       ordersTabButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
+      updateTabSwitchIndicator(btn.closest(".orders-tabs"));
 
       if (tab === "history") {
         ordersLivePanelEl.classList.add("hidden");
@@ -11417,6 +11618,7 @@
 
       fillsTabButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
+      updateTabSwitchIndicator(btn.closest(".orders-tabs"));
 
       if (tab === "fills-history") {
         fillsLivePanelEl.classList.add("hidden");
