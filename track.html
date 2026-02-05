@@ -231,6 +231,17 @@
       transform: scale(1.04);
     }
 
+    body.light .wallet-fav-btn {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #475569;
+    }
+
+    body.light .wallet-fav-btn:hover {
+      border-color: rgba(15, 23, 42, 0.2);
+      color: #0f172a;
+    }
+
     .favorites-btn {
       width: 32px;
       height: 32px;
@@ -1581,6 +1592,12 @@
 
     body.light .chart-loading { color: #6b7280; }
     body.light .price-stack .current-price { color: #0f172a; }
+    body.light .size-ticker { color: #0f172a; opacity: 0.7; }
+    body.light .notional-sub { color: #0f172a; opacity: 0.7; }
+    body.light .upnl-pos { color: #16a34a; }
+    body.light .upnl-neg { color: #dc2626; }
+    .favorites-metrics .upnl-pos { color: #22c55e; }
+    .favorites-metrics .upnl-neg { color: #f43f5e; }
 
 
     .linkedin-badge {
@@ -1909,6 +1926,17 @@
       text-transform: uppercase;
       color: #fbbf24;
       margin-left: 0.35rem;
+    }
+
+    body.light .liq-bar {
+      background: rgba(15, 23, 42, 0.1);
+    }
+
+    body.light .liq-meta,
+    body.light .liq-pct,
+    body.light .liq-price {
+      color: #0f172a;
+      opacity: 0.7;
     }
 
     .placeholder-row td {
@@ -2449,6 +2477,70 @@
       background: #ffffff;
       color: #475569;
       border-color: #e5e7eb;
+    }
+
+    body.light .favorites-panel {
+      background: rgba(226, 232, 240, 0.6);
+    }
+
+    body.light .favorites-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: #e5e7eb;
+      box-shadow: 0 16px 28px rgba(15, 23, 42, 0.12);
+      color: #0f172a;
+    }
+
+    body.light .favorites-item {
+      background: rgba(248, 250, 252, 0.9);
+      border-color: #e5e7eb;
+      color: #0f172a;
+    }
+
+    body.light .favorites-item:hover {
+      border-color: rgba(15, 23, 42, 0.12);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+    }
+
+    body.light .favorites-wallet-sub,
+    body.light .favorites-wallet-full,
+    body.light .favorites-metrics {
+      color: #64748b;
+    }
+
+    body.light .favorites-wallet-btn,
+    body.light .favorites-header {
+      color: #0f172a;
+    }
+
+    body.light .favorites-chip {
+      color: #475569;
+      border-color: #cbd5f5;
+    }
+
+    body.light .favorites-close {
+      color: #0f172a;
+    }
+
+    body.light .favorites-copy,
+    body.light .favorites-add-btn,
+    body.light .favorites-remove-btn,
+    body.light .favorites-input {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #475569;
+    }
+
+    body.light .favorites-copy:hover,
+    body.light .favorites-add-btn:hover,
+    body.light .favorites-remove-btn:hover {
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.2);
+    }
+
+    body.light .favorites-copy-toast {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #475569;
     }
 
     .funding-pos { color: #4ade80; }
