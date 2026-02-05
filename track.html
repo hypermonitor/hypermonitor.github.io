@@ -153,6 +153,12 @@
       width: 100%;
     }
 
+    .wallet-input-actions {
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
     .wallet-inputs-label {
       font-size: 0.65rem;
       letter-spacing: 0.12em;
@@ -197,6 +203,317 @@
       justify-content: flex-start;
       margin-top: 0;
       align-self: start;
+    }
+
+    .wallet-fav-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      flex: 0 0 auto;
+    }
+
+    .wallet-fav-btn.active {
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.6);
+    }
+
+    .wallet-fav-btn:hover {
+      transform: scale(1.04);
+    }
+
+    .favorites-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.5);
+      color: #f8fafc;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .favorites-btn.active {
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.6);
+    }
+
+    .favorites-btn:hover {
+      transform: scale(1.04);
+    }
+
+
+    .favorites-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 240;
+      background: rgba(8, 10, 14, 0.65);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 1.5rem;
+    }
+
+    .favorites-panel.show {
+      display: flex;
+    }
+
+    .favorites-card {
+      width: min(360px, 90vw);
+      background: rgba(10, 10, 12, 0.96);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 22px 40px rgba(0, 0, 0, 0.5);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .favorites-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+
+    .favorites-add {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .favorites-input {
+      flex: 1 1 auto;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.5);
+      color: var(--text-main);
+      border-radius: 10px;
+      padding: 0.45rem 0.6rem;
+      font-size: 0.8rem;
+      height: 38px;
+    }
+
+    .favorites-input:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+    }
+
+    .favorites-add-btn {
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      width: 38px;
+      min-width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .favorites-add-btn:hover,
+    .favorites-remove-btn:hover,
+    .favorites-close:hover {
+      border-color: rgba(255,255,255,0.25);
+      color: #f8fafc;
+    }
+
+    .favorites-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 55vh;
+      overflow: auto;
+      padding-right: 0.2rem;
+    }
+
+    .favorites-item {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 12px;
+      padding: 0.45rem 0.6rem;
+      background: rgba(10, 10, 12, 0.45);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.3rem 0.5rem;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .favorites-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--fav-accent, rgba(148, 163, 184, 0.45));
+      opacity: 0.85;
+    }
+
+    .favorites-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .favorites-item {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .favorites-wallet-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .favorites-wallet-sub {
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 0.7rem;
+    }
+
+    .favorites-wallet-full {
+      display: none;
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 0.7rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    @media (min-width: 720px) {
+      .favorites-wallet-full {
+        display: inline;
+      }
+      .favorites-wallet-sub {
+        display: none;
+      }
+    }
+
+    .favorites-chip {
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--muted);
+      padding: 0.05rem 0.35rem;
+      border-radius: 999px;
+    }
+
+    .favorites-copy {
+      opacity: 0;
+      border: none;
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      border-radius: 8px;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .favorites-item:hover .favorites-copy,
+    .favorites-wallet-btn:focus-visible .favorites-copy {
+      opacity: 1;
+    }
+
+    .favorites-copy:hover {
+      color: #f8fafc;
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    .favorites-copy-toast {
+      opacity: 0;
+      pointer-events: none;
+      font-size: 0.65rem;
+      color: #e2e8f0;
+      background: rgba(10, 10, 12, 0.6);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      padding: 0.1rem 0.4rem;
+      margin-left: 0.35rem;
+      transition: opacity 0.2s ease;
+    }
+
+    .favorites-copy-toast.show {
+      opacity: 1;
+    }
+
+    .favorites-metrics {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: 0.5rem;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .favorites-metrics .favorites-metric {
+      grid-column: 1;
+    }
+
+    .favorites-spark {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      height: 22px;
+      width: 90px;
+      align-self: center;
+    }
+
+    .favorites-spark svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .favorites-metric strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .favorites-remove-btn {
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .market-toggle {
@@ -294,7 +611,7 @@
 
     .wallet-track-btn {
       padding: 0.45rem 0.8rem;
-      border-radius: 999px;
+      border-radius: 10px;
       border: 1px solid var(--glass-border);
       background: rgba(10, 10, 12, 0.45);
       color: var(--muted);
@@ -582,11 +899,17 @@
       color: #e2e8f0;
       font-size: 0.75rem;
       padding: 0.3rem 0.7rem;
+      height: 28px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
       transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    .favorites-panel-btn {
+      padding: 0.3rem 0.7rem;
+      line-height: 1;
     }
 
     .theme-toggle-btn:hover {
@@ -2322,14 +2645,17 @@
         <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
       </a>
       <div class="tagline">
-        Track any Hyperliquid wallet. No wallet connection required.
+        Track any Hyperliquid wallet. No account required.
       </div>
       <div class="wallet-inputs-label">Wallet addresses</div>
       <div class="wallet-inputs-row">
         <div class="wallet-inputs" id="walletInputs">
           <div class="wallet-input-row" data-index="0">
             <input id="walletInput0" class="wallet-input" type="text" placeholder="0x..." autocomplete="off" aria-label="Wallet address" />
-            <button id="addWalletBtn" class="wallet-icon-btn" type="button" aria-label="Add wallet">+</button>
+            <div class="wallet-input-actions">
+              <button class="wallet-fav-btn" type="button" aria-label="Favorite wallet">☆</button>
+              <button id="addWalletBtn" class="wallet-icon-btn" type="button" aria-label="Add wallet">+</button>
+            </div>
           </div>
         </div>
         <div class="wallet-actions">
@@ -2344,6 +2670,9 @@
     <div class="header-right">
       <div class="header-right-top">
         <button id="themeToggle" class="theme-toggle-btn">☀️</button>
+        <button id="favoritesPanelBtn" class="theme-toggle-btn favorites-panel-btn" type="button" aria-label="Favorite wallets" title="Favorite wallets">
+          ★
+        </button>
         <div class="status-pill">
           <span id="statusDot" class="status-dot"></span>
           <span id="statusText"></span>
@@ -2906,6 +3235,20 @@
   </div>
 </div>
 
+<div class="favorites-panel" id="favoritesPanel" aria-hidden="true">
+  <div class="favorites-card">
+    <div class="favorites-header">
+      <span>Favorite wallets</span>
+      <div class="modal-close-btn favorites-close" id="favoritesCloseBtn" role="button" tabindex="0" aria-label="Close favorites">&times;</div>
+    </div>
+    <div class="favorites-add">
+      <input class="favorites-input" id="favoritesInput" type="text" placeholder="0x..." autocomplete="off" />
+      <button class="favorites-add-btn" id="favoritesAddBtn" type="button">+</button>
+    </div>
+    <div class="favorites-list" id="favoritesList"></div>
+  </div>
+</div>
+
 <div class="share-modal" id="pnlShareModal" aria-hidden="true">
   <div class="share-card">
     <div class="share-header">
@@ -2966,6 +3309,13 @@
   const priceAddInputEl = document.getElementById("priceAddInput");
   const priceAddBtnEl = document.getElementById("priceAddBtn");
   const priceContextMenuEl = document.getElementById("priceContextMenu");
+  const favoritesBtnEl = document.getElementById("favoritesBtn");
+  const favoritesPanelBtnEl = document.getElementById("favoritesPanelBtn");
+  const favoritesPanelEl = document.getElementById("favoritesPanel");
+  const favoritesCloseBtnEl = document.getElementById("favoritesCloseBtn");
+  const favoritesInputEl = document.getElementById("favoritesInput");
+  const favoritesAddBtnEl = document.getElementById("favoritesAddBtn");
+  const favoritesListEl = document.getElementById("favoritesList");
   const positionsHeaderEls = Array.from(document.querySelectorAll(".positions-card thead th[data-sort]"));
   const historicalOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersHistoryPanel thead th[data-sort]"));
   const historicalFillsHeaderEls = Array.from(document.querySelectorAll("#fillsHistoryPanel thead th[data-sort]"));
@@ -3064,6 +3414,7 @@
   let logoRetryTimer = null;
   let logoRefreshTimer = null;
   const FOOTER_COINS_KEY = "hypermonitor-footer-coins";
+  const FAVORITES_KEY = "hypermonitor-favorite-wallets";
   const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
   const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
   const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "cash:USA500", "xyz:GOLD", "xyz:SILVER", "xyz:MSTR", "xyz:NVDA"];
@@ -3110,6 +3461,196 @@
         trackedFooterCoins = parsed.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
       }
     } catch (e) {}
+  }
+
+  function loadFavoriteWallets() {
+    try {
+      const raw = localStorage.getItem(FAVORITES_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        favoriteWallets = parsed.map(normalizeWalletInput).filter(isValidAddress);
+      }
+    } catch (e) {}
+  }
+
+  function saveFavoriteWallets() {
+    try {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favoriteWallets));
+    } catch (e) {}
+  }
+
+  function isFavoriteWallet(wallet) {
+    const norm = String(wallet || "").toLowerCase();
+    return favoriteWallets.some((w) => String(w).toLowerCase() === norm);
+  }
+
+  function updateFavoriteToggle() {
+    syncWalletInputStars();
+  }
+
+  function syncWalletInputStars() {
+    if (!walletInputsEl) return;
+    const rows = Array.from(walletInputsEl.querySelectorAll(".wallet-input-row"));
+    rows.forEach((row) => {
+      const input = row.querySelector(".wallet-input");
+      const star = row.querySelector(".wallet-fav-btn");
+      if (!star) return;
+      const value = input?.value || "";
+      const active = isValidAddress(value) && isFavoriteWallet(value);
+      star.classList.toggle("active", active);
+      star.textContent = active ? "★" : "☆";
+    });
+  }
+
+  function addFavoriteWallet(wallet) {
+    const norm = normalizeWalletInput(wallet);
+    if (!isValidAddress(norm)) return false;
+    if (isFavoriteWallet(norm)) return true;
+    favoriteWallets.push(norm);
+    saveFavoriteWallets();
+    updateFavoriteToggle();
+    return true;
+  }
+
+  function removeFavoriteWallet(wallet) {
+    const norm = String(wallet || "").toLowerCase();
+    favoriteWallets = favoriteWallets.filter((w) => String(w).toLowerCase() !== norm);
+    favoriteMetricsCache.delete(normalizeWalletInput(wallet));
+    saveFavoriteWallets();
+    updateFavoriteToggle();
+  }
+
+  async function getFavoriteMetrics(wallet) {
+    const norm = normalizeWalletInput(wallet);
+    if (!isValidAddress(norm)) return null;
+    if (favoriteMetricsCache.has(norm)) return favoriteMetricsCache.get(norm);
+    const entry = { loading: true, day: null, all: null, spark: null, error: null };
+    favoriteMetricsCache.set(norm, entry);
+    try {
+      const data = await fetchPortfolio(norm);
+      const daySection = getPortfolioSection(data, "day", "all");
+      const allSection = getPortfolioSection(data, "allTime", "all");
+      const dayView = buildViewFromSection(daySection);
+      const allView = buildViewFromSection(allSection);
+      const dayMetrics = dayView ? computePerformanceMetrics(dayView) : null;
+      const allMetrics = allView ? computePerformanceMetrics(allView) : null;
+      entry.day = dayMetrics?.returnPct ?? null;
+      entry.all = allMetrics?.returnPct ?? null;
+      const weekSection = getPortfolioSection(data, "week", "all");
+      if (weekSection?.pnlHistory?.length) {
+        const hist = weekSection.pnlHistory
+          .map(([, v]) => Number(v ?? 0))
+          .filter(Number.isFinite);
+        const last = hist.slice(-8);
+        entry.spark = last.length >= 2 ? last : null;
+      }
+      entry.loading = false;
+    } catch (err) {
+      entry.loading = false;
+      entry.error = err?.message || "Failed";
+    }
+    return entry;
+  }
+
+  function buildSparklineSvg(values, color) {
+    if (!Array.isArray(values) || values.length < 2) return "";
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    const w = 90;
+    const h = 22;
+    const step = w / (values.length - 1);
+    const points = values.map((v, i) => {
+      const x = i * step;
+      const y = h - ((v - min) / range) * (h - 2) - 1;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+    return `
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <polyline
+          fill="none"
+          stroke="${color}"
+          stroke-width="1.6"
+          points="${points.join(" ")}"
+        />
+      </svg>
+    `;
+  }
+
+  function renderFavoritesList() {
+    if (!favoritesListEl) return;
+    if (!favoriteWallets.length) {
+      favoritesListEl.innerHTML = "<div class='muted'>No favorites yet.</div>";
+      return;
+    }
+    favoritesListEl.innerHTML = favoriteWallets
+      .map((wallet) => {
+        const label = formatWalletLabel(wallet);
+        const short = `${wallet.slice(0, 4)}…${wallet.slice(-3)}`;
+        const showShort = !String(label || "").toLowerCase().includes("0x");
+        const full = wallet;
+        const tracked = primaryWallet && String(primaryWallet).toLowerCase() === String(wallet).toLowerCase();
+        const chip = tracked ? `<span class="favorites-chip">Tracked</span>` : "";
+        return `
+          <div class="favorites-item" data-wallet="${wallet}">
+            <button class="favorites-wallet-btn" type="button" data-action="open" data-wallet="${wallet}">
+              <span>${label}</span>
+              ${showShort ? `<span class="favorites-wallet-sub">${short}</span>` : ""}
+              ${showShort ? `<span class="favorites-wallet-full">${full}</span>` : ""}
+              ${chip}
+              <span class="favorites-copy" data-action="copy" data-wallet="${wallet}" title="Copy address">⧉</span>
+              <span class="favorites-copy-toast" aria-live="polite">Copied!</span>
+            </button>
+            <button class="favorites-remove-btn" type="button" data-action="remove" data-wallet="${wallet}">-</button>
+            <div class="favorites-metrics" data-wallet="${wallet}">
+              <div class="favorites-metric">1 day: <strong>…</strong></div>
+              <div class="favorites-metric">All time: <strong>…</strong></div>
+              <div class="favorites-spark"></div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+    favoriteWallets.forEach(async (wallet) => {
+      const metricsEl = favoritesListEl.querySelector(`.favorites-metrics[data-wallet="${wallet}"]`);
+      const itemEl = favoritesListEl.querySelector(`.favorites-item[data-wallet="${wallet}"]`);
+      if (!metricsEl) return;
+      const data = await getFavoriteMetrics(wallet);
+      if (!data || data.loading) return;
+      const dayText = Number.isFinite(data.day) ? formatSignedPercent(data.day) : "N/A";
+      const allText = Number.isFinite(data.all) ? formatSignedPercent(data.all) : "N/A";
+      const dayClass = Number.isFinite(data.day) ? (data.day >= 0 ? "upnl-pos" : "upnl-neg") : "";
+      const allClass = Number.isFinite(data.all) ? (data.all >= 0 ? "upnl-pos" : "upnl-neg") : "";
+      const accent =
+        Number.isFinite(data.day)
+          ? data.day >= 0
+            ? "rgba(74, 222, 128, 0.75)"
+            : "rgba(251, 113, 133, 0.75)"
+          : "rgba(148, 163, 184, 0.45)";
+      if (itemEl) itemEl.style.setProperty("--fav-accent", accent);
+      const sparkColor = Number.isFinite(data.day)
+        ? data.day >= 0
+          ? "rgba(74, 222, 128, 0.85)"
+          : "rgba(251, 113, 133, 0.85)"
+        : "rgba(148, 163, 184, 0.6)";
+      metricsEl.innerHTML = `
+        <div class="favorites-metric">1 day: <strong class="${dayClass}">${dayText}</strong></div>
+        <div class="favorites-metric">All time: <strong class="${allClass}">${allText}</strong></div>
+        <div class="favorites-spark">${data.spark ? buildSparklineSvg(data.spark, sparkColor) : ""}</div>
+      `;
+    });
+  }
+
+  function toggleFavoritesPanel(forceOpen = null) {
+    if (!favoritesPanelEl) return;
+    const shouldOpen = forceOpen !== null ? forceOpen : !favoritesPanelEl.classList.contains("show");
+    favoritesPanelEl.classList.toggle("show", shouldOpen);
+    favoritesPanelEl.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+    if (shouldOpen) {
+      renderFavoritesList();
+      if (favoritesInputEl) favoritesInputEl.focus();
+    }
   }
 
   function loadFooterChangePrefs() {
@@ -3357,11 +3898,15 @@
     const inputId = `walletInput${idx}`;
     row.innerHTML = `
       <input id="${inputId}" class="wallet-input" type="text" placeholder="0x..." autocomplete="off" aria-label="Wallet address" />
-      <button class="wallet-icon-btn wallet-remove-btn" type="button" aria-label="Remove wallet">-</button>
+      <div class="wallet-input-actions">
+        <button class="wallet-fav-btn" type="button" aria-label="Favorite wallet">☆</button>
+        <button class="wallet-icon-btn wallet-remove-btn" type="button" aria-label="Remove wallet">-</button>
+      </div>
     `;
     walletInputsEl.appendChild(row);
     const inputEl = row.querySelector("input");
     if (inputEl) inputEl.value = value;
+    syncWalletInputStars();
   }
 
   function setWalletInputs(wallets) {
@@ -3373,6 +3918,7 @@
     if (primaryInput) primaryInput.value = wallets[0] || "";
 
     (wallets || []).slice(1).forEach((wallet) => addWalletInputRow(wallet));
+    syncWalletInputStars();
   }
 
   async function getPerpDexNames() {
@@ -3565,6 +4111,8 @@
     "1d": { label: "1 day", interval: "1d", ms: 24 * 60 * 60 * 1000 },
     "1w": { label: "1 week", interval: "1w", ms: 7 * 24 * 60 * 60 * 1000 },
   };
+  let favoriteWallets = [];
+  const favoriteMetricsCache = new Map();
 
   let lastComputedUpnlTotal = 0;
   let lastComputedTotalNotional = 0;
@@ -10041,6 +10589,7 @@
 
     currentWallets = walletList;
     primaryWallet = walletList[0];
+    updateFavoriteToggle();
     startedAtEl.textContent = "Started: " + new Date().toLocaleString();
     setStatus("connecting", "Connecting…");
 
@@ -10079,6 +10628,7 @@
     updateMarketToggleButtons();
     updatePerformanceVisibility();
     loadFooterCoins();
+    loadFavoriteWallets();
     loadFooterChangePrefs();
     loadCoinNameCache();
     loadCoinColorCache();
@@ -10097,6 +10647,7 @@
 
     startedAtEl.textContent = "Started: " + new Date().toLocaleString();
     setStatus("connecting", "Connecting…");
+    updateFavoriteToggle();
 
     await initClients();
     await ensurePriceStream();
@@ -10143,6 +10694,23 @@
       if (removeBtn) {
         const row = removeBtn.closest(".wallet-input-row");
         if (row) row.remove();
+      }
+      const favBtn = e.target.closest(".wallet-fav-btn");
+      if (favBtn) {
+        const row = favBtn.closest(".wallet-input-row");
+        const input = row?.querySelector(".wallet-input");
+        const value = input?.value || "";
+        if (!isValidAddress(value)) return;
+        if (isFavoriteWallet(value)) removeFavoriteWallet(value);
+        else addFavoriteWallet(value);
+        syncWalletInputStars();
+        renderFavoritesList();
+      }
+    });
+
+    walletInputsEl.addEventListener("input", (e) => {
+      if (e.target.classList.contains("wallet-input")) {
+        syncWalletInputStars();
       }
     });
   }
@@ -10351,6 +10919,99 @@
         }
       }
       hidePriceContextMenu();
+    });
+  }
+
+  if (favoritesBtnEl) {
+    favoritesBtnEl.addEventListener("click", () => {
+      if (primaryWallet && isValidAddress(primaryWallet)) {
+        if (isFavoriteWallet(primaryWallet)) removeFavoriteWallet(primaryWallet);
+        else addFavoriteWallet(primaryWallet);
+      }
+      renderFavoritesList();
+      toggleFavoritesPanel(true);
+    });
+  }
+
+  if (favoritesPanelBtnEl) {
+    favoritesPanelBtnEl.addEventListener("click", () => {
+      toggleFavoritesPanel();
+    });
+  }
+
+  if (favoritesCloseBtnEl) {
+    favoritesCloseBtnEl.addEventListener("click", () => toggleFavoritesPanel(false));
+    favoritesCloseBtnEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFavoritesPanel(false);
+      }
+    });
+  }
+
+  if (favoritesPanelEl) {
+    favoritesPanelEl.addEventListener("click", (e) => {
+      if (e.target === favoritesPanelEl) toggleFavoritesPanel(false);
+    });
+  }
+
+  if (favoritesAddBtnEl) {
+    favoritesAddBtnEl.addEventListener("click", () => {
+      const value = favoritesInputEl?.value || "";
+      if (!value) return;
+      if (addFavoriteWallet(value)) {
+        if (favoritesInputEl) favoritesInputEl.value = "";
+        renderFavoritesList();
+      }
+    });
+  }
+
+  if (favoritesListEl) {
+    favoritesListEl.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const wallet = btn.dataset.wallet;
+      if (!wallet) return;
+      if (action === "copy") {
+        e.stopPropagation();
+        const toast = btn.parentElement?.querySelector(".favorites-copy-toast");
+        try {
+          await navigator.clipboard.writeText(wallet);
+          if (toast) {
+            toast.classList.add("show");
+            clearTimeout(toast._hideTimer);
+            toast._hideTimer = setTimeout(() => {
+              toast.classList.remove("show");
+            }, 1200);
+          }
+        } catch (err) {
+          console.warn("Copy failed", err);
+        }
+        return;
+      }
+      if (action === "remove") {
+        removeFavoriteWallet(wallet);
+        renderFavoritesList();
+        return;
+      }
+      if (action === "open") {
+        toggleFavoritesPanel(false);
+        await trackWallets({ wallets: [wallet] });
+        setWalletInputs([wallet]);
+      }
+    });
+
+    favoritesListEl.addEventListener("click", async (e) => {
+      const actionBtn = e.target.closest("[data-action]");
+      if (actionBtn) return;
+      const item = e.target.closest(".favorites-item");
+      if (!item) return;
+      const wallet = item.dataset.wallet;
+      if (!wallet) return;
+      toggleFavoritesPanel(false);
+      await trackWallets({ wallets: [wallet] });
+      setWalletInputs([wallet]);
     });
   }
 
