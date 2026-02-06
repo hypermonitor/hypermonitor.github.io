@@ -4557,9 +4557,7 @@
       `;
       const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
       if (valueEl) valueEl.style.color = resolve(v);
-      const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
-      tooltipEl.style.left = `${positionX + tooltip.caretX}px`;
-      tooltipEl.style.top = `${positionY + tooltip.caretY - 8}px`;
+      positionChartTooltip(tooltipEl, chart, tooltip);
       tooltipEl.style.opacity = "1";
     };
   }
@@ -4592,11 +4590,52 @@
       `;
       const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
       if (valueEl) valueEl.style.color = resolve(v);
-      const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
-      tooltipEl.style.left = `${positionX + tooltip.caretX}px`;
-      tooltipEl.style.top = `${positionY + tooltip.caretY - 8}px`;
+      positionChartTooltip(tooltipEl, chart, tooltip);
       tooltipEl.style.opacity = "1";
     };
+  }
+
+  function applyEquityTooltipStyling(chart) {
+    if (!chart?.options?.plugins?.tooltip) return;
+    chart.options.plugins.tooltip.enabled = false;
+    chart.options.plugins.tooltip.external = (context) => {
+      const { chart, tooltip } = context;
+      let tooltipEl = chart.canvas.parentElement?.querySelector(".pnl-tooltip");
+      if (!tooltipEl) {
+        tooltipEl = document.createElement("div");
+        tooltipEl.className = "pnl-tooltip";
+        chart.canvas.parentElement?.appendChild(tooltipEl);
+      }
+      if (!tooltip || tooltip.opacity === 0) {
+        tooltipEl.style.opacity = "0";
+        return;
+      }
+      const point = tooltip.dataPoints?.[0];
+      const v = Number(point?.parsed?.y ?? point?.raw ?? 0);
+      const title = tooltip.title?.[0] || point?.label || "";
+      tooltipEl.innerHTML = `
+        <div class="pnl-tooltip-title">${title}</div>
+        <div class="pnl-tooltip-value">${fmtMoney(v, 2)}</div>
+      `;
+      const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
+      if (valueEl) valueEl.style.color = getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
+      positionChartTooltip(tooltipEl, chart, tooltip);
+      tooltipEl.style.opacity = "1";
+    };
+  }
+
+  function positionChartTooltip(tooltipEl, chart, tooltip) {
+    if (!tooltipEl || !chart || !tooltip) return;
+    const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+    const caretX = positionX + tooltip.caretX;
+    const caretY = positionY + tooltip.caretY - 8;
+    const chartArea = chart.chartArea || { left: 0, right: chart.width };
+    const minX = positionX + chartArea.left + 6;
+    const maxX = positionX + chartArea.right - 6;
+    const halfWidth = tooltipEl.offsetWidth / 2;
+    const clampedX = Math.min(Math.max(caretX, minX + halfWidth), maxX - halfWidth);
+    tooltipEl.style.left = `${clampedX}px`;
+    tooltipEl.style.top = `${caretY}px`;
   }
 
   function fmtPrice(v) {
@@ -10808,6 +10847,33 @@
   }
 
   function createLineChart(ctx, labels, datasets) {
+    const hoverLinePlugin = {
+      id: "hoverLine",
+      afterDatasetsDraw(chart) {
+        const active = chart.getActiveElements();
+        if (!active || !active.length) return;
+        const { ctx, chartArea, scales } = chart;
+        const x = active[0].element?.x;
+        if (!Number.isFinite(x)) return;
+        ctx.save();
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(255,255,255,0.18)";
+        const y = active[0].element?.y;
+        const startY = Number.isFinite(y) ? y : chartArea.top;
+        ctx.beginPath();
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, chartArea.bottom);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(chartArea.left, startY);
+        ctx.lineTo(x, startY);
+        ctx.stroke();
+        ctx.restore();
+      },
+    };
+
     return new Chart(ctx, {
       type: "line",
       data: {
@@ -10859,6 +10925,7 @@
           },
         },
       },
+      plugins: [hoverLinePlugin],
     });
   }
 
@@ -10902,6 +10969,7 @@
       labels,
       equityDatasets
     );
+    applyEquityTooltipStyling(portfolioCharts.equity);
 
     portfolioCharts.pnl = createLineChart(
       pnlCanvas.getContext("2d"),
@@ -10967,6 +11035,7 @@
     if (equityChart.options.plugins?.legend) {
       equityChart.options.plugins.legend.display = equityDatasets.length > 1;
     }
+    applyEquityTooltipStyling(equityChart);
     equityChart.update();
 
     pnlChart.data.labels = labels;
