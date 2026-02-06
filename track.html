@@ -3224,9 +3224,9 @@
       <button class="metrics-scroll-arrow right" type="button" aria-label="Scroll metrics right">›</button>
       <div class="metrics-grid">
         <div class="metric">
-          <div class="metric-label" title="Net change in portfolio PnL over the selected range." data-tooltip="Net change in portfolio PnL over the selected range.">Total PnL (Portfolio)</div>
+          <div class="metric-label" title="Net change in portfolio PnL over the selected range." data-tooltip="Net change in portfolio PnL over the selected range.">Total PnL</div>
           <div class="metric-value" id="metricTotalPnl">-</div>
-          <div class="metric-sub">PnL change over range</div>
+          <div class="metric-sub" id="metricTotalPnlSub">PnL change over range</div>
         </div>
         <div class="metric">
           <div class="metric-label" title="PnL change divided by total deposits in the range." data-tooltip="PnL change divided by total deposits in the range.">Return</div>
@@ -3733,6 +3733,7 @@
   const metricsWalletLabelEl = document.getElementById("metricsWalletLabel");
   const metricsRangeLabelEl = document.getElementById("metricsRangeLabel");
   const metricTotalPnlEl = document.getElementById("metricTotalPnl");
+  const metricTotalPnlSubEl = document.getElementById("metricTotalPnlSub");
   const metricReturnEl = document.getElementById("metricReturn");
   const metricMaxDrawdownEl = document.getElementById("metricMaxDrawdown");
   const metricSharpeEl = document.getElementById("metricSharpe");
@@ -3802,6 +3803,8 @@
   const coinPriceDecimals = new Map();
   const lastFooterPrices = new Map();
   let latestLiveEquityValue = null;
+  let latestLivePnlValue = null;
+  let latestBaseEquityValue = null;
   const chartLastValues = { equity: null, pnl: null, deposits: null };
   const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl", "cash"];
   const manualMidCoins = new Set();
@@ -4605,10 +4608,27 @@
       if (liveEquity !== null && equityChartValue !== null && pnlChartValue !== null) {
         pnlDisplay = pnlChartValue + (liveEquity - equityChartValue);
       }
+      latestLivePnlValue = Number.isFinite(pnlDisplay) ? pnlDisplay : null;
       pnlTitleValueEl.textContent = pnlDisplay !== null ? formatSignedDollarWithPlus(pnlDisplay, 0) : "-";
       pnlTitleValueEl.classList.remove("positive", "negative");
       if (Number.isFinite(pnlDisplay)) {
         pnlTitleValueEl.classList.add(pnlDisplay >= 0 ? "positive" : "negative");
+      }
+    }
+
+    if (metricTotalPnlEl) {
+      const livePnl = Number.isFinite(latestLivePnlValue) ? latestLivePnlValue : null;
+      if (livePnl !== null) {
+        setMetricValue(metricTotalPnlEl, formatSignedDollarWithPlus(livePnl), livePnl);
+      }
+    }
+
+    if (metricReturnEl) {
+      const livePnl = Number.isFinite(latestLivePnlValue) ? latestLivePnlValue : null;
+      const baseEquity = Number.isFinite(latestBaseEquityValue) ? latestBaseEquityValue : null;
+      if (livePnl !== null && baseEquity && baseEquity !== 0) {
+        const returnPct = livePnl / baseEquity;
+        setMetricValue(metricReturnEl, formatSignedPercent(returnPct, 2), returnPct);
       }
     }
 
@@ -4624,6 +4644,26 @@
         }
       }
     }
+  }
+
+  function getRangePnlLabel(rangeKey) {
+    switch (rangeKey) {
+      case "day":
+        return "24 hr PnL change";
+      case "week":
+        return "7 day PnL change";
+      case "month":
+        return "30 day PnL change";
+      case "allTime":
+        return "All time PnL change";
+      default:
+        return "PnL change";
+    }
+  }
+
+  function updateTotalPnlSubLabel(rangeKey) {
+    if (!metricTotalPnlSubEl) return;
+    metricTotalPnlSubEl.textContent = getRangePnlLabel(rangeKey);
   }
 
   function applyPnlTooltipStyling(chart) {
@@ -10824,6 +10864,7 @@
       return;
     }
     if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = source?.label || "-";
+    updateTotalPnlSubLabel(rangeKey);
 
     const metrics = computePerformanceMetrics(source.view);
     const rangeWindow = getMetricsRangeWindow(source.view, rangeKey);
@@ -10835,7 +10876,10 @@
       marketType: currentMarketType,
     });
     if (metrics) {
-      setMetricValue(metricTotalPnlEl, formatSignedDollarWithPlus(metrics.totalPnl), metrics.totalPnl);
+      latestBaseEquityValue = Number.isFinite(metrics.baseEquity) ? metrics.baseEquity : null;
+      const livePnl = Number.isFinite(latestLivePnlValue) ? latestLivePnlValue : null;
+      const totalPnlValue = livePnl !== null ? livePnl : metrics.totalPnl;
+      setMetricValue(metricTotalPnlEl, formatSignedDollarWithPlus(totalPnlValue), totalPnlValue);
       setMetricValue(metricReturnEl, formatSignedPercent(metrics.returnPct), metrics.returnPct);
       setMetricValue(metricMaxDrawdownEl, formatPercent(metrics.maxDrawdown), null);
       setMetricValue(metricSharpeEl, metrics.sharpe !== null ? formatRatio(metrics.sharpe, 2) : "-", metrics.sharpe);
@@ -11698,6 +11742,7 @@
       rangeButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       updateRangeToggleIndicator();
+      updateTotalPnlSubLabel(currentRangeKey);
 
       if (portfolioDataByWallet.size) {
         updatePortfolioCharts(currentRangeKey);
