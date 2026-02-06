@@ -2231,8 +2231,98 @@
     }
 
     .metrics-card.collapsed .metrics-grid {
-      max-height: 92px;
-      overflow: hidden;
+      max-height: none;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.65rem;
+      padding-bottom: 0.65rem;
+      position: relative;
+      cursor: grab;
+      user-select: none;
+      scrollbar-width: none;
+    }
+
+    .metrics-card.collapsed .metrics-grid::-webkit-scrollbar {
+      height: 0;
+    }
+
+    .metrics-card.collapsed .metric {
+      min-width: 170px;
+      flex: 0 0 auto;
+    }
+
+    .metrics-card.collapsed .metrics-grid:active {
+      cursor: grabbing;
+    }
+
+    .metrics-card.collapsed .metrics-grid::before,
+    .metrics-card.collapsed .metrics-grid::after {
+      content: "";
+      position: sticky;
+      top: 0;
+      width: 28px;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .metrics-card.collapsed .metrics-grid::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(11, 11, 15, 0.85), rgba(11, 11, 15, 0));
+    }
+
+    .metrics-card.collapsed .metrics-grid::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(11, 11, 15, 0.85), rgba(11, 11, 15, 0));
+    }
+
+    body.light .metrics-card.collapsed .metrics-grid::before {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+    }
+
+    body.light .metrics-card.collapsed .metrics-grid::after {
+      background: linear-gradient(270deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+    }
+
+    .metrics-card {
+      position: relative;
+    }
+
+    .metrics-scroll-arrow {
+      position: absolute;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.6);
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      z-index: 5;
+      pointer-events: auto;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+
+    .metrics-scroll-arrow.left { left: 6px; }
+    .metrics-scroll-arrow.right { right: 6px; }
+
+    .metrics-card.show-left .metrics-scroll-arrow.left,
+    .metrics-card.show-right .metrics-scroll-arrow.right {
+      opacity: 0.85;
+    }
+
+    body.light .metrics-scroll-arrow {
+      background: rgba(255, 255, 255, 0.85);
+      color: #0f172a;
+      border-color: #e5e7eb;
     }
 
     .metrics-toggle {
@@ -3106,7 +3196,32 @@
     </div>
 
     <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
+      <div class="chart-grid" id="portfolioCharts">
+        <div class="chart-card">
+          <h3>Equity <span class="spark-label" id="equityTitleValue">[-]</span></h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="equityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Profit & Loss <span class="spark-label" id="pnlTitleValue">[-]</span></h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="pnlChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Deposits & Withdrawals <span class="spark-label" id="depositsTitleValue">[-]</span></h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="depositsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
       <div class="metrics-card collapsed loading" id="metricsCard">
+      <button class="metrics-scroll-arrow left" type="button" aria-label="Scroll metrics left">‹</button>
+      <button class="metrics-scroll-arrow right" type="button" aria-label="Scroll metrics right">›</button>
       <div class="metrics-grid">
         <div class="metric">
           <div class="metric-label" title="Net change in portfolio PnL over the selected range." data-tooltip="Net change in portfolio PnL over the selected range.">Total PnL (Portfolio)</div>
@@ -3229,28 +3344,6 @@
           <div class="metric-sub">PnL vs BTC</div>
         </div>
       </div>
-      </div>
-      <div class="chart-grid" id="portfolioCharts">
-        <div class="chart-card">
-          <h3>Equity <span class="spark-label" id="equityTitleValue">[-]</span></h3>
-          <div class="chart-canvas-wrap">
-            <canvas id="equityChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h3>Profit & Loss <span class="spark-label" id="pnlTitleValue">[-]</span></h3>
-          <div class="chart-canvas-wrap">
-            <canvas id="pnlChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h3>Deposits & Withdrawals <span class="spark-label" id="depositsTitleValue">[-]</span></h3>
-          <div class="chart-canvas-wrap">
-            <canvas id="depositsChart"></canvas>
-          </div>
-        </div>
       </div>
       <div class="spot-performance-note is-hidden" id="spotPerformanceNote">
         Spot charts are derived from total account value minus perps.
@@ -3634,6 +3727,7 @@
   const rangeButtons = document.querySelectorAll(".chart-range-btn");
   const exportExcelBtn = document.getElementById("exportExcelBtn");
   const metricsCardEl = document.getElementById("metricsCard");
+  const metricsGridEl = metricsCardEl ? metricsCardEl.querySelector(".metrics-grid") : null;
   const metricsToggleEl = document.getElementById("metricsToggle");
   const performanceShareBtnEl = document.getElementById("performanceShareBtn");
   const metricsWalletLabelEl = document.getElementById("metricsWalletLabel");
@@ -11619,7 +11713,115 @@
       const icon = metricsToggleEl.querySelector("[aria-hidden='true']");
       if (icon) icon.textContent = isCollapsed ? "▾" : "▴";
       metricsToggleEl.setAttribute("aria-expanded", String(!isCollapsed));
+      if (metricsGridEl) {
+        const maxScroll = metricsGridEl.scrollWidth - metricsGridEl.clientWidth;
+        const leftOk = metricsGridEl.scrollLeft > 2;
+        const rightOk = metricsGridEl.scrollLeft < maxScroll - 2;
+        metricsCardEl.classList.toggle("show-left", isCollapsed && leftOk);
+        metricsCardEl.classList.toggle("show-right", isCollapsed && rightOk);
+      }
     });
+  }
+
+  if (metricsGridEl) {
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragScrollLeft = 0;
+
+    const updateMetricsScrollArrows = () => {
+      if (!metricsCardEl) return;
+      if (!metricsCardEl.classList.contains("collapsed")) {
+        metricsCardEl.classList.remove("show-left", "show-right");
+        return;
+      }
+      const maxScroll = metricsGridEl.scrollWidth - metricsGridEl.clientWidth;
+      const leftOk = metricsGridEl.scrollLeft > 2;
+      const rightOk = metricsGridEl.scrollLeft < maxScroll - 2;
+      metricsCardEl.classList.toggle("show-left", leftOk);
+      metricsCardEl.classList.toggle("show-right", rightOk);
+    };
+
+    const scrollMetricsBy = (dir = 1, multiplier = 1) => {
+      const base = Math.max(metricsGridEl.clientWidth * 0.6, 180);
+      metricsGridEl.scrollBy({ left: base * dir * multiplier, behavior: "smooth" });
+    };
+    const scrollMetricsStep = (dir = 1) => scrollMetricsBy(dir, 0.25);
+
+    const leftArrow = metricsCardEl?.querySelector(".metrics-scroll-arrow.left");
+    const rightArrow = metricsCardEl?.querySelector(".metrics-scroll-arrow.right");
+    let metricsHoldTimer = null;
+    const clearMetricsHold = () => {
+      if (metricsHoldTimer) {
+        clearInterval(metricsHoldTimer);
+        metricsHoldTimer = null;
+      }
+    };
+
+    if (leftArrow) {
+      leftArrow.addEventListener("click", (e) => {
+        e.preventDefault();
+        scrollMetricsBy(-1);
+      });
+      leftArrow.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        clearMetricsHold();
+        metricsHoldTimer = setInterval(() => scrollMetricsStep(-1), 120);
+      });
+      leftArrow.addEventListener("mouseup", clearMetricsHold);
+      leftArrow.addEventListener("mouseleave", clearMetricsHold);
+      leftArrow.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        clearMetricsHold();
+        metricsHoldTimer = setInterval(() => scrollMetricsStep(-1), 120);
+      }, { passive: false });
+      leftArrow.addEventListener("touchend", clearMetricsHold);
+    }
+    if (rightArrow) {
+      rightArrow.addEventListener("click", (e) => {
+        e.preventDefault();
+        scrollMetricsBy(1);
+      });
+      rightArrow.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        clearMetricsHold();
+        metricsHoldTimer = setInterval(() => scrollMetricsStep(1), 120);
+      });
+      rightArrow.addEventListener("mouseup", clearMetricsHold);
+      rightArrow.addEventListener("mouseleave", clearMetricsHold);
+      rightArrow.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        clearMetricsHold();
+        metricsHoldTimer = setInterval(() => scrollMetricsStep(1), 120);
+      }, { passive: false });
+      rightArrow.addEventListener("touchend", clearMetricsHold);
+    }
+
+    metricsGridEl.addEventListener("mousedown", (e) => {
+      if (!metricsCardEl?.classList.contains("collapsed")) return;
+      isDragging = true;
+      dragStartX = e.pageX - metricsGridEl.offsetLeft;
+      dragScrollLeft = metricsGridEl.scrollLeft;
+    });
+
+    metricsGridEl.addEventListener("mouseleave", () => {
+      isDragging = false;
+    });
+
+    metricsGridEl.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+
+    metricsGridEl.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = e.pageX - metricsGridEl.offsetLeft;
+      const walk = x - dragStartX;
+      metricsGridEl.scrollLeft = dragScrollLeft - walk;
+    });
+
+    metricsGridEl.addEventListener("scroll", updateMetricsScrollArrows);
+    window.addEventListener("resize", updateMetricsScrollArrows);
+    updateMetricsScrollArrows();
   }
 
   const metricTooltipEl = document.getElementById("metricTooltip");
