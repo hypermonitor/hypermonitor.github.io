@@ -49,6 +49,7 @@
       --accent-cyan: #00b4d8;
       --control-height: 32px;
       --switch-height: 30px;
+      --neutral-blue: rgba(124, 176, 255, 0.95);
     }
 
     * { box-sizing: border-box; }
@@ -1510,6 +1511,10 @@
       font-weight: 400;
     }
 
+    .chart-card h3 span.spark-label.positive { color: var(--accent); }
+    .chart-card h3 span.spark-label.negative { color: var(--danger); }
+    .chart-card h3 span.spark-label.neutral { color: var(--neutral-blue); }
+
     .chart-canvas-wrap {
       position: relative;
       flex: 1 1 auto;
@@ -2210,8 +2215,8 @@
     body.light .breakdown-label { color: #0f172a; }
 
     .metrics-card {
-      margin-top: 0.65rem;
-      padding-top: 0.5rem;
+      margin-top: 0.35rem;
+      padding-top: 0.3rem;
     }
 
     .metrics-card.loading {
@@ -2363,6 +2368,29 @@
 
     body.light .metric-tooltip[data-placement="bottom"]::after {
       border-color: transparent transparent rgba(15, 23, 42, 0.85) transparent;
+    }
+
+    .pnl-tooltip {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      background: rgba(0, 0, 0, 0.75);
+      color: #e5e7eb;
+      border: 1px solid rgba(148,163,184,0.5);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.75rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      white-space: nowrap;
+      z-index: 50;
+    }
+
+    .pnl-tooltip .pnl-tooltip-title {
+      font-size: 0.7rem;
+      color: #e5e7eb;
+      font-weight: 600;
+      margin-bottom: 4px;
     }
 
     /* Trades table: slightly denser and allow the last column to wrap so it fits without scrolling */
@@ -3204,21 +3232,21 @@
       </div>
       <div class="chart-grid" id="portfolioCharts">
         <div class="chart-card">
-          <h3>Equity</h3>
+          <h3>Equity <span class="spark-label" id="equityTitleValue">[-]</span></h3>
           <div class="chart-canvas-wrap">
             <canvas id="equityChart"></canvas>
           </div>
         </div>
 
         <div class="chart-card">
-          <h3>Profit & Loss</h3>
+          <h3>Profit & Loss <span class="spark-label" id="pnlTitleValue">[-]</span></h3>
           <div class="chart-canvas-wrap">
             <canvas id="pnlChart"></canvas>
           </div>
         </div>
 
         <div class="chart-card">
-          <h3>Deposits & Withdrawals</h3>
+          <h3>Deposits & Withdrawals <span class="spark-label" id="depositsTitleValue">[-]</span></h3>
           <div class="chart-canvas-wrap">
             <canvas id="depositsChart"></canvas>
           </div>
@@ -3646,6 +3674,9 @@
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
   const depositsCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("depositsChart"));
+  const equityTitleValueEl = document.getElementById("equityTitleValue");
+  const pnlTitleValueEl = document.getElementById("pnlTitleValue");
+  const depositsTitleValueEl = document.getElementById("depositsTitleValue");
 
   const themeToggleBtn = document.getElementById("themeToggle");
 
@@ -3676,6 +3707,8 @@
   const coinColorPending = new Set();
   const coinPriceDecimals = new Map();
   const lastFooterPrices = new Map();
+  let latestLiveEquityValue = null;
+  const chartLastValues = { equity: null, pnl: null, deposits: null };
   const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl", "cash"];
   const manualMidCoins = new Set();
   let manualMidTimer = null;
@@ -4436,6 +4469,134 @@
       maximumFractionDigits: decimals,
     });
     return `${sign}$${abs}`;
+  }
+
+  function getCssVar(name, fallback) {
+    const val = getComputedStyle(document.body).getPropertyValue(name).trim();
+    return val || fallback;
+  }
+
+  function getLastFiniteValue(list) {
+    if (!Array.isArray(list)) return null;
+    for (let i = list.length - 1; i >= 0; i -= 1) {
+      const n = Number(list[i]);
+      if (Number.isFinite(n)) return n;
+    }
+    return null;
+  }
+
+  function getLastFiniteFromDatasets(datasets) {
+    if (!Array.isArray(datasets)) return null;
+    for (const ds of datasets) {
+      const val = getLastFiniteValue(ds?.data);
+      if (Number.isFinite(val)) return val;
+    }
+    return null;
+  }
+
+  function updateChartTitleValues(liveEquityValue = null) {
+    const liveEquity = Number.isFinite(liveEquityValue) ? liveEquityValue : null;
+    const equityChartValue = Number.isFinite(chartLastValues.equity) ? chartLastValues.equity : null;
+    const pnlChartValue = Number.isFinite(chartLastValues.pnl) ? chartLastValues.pnl : null;
+    const depositsChartValue = Number.isFinite(chartLastValues.deposits) ? chartLastValues.deposits : null;
+
+    if (equityTitleValueEl) {
+      const equityDisplay = liveEquity !== null ? liveEquity : equityChartValue;
+      equityTitleValueEl.textContent = equityDisplay !== null ? fmtMoney(equityDisplay, 0) : "-";
+      equityTitleValueEl.classList.add("neutral");
+    }
+
+    if (pnlTitleValueEl) {
+      let pnlDisplay = pnlChartValue;
+      if (liveEquity !== null && equityChartValue !== null && pnlChartValue !== null) {
+        pnlDisplay = pnlChartValue + (liveEquity - equityChartValue);
+      }
+      pnlTitleValueEl.textContent = pnlDisplay !== null ? formatSignedDollarWithPlus(pnlDisplay, 0) : "-";
+      pnlTitleValueEl.classList.remove("positive", "negative");
+      if (Number.isFinite(pnlDisplay)) {
+        pnlTitleValueEl.classList.add(pnlDisplay >= 0 ? "positive" : "negative");
+      }
+    }
+
+    if (depositsTitleValueEl) {
+      depositsTitleValueEl.textContent =
+        depositsChartValue !== null ? formatSignedDollarWithPlus(depositsChartValue, 0) : "-";
+      depositsTitleValueEl.classList.remove("positive", "negative", "neutral");
+      if (Number.isFinite(depositsChartValue)) {
+        if (depositsChartValue === 0) {
+          depositsTitleValueEl.classList.add("neutral");
+        } else {
+          depositsTitleValueEl.classList.add(depositsChartValue >= 0 ? "negative" : "positive");
+        }
+      }
+    }
+  }
+
+  function applyPnlTooltipStyling(chart) {
+    if (!chart?.options?.plugins?.tooltip) return;
+    const resolve = (v) => (v >= 0 ? getCssVar("--accent", "#22c55e") : getCssVar("--danger", "#ef4444"));
+    chart.options.plugins.tooltip.enabled = false;
+    chart.options.plugins.tooltip.external = (context) => {
+      const { chart, tooltip } = context;
+      let tooltipEl = chart.canvas.parentElement?.querySelector(".pnl-tooltip");
+      if (!tooltipEl) {
+        tooltipEl = document.createElement("div");
+        tooltipEl.className = "pnl-tooltip";
+        chart.canvas.parentElement?.appendChild(tooltipEl);
+      }
+      if (!tooltip || tooltip.opacity === 0) {
+        tooltipEl.style.opacity = "0";
+        return;
+      }
+      const point = tooltip.dataPoints?.[0];
+      const v = Number(point?.parsed?.y ?? point?.raw ?? 0);
+      const title = tooltip.title?.[0] || point?.label || "";
+      tooltipEl.innerHTML = `
+        <div class="pnl-tooltip-title">${title}</div>
+        <div class="pnl-tooltip-value">${formatSignedDollarWithPlus(v, 2)}</div>
+      `;
+      const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
+      if (valueEl) valueEl.style.color = resolve(v);
+      const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+      tooltipEl.style.left = `${positionX + tooltip.caretX}px`;
+      tooltipEl.style.top = `${positionY + tooltip.caretY - 8}px`;
+      tooltipEl.style.opacity = "1";
+    };
+  }
+
+  function applyDepositsTooltipStyling(chart) {
+    if (!chart?.options?.plugins?.tooltip) return;
+    const resolve = (v) => {
+      if (v === 0) return getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
+      return v >= 0 ? getCssVar("--danger", "#ef4444") : getCssVar("--accent", "#22c55e");
+    };
+    chart.options.plugins.tooltip.enabled = false;
+    chart.options.plugins.tooltip.external = (context) => {
+      const { chart, tooltip } = context;
+      let tooltipEl = chart.canvas.parentElement?.querySelector(".pnl-tooltip");
+      if (!tooltipEl) {
+        tooltipEl = document.createElement("div");
+        tooltipEl.className = "pnl-tooltip";
+        chart.canvas.parentElement?.appendChild(tooltipEl);
+      }
+      if (!tooltip || tooltip.opacity === 0) {
+        tooltipEl.style.opacity = "0";
+        return;
+      }
+      const point = tooltip.dataPoints?.[0];
+      const v = Number(point?.parsed?.y ?? point?.raw ?? 0);
+      const title = tooltip.title?.[0] || point?.label || "";
+      tooltipEl.innerHTML = `
+        <div class="pnl-tooltip-title">${title}</div>
+        <div class="pnl-tooltip-value">${formatSignedDollarWithPlus(v, 2)}</div>
+      `;
+      const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
+      if (valueEl) valueEl.style.color = resolve(v);
+      const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+      tooltipEl.style.left = `${positionX + tooltip.caretX}px`;
+      tooltipEl.style.top = `${positionY + tooltip.caretY - 8}px`;
+      tooltipEl.style.opacity = "1";
+    };
   }
 
   function fmtPrice(v) {
@@ -6989,6 +7150,8 @@
   function recomputeAndRenderMarginSummary() {
     if (!currentWallets.length) {
       renderMarginSummary([]);
+      latestLiveEquityValue = null;
+      updateChartTitleValues(latestLiveEquityValue);
       return;
     }
 
@@ -7040,6 +7203,13 @@
     });
 
     renderMarginSummary(items);
+    const weights = getNormalizedWeights(currentWallets.map((w) => String(w)));
+    latestLiveEquityValue = items.reduce((sum, item, idx) => {
+      const val = Number(item?.summary?.accountValue ?? 0);
+      const weight = Number(weights[idx] ?? 0);
+      return sum + (Number.isFinite(val) ? val * weight : 0);
+    }, 0);
+    updateChartTitleValues(latestLiveEquityValue);
   }
 
   function renderPositions(assetPositions) {
@@ -10698,6 +10868,10 @@
       setPortfolioLoadingState(false, "");
       portfolioErrorEl.textContent = "No performance data available for the selected wallets.";
       if (currentMarketType === "perp") clearPerformanceMetrics();
+      chartLastValues.equity = null;
+      chartLastValues.pnl = null;
+      chartLastValues.deposits = null;
+      updateChartTitleValues(latestLiveEquityValue);
       return;
     }
 
@@ -10710,32 +10884,43 @@
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
     const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
 
+    const equityDatasets = [
+      ...(weightedEquity ? [weightedEquity] : []),
+      ...buildWalletDatasets(views, labels, "equity", singleWallet ? singleColors.equity : null),
+    ];
+    const pnlDatasets = [
+      ...(weightedPnl ? [weightedPnl] : []),
+      ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
+    ];
+    const depositsDatasets = [
+      ...(weightedDeposits ? [weightedDeposits] : []),
+      ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
+    ];
+
     portfolioCharts.equity = createLineChart(
       equityCanvas.getContext("2d"),
       labels,
-      [
-        ...(weightedEquity ? [weightedEquity] : []),
-        ...buildWalletDatasets(views, labels, "equity", singleWallet ? singleColors.equity : null),
-      ]
+      equityDatasets
     );
 
     portfolioCharts.pnl = createLineChart(
       pnlCanvas.getContext("2d"),
       labels,
-      [
-        ...(weightedPnl ? [weightedPnl] : []),
-        ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
-      ]
+      pnlDatasets
     );
+    applyPnlTooltipStyling(portfolioCharts.pnl);
 
     portfolioCharts.deposits = createLineChart(
       depositsCanvas.getContext("2d"),
       labels,
-      [
-        ...(weightedDeposits ? [weightedDeposits] : []),
-        ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
-      ]
+      depositsDatasets
     );
+    applyDepositsTooltipStyling(portfolioCharts.deposits);
+
+    chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
+    chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
+    chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
+    updateChartTitleValues(latestLiveEquityValue);
     updatePerformanceMetrics(rangeKey);
   }
 
@@ -10744,6 +10929,10 @@
     if (!views.length) {
       portfolioErrorEl.textContent = "No performance data available for the selected range.";
       if (currentMarketType === "perp") clearPerformanceMetrics();
+      chartLastValues.equity = null;
+      chartLastValues.pnl = null;
+      chartLastValues.deposits = null;
+      updateChartTitleValues(latestLiveEquityValue);
       return;
     }
     portfolioErrorEl.textContent = "";
@@ -10785,6 +10974,7 @@
     if (pnlChart.options.plugins?.legend) {
       pnlChart.options.plugins.legend.display = pnlDatasets.length > 1;
     }
+    applyPnlTooltipStyling(pnlChart);
     pnlChart.update();
 
     depositsChart.data.labels = labels;
@@ -10792,7 +10982,12 @@
     if (depositsChart.options.plugins?.legend) {
       depositsChart.options.plugins.legend.display = depositsDatasets.length > 1;
     }
+    applyDepositsTooltipStyling(depositsChart);
     depositsChart.update();
+    chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
+    chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
+    chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
+    updateChartTitleValues(latestLiveEquityValue);
     updatePerformanceMetrics(rangeKey);
   }
 
