@@ -2563,7 +2563,7 @@
     .price-item {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.3rem;
       font-size: 0.78rem;
       color: var(--text-main);
       font-weight: 400;
@@ -2605,7 +2605,7 @@
       min-width: 7ch;
       text-align: right;
       color: var(--muted);
-      margin-left: -0.25rem;
+      margin-left: 0.25rem;
     }
 
     .price-item .coin-change.upnl-pos {
@@ -4768,8 +4768,17 @@
     const maxX = positionX + chartArea.right - 6;
     const halfWidth = tooltipEl.offsetWidth / 2;
     const clampedX = Math.min(Math.max(caretX, minX + halfWidth), maxX - halfWidth);
+    const minY = positionY + chartArea.top + 6;
+    const maxY = positionY + chartArea.bottom - 6;
+    const height = tooltipEl.offsetHeight || 0;
+    let top = caretY;
+    if (top < minY) {
+      top = minY;
+    } else if (top + height > maxY) {
+      top = maxY - height;
+    }
     tooltipEl.style.left = `${clampedX}px`;
-    tooltipEl.style.top = `${caretY}px`;
+    tooltipEl.style.top = `${top}px`;
   }
 
   function fmtPrice(v) {
@@ -8704,6 +8713,17 @@
     }
   }
 
+  async function initFooterStream() {
+    await ensurePriceStream();
+    applyFooterChangeVisibility();
+    await refreshFooterChanges();
+    ensureFooterChangeTimer();
+    await sanitizeFooterCoins();
+    await primeManualMidsForFooter();
+    renderFooterPrices();
+    updateFooterActionLabel();
+  }
+
   async function loadSnapshot(wallet) {
     try {
       snapshotErrorEl.textContent = "";
@@ -11287,13 +11307,15 @@
     try {
       const spotMetaTask = ensureSpotMeta();
       await initClients();
-      await ensurePriceStream();
       await spotMetaTask;
       const spotLoadTask = refreshSpotForWallets(walletList);
-      await Promise.all(walletList.map((wallet) => loadSnapshot(wallet)));
-      await startStreams(walletList);
-      await loadPortfolio(walletList);
-      await ensureHistoricalDataLoaded();
+      await Promise.all([
+        Promise.all(walletList.map((wallet) => loadSnapshot(wallet))),
+        loadPortfolio(walletList),
+        startStreams(walletList),
+        ensureHistoricalDataLoaded(),
+      ]);
+      await initFooterStream();
 
       if (ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalOrders(walletList);
@@ -11337,17 +11359,10 @@
     updateFavoriteToggle();
 
     await initClients();
-    await ensurePriceStream();
-    applyFooterChangeVisibility();
-    await refreshFooterChanges();
-    ensureFooterChangeTimer();
-    await sanitizeFooterCoins();
-    await primeManualMidsForFooter();
-    renderFooterPrices();
-    updateFooterActionLabel();
 
     // ✅ Replace URL on first load (so / becomes /?wallet=... without extra history)
     await trackWallets({ wallets: initialWallets }, { replaceUrl: true });
+    await initFooterStream();
     updateMarketToggleIndicator();
     updateRangeToggleIndicator();
     updateTabSwitchIndicator(ordersTabsEl);
