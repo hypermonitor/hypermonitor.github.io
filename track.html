@@ -625,6 +625,10 @@
       display: none !important;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     .wallet-track-btn {
       padding: 0.45rem 0.8rem;
       border-radius: 10px;
@@ -814,7 +818,7 @@
       }
 
       /* --- Orders / Fills tables: hide time + total (usually widest) --- */
-      /* Open Orders: OrderID(1) Time(2) Side(3) Asset(4) Size(5) Limit(6) Total(7) */
+      /* Open Orders: OrderID(1) Time(2) Asset(3) Side(4) Type(5) Size(6) Limit(7) MobilePrice(8) */
       #openOrdersBody td:nth-child(1),
       #openOrdersBody td:nth-child(2),
       #openOrdersBody td:nth-child(7),
@@ -822,7 +826,7 @@
         display: none;
       }
 
-      /* Trades Stream: OrderID(1) Time(2) Side(3) Asset(4) Size(5) Price(6) Total(7) */
+      /* Trades Stream: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) */
       #fillsBody td:nth-child(1),
       #fillsBody td:nth-child(2),
       #fillsBody td:nth-child(7),
@@ -838,13 +842,9 @@
         display: none;
       }
 
-      /* Canceled Orders: OrderID(1) Created(2) Canceled(3) Side(4) Asset(5) Size(6) */
+      /* Canceled Orders: OrderID(1) Time(2) Asset(3) Side(4) Type(5) Size(6) */
       #canceledOrdersBody th:nth-child(1),
-      #canceledOrdersBody td:nth-child(1),
-      #canceledOrdersBody td:nth-child(2),
-      #canceledOrdersBody th:nth-child(2),
-      #canceledOrdersBody td:nth-child(3),
-      #canceledOrdersBody th:nth-child(3) {
+      #canceledOrdersBody td:nth-child(1) {
         display: none;
       }
     }
@@ -1312,6 +1312,19 @@
       margin-bottom: 1.5rem;
     }
 
+    #liveLayout .layout-two {
+      gap: 0;
+    }
+
+    #liveLayout .layout-two > *:first-child {
+      padding-right: 0.8rem;
+      border-right: 1px solid var(--border);
+    }
+
+    #liveLayout .layout-two > *:last-child {
+      padding-left: 0.8rem;
+    }
+
     @media (max-width: 900px) {
       .layout-two { grid-template-columns: 1fr; }
     }
@@ -1332,6 +1345,44 @@
     .section-title small {
       font-size: 0.75rem;
       color: var(--muted);
+    }
+
+    #liveLayout > .section-title {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+    }
+
+    #liveLayout > .section-title > h2 {
+      justify-self: start;
+    }
+
+    #liveLayout > .section-title > .orders-tabs {
+      justify-self: center;
+    }
+
+    #historyLayout > .section-title {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+    }
+
+    #historyLayout > .section-title > h2 {
+      justify-self: start;
+    }
+
+    #historyLayout > .section-title > .orders-tabs {
+      justify-self: center;
+    }
+
+    .history-tabs-row {
+      justify-content: flex-start;
+    }
+
+    #liveLayout h3,
+    #historyLayout h3 {
+      margin: 0 0 0.4rem;
+      font-size: 0.95rem;
     }
 
     .section-actions {
@@ -2484,9 +2535,9 @@
     }
 
     /* Trades table: slightly denser and allow the last column to wrap so it fits without scrolling */
-    .trades-card table { font-size: 0.78rem; }
-    .trades-card th, .trades-card td { padding: 0.3rem 0.35rem; }
-    .trades-card td.desktop-only.money:last-child {
+    .trades-live-panel table { font-size: 0.78rem; }
+    .trades-live-panel th, .trades-live-panel td { padding: 0.3rem 0.35rem; }
+    .trades-live-panel td.desktop-only.money:last-child {
       white-space: normal;
       word-break: break-word;
     }
@@ -3358,17 +3409,16 @@
 
   <p></p>
 
-  <div class="layout-two">
-    <section class="card">
+  <section class="card" id="liveLayout">
+    <div class="section-title">
       <h2>Orders</h2>
-
-      <div class="orders-tabs switch" id="ordersTabs">
+      <div class="orders-tabs switch" id="modeTabs">
         <span class="orders-tabs-indicator" aria-hidden="true"></span>
-        <button class="orders-tab-btn orders-only-tab-btn active" data-tab="live" aria-label="Live">
+        <button class="orders-tab-btn mode-tab-btn active" data-tab="live" aria-label="Live">
           <span class="live-dot" aria-hidden="true"></span>
           <span>Live</span>
         </button>
-        <button class="orders-tab-btn orders-only-tab-btn" data-tab="history" aria-label="History">
+        <button class="orders-tab-btn mode-tab-btn" data-tab="history" aria-label="History">
           <span class="history-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false">
               <path d="M12 8v5l4 2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -3379,127 +3429,102 @@
           <span>History</span>
         </button>
       </div>
+    </div>
 
-      <div id="ordersLivePanel" class="tab-panel">
-        <div class="section-title">
-          <span>Open</span>
-          <small id="openOrdersCount">–</small>
-        </div>
-        <div style="height: 160px; overflow: auto; margin-bottom: .75rem;">
-          <table>
-            <thead>
-            <tr>
-              <th class="desktop-only">Order ID</th>
-              <th class="desktop-only">Time</th>  
-              <th style="width: 20%;">Asset</th>
-              <th>Side</th>
-              <th>Size</th>
-              <th class="desktop-only">Limit Price</th>
-              <th class="mobile-only">Price</th>
-            </tr>
-            </thead>
-            <tbody id="openOrdersBody">
-            <tr><td colspan="6" class="muted">No open orders.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="section-title">
-          <span>Canceled</span>
-          <small id="canceledCount">–</small>
-        </div>
-        <div style="max-height: 160px; overflow: auto;">
-          <table>
-            <thead>
-            <tr>
-              <th class="desktop-only">Order ID</th>
-              <th class="desktop-only">Created</th>
-              <th class="desktop-only">Canceled</th>
-              <th>Asset</th>
-              <th>Side</th>
-              <th>Size</th>
-              <th class="mobile-only">Price</th>
-            </tr>
-            </thead>
-            <tbody id="canceledOrdersBody">
-            <tr><td colspan="6" class="muted">No canceled orders yet.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="error" id="ordersError"></div>
-      </div>
-
-      <div id="ordersHistoryPanel" class="tab-panel hidden">
-        <div class="section-title">
-          <span>Historical (last 2000)</span>
-          <small id="historicalOrdersCount">–</small>
-        </div>
-
-        <div class="orders-filter-bar">
-          <div class="orders-filter-group">
-            <span class="orders-filter-label">Asset</span>
-            <input
-              id="historicalAssetFilter"
-              class="orders-filter-input"
-              type="text"
-              placeholder="e.g. ETH"
-              autocomplete="off"
-            />
+    <div class="layout-two">
+      <section class="orders-live-panel">
+        <div id="ordersLivePanel" class="tab-panel">
+          <div class="section-title">
+            <span>Open</span>
+            <small id="openOrdersCount">–</small>
+          </div>
+          <div style="height: 160px; overflow: auto; margin-bottom: .75rem;">
+            <table>
+              <thead>
+              <tr>
+                <th class="desktop-only">Order ID</th>
+                <th class="desktop-only">Time</th>  
+                <th style="width: 20%;">Asset</th>
+                <th>Side</th>
+                <th>Size</th>
+                <th class="desktop-only">Type</th>
+                <th class="desktop-only">Limit Price</th>
+                <th class="mobile-only">Price</th>
+              </tr>
+              </thead>
+              <tbody id="openOrdersBody">
+              <tr><td colspan="8" class="muted">Loading open orders…</td></tr>
+              </tbody>
+            </table>
           </div>
 
-          <div class="orders-filter-group">
-            <span class="orders-filter-label">Side</span>
-            <select id="historicalSideFilter" class="orders-filter-select">
-              <option value="all">All</option>
-              <option value="B">Buy</option>
-              <option value="S">Sell</option>
-            </select>
+          <div class="section-title">
+            <span>Canceled</span>
+            <small id="canceledCount">–</small>
+          </div>
+          <div style="max-height: 160px; overflow: auto;">
+            <table>
+              <thead>
+              <tr>
+                <th class="desktop-only">Order ID</th>
+                <th>Time</th>
+                <th>Asset</th>
+                <th>Side</th>
+                <th class="desktop-only">Type</th>
+                <th>Size</th>
+                <th class="mobile-only">Price</th>
+              </tr>
+              </thead>
+              <tbody id="canceledOrdersBody">
+              <tr><td colspan="7" class="muted">No canceled orders yet.</td></tr>
+              </tbody>
+            </table>
           </div>
 
-          <div class="orders-filter-group">
-            <span class="orders-filter-label">Status</span>
-            <select id="historicalStatusFilter" class="orders-filter-select">
-              <option value="all">All</option>
-              <option value="open">Open</option>
-              <option value="filled">Filled</option>
-              <option value="canceled">Canceled</option>
-              <option value="resting">Resting</option>
-            </select>
+          <div class="error" id="ordersError"></div>
+        </div>
+      </section>
+
+      <section class="trades-live-panel">
+        <div id="fillsLivePanel" class="tab-panel">
+          <div class="section-title">
+            <span>Filled</span>
+            <small id="fillsCount">–</small>
           </div>
+          <div style="max-height: 360px; overflow: auto;">
+            <table>
+              <thead>
+              <tr>
+                <th class="desktop-only">Order ID</th>
+                <th class="desktop-only">Time</th>
+                <th>Asset</th>
+                <th>Side</th>
+                <th>Size</th>
+                <th>Price</th>
+                <th class="desktop-only">Type</th>
+              </tr>
+              </thead>
+              <tbody id="fillsBody">
+              <tr><td colspan="7" class="muted">Waiting for fills…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="error" id="fillsError"></div>
         </div>
+      </section>
+    </div>
+  </section>
 
-        <div style="max-height: 380px; overflow: auto;">
-          <table class="table-sortable">
-            <thead>
-            <tr>
-              <th class="sortable" data-sort="orderId">Order ID</th>
-              <th class="sortable" data-sort="time">Date / Time</th>
-              <th class="sortable" data-sort="side">Side</th>
-              <th class="sortable" data-sort="asset">Asset</th>
-              <th class="sortable" data-sort="size">Size</th>
-              <th class="sortable" data-sort="price">Price</th>
-              <th class="sortable" data-sort="status">Status</th>
-            </tr>
-            </thead>
-            <tbody id="historicalOrdersBody">
-            <tr><td colspan="7" class="muted">Loading historical orders…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section class="card trades-card">
-      <h2>Trades</h2>
-
-      <div class="orders-tabs switch" id="fillsTabs">
+  <section class="card tab-panel hidden" id="historyLayout">
+    <div class="section-title">
+      <h2>History</h2>
+      <div class="orders-tabs switch" id="modeTabsHistory">
         <span class="orders-tabs-indicator" aria-hidden="true"></span>
-        <button class="orders-tab-btn fills-tab-btn active" data-tab="fills-live" aria-label="Live">
+        <button class="orders-tab-btn mode-tab-btn active" data-tab="live" aria-label="Live">
           <span class="live-dot" aria-hidden="true"></span>
           <span>Live</span>
         </button>
-        <button class="orders-tab-btn fills-tab-btn" data-tab="fills-history" aria-label="History">
+        <button class="orders-tab-btn mode-tab-btn" data-tab="history" aria-label="History">
           <span class="history-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false">
               <path d="M12 8v5l4 2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -3510,63 +3535,107 @@
           <span>History</span>
         </button>
       </div>
+    </div>
 
-      <div id="fillsLivePanel" class="tab-panel">
-        <div class="section-title">
-          <span>Live</span>
-          <small id="fillsCount">–</small>
-        </div>
-        <div style="max-height: 360px; overflow: auto;">
-          <table>
-            <thead>
-            <tr>
-              <th class="desktop-only">Order ID</th>
-              <th class="desktop-only">Time</th>
-              <th>Side</th>
-              <th>Asset</th>
-              <th>Size</th>
-              <th>Price</th>
-              <th class="desktop-only">Notional</th>
-            </tr>
-            </thead>
-            <tbody id="fillsBody">
-            <tr><td colspan="7" class="muted">Waiting for fills…</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="error" id="fillsError"></div>
+    <div class="section-title history-tabs-row">
+      <div class="orders-tabs switch" id="historyTabs">
+        <span class="orders-tabs-indicator" aria-hidden="true"></span>
+        <button class="orders-tab-btn history-tab-btn active" data-tab="orders-history" aria-label="Historical Orders">
+          <span>Orders</span>
+        </button>
+        <button class="orders-tab-btn history-tab-btn" data-tab="fills-history" aria-label="Historical Trades">
+          <span>Trades</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="ordersHistoryPanel" class="tab-panel">
+      <div class="section-title">
+        <span>Historical (last 2000)</span>
+        <small id="historicalOrdersCount">–</small>
       </div>
 
-      <div id="fillsHistoryPanel" class="tab-panel hidden">
-        <div class="section-title">
-          <span>Historical (last 2000)</span>
-          <small id="historicalFillsCount">–</small>
+      <div class="orders-filter-bar">
+        <div class="orders-filter-group">
+          <span class="orders-filter-label">Asset</span>
+          <input
+            id="historicalAssetFilter"
+            class="orders-filter-input"
+            type="text"
+            placeholder="e.g. ETH"
+            autocomplete="off"
+          />
         </div>
-        <div style="max-height: 360px; overflow: auto;">
-          <table class="table-sortable">
-            <thead>
-            <tr>
-              <th class="desktop-only sortable" data-sort="orderId">Order ID</th>
-              <th class="sortable" data-sort="time">Date / Time</th>
-              <th class="sortable" data-sort="side">Side</th>
-              <th class="sortable" data-sort="asset">Asset</th>
-              <th class="sortable" data-sort="size">Size</th>
-              <th class="sortable" data-sort="price">Price</th>
-              <th class="sortable" data-sort="pnl">Closed PnL</th>
-            </tr>
-            </thead>
-            <tbody id="historicalFillsBody">
-            <tr><td colspan="6" class="muted">Loading historical fills…</td></tr>
-            </tbody>
-          </table>
+
+        <div class="orders-filter-group">
+          <span class="orders-filter-label">Side</span>
+          <select id="historicalSideFilter" class="orders-filter-select">
+            <option value="all">All</option>
+            <option value="B">Buy</option>
+            <option value="S">Sell</option>
+          </select>
+        </div>
+
+        <div class="orders-filter-group">
+          <span class="orders-filter-label">Status</span>
+          <select id="historicalStatusFilter" class="orders-filter-select">
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="filled">Filled</option>
+            <option value="canceled">Canceled</option>
+            <option value="resting">Resting</option>
+          </select>
         </div>
       </div>
-    </section>
-  </div>
+
+      <div style="max-height: 380px; overflow: auto;">
+        <table class="table-sortable">
+          <thead>
+          <tr>
+            <th class="sortable" data-sort="orderId">Order ID</th>
+            <th class="sortable" data-sort="time">Date / Time</th>
+            <th class="sortable" data-sort="side">Side</th>
+            <th class="sortable" data-sort="asset">Asset</th>
+            <th class="sortable" data-sort="size">Size</th>
+            <th class="sortable" data-sort="price">Price</th>
+            <th class="sortable" data-sort="status">Status</th>
+          </tr>
+          </thead>
+          <tbody id="historicalOrdersBody">
+          <tr><td colspan="7" class="muted">Loading historical orders…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="fillsHistoryPanel" class="tab-panel hidden">
+      <div class="section-title">
+        <span>Historical (last 2000)</span>
+        <small id="historicalFillsCount">–</small>
+      </div>
+      <div style="max-height: 360px; overflow: auto;">
+        <table class="table-sortable">
+          <thead>
+          <tr>
+            <th class="desktop-only sortable" data-sort="orderId">Order ID</th>
+            <th class="sortable" data-sort="time">Date / Time</th>
+            <th class="sortable" data-sort="side">Side</th>
+            <th class="sortable" data-sort="asset">Asset</th>
+            <th class="sortable" data-sort="size">Size</th>
+            <th class="sortable" data-sort="price">Price</th>
+            <th class="sortable" data-sort="pnl">Closed PnL</th>
+          </tr>
+          </thead>
+          <tbody id="historicalFillsBody">
+          <tr><td colspan="6" class="muted">Loading historical fills…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
   <footer>
     <div style="margin-top:.1rem;">
-        © <span id="year"></span> <a href="/">Hypermonitor</a>.
     </div>
   </footer>
 </div>
@@ -3698,10 +3767,15 @@
   const historicalOrdersBodyEl = document.getElementById("historicalOrdersBody");
   const historicalOrdersCountEl = document.getElementById("historicalOrdersCount");
 
-  const ordersTabButtons = document.querySelectorAll(".orders-only-tab-btn");
   const ordersLivePanelEl = document.getElementById("ordersLivePanel");
   const ordersHistoryPanelEl = document.getElementById("ordersHistoryPanel");
-  const ordersTabsEl = document.getElementById("ordersTabs");
+  const historyLayoutEl = document.getElementById("historyLayout");
+  const liveLayoutEl = document.getElementById("liveLayout");
+  const historyTabsEl = document.getElementById("historyTabs");
+  const modeTabsEl = document.getElementById("modeTabs");
+  const modeTabsHistoryEl = document.getElementById("modeTabsHistory");
+  const modeTabButtons = document.querySelectorAll(".mode-tab-btn");
+  const historyTabButtons = document.querySelectorAll(".history-tab-btn");
 
   const historicalSideFilterEl = document.getElementById("historicalSideFilter");
   const historicalStatusFilterEl = document.getElementById("historicalStatusFilter");
@@ -3712,10 +3786,8 @@
   const fillsCountEl = document.getElementById("fillsCount");
   const historicalFillsBodyEl = document.getElementById("historicalFillsBody");
   const historicalFillsCountEl = document.getElementById("historicalFillsCount");
-  const fillsTabButtons = document.querySelectorAll(".fills-tab-btn");
   const fillsLivePanelEl = document.getElementById("fillsLivePanel");
   const fillsHistoryPanelEl = document.getElementById("fillsHistoryPanel");
-  const fillsTabsEl = document.getElementById("fillsTabs");
 
   const portfolioErrorEl = document.getElementById("portfolioError");
   const portfolioLoadingEl = document.getElementById("portfolioLoading");
@@ -3832,7 +3904,6 @@
     ].map((t) => t.toUpperCase())
   );
 
-  document.getElementById("year").textContent = new Date().getFullYear();
 
   function loadFooterCoins() {
     try {
@@ -4833,6 +4904,33 @@
     if (!Number.isFinite(n) || n === 0) return "–";
     const rounded = Number.isInteger(n) ? n.toFixed(0) : n.toFixed(1);
     return `${rounded}X`;
+  }
+
+  function getEntryLeverage(entry) {
+    const leverage =
+      entry?.leverage?.value ??
+      entry?.leverage ??
+      entry?.lever ??
+      entry?.leverageValue ??
+      entry?.maxLeverage ??
+      entry?.lev;
+    const n = Number(leverage);
+    if (!Number.isFinite(n) || n === 0) return "";
+    return formatLeverage(n);
+  }
+
+  function getOrderTypeLabel(entry) {
+    const raw = entry?.orderType ?? entry?.type ?? entry?.order_type;
+    if (typeof raw === "string") return raw.toUpperCase();
+    if (raw && typeof raw === "object") {
+      if (raw.limit) return "LIMIT";
+      if (raw.market) return "MARKET";
+      if (raw.trigger) return "TRIGGER";
+    }
+    if (entry?.isTrigger || entry?.triggerPx || entry?.triggerPrice) return "TRIGGER";
+    if (entry?.isMarket || entry?.market) return "MARKET";
+    if (entry?.tif) return "LIMIT";
+    return "–";
   }
 
   function formatFunding(value) {
@@ -7775,16 +7873,20 @@
     const rows = values.map((order) => {
       const created = fmtDateTime(order.timestamp);
       const side = order.side ?? "?";
+      const leverageDisplay =
+        order.marketType !== "spot" ? getEntryLeverage(order) : "";
       const coin = resolveCoinName(order.coin, order.asset);
       const wallet = order.wallet || primaryWallet;
       const forceSpot = entryMatchesMarketType(order, "spot");
       const orderIdHtml = formatSpotIdHtml(order.oid);
+      const orderType = getOrderTypeLabel(order);
       return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
           <td class="desktop-only"><span class="timestamp">${created}</span></td>
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
-          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}${leverageDisplay ? ` ${leverageDisplay}` : ""}</span></td>
+          <td class="desktop-only">${orderType}</td>
           <td class="money">${fmtSize(order.sz)}</td>
           <td class="money">${fmtLimitPrice(order.limitPx) ?? ""}</td>
         </tr>
@@ -7793,14 +7895,14 @@
 
     // If none, show 1 “No open orders.” row, then pad to MIN_ROWS
     if (rows.length === 0) {
-      rows.push(`<tr><td colspan="6" class="muted">No open orders.</td></tr>`);
+      rows.push(`<tr><td colspan="8" class="muted">No open orders.</td></tr>`);
     }
 
     // Pad with empty rows until we have MIN_ROWS visible rows
     while (rows.length < MIN_ROWS) {
       rows.push(`
         <tr class="placeholder-row">
-          <td colspan="6">&nbsp;</td>
+          <td colspan="8">&nbsp;</td>
         </tr>
       `);
     }
@@ -7813,7 +7915,7 @@
     canceledCountEl.textContent = filtered.length.toString();
 
     if (filtered.length === 0) {
-      canceledOrdersBodyEl.innerHTML = "<tr><td colspan='4' class='muted'>No canceled orders yet.</td></tr>";
+      canceledOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No canceled orders yet.</td></tr>";
       return;
     }
 
@@ -7822,21 +7924,26 @@
       const created = fmtTimeOnly(o.timestamp);
       const canceledAtTime = fmtTimeOnly(o.statusTimestamp);
       const side = o.side ?? "?";
+      const leverageDisplay =
+        o.marketType !== "spot" ? getEntryLeverage(o) : "";
       const coin = resolveCoinName(o.coin, o.asset);
       const wallet = o.wallet || primaryWallet;
       const forceSpot = entryMatchesMarketType(o, "spot");
       const orderIdHtml = formatSpotIdHtml(o.oid);
+      const orderType = getOrderTypeLabel(o);
       return `
         <tr class="flash-cancel">
           <td class="desktop-only">${orderIdHtml}</td>
-          <td class="desktop-only"><span class="timestamp">${created}</span></td>
           <td>
-            <span class="mobile-only timestamp">${canceledAtTime}</span>
-            <span class="desktop-only timestamp">${canceledAtTime}</span>
+            <div class="price-stack">
+              <span class="timestamp">Created: ${created}</span>
+              <span class="timestamp">Canceled: ${canceledAtTime}</span>
+            </div>
           </td>
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
-          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>  
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}${leverageDisplay ? ` ${leverageDisplay}` : ""}</span></td>  
           <td class="money">${fmtSize(o.sz)}</td>
+          <td class="desktop-only">${orderType}</td>
           <td class="mobile-only money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
         </tr>
       `;
@@ -7857,10 +7964,19 @@
         const tTime = fmtTimeOnly(fill.time);
         const total = computeTotal(fill);
         const side = fill.side ?? "?";
+        const leverageDisplay =
+          fill.marketType !== "spot" ? getEntryLeverage(fill) : "";
         const orderIdHtml = formatSpotIdHtml(fill.oid);
         const coin = resolveCoinName(fill.coin, fill.asset ?? fill.symbol ?? fill.sym);
         const wallet = fill.wallet || primaryWallet;
         const forceSpot = entryMatchesMarketType(fill, "spot");
+        const sizeAbs = Math.abs(Number(fill.sz ?? 0));
+        const pxVal = Number(fill.px ?? 0);
+        const notionalVal =
+          Number.isFinite(sizeAbs) && Number.isFinite(pxVal) ? sizeAbs * pxVal : NaN;
+        const signedNotional = side === "S" ? -notionalVal : notionalVal;
+        const notionalDisplay = Number.isFinite(signedNotional) ? formatSignedDollar(signedNotional) : "";
+        const orderType = getOrderTypeLabel(fill);
         return `
         <tr class="flash">
           <td class="desktop-only">${orderIdHtml}</td>
@@ -7868,11 +7984,16 @@
             <span class="mobile-only timestamp">${tTime}</span>
             <span class="desktop-only timestamp">${tTime}</span>
           </td>
-          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
-          <td class="money">${fmtSize(fill.sz)}</td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}${leverageDisplay ? ` ${leverageDisplay}` : ""}</span></td>
+          <td class="money size-cell">
+            <div class="price-stack size-stack">
+              <span class="notional-sub">${notionalDisplay}</span>
+              <span class="size-main">${fmtSize(fill.sz)} <span class="size-ticker">${coin}</span></span>
+            </div>
+          </td>
           <td class="money">${fmtPrice(fill.px) ?? ""}</td>
-          <td class="desktop-only money">${total ? "$" + total : ""}</td>
+          <td class="desktop-only">${orderType}</td>
         </tr>
       `;
       })
@@ -8665,8 +8786,8 @@
     fillsErrorEl.textContent = "";
     snapshotErrorEl.textContent = "";
 
-    openOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No open orders.</td></tr>";
-    canceledOrdersBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>No canceled orders yet.</td></tr>";
+    openOrdersBodyEl.innerHTML = "<tr><td colspan='8' class='muted'>Loading open orders…</td></tr>";
+    canceledOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No canceled orders yet.</td></tr>";
     fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills…</td></tr>";
 
     if (historicalOrdersBodyEl) {
@@ -8756,7 +8877,7 @@
         setWalletPositions("perp", wallet, combined);
       });
 
-      const existingOpen = await infoClient.openOrders({ user: wallet });
+      const existingOpen = await infoClient.frontendOpenOrders({ user: wallet });
       existingOpen.forEach((order) => {
         const key = `${wallet}:${order.oid}`;
         const rawCoin = order.coin ?? order.asset ?? order.symbol ?? order.sym ?? "";
@@ -8809,6 +8930,9 @@
                   renderOpenOrders();
                   canceledOrders.unshift(order);
                   renderCanceledOrders();
+                } else if (status === "filled" || status === "closed" || status === "rejected") {
+                  openOrders.delete(key);
+                  renderOpenOrders();
                 }
               });
             } catch (err) {
@@ -11317,10 +11441,10 @@
       ]);
       await initFooterStream();
 
-      if (ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
+      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalOrders(walletList);
       }
-      if (fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
+      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalFills(walletList);
       }
       if (currentMarketType === "spot") {
@@ -11365,8 +11489,9 @@
     await initFooterStream();
     updateMarketToggleIndicator();
     updateRangeToggleIndicator();
-    updateTabSwitchIndicator(ordersTabsEl);
-    updateTabSwitchIndicator(fillsTabsEl);
+    updateTabSwitchIndicator(modeTabsEl);
+    updateTabSwitchIndicator(modeTabsHistoryEl);
+    updateTabSwitchIndicator(historyTabsEl);
   })();
 
   trackBtnEl.addEventListener("click", () => {
@@ -11385,8 +11510,8 @@
   window.addEventListener("resize", () => {
     updateMarketToggleIndicator();
     updateRangeToggleIndicator();
-    updateTabSwitchIndicator(ordersTabsEl);
-    updateTabSwitchIndicator(fillsTabsEl);
+    updateTabSwitchIndicator(modeTabsEl);
+    updateTabSwitchIndicator(modeTabsHistoryEl);
   });
 
   if (walletInputsEl) {
@@ -11767,6 +11892,30 @@
     });
   });
 
+  let lastHistoryFocus = "orders";
+  function setHistoryMode(enabled, focus = lastHistoryFocus) {
+    if (liveLayoutEl) liveLayoutEl.classList.toggle("hidden", enabled);
+    if (historyLayoutEl) historyLayoutEl.classList.toggle("hidden", !enabled);
+    if (!enabled) {
+      ordersLivePanelEl?.classList.remove("hidden");
+      fillsLivePanelEl?.classList.remove("hidden");
+      modeTabButtons.forEach((b) => b.classList.toggle("active", b.dataset.tab === "live"));
+      updateTabSwitchIndicator(modeTabsEl);
+      updateTabSwitchIndicator(modeTabsHistoryEl);
+      return;
+    }
+
+    const isOrders = focus === "orders";
+    lastHistoryFocus = isOrders ? "orders" : "fills";
+    if (ordersHistoryPanelEl) ordersHistoryPanelEl.classList.toggle("hidden", !isOrders);
+    if (fillsHistoryPanelEl) fillsHistoryPanelEl.classList.toggle("hidden", isOrders);
+    historyTabButtons.forEach((b) => b.classList.toggle("active", b.dataset.tab === (isOrders ? "orders-history" : "fills-history")));
+    updateTabSwitchIndicator(historyTabsEl);
+    modeTabButtons.forEach((b) => b.classList.toggle("active", b.dataset.tab === "history"));
+    updateTabSwitchIndicator(modeTabsEl);
+    updateTabSwitchIndicator(modeTabsHistoryEl);
+  }
+
   if (metricsToggleEl && metricsCardEl) {
     metricsToggleEl.addEventListener("click", () => {
       const isCollapsed = metricsCardEl.classList.toggle("collapsed");
@@ -12118,41 +12267,35 @@
     });
   }
 
-  ordersTabButtons.forEach((btn) => {
+  modeTabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const tab = btn.dataset.tab;
-
-      ordersTabButtons.forEach((b) => b.classList.remove("active"));
+      modeTabButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       updateTabSwitchIndicator(btn.closest(".orders-tabs"));
 
       if (tab === "history") {
-        ordersLivePanelEl.classList.add("hidden");
-        ordersHistoryPanelEl.classList.remove("hidden");
-
-        if (currentWallets.length) loadHistoricalOrders(currentWallets);
+        setHistoryMode(true, lastHistoryFocus);
+        if (lastHistoryFocus === "orders") {
+          if (currentWallets.length) loadHistoricalOrders(currentWallets);
+        } else {
+          if (currentWallets.length) loadHistoricalFills(currentWallets);
+        }
       } else {
-        ordersHistoryPanelEl.classList.add("hidden");
-        ordersLivePanelEl.classList.remove("hidden");
+        setHistoryMode(false);
       }
     });
   });
 
-  fillsTabButtons.forEach((btn) => {
+  historyTabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const tab = btn.dataset.tab;
-
-      fillsTabButtons.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      updateTabSwitchIndicator(btn.closest(".orders-tabs"));
-
-      if (tab === "fills-history") {
-        fillsLivePanelEl.classList.add("hidden");
-        fillsHistoryPanelEl.classList.remove("hidden");
-        if (currentWallets.length) loadHistoricalFills(currentWallets);
+      const isOrders = tab === "orders-history";
+      setHistoryMode(true, isOrders ? "orders" : "fills");
+      if (isOrders) {
+        if (currentWallets.length) loadHistoricalOrders(currentWallets);
       } else {
-        fillsHistoryPanelEl.classList.add("hidden");
-        fillsLivePanelEl.classList.remove("hidden");
+        if (currentWallets.length) loadHistoricalFills(currentWallets);
       }
     });
   });
