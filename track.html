@@ -2572,22 +2572,42 @@
     }
 
     .orders-live-panel tbody td:nth-child(2) {
-      text-align: center;
+      text-align: left;
     }
 
     @media (min-width: 720px) {
-      .orders-live-panel thead th:nth-child(1) { width: 17.5%; }
+      .orders-live-panel thead th:nth-child(1) { width: 16%; }
       .orders-live-panel thead th:nth-child(2) { width: 15%; }
       .orders-live-panel thead th:nth-child(3) { width: 12%; }
-      .orders-live-panel thead th:nth-child(4) { width: 14%; }
-      .orders-live-panel thead th:nth-child(5) { width: 16%; }
+      .orders-live-panel thead th:nth-child(4) { width: 12%; }
+      .orders-live-panel thead th:nth-child(5) { width: 18%; }
       .orders-live-panel thead th:nth-child(6) { width: 15%; }
       .orders-live-panel thead th:nth-child(7) { width: 18%; }
+
+      #canceledOrdersTable thead th:nth-child(1) { width: 16%; }
+      #canceledOrdersTable thead th:nth-child(2) { width: 20%; }
+      #canceledOrdersTable thead th:nth-child(3) { width: 12%; }
+      #canceledOrdersTable thead th:nth-child(4) { width: 12%; }
+      #canceledOrdersTable thead th:nth-child(5) { width: 17%; }
+      #canceledOrdersTable thead th:nth-child(6) { width: 13%; }
+      #canceledOrdersTable thead th:nth-child(7) { width: 16%; }
     }
 
     .trades-live-panel td.desktop-only.money:last-child {
       white-space: normal;
       word-break: break-word;
+    }
+
+    .time-line {
+      display: inline-flex;
+      gap: 0.35rem;
+      white-space: nowrap;
+      align-items: baseline;
+    }
+
+    .order-id {
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
     }
 
     .price-footer {
@@ -3487,7 +3507,7 @@
             <small id="openOrdersCount">–</small>
           </div>
           <div style="height: 190px; overflow: auto; margin-bottom: .75rem;">
-            <table class="table-sortable">
+            <table class="table-sortable" id="openOrdersTable">
               <thead>
               <tr>
                 <th class="desktop-only sortable" data-sort="orderId">Order ID</th>
@@ -3495,8 +3515,8 @@
                 <th class="sortable" data-sort="asset">Asset</th>
                 <th class="sortable" data-sort="side">Side</th>
                 <th class="sortable" data-sort="size">Size</th>
-                <th class="desktop-only sortable" data-sort="type">Type</th>
                 <th class="desktop-only sortable" data-sort="price">Price</th>
+                <th class="desktop-only sortable" data-sort="type">Type</th>
                 <th class="mobile-only sortable" data-sort="price">Price</th>
               </tr>
               </thead>
@@ -3511,17 +3531,17 @@
             <small id="canceledCount">–</small>
           </div>
           <div style="max-height: 160px; overflow: auto;">
-            <table class="table-sortable">
+            <table class="table-sortable" id="canceledOrdersTable">
               <thead>
               <tr>
-                <th class="desktop-only">Order ID</th>
-                <th>Time</th>
-                <th>Asset</th>
-                <th>Side</th>
-                <th>Size</th>
-                <th class="desktop-only">Type</th>
-                <th class="desktop-only">Price</th>
-                <th class="mobile-only">Price</th>
+                <th class="desktop-only sortable" data-sort="orderId">Order ID</th>
+                <th class="sortable" data-sort="time">Time</th>
+                <th class="sortable" data-sort="asset">Asset</th>
+                <th class="sortable" data-sort="side">Side</th>
+                <th class="sortable" data-sort="size">Size</th>
+                <th class="desktop-only sortable" data-sort="price">Price</th>
+                <th class="desktop-only sortable" data-sort="type">Type</th>
+                <th class="mobile-only sortable" data-sort="price">Price</th>
               </tr>
               </thead>
               <tbody id="canceledOrdersBody">
@@ -3804,7 +3824,8 @@
   const favoritesAddBtnEl = document.getElementById("favoritesAddBtn");
   const favoritesListEl = document.getElementById("favoritesList");
   const positionsHeaderEls = Array.from(document.querySelectorAll(".positions-card thead th[data-sort]"));
-  const openOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersLivePanel thead th[data-sort]"));
+  const openOrdersHeaderEls = Array.from(document.querySelectorAll("#openOrdersTable thead th[data-sort]"));
+  const canceledOrdersHeaderEls = Array.from(document.querySelectorAll("#canceledOrdersTable thead th[data-sort]"));
   const historicalOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersHistoryPanel thead th[data-sort]"));
   const historicalFillsHeaderEls = Array.from(document.querySelectorAll("#fillsHistoryPanel thead th[data-sort]"));
 
@@ -3908,6 +3929,7 @@
   let currentHistoricalOrdersSort = { key: "time", dir: "desc" };
   let currentHistoricalFillsSort = { key: "time", dir: "desc" };
   let currentOpenOrdersSort = { key: "time", dir: "desc" };
+  let currentCanceledOrdersSort = { key: "time", dir: "desc" };
   const coinIdMap = new Map();
   const spotIdMetaMap = new Map();
   let perpDexNames = null;
@@ -5149,6 +5171,19 @@
     const size = Math.abs(Number(order?.sz ?? 0));
     const price = Number(order?.limitPx ?? order?.px ?? 0);
     const time = Number(order?.timestamp ?? 0);
+    const orderId = String(order?.oid ?? "");
+    return { asset: assetLabel, side, type, size, price, time, orderId };
+  }
+
+  function getCanceledOrdersSortMetrics(order) {
+    const coin = resolveCoinName(order?.coin, order?.asset) || "";
+    const { label: spotLabel } = resolveSpotDisplay(coin);
+    const assetLabel = (spotLabel || coin || "").toUpperCase();
+    const side = sideLabel(order?.side ?? "");
+    const type = getOrderTypeLabel(order) || "";
+    const size = Math.abs(Number(order?.sz ?? 0));
+    const price = Number(order?.limitPx ?? order?.px ?? 0);
+    const time = Number(order?.statusTimestamp ?? order?.timestamp ?? 0);
     const orderId = String(order?.oid ?? "");
     return { asset: assetLabel, side, type, size, price, time, orderId };
   }
@@ -8018,7 +8053,7 @@
       const notionalDisplay = Number.isFinite(signedNotional) ? formatSignedDollar(signedNotional) : "";
       return `
         <tr>
-          <td class="desktop-only">${orderIdHtml}</td>
+          <td class="desktop-only"><span class="order-id">${orderIdHtml}</span></td>
           <td class="desktop-only">
             <div class="price-stack">
               <span class="timestamp">${createdDate}</span>
@@ -8033,13 +8068,13 @@
               <span class="size-main">${fmtSize(order.sz)} <span class="size-ticker">${coinLabel}</span></span>
             </div>
           </td>
-          <td class="desktop-only"><span class="order-type">${orderType}</span></td>
           <td class="money">
             <div class="price-stack">
               <span>${limitPriceDisplay}</span>
               ${triggerCondition ? `<span class="notional-sub">Trigger: ${triggerCondition}</span>` : ""}
             </div>
           </td>
+          <td class="desktop-only"><span class="order-type">${orderType}</span></td>
         </tr>
       `;
     });
@@ -8066,8 +8101,23 @@
     canceledCountEl.textContent = filtered.length.toString();
 
     if (filtered.length === 0) {
-      canceledOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No canceled orders yet.</td></tr>";
+      canceledOrdersBodyEl.innerHTML = "<tr><td colspan='8' class='muted'>No canceled orders yet.</td></tr>";
       return;
+    }
+
+    if (currentCanceledOrdersSort?.key) {
+      const metricsMap = new Map();
+      const getMetrics = (order) => {
+        if (!metricsMap.has(order)) metricsMap.set(order, getCanceledOrdersSortMetrics(order));
+        return metricsMap.get(order);
+      };
+      const sortKey = currentCanceledOrdersSort.key;
+      const sortDir = currentCanceledOrdersSort.dir;
+      filtered.sort((a, b) => {
+        const ma = getMetrics(a);
+        const mb = getMetrics(b);
+        return comparePositionSort(ma?.[sortKey], mb?.[sortKey], sortDir);
+      });
     }
 
     canceledOrdersBodyEl.innerHTML = filtered
@@ -8078,24 +8128,54 @@
       const leverageDisplay =
         o.marketType !== "spot" ? getEntryLeverage(o) : "";
       const coin = resolveCoinName(o.coin, o.asset);
+      const { label: spotLabel } = resolveSpotDisplay(coin);
+      const coinLabel = spotLabel || coin;
       const wallet = o.wallet || primaryWallet;
       const forceSpot = entryMatchesMarketType(o, "spot");
       const orderIdHtml = formatSpotIdHtml(o.oid);
       const orderType = getOrderTypeLabel(o);
+      const triggerCondition = formatTriggerConditionLabel(getTriggerCondition(o));
+      const triggerPxRaw = o?.triggerPx ?? o?.triggerPrice ?? o?.trigger_price;
+      const triggerPxValue = Number(triggerPxRaw);
+      const triggerPxDisplay = Number.isFinite(triggerPxValue) ? fmtPrice(triggerPxValue) : "";
+      const limitPriceDisplay = fmtLimitPrice(o.limitPx) ?? "";
+      const sizeAbs = Math.abs(Number(o.sz ?? 0));
+      const limitPxVal = Number(o.limitPx ?? 0);
+      const notionalVal =
+        Number.isFinite(sizeAbs) && Number.isFinite(limitPxVal) ? sizeAbs * limitPxVal : NaN;
+      const signedNotional = side === "S" ? -notionalVal : notionalVal;
+      const notionalDisplay = Number.isFinite(signedNotional) ? formatSignedDollar(signedNotional) : "";
       return `
         <tr class="flash-cancel">
-          <td class="desktop-only">${orderIdHtml}</td>
+          <td class="desktop-only"><span class="order-id">${orderIdHtml}</span></td>
           <td>
             <div class="price-stack">
-              <span class="timestamp">Created: ${created}</span>
-              <span class="timestamp">Canceled: ${canceledAtTime}</span>
+              <span class="timestamp time-line"><span>Created:</span><span>${created}</span></span>
+              <span class="timestamp time-line"><span>Canceled:</span><span>${canceledAtTime}</span></span>
             </div>
           </td>
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}${leverageDisplay ? ` ${leverageDisplay}` : ""}</span></td>  
-          <td class="money">${fmtSize(o.sz)}</td>
+          <td class="money size-cell">
+            <div class="price-stack size-stack">
+              <span class="notional-sub">${notionalDisplay}</span>
+              <span class="size-main">${fmtSize(o.sz)} <span class="size-ticker">${coinLabel}</span></span>
+            </div>
+          </td>
+          <td class="money">
+            <div class="price-stack">
+              <span>${limitPriceDisplay}</span>
+              ${
+                triggerCondition
+                  ? `<span class="notional-sub">Trigger: ${triggerCondition}${
+                      triggerPxDisplay ? ` · ${triggerPxDisplay}` : ""
+                    }</span>`
+                  : ""
+              }
+            </div>
+          </td>
           <td class="desktop-only"><span class="order-type">${orderType}</span></td>
-          <td class="mobile-only money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
+          <td class="mobile-only money">${limitPriceDisplay}</td>
         </tr>
       `;
       })
@@ -8130,7 +8210,7 @@
         const orderType = getOrderTypeLabel(fill);
         return `
         <tr class="flash">
-          <td class="desktop-only">${orderIdHtml}</td>
+          <td class="desktop-only"><span class="order-id">${orderIdHtml}</span></td>
           <td>
             <span class="mobile-only timestamp">${tTime}</span>
             <span class="desktop-only timestamp">${tTime}</span>
@@ -8938,7 +9018,7 @@
     snapshotErrorEl.textContent = "";
 
     openOrdersBodyEl.innerHTML = "<tr><td colspan='8' class='muted'>Loading open orders…</td></tr>";
-    canceledOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>No canceled orders yet.</td></tr>";
+    canceledOrdersBodyEl.innerHTML = "<tr><td colspan='8' class='muted'>No canceled orders yet.</td></tr>";
     fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills…</td></tr>";
 
     if (historicalOrdersBodyEl) {
@@ -11835,6 +11915,23 @@
       });
     });
     updateTableSortHeaders(openOrdersHeaderEls, currentOpenOrdersSort);
+  }
+
+  if (canceledOrdersHeaderEls.length) {
+    canceledOrdersHeaderEls.forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (!key) return;
+        if (currentCanceledOrdersSort?.key === key) {
+          currentCanceledOrdersSort.dir = currentCanceledOrdersSort.dir === "asc" ? "desc" : "asc";
+        } else {
+          currentCanceledOrdersSort = { key, dir: getGenericSortDefaultDir(key) };
+        }
+        updateTableSortHeaders(canceledOrdersHeaderEls, currentCanceledOrdersSort);
+        renderCanceledOrders();
+      });
+    });
+    updateTableSortHeaders(canceledOrdersHeaderEls, currentCanceledOrdersSort);
   }
 
   if (historicalOrdersHeaderEls.length) {
