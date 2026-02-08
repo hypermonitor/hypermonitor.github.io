@@ -5211,6 +5211,63 @@
     return { asset: assetLabel, side, type, size, price, time, orderId };
   }
 
+  function getFillMetaLabel(fill) {
+    const tif = fill?.tif ?? fill?.timeInForce ?? fill?.time_in_force;
+    const postOnly = fill?.postOnly ?? fill?.isPostOnly ?? fill?.post_only ?? false;
+    const parts = [];
+    if (typeof tif === "string" && tif.trim()) parts.push(tif.trim().toUpperCase());
+    if (postOnly) parts.push("Post-only");
+    return parts.join(" · ");
+  }
+
+  function getFillFeeLabel(fill) {
+    const feeRaw =
+      fill?.feeUsd ??
+      fill?.feeUSD ??
+      fill?.fee ??
+      fill?.feeAmount ??
+      fill?.feeValue ??
+      fill?.feePaid;
+    const fee = Number(feeRaw);
+    if (Number.isFinite(fee) && fee !== 0) {
+      return formatSignedDollar(fee);
+    }
+    const feeToken = fill?.feeToken ?? fill?.feeCoin ?? fill?.feeCurrency;
+    if (Number.isFinite(fee) && feeToken) return `${fee} ${feeToken}`;
+    return "";
+  }
+
+  function getFillLiquidityLabel(fill) {
+    const raw =
+      fill?.liquidity ??
+      fill?.liq ??
+      fill?.isMaker ??
+      fill?.maker ??
+      fill?.taker ??
+      fill?.isTaker;
+    if (typeof raw === "string") {
+      const lower = raw.toLowerCase();
+      if (lower.includes("maker")) return "Maker";
+      if (lower.includes("taker")) return "Taker";
+    }
+    if (raw === true && (fill?.isMaker || fill?.maker)) return "Maker";
+    if (raw === true && (fill?.isTaker || fill?.taker)) return "Taker";
+    if (fill?.isMaker === true || fill?.maker === true) return "Maker";
+    if (fill?.isTaker === true || fill?.taker === true) return "Taker";
+    return "";
+  }
+
+  function getFillStatusLabel(fill) {
+    const raw = fill?.status ?? fill?.fillStatus ?? fill?.orderStatus;
+    if (!raw) return "";
+    if (typeof raw === "string") {
+      const lower = raw.toLowerCase();
+      if (lower.includes("partial")) return "Partial";
+      if (lower.includes("filled") || lower.includes("done")) return "Filled";
+    }
+    return "";
+  }
+
   function getPositionSortMetrics(item) {
     const p = item?.position || {};
     const coin = p.coin || "";
@@ -8119,7 +8176,8 @@
     openOrdersBodyEl.innerHTML = rows.join("");
   }
 
-  function renderCanceledOrders() {
+  function renderCanceledOrders(options = {}) {
+    const suppressFlash = Boolean(options.suppressFlash);
     const filtered = filterEntriesByMarketType(canceledOrders);
     canceledCountEl.textContent = filtered.length.toString();
 
@@ -8169,7 +8227,7 @@
       const signedNotional = side === "S" ? -notionalVal : notionalVal;
       const notionalDisplay = Number.isFinite(signedNotional) ? formatSignedDollar(signedNotional) : "";
       return `
-        <tr class="flash-cancel">
+        <tr class="${suppressFlash ? "" : "flash-cancel"}">
           <td class="desktop-only"><span class="order-id">${orderIdHtml}</span></td>
           <td>
             <div class="price-stack">
@@ -8205,7 +8263,8 @@
       .join("");
   }
 
-  function renderFills() {
+  function renderFills(options = {}) {
+    const suppressFlash = Boolean(options.suppressFlash);
     const filtered = filterEntriesByMarketType(fills);
     if (filtered.length === 0) {
       fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills...</td></tr>";
@@ -8246,8 +8305,12 @@
         const signedNotional = side === "S" ? -notionalVal : notionalVal;
         const notionalDisplay = Number.isFinite(signedNotional) ? formatSignedDollar(signedNotional) : "";
         const orderType = getOrderTypeLabel(fill);
+        const typeMeta = getFillMetaLabel(fill);
+        const feeLabel = getFillFeeLabel(fill);
+        const liquidityLabel = getFillLiquidityLabel(fill);
+        const statusLabel = getFillStatusLabel(fill);
         return `
-        <tr class="flash">
+        <tr class="${suppressFlash ? "" : "flash"}">
           <td class="desktop-only"><span class="order-id">${orderIdHtml}</span></td>
           <td>
             <span class="mobile-only timestamp">${tTime}</span>
@@ -8261,8 +8324,22 @@
               <span class="size-main">${fmtSize(fill.sz)} <span class="size-ticker">${coin}</span></span>
             </div>
           </td>
-          <td class="money">${fmtPrice(fill.px) ?? ""}</td>
-          <td class="desktop-only"><span class="order-type">${orderType}</span></td>
+          <td class="money">
+            <div class="price-stack">
+              <span>${fmtPrice(fill.px) ?? ""}</span>
+              ${feeLabel ? `<span class="notional-sub">Fee: ${feeLabel}</span>` : ""}
+            </div>
+          </td>
+          <td class="desktop-only">
+            <div class="price-stack">
+              ${orderType && orderType !== "–" ? `<span class="order-type">${orderType}</span>` : ""}
+              ${
+                [typeMeta, liquidityLabel, statusLabel].filter(Boolean).length
+                  ? `<span class="notional-sub">${[typeMeta, liquidityLabel, statusLabel].filter(Boolean).join(" · ")}</span>`
+                  : ""
+              }
+            </div>
+          </td>
         </tr>
       `;
       })
@@ -11966,7 +12043,7 @@
           currentCanceledOrdersSort = { key, dir: getGenericSortDefaultDir(key) };
         }
         updateTableSortHeaders(canceledOrdersHeaderEls, currentCanceledOrdersSort);
-        renderCanceledOrders();
+        renderCanceledOrders({ suppressFlash: true });
       });
     });
     updateTableSortHeaders(canceledOrdersHeaderEls, currentCanceledOrdersSort);
@@ -11983,7 +12060,7 @@
           currentFillsSort = { key, dir: getGenericSortDefaultDir(key) };
         }
         updateTableSortHeaders(fillsHeaderEls, currentFillsSort);
-        renderFills();
+        renderFills({ suppressFlash: true });
       });
     });
     updateTableSortHeaders(fillsHeaderEls, currentFillsSort);
