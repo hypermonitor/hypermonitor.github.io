@@ -817,6 +817,18 @@
         opacity: 0.9;
       }
 
+      .table-sortable .sort-indicator {
+        margin-left: 0.25rem;
+        font-size: 0.5rem;
+        letter-spacing: 0.02em;
+        opacity: 0.9;
+      }
+
+      .order-type {
+        display: inline-block;
+        line-height: 1.15;
+      }
+
       /* --- Orders / Fills tables: hide time + total (usually widest) --- */
       /* Open Orders: OrderID(1) Time(2) Asset(3) Side(4) Type(5) Size(6) Limit(7) MobilePrice(8) */
       #openOrdersBody td:nth-child(1),
@@ -2534,9 +2546,45 @@
       margin-bottom: 4px;
     }
 
-    /* Trades table: slightly denser and allow the last column to wrap so it fits without scrolling */
-    .trades-live-panel table { font-size: 0.78rem; }
-    .trades-live-panel th, .trades-live-panel td { padding: 0.3rem 0.35rem; }
+    /* Orders/Fills tables: auto scale to reduce horizontal scrolling */
+    .orders-live-panel table,
+    .trades-live-panel table {
+      font-size: clamp(0.64rem, 0.55vw + 0.35rem, 0.8rem);
+    }
+
+    .orders-live-panel th,
+    .orders-live-panel td,
+    .trades-live-panel th,
+    .trades-live-panel td {
+      padding: clamp(0.2rem, 0.4vw, 0.35rem) clamp(0.25rem, 0.5vw, 0.45rem);
+      word-break: break-word;
+    }
+
+    .orders-live-panel table {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .orders-live-panel th,
+    .orders-live-panel td {
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    .orders-live-panel tbody td:nth-child(2) {
+      text-align: center;
+    }
+
+    @media (min-width: 720px) {
+      .orders-live-panel thead th:nth-child(1) { width: 17.5%; }
+      .orders-live-panel thead th:nth-child(2) { width: 15%; }
+      .orders-live-panel thead th:nth-child(3) { width: 12%; }
+      .orders-live-panel thead th:nth-child(4) { width: 14%; }
+      .orders-live-panel thead th:nth-child(5) { width: 16%; }
+      .orders-live-panel thead th:nth-child(6) { width: 15%; }
+      .orders-live-panel thead th:nth-child(7) { width: 18%; }
+    }
+
     .trades-live-panel td.desktop-only.money:last-child {
       white-space: normal;
       word-break: break-word;
@@ -3438,18 +3486,18 @@
             <span>Open</span>
             <small id="openOrdersCount">–</small>
           </div>
-          <div style="height: 160px; overflow: auto; margin-bottom: .75rem;">
-            <table>
+          <div style="height: 190px; overflow: auto; margin-bottom: .75rem;">
+            <table class="table-sortable">
               <thead>
               <tr>
-                <th class="desktop-only">Order ID</th>
-                <th class="desktop-only">Time</th>  
-                <th style="width: 20%;">Asset</th>
-                <th>Side</th>
-                <th>Size</th>
-                <th class="desktop-only">Type</th>
-                <th class="desktop-only">Limit Price</th>
-                <th class="mobile-only">Price</th>
+                <th class="desktop-only sortable" data-sort="orderId">Order ID</th>
+                <th class="desktop-only sortable" data-sort="time">Time</th>  
+                <th class="sortable" data-sort="asset">Asset</th>
+                <th class="sortable" data-sort="side">Side</th>
+                <th class="sortable" data-sort="size">Size</th>
+                <th class="desktop-only sortable" data-sort="type">Type</th>
+                <th class="desktop-only sortable" data-sort="price">Price</th>
+                <th class="mobile-only sortable" data-sort="price">Price</th>
               </tr>
               </thead>
               <tbody id="openOrdersBody">
@@ -3463,20 +3511,21 @@
             <small id="canceledCount">–</small>
           </div>
           <div style="max-height: 160px; overflow: auto;">
-            <table>
+            <table class="table-sortable">
               <thead>
               <tr>
                 <th class="desktop-only">Order ID</th>
                 <th>Time</th>
                 <th>Asset</th>
                 <th>Side</th>
-                <th class="desktop-only">Type</th>
                 <th>Size</th>
+                <th class="desktop-only">Type</th>
+                <th class="desktop-only">Price</th>
                 <th class="mobile-only">Price</th>
               </tr>
               </thead>
               <tbody id="canceledOrdersBody">
-              <tr><td colspan="7" class="muted">No canceled orders yet.</td></tr>
+              <tr><td colspan="8" class="muted">No canceled orders yet.</td></tr>
               </tbody>
             </table>
           </div>
@@ -3755,6 +3804,7 @@
   const favoritesAddBtnEl = document.getElementById("favoritesAddBtn");
   const favoritesListEl = document.getElementById("favoritesList");
   const positionsHeaderEls = Array.from(document.querySelectorAll(".positions-card thead th[data-sort]"));
+  const openOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersLivePanel thead th[data-sort]"));
   const historicalOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersHistoryPanel thead th[data-sort]"));
   const historicalFillsHeaderEls = Array.from(document.querySelectorAll("#fillsHistoryPanel thead th[data-sort]"));
 
@@ -3857,6 +3907,7 @@
   let currentPositionsSort = { key: "asset", dir: "asc" };
   let currentHistoricalOrdersSort = { key: "time", dir: "desc" };
   let currentHistoricalFillsSort = { key: "time", dir: "desc" };
+  let currentOpenOrdersSort = { key: "time", dir: "desc" };
   const coinIdMap = new Map();
   const spotIdMetaMap = new Map();
   let perpDexNames = null;
@@ -4619,6 +4670,13 @@
     return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   }
 
+  function fmtDateOnly(ms) {
+    if (!ms && ms !== 0) return "";
+    const d = new Date(Number(ms));
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  }
+
   function fmtDateTime(ms) {
     if (!ms && ms !== 0) return "";
     const d = new Date(Number(ms));
@@ -4919,18 +4977,57 @@
     return formatLeverage(n);
   }
 
+  function getTriggerCondition(entry) {
+    const triggerConditionRaw = entry?.triggerCondition ?? entry?.trigger_condition ?? "";
+    if (typeof triggerConditionRaw !== "string") return "";
+    const trimmed = triggerConditionRaw.trim();
+    if (!trimmed || trimmed.toUpperCase() === "N/A") return "";
+    return trimmed;
+  }
+
+  function formatTriggerConditionLabel(value) {
+    const base = String(value || "").trim();
+    if (!base) return "";
+    const withDollar = base.replace(/(\d+(?:\.\d+)?)/g, (match) => (match.startsWith("$") ? match : `$${match}`));
+    return withDollar;
+  }
+
+  function toTitleCase(value) {
+    const s = String(value || "").trim().toLowerCase();
+    if (!s) return "";
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function formatOrderTypeLabel(label) {
+    const parts = String(label || "").trim().split(/\s+/).filter(Boolean);
+    if (parts.length > 2) {
+      return `${parts.slice(0, 2).join(" ")}<br>${parts.slice(2).join(" ")}`;
+    }
+    return parts.join(" ");
+  }
+
   function getOrderTypeLabel(entry) {
     const raw = entry?.orderType ?? entry?.type ?? entry?.order_type;
-    if (typeof raw === "string") return raw.toUpperCase();
+    if (typeof raw === "string") return formatOrderTypeLabel(toTitleCase(raw));
     if (raw && typeof raw === "object") {
-      if (raw.limit) return "LIMIT";
-      if (raw.market) return "MARKET";
-      if (raw.trigger) return "TRIGGER";
+      if (raw.limit) return "Limit";
+      if (raw.market) return "Market";
+      if (raw.trigger) return "Trigger";
     }
-    if (entry?.isTrigger || entry?.triggerPx || entry?.triggerPrice) return "TRIGGER";
-    if (entry?.isMarket || entry?.market) return "MARKET";
-    if (entry?.tif) return "LIMIT";
-    return "–";
+    if (entry?.isTrigger || entry?.triggerPx || entry?.triggerPrice) return "Trigger";
+    if (entry?.isMarket || entry?.market) return "Market";
+    if (entry?.tif) return "Limit";
+    const rawFallback =
+      entry?.orderType ??
+      entry?.type ??
+      entry?.order_type ??
+      entry?.tif ??
+      entry?.timeInForce ??
+      entry?.time_in_force;
+    if (rawFallback !== undefined && rawFallback !== null) {
+      return typeof rawFallback === "string" ? rawFallback : JSON.stringify(rawFallback);
+    }
+    return "-";
   }
 
   function formatFunding(value) {
@@ -5041,6 +5138,19 @@
 
   function getGenericSortDefaultDir(key) {
     return ["asset", "side", "status", "orderId"].includes(key) ? "asc" : "desc";
+  }
+
+  function getOpenOrdersSortMetrics(order) {
+    const coin = resolveCoinName(order?.coin, order?.asset) || "";
+    const { label: spotLabel } = resolveSpotDisplay(coin);
+    const assetLabel = (spotLabel || coin || "").toUpperCase();
+    const side = sideLabel(order?.side ?? "");
+    const type = getOrderTypeLabel(order) || "";
+    const size = Math.abs(Number(order?.sz ?? 0));
+    const price = Number(order?.limitPx ?? order?.px ?? 0);
+    const time = Number(order?.timestamp ?? 0);
+    const orderId = String(order?.oid ?? "");
+    return { asset: assetLabel, side, type, size, price, time, orderId };
   }
 
   function getPositionSortMetrics(item) {
@@ -7870,25 +7980,66 @@
     const MIN_ROWS = 4;
 
     // Build real rows
+    if (currentOpenOrdersSort?.key) {
+      const metricsMap = new Map();
+      const getMetrics = (order) => {
+        if (!metricsMap.has(order)) metricsMap.set(order, getOpenOrdersSortMetrics(order));
+        return metricsMap.get(order);
+      };
+      const sortKey = currentOpenOrdersSort.key;
+      const sortDir = currentOpenOrdersSort.dir;
+      values.sort((a, b) => {
+        const ma = getMetrics(a);
+        const mb = getMetrics(b);
+        return comparePositionSort(ma?.[sortKey], mb?.[sortKey], sortDir);
+      });
+    }
+
     const rows = values.map((order) => {
-      const created = fmtDateTime(order.timestamp);
+      const createdDate = fmtDateOnly(order.timestamp);
+      const createdTime = fmtTimeOnly(order.timestamp);
       const side = order.side ?? "?";
       const leverageDisplay =
         order.marketType !== "spot" ? getEntryLeverage(order) : "";
       const coin = resolveCoinName(order.coin, order.asset);
+      const { label: spotLabel } = resolveSpotDisplay(coin);
+      const coinLabel = spotLabel || coin;
       const wallet = order.wallet || primaryWallet;
       const forceSpot = entryMatchesMarketType(order, "spot");
       const orderIdHtml = formatSpotIdHtml(order.oid);
       const orderType = getOrderTypeLabel(order);
+      const triggerCondition = formatTriggerConditionLabel(getTriggerCondition(order));
+      const limitPriceDisplay = fmtLimitPrice(order.limitPx) ?? "";
+      const sizeAbs = Math.abs(Number(order.sz ?? 0));
+      const limitPxVal = Number(order.limitPx ?? 0);
+      const notionalVal =
+        Number.isFinite(sizeAbs) && Number.isFinite(limitPxVal) ? sizeAbs * limitPxVal : NaN;
+      const signedNotional = side === "S" ? -notionalVal : notionalVal;
+      const notionalDisplay = Number.isFinite(signedNotional) ? formatSignedDollar(signedNotional) : "";
       return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
-          <td class="desktop-only"><span class="timestamp">${created}</span></td>
+          <td class="desktop-only">
+            <div class="price-stack">
+              <span class="timestamp">${createdDate}</span>
+              <span class="timestamp">${createdTime}</span>
+            </div>
+          </td>
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}${leverageDisplay ? ` ${leverageDisplay}` : ""}</span></td>
-          <td class="desktop-only">${orderType}</td>
-          <td class="money">${fmtSize(order.sz)}</td>
-          <td class="money">${fmtLimitPrice(order.limitPx) ?? ""}</td>
+          <td class="money size-cell">
+            <div class="price-stack size-stack">
+              <span class="notional-sub">${notionalDisplay}</span>
+              <span class="size-main">${fmtSize(order.sz)} <span class="size-ticker">${coinLabel}</span></span>
+            </div>
+          </td>
+          <td class="desktop-only"><span class="order-type">${orderType}</span></td>
+          <td class="money">
+            <div class="price-stack">
+              <span>${limitPriceDisplay}</span>
+              ${triggerCondition ? `<span class="notional-sub">Trigger: ${triggerCondition}</span>` : ""}
+            </div>
+          </td>
         </tr>
       `;
     });
@@ -7943,7 +8094,7 @@
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
           <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}${leverageDisplay ? ` ${leverageDisplay}` : ""}</span></td>  
           <td class="money">${fmtSize(o.sz)}</td>
-          <td class="desktop-only">${orderType}</td>
+          <td class="desktop-only"><span class="order-type">${orderType}</span></td>
           <td class="mobile-only money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
         </tr>
       `;
@@ -7993,7 +8144,7 @@
             </div>
           </td>
           <td class="money">${fmtPrice(fill.px) ?? ""}</td>
-          <td class="desktop-only">${orderType}</td>
+          <td class="desktop-only"><span class="order-type">${orderType}</span></td>
         </tr>
       `;
       })
@@ -11667,6 +11818,23 @@
       });
     });
     updatePositionsSortHeaders();
+  }
+
+  if (openOrdersHeaderEls.length) {
+    openOrdersHeaderEls.forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (!key) return;
+        if (currentOpenOrdersSort?.key === key) {
+          currentOpenOrdersSort.dir = currentOpenOrdersSort.dir === "asc" ? "desc" : "asc";
+        } else {
+          currentOpenOrdersSort = { key, dir: getGenericSortDefaultDir(key) };
+        }
+        updateTableSortHeaders(openOrdersHeaderEls, currentOpenOrdersSort);
+        renderOpenOrders();
+      });
+    });
+    updateTableSortHeaders(openOrdersHeaderEls, currentOpenOrdersSort);
   }
 
   if (historicalOrdersHeaderEls.length) {
