@@ -1389,6 +1389,66 @@
 
     .history-tabs-row {
       justify-content: flex-start;
+      margin-top: -0.1rem;
+      width: 100%;
+    }
+
+    #historyTabs {
+      margin-left: 0;
+      margin-right: auto;
+      align-self: flex-start;
+    }
+
+    .history-filter-bar {
+      margin-top: -0.15rem;
+      align-items: flex-end;
+      gap: 0.75rem;
+    }
+
+    .history-filter-bar .history-filter-orders {
+      display: inline-flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .history-filter-bar .history-filter-fills {
+      display: inline-flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .history-filter-bar .history-counts {
+      margin-left: auto;
+      display: inline-flex;
+      gap: 0.6rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .history-orders-table th:nth-child(6),
+    .history-orders-table td:nth-child(6) {
+      width: 17%;
+    }
+
+    .history-fills-table th:nth-child(6),
+    .history-fills-table td:nth-child(6) {
+      width: 17%;
+    }
+
+    #historyLayout[data-view="fills"] .history-filter-orders {
+      display: none;
+    }
+
+    #historyLayout[data-view="orders"] .history-filter-fills {
+      display: none;
+    }
+
+    #historyLayout[data-view="orders"] #historicalFillsCount {
+      display: none;
+    }
+
+    #historyLayout[data-view="fills"] #historicalOrdersCount {
+      display: none;
     }
 
     #liveLayout h3,
@@ -2618,6 +2678,21 @@
       letter-spacing: 0.02em;
     }
 
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.05rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--muted);
+      font-size: 0.65rem;
+      letter-spacing: 0.02em;
+    }
+
+    .reduce-only-badge {
+      margin-left: 0.35rem;
+    }
+
     .price-footer {
       position: fixed;
       left: 0;
@@ -3594,7 +3669,7 @@
 
   <section class="card tab-panel hidden" id="historyLayout">
     <div class="section-title">
-      <h2>History</h2>
+      <h2>Orders</h2>
       <div class="orders-tabs switch" id="modeTabsHistory">
         <span class="orders-tabs-indicator" aria-hidden="true"></span>
         <button class="orders-tab-btn mode-tab-btn active" data-tab="live" aria-label="Live">
@@ -3614,25 +3689,16 @@
       </div>
     </div>
 
-    <div class="section-title history-tabs-row">
-      <div class="orders-tabs switch" id="historyTabs">
-        <span class="orders-tabs-indicator" aria-hidden="true"></span>
-        <button class="orders-tab-btn history-tab-btn active" data-tab="orders-history" aria-label="Historical Orders">
-          <span>Orders</span>
-        </button>
-        <button class="orders-tab-btn history-tab-btn" data-tab="fills-history" aria-label="Historical Trades">
-          <span>Trades</span>
-        </button>
-      </div>
-    </div>
-
-    <div id="ordersHistoryPanel" class="tab-panel">
-      <div class="section-title">
-        <span>Historical (last 2000)</span>
-        <small id="historicalOrdersCount">–</small>
+    <div class="orders-filter-bar history-filter-bar">
+      <div class="orders-filter-group">
+        <span class="orders-filter-label">View</span>
+        <select id="historyViewSelect" class="orders-filter-select">
+          <option value="orders">Orders</option>
+          <option value="fills">Fills</option>
+        </select>
       </div>
 
-      <div class="orders-filter-bar">
+      <div class="history-filter-orders">
         <div class="orders-filter-group">
           <span class="orders-filter-label">Asset</span>
           <input
@@ -3648,8 +3714,8 @@
           <span class="orders-filter-label">Side</span>
           <select id="historicalSideFilter" class="orders-filter-select">
             <option value="all">All</option>
-            <option value="B">Buy</option>
-            <option value="S">Sell</option>
+            <option value="B">Long</option>
+            <option value="S">Short</option>
           </select>
         </div>
 
@@ -3665,15 +3731,46 @@
         </div>
       </div>
 
+      <div class="history-filter-fills">
+        <div class="orders-filter-group">
+          <span class="orders-filter-label">Asset</span>
+          <input
+            id="historicalFillsAssetFilter"
+            class="orders-filter-input"
+            type="text"
+            placeholder="e.g. ETH"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="orders-filter-group">
+          <span class="orders-filter-label">Side</span>
+          <select id="historicalFillsSideFilter" class="orders-filter-select">
+            <option value="all">All</option>
+            <option value="B">Long</option>
+            <option value="S">Short</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="history-counts">
+        <small id="historicalOrdersCount">–</small>
+        <small id="historicalFillsCount">–</small>
+      </div>
+    </div>
+
+    <div id="ordersHistoryPanel" class="tab-panel">
+
       <div style="max-height: 380px; overflow: auto;">
-        <table class="table-sortable">
+        <table class="table-sortable history-orders-table">
           <thead>
           <tr>
             <th class="sortable" data-sort="orderId">Order ID</th>
-            <th class="sortable" data-sort="time">Date / Time</th>
-            <th class="sortable" data-sort="side">Side</th>
+            <th class="sortable" data-sort="time">Time</th>
             <th class="sortable" data-sort="asset">Asset</th>
+            <th class="sortable" data-sort="side">Side</th>
             <th class="sortable" data-sort="size">Size</th>
+            <th class="sortable" data-sort="type">Type</th>
             <th class="sortable" data-sort="price">Price</th>
             <th class="sortable" data-sort="status">Status</th>
           </tr>
@@ -3686,19 +3783,16 @@
     </div>
 
     <div id="fillsHistoryPanel" class="tab-panel hidden">
-      <div class="section-title">
-        <span>Historical (last 2000)</span>
-        <small id="historicalFillsCount">–</small>
-      </div>
       <div style="max-height: 360px; overflow: auto;">
-        <table class="table-sortable">
+        <table class="table-sortable history-fills-table">
           <thead>
           <tr>
             <th class="desktop-only sortable" data-sort="orderId">Order ID</th>
-            <th class="sortable" data-sort="time">Date / Time</th>
-            <th class="sortable" data-sort="side">Side</th>
+            <th class="sortable" data-sort="time">Time</th>
             <th class="sortable" data-sort="asset">Asset</th>
+            <th class="sortable" data-sort="side">Side</th>
             <th class="sortable" data-sort="size">Size</th>
+            <th class="sortable" data-sort="type">Type</th>
             <th class="sortable" data-sort="price">Price</th>
             <th class="sortable" data-sort="pnl">Closed PnL</th>
           </tr>
@@ -3837,6 +3931,9 @@
   const fillsHeaderEls = Array.from(document.querySelectorAll("#fillsTable thead th[data-sort]"));
   const historicalOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersHistoryPanel thead th[data-sort]"));
   const historicalFillsHeaderEls = Array.from(document.querySelectorAll("#fillsHistoryPanel thead th[data-sort]"));
+  const historyViewSelectEl = document.getElementById("historyViewSelect");
+  const historicalFillsAssetFilterEl = document.getElementById("historicalFillsAssetFilter");
+  const historicalFillsSideFilterEl = document.getElementById("historicalFillsSideFilter");
 
   const openOrdersBodyEl = document.getElementById("openOrdersBody");
   const openOrdersCountEl = document.getElementById("openOrdersCount");
@@ -5010,7 +5107,8 @@
   }
 
   function getTriggerCondition(entry) {
-    const triggerConditionRaw = entry?.triggerCondition ?? entry?.trigger_condition ?? "";
+    const source = entry?.order && typeof entry.order === "object" ? entry.order : entry;
+    const triggerConditionRaw = source?.triggerCondition ?? source?.trigger_condition ?? "";
     if (typeof triggerConditionRaw !== "string") return "";
     const trimmed = triggerConditionRaw.trim();
     if (!trimmed || trimmed.toUpperCase() === "N/A") return "";
@@ -5039,27 +5137,28 @@
   }
 
   function getOrderTypeLabel(entry) {
-    const raw = entry?.orderType ?? entry?.type ?? entry?.order_type;
+    const source = entry?.order && typeof entry.order === "object" ? entry.order : entry;
+    const raw = source?.orderType ?? source?.type ?? source?.order_type;
     if (typeof raw === "string") return formatOrderTypeLabel(toTitleCase(raw));
     if (raw && typeof raw === "object") {
       if (raw.limit) return "Limit";
       if (raw.market) return "Market";
       if (raw.trigger) return "Trigger";
     }
-    if (entry?.isTrigger || entry?.triggerPx || entry?.triggerPrice) return "Trigger";
-    if (entry?.isMarket || entry?.market) return "Market";
-    if (entry?.tif) return "Limit";
+    if (source?.isTrigger || source?.triggerPx || source?.triggerPrice) return "Trigger";
+    if (source?.isMarket || source?.market) return "Market";
+    if (source?.tif) return "Limit";
     const rawFallback =
-      entry?.orderType ??
-      entry?.type ??
-      entry?.order_type ??
-      entry?.tif ??
-      entry?.timeInForce ??
-      entry?.time_in_force;
+      source?.orderType ??
+      source?.type ??
+      source?.order_type ??
+      source?.tif ??
+      source?.timeInForce ??
+      source?.time_in_force;
     if (rawFallback !== undefined && rawFallback !== null) {
       return typeof rawFallback === "string" ? rawFallback : JSON.stringify(rawFallback);
     }
-    return "-";
+    return "–";
   }
 
   function formatFunding(value) {
@@ -5266,6 +5365,53 @@
       if (lower.includes("filled") || lower.includes("done")) return "Filled";
     }
     return "";
+  }
+
+  function formatTifLabel(value) {
+    if (typeof value !== "string") return "";
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    const map = {
+      FrontendMarket: "Market",
+      Gtc: "GTC",
+      Ioc: "IOC",
+      Fok: "FOK",
+      Alo: "ALO",
+    };
+    if (map[trimmed]) return map[trimmed];
+    if (trimmed.length <= 4) return trimmed.toUpperCase();
+    return trimmed.replace(/([a-z])([A-Z])/g, "$1 $2");
+  }
+
+  function getOrderMetaParts(entry) {
+    const source = entry?.order && typeof entry.order === "object" ? entry.order : entry;
+    const tifLabel = formatTifLabel(source?.tif ?? source?.timeInForce ?? source?.time_in_force);
+    const reduceOnly = source?.reduceOnly ?? source?.isReduceOnly ?? source?.reduce_only;
+    const isTpsl = source?.isPositionTpsl ?? source?.positionTpsl ?? false;
+
+    const children = Array.isArray(source?.children) ? source.children : [];
+    const tpParts = [];
+    const slParts = [];
+    children.forEach((child) => {
+      const cond = formatTriggerConditionLabel(getTriggerCondition(child));
+      const pxRaw = child?.triggerPx ?? child?.triggerPrice ?? child?.trigger_price;
+      const pxVal = Number(pxRaw);
+      const pxDisplay = Number.isFinite(pxVal) ? fmtPrice(pxVal) : "";
+      const lower = String(cond || "").toLowerCase();
+      if (lower.includes("tp") || lower.includes("take")) {
+        if (pxDisplay) tpParts.push(pxDisplay);
+      } else if (lower.includes("sl") || lower.includes("stop")) {
+        if (pxDisplay) slParts.push(pxDisplay);
+      }
+    });
+    let tpslLabel = "";
+    if (tpParts.length || slParts.length || isTpsl) {
+      const tp = tpParts.length ? `TP ${tpParts.join(", ")}` : "";
+      const sl = slParts.length ? `SL ${slParts.join(", ")}` : "";
+      tpslLabel = [tp, sl].filter(Boolean).join(" · ") || "TP/SL";
+    }
+
+    return { tifLabel, reduceOnly: Boolean(reduceOnly), tpslLabel };
   }
 
   function getPositionSortMetrics(item) {
@@ -8231,7 +8377,7 @@
           <td class="desktop-only"><span class="order-id">${orderIdHtml}</span></td>
           <td>
             <div class="price-stack">
-              <span class="timestamp time-line"><span>Created:</span><span>${created}</span></span>
+              <span class="timestamp time-line"><span>Opened:</span><span>${created}</span></span>
               <span class="timestamp time-line"><span>Canceled:</span><span>${canceledAtTime}</span></span>
             </div>
           </td>
@@ -8358,11 +8504,24 @@
       return;
     }
 
+    const fillsAssetFilter = (historicalFillsAssetFilterEl?.value || "").trim().toLowerCase();
+    const fillsSideFilter = historicalFillsSideFilterEl?.value || "all";
+
     const filtered = marketFiltered.filter((fill) => {
       const sz = Number(fill.sz ?? fill.size ?? 0);
       const px = Number(fill.px ?? fill.price ?? 0);
       const val = sz * px;
-      return !(Number.isFinite(val) && Math.abs(val) < 0.0000001);
+      if (Number.isFinite(val) && Math.abs(val) < 0.0000001) return false;
+
+      const side = normalizeSideCode(fill.side ?? (fill.isBuy ? "B" : "S"));
+      if (fillsSideFilter !== "all" && side !== fillsSideFilter) return false;
+
+      if (fillsAssetFilter) {
+        const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
+        if (!String(coin || "").toLowerCase().includes(fillsAssetFilter)) return false;
+      }
+
+      return true;
     });
 
     let historicalFillsClosedPnl = null;
@@ -8417,8 +8576,8 @@
       sorted.sort((a, b) => {
         const aCoin = resolveCoinName(a.coin ?? "", a.asset ?? a.symbol ?? a.sym);
         const bCoin = resolveCoinName(b.coin ?? "", b.asset ?? b.symbol ?? b.sym);
-        const aSide = a.side ?? (a.isBuy ? "B" : "S") ?? "";
-        const bSide = b.side ?? (b.isBuy ? "B" : "S") ?? "";
+        const aSide = normalizeSideCode(a.side ?? (a.isBuy ? "B" : "S") ?? "");
+        const bSide = normalizeSideCode(b.side ?? (b.isBuy ? "B" : "S") ?? "");
         const aPnl = historicalFillsClosedPnl?.get(a);
         const bPnl = historicalFillsClosedPnl?.get(b);
         const aMetrics = {
@@ -8427,6 +8586,7 @@
           side: aSide,
           asset: String(aCoin ?? "").toUpperCase(),
           size: Number(a.sz ?? a.size ?? 0),
+          type: getOrderTypeLabel(a),
           price: Number(a.px ?? a.price ?? 0),
           pnl: Number.isFinite(aPnl) ? aPnl : null,
         };
@@ -8436,6 +8596,7 @@
           side: bSide,
           asset: String(bCoin ?? "").toUpperCase(),
           size: Number(b.sz ?? b.size ?? 0),
+          type: getOrderTypeLabel(b),
           price: Number(b.px ?? b.price ?? 0),
           pnl: Number.isFinite(bPnl) ? bPnl : null,
         };
@@ -8445,9 +8606,13 @@
 
     historicalFillsBodyEl.innerHTML = sorted
       .map((fill) => {
-        const t = fmtDateTime(fill.time ?? fill.timestamp);
+        const fillDate = fmtDateOnly(fill.time ?? fill.timestamp);
+        const fillTime = fmtTimeOnly(fill.time ?? fill.timestamp);
+        const openedStamp = fill.openTime ?? fill.startTime ?? fill.createdTime ?? fill.openTimestamp ?? fill.timestamp;
+        const openedDate = fmtDateOnly(openedStamp);
+        const openedTime = fmtTimeOnly(openedStamp);
         const total = computeTotal(fill);
-        const side = fill.side ?? (fill.isBuy ? "B" : "S") ?? "?";
+        const side = normalizeSideCode(fill.side ?? (fill.isBuy ? "B" : "S") ?? "?");
         const orderIdHtml = formatSpotIdHtml(fill.oid ?? "");
         const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
         const wallet = fill.wallet || primaryWallet;
@@ -8457,10 +8622,25 @@
         return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
-          <td><span class="timestamp">${t}</span></td>
-          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td>
+            <div class="price-stack">
+              <span class="timestamp time-line"><span>Opened:</span><span>${openedDate} ${openedTime}</span></span>
+              <span class="timestamp time-line"><span>Filled:</span><span>${fillDate} ${fillTime}</span></span>
+            </div>
+          </td>
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
-          <td class="money">${fmtSize(fill.sz ?? fill.size)}</td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td class="money size-cell">
+            <div class="price-stack size-stack">
+              <span class="notional-sub">${
+                Number.isFinite(Number(fill.sz ?? fill.size)) && Number.isFinite(Number(fill.px ?? fill.price))
+                  ? formatSignedDollar((side === "S" ? -1 : 1) * Math.abs(Number(fill.sz ?? fill.size) * Number(fill.px ?? fill.price)))
+                  : ""
+              }</span>
+              <span class="size-main">${fmtSize(fill.sz ?? fill.size)} <span class="size-ticker">${coin}</span></span>
+            </div>
+          </td>
+          <td><span class="order-type">${getOrderTypeLabel(fill)}</span></td>
           <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
           <td class="money ${Number.isFinite(closedPnl) ? (closedPnl >= 0 ? "upnl-pos" : "upnl-neg") : ""}">
             ${closedPnlDisplay}
@@ -8500,10 +8680,72 @@
       limitPx: o.limitPx ?? o.px,
       sz: o.origSz ?? o.sz,
       timestamp: o.timestamp,
+      orderType: o.orderType ?? o.type ?? o.order_type,
+      tif: o.tif ?? o.timeInForce ?? o.time_in_force,
+      isTrigger: o.isTrigger ?? o.trigger,
+      triggerPx: o.triggerPx ?? o.triggerPrice ?? o.trigger_price,
+      triggerCondition: o.triggerCondition ?? o.trigger_condition,
+      postOnly: o.postOnly ?? o.isPostOnly ?? o.post_only,
+      reduceOnly: o.reduceOnly ?? o.isReduceOnly ?? o.reduce_only,
       status,
       statusTimestamp,
       raw: entry,
     };
+  }
+
+  function formatStatusLabel(status) {
+    if (!status) return "";
+    const spaced = String(status)
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/_/g, " ")
+      .trim();
+    return spaced
+      .split(/\s+/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
+  function getStatusDescription(status) {
+    const map = {
+      filled: "Order completely executed",
+      triggered: "Trigger order activated and converted",
+      canceled: "Order canceled by user",
+      marginCanceled: "Canceled due to insufficient margin",
+      vaultWithdrawalCanceled: "Canceled due to vault withdrawal",
+      openInterestCapCanceled: "Canceled due to open interest cap",
+      selfTradeCanceled: "Canceled due to self-trade prevention",
+      reduceOnlyCanceled: "Canceled reduce-only order that wouldn’t reduce position",
+      siblingFilledCanceled: "TP/SL canceled due to sibling order execution",
+      delistedCanceled: "Canceled due to asset delisting",
+      liquidatedCanceled: "Canceled due to liquidation",
+      scheduledCancel: "Canceled due to scheduled cancel (dead man’s switch)",
+      rejected: "Order rejected at placement",
+      tickRejected: "Rejected due to invalid tick price",
+      minTradeNtlRejected: "Rejected due to minimum notional requirement",
+      perpMarginRejected: "Rejected due to insufficient margin",
+      reduceOnlyRejected: "Rejected due to reduce-only constraints",
+      badAloPxRejected: "Rejected due to post-only immediate match",
+      iocCancelRejected: "IOC order rejected due to no immediate match",
+      badTriggerPxRejected: "Rejected due to invalid trigger price",
+      marketOrderNoLiquidityRejected: "Market order rejected due to insufficient liquidity",
+      positionIncreaseAtOpenInterestCapRejected: "Rejected due to open interest cap",
+      positionFlipAtOpenInterestCapRejected: "Rejected due to position flip at OI cap",
+      tooAggressiveAtOpenInterestCapRejected: "Rejected due to aggressive pricing at OI cap",
+      openInterestIncreaseRejected: "Rejected due to open interest increase limits",
+      insufficientSpotBalanceRejected: "Rejected due to insufficient spot balance",
+      oracleRejected: "Rejected due to price deviation from oracle",
+      perpMaxPositionRejected: "Rejected due to position size limits",
+      open: "Order still active",
+    };
+    if (!map[status]) return "";
+    return map[status].endsWith(".") ? map[status] : `${map[status]}.`;
+  }
+
+  function normalizeSideCode(side) {
+    const s = String(side || "").toUpperCase();
+    if (s === "A") return "S";
+    if (s === "B") return "B";
+    return s;
   }
 
   function buildLiveOrdersRowsForExport() {
@@ -8919,7 +9161,8 @@
     const filtered = marketFiltered
       .map(normalizeHistoricalOrder)
       .filter((o) => {
-        const side = o.side ?? (o.isBuy ? "B" : "S");
+        const sideRaw = o.side ?? (o.isBuy ? "B" : "S");
+        const side = normalizeSideCode(sideRaw);
         const status = (o.status ?? "").toLowerCase();
         const coin = (o.coin ?? "").toLowerCase();
 
@@ -8931,7 +9174,7 @@
       });
 
     if (historicalOrdersCountEl) {
-      if (historicalOrdersLoaded) historicalOrdersCountEl.textContent = `${filtered.length} / ${totalCount}`;
+      if (historicalOrdersLoaded) historicalOrdersCountEl.textContent = `${filtered.length}`;
       else historicalOrdersCountEl.textContent = "–";
     }
 
@@ -8948,8 +9191,8 @@
       sorted.sort((a, b) => {
         const aCoin = resolveCoinName(a.coin ?? "", a.asset ?? a.symbol ?? a.sym);
         const bCoin = resolveCoinName(b.coin ?? "", b.asset ?? b.symbol ?? b.sym);
-        const aSide = a.side ?? (a.isBuy ? "B" : "S") ?? "";
-        const bSide = b.side ?? (b.isBuy ? "B" : "S") ?? "";
+        const aSide = normalizeSideCode(a.side ?? (a.isBuy ? "B" : "S") ?? "");
+        const bSide = normalizeSideCode(b.side ?? (b.isBuy ? "B" : "S") ?? "");
         const aStatus = String(a.status ?? "").toUpperCase();
         const bStatus = String(b.status ?? "").toUpperCase();
         const aMetrics = {
@@ -8958,6 +9201,7 @@
           side: aSide,
           asset: String(aCoin ?? "").toUpperCase(),
           size: Number(a.sz ?? a.size ?? 0),
+          type: getOrderTypeLabel(a),
           price: Number(a.limitPx ?? a.px ?? 0),
           status: aStatus,
         };
@@ -8967,6 +9211,7 @@
           side: bSide,
           asset: String(bCoin ?? "").toUpperCase(),
           size: Number(b.sz ?? b.size ?? 0),
+          type: getOrderTypeLabel(b),
           price: Number(b.limitPx ?? b.px ?? 0),
           status: bStatus,
         };
@@ -8976,23 +9221,86 @@
 
     historicalOrdersBodyEl.innerHTML = sorted
       .map((o) => {
-        const created = fmtDateTime(o.timestamp);
-        const side = o.side ?? (o.isBuy ? "B" : "S");
+        const createdDate = fmtDateOnly(o.timestamp);
+        const createdTime = fmtTimeOnly(o.timestamp);
+        const statusStamp = o.statusTimestamp ?? o.statusTime ?? o.statusTimeMs ?? o.status_ts;
+        const statusDate = fmtDateOnly(statusStamp);
+        const statusTime = fmtTimeOnly(statusStamp);
+        const showStatusLine =
+          statusStamp && Number(statusStamp) !== Number(o.timestamp) && (statusDate || statusTime);
+        const side = normalizeSideCode(o.side ?? (o.isBuy ? "B" : "S"));
         const status = o.status ?? "";
+        const statusLabel = formatStatusLabel(status) || status;
+        const statusDesc = getStatusDescription(status);
         const orderIdHtml = formatSpotIdHtml(o.oid ?? "");
         const coin = resolveCoinName(o.coin ?? "", o.asset ?? o.symbol ?? o.sym);
         const wallet = o.wallet || primaryWallet;
         const forceSpot = entryMatchesMarketType(o, "spot");
+        const typeLabelRaw = getOrderTypeLabel(o);
+        const typeLabel = String(typeLabelRaw || "")
+          .replaceAll("<br>", " ")
+          .replaceAll("<br/>", " ")
+          .replaceAll("<br />", " ")
+          .trim()
+          .replace(/\s+/g, " ");
+        const triggerCondition = formatTriggerConditionLabel(getTriggerCondition(o));
+        const triggerPxRaw = o?.triggerPx ?? o?.triggerPrice ?? o?.trigger_price;
+        const triggerPxValue = Number(triggerPxRaw);
+        const triggerPxDisplay = Number.isFinite(triggerPxValue) ? fmtPrice(triggerPxValue) : "";
+        const { tifLabel, reduceOnly, tpslLabel } = getOrderMetaParts(o);
+        const typeLine = typeLabel;
+        const triggerHasPrice = /\$\d/.test(triggerCondition);
+        const triggerLine =
+          triggerCondition
+            ? `Trigger: ${triggerCondition}${!triggerHasPrice && triggerPxDisplay ? ` · ${triggerPxDisplay}` : ""}`
+            : "";
+        const tifLine = tifLabel ? tifLabel : "";
 
         return `
         <tr>
           <td>${orderIdHtml}</td>
-          <td><span class="timestamp">${created}</span></td>
-          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td>
+            <div class="price-stack">
+              <span class="timestamp time-line"><span>Opened:</span><span>${createdDate} ${createdTime}</span></span>
+              ${
+                showStatusLine
+                  ? `<span class="timestamp time-line"><span>Updated:</span><span>${statusDate} ${statusTime}</span></span>`
+                  : ""
+              }
+            </div>
+          </td>
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
-          <td class="money">${fmtSize(o.sz ?? o.size)}</td>
+          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td class="money size-cell">
+            <div class="price-stack size-stack">
+              <span class="notional-sub">${
+                Number.isFinite(Number(o.sz ?? o.size)) && Number.isFinite(Number(o.limitPx ?? o.px))
+                  ? formatSignedDollar((o.side ?? (o.isBuy ? "B" : "S")) === "S"
+                      ? -Math.abs(Number(o.sz ?? o.size) * Number(o.limitPx ?? o.px))
+                      : Math.abs(Number(o.sz ?? o.size) * Number(o.limitPx ?? o.px)))
+                  : ""
+              }</span>
+              <span class="size-main">${fmtSize(o.sz ?? o.size)} <span class="size-ticker">${coin}</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="price-stack">
+              ${typeLine ? `<span class="order-type">${typeLine}${reduceOnly ? ` <span class="meta-badge reduce-only-badge">Reduce-only</span>` : ""}</span>` : ""}
+              ${triggerLine ? `<span class="notional-sub">${triggerLine}</span>` : ""}
+              ${
+                [tifLine, tpslLabel].filter(Boolean).length
+                  ? `<span class="notional-sub">${[tifLine, tpslLabel].filter(Boolean).join(" · ")}</span>`
+                  : ""
+              }
+            </div>
+          </td>
           <td class="money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
-          <td>${status}</td>
+          <td>
+            <div class="price-stack">
+              <span>${statusLabel}</span>
+              ${statusDesc ? `<span class="notional-sub">${statusDesc}</span>` : ""}
+            </div>
+          </td>
         </tr>
       `;
       })
@@ -12066,6 +12374,25 @@
     updateTableSortHeaders(fillsHeaderEls, currentFillsSort);
   }
 
+  if (historyViewSelectEl) {
+    historyViewSelectEl.addEventListener("change", () => {
+      const value = historyViewSelectEl.value === "fills" ? "fills" : "orders";
+      setHistoryMode(true, value);
+    });
+  }
+
+  if (historicalFillsAssetFilterEl) {
+    historicalFillsAssetFilterEl.addEventListener("input", () => {
+      if (historicalFillsLoaded) renderHistoricalFills();
+    });
+  }
+
+  if (historicalFillsSideFilterEl) {
+    historicalFillsSideFilterEl.addEventListener("change", () => {
+      if (historicalFillsLoaded) renderHistoricalFills();
+    });
+  }
+
   if (historicalOrdersHeaderEls.length) {
     historicalOrdersHeaderEls.forEach((th) => {
       th.addEventListener("click", () => {
@@ -12308,6 +12635,8 @@
     if (fillsHistoryPanelEl) fillsHistoryPanelEl.classList.toggle("hidden", isOrders);
     historyTabButtons.forEach((b) => b.classList.toggle("active", b.dataset.tab === (isOrders ? "orders-history" : "fills-history")));
     updateTabSwitchIndicator(historyTabsEl);
+    if (historyViewSelectEl) historyViewSelectEl.value = isOrders ? "orders" : "fills";
+    if (historyLayoutEl) historyLayoutEl.dataset.view = isOrders ? "orders" : "fills";
     modeTabButtons.forEach((b) => b.classList.toggle("active", b.dataset.tab === "history"));
     updateTabSwitchIndicator(modeTabsEl);
     updateTabSwitchIndicator(modeTabsHistoryEl);
@@ -12674,9 +13003,17 @@
       if (tab === "history") {
         setHistoryMode(true, lastHistoryFocus);
         if (lastHistoryFocus === "orders") {
-          if (currentWallets.length) loadHistoricalOrders(currentWallets);
+          if (historicalOrdersLoaded) {
+            renderHistoricalOrders();
+          } else if (currentWallets.length) {
+            loadHistoricalOrders(currentWallets);
+          }
         } else {
-          if (currentWallets.length) loadHistoricalFills(currentWallets);
+          if (historicalFillsLoaded) {
+            renderHistoricalFills();
+          } else if (currentWallets.length) {
+            loadHistoricalFills(currentWallets);
+          }
         }
       } else {
         setHistoryMode(false);
@@ -12690,9 +13027,17 @@
       const isOrders = tab === "orders-history";
       setHistoryMode(true, isOrders ? "orders" : "fills");
       if (isOrders) {
-        if (currentWallets.length) loadHistoricalOrders(currentWallets);
+        if (historicalOrdersLoaded) {
+          renderHistoricalOrders();
+        } else if (currentWallets.length) {
+          loadHistoricalOrders(currentWallets);
+        }
       } else {
-        if (currentWallets.length) loadHistoricalFills(currentWallets);
+        if (historicalFillsLoaded) {
+          renderHistoricalFills();
+        } else if (currentWallets.length) {
+          loadHistoricalFills(currentWallets);
+        }
       }
     });
   });
