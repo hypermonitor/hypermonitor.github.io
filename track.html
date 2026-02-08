@@ -829,35 +829,179 @@
         line-height: 1.15;
       }
 
-      /* --- Orders / Fills tables: hide time + total (usually widest) --- */
-      /* Open Orders: OrderID(1) Time(2) Asset(3) Side(4) Type(5) Size(6) Limit(7) MobilePrice(8) */
+      .orders-filter-bar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .orders-filter-group {
+        flex: 1 1 46%;
+        min-width: 140px;
+      }
+
+      #liveLayout > .section-title,
+      #historyLayout > .section-title {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        row-gap: 0.5rem;
+      }
+
+      #liveLayout > .section-title > .orders-tabs,
+      #historyLayout > .section-title > .orders-tabs {
+        align-self: stretch;
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      #liveLayout .orders-tabs.switch,
+      #historyLayout .orders-tabs.switch {
+        width: 100%;
+        justify-content: flex-end;
+        margin: 0;
+      }
+
+      .orders-filter-input,
+      .orders-filter-select {
+        width: 100%;
+      }
+
+      .history-filter-bar .history-counts {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-end;
+        text-align: right;
+      }
+
+      .history-filter-bar .history-filter-orders,
+      .history-filter-bar .history-filter-fills {
+        flex-wrap: wrap;
+      }
+
+      .performance-title {
+        flex-wrap: wrap;
+      }
+
+      .performance-title h2 {
+        order: 1;
+      }
+
+      .performance-title .chart-actions {
+        order: 2;
+        margin-left: auto;
+      }
+
+      .performance-title .performance-toolbar {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .history-orders-table td .price-stack,
+      .history-fills-table td .price-stack {
+        white-space: normal;
+      }
+
+      .history-orders-table td .price-stack span,
+      .history-fills-table td .price-stack span {
+        white-space: normal;
+      }
+
+      .mobile-loading-overlay.active {
+        display: flex;
+      }
+
+      .history-fills-table td .size-stack .start-pos,
+      .history-fills-table td .price-stack .fee-line {
+        display: none;
+      }
+
+      .history-orders-table,
+      .history-fills-table {
+        font-size: 0.7rem;
+      }
+
+      .history-orders-table th,
+      .history-orders-table td,
+      .history-fills-table th,
+      .history-fills-table td {
+        padding: 0.22rem 0.26rem;
+      }
+
+      .orders-table-scroll {
+        height: 160px;
+        margin-bottom: 0.6rem;
+      }
+
+      .fills-orders-scroll {
+        height: 160px;
+        margin-bottom: 0;
+      }
+
+      /* --- Orders / Fills tables: show Asset, Side, Size, Price only --- */
+      /* Open Orders: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) MobilePrice(8) */
+      #openOrdersTable th:nth-child(1),
+      #openOrdersTable th:nth-child(2),
+      #openOrdersTable th:nth-child(6),
+      #openOrdersTable th:nth-child(7),
       #openOrdersBody td:nth-child(1),
       #openOrdersBody td:nth-child(2),
-      #openOrdersBody td:nth-child(7),
-      #openOrdersBody th:nth-child(7) {
+      #openOrdersBody td:nth-child(6),
+      #openOrdersBody td:nth-child(7) {
+        display: none;
+      }
+
+      /* Canceled Orders: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) MobilePrice(8) */
+      #canceledOrdersTable th:nth-child(1),
+      #canceledOrdersTable th:nth-child(2),
+      #canceledOrdersTable th:nth-child(6),
+      #canceledOrdersTable th:nth-child(7),
+      #canceledOrdersBody td:nth-child(1),
+      #canceledOrdersBody td:nth-child(2),
+      #canceledOrdersBody td:nth-child(6),
+      #canceledOrdersBody td:nth-child(7) {
         display: none;
       }
 
       /* Trades Stream: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) */
       #fillsBody td:nth-child(1),
-      #fillsBody td:nth-child(2),
-      #fillsBody td:nth-child(7),
       #fillsBody th:nth-child(1),
+      #fillsBody td:nth-child(2),
       #fillsBody th:nth-child(2),
+      #fillsBody td:nth-child(7),
       #fillsBody th:nth-child(7) {
         display: none;
       }
 
-      /* Historical Orders: OrderID(1) Date/Time(2) Side(3) Asset(4) Size(5) Limit(6) Status(7) */
-      #historicalOrdersBody td:nth-child(2),
-      #historicalOrdersBody th:nth-child(2) {
+      /* History Orders: Order ID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) Status(8) */
+      #ordersHistoryPanel th:nth-child(1),
+      #ordersHistoryPanel td:nth-child(1),
+      #ordersHistoryPanel th:nth-child(2),
+      #ordersHistoryPanel td:nth-child(2),
+      #ordersHistoryPanel th:nth-child(7),
+      #ordersHistoryPanel td:nth-child(7),
+      #ordersHistoryPanel th:nth-child(8),
+      #ordersHistoryPanel td:nth-child(8),
+      /* History Fills: Order ID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) Closed PnL(8) */
+      #fillsHistoryPanel th:nth-child(1),
+      #fillsHistoryPanel td:nth-child(1),
+      #fillsHistoryPanel th:nth-child(2),
+      #fillsHistoryPanel td:nth-child(2),
+      #fillsHistoryPanel th:nth-child(7),
+      #fillsHistoryPanel td:nth-child(7),
+      #fillsHistoryPanel th:nth-child(8),
+      #fillsHistoryPanel td:nth-child(8) {
         display: none;
       }
 
-      /* Canceled Orders: OrderID(1) Time(2) Asset(3) Side(4) Type(5) Size(6) */
-      #canceledOrdersBody th:nth-child(1),
-      #canceledOrdersBody td:nth-child(1) {
-        display: none;
+      /* Always show empty-state rows on mobile */
+      #openOrdersBody td.muted,
+      #canceledOrdersBody td.muted,
+      #fillsBody td.muted {
+        display: table-cell !important;
+        width: 100%;
+        white-space: normal;
+        text-align: left;
       }
     }
 
@@ -1330,7 +1474,6 @@
 
     #liveLayout .layout-two > *:first-child {
       padding-right: 0.8rem;
-      border-right: 1px solid var(--border);
     }
 
     #liveLayout .layout-two > *:last-child {
@@ -1339,6 +1482,8 @@
 
     @media (max-width: 900px) {
       .layout-two { grid-template-columns: 1fr; }
+      #liveLayout .layout-two > *:first-child { padding-right: 0; }
+      #liveLayout .layout-two > *:last-child { padding-left: 0; }
     }
 
     .section-title {
@@ -1691,6 +1836,39 @@
 
     .chart-loading-wrap.loading .chart-loading {
       display: block;
+    }
+
+    .mobile-loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 7, 10, 0.96);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .mobile-loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .mobile-loading-pulse {
+      width: 220px;
+      height: 220px;
+      background-image: url("images/pulse.gif");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+
+    .mobile-loading-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+      text-align: center;
     }
 
     body.light {
@@ -2693,6 +2871,17 @@
       margin-left: 0.35rem;
     }
 
+    .orders-table-scroll {
+      height: 180px;
+      overflow: auto;
+      margin-bottom: 0.75rem;
+    }
+
+    .fills-orders-scroll {
+      height: 180px;
+      margin-bottom: 0;
+    }
+
     .price-footer {
       position: fixed;
       left: 0;
@@ -3197,7 +3386,13 @@
   </style>
 </head>
 
-<body>
+  <body>
+    <div class="mobile-loading-overlay" id="mobileLoadingOverlay" aria-hidden="true">
+      <div class="mobile-loading-content">
+        <div class="mobile-loading-pulse" aria-hidden="true"></div>
+        <div class="mobile-loading-text">Loading…</div>
+      </div>
+    </div>
 <div id="app">
   <header>
     <div class="wallet-controls">
@@ -3589,7 +3784,7 @@
             <span>Open</span>
             <small id="openOrdersCount">–</small>
           </div>
-          <div style="height: 190px; overflow: auto; margin-bottom: .75rem;">
+          <div class="orders-table-scroll open-orders-scroll">
             <table class="table-sortable" id="openOrdersTable">
               <thead>
               <tr>
@@ -3613,7 +3808,7 @@
             <span>Canceled</span>
             <small id="canceledCount">–</small>
           </div>
-          <div style="max-height: 160px; overflow: auto;">
+          <div class="orders-table-scroll canceled-orders-scroll">
             <table class="table-sortable" id="canceledOrdersTable">
               <thead>
               <tr>
@@ -3643,7 +3838,7 @@
             <span>Filled</span>
             <small id="fillsCount">–</small>
           </div>
-          <div style="max-height: 360px; overflow: auto;">
+          <div class="orders-table-scroll fills-orders-scroll">
             <table class="table-sortable" id="fillsTable">
               <thead>
               <tr>
@@ -3979,6 +4174,7 @@
   const metricsGridEl = metricsCardEl ? metricsCardEl.querySelector(".metrics-grid") : null;
   const metricsToggleEl = document.getElementById("metricsToggle");
   const performanceShareBtnEl = document.getElementById("performanceShareBtn");
+  const mobileLoadingOverlayEl = document.getElementById("mobileLoadingOverlay");
   const metricsWalletLabelEl = document.getElementById("metricsWalletLabel");
   const metricsRangeLabelEl = document.getElementById("metricsRangeLabel");
   const metricTotalPnlEl = document.getElementById("metricTotalPnl");
@@ -5225,6 +5421,14 @@
 
   function getPositionsColspan() {
     return window.matchMedia("(max-width: 600px)").matches ? 4 : 8;
+  }
+
+  function getOrdersColspan() {
+    return window.matchMedia("(max-width: 600px)").matches ? 4 : 8;
+  }
+
+  function getFillsColspan() {
+    return window.matchMedia("(max-width: 600px)").matches ? 4 : 7;
   }
 
   function getPositionsSortDefaultDir(key) {
@@ -8320,20 +8524,21 @@
             </div>
           </td>
           <td class="desktop-only"><span class="order-type">${orderType}</span></td>
+          <td class="mobile-only money">${limitPriceDisplay}</td>
         </tr>
       `;
     });
 
     // If none, show 1 “No open orders.” row, then pad to MIN_ROWS
     if (rows.length === 0) {
-      rows.push(`<tr><td colspan="8" class="muted">No open orders.</td></tr>`);
+      rows.push(`<tr><td colspan="${getOrdersColspan()}" class="muted">No open orders.</td></tr>`);
     }
 
     // Pad with empty rows until we have MIN_ROWS visible rows
     while (rows.length < MIN_ROWS) {
       rows.push(`
         <tr class="placeholder-row">
-          <td colspan="8">&nbsp;</td>
+          <td colspan="${getOrdersColspan()}">&nbsp;</td>
         </tr>
       `);
     }
@@ -8347,7 +8552,7 @@
     canceledCountEl.textContent = filtered.length.toString();
 
     if (filtered.length === 0) {
-      canceledOrdersBodyEl.innerHTML = "<tr><td colspan='8' class='muted'>No canceled orders yet.</td></tr>";
+      canceledOrdersBodyEl.innerHTML = `<tr><td colspan='${getOrdersColspan()}' class='muted'>No canceled orders yet.</td></tr>`;
       return;
     }
 
@@ -8432,7 +8637,7 @@
     const suppressFlash = Boolean(options.suppressFlash);
     const filtered = filterEntriesByMarketType(fills);
     if (filtered.length === 0) {
-      fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills...</td></tr>";
+      fillsBodyEl.innerHTML = `<tr><td colspan='${getFillsColspan()}' class='muted'>Waiting for fills...</td></tr>`;
       if (fillsCountEl) fillsCountEl.textContent = "0";
       return;
     }
@@ -8679,14 +8884,14 @@
                   : ""
               }</span>
               <span class="size-main">${fmtSize(fill.sz ?? fill.size)} <span class="size-ticker">${coin}</span></span>
-              ${startPosDisplay ? `<span class="notional-sub">Start: ${startPosDisplay} ${coin}</span>` : ""}
+              ${startPosDisplay ? `<span class="notional-sub start-pos">Start: ${startPosDisplay} ${coin}</span>` : ""}
             </div>
           </td>
           <td class="money">
             <div class="price-stack">
               <span>${fmtPrice(fill.px ?? fill.price) ?? ""}</span>
-              ${feeDisplay ? `<span class="notional-sub">Fee: ${feeDisplay}</span>` : ""}
-              ${builderDisplay ? `<span class="notional-sub">Builder: ${builderDisplay}</span>` : ""}
+              ${feeDisplay ? `<span class="notional-sub fee-line">Fee: ${feeDisplay}</span>` : ""}
+              ${builderDisplay ? `<span class="notional-sub fee-line">Builder: ${builderDisplay}</span>` : ""}
             </div>
           </td>
           <td>
@@ -9493,9 +9698,9 @@
     fillsErrorEl.textContent = "";
     snapshotErrorEl.textContent = "";
 
-    openOrdersBodyEl.innerHTML = "<tr><td colspan='8' class='muted'>Loading open orders…</td></tr>";
-    canceledOrdersBodyEl.innerHTML = "<tr><td colspan='8' class='muted'>No canceled orders yet.</td></tr>";
-    fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills…</td></tr>";
+    openOrdersBodyEl.innerHTML = `<tr><td colspan='${getOrdersColspan()}' class='muted'>Loading open orders…</td></tr>`;
+    canceledOrdersBodyEl.innerHTML = `<tr><td colspan='${getOrdersColspan()}' class='muted'>No canceled orders yet.</td></tr>`;
+    fillsBodyEl.innerHTML = `<tr><td colspan='${getFillsColspan()}' class='muted'>Waiting for fills…</td></tr>`;
 
     if (historicalOrdersBodyEl) {
       historicalOrdersBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Loading historical orders…</td></tr>";
@@ -9703,6 +9908,11 @@
     }
     if (metricsCardEl) {
       metricsCardEl.classList.toggle("loading", Boolean(isLoading));
+    }
+    if (mobileLoadingOverlayEl) {
+      const isMobile = window.matchMedia("(max-width: 600px)").matches;
+      mobileLoadingOverlayEl.classList.toggle("active", Boolean(isLoading) && isMobile);
+      mobileLoadingOverlayEl.setAttribute("aria-hidden", String(!(Boolean(isLoading) && isMobile)));
     }
   }
 
