@@ -4734,9 +4734,11 @@
   let allMidsSub = null;
   const footerChangePcts = new Map();
   const footerChangeRefs = new Map();
+  const footerChangeProvisional = new Set();
   let footerChangeTimer = null;
   let footerChangeEnabled = true;
   let footerChangeRange = "1d";
+  let footerChangeRangeKey = "1d";
   const FOOTER_CHANGE_STORAGE_KEY = "hypermonitor-footer-change";
   const FOOTER_CHANGE_RANGES = {
     "5m": { label: "5 min", interval: "5m", ms: 5 * 60 * 1000 },
@@ -6648,6 +6650,12 @@
     if (!key) {
       if (footerChangePcts.has(coin)) return footerChangePcts.get(coin);
       if (footerChangePcts.has(base)) return footerChangePcts.get(base);
+      const live = getLivePriceForCoin(coin);
+      if (Number.isFinite(live)) {
+        footerChangeRefs.set(coin, { prev: live, last: live });
+        footerChangeProvisional.add(coin);
+        return 0;
+      }
       return null;
     }
     const ref = footerChangeRefs.get(key);
@@ -6701,6 +6709,12 @@
         return;
       }
 
+      if (footerChangeRangeKey !== footerChangeRange) {
+        footerChangeRangeKey = footerChangeRange;
+        footerChangeRefs.clear();
+        footerChangeProvisional.clear();
+      }
+
       const dexes = new Set();
       trackedFooterCoins.forEach((coin) => {
         const { dex } = splitDexCoin(coin);
@@ -6727,7 +6741,6 @@
       };
 
       footerChangePcts.clear();
-      footerChangeRefs.clear();
 
       if (footerChangeRange === "1d") {
         const results = await Promise.allSettled([fetchCtxs(), ...Array.from(dexes).map((d) => fetchCtxs(d))]);
@@ -6745,9 +6758,11 @@
             const prev = Number(ctx.prevDayPx ?? ctx.prevDay ?? ctx.prevPx ?? ctx.openPx);
             if (!Number.isFinite(mark) || !Number.isFinite(prev) || prev === 0) return;
             footerChangeRefs.set(coin, { prev, last: mark });
+            footerChangeProvisional.delete(coin);
             if (dex) {
               const key = `${String(dex).toUpperCase()}:${coin}`;
               footerChangeRefs.set(key, { prev, last: mark });
+              footerChangeProvisional.delete(key);
             }
           });
         });
@@ -6756,7 +6771,7 @@
       const missing = trackedFooterCoins
         .map((c) => normalizeFooterCoinValue(c))
         .filter(Boolean)
-        .filter((coin) => !Number.isFinite(getFooterChangePct(coin)));
+        .filter((coin) => !footerChangeRefs.has(coin) || footerChangeProvisional.has(coin));
 
       await Promise.allSettled(
         missing.map(async (coin) => {
@@ -6769,8 +6784,12 @@
             if (!change || !Number.isFinite(change.prev)) return;
             const upper = String(coin).toUpperCase();
             footerChangeRefs.set(upper, change);
+            footerChangeProvisional.delete(upper);
             const base = getFooterBase(coin);
-            if (base) footerChangeRefs.set(base, change);
+            if (base) {
+              footerChangeRefs.set(base, change);
+              footerChangeProvisional.delete(base);
+            }
           } catch (err) {
             console.warn("Footer candle fallback failed", coin, err);
           }
@@ -9492,7 +9511,6 @@
     await ensurePriceStream();
     applyFooterChangeVisibility();
     await refreshFooterChanges();
-    ensureFooterChangeTimer();
     await sanitizeFooterCoins();
     await primeManualMidsForFooter();
     renderFooterPrices();
