@@ -2591,6 +2591,14 @@
       #canceledOrdersTable thead th:nth-child(5) { width: 17%; }
       #canceledOrdersTable thead th:nth-child(6) { width: 13%; }
       #canceledOrdersTable thead th:nth-child(7) { width: 16%; }
+
+      #fillsTable thead th:nth-child(1) { width: 16%; }
+      #fillsTable thead th:nth-child(2) { width: 15%; }
+      #fillsTable thead th:nth-child(3) { width: 12%; }
+      #fillsTable thead th:nth-child(4) { width: 12%; }
+      #fillsTable thead th:nth-child(5) { width: 18%; }
+      #fillsTable thead th:nth-child(6) { width: 15%; }
+      #fillsTable thead th:nth-child(7) { width: 18%; }
     }
 
     .trades-live-panel td.desktop-only.money:last-child {
@@ -3561,16 +3569,16 @@
             <small id="fillsCount">–</small>
           </div>
           <div style="max-height: 360px; overflow: auto;">
-            <table>
+            <table class="table-sortable" id="fillsTable">
               <thead>
               <tr>
-                <th class="desktop-only">Order ID</th>
-                <th class="desktop-only">Time</th>
-                <th>Asset</th>
-                <th>Side</th>
-                <th>Size</th>
-                <th>Price</th>
-                <th class="desktop-only">Type</th>
+                <th class="desktop-only sortable" data-sort="orderId">Order ID</th>
+                <th class="desktop-only sortable" data-sort="time">Time</th>
+                <th class="sortable" data-sort="asset">Asset</th>
+                <th class="sortable" data-sort="side">Side</th>
+                <th class="sortable" data-sort="size">Size</th>
+                <th class="sortable" data-sort="price">Price</th>
+                <th class="desktop-only sortable" data-sort="type">Type</th>
               </tr>
               </thead>
               <tbody id="fillsBody">
@@ -3826,6 +3834,7 @@
   const positionsHeaderEls = Array.from(document.querySelectorAll(".positions-card thead th[data-sort]"));
   const openOrdersHeaderEls = Array.from(document.querySelectorAll("#openOrdersTable thead th[data-sort]"));
   const canceledOrdersHeaderEls = Array.from(document.querySelectorAll("#canceledOrdersTable thead th[data-sort]"));
+  const fillsHeaderEls = Array.from(document.querySelectorAll("#fillsTable thead th[data-sort]"));
   const historicalOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersHistoryPanel thead th[data-sort]"));
   const historicalFillsHeaderEls = Array.from(document.querySelectorAll("#fillsHistoryPanel thead th[data-sort]"));
 
@@ -3930,6 +3939,7 @@
   let currentHistoricalFillsSort = { key: "time", dir: "desc" };
   let currentOpenOrdersSort = { key: "time", dir: "desc" };
   let currentCanceledOrdersSort = { key: "time", dir: "desc" };
+  let currentFillsSort = { key: "time", dir: "desc" };
   const coinIdMap = new Map();
   const spotIdMetaMap = new Map();
   let perpDexNames = null;
@@ -5185,6 +5195,19 @@
     const price = Number(order?.limitPx ?? order?.px ?? 0);
     const time = Number(order?.statusTimestamp ?? order?.timestamp ?? 0);
     const orderId = String(order?.oid ?? "");
+    return { asset: assetLabel, side, type, size, price, time, orderId };
+  }
+
+  function getFillsSortMetrics(fill) {
+    const coin = resolveCoinName(fill?.coin, fill?.asset ?? fill?.symbol ?? fill?.sym) || "";
+    const { label: spotLabel } = resolveSpotDisplay(coin);
+    const assetLabel = (spotLabel || coin || "").toUpperCase();
+    const side = sideLabel(fill?.side ?? "");
+    const type = getOrderTypeLabel(fill) || "";
+    const size = Math.abs(Number(fill?.sz ?? 0));
+    const price = Number(fill?.px ?? 0);
+    const time = Number(fill?.time ?? fill?.timestamp ?? 0);
+    const orderId = String(fill?.oid ?? "");
     return { asset: assetLabel, side, type, size, price, time, orderId };
   }
 
@@ -8188,6 +8211,21 @@
       fillsBodyEl.innerHTML = "<tr><td colspan='7' class='muted'>Waiting for fills...</td></tr>";
       if (fillsCountEl) fillsCountEl.textContent = "0";
       return;
+    }
+
+    if (currentFillsSort?.key) {
+      const metricsMap = new Map();
+      const getMetrics = (fill) => {
+        if (!metricsMap.has(fill)) metricsMap.set(fill, getFillsSortMetrics(fill));
+        return metricsMap.get(fill);
+      };
+      const sortKey = currentFillsSort.key;
+      const sortDir = currentFillsSort.dir;
+      filtered.sort((a, b) => {
+        const ma = getMetrics(a);
+        const mb = getMetrics(b);
+        return comparePositionSort(ma?.[sortKey], mb?.[sortKey], sortDir);
+      });
     }
 
     fillsBodyEl.innerHTML = filtered
@@ -11932,6 +11970,23 @@
       });
     });
     updateTableSortHeaders(canceledOrdersHeaderEls, currentCanceledOrdersSort);
+  }
+
+  if (fillsHeaderEls.length) {
+    fillsHeaderEls.forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (!key) return;
+        if (currentFillsSort?.key === key) {
+          currentFillsSort.dir = currentFillsSort.dir === "asc" ? "desc" : "asc";
+        } else {
+          currentFillsSort = { key, dir: getGenericSortDefaultDir(key) };
+        }
+        updateTableSortHeaders(fillsHeaderEls, currentFillsSort);
+        renderFills();
+      });
+    });
+    updateTableSortHeaders(fillsHeaderEls, currentFillsSort);
   }
 
   if (historicalOrdersHeaderEls.length) {
