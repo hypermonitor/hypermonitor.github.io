@@ -3770,8 +3770,8 @@
             <th class="sortable" data-sort="asset">Asset</th>
             <th class="sortable" data-sort="side">Side</th>
             <th class="sortable" data-sort="size">Size</th>
-            <th class="sortable" data-sort="type">Type</th>
             <th class="sortable" data-sort="price">Price</th>
+            <th class="sortable" data-sort="type">Type</th>
             <th class="sortable" data-sort="status">Status</th>
           </tr>
           </thead>
@@ -3792,8 +3792,8 @@
             <th class="sortable" data-sort="asset">Asset</th>
             <th class="sortable" data-sort="side">Side</th>
             <th class="sortable" data-sort="size">Size</th>
-            <th class="sortable" data-sort="type">Type</th>
             <th class="sortable" data-sort="price">Price</th>
+            <th class="sortable" data-sort="type">Type</th>
             <th class="sortable" data-sort="pnl">Closed PnL</th>
           </tr>
           </thead>
@@ -8605,7 +8605,7 @@
           side: aSide,
           asset: String(aCoin ?? "").toUpperCase(),
           size: Number(a.sz ?? a.size ?? 0),
-          type: getOrderTypeLabel(a),
+          type: String(a.dir ?? ""),
           price: Number(a.px ?? a.price ?? 0),
           pnl: Number.isFinite(aPnl) ? aPnl : null,
         };
@@ -8615,7 +8615,7 @@
           side: bSide,
           asset: String(bCoin ?? "").toUpperCase(),
           size: Number(b.sz ?? b.size ?? 0),
-          type: getOrderTypeLabel(b),
+          type: String(b.dir ?? ""),
           price: Number(b.px ?? b.price ?? 0),
           pnl: Number.isFinite(bPnl) ? bPnl : null,
         };
@@ -8638,17 +8638,39 @@
         const forceSpot = entryMatchesMarketType(fill, "spot");
         const closedPnl = historicalFillsClosedPnl?.get(fill);
         const closedPnlDisplay = Number.isFinite(closedPnl) ? formatSignedDollarWithPlus(closedPnl) : "";
+        const dirLabel = String(fill.dir ?? "").trim();
+        const crossed = Boolean(fill.crossed);
+        const feeRaw = fill.fee ?? fill.feeUsd ?? fill.feeUSD ?? fill.feePaid ?? fill.feeAmount;
+        const builderFeeRaw = fill.builderFee ?? fill.builder_fee;
+        const feeToken = fill.feeToken ?? fill.feeCurrency ?? fill.feeCoin;
+        const feeValue = Number(feeRaw);
+        const builderFeeValue = Number(builderFeeRaw);
+        const feeDisplay =
+          Number.isFinite(feeValue) && feeToken
+            ? `${feeValue} ${feeToken}`
+            : Number.isFinite(feeValue)
+              ? formatSignedDollar(feeValue)
+              : "";
+        const builderDisplay =
+          Number.isFinite(builderFeeValue) && builderFeeValue !== 0
+            ? feeToken
+              ? `${builderFeeValue} ${feeToken}`
+              : formatSignedDollar(builderFeeValue)
+            : "";
+        const startPosValue = Number(fill.startPosition ?? fill.startPos ?? fill.start_position);
+        const startPosDisplay = Number.isFinite(startPosValue) ? fmtSize(startPosValue) : "";
         return `
         <tr>
           <td class="desktop-only">${orderIdHtml}</td>
           <td>
             <div class="price-stack">
-              <span class="timestamp time-line"><span>Opened:</span><span>${openedDate} ${openedTime}</span></span>
-              <span class="timestamp time-line"><span>Filled:</span><span>${fillDate} ${fillTime}</span></span>
+              <span class="timestamp">${fillDate} ${fillTime}</span>
             </div>
           </td>
           <td class="asset-cell">${coinCellHtml(coin, wallet, forceSpot)}</td>
-          <td><span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span></td>
+          <td>
+            <span class="pill ${sidePillClass(side)}">${sideLabel(side)}</span>
+          </td>
           <td class="money size-cell">
             <div class="price-stack size-stack">
               <span class="notional-sub">${
@@ -8657,10 +8679,22 @@
                   : ""
               }</span>
               <span class="size-main">${fmtSize(fill.sz ?? fill.size)} <span class="size-ticker">${coin}</span></span>
+              ${startPosDisplay ? `<span class="notional-sub">Start: ${startPosDisplay} ${coin}</span>` : ""}
             </div>
           </td>
-          <td><span class="order-type">${getOrderTypeLabel(fill)}</span></td>
-          <td class="money">${fmtPrice(fill.px ?? fill.price) ?? ""}</td>
+          <td class="money">
+            <div class="price-stack">
+              <span>${fmtPrice(fill.px ?? fill.price) ?? ""}</span>
+              ${feeDisplay ? `<span class="notional-sub">Fee: ${feeDisplay}</span>` : ""}
+              ${builderDisplay ? `<span class="notional-sub">Builder: ${builderDisplay}</span>` : ""}
+            </div>
+          </td>
+          <td>
+            <div class="price-stack">
+              ${dirLabel ? `<span class="order-type">${dirLabel}</span>` : `<span class="order-type">—</span>`}
+              ${crossed ? `<span class="notional-sub"><span class="meta-badge">Crossed</span></span>` : ""}
+            </div>
+          </td>
           <td class="money ${Number.isFinite(closedPnl) ? (closedPnl >= 0 ? "upnl-pos" : "upnl-neg") : ""}">
             ${closedPnlDisplay}
           </td>
@@ -9302,6 +9336,7 @@
               <span class="size-main">${fmtSize(o.sz ?? o.size)} <span class="size-ticker">${coin}</span></span>
             </div>
           </td>
+          <td class="money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
           <td>
             <div class="price-stack">
               ${typeLine ? `<span class="order-type">${typeLine}${reduceOnly ? ` <span class="meta-badge reduce-only-badge">Reduce-only</span>` : ""}</span>` : ""}
@@ -9313,7 +9348,6 @@
               }
             </div>
           </td>
-          <td class="money">${fmtLimitPrice(o.limitPx) ?? ""}</td>
           <td>
             <div class="price-stack">
               <span>${statusLabel}</span>
