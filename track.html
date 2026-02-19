@@ -2871,15 +2871,26 @@
       margin-left: 0.35rem;
     }
 
+    :root {
+      --orders-table-height: 180px;
+    }
+
     .orders-table-scroll {
-      height: 180px;
+      height: var(--orders-table-height);
       overflow: auto;
       margin-bottom: 0.75rem;
     }
 
     .fills-orders-scroll {
-      height: 180px;
+      height: var(--orders-table-height);
       margin-bottom: 0;
+    }
+
+    @media (min-width: 901px) {
+      /* Match left column endpoint: open table + middle title spacing + canceled table */
+      .trades-live-panel #fillsLivePanel .fills-orders-scroll {
+        height: calc((var(--orders-table-height) * 2) + 2rem);
+      }
     }
 
     .price-footer {
