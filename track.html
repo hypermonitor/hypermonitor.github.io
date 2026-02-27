@@ -1964,11 +1964,40 @@
       gap: 0.14rem;
     }
 
+    .transfer-type-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+
     .transfer-type {
       font-size: 0.72rem;
       color: var(--text-main);
       font-weight: 700;
       letter-spacing: 0.01em;
+    }
+
+    .transfer-copy-btn {
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      border-radius: 999px;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      flex: 0 0 auto;
+    }
+
+    .transfer-copy-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      color: #f8fafc;
     }
 
     .transfer-time {
@@ -2220,6 +2249,15 @@
     }
 
     body.light .transfer-type { color: #0f172a; }
+    body.light .transfer-copy-btn {
+      background: #ffffff;
+      border-color: #d1d5db;
+      color: #64748b;
+    }
+    body.light .transfer-copy-btn:hover {
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
     body.light .transfer-coin .asset-cell { color: #64748b; }
     body.light .transfer-wallet { color: #64748b; }
     body.light .transfer-item:hover { background: #f9fafb; }
@@ -5551,6 +5589,7 @@
     const coinRaw = extractTransferCoin(raw, delta, hasUsdcAmount);
     const coinResolved = resolveCoinName(coinRaw, "");
     const coinDisplay = resolveSpotDisplay(coinResolved || coinRaw || "");
+    const counterpartyInfo = getTransferCounterparty(raw, delta, wallet);
 
     const direction = inferTransferDirection(typeRaw, amount);
     let signedAmount = amount;
@@ -5572,6 +5611,10 @@
       coin: coinResolved || coinRaw || "",
       coinLabel: coinDisplay?.label || "",
       coinIconKey: coinDisplay?.iconKey || coinResolved || coinRaw || "",
+      counterparty:
+        counterpartyInfo?.counterparty && isValidAddress(counterpartyInfo.counterparty)
+          ? String(counterpartyInfo.counterparty)
+          : "",
     };
   }
 
@@ -5605,10 +5648,27 @@
       const main = document.createElement("div");
       main.className = "transfer-main";
 
+      const typeRow = document.createElement("div");
+      typeRow.className = "transfer-type-row";
+
       const type = document.createElement("div");
       type.className = "transfer-type";
       type.textContent = item.typeLabel || "Transfer";
-      main.appendChild(type);
+      typeRow.appendChild(type);
+
+      if (item.counterparty) {
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "transfer-copy-btn";
+        copyBtn.type = "button";
+        copyBtn.textContent = "⧉";
+        copyBtn.dataset.action = "copy-transfer-wallet";
+        copyBtn.dataset.wallet = item.counterparty;
+        copyBtn.title = "Copy wallet address";
+        copyBtn.setAttribute("aria-label", `Copy wallet ${item.counterparty}`);
+        typeRow.appendChild(copyBtn);
+      }
+
+      main.appendChild(typeRow);
 
       if (item.coinLabel || item.coin) {
         const coinWrap = document.createElement("div");
@@ -7349,6 +7409,17 @@
 
   function getIconCandidates(rawName, cleanName) {
     const candidates = [];
+    const getWrappedBaseSymbol = (name) => {
+      const raw = String(name || "").trim();
+      if (!raw) return "";
+      const { base } = splitDexCoin(raw);
+      const symbol = String(base || raw).trim().toUpperCase();
+      if (!symbol.startsWith("U") || symbol.length <= 1) return "";
+      const unwrapped = symbol.slice(1);
+      if (!unwrapped) return "";
+      if (HYPERLIQUID_TICKERS.has(unwrapped) || SPECIAL_LOGOS.has(unwrapped)) return unwrapped;
+      return "";
+    };
 
     const addSymbolCandidates = (name) => {
       const raw = String(name || "").trim();
@@ -7367,24 +7438,19 @@
     };
 
     const addWrappedSpotFallback = (name) => {
-      const raw = String(name || "").trim();
-      if (!raw) return;
-      const { base } = splitDexCoin(raw);
-      const symbol = String(base || raw).trim().toUpperCase();
-      if (!symbol.startsWith("U") || symbol.length <= 1) return;
-      const baseSymbol = symbol.slice(1);
+      const baseSymbol = getWrappedBaseSymbol(name);
       if (!baseSymbol) return;
-      const isKnown = HYPERLIQUID_TICKERS.has(baseSymbol) || SPECIAL_LOGOS.has(baseSymbol);
-      if (!isKnown) return;
       addSymbolCandidates(baseSymbol);
     };
+
+    // Prefer canonical base logo for wrapped spot symbols (e.g. UBTC -> BTC).
+    addWrappedSpotFallback(cleanName);
+    addWrappedSpotFallback(rawName);
 
     const specialLogo = getSpecialLogoUrl(rawName, cleanName);
     if (specialLogo) candidates.push(specialLogo);
     addSymbolCandidates(rawName);
     addSymbolCandidates(cleanName);
-    addWrappedSpotFallback(cleanName);
-    addWrappedSpotFallback(rawName);
 
     return Array.from(new Set(candidates));
   }
@@ -7734,8 +7800,16 @@
     const cleaned = String(value || "").trim();
     if (!cleaned) return "";
     const { dex, base } = splitDexCoin(cleaned);
-    if (dex) return `${dex.toLowerCase()}:${String(base || "").toUpperCase()}`;
-    return cleaned.toUpperCase();
+    let normalizedBase = String(base || "").toUpperCase();
+    if (normalizedBase.startsWith("U") && normalizedBase.length > 1) {
+      const unwrapped = normalizedBase.slice(1);
+      if (HYPERLIQUID_TICKERS.has(unwrapped) || SPECIAL_LOGOS.has(unwrapped)) {
+        normalizedBase = unwrapped;
+      }
+    }
+    if (dex) return `${dex.toLowerCase()}:${normalizedBase}`;
+    if (!normalizedBase) return cleaned.toUpperCase();
+    return normalizedBase;
   }
 
   function getFooterBase(coin) {
@@ -14525,6 +14599,26 @@
       setThirdPanelMode(mode);
     });
   });
+
+  if (transfersListBodyEl) {
+    transfersListBodyEl.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-action='copy-transfer-wallet']");
+      if (!btn) return;
+      const wallet = String(btn.dataset.wallet || "").trim();
+      if (!wallet) return;
+      e.stopPropagation();
+      const prev = btn.textContent;
+      try {
+        await navigator.clipboard.writeText(wallet);
+        btn.textContent = "✓";
+        setTimeout(() => {
+          btn.textContent = prev || "⧉";
+        }, 1000);
+      } catch (err) {
+        console.warn("Transfer wallet copy failed", err);
+      }
+    });
+  }
 
   let lastHistoryFocus = "orders";
   function setHistoryMode(enabled, focus = lastHistoryFocus) {
