@@ -7425,6 +7425,15 @@
 
   function getIconCandidates(rawName, cleanName) {
     const candidates = [];
+    const addPrefixedCandidates = (name) => {
+      const raw = String(name || "").trim();
+      if (!raw) return;
+      if (!raw.includes(":")) return;
+      // Keep exact prefixed path first for HIP-3/non-crypto assets (e.g. xyz:NVDA).
+      candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(raw)}.svg`);
+      const upper = raw.toUpperCase();
+      if (upper !== raw) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
+    };
     const getWrappedBaseSymbol = (name) => {
       const raw = String(name || "").trim();
       if (!raw) return "";
@@ -7464,6 +7473,10 @@
       if (!baseSymbol) return;
       addSymbolCandidates(baseSymbol);
     };
+
+    // Prefer exact prefixed Hyperliquid logos for HIP-3/non-crypto assets.
+    addPrefixedCandidates(cleanName);
+    addPrefixedCandidates(rawName);
 
     // Prefer canonical base logo for wrapped spot symbols (e.g. UBTC -> BTC).
     addWrappedSpotFallback(cleanName);
