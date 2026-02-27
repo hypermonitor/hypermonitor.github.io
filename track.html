@@ -1977,6 +1977,19 @@
       white-space: nowrap;
     }
 
+    .transfer-coin .asset-cell {
+      font-size: 0.68rem;
+      color: var(--muted);
+      gap: 0.28rem;
+    }
+
+    .transfer-coin .coinIcon,
+    .transfer-coin .coinFallback {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
     .transfer-wallet {
       font-size: 0.62rem;
       color: var(--muted);
@@ -2197,6 +2210,7 @@
     }
 
     body.light .transfer-type { color: #0f172a; }
+    body.light .transfer-coin .asset-cell { color: #64748b; }
     body.light .transfer-wallet { color: #64748b; }
     body.light .transfer-item:hover { background: #f9fafb; }
 
@@ -2884,6 +2898,12 @@
     .performance-title .pill-action-btn,
     .performance-title .metrics-toggle {
       height: 25px;
+    }
+
+    #positionsTimelineToggle .timeline-toggle-icon {
+      width: 12px;
+      height: 12px;
+      display: block;
     }
 
     .metric {
@@ -5299,6 +5319,17 @@
 
   function normalizeTransferRoute(raw = {}, delta = {}) {
     const merged = { ...raw, ...delta };
+    const parseBoolLike = (value) => {
+      if (typeof value === "boolean") return value;
+      if (typeof value === "number") {
+        if (value === 1) return true;
+        if (value === 0) return false;
+      }
+      const s = String(value ?? "").trim().toLowerCase();
+      if (s === "true" || s === "1") return true;
+      if (s === "false" || s === "0") return false;
+      return null;
+    };
     const read = (value) => String(value || "").trim().toLowerCase();
     const normalizeSide = (value) => {
       const s = read(value);
@@ -5308,8 +5339,15 @@
       return "";
     };
 
-    if (typeof merged.toPerp === "boolean") {
-      return merged.toPerp ? "Spot > Perp" : "Perp > Spot";
+    const toPerpRaw =
+      merged.toPerp ??
+      merged.to_perp ??
+      merged.toPerps ??
+      merged.to_perps ??
+      merged.isToPerp;
+    const toPerp = parseBoolLike(toPerpRaw);
+    if (toPerp !== null) {
+      return toPerp ? "Spot > Perps" : "Perps > Spot";
     }
 
     const fromCandidates = [
@@ -5350,12 +5388,73 @@
     return "";
   }
 
-  function normalizeTransferType(rawType, raw = {}, delta = {}) {
+  function getTransferCounterparty(raw = {}, delta = {}, wallet = "") {
+    const merged = { ...raw, ...delta };
+    const sourceRaw = String(merged.user ?? merged.source ?? merged.from ?? merged.src ?? "").trim();
+    const destinationRaw = String(merged.destination ?? merged.to ?? merged.dst ?? "").trim();
+    const source = sourceRaw.toLowerCase();
+    const destination = destinationRaw.toLowerCase();
+    const me = String(wallet || "").trim().toLowerCase();
+    if (source && destination && source === destination) return null;
+
+    if (me) {
+      if (source === me && destination === me) return null;
+      if (source === me && destination && destination === me) return null;
+      if (destination === me && source && source === me) return null;
+      if (source && source === me && destinationRaw) return { direction: "out", counterparty: destinationRaw };
+      if (destination && destination === me && sourceRaw) return { direction: "in", counterparty: sourceRaw };
+    }
+
+    if (destinationRaw && (!me || destination !== me)) return { direction: "out", counterparty: destinationRaw };
+    if (sourceRaw && (!me || source !== me)) return { direction: "in", counterparty: sourceRaw };
+    return null;
+  }
+
+  function normalizeTransferType(rawType, raw = {}, delta = {}, wallet = "") {
     const type = String(rawType || "").trim();
     if (!type) return "Transfer";
     const typeLower = type.toLowerCase();
+    const counterparty = getTransferCounterparty(raw, delta, wallet);
+    if (typeLower.includes("accountclasstransfer")) {
+      return normalizeTransferRoute(raw, delta) || "Account Transfer";
+    }
+    if (typeLower.includes("spottransfer")) {
+      if (counterparty?.direction === "out" && counterparty.counterparty) {
+        return `Spot transfer to ${formatShortWallet(counterparty.counterparty)}`;
+      }
+      if (counterparty?.direction === "in" && counterparty.counterparty) {
+        return `Spot transfer from ${formatShortWallet(counterparty.counterparty)}`;
+      }
+      return "Spot Transfer";
+    }
+    if (typeLower.includes("subaccounttransfer")) {
+      if (counterparty?.direction === "out" && counterparty.counterparty) {
+        return `Sub-account transfer to ${formatShortWallet(counterparty.counterparty)}`;
+      }
+      if (counterparty?.direction === "in" && counterparty.counterparty) {
+        return `Sub-account transfer from ${formatShortWallet(counterparty.counterparty)}`;
+      }
+      return "Sub-account Transfer";
+    }
+    if (typeLower.includes("internaltransfer")) {
+      if (counterparty?.direction === "out" && counterparty.counterparty) {
+        return `Internal transfer to ${formatShortWallet(counterparty.counterparty)}`;
+      }
+      if (counterparty?.direction === "in" && counterparty.counterparty) {
+        return `Internal transfer from ${formatShortWallet(counterparty.counterparty)}`;
+      }
+      return "Internal Transfer";
+    }
     if (typeLower.includes("send")) {
-      return normalizeTransferRoute(raw, delta) || "Send";
+      const route = normalizeTransferRoute(raw, delta);
+      if (route) return route;
+      if (counterparty?.direction === "out" && counterparty.counterparty) {
+        return `Send to ${formatShortWallet(counterparty.counterparty)}`;
+      }
+      if (counterparty?.direction === "in" && counterparty.counterparty) {
+        return `Receive from ${formatShortWallet(counterparty.counterparty)}`;
+      }
+      return "Perps <-> Spot";
     }
     const words = type
       .replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -5372,6 +5471,31 @@
     if (lower.includes("deposit")) return 1;
     if (Number.isFinite(amount) && amount !== 0) return amount > 0 ? 1 : -1;
     return 0;
+  }
+
+  function extractTransferCoin(raw = {}, delta = {}, hasUsdcAmount = false) {
+    const candidates = [
+      delta.coin,
+      raw.coin,
+      delta.token,
+      raw.token,
+      delta.asset,
+      raw.asset,
+      delta.symbol,
+      raw.symbol,
+      delta.base,
+      raw.base,
+      delta.currency,
+      raw.currency,
+    ];
+    for (const candidate of candidates) {
+      if (candidate === null || candidate === undefined) continue;
+      const text = String(candidate).trim();
+      if (!text) continue;
+      return text;
+    }
+    if (hasUsdcAmount) return "USDC";
+    return "";
   }
 
   function normalizeTransferRecord(raw, wallet) {
@@ -5399,6 +5523,12 @@
         break;
       }
     }
+    const hasUsdcAmount =
+      Number.isFinite(Number(delta.usdc)) ||
+      Number.isFinite(Number(raw.usdc));
+    const coinRaw = extractTransferCoin(raw, delta, hasUsdcAmount);
+    const coinResolved = resolveCoinName(coinRaw, "");
+    const coinDisplay = resolveSpotDisplay(coinResolved || coinRaw || "");
 
     const direction = inferTransferDirection(typeRaw, amount);
     let signedAmount = amount;
@@ -5410,8 +5540,11 @@
       wallet,
       time,
       type: String(typeRaw || "").trim(),
-      typeLabel: normalizeTransferType(typeRaw, raw, delta),
+      typeLabel: normalizeTransferType(typeRaw, raw, delta, wallet),
       amount: Number.isFinite(signedAmount) ? signedAmount : null,
+      coin: coinResolved || coinRaw || "",
+      coinLabel: coinDisplay?.label || "",
+      coinIconKey: coinDisplay?.iconKey || coinResolved || coinRaw || "",
     };
   }
 
@@ -5449,6 +5582,15 @@
       type.className = "transfer-type";
       type.textContent = item.typeLabel || "Transfer";
       main.appendChild(type);
+
+      if (item.coinLabel || item.coin) {
+        const coinWrap = document.createElement("div");
+        coinWrap.className = "transfer-coin";
+        const iconKey = item.coinIconKey || item.coin || item.coinLabel || "";
+        const label = item.coinLabel || item.coin || "";
+        coinWrap.innerHTML = `<span class="asset-cell">${coinIconHtml(iconKey, label)}<span>${label}</span></span>`;
+        main.appendChild(coinWrap);
+      }
 
       const time = document.createElement("div");
       time.className = "transfer-time";
@@ -7166,24 +7308,43 @@
 
   function getIconCandidates(rawName, cleanName) {
     const candidates = [];
+
+    const addSymbolCandidates = (name) => {
+      const raw = String(name || "").trim();
+      if (!raw) return;
+      const { base } = splitDexCoin(raw);
+      const symbol = String(base || raw).trim();
+      if (!symbol) return;
+      const upper = symbol.toUpperCase();
+      const safe = symbol.replace(/\//g, "_");
+      const pngOnly = new Set(["USA500", "COPPER"]);
+      const localExt = pngOnly.has(upper) ? "png" : "svg";
+      candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(symbol)}.svg`);
+      if (upper !== symbol) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
+      candidates.push(`images/coins/${encodeURIComponent(safe)}.${localExt}`);
+      if (upper !== safe) candidates.push(`images/coins/${encodeURIComponent(upper)}.${localExt}`);
+    };
+
+    const addWrappedSpotFallback = (name) => {
+      const raw = String(name || "").trim();
+      if (!raw) return;
+      const { base } = splitDexCoin(raw);
+      const symbol = String(base || raw).trim().toUpperCase();
+      if (!symbol.startsWith("U") || symbol.length <= 1) return;
+      const baseSymbol = symbol.slice(1);
+      if (!baseSymbol) return;
+      const isKnown = HYPERLIQUID_TICKERS.has(baseSymbol) || SPECIAL_LOGOS.has(baseSymbol);
+      if (!isKnown) return;
+      addSymbolCandidates(baseSymbol);
+    };
+
     const specialLogo = getSpecialLogoUrl(rawName, cleanName);
     if (specialLogo) candidates.push(specialLogo);
-    if (rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
-    if (cleanName && cleanName !== rawName) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(cleanName)}.svg`);
-    const addUnprefixed = (name) => {
-      if (!name || name.length <= 1) return;
-      if (name[0] !== "U" && name[0] !== "u") return;
-      const unprefixed = name.slice(1);
-      if (!unprefixed) return;
-      candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(unprefixed)}.svg`);
-      const upper = unprefixed.toUpperCase();
-      if (upper !== unprefixed) {
-        candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
-      }
-    };
-    addUnprefixed(cleanName);
-    addUnprefixed(rawName);
-    if (rawName && rawName.includes(":")) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(rawName)}.svg`);
+    addSymbolCandidates(rawName);
+    addSymbolCandidates(cleanName);
+    addWrappedSpotFallback(cleanName);
+    addWrappedSpotFallback(rawName);
+
     return Array.from(new Set(candidates));
   }
 
@@ -7202,8 +7363,31 @@
   }
 
   function ensureLogoCache(rawKey, rawName, cleanName) {
-    if (logoCache.has(rawKey)) return logoCache.get(rawKey);
     const urls = getIconCandidates(rawName, cleanName);
+    const existing = logoCache.get(rawKey);
+    if (existing) {
+      const oldList = Array.isArray(existing.urls) ? existing.urls : [];
+      const sameLength = oldList.length === urls.length;
+      const sameUrls = sameLength && oldList.every((url, idx) => url === urls[idx]);
+      if (!sameUrls) {
+        existing.urls = urls;
+        existing.idx = 0;
+        existing.okUrl = null;
+        existing.state = "unknown";
+        existing.permaFail = false;
+        existing.retryCount = 0;
+      } else if (
+        existing.state === "bad" &&
+        !existing.permaFail &&
+        Array.isArray(existing.urls) &&
+        existing.urls.length > 0
+      ) {
+        // Allow stale bad entries to recover on subsequent renders.
+        existing.state = "unknown";
+        existing.idx = 0;
+      }
+      return existing;
+    }
     const entry = { state: "unknown", idx: 0, urls, okUrl: null };
     logoCache.set(rawKey, entry);
     return entry;
@@ -13971,14 +14155,31 @@
     });
   }
 
+  function setPositionsTimelineToggleVisual(expanded) {
+    if (!positionsTimelineToggleEl) return;
+    const icon = positionsTimelineToggleEl.querySelector("[aria-hidden='true']");
+    if (!icon) return;
+    if (!expanded) {
+      icon.innerHTML = `
+        <svg class="timeline-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 8v4l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M21 12a9 9 0 1 1-2.64-6.36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+          <path d="M21 3v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      `;
+      return;
+    }
+    icon.textContent = "▴";
+  }
+
   if (positionsTimelineToggleEl && positionsTimelineWrapEl) {
     positionsTimelineToggleEl.addEventListener("click", () => {
       const isHidden = positionsTimelineWrapEl.classList.toggle("hidden");
       const expanded = !isHidden;
       positionsTimelineToggleEl.setAttribute("aria-expanded", String(expanded));
-      const icon = positionsTimelineToggleEl.querySelector("[aria-hidden='true']");
-      if (icon) icon.textContent = expanded ? "▴" : "▾";
+      setPositionsTimelineToggleVisual(expanded);
     });
+    setPositionsTimelineToggleVisual(!positionsTimelineWrapEl.classList.contains("hidden"));
   }
 
   if (openOrdersHeaderEls.length) {
