@@ -1608,10 +1608,84 @@
       gap: 0.35rem;
     }
 
+    .positions-timeline-wrap {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.15rem 0 0.55rem;
+      padding: 0.38rem 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 10px;
+      background: rgba(148, 163, 184, 0.05);
+    }
+
+    .positions-timeline-label {
+      font-size: 0.67rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      opacity: 0.85;
+    }
+
+    .positions-timeline-controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+      min-width: 0;
+    }
+
+    .positions-timeline-slider {
+      width: 100%;
+      accent-color: #f8fafc;
+      opacity: 0.5;
+    }
+
+    .positions-timeline-stamp {
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+      min-width: 0;
+    }
+
+    .positions-timeline-live {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(148, 163, 184, 0.03);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.18rem 0.45rem;
+      font-size: 0.66rem;
+      cursor: pointer;
+    }
+
+    .positions-timeline-live:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .timeline-estimate-note {
+      display: inline-block;
+      margin-top: 0.25rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
     @media (max-width: 720px) {
       .positions-card .section-actions {
         margin-left: auto;
         justify-content: flex-end;
+      }
+
+      .positions-timeline-wrap {
+        grid-template-columns: 1fr auto;
+        gap: 0.4rem;
+      }
+
+      .positions-timeline-label {
+        display: none;
       }
     }
 
@@ -1773,6 +1847,52 @@
       gap: 0.35rem;
     }
 
+    .deposits-card-title {
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .deposits-card-heading {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .third-panel-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 2px;
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      background: rgba(10, 10, 12, 0.45);
+      height: 25px;
+    }
+
+    .third-panel-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+      line-height: 1;
+      border-radius: 999px;
+      padding: 0 0.68rem;
+      cursor: pointer;
+      height: 100%;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .third-panel-btn.active {
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .third-panel-btn:not(.active):hover {
+      color: #f8fafc;
+    }
+
     .chart-card h3 span.spark-label {
       font-size: 0.7rem;
       color: var(--muted);
@@ -1793,6 +1913,86 @@
       width: 100% !important;
       height: 100% !important;
     }
+
+    .transfers-wrap {
+      flex: 1 1 auto;
+      height: 170px;
+      min-height: 170px;
+      max-height: 170px;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: rgba(15, 23, 42, 0.08);
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .transfers-list-status {
+      font-size: 0.7rem;
+      color: var(--muted);
+      padding: 0.5rem 0.6rem 0.35rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(148, 163, 184, 0.05);
+    }
+
+    .transfers-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      overflow: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .transfer-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.42rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .transfer-item:last-child { border-bottom: 0; }
+    .transfer-item:hover { background: rgba(148, 163, 184, 0.08); }
+
+    .transfer-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.14rem;
+    }
+
+    .transfer-type {
+      font-size: 0.72rem;
+      color: var(--text-main);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .transfer-time {
+      font-size: 0.66rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .transfer-wallet {
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .transfer-amount {
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .transfer-amount.positive { color: var(--accent); }
+    .transfer-amount.negative { color: var(--danger); }
+    .transfer-amount.neutral { color: var(--neutral-blue); }
 
     .chart-loading-wrap {
       position: relative;
@@ -1971,6 +2171,34 @@
       background: #ffffff;
       border: 1px solid #e5e7eb;
     }
+
+    body.light .third-panel-toggle {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .third-panel-btn {
+      color: #475569;
+    }
+
+    body.light .third-panel-btn.active {
+      color: #0f172a;
+      background: #f8fafc;
+    }
+
+    body.light .transfers-wrap {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .transfers-list-status {
+      background: #f8fafc;
+      border-bottom-color: #e5e7eb;
+    }
+
+    body.light .transfer-type { color: #0f172a; }
+    body.light .transfer-wallet { color: #64748b; }
+    body.light .transfer-item:hover { background: #f9fafb; }
 
     body.light .chart-loading { color: #6b7280; }
     body.light .price-stack .current-price { color: #0f172a; }
@@ -2652,6 +2880,7 @@
 
     .positions-card .pill-action-btn,
     .positions-card .export-btn,
+    .positions-card .metrics-toggle,
     .performance-title .pill-action-btn,
     .performance-title .metrics-toggle {
       height: 25px;
@@ -3511,7 +3740,19 @@
             </svg>
             <span class="sr-only">Export Excel</span>
           </button>
+          <button class="metrics-toggle" id="positionsTimelineToggle" type="button" aria-expanded="false" title="Toggle timeline">
+            <span class="sr-only">Toggle timeline</span>
+            <span aria-hidden="true">▾</span>
+          </button>
         </div>
+      </div>
+      <div class="positions-timeline-wrap hidden" id="positionsTimelineWrap">
+        <div class="positions-timeline-label">Timeline</div>
+        <div class="positions-timeline-controls">
+          <input id="positionsTimelineSlider" class="positions-timeline-slider" type="range" min="0" max="0" step="1" value="0" disabled />
+          <span id="positionsTimelineStamp" class="positions-timeline-stamp">Live</span>
+        </div>
+        <button id="positionsTimelineLiveBtn" class="positions-timeline-live" type="button" disabled>Live</button>
       </div>
       <table>
         <thead>
@@ -3620,9 +3861,19 @@
         </div>
 
         <div class="chart-card">
-          <h3>Deposits & Withdrawals <span class="spark-label" id="depositsTitleValue">[-]</span></h3>
-          <div class="chart-canvas-wrap">
+          <h3 class="deposits-card-title">
+            <span class="deposits-card-heading">Deposits & Withdrawals <span class="spark-label" id="depositsTitleValue">[-]</span></span>
+            <span class="third-panel-toggle" role="tablist" aria-label="Third panel mode">
+              <button class="third-panel-btn active" id="thirdPanelChartBtn" type="button" data-panel-mode="chart" role="tab" aria-selected="true">Graph</button>
+              <button class="third-panel-btn" id="thirdPanelTransfersBtn" type="button" data-panel-mode="transfers" role="tab" aria-selected="false">Log</button>
+            </span>
+          </h3>
+          <div class="chart-canvas-wrap" id="depositsChartWrap">
             <canvas id="depositsChart"></canvas>
+          </div>
+          <div class="transfers-wrap is-hidden" id="transfersListWrap">
+            <div class="transfers-list-status" id="transfersListStatus">Transfers will appear here.</div>
+            <ul class="transfers-list" id="transfersListBody"></ul>
           </div>
         </div>
       </div>
@@ -4110,6 +4361,11 @@
 
   const positionsBodyEl = document.getElementById("positionsBody");
   const positionsChartBtn = document.getElementById("positionsChartBtn");
+  const positionsTimelineWrapEl = document.getElementById("positionsTimelineWrap");
+  const positionsTimelineSliderEl = document.getElementById("positionsTimelineSlider");
+  const positionsTimelineStampEl = document.getElementById("positionsTimelineStamp");
+  const positionsTimelineLiveBtnEl = document.getElementById("positionsTimelineLiveBtn");
+  const positionsTimelineToggleEl = document.getElementById("positionsTimelineToggle");
   const portfolioModalEl = document.getElementById("portfolioModal");
   const portfolioModalCloseEl = document.getElementById("portfolioModalClose");
   const portfolioDoughnutCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("portfolioDoughnut"));
@@ -4225,6 +4481,11 @@
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
   const depositsCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("depositsChart"));
+  const depositsChartWrapEl = document.getElementById("depositsChartWrap");
+  const transfersListWrapEl = document.getElementById("transfersListWrap");
+  const transfersListBodyEl = document.getElementById("transfersListBody");
+  const transfersListStatusEl = document.getElementById("transfersListStatus");
+  const thirdPanelModeButtons = document.querySelectorAll(".third-panel-btn");
   const equityTitleValueEl = document.getElementById("equityTitleValue");
   const pnlTitleValueEl = document.getElementById("pnlTitleValue");
   const depositsTitleValueEl = document.getElementById("depositsTitleValue");
@@ -4244,6 +4505,14 @@
   let currentOpenOrdersSort = { key: "time", dir: "desc" };
   let currentCanceledOrdersSort = { key: "time", dir: "desc" };
   let currentFillsSort = { key: "time", dir: "desc" };
+  let timelineAsOfMs = null;
+  let timelineTimestamps = [];
+  let timelineSelectedIndex = -1;
+  let timelinePriceRequestId = 0;
+  let timelinePriceRefreshTimer = null;
+  const timelineCoinPriceCache = new Map();
+  const timelinePriceByCoin = new Map();
+  let lastRenderedWalletTotals = new Map();
   const coinIdMap = new Map();
   const spotIdMetaMap = new Map();
   let perpDexNames = null;
@@ -4961,6 +5230,10 @@
 
   const portfolioDataByWallet = new Map();
   let currentRangeKey = "allTime";
+  let thirdPanelMode = "chart";
+  const transferHistoryByWallet = new Map();
+  let transfersRequestToken = 0;
+  const TRANSFERS_MAX_ROWS = 120;
   const portfolioCharts = { equity: null, pnl: null, deposits: null };
   const portfolioBreakdownChart = { chart: null };
   const WALLET_COLOR_PALETTE = ["#38bdf8", "#f59e0b", "#f472b6", "#22d3ee", "#a78bfa", "#34d399", "#f97316", "#60a5fa"];
@@ -5022,6 +5295,252 @@
     const date = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
     const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     return `${date} ${time}`;
+  }
+
+  function normalizeTransferRoute(raw = {}, delta = {}) {
+    const merged = { ...raw, ...delta };
+    const read = (value) => String(value || "").trim().toLowerCase();
+    const normalizeSide = (value) => {
+      const s = read(value);
+      if (!s) return "";
+      if (s.includes("perp") || s.includes("deriv")) return "Perp";
+      if (s.includes("spot")) return "Spot";
+      return "";
+    };
+
+    if (typeof merged.toPerp === "boolean") {
+      return merged.toPerp ? "Spot > Perp" : "Perp > Spot";
+    }
+
+    const fromCandidates = [
+      merged.from,
+      merged.fromType,
+      merged.fromClass,
+      merged.fromAccountType,
+      merged.source,
+      merged.src,
+    ];
+    const toCandidates = [
+      merged.to,
+      merged.toType,
+      merged.toClass,
+      merged.toAccountType,
+      merged.destination,
+      merged.dst,
+    ];
+
+    let from = "";
+    let to = "";
+    for (const value of fromCandidates) {
+      const side = normalizeSide(value);
+      if (side) {
+        from = side;
+        break;
+      }
+    }
+    for (const value of toCandidates) {
+      const side = normalizeSide(value);
+      if (side) {
+        to = side;
+        break;
+      }
+    }
+
+    if (from && to && from !== to) return `${from} > ${to}`;
+    return "";
+  }
+
+  function normalizeTransferType(rawType, raw = {}, delta = {}) {
+    const type = String(rawType || "").trim();
+    if (!type) return "Transfer";
+    const typeLower = type.toLowerCase();
+    if (typeLower.includes("send")) {
+      return normalizeTransferRoute(raw, delta) || "Send";
+    }
+    const words = type
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/_/g, " ")
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => toTitleCase(part));
+    return words.join(" ");
+  }
+
+  function inferTransferDirection(type, amount) {
+    const lower = String(type || "").toLowerCase();
+    if (lower.includes("withdraw")) return -1;
+    if (lower.includes("deposit")) return 1;
+    if (Number.isFinite(amount) && amount !== 0) return amount > 0 ? 1 : -1;
+    return 0;
+  }
+
+  function normalizeTransferRecord(raw, wallet) {
+    if (!raw || typeof raw !== "object") return null;
+    const delta = raw.delta && typeof raw.delta === "object" ? raw.delta : {};
+    const time = normalizeTimestamp(raw.time ?? raw.timestamp ?? raw.createdTime ?? raw.blockTime ?? raw.blockTimestamp);
+    if (!Number.isFinite(time)) return null;
+
+    const typeRaw = delta.type ?? raw.type ?? raw.eventType ?? "";
+    const amountCandidates = [
+      delta.usdc,
+      delta.amount,
+      delta.value,
+      delta.usd,
+      raw.usdc,
+      raw.amount,
+      raw.value,
+      raw.usd,
+    ];
+    let amount = null;
+    for (const candidate of amountCandidates) {
+      const n = Number(candidate);
+      if (Number.isFinite(n)) {
+        amount = n;
+        break;
+      }
+    }
+
+    const direction = inferTransferDirection(typeRaw, amount);
+    let signedAmount = amount;
+    if (Number.isFinite(amount) && direction !== 0) {
+      signedAmount = Math.abs(amount) * direction;
+    }
+
+    return {
+      wallet,
+      time,
+      type: String(typeRaw || "").trim(),
+      typeLabel: normalizeTransferType(typeRaw, raw, delta),
+      amount: Number.isFinite(signedAmount) ? signedAmount : null,
+    };
+  }
+
+  async function fetchWalletTransfers(wallet) {
+    const res = await fetch(PORTFOLIO_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "userNonFundingLedgerUpdates", user: wallet }),
+    });
+    if (!res.ok) throw new Error(`Transfers API error: ${res.status} ${res.statusText}`);
+    const raw = await res.json();
+    const rows = Array.isArray(raw) ? raw : [];
+    return rows
+      .map((entry) => normalizeTransferRecord(entry, wallet))
+      .filter(Boolean)
+      .sort((a, b) => b.time - a.time);
+  }
+
+  function renderTransfersList(items, statusText = "") {
+    if (!transfersListBodyEl || !transfersListStatusEl) return;
+    transfersListBodyEl.innerHTML = "";
+    transfersListStatusEl.textContent = statusText || "";
+    if (!items.length) return;
+
+    const multiWallet = currentWallets.length > 1;
+    const fragment = document.createDocumentFragment();
+    items.forEach((item) => {
+      const li = document.createElement("li");
+      li.className = "transfer-item";
+
+      const main = document.createElement("div");
+      main.className = "transfer-main";
+
+      const type = document.createElement("div");
+      type.className = "transfer-type";
+      type.textContent = item.typeLabel || "Transfer";
+      main.appendChild(type);
+
+      const time = document.createElement("div");
+      time.className = "transfer-time";
+      time.textContent = fmtDateTime(item.time);
+      main.appendChild(time);
+
+      if (multiWallet) {
+        const wallet = document.createElement("div");
+        wallet.className = "transfer-wallet";
+        wallet.textContent = formatShortWallet(item.wallet);
+        main.appendChild(wallet);
+      }
+
+      const amount = document.createElement("div");
+      amount.className = "transfer-amount";
+      if (Number.isFinite(item.amount)) {
+        amount.textContent = formatSignedDollarWithPlus(item.amount, 2);
+        amount.classList.add(item.amount > 0 ? "negative" : item.amount < 0 ? "positive" : "neutral");
+      } else {
+        amount.textContent = "-";
+        amount.classList.add("neutral");
+      }
+
+      li.appendChild(main);
+      li.appendChild(amount);
+      fragment.appendChild(li);
+    });
+
+    transfersListBodyEl.appendChild(fragment);
+  }
+
+  async function refreshTransfersPanel(rangeKey = currentRangeKey) {
+    if (thirdPanelMode !== "transfers") return;
+    if (!currentWallets.length) {
+      renderTransfersList([], "No wallet selected.");
+      return;
+    }
+
+    const requestToken = ++transfersRequestToken;
+    renderTransfersList([], "Loading transfers…");
+    const windowBounds = getRangeWindowForKey(rangeKey);
+
+    const tasks = currentWallets.map(async (wallet) => {
+      const key = String(wallet).toLowerCase();
+      if (transferHistoryByWallet.has(key)) {
+        return transferHistoryByWallet.get(key) || [];
+      }
+      const rows = await fetchWalletTransfers(wallet);
+      transferHistoryByWallet.set(key, rows);
+      return rows;
+    });
+
+    try {
+      const grouped = await Promise.all(tasks);
+      if (requestToken !== transfersRequestToken) return;
+      const allRows = grouped
+        .flat()
+        .filter((row) => {
+          const t = Number(row?.time);
+          if (!Number.isFinite(t)) return false;
+          if (Number.isFinite(windowBounds.start) && t < windowBounds.start) return false;
+          if (Number.isFinite(windowBounds.end) && t > windowBounds.end) return false;
+          return true;
+        })
+        .sort((a, b) => b.time - a.time)
+        .slice(0, TRANSFERS_MAX_ROWS);
+
+      if (!allRows.length) {
+        renderTransfersList([], "No transfer events in this range.");
+        return;
+      }
+      renderTransfersList(allRows, `${allRows.length} most recent events`);
+    } catch (err) {
+      console.error("Transfers fetch failed", err);
+      if (requestToken !== transfersRequestToken) return;
+      renderTransfersList([], "Failed to load transfer history.");
+    }
+  }
+
+  function setThirdPanelMode(mode) {
+    const next = mode === "transfers" ? "transfers" : "chart";
+    thirdPanelMode = next;
+
+    thirdPanelModeButtons.forEach((btn) => {
+      const isActive = btn.dataset.panelMode === next;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", String(isActive));
+    });
+
+    if (depositsChartWrapEl) depositsChartWrapEl.classList.toggle("is-hidden", next !== "chart");
+    if (transfersListWrapEl) transfersListWrapEl.classList.toggle("is-hidden", next !== "transfers");
+    if (next === "transfers") refreshTransfersPanel(currentRangeKey);
   }
 
   function fmtMoney(v, decimals = 2) {
@@ -5252,8 +5771,20 @@
     if (v === null || v === undefined) return "";
     const n = Number(v);
     if (Number.isNaN(n)) return String(v);
+    const abs = Math.abs(n);
+    let decimals = 0;
+    if (abs < 1) {
+      // Continue the same granularity trend below 1 (up to 8 dp).
+      const extra = abs > 0 ? Math.ceil(Math.log10(1 / abs)) : 0;
+      decimals = Math.min(8, 4 + Math.max(0, extra));
+    } else if (abs < 10) decimals = 4;
+    else if (abs < 100) decimals = 3;
+    else if (abs < 1000) decimals = 2;
+    else if (abs < 10000) decimals = 1;
+    else decimals = 0;
     const formatted = n.toLocaleString(undefined, {
-      maximumFractionDigits: 8,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
       useGrouping: true,
     });
     return `$${formatted}`;
@@ -5313,6 +5844,52 @@
     const n = Number(leverage);
     if (!Number.isFinite(n) || n === 0) return "";
     return formatLeverage(n);
+  }
+
+  function getEntryLeverageValue(entry) {
+    const leverage =
+      entry?.leverage?.value ??
+      entry?.leverage ??
+      entry?.lever ??
+      entry?.leverageValue ??
+      entry?.maxLeverage ??
+      entry?.lev;
+    const n = Number(leverage);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  function parseLeverageFromText(value) {
+    const text = String(value || "");
+    if (!text) return null;
+    const m = text.match(/(^|[^0-9])(\d+(?:\.\d+)?)\s*[xX]\b/);
+    if (!m) return null;
+    const n = Number(m[2]);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  function inferLeverageFromFill(fill) {
+    if (!fill || typeof fill !== "object") return null;
+    const direct = getEntryLeverageValue(fill);
+    if (Number.isFinite(direct)) return direct;
+    const fromOrder = getEntryLeverageValue(fill?.order);
+    if (Number.isFinite(fromOrder)) return fromOrder;
+
+    const textCandidates = [
+      fill?.dir,
+      fill?.direction,
+      fill?.orderType,
+      fill?.type,
+      fill?.order?.orderType,
+      fill?.order?.type,
+      fill?.description,
+      fill?.event,
+      fill?.notes,
+    ];
+    for (const text of textCandidates) {
+      const parsed = parseLeverageFromText(text);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
   }
 
   function getTriggerCondition(entry) {
@@ -5405,10 +5982,7 @@
   function formatLiqPrice(value, entryPx, markPx) {
     const n = Number(value);
     if (!Number.isFinite(n) || n === 0) return "–";
-    const entryDecimals = getPriceDecimals(entryPx);
-    const markDecimals = getPriceDecimals(markPx);
-    const refDecimals = Number.isFinite(entryDecimals) ? entryDecimals : markDecimals;
-    return formatPriceWithMaxDecimals(n, refDecimals);
+    return fmtPrice(n);
   }
 
   function computeLiqDistanceRatio(entryPx, markPx, liqPx, size) {
@@ -5428,6 +6002,116 @@
       return (liq - mark) / denom;
     }
     return null;
+  }
+
+  function estimateCrossLiqForPosition({
+    entryPx,
+    size,
+    markPx,
+    walletEquity,
+    otherMaintenance,
+    maintenanceRate = 0.005,
+  } = {}) {
+    const szi = Number(size);
+    const entry = Number(entryPx);
+    const mark = Number(markPx);
+    const equityRaw = Number(walletEquity);
+    const maintOther = Math.max(0, Number(otherMaintenance));
+    if (!Number.isFinite(szi) || szi === 0) return null;
+    if (!Number.isFinite(entry) || entry <= 0) return null;
+    if (!Number.isFinite(mark) || mark <= 0) return null;
+    if (!Number.isFinite(equityRaw)) return null;
+    if (!Number.isFinite(maintOther)) return null;
+    const mmr = Number.isFinite(Number(maintenanceRate)) ? Math.max(0, Number(maintenanceRate)) : 0.005;
+
+    // Cross-margin equation with other positions held constant:
+    // E(mark) + dPnL_i(mark->liq) = M_other + mmr_i * |liq * size_i|
+    // where M_other is maintenance requirement from all other open positions.
+    let liqPx = null;
+    if (szi > 0) {
+      const denom = szi * (1 - mmr);
+      if (denom <= 0) return null;
+      liqPx = (maintOther - equityRaw + szi * mark) / denom;
+      if (!Number.isFinite(liqPx)) return null;
+      if (liqPx >= mark) {
+        return { liqPx: mark, distanceRatio: null, distanceToLiqFrac: 0 };
+      }
+    } else {
+      const q = Math.abs(szi);
+      const denom = q * (1 + mmr);
+      if (denom <= 0) return null;
+      liqPx = (equityRaw + q * mark - maintOther) / denom;
+      if (!Number.isFinite(liqPx)) return null;
+      if (liqPx <= mark) {
+        return { liqPx: mark, distanceRatio: null, distanceToLiqFrac: 0 };
+      }
+    }
+
+    if (!Number.isFinite(liqPx) || liqPx <= 0) return null;
+
+    let riskUsedFrac = null;
+    if (szi > 0) {
+      const denom = entry - liqPx;
+      if (Number.isFinite(denom) && denom > 0) {
+        riskUsedFrac = (entry - mark) / denom;
+      }
+    } else {
+      const denom = liqPx - entry;
+      if (Number.isFinite(denom) && denom > 0) {
+        riskUsedFrac = (mark - entry) / denom;
+      }
+    }
+    if (!Number.isFinite(riskUsedFrac)) {
+      riskUsedFrac = Math.abs(mark - liqPx) / Math.max(1e-9, Math.abs(mark));
+    }
+    return {
+      liqPx,
+      distanceRatio: null,
+      distanceToLiqFrac: Number.isFinite(riskUsedFrac) ? riskUsedFrac : null,
+    };
+  }
+
+  function buildTimelineCrossRiskContext(positions) {
+    const map = new Map();
+    if (!Array.isArray(positions) || !positions.length || !isTimelineActive()) return map;
+    const asOfMs = Number(timelineAsOfMs);
+    if (!Number.isFinite(asOfMs)) return map;
+
+    const perpPositions = positions.filter((item) => item?.marketType !== "spot");
+    const walletTotals = new Map();
+    perpPositions.forEach((item) => {
+      const wallet = item?.wallet || primaryWallet;
+      const p = item?.position || {};
+      const szi = Number(p.szi ?? 0);
+      const entry = Number(p.entryPx ?? 0);
+      const coin = p.coin || "";
+      const mark = Number(getMarkPriceForCoin(coin));
+      let positionValue = Number(p.positionValue ?? 0);
+      if ((!Number.isFinite(positionValue) || positionValue === 0) && Number.isFinite(mark) && szi !== 0) {
+        positionValue = mark * szi;
+      } else if ((!Number.isFinite(positionValue) || positionValue === 0) && Number.isFinite(entry) && szi !== 0) {
+        positionValue = entry * szi;
+      }
+      const notional = Math.abs(Number(positionValue ?? 0));
+      if (!Number.isFinite(notional) || notional <= 0) return;
+      const mmr = 0.005;
+      const current = walletTotals.get(wallet) || { notional: 0, maintenance: 0 };
+      current.notional += notional;
+      current.maintenance += notional * mmr;
+      walletTotals.set(wallet, current);
+    });
+
+    walletTotals.forEach((totals, wallet) => {
+      const eq = getAccountValueAtTime(wallet, asOfMs, currentMarketType);
+      if (!Number.isFinite(eq)) return;
+      map.set(wallet, {
+        equity: Number(eq),
+        notional: Number(totals.notional ?? 0),
+        maintenance: Number(totals.maintenance ?? 0),
+      });
+    });
+
+    return map;
   }
 
   function getPositionsColspan() {
@@ -5639,8 +6323,8 @@
     const { label: spotLabel } = resolveSpotDisplay(coinDisplayName);
     const szi = Number(p.szi ?? 0);
     const entryPx = Number(p.entryPx ?? 0);
-    const livePx = getLivePriceForCoin(coin);
-    let markPx = Number.isFinite(livePx) ? livePx : undefined;
+    const contextPx = getMarkPriceForCoin(coin);
+    let markPx = Number.isFinite(contextPx) ? contextPx : undefined;
     const snapshotValue = Number(p.positionValue ?? 0);
     if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
       markPx = Math.abs(snapshotValue) / Math.abs(szi);
@@ -6224,10 +6908,10 @@
     pnlShareModalEl.setAttribute("aria-hidden", "true");
   }
 
-  function computePositionAgeMs(coin, szi, wallet) {
+  function computePositionAgeMsAtTime(coin, szi, wallet, asOfMs = Date.now()) {
     const target = Number(szi) || 0;
     if (target === 0) return null;
-    const fillsForCoin = getAllFillsForCoin(coin, wallet, currentMarketType);
+    const fillsForCoin = getAllFillsForCoin(coin, wallet, currentMarketType, asOfMs);
     if (!fillsForCoin.length) return null;
     const sorted = [...fillsForCoin].sort(
       (a, b) => Number(b.time ?? b.timestamp ?? 0) - Number(a.time ?? a.timestamp ?? 0)
@@ -6274,8 +6958,12 @@
       if (Math.abs(netSize - target) <= EPS) break;
     }
     if (!Number.isFinite(oldestTime)) return null;
-    const age = Date.now() - oldestTime;
+    const age = Number(asOfMs) - oldestTime;
     return Number.isFinite(age) && age >= 0 ? age : null;
+  }
+
+  function computePositionAgeMs(coin, szi, wallet) {
+    return computePositionAgeMsAtTime(coin, szi, wallet, Date.now());
   }
 
   function formatSignedPercent(value, decimals = 2) {
@@ -6770,6 +7458,8 @@
   }
 
   function applyMarketFilter() {
+    recomputeTimelineControls();
+    if (isTimelineActive()) queueTimelinePriceRefresh();
     renderPositions(getPositionsForMarketType(currentMarketType));
     renderOpenOrders();
     renderCanceledOrders();
@@ -7750,7 +8440,532 @@
     }
   }
 
+  function isTimelineActive() {
+    return Number.isFinite(timelineAsOfMs);
+  }
+
+  function getTimelinePriceCacheKey(coin, asOfMs) {
+    const bucket = Math.floor(Number(asOfMs) / 86400000);
+    return `${coin}|${bucket}`;
+  }
+
+  function getUtcDayBounds(ms) {
+    const d = new Date(Number(ms));
+    if (Number.isNaN(d.getTime())) return null;
+    const start = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0);
+    const end = start + 86400000;
+    return { start, end };
+  }
+
+  function normalizeExternalPriceSymbol(rawCoin) {
+    const base = String(splitDexCoin(rawCoin).base || rawCoin || "")
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    const aliases = new Map([
+      ["XBT", "BTC"],
+    ]);
+    return aliases.get(base) || base;
+  }
+
+  async function fetchBinanceHistoricalPrice(symbolBase, asOfMs) {
+    const base = normalizeExternalPriceSymbol(symbolBase);
+    if (!base) return null;
+    const bounds = getUtcDayBounds(asOfMs);
+    if (!bounds) return null;
+    const quoteCandidates = ["USDT", "USDC", "BUSD", "FDUSD"];
+    for (const quote of quoteCandidates) {
+      const symbol = `${base}${quote}`;
+      try {
+        const startTime = Math.max(0, bounds.start);
+        const endTime = bounds.end;
+        const url = `https://api.binance.com/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=1d&startTime=${startTime}&endTime=${endTime}&limit=2`;
+        const res = await fetch(url, { method: "GET" });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const candle = Array.isArray(data) && data.length ? data[0] : null;
+        const px = Number(candle?.[4] ?? candle?.[1]);
+        if (Number.isFinite(px) && px > 0) return px;
+      } catch (err) {
+        console.warn("Binance daily price fetch failed", symbol, err);
+      }
+    }
+    return null;
+  }
+
+  async function fetchBybitHistoricalPrice(symbolBase, asOfMs) {
+    const base = normalizeExternalPriceSymbol(symbolBase);
+    if (!base) return null;
+    const quoteCandidates = ["USDT", "USDC"];
+    for (const quote of quoteCandidates) {
+      const symbol = `${base}${quote}`;
+      try {
+        const start = Math.max(0, Number(asOfMs) - 10 * 60 * 1000);
+        const end = Number(asOfMs) + 60 * 1000;
+        const url = `https://api.bybit.com/v5/market/kline?category=linear&symbol=${encodeURIComponent(symbol)}&interval=1&start=${start}&end=${end}&limit=200`;
+        const res = await fetch(url, { method: "GET" });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const list = Array.isArray(data?.result?.list) ? data.result.list : [];
+        const candles = list
+          .map((c) => ({
+            t: Number(c?.[0]),
+            o: Number(c?.[1]),
+            c: Number(c?.[4]),
+          }))
+          .filter((c) => Number.isFinite(c.t) && Number.isFinite(c.o) && Number.isFinite(c.c))
+          .sort((a, b) => a.t - b.t);
+        if (!candles.length) continue;
+        let chosen = null;
+        for (const candle of candles) {
+          if (candle.t <= asOfMs) chosen = candle;
+          else break;
+        }
+        if (!chosen) chosen = candles[0];
+        const px = Number(chosen.c ?? chosen.o);
+        if (Number.isFinite(px) && px > 0) return px;
+      } catch (err) {
+        console.warn("Bybit price fallback failed", symbol, err);
+      }
+    }
+    return null;
+  }
+
+  async function fetchHistoricalCoinPriceFromHyperliquid(coin, asOfMs) {
+    const cacheKey = getTimelinePriceCacheKey(coin, asOfMs);
+    if (timelineCoinPriceCache.has(cacheKey)) {
+      return timelineCoinPriceCache.get(cacheKey);
+    }
+
+    const endTime = Number(asOfMs) + 60000;
+    const startTime = Number(asOfMs) - 24 * 60 * 60 * 1000;
+    if (!Number.isFinite(startTime) || !Number.isFinite(endTime)) {
+      timelineCoinPriceCache.set(cacheKey, null);
+      return null;
+    }
+
+    const candidates = Array.from(
+      new Set(
+        [coin, splitDexCoin(coin).base, normalizeCoin(coin), normalizeCoin(splitDexCoin(coin).base)]
+          .map((v) => String(v || "").trim())
+          .filter(Boolean)
+      )
+    );
+
+    const externalBase = splitDexCoin(coin).base || coin;
+    const fromBinance = await fetchBinanceHistoricalPrice(externalBase, asOfMs);
+    if (Number.isFinite(fromBinance)) {
+      timelineCoinPriceCache.set(cacheKey, fromBinance);
+      return fromBinance;
+    }
+
+    for (const candidate of candidates) {
+      const intervals = ["15m", "1h", "4h", "1d"];
+      for (const interval of intervals) {
+        try {
+          const res = await fetch(PORTFOLIO_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "candleSnapshot",
+              req: {
+                coin: candidate,
+                interval,
+                startTime,
+                endTime,
+              },
+            }),
+          });
+          if (!res.ok) continue;
+          const data = await res.json();
+          const candles = (Array.isArray(data) ? data : [])
+            .map((c) => ({
+              t: Number(c.t),
+              o: Number(c.o),
+              c: Number(c.c),
+            }))
+            .filter((c) => Number.isFinite(c.t) && Number.isFinite(c.o) && Number.isFinite(c.c))
+            .sort((a, b) => a.t - b.t);
+          if (!candles.length) continue;
+          let chosen = null;
+          for (const candle of candles) {
+            if (candle.t <= asOfMs) chosen = candle;
+            else break;
+          }
+          if (!chosen) chosen = candles[0];
+          const price = Number(chosen.c ?? chosen.o);
+          if (Number.isFinite(price) && price > 0) {
+            timelineCoinPriceCache.set(cacheKey, price);
+            return price;
+          }
+        } catch (err) {
+          console.warn("Timeline candleSnapshot failed", candidate, interval, err);
+        }
+      }
+    }
+
+    const fromBybit = await fetchBybitHistoricalPrice(externalBase, asOfMs);
+    if (Number.isFinite(fromBybit)) {
+      timelineCoinPriceCache.set(cacheKey, fromBybit);
+      return fromBybit;
+    }
+
+    const fallback = getStablecoinPriceFallback(splitDexCoin(coin).base);
+    const price = Number.isFinite(fallback) ? fallback : null;
+    timelineCoinPriceCache.set(cacheKey, price);
+    return price;
+  }
+
+  async function refreshTimelinePrices(asOfMs, positions) {
+    if (!Number.isFinite(asOfMs) || !Array.isArray(positions) || !positions.length) {
+      timelinePriceByCoin.clear();
+      return;
+    }
+    const requestId = ++timelinePriceRequestId;
+    const coins = Array.from(
+      new Set(
+        positions
+          .map((item) => item?.position?.coin)
+          .filter(Boolean)
+      )
+    );
+    const results = await Promise.all(
+      coins.map(async (coin) => {
+        const px = await fetchHistoricalCoinPriceFromHyperliquid(coin, asOfMs);
+        return [coin, px];
+      })
+    );
+    if (requestId !== timelinePriceRequestId) return;
+    timelinePriceByCoin.clear();
+    results.forEach(([coin, px]) => {
+      if (Number.isFinite(px)) timelinePriceByCoin.set(coin, Number(px));
+    });
+  }
+
+  function queueTimelinePriceRefresh() {
+    if (!isTimelineActive()) return;
+    if (timelinePriceRefreshTimer) clearTimeout(timelinePriceRefreshTimer);
+    timelinePriceRefreshTimer = setTimeout(async () => {
+      timelinePriceRefreshTimer = null;
+      const rendered = computeTimelineAdjustedPositions(currentAssetPositions);
+      await refreshTimelinePrices(timelineAsOfMs, rendered);
+      renderPositions(currentAssetPositions, { preserveBase: true });
+    }, 120);
+  }
+
+  function getTimelinePositionKey(wallet, coin, marketType) {
+    return `${marketType || "perp"}|${String(wallet || "").toLowerCase()}|${String(coin || "").toUpperCase()}`;
+  }
+
+  function collectTimelineFillsForCurrentContext() {
+    const out = [];
+    const walletSet = new Set(currentWallets.map((w) => String(w).toLowerCase()));
+    const pushFrom = (arr) => {
+      if (!Array.isArray(arr)) return;
+      arr.forEach((fill) => {
+        const normalized = normalizeFillForMetrics(fill);
+        if (!normalized) return;
+        const walletKey = String(normalized.wallet || "").toLowerCase();
+        if (walletSet.size && walletKey && !walletSet.has(walletKey)) return;
+        if (currentMarketType !== "all" && normalized.marketType !== currentMarketType) return;
+        if (!normalized.coin || !normalized.side || !Number.isFinite(normalized.size) || normalized.size <= 0) return;
+        out.push({
+          time: normalized.time,
+          wallet: normalized.wallet || primaryWallet,
+          coin: normalized.coin,
+          marketType: normalized.marketType,
+          side: normalized.side,
+          size: normalized.size,
+          price: normalized.price,
+        });
+      });
+    };
+    pushFrom(historicalFills);
+    pushFrom(fills);
+
+    const seen = new Set();
+    const unique = [];
+    out.forEach((f) => {
+      const key = [f.wallet, f.coin, f.marketType, f.time, f.side, f.size, f.price].join("|");
+      if (seen.has(key)) return;
+      seen.add(key);
+      unique.push(f);
+    });
+    unique.sort((a, b) => a.time - b.time);
+    return unique;
+  }
+
+  function recomputeTimelineControls() {
+    if (!positionsTimelineSliderEl || !positionsTimelineStampEl || !positionsTimelineLiveBtnEl) return;
+    const fillsForTimeline = collectTimelineFillsForCurrentContext();
+    const rawTimes = fillsForTimeline.map((f) => Number(f.time)).filter(Number.isFinite);
+    const now = Date.now();
+    rawTimes.push(now);
+    timelineTimestamps = Array.from(new Set(rawTimes)).sort((a, b) => a - b);
+
+    if (!timelineTimestamps.length) {
+      timelineTimestamps = [now];
+    }
+
+    positionsTimelineSliderEl.min = "0";
+    positionsTimelineSliderEl.max = String(Math.max(0, timelineTimestamps.length - 1));
+
+    const hasHistory = timelineTimestamps.length > 1;
+    positionsTimelineSliderEl.disabled = !hasHistory;
+
+    const liveIndex = timelineTimestamps.length - 1;
+    if (!isTimelineActive()) {
+      timelineSelectedIndex = liveIndex;
+      positionsTimelineSliderEl.value = String(liveIndex);
+      positionsTimelineStampEl.textContent = "Live";
+      positionsTimelineLiveBtnEl.disabled = true;
+      return;
+    }
+
+    let nearestIdx = liveIndex;
+    let nearestDist = Number.POSITIVE_INFINITY;
+    timelineTimestamps.forEach((ts, idx) => {
+      const dist = Math.abs(ts - timelineAsOfMs);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearestIdx = idx;
+      }
+    });
+    timelineSelectedIndex = nearestIdx;
+    positionsTimelineSliderEl.value = String(nearestIdx);
+    const asOf = timelineTimestamps[nearestIdx];
+    timelineAsOfMs = nearestIdx === liveIndex ? null : asOf;
+    positionsTimelineStampEl.textContent = timelineAsOfMs ? fmtDateTime(asOf) : "Live";
+    positionsTimelineLiveBtnEl.disabled = !timelineAsOfMs;
+  }
+
+  async function setTimelineIndex(index) {
+    if (!timelineTimestamps.length) {
+      recomputeTimelineControls();
+      return;
+    }
+    const liveIndex = timelineTimestamps.length - 1;
+    const safeIdx = Math.max(0, Math.min(liveIndex, Number(index) || 0));
+    timelineSelectedIndex = safeIdx;
+    if (positionsTimelineSliderEl) positionsTimelineSliderEl.value = String(safeIdx);
+
+    if (safeIdx >= liveIndex) {
+      timelineAsOfMs = null;
+      timelinePriceByCoin.clear();
+      if (positionsTimelineStampEl) positionsTimelineStampEl.textContent = "Live";
+      if (positionsTimelineLiveBtnEl) positionsTimelineLiveBtnEl.disabled = true;
+      renderPositions(currentAssetPositions, { preserveBase: true });
+      return;
+    }
+
+    timelineAsOfMs = Number(timelineTimestamps[safeIdx]);
+    if (positionsTimelineStampEl) {
+      positionsTimelineStampEl.textContent = Number.isFinite(timelineAsOfMs) ? fmtDateTime(timelineAsOfMs) : "Live";
+    }
+    if (positionsTimelineLiveBtnEl) positionsTimelineLiveBtnEl.disabled = false;
+    queueTimelinePriceRefresh();
+    renderPositions(currentAssetPositions, { preserveBase: true });
+  }
+
+  function getTimelinePriceForCoin(coin) {
+    if (!isTimelineActive()) return null;
+    if (!timelinePriceByCoin.has(coin)) return null;
+    const px = Number(timelinePriceByCoin.get(coin));
+    return Number.isFinite(px) ? px : null;
+  }
+
+  function computeLotsAtTimelineTime(fillsSorted, asOfMs) {
+    const lotsByKey = new Map();
+    for (const fill of fillsSorted) {
+      if (!Number.isFinite(fill.time) || fill.time > asOfMs) break;
+      const sideSign = fill.side === "B" ? 1 : fill.side === "S" ? -1 : 0;
+      if (!sideSign) continue;
+      const sizeAbs = Number(fill.size);
+      const price = Number(fill.price);
+      if (!Number.isFinite(sizeAbs) || sizeAbs <= 0 || !Number.isFinite(price)) continue;
+      const key = getTimelinePositionKey(fill.wallet, fill.coin, fill.marketType);
+      const lots = lotsByKey.get(key) || [];
+      let remaining = sizeAbs;
+      while (remaining > 0 && lots.length > 0 && lots[0].sideSign !== sideSign) {
+        const lot = lots[0];
+        const matched = Math.min(remaining, lot.size);
+        lot.size -= matched;
+        remaining -= matched;
+        if (lot.size <= 1e-10) lots.shift();
+      }
+      if (remaining > 1e-10) {
+        lots.push({ sideSign, size: remaining, price });
+      }
+      lotsByKey.set(key, lots);
+    }
+    return lotsByKey;
+  }
+
+  function deriveEntryFromLots(lots) {
+    if (!Array.isArray(lots) || !lots.length) return null;
+    const sideSign = lots[0].sideSign;
+    const sameSide = lots.every((lot) => lot.sideSign === sideSign);
+    if (!sameSide || !sideSign) return null;
+    let size = 0;
+    let cost = 0;
+    lots.forEach((lot) => {
+      const lotSize = Number(lot.size);
+      const lotPrice = Number(lot.price);
+      if (!Number.isFinite(lotSize) || lotSize <= 0 || !Number.isFinite(lotPrice)) return;
+      size += lotSize;
+      cost += lotSize * lotPrice;
+    });
+    if (size <= 0) return null;
+    return cost / size;
+  }
+
+  function computeTimelineAdjustedPositions(basePositions) {
+    if (!isTimelineActive()) return Array.isArray(basePositions) ? basePositions.slice() : [];
+    const asOfMs = Number(timelineAsOfMs);
+    if (!Number.isFinite(asOfMs)) return Array.isArray(basePositions) ? basePositions.slice() : [];
+
+    const fillsSorted = collectTimelineFillsForCurrentContext();
+    const templateByKey = new Map();
+
+    (Array.isArray(basePositions) ? basePositions : []).forEach((item) => {
+      const p = item?.position || {};
+      const wallet = item?.wallet || primaryWallet;
+      const coin = p.coin || "";
+      const marketType = item?.marketType || getMarketTypeFromCoin(coin);
+      const key = getTimelinePositionKey(wallet, coin, marketType);
+      templateByKey.set(key, item);
+    });
+
+    const sizeAtFromLots = new Map();
+    const lotsByKey = computeLotsAtTimelineTime(fillsSorted, asOfMs);
+    lotsByKey.forEach((lots, key) => {
+      const net = (Array.isArray(lots) ? lots : []).reduce((sum, lot) => {
+        const sideSign = Number(lot?.sideSign ?? 0);
+        const size = Number(lot?.size ?? 0);
+        if (!Number.isFinite(sideSign) || !Number.isFinite(size)) return sum;
+        return sum + sideSign * size;
+      }, 0);
+      if (Number.isFinite(net) && Math.abs(net) > 1e-10) sizeAtFromLots.set(key, net);
+    });
+
+    const sizeNowByKey = new Map();
+    (Array.isArray(basePositions) ? basePositions : []).forEach((item) => {
+      const p = item?.position || {};
+      const wallet = item?.wallet || primaryWallet;
+      const coin = p.coin || "";
+      const marketType = item?.marketType || getMarketTypeFromCoin(coin);
+      const key = getTimelinePositionKey(wallet, coin, marketType);
+      const szi = Number(p.szi ?? 0);
+      if (Number.isFinite(szi)) sizeNowByKey.set(key, szi);
+    });
+
+    const deltaAfterByKey = new Map();
+    fillsSorted.forEach((fill) => {
+      if (!Number.isFinite(fill.time) || fill.time <= asOfMs) return;
+      const sideSign = fill.side === "B" ? 1 : fill.side === "S" ? -1 : 0;
+      if (!sideSign || !Number.isFinite(fill.size) || fill.size <= 0) return;
+      const key = getTimelinePositionKey(fill.wallet, fill.coin, fill.marketType);
+      const signed = sideSign * Number(fill.size);
+      const next = Number(deltaAfterByKey.get(key) ?? 0) + signed;
+      deltaAfterByKey.set(key, next);
+    });
+
+    const sizeAtFromDelta = new Map();
+    const allDeltaKeys = new Set([...sizeNowByKey.keys(), ...deltaAfterByKey.keys()]);
+    allDeltaKeys.forEach((key) => {
+      const currentSize = Number(sizeNowByKey.get(key) ?? 0);
+      const deltaAfter = Number(deltaAfterByKey.get(key) ?? 0);
+      const sizeAtTime = currentSize - deltaAfter;
+      if (Number.isFinite(sizeAtTime) && Math.abs(sizeAtTime) > 1e-10) {
+        sizeAtFromDelta.set(key, sizeAtTime);
+      }
+    });
+
+    const keys = new Set([
+      ...sizeAtFromLots.keys(),
+      ...sizeAtFromDelta.keys(),
+      ...templateByKey.keys(),
+    ]);
+    const out = [];
+
+    keys.forEach((key) => {
+      const sizeAtTime = sizeAtFromLots.has(key)
+        ? Number(sizeAtFromLots.get(key))
+        : Number(sizeAtFromDelta.get(key) ?? 0);
+      if (!Number.isFinite(sizeAtTime) || Math.abs(sizeAtTime) <= 1e-10) return;
+
+      const template = templateByKey.get(key);
+      if (template) {
+        const p = template.position || {};
+        const walletForLeverage = template?.wallet || primaryWallet;
+        const lots = lotsByKey.get(key) || [];
+        const entryFromLots = deriveEntryFromLots(lots);
+        const entryPx = Number.isFinite(entryFromLots) ? entryFromLots : Number(p.entryPx ?? 0);
+        const coin = p.coin || "";
+        const timelinePrice = getTimelinePriceForCoin(coin);
+        const markPx = Number.isFinite(timelinePrice) ? timelinePrice : entryPx;
+        const positionValue = Number.isFinite(markPx) ? markPx * sizeAtTime : Number(p.positionValue ?? 0);
+        const upnl =
+          Number.isFinite(markPx) && Number.isFinite(entryPx)
+            ? (markPx - entryPx) * sizeAtTime
+            : Number(p.unrealizedPnl ?? 0);
+        const inferredLeverage = getHistoricalLeverageForPosition(
+          coin,
+          walletForLeverage,
+          template?.marketType || getMarketTypeFromCoin(coin),
+          asOfMs
+        );
+        out.push({
+          ...template,
+          position: {
+            ...p,
+            szi: sizeAtTime,
+            entryPx: Number.isFinite(entryPx) ? entryPx : p.entryPx,
+            positionValue: Number.isFinite(positionValue) ? positionValue : 0,
+            unrealizedPnl: Number.isFinite(upnl) ? upnl : 0,
+            leverage: Number.isFinite(inferredLeverage) ? inferredLeverage : p.leverage,
+          },
+        });
+      } else {
+        const [marketType = "perp", walletLower = "", coinUpper = ""] = key.split("|");
+        const wallet = currentWallets.find((w) => String(w).toLowerCase() === walletLower) || walletLower;
+        const coin = fillsSorted.find(
+          (f) => getTimelinePositionKey(f.wallet, f.coin, f.marketType) === key
+        )?.coin || coinUpper;
+        const lots = lotsByKey.get(key) || [];
+        const entryPx = deriveEntryFromLots(lots);
+        const timelinePrice = getTimelinePriceForCoin(coin);
+        const markPx = Number.isFinite(timelinePrice) ? timelinePrice : entryPx;
+        const positionValue = Number.isFinite(markPx) ? markPx * sizeAtTime : 0;
+        const upnl =
+          Number.isFinite(markPx) && Number.isFinite(entryPx)
+            ? (markPx - entryPx) * sizeAtTime
+            : 0;
+        const inferredLeverage = getHistoricalLeverageForPosition(coin, wallet, marketType, asOfMs);
+        out.push({
+          wallet,
+          marketType,
+          position: {
+            coin,
+            szi: sizeAtTime,
+            entryPx: Number.isFinite(entryPx) ? entryPx : 0,
+            positionValue,
+            unrealizedPnl: upnl,
+            leverage: Number.isFinite(inferredLeverage) ? inferredLeverage : 0,
+          },
+        });
+      }
+    });
+
+    return out;
+  }
+
   function getMarkPriceForCoin(coin) {
+    if (isTimelineActive()) {
+      const timelinePx = getTimelinePriceForCoin(coin);
+      if (Number.isFinite(timelinePx)) return timelinePx;
+      return null;
+    }
     const norm = normalizeCoin(coin);
     const { base } = splitDexCoin(coin);
     const baseNorm = normalizeCoin(base);
@@ -7778,7 +8993,7 @@
     return Number.isFinite(entryPx) ? entryPx : null;
   }
 
-  function getAllFillsForCoin(coin, wallet, marketType = currentMarketType) {
+  function getAllFillsForCoin(coin, wallet, marketType = currentMarketType, asOfMs = null) {
     const norm = normalizeCoin(coin);
     if (!norm) return [];
     const combined = [];
@@ -7789,6 +9004,8 @@
           const fWallet = String(f?.wallet || "");
           if (!fWallet || fWallet.toLowerCase() !== wallet.toLowerCase()) return;
         }
+        const fillTime = Number(f?.time ?? f?.timestamp ?? 0);
+        if (Number.isFinite(asOfMs) && Number.isFinite(fillTime) && fillTime > asOfMs) return;
         const resolved = resolveCoinName(f?.coin ?? f?.asset ?? "", f?.asset ?? f?.symbol ?? f?.sym);
         if (resolved) f.coin = resolved;
         const c = normalizeCoin(resolved);
@@ -7818,8 +9035,23 @@
     return unique.sort((a, b) => Number(a.time ?? a.timestamp ?? 0) - Number(b.time ?? b.timestamp ?? 0));
   }
 
+  function getHistoricalLeverageForPosition(coin, wallet, marketType = currentMarketType, asOfMs = null) {
+    if (!coin || !wallet) return null;
+    const fillsForCoin = getAllFillsForCoin(coin, wallet, marketType, asOfMs);
+    for (let i = fillsForCoin.length - 1; i >= 0; i -= 1) {
+      const lev = inferLeverageFromFill(fillsForCoin[i]);
+      if (Number.isFinite(lev)) return lev;
+    }
+    return null;
+  }
+
   function buildPositionFillDetails(coin, szi, markPx, wallet) {
-    const fillsForCoin = getAllFillsForCoin(coin, wallet, currentMarketType);
+    const fillsForCoin = getAllFillsForCoin(
+      coin,
+      wallet,
+      currentMarketType,
+      isTimelineActive() ? timelineAsOfMs : null
+    );
     const rows = [];
     let netSize = 0;
     let totalUpnl = 0;
@@ -7976,7 +9208,7 @@
     });
   }
 
-  function renderMarginSummary(items) {
+  function renderMarginSummary(items, { estimated = false } = {}) {
     if (!Array.isArray(items) || items.length === 0) {
       marginSummaryEl.innerHTML = "<span class='muted'>No margin summary.</span>";
       return;
@@ -8029,6 +9261,7 @@
           })
           .join("")}
       </div>
+      ${estimated ? "" : ""}
     `;
   }
 
@@ -8087,7 +9320,32 @@
       return { wallet, summary: summaryLive, withdrawable: snap.withdrawable };
     });
 
-    renderMarginSummary(items);
+    if (isTimelineActive()) {
+      const estimatedItems = items.map((item) => {
+        const base = item?.summary || null;
+        const walletTotalsEntry = lastRenderedWalletTotals.get(item.wallet) || { upnlTotal: 0, notionalTotal: 0 };
+        if (!base) return item;
+        const accountValueFromHistory = getAccountValueAtTime(item.wallet, timelineAsOfMs, currentMarketType);
+        const equityValue = Number.isFinite(accountValueFromHistory)
+          ? Number(accountValueFromHistory)
+          : Number(base.totalRawUsd ?? 0) + Number(walletTotalsEntry.upnlTotal ?? 0);
+        const notionalValue = Number(walletTotalsEntry.notionalTotal ?? 0);
+        const collateralValue = equityValue - notionalValue;
+        return {
+          wallet: item.wallet,
+          withdrawable: item.withdrawable,
+          summary: {
+            ...base,
+            accountValue: equityValue,
+            totalNtlPos: notionalValue,
+            totalRawUsd: collateralValue,
+          },
+        };
+      });
+      renderMarginSummary(estimatedItems, { estimated: true });
+    } else {
+      renderMarginSummary(items);
+    }
     const weights = getNormalizedWeights(currentWallets.map((w) => String(w)));
     latestLiveEquityValue = items.reduce((sum, item, idx) => {
       const val = Number(item?.summary?.accountValue ?? 0);
@@ -8097,23 +9355,30 @@
     updateChartTitleValues(latestLiveEquityValue);
   }
 
-  function renderPositions(assetPositions) {
-    currentAssetPositions = Array.isArray(assetPositions) ? assetPositions : [];
+  function renderPositions(assetPositions, { preserveBase = false } = {}) {
+    if (!preserveBase) currentAssetPositions = Array.isArray(assetPositions) ? assetPositions : [];
     lastComputedUpnlTotal = 0;
     lastComputedTotalNotional = 0;
     const walletTotals = getActiveTotals();
     walletTotals.clear();
+    lastRenderedWalletTotals = new Map();
     const positionsColspan = getPositionsColspan();
     updatePositionsSortHeaders();
 
-    if (!currentAssetPositions.length) {
+    const basePositions = Array.isArray(currentAssetPositions) ? currentAssetPositions : [];
+    const renderSourcePositions = isTimelineActive() ? computeTimelineAdjustedPositions(basePositions) : basePositions;
+
+    if (!renderSourcePositions.length) {
       positionsBodyEl.innerHTML = `<tr><td colspan='${positionsColspan}' class='muted'>No open positions.</td></tr>`;
       recomputeAndRenderMarginSummary();
       refreshBreakdownIfOpen();
       return;
     }
 
-    let positionsToRender = currentAssetPositions.slice();
+    let positionsToRender = renderSourcePositions.slice();
+    const timelineCrossRiskByWallet = isTimelineActive()
+      ? buildTimelineCrossRiskContext(positionsToRender)
+      : new Map();
     if (currentPositionsSort?.key) {
       const metricsMap = new Map();
       const keyFor = (item) => `${item.marketType || "perp"}:${item.wallet || ""}:${item.position?.coin || ""}`;
@@ -8148,8 +9413,8 @@
         const dirColor = szi >= 0 ? "#4ade80" : "#fb7185";
         const entryPx = Number(p.entryPx ?? 0);
 
-        const livePx = getLivePriceForCoin(coin);
-        let markPx = Number.isFinite(livePx) ? livePx : undefined;
+        const markFromContext = getMarkPriceForCoin(coin);
+        let markPx = Number.isFinite(markFromContext) ? markFromContext : undefined;
 
         const snapshotValue = Number(p.positionValue ?? 0);
         if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
@@ -8182,7 +9447,9 @@
 
         const isPerp = item.marketType !== "spot";
         const leverageValue = p.leverage?.value ?? p.leverage ?? p.lever ?? p.leverageValue;
-        const ageMs = computePositionAgeMs(coin, szi, wallet);
+        const ageMs = isTimelineActive()
+          ? computePositionAgeMsAtTime(coin, szi, wallet, timelineAsOfMs)
+          : computePositionAgeMs(coin, szi, wallet);
         const ageDisplay = Number.isFinite(ageMs) ? formatDuration(ageMs) : "–";
         const upnlFormatted = formatSignedDollarWithPlus(upnl);
         const entryNotional = Number.isFinite(entryPx) && szi !== 0 ? Math.abs(entryPx * szi) : null;
@@ -8194,7 +9461,10 @@
         const upnlPercent = Number.isFinite(initialMargin) && initialMargin !== 0 ? upnl / initialMargin : null;
         const upnlPercentDisplay = upnlPercent === null ? "" : formatSignedPercent(upnlPercent, 2);
         const formattedValue = formatSignedDollar(positionValue);
-        const leverageDisplay = isPerp ? formatLeverage(leverageValue) : "";
+        const leverageDisplay =
+          isPerp && Number.isFinite(Number(leverageValue)) && Number(leverageValue) > 0
+            ? formatLeverage(leverageValue)
+            : "";
         const fundingValue =
           (p.cumFunding && typeof p.cumFunding === "object"
             ? p.cumFunding.sinceOpen ?? p.cumFunding.sinceChange ?? p.cumFunding.allTime
@@ -8203,7 +9473,29 @@
           p.fundingPaid ??
           p.cumFundingUsd ??
           p.cumFundingUSDC;
-        const liqValue = p.liqPx ?? p.liquidationPx ?? p.liquidationPrice ?? p.liqPrice;
+        let liqValue = p.liqPx ?? p.liquidationPx ?? p.liquidationPrice ?? p.liqPrice;
+        let timelineCrossDistanceOverride = null;
+        if (isTimelineActive() && isPerp) {
+          const walletRisk = timelineCrossRiskByWallet.get(wallet);
+          const positionNotional = Math.abs(Number(positionValue ?? 0));
+          const maintenanceRate = 0.005;
+          const positionMaintenance = positionNotional * maintenanceRate;
+          const otherMaintenance = Math.max(0, Number(walletRisk?.maintenance ?? 0) - positionMaintenance);
+          const est = estimateCrossLiqForPosition({
+            entryPx,
+            size: szi,
+            markPx,
+            walletEquity: walletRisk?.equity,
+            otherMaintenance,
+            maintenanceRate,
+          });
+          if (Number.isFinite(est?.liqPx)) {
+            liqValue = est.liqPx;
+          }
+          if (Number.isFinite(est?.distanceToLiqFrac)) {
+            timelineCrossDistanceOverride = Math.max(0, Math.min(0.99, Number(est.distanceToLiqFrac)));
+          }
+        }
         const fundingDisplay = isPerp ? formatFunding(fundingValue) : "–";
         const fundingClass = isPerp ? fundingToneClass(fundingValue) : "";
         const hasLiq = Number.isFinite(Number(liqValue)) && Number(liqValue) !== 0;
@@ -8213,9 +9505,17 @@
             ? Math.max(0, Math.min(1, liqDistanceRaw))
             : 0
           : null;
-        const liqDistanceDisplay =
+        const liqDistanceDisplayBase =
           liqDistanceClamped === null ? null : Math.max(0, Math.min(1, 1 - liqDistanceClamped));
-        const liqDistanceDisplaySafe = !hasLiq && isPerp ? 0 : liqDistanceDisplay;
+        let liqDistanceDisplay =
+          Number.isFinite(timelineCrossDistanceOverride) ? timelineCrossDistanceOverride : liqDistanceDisplayBase;
+        if (Number.isFinite(upnl) && upnl > 0 && szi > 0) {
+          liqDistanceDisplay = 0;
+        }
+        const liqDistanceDisplaySafe =
+          !hasLiq && isPerp
+            ? (isTimelineActive() ? null : 0)
+            : liqDistanceDisplay;
         const liqDistanceClass =
           liqDistanceDisplaySafe === null
             ? ""
@@ -8229,7 +9529,7 @@
         const liqDistancePct = liqDistanceDisplaySafe === null ? "–" : formatPercent(liqDistanceDisplaySafe, 0);
         const liqDistanceWidth = liqDistanceDisplaySafe === null ? 0 : Math.round(liqDistanceDisplaySafe * 100);
         const liqHue = liqDistanceDisplaySafe === null ? 120 : Math.round((1 - liqDistanceDisplaySafe) * 120);
-        const liqPriceDisplay = isPerp ? (hasLiq ? formatLiqPrice(liqValue, entryPx, markPx) : "$0") : "–";
+        const liqPriceDisplay = isPerp ? (hasLiq ? formatLiqPrice(liqValue, entryPx, markPx) : "–") : "–";
         const liqHighFlag =
           liqDistanceDisplaySafe !== null && liqDistanceDisplaySafe >= 0.9 ? `<span class="liq-flag">HIGH</span>` : "";
         const liqDistanceHtml =
@@ -8337,7 +9637,7 @@
           </td>
           <td class="money">
             <div class="price-stack">
-              <span class="current-price">Live: ${currentPriceDisplay}</span>
+              <span class="current-price">${isTimelineActive() ? "At Time" : "Live"}: ${currentPriceDisplay}</span>
               <span>Entry: ${entryPriceDisplay}</span>
             </div>
           </td>
@@ -8374,6 +9674,7 @@
       })
       .join("");
 
+    lastRenderedWalletTotals = new Map(walletTotals.entries());
     recomputeAndRenderMarginSummary();
     refreshBreakdownIfOpen();
   }
@@ -9671,6 +10972,8 @@
 
       historicalFillsLoaded = true;
       renderHistoricalFills();
+      recomputeTimelineControls();
+      if (isTimelineActive()) queueTimelinePriceRefresh();
       updatePerformanceMetrics(currentRangeKey);
     } catch (err) {
       console.error("Historical fills error", err);
@@ -9698,6 +11001,16 @@
     historicalOrdersLoaded = false;
     historicalFills.length = 0;
     historicalFillsLoaded = false;
+    timelineAsOfMs = null;
+    timelineTimestamps = [];
+    timelineSelectedIndex = -1;
+    timelinePriceByCoin.clear();
+    timelineCoinPriceCache.clear();
+    timelinePriceRequestId += 1;
+    if (timelinePriceRefreshTimer) {
+      clearTimeout(timelinePriceRefreshTimer);
+      timelinePriceRefreshTimer = null;
+    }
 
     openOrdersCountEl.textContent = "–";
     canceledCountEl.textContent = "–";
@@ -9724,6 +11037,7 @@
     positionsBodyEl.innerHTML = `<tr class='loading-row'><td colspan='${positionsColspan}' class='muted'>Loading…</td></tr>`;
     marginSummaryEl.innerHTML = "<span class='muted'>Loading…</span>";
 
+    recomputeTimelineControls();
     refreshBreakdownIfOpen();
   }
 
@@ -9877,6 +11191,8 @@
               });
               if (fills.length > MAX_FILL_ROWS) fills.length = MAX_FILL_ROWS;
               renderFills();
+              recomputeTimelineControls();
+              if (isTimelineActive()) queueTimelinePriceRefresh();
               updatePerformanceMetrics(currentRangeKey);
 
               refreshPositionsAndMargin(wallet);
@@ -9929,9 +11245,12 @@
 
   function resetPortfolioSection() {
     portfolioDataByWallet.clear();
+    transferHistoryByWallet.clear();
+    transfersRequestToken += 1;
     portfolioErrorEl.textContent = "";
     setPortfolioLoadingState(true, "Loading performance graphs…");
     clearPerformanceMetrics();
+    renderTransfersList([], "Transfers will appear here.");
     if (portfolioCharts.equity) {
       portfolioCharts.equity.destroy();
       portfolioCharts.pnl.destroy();
@@ -10041,6 +11360,41 @@
     return buildViewFromSection(primary) || buildViewFromSection(fallback) || null;
   }
 
+  function getAccountValueAtTime(wallet, asOfMs, marketType = currentMarketType) {
+    if (!Number.isFinite(asOfMs)) return null;
+    const data = portfolioDataByWallet.get(wallet);
+    if (!data) return null;
+    const section =
+      getPortfolioSection(data, "allTime", marketType) ||
+      getPortfolioSection(data, currentRangeKey || "allTime", marketType);
+    const hist = section?.accountValueHistory;
+    if (!Array.isArray(hist) || hist.length === 0) return null;
+
+    const points = hist
+      .map(([t, v]) => [Number(t), Number(v)])
+      .filter(([t, v]) => Number.isFinite(t) && Number.isFinite(v))
+      .sort((a, b) => a[0] - b[0]);
+    if (!points.length) return null;
+    if (asOfMs <= points[0][0]) return points[0][1];
+    if (asOfMs >= points[points.length - 1][0]) return points[points.length - 1][1];
+
+    let lo = 0;
+    let hi = points.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      const t = points[mid][0];
+      if (t === asOfMs) return points[mid][1];
+      if (t < asOfMs) lo = mid + 1;
+      else hi = mid - 1;
+    }
+    const prev = points[Math.max(0, hi)];
+    const next = points[Math.min(points.length - 1, lo)];
+    if (!prev || !next) return null;
+    if (next[0] === prev[0]) return prev[1];
+    const w = (asOfMs - prev[0]) / (next[0] - prev[0]);
+    return prev[1] + (next[1] - prev[1]) * Math.max(0, Math.min(1, w));
+  }
+
   function buildLabels(times, rangeKey) {
     const showTimeOnly = rangeKey === "day";
     return times.map((d) => {
@@ -10086,8 +11440,8 @@
         if (!coin || !Number.isFinite(szi) || szi === 0) return null;
 
         const entryPx = Number(p.entryPx ?? 0);
-        const livePx = getLivePriceForCoin(coin);
-        let markPx = Number.isFinite(livePx) ? livePx : undefined;
+        const contextPx = getMarkPriceForCoin(coin);
+        let markPx = Number.isFinite(contextPx) ? contextPx : undefined;
 
         const snapshotValue = Number(p.positionValue ?? 0);
         if ((markPx === undefined || Number.isNaN(markPx)) && !Number.isNaN(snapshotValue) && szi !== 0) {
@@ -12288,6 +13642,9 @@
       );
 
       initPortfolioCharts(currentRangeKey);
+      if (thirdPanelMode === "transfers") {
+        refreshTransfersPanel(currentRangeKey);
+      }
     } catch (err) {
       console.error("Portfolio error", err);
       setPortfolioLoadingState(false, "");
@@ -12367,6 +13724,10 @@
         ensureHistoricalDataLoaded(),
       ]);
       await initFooterStream();
+      recomputeTimelineControls();
+      if (timelineTimestamps.length) {
+        await setTimelineIndex(timelineTimestamps.length - 1);
+      }
 
       if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalOrders(walletList);
@@ -12384,6 +13745,7 @@
 
   (async function boot() {
     initTheme();
+    recomputeTimelineControls();
     updateMarketLabels();
     updateMarketToggleButtons();
     updatePerformanceVisibility();
@@ -12594,6 +13956,29 @@
       });
     });
     updatePositionsSortHeaders();
+  }
+
+  if (positionsTimelineSliderEl) {
+    positionsTimelineSliderEl.addEventListener("input", async () => {
+      await setTimelineIndex(Number(positionsTimelineSliderEl.value || 0));
+    });
+  }
+
+  if (positionsTimelineLiveBtnEl) {
+    positionsTimelineLiveBtnEl.addEventListener("click", async () => {
+      if (!timelineTimestamps.length) return;
+      await setTimelineIndex(timelineTimestamps.length - 1);
+    });
+  }
+
+  if (positionsTimelineToggleEl && positionsTimelineWrapEl) {
+    positionsTimelineToggleEl.addEventListener("click", () => {
+      const isHidden = positionsTimelineWrapEl.classList.toggle("hidden");
+      const expanded = !isHidden;
+      positionsTimelineToggleEl.setAttribute("aria-expanded", String(expanded));
+      const icon = positionsTimelineToggleEl.querySelector("[aria-hidden='true']");
+      if (icon) icon.textContent = expanded ? "▴" : "▾";
+    });
   }
 
   if (openOrdersHeaderEls.length) {
@@ -12886,6 +14271,16 @@
       } else {
         updatePerformanceMetrics(currentRangeKey);
       }
+      if (thirdPanelMode === "transfers") {
+        refreshTransfersPanel(currentRangeKey);
+      }
+    });
+  });
+
+  thirdPanelModeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.panelMode === "transfers" ? "transfers" : "chart";
+      setThirdPanelMode(mode);
     });
   });
 
