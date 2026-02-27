@@ -2001,11 +2001,21 @@
       font-size: 0.72rem;
       font-weight: 600;
       white-space: nowrap;
+      text-align: right;
+      line-height: 1.2;
     }
 
     .transfer-amount.positive { color: var(--accent); }
     .transfer-amount.negative { color: var(--danger); }
     .transfer-amount.neutral { color: var(--neutral-blue); }
+
+    .transfer-amount-coin {
+      display: block;
+      font-size: 0.64rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 0.12rem;
+    }
 
     .chart-loading-wrap {
       position: relative;
@@ -5339,6 +5349,11 @@
       return "";
     };
 
+    const sourceDex = read(merged.sourceDex ?? merged.source_dex ?? merged.srcDex);
+    const destinationDex = read(merged.destinationDex ?? merged.destination_dex ?? merged.dstDex);
+    if (sourceDex === "spot" && destinationDex !== "spot") return "Spot > Perps";
+    if (destinationDex === "spot" && sourceDex !== "spot") return "Perps > Spot";
+
     const toPerpRaw =
       merged.toPerp ??
       merged.to_perp ??
@@ -5498,6 +5513,15 @@
     return "";
   }
 
+  function formatTransferCoinAmount(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    return n.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 6,
+    });
+  }
+
   function normalizeTransferRecord(raw, wallet) {
     if (!raw || typeof raw !== "object") return null;
     const delta = raw.delta && typeof raw.delta === "object" ? raw.delta : {};
@@ -5505,24 +5529,22 @@
     if (!Number.isFinite(time)) return null;
 
     const typeRaw = delta.type ?? raw.type ?? raw.eventType ?? "";
-    const amountCandidates = [
-      delta.usdc,
-      delta.amount,
-      delta.value,
-      delta.usd,
-      raw.usdc,
-      raw.amount,
-      raw.value,
-      raw.usd,
-    ];
-    let amount = null;
-    for (const candidate of amountCandidates) {
-      const n = Number(candidate);
-      if (Number.isFinite(n)) {
-        amount = n;
-        break;
-      }
-    }
+    const tokenAmountRaw = Number(delta.amount ?? raw.amount);
+    const usdcValueRaw = Number(
+      delta.usdcValue ??
+      raw.usdcValue ??
+      delta.usdc ??
+      raw.usdc ??
+      delta.value ??
+      raw.value ??
+      delta.usd ??
+      raw.usd
+    );
+    let amount = Number.isFinite(usdcValueRaw)
+      ? usdcValueRaw
+      : Number.isFinite(tokenAmountRaw)
+        ? tokenAmountRaw
+        : null;
     const hasUsdcAmount =
       Number.isFinite(Number(delta.usdc)) ||
       Number.isFinite(Number(raw.usdc));
@@ -5535,6 +5557,10 @@
     if (Number.isFinite(amount) && direction !== 0) {
       signedAmount = Math.abs(amount) * direction;
     }
+    let signedTokenAmount = Number.isFinite(tokenAmountRaw) ? tokenAmountRaw : null;
+    if (Number.isFinite(signedTokenAmount) && direction !== 0) {
+      signedTokenAmount = Math.abs(signedTokenAmount) * direction;
+    }
 
     return {
       wallet,
@@ -5542,6 +5568,7 @@
       type: String(typeRaw || "").trim(),
       typeLabel: normalizeTransferType(typeRaw, raw, delta, wallet),
       amount: Number.isFinite(signedAmount) ? signedAmount : null,
+      tokenAmount: Number.isFinite(signedTokenAmount) ? signedTokenAmount : null,
       coin: coinResolved || coinRaw || "",
       coinLabel: coinDisplay?.label || "",
       coinIconKey: coinDisplay?.iconKey || coinResolved || coinRaw || "",
@@ -5608,7 +5635,21 @@
       amount.className = "transfer-amount";
       if (Number.isFinite(item.amount)) {
         amount.textContent = formatSignedDollarWithPlus(item.amount, 2);
-        amount.classList.add(item.amount > 0 ? "negative" : item.amount < 0 ? "positive" : "neutral");
+        const isPerpsToSpot = String(item.typeLabel || "").trim() === "Perps > Spot";
+        if (isPerpsToSpot) {
+          amount.classList.add(item.amount > 0 ? "positive" : item.amount < 0 ? "negative" : "neutral");
+        } else {
+          amount.classList.add(item.amount > 0 ? "negative" : item.amount < 0 ? "positive" : "neutral");
+        }
+
+        const coinSymbol = String(item.coinLabel || item.coin || "").trim();
+        const isUsdc = coinSymbol.toUpperCase() === "USDC";
+        if (!isUsdc && Number.isFinite(item.tokenAmount) && coinSymbol) {
+          const coinLine = document.createElement("span");
+          coinLine.className = "transfer-amount-coin";
+          coinLine.textContent = `${formatTransferCoinAmount(item.tokenAmount)} ${coinSymbol}`;
+          amount.appendChild(coinLine);
+        }
       } else {
         amount.textContent = "-";
         amount.classList.add("neutral");
