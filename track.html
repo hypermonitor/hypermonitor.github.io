@@ -4564,6 +4564,20 @@
   const SPECIAL_LOGOS = new Map([
     ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
     ["COPPER", "https://s3-symbol-logo.tradingview.com/metal/copper--600.png"],
+    ["GOLD", "https://s3-symbol-logo.tradingview.com/metal/gold--600.png"],
+    ["SILVER", "https://s3-symbol-logo.tradingview.com/metal/silver--600.png"],
+  ]);
+  const DOMAIN_LOGOS = new Map([
+    ["NVDA", "https://logo.clearbit.com/nvidia.com"],
+    ["MSTR", "https://logo.clearbit.com/microstrategy.com"],
+    ["TSLA", "https://logo.clearbit.com/tesla.com"],
+    ["AAPL", "https://logo.clearbit.com/apple.com"],
+    ["AMZN", "https://logo.clearbit.com/amazon.com"],
+    ["GOOGL", "https://logo.clearbit.com/google.com"],
+    ["MSFT", "https://logo.clearbit.com/microsoft.com"],
+    ["META", "https://logo.clearbit.com/meta.com"],
+    ["SPY", "https://logo.clearbit.com/ssga.com"],
+    ["QQQ", "https://logo.clearbit.com/invesco.com"],
   ]);
   const logoCache = new Map();
   const expandedPositions = new Set();
@@ -5695,8 +5709,10 @@
       amount.className = "transfer-amount";
       if (Number.isFinite(item.amount)) {
         amount.textContent = formatSignedDollarWithPlus(item.amount, 2);
-        const isPerpsToSpot = String(item.typeLabel || "").trim() === "Perps > Spot";
-        if (isPerpsToSpot) {
+        const typeLabel = String(item.typeLabel || "").trim();
+        const isPerpsToSpot = typeLabel === "Perps > Spot";
+        const isSendTo = typeLabel.toLowerCase().startsWith("send to ");
+        if (isPerpsToSpot || isSendTo) {
           amount.classList.add(item.amount > 0 ? "positive" : item.amount < 0 ? "negative" : "neutral");
         } else {
           amount.classList.add(item.amount > 0 ? "negative" : item.amount < 0 ? "positive" : "neutral");
@@ -7424,7 +7440,7 @@
     const addSymbolCandidates = (name) => {
       const raw = String(name || "").trim();
       if (!raw) return;
-      const { base } = splitDexCoin(raw);
+      const { dex, base } = splitDexCoin(raw);
       const symbol = String(base || raw).trim();
       if (!symbol) return;
       const upper = symbol.toUpperCase();
@@ -7435,6 +7451,12 @@
       if (upper !== symbol) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
       candidates.push(`images/coins/${encodeURIComponent(safe)}.${localExt}`);
       if (upper !== safe) candidates.push(`images/coins/${encodeURIComponent(upper)}.${localExt}`);
+      const dexLower = String(dex || "").toLowerCase();
+      if (NON_CRYPTO_PREFIXES.includes(dexLower)) {
+        // Generic HIP-3 ticker logo fallbacks (e.g. xyz:NVDA, xyz:MSTR, cash:SPY).
+        candidates.push(`https://financialmodelingprep.com/image-stock/${encodeURIComponent(upper)}.png`);
+        candidates.push(`https://eodhd.com/img/logos/US/${encodeURIComponent(upper)}.png`);
+      }
     };
 
     const addWrappedSpotFallback = (name) => {
@@ -7461,9 +7483,11 @@
       if (!key) continue;
       const upper = String(key).trim().toUpperCase();
       if (SPECIAL_LOGOS.has(upper)) return SPECIAL_LOGOS.get(upper);
+      if (DOMAIN_LOGOS.has(upper)) return DOMAIN_LOGOS.get(upper);
       if (upper.includes(":")) {
         const base = upper.split(":").pop();
         if (SPECIAL_LOGOS.has(base)) return SPECIAL_LOGOS.get(base);
+        if (DOMAIN_LOGOS.has(base)) return DOMAIN_LOGOS.get(base);
       }
     }
     return null;
