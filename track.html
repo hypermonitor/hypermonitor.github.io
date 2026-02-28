@@ -6114,7 +6114,7 @@
         renderTransfersList([], "No transfer events in this range.");
         return;
       }
-      renderTransfersList(allRows, `${allRows.length} events`);
+      renderTransfersList(allRows, `${allRows.length} transfers`);
     } catch (err) {
       console.error("Transfers fetch failed", err);
       if (requestToken !== transfersRequestToken) return;
