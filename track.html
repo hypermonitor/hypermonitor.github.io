@@ -6367,18 +6367,62 @@
     };
   }
 
-  function buildDrawdownSeries(values) {
+  function buildCashFlowAdjustedIndex(values, flowValues) {
     if (!Array.isArray(values)) return [];
     const out = [];
+    let prevEquity = null;
+    let prevFlow = null;
+    let index = 1;
+
+    values.forEach((rawEquity, i) => {
+      const equity = Number(rawEquity);
+      const flowRaw = Array.isArray(flowValues) ? Number(flowValues[i]) : NaN;
+      const currFlow = Number.isFinite(flowRaw) ? flowRaw : prevFlow;
+
+      if (!Number.isFinite(equity)) {
+        out.push(null);
+        return;
+      }
+
+      if (!Number.isFinite(prevEquity)) {
+        out.push(index);
+        prevEquity = equity;
+        prevFlow = Number.isFinite(currFlow) ? currFlow : 0;
+        return;
+      }
+
+      const intervalFlow =
+        Number.isFinite(currFlow) && Number.isFinite(prevFlow) ? currFlow - prevFlow : 0;
+      const denom = prevEquity;
+      let ret = 0;
+      if (Number.isFinite(denom) && Math.abs(denom) > 1e-9) {
+        ret = (equity - prevEquity - intervalFlow) / denom;
+        if (!Number.isFinite(ret)) ret = 0;
+        if (ret < -0.9999) ret = -0.9999;
+      }
+      index *= 1 + ret;
+      out.push(index);
+
+      prevEquity = equity;
+      prevFlow = Number.isFinite(currFlow) ? currFlow : prevFlow;
+    });
+
+    return out;
+  }
+
+  function buildDrawdownSeries(values, flowValues) {
+    const indexSeries = buildCashFlowAdjustedIndex(values, flowValues);
+    if (!indexSeries.length) return [];
+    const out = [];
     let peak = null;
-    values.forEach((raw) => {
+    indexSeries.forEach((raw) => {
       const n = Number(raw);
       if (!Number.isFinite(n)) {
         out.push(null);
         return;
       }
       if (peak === null || n > peak) peak = n;
-      if (!Number.isFinite(peak) || peak === 0) {
+      if (!Number.isFinite(peak) || peak <= 0) {
         out.push(0);
         return;
       }
@@ -6393,7 +6437,7 @@
       const color = "#fb7185";
       return {
         ...ds,
-        data: buildDrawdownSeries(ds?.data || []),
+        data: buildDrawdownSeries(ds?.data || [], ds?.flowData || []),
         borderColor: color,
         backgroundColor: "rgba(251, 113, 133, 0.22)",
         fill: { target: "origin" },
@@ -12352,13 +12396,7 @@
       const views = getWalletViews(currentRangeKey, currentMarketType);
       if (views.length) {
         const labels = buildLabels(views[0].view.times, currentRangeKey);
-        const singleWallet = views.length === 1;
-        const singleColors = { equity: "#8b5cf6" };
-        const weightedEquity = buildWeightedSeries(views, labels, "equity");
-        const equityDatasets = [
-          ...(weightedEquity ? [weightedEquity] : []),
-          ...buildWalletDatasets(views, labels, "equity", singleWallet ? singleColors.equity : null),
-        ];
+        const equityDatasets = buildEquityDatasets(views, labels);
         portfolioCharts.equity.data.labels = labels;
         applyEquityChartMode(portfolioCharts.equity, equityDatasets);
       }
@@ -12706,6 +12744,41 @@
       borderWidth: 2.4,
       tension: 0.25,
     };
+  }
+
+  function buildEquityDatasets(views, labels) {
+    const singleWallet = views.length === 1;
+    const singleColor = "#8b5cf6";
+    const datasets = [];
+
+    if (views.length > 1) {
+      const weightedEquity = buildWeightedSeries(views, labels, "equity");
+      if (weightedEquity) {
+        const weightedFlows = buildWeightedSeries(views, labels, "rawDeposits");
+        weightedEquity.flowData = Array.isArray(weightedFlows?.data)
+          ? weightedFlows.data.slice(0, labels.length)
+          : [];
+        datasets.push(weightedEquity);
+      }
+    }
+
+    views.forEach(({ wallet, view }) => {
+      const color = singleWallet ? singleColor : getWalletColor(wallet);
+      const equityValues = Array.isArray(view?.equity) ? view.equity : [];
+      const flowValues = Array.isArray(view?.rawDeposits) ? view.rawDeposits : [];
+      datasets.push({
+        label: formatWalletLabel(wallet),
+        data: equityValues.slice(0, labels.length),
+        flowData: flowValues.slice(0, labels.length),
+        borderColor: color,
+        backgroundColor: color + "2a",
+        pointRadius: 0,
+        borderWidth: 1.7,
+        tension: 0.25,
+      });
+    });
+
+    return datasets;
   }
 
   function detectOrderType(order) {
@@ -14632,14 +14705,10 @@
     const singleWallet = views.length === 1;
     const singleColors = { equity: "#8b5cf6", pnl: "#f59e0b", deposits: "#14b8a6" };
 
-    const weightedEquity = buildWeightedSeries(views, labels, "equity");
+    const equityDatasets = buildEquityDatasets(views, labels);
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
     const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
 
-    const equityDatasets = [
-      ...(weightedEquity ? [weightedEquity] : []),
-      ...buildWalletDatasets(views, labels, "equity", singleWallet ? singleColors.equity : null),
-    ];
     const pnlDatasets = [
       ...(weightedPnl ? [weightedPnl] : []),
       ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
@@ -14695,13 +14764,9 @@
     const labels = buildLabels(views[0].view.times, rangeKey);
     const singleWallet = views.length === 1;
     const singleColors = { equity: "#8b5cf6", pnl: "#f59e0b", deposits: "#14b8a6" };
-    const weightedEquity = buildWeightedSeries(views, labels, "equity");
+    const equityDatasets = buildEquityDatasets(views, labels);
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
     const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
-    const equityDatasets = [
-      ...(weightedEquity ? [weightedEquity] : []),
-      ...buildWalletDatasets(views, labels, "equity", singleWallet ? singleColors.equity : null),
-    ];
     const pnlDatasets = [
       ...(weightedPnl ? [weightedPnl] : []),
       ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
