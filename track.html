@@ -5605,6 +5605,7 @@
   const openOrders = new Map();
   const canceledOrders = [];
   const fills = [];
+  const recentCancelTimestamps = [];
 
   const historicalOrders = [];
   let historicalOrdersLoaded = false;
@@ -5618,6 +5619,12 @@
 
   let currentAssetPositions = [];
   let currentMarketType = "perp";
+  let isHftOrderRenderMode = false;
+  let orderRenderTimer = null;
+  let pendingOpenOrdersRender = false;
+  let pendingCanceledOrdersRender = false;
+  let positionsLiveRenderTimer = null;
+  let pendingPositionsLiveRender = false;
   const liveMids = new Map();
   let allMidsSub = null;
   const footerChangePcts = new Map();
@@ -5655,6 +5662,11 @@
   const portfolioBreakdownChart = { chart: null };
   const WALLET_COLOR_PALETTE = ["#38bdf8", "#f59e0b", "#f472b6", "#22d3ee", "#a78bfa", "#34d399", "#f97316", "#60a5fa"];
   const walletColorMap = new Map();
+  const HFT_CANCEL_THRESHOLD_PER_MIN = 10;
+  const HFT_CANCEL_WINDOW_MS = 60_000;
+  const HFT_ORDER_RENDER_INTERVAL_MS = 5_000;
+  const HFT_POSITIONS_THRESHOLD = 15;
+  const HFT_POSITIONS_RENDER_INTERVAL_MS = 5_000;
 
   function updateSpinnerForTheme(theme) {
     if (!statusSpinnerEl) return;
@@ -5662,6 +5674,110 @@
       theme === "light"
         ? "https://hyperfoundation.org/landing/blob-dark.gif"
         : "https://hyperfoundation.org/landing/blob_green.gif";
+  }
+
+  function pruneRecentCancelTimestamps(now = Date.now()) {
+    while (recentCancelTimestamps.length && now - recentCancelTimestamps[0] > HFT_CANCEL_WINDOW_MS) {
+      recentCancelTimestamps.shift();
+    }
+  }
+
+  function flushPendingOrderRenders() {
+    if (pendingOpenOrdersRender) {
+      pendingOpenOrdersRender = false;
+      renderOpenOrders();
+    }
+    if (pendingCanceledOrdersRender) {
+      pendingCanceledOrdersRender = false;
+      renderCanceledOrders();
+    }
+  }
+
+  function stopOrderRenderTimer() {
+    if (!orderRenderTimer) return;
+    clearInterval(orderRenderTimer);
+    orderRenderTimer = null;
+  }
+
+  function ensureOrderRenderTimer() {
+    if (orderRenderTimer) return;
+    orderRenderTimer = setInterval(() => {
+      const now = Date.now();
+      pruneRecentCancelTimestamps(now);
+      if (recentCancelTimestamps.length < HFT_CANCEL_THRESHOLD_PER_MIN) {
+        isHftOrderRenderMode = false;
+        stopOrderRenderTimer();
+        flushPendingOrderRenders();
+        return;
+      }
+      flushPendingOrderRenders();
+    }, HFT_ORDER_RENDER_INTERVAL_MS);
+  }
+
+  function updateHftOrderRenderMode(now = Date.now()) {
+    pruneRecentCancelTimestamps(now);
+    const shouldThrottle = recentCancelTimestamps.length >= HFT_CANCEL_THRESHOLD_PER_MIN;
+    if (shouldThrottle === isHftOrderRenderMode) return;
+    isHftOrderRenderMode = shouldThrottle;
+    if (isHftOrderRenderMode) {
+      ensureOrderRenderTimer();
+    } else {
+      stopOrderRenderTimer();
+      flushPendingOrderRenders();
+    }
+  }
+
+  function requestOrderRenders({ open = false, canceled = false } = {}) {
+    if (open) pendingOpenOrdersRender = true;
+    if (canceled) pendingCanceledOrdersRender = true;
+    if (!isHftOrderRenderMode) {
+      flushPendingOrderRenders();
+      return;
+    }
+    ensureOrderRenderTimer();
+  }
+
+  function getOpenPositionsCount(positions = currentAssetPositions) {
+    if (!Array.isArray(positions) || positions.length === 0) return 0;
+    return positions.reduce((count, item) => {
+      const size = Number(item?.position?.szi ?? 0);
+      return Number.isFinite(size) && Math.abs(size) > 1e-12 ? count + 1 : count;
+    }, 0);
+  }
+
+  function flushPendingLivePositionsRender() {
+    if (!pendingPositionsLiveRender) return;
+    pendingPositionsLiveRender = false;
+    if (currentAssetPositions.length) renderPositions(currentAssetPositions);
+  }
+
+  function stopPositionsLiveRenderTimer() {
+    if (!positionsLiveRenderTimer) return;
+    clearInterval(positionsLiveRenderTimer);
+    positionsLiveRenderTimer = null;
+  }
+
+  function ensurePositionsLiveRenderTimer() {
+    if (positionsLiveRenderTimer) return;
+    positionsLiveRenderTimer = setInterval(() => {
+      if (getOpenPositionsCount() <= HFT_POSITIONS_THRESHOLD) {
+        stopPositionsLiveRenderTimer();
+        flushPendingLivePositionsRender();
+        return;
+      }
+      flushPendingLivePositionsRender();
+    }, HFT_POSITIONS_RENDER_INTERVAL_MS);
+  }
+
+  function requestLivePositionsRender() {
+    if (!currentAssetPositions.length) return;
+    pendingPositionsLiveRender = true;
+    if (getOpenPositionsCount() <= HFT_POSITIONS_THRESHOLD) {
+      stopPositionsLiveRenderTimer();
+      flushPendingLivePositionsRender();
+      return;
+    }
+    ensurePositionsLiveRenderTimer();
   }
 
   function setStatus(status, message) {
@@ -8621,7 +8737,7 @@
       liveMids.set(coin, mid);
     });
     renderFooterPrices();
-    if (currentAssetPositions.length) renderPositions(currentAssetPositions);
+    requestLivePositionsRender();
   }
 
   async function primeManualMidsForFooter() {
@@ -11828,6 +11944,13 @@
     openOrders.clear();
     canceledOrders.length = 0;
     fills.length = 0;
+    recentCancelTimestamps.length = 0;
+    isHftOrderRenderMode = false;
+    pendingOpenOrdersRender = false;
+    pendingCanceledOrdersRender = false;
+    stopOrderRenderTimer();
+    pendingPositionsLiveRender = false;
+    stopPositionsLiveRenderTimer();
     currentAssetPositions = [];
     expandedPositions.clear();
     liveMids.clear();
@@ -11901,7 +12024,7 @@
 
         renderFooterPrices();
 
-        if (currentAssetPositions.length) renderPositions(currentAssetPositions);
+        requestLivePositionsRender();
       });
     } catch (err) {
       console.error("allMids subscription error", err);
@@ -11956,7 +12079,7 @@
         const rawCoin = order.coin ?? order.asset ?? order.symbol ?? order.sym ?? "";
         openOrders.set(key, { ...order, wallet, marketType: getMarketTypeFromCoin(rawCoin) });
       });
-      renderOpenOrders();
+      requestOrderRenders({ open: true });
     } catch (err) {
       console.error("Snapshot error", err);
       snapshotErrorEl.textContent = "Failed to load initial snapshot: " + (err?.message || err);
@@ -11997,15 +12120,17 @@
 
                 if (status === "open") {
                   openOrders.set(key, order);
-                  renderOpenOrders();
+                  requestOrderRenders({ open: true });
                 } else if (status === "canceled") {
+                  const now = Number(statusTimestamp) || Date.now();
+                  recentCancelTimestamps.push(now);
+                  updateHftOrderRenderMode(now);
                   openOrders.delete(key);
-                  renderOpenOrders();
                   canceledOrders.unshift(order);
-                  renderCanceledOrders();
+                  requestOrderRenders({ open: true, canceled: true });
                 } else if (status === "filled" || status === "closed" || status === "rejected") {
                   openOrders.delete(key);
-                  renderOpenOrders();
+                  requestOrderRenders({ open: true });
                 }
               });
             } catch (err) {
