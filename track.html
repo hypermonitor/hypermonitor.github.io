@@ -3039,6 +3039,153 @@
       gap: 0.75rem;
     }
 
+    .coin-info-trigger {
+      cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+
+    .coin-info-trigger:hover {
+      transform: scale(1.04);
+    }
+
+    #coinInfoModal .modal-card {
+      width: min(460px, 100%);
+      padding: 1.05rem;
+      transition: transform 0.2s ease;
+    }
+
+    .coin-info-hero {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(18, 18, 24, 0.58), rgba(18, 18, 24, 0.28));
+    }
+
+    body.light .coin-info-hero {
+      background: linear-gradient(135deg, #fafafa, #f3f4f6);
+      border-color: #e5e7eb;
+    }
+
+    .coin-info-logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 11px;
+      background: rgba(10, 10, 12, 0.38);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #e2e8f0;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .coin-info-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    body.light .coin-info-logo {
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    .coin-info-title {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .coin-info-symbol {
+      font-size: 0.97rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+    }
+
+    .coin-info-category {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      padding: 0.18rem 0.58rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #e2e8f0;
+      background: rgba(148, 163, 184, 0.18);
+      width: fit-content;
+    }
+
+    body.light .coin-info-category {
+      color: #334155;
+      border-color: #d1d5db;
+      background: #f8fafc;
+    }
+
+    .coin-info-panel {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.2);
+      padding: 0.78rem 0.82rem;
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    body.light .coin-info-panel {
+      background: #f8fafc;
+      border-color: #e5e7eb;
+    }
+
+    .coin-info-panel-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .coin-info-description {
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: #e2e8f0;
+      min-height: 2.8em;
+    }
+
+    body.light .coin-info-description {
+      color: #0f172a;
+    }
+
+    @media (max-width: 720px) {
+      #coinInfoModal {
+        align-items: flex-end;
+        padding: 0;
+      }
+
+      #coinInfoModal .modal-card {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        border-radius: 16px 16px 0 0;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+        padding: 0.95rem 0.95rem calc(0.95rem + env(safe-area-inset-bottom));
+        max-height: min(78vh, 640px);
+        overflow: auto;
+        transform: translateY(20px);
+      }
+
+      #coinInfoModal.open .modal-card {
+        transform: translateY(0);
+      }
+    }
+
     .portfolio-doughnut-wrap {
       width: 100%;
       height: 260px;
@@ -3552,20 +3699,20 @@
       font-weight: 400;
       letter-spacing: 0.02em;
       font-variant-numeric: tabular-nums;
-      display: inline-block;
-      min-width: 6ch;
-      text-align: right;
+      display: inline;
+      min-width: 0;
+      text-align: left;
     }
 
     .price-item .coin-change {
       font-weight: 400;
       letter-spacing: 0.02em;
       font-variant-numeric: tabular-nums;
-      display: inline-block;
-      min-width: 7ch;
-      text-align: right;
+      display: inline;
+      min-width: 0;
+      text-align: left;
       color: var(--muted);
-      margin-left: 0.25rem;
+      margin-left: 0;
     }
 
     .price-item .coin-change.upnl-pos {
@@ -4139,6 +4286,28 @@
             <div class="breakdown-label">Withdrawable</div>
             <div class="money" id="withdrawableValueStat">$0.00</div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="portfolio-modal" id="coinInfoModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Asset Info</h3>
+        <button id="coinInfoModalClose" class="modal-close-btn" aria-label="Close asset info">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="coin-info-hero">
+          <div class="coin-info-logo" id="coinInfoLogo">?</div>
+          <div class="coin-info-title">
+            <div class="coin-info-symbol" id="coinInfoSymbol">-</div>
+            <div class="coin-info-category" id="coinInfoCategory">Loading</div>
+          </div>
+        </div>
+        <div class="coin-info-panel">
+          <div class="coin-info-panel-label">Perp Annotation</div>
+          <div class="coin-info-description" id="coinInfoDescription">Loading annotation…</div>
         </div>
       </div>
     </div>
@@ -4725,6 +4894,7 @@
 
   const MAX_FILL_ROWS = 100;
   const PORTFOLIO_API_URL = "https://api.hyperliquid.xyz/info";
+  const PERP_ANNOTATION_API_URL = "https://api-ui.hyperliquid.xyz/info";
 
   const walletInputsEl = document.getElementById("walletInputs");
   const addWalletBtnEl = document.getElementById("addWalletBtn");
@@ -4754,6 +4924,12 @@
   const positionsTimelineToggleEl = document.getElementById("positionsTimelineToggle");
   const portfolioModalEl = document.getElementById("portfolioModal");
   const portfolioModalCloseEl = document.getElementById("portfolioModalClose");
+  const coinInfoModalEl = document.getElementById("coinInfoModal");
+  const coinInfoModalCloseEl = document.getElementById("coinInfoModalClose");
+  const coinInfoLogoEl = document.getElementById("coinInfoLogo");
+  const coinInfoSymbolEl = document.getElementById("coinInfoSymbol");
+  const coinInfoCategoryEl = document.getElementById("coinInfoCategory");
+  const coinInfoDescriptionEl = document.getElementById("coinInfoDescription");
   const portfolioDoughnutCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("portfolioDoughnut"));
   const positionsValueStatEl = document.getElementById("positionsValueStat");
   const withdrawableValueStatEl = document.getElementById("withdrawableValueStat");
@@ -4927,6 +5103,7 @@
   let lastRenderedWalletTotals = new Map();
   const coinIdMap = new Map();
   const spotIdMetaMap = new Map();
+  const spotTokenMetaByName = new Map();
   let perpDexNames = null;
   let spotMetaPromise = null;
   let logoRetryTimer = null;
@@ -5616,6 +5793,7 @@
   let subsClient = null;
   const orderUpdatesSubs = new Map();
   const userEventsSubs = new Map();
+  const perpAnnotationCache = new Map();
 
   let currentAssetPositions = [];
   let currentMarketType = "perp";
@@ -7976,6 +8154,12 @@
         if (!Array.isArray(tokens) || !Array.isArray(universe)) {
           throw new Error("spotMeta response missing tokens/universe");
         }
+        tokens.forEach((token) => {
+          if (!token || typeof token !== "object") return;
+          const name = String(token.name ?? "").trim();
+          if (!name) return;
+          spotTokenMetaByName.set(name.toUpperCase(), token);
+        });
         const tokenByIndex = buildTokenIndexMap(tokens);
         universe
           .filter((u) => u && typeof u.index !== "undefined")
@@ -8199,9 +8383,11 @@
     const logoKey = normalizeLogoKey(rawName || cleanName);
     const entry = ensureLogoCache(logoKey, rawName, cleanName);
     const letter = (cleanName?.[0] || rawName?.[0] || "?").toUpperCase();
+    const coinKey = xmlEscape(rawName || cleanName || "");
+    const label = xmlEscape(cleanName || rawName || "");
 
     if (entry.state === "bad" || !entry.urls.length) {
-      return `<span class="coinFallback">${letter}</span>`;
+      return `<span class="coinFallback coin-info-trigger" data-coin-key="${coinKey}" data-coin-label="${label}">${letter}</span>`;
     }
 
     const src = (entry.state === "ok" && entry.okUrl) ? entry.okUrl : entry.urls[entry.idx || 0];
@@ -8209,9 +8395,11 @@
 
     return `
       <img
-        class="coinIcon"
+        class="coinIcon coin-info-trigger"
         src="${src}"
-        alt="${cleanName || rawName}"
+        alt="${xmlEscape(cleanName || rawName || "")}"
+        data-coin-key="${coinKey}"
+        data-coin-label="${label}"
         loading="lazy"
         referrerpolicy="no-referrer"
         onload="window.__logoOk('${safeKey}', this)"
@@ -8577,8 +8765,6 @@
       trackedFooterCoins.forEach((coin) => {
         const { dex } = splitDexCoin(coin);
         if (!dex) return;
-        const low = dex.toLowerCase();
-        if (NON_CRYPTO_PREFIXES.includes(low)) return;
         dexes.add(dex);
       });
 
@@ -14695,6 +14881,181 @@
     portfolioModalEl.classList.remove("open");
   }
 
+  function closeCoinInfoModal() {
+    if (!coinInfoModalEl) return;
+    coinInfoModalEl.classList.remove("open");
+    coinInfoModalEl.setAttribute("aria-hidden", "true");
+  }
+
+  function normalizePerpAnnotationCoin(rawCoin, fallbackLabel = "") {
+    const direct = String(rawCoin || "").trim();
+    if (direct && !direct.startsWith("@")) return direct;
+    return String(fallbackLabel || "").trim();
+  }
+
+  function buildPerpAnnotationCandidates(coin) {
+    const key = String(coin || "").trim();
+    if (!key) return [];
+    const candidates = new Set();
+    const add = (v) => {
+      const s = String(v || "").trim();
+      if (s) candidates.add(s);
+    };
+    add(key);
+    add(key.toUpperCase());
+
+    // HIP-3/perp style symbols should be tried as-is.
+    if (key.includes(":")) return Array.from(candidates);
+
+    const upper = key.toUpperCase();
+    const base = upper.replace(/[-/].*$/, "");
+    add(`${base}-USDC`);
+    add(`${base}/USDC`);
+    add(`U${base}`);
+    add(`U${base}-USDC`);
+    add(`U${base}/USDC`);
+
+    // Try spot universe-derived aliases and pairs (e.g. BTC -> UBTC/USDC).
+    if (spotIdMetaMap.size) {
+      spotIdMetaMap.forEach((meta) => {
+        const pair = String(meta?.pair || "").trim();
+        const metaBase = String(meta?.base || "").trim().toUpperCase();
+        if (!pair || !metaBase) return;
+        const stripped = metaBase.startsWith("U") ? metaBase.slice(1) : metaBase;
+        if (metaBase === base || stripped === base) {
+          add(pair);
+          add(pair.replace("/", "-"));
+          add(meta?.base);
+        }
+      });
+    }
+    return Array.from(candidates);
+  }
+
+  async function fetchSpotMetaAnnotationFallback(coin) {
+    const key = String(coin || "").trim();
+    if (!key) return null;
+    await ensureSpotMeta();
+
+    const upper = key.toUpperCase();
+    const base = upper.replace(/[-/].*$/, "");
+    const tokenKeys = [upper, base, `U${base}`];
+    let token = null;
+    for (const tokenKey of tokenKeys) {
+      token = spotTokenMetaByName.get(tokenKey);
+      if (token) break;
+    }
+
+    const tokenName =
+      String(
+        token?.fullName ??
+        token?.displayName ??
+        token?.longName ??
+        token?.name ??
+        ""
+      ).trim();
+    const tokenDesc =
+      String(
+        token?.description ??
+        token?.desc ??
+        token?.details ??
+        token?.longDescription ??
+        token?.about ??
+        ""
+      ).trim();
+
+    let spotPair = "";
+    spotIdMetaMap.forEach((meta) => {
+      if (spotPair) return;
+      const metaBase = String(meta?.base || "").trim().toUpperCase();
+      const stripped = metaBase.startsWith("U") ? metaBase.slice(1) : metaBase;
+      if (metaBase === base || stripped === base) {
+        spotPair = String(meta?.pair || "").trim();
+      }
+    });
+
+    if (tokenDesc) {
+      return { category: "spot", description: tokenDesc };
+    }
+    if (tokenName || spotPair) {
+      const title = tokenName || base;
+      const pairPart = spotPair ? `${spotPair} ` : "";
+      return { category: "spot", description: `${pairPart}spot asset on Hyperliquid (${title}).` };
+    }
+    return null;
+  }
+
+  async function fetchPerpAnnotation(coin) {
+    const key = String(coin || "").trim();
+    if (!key) return null;
+    if (perpAnnotationCache.has(key)) return perpAnnotationCache.get(key);
+
+    const fetchSingle = async (candidate) => {
+      const res = await fetch(PERP_ANNOTATION_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coin: candidate, type: "perpAnnotation" }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || typeof data !== "object") return null;
+      const category = String(data.category || "").trim();
+      const description = String(data.description || "").trim();
+      if (!category && !description) return null;
+      return { category, description };
+    };
+
+    const req = (async () => {
+      await ensureSpotMeta();
+      const candidates = buildPerpAnnotationCandidates(key);
+      for (const candidate of candidates) {
+        // eslint-disable-next-line no-await-in-loop
+        const info = await fetchSingle(candidate);
+        if (info) return info;
+      }
+      return fetchSpotMetaAnnotationFallback(key);
+    })().catch(() => null);
+
+    perpAnnotationCache.set(key, req);
+    return req;
+  }
+
+  function setCoinInfoLogo(logoSrc, fallbackLetter = "?") {
+    if (!coinInfoLogoEl) return;
+    const letter = String(fallbackLetter || "?").slice(0, 1).toUpperCase();
+    if (logoSrc) {
+      coinInfoLogoEl.innerHTML = `<img src="${xmlEscape(logoSrc)}" alt="Coin logo" referrerpolicy="no-referrer" />`;
+      return;
+    }
+    coinInfoLogoEl.textContent = letter;
+  }
+
+  async function openCoinInfoModal({ coinKey, coinLabel, logoSrc, fallbackLetter }) {
+    if (!coinInfoModalEl || !coinInfoSymbolEl || !coinInfoCategoryEl || !coinInfoDescriptionEl) return;
+
+    const normalizedCoin = normalizePerpAnnotationCoin(coinKey, coinLabel);
+    const displayLabel = String(coinLabel || normalizedCoin || "").trim();
+    const symbolText = displayLabel || "Unknown asset";
+
+    coinInfoSymbolEl.textContent = symbolText;
+    coinInfoCategoryEl.textContent = "Loading";
+    coinInfoDescriptionEl.textContent = "Loading annotation…";
+    setCoinInfoLogo(logoSrc, fallbackLetter || symbolText);
+
+    coinInfoModalEl.classList.add("open");
+    coinInfoModalEl.setAttribute("aria-hidden", "false");
+
+    if (!normalizedCoin) {
+      coinInfoCategoryEl.textContent = "Unavailable";
+      coinInfoDescriptionEl.textContent = "No asset key available for annotation.";
+      return;
+    }
+
+    const info = await fetchPerpAnnotation(normalizedCoin);
+    coinInfoCategoryEl.textContent = info?.category ? info.category : "Unavailable";
+    coinInfoDescriptionEl.textContent = info?.description || `No annotation available for ${normalizedCoin}.`;
+  }
+
   function createLineChart(ctx, labels, datasets) {
     const hoverLinePlugin = {
       id: "hoverLine",
@@ -15903,6 +16264,16 @@
     });
   }
 
+  if (coinInfoModalCloseEl) {
+    coinInfoModalCloseEl.addEventListener("click", closeCoinInfoModal);
+  }
+
+  if (coinInfoModalEl) {
+    coinInfoModalEl.addEventListener("click", (e) => {
+      if (e.target === coinInfoModalEl) closeCoinInfoModal();
+    });
+  }
+
   async function handlePnlShareClick(shareBtn) {
     const payload = {
       wallet: shareBtn.dataset.wallet || "",
@@ -15966,6 +16337,8 @@
     positionsBodyEl.addEventListener("click", async (e) => {
       const shareBtn = e.target.closest(".pnl-share-btn");
       if (shareBtn) return;
+      const coinInfoTrigger = e.target.closest(".coin-info-trigger");
+      if (coinInfoTrigger) return;
       const row = e.target.closest(".position-row");
       if (!row) return;
       row.classList.add("loading");
@@ -15986,9 +16359,36 @@
     if (e.key === "Escape" && portfolioModalEl?.classList.contains("open")) {
       closePortfolioModal();
     }
+    if (e.key === "Escape" && coinInfoModalEl?.classList.contains("open")) {
+      closeCoinInfoModal();
+    }
     if (e.key === "Escape" && pnlShareModalEl?.classList.contains("open")) {
       closePnlShareModal();
     }
+  });
+
+  document.addEventListener("click", async (e) => {
+    let trigger = e.target.closest(".coin-info-trigger");
+    let coinKey = "";
+    let coinLabel = "";
+    let logoSrc = "";
+    if (trigger) {
+      coinKey = trigger.dataset.coinKey || "";
+      coinLabel = trigger.dataset.coinLabel || coinKey || "";
+      logoSrc = trigger.tagName === "IMG" ? (trigger.currentSrc || trigger.src || "") : "";
+    } else {
+      const priceItem = e.target.closest(".price-item");
+      if (!priceItem || !priceFooterWrapEl?.contains(priceItem)) return;
+      coinKey = priceItem.dataset.coin || "";
+      coinLabel = coinKey || "";
+      const iconEl = priceItem.querySelector(".coinIcon");
+      logoSrc = iconEl ? (iconEl.currentSrc || iconEl.src || "") : "";
+      trigger = priceItem;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    const fallbackLetter = String(coinLabel || coinKey || "?").slice(0, 1).toUpperCase();
+    await openCoinInfoModal({ coinKey, coinLabel, logoSrc, fallbackLetter });
   });
 
   if (shareModalCloseEl) {
