@@ -209,7 +209,7 @@
     }
 
     .wallet-fav-btn {
-      width: 38px;
+      min-width: 38px;
       height: 38px;
       border-radius: 10px;
       border: 1px solid var(--glass-border);
@@ -218,6 +218,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.2rem;
+      padding: 0 0.35rem;
       cursor: pointer;
       font-size: 0.8rem;
       font-weight: 600;
@@ -232,6 +234,19 @@
 
     .wallet-fav-btn:hover {
       transform: scale(1.04);
+    }
+
+    .wallet-fav-star {
+      line-height: 1;
+      font-size: 0.86rem;
+    }
+
+    .wallet-fav-count {
+      font-size: 0.63rem;
+      line-height: 1;
+      opacity: 0.9;
+      letter-spacing: 0.01em;
+      font-variant-numeric: tabular-nums;
     }
 
     body.light .wallet-fav-btn {
@@ -439,6 +454,26 @@
       color: var(--muted);
       padding: 0.05rem 0.35rem;
       border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .favorites-chip.favorites-stars {
+      text-transform: none;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      color: #f8fafc;
+      border-color: rgba(251, 191, 36, 0.35);
+      background: rgba(251, 191, 36, 0.12);
+      gap: 0.15rem;
+    }
+
+    body.light .favorites-chip.favorites-stars {
+      color: #92400e;
+      border-color: rgba(217, 119, 6, 0.28);
+      background: rgba(251, 191, 36, 0.16);
     }
 
     .favorites-copy {
@@ -5110,6 +5145,17 @@
   let logoRefreshTimer = null;
   const FOOTER_COINS_KEY = "hypermonitor-footer-coins";
   const FAVORITES_KEY = "hypermonitor-favorite-wallets";
+  const WALLET_STAR_API_BASE =
+    window.HYPERMONITOR_STAR_API_BASE ||
+    (() => {
+      try {
+        return localStorage.getItem("hypermonitor-star-api-base") || "";
+      } catch (err) {
+        return "";
+      }
+    })() ||
+    "https://hypermonitor-wallet-stars.hypermonitor.workers.dev/api/wallet-stars";
+  const WALLET_STAR_CLIENT_KEY = "hypermonitor-star-client-id";
   const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
   const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
   const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "cash:USA500", "xyz:GOLD", "xyz:SILVER", "xyz:MSTR", "xyz:NVDA"];
@@ -5183,6 +5229,129 @@
     return favoriteWallets.some((w) => String(w).toLowerCase() === norm);
   }
 
+  function walletStarKey(wallet) {
+    return String(normalizeWalletInput(wallet) || "").toLowerCase();
+  }
+
+  function getOrCreateStarClientId() {
+    try {
+      const existing = localStorage.getItem(WALLET_STAR_CLIENT_KEY);
+      if (existing && typeof existing === "string" && existing.length >= 12) return existing;
+      const created =
+        (crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`).toLowerCase();
+      localStorage.setItem(WALLET_STAR_CLIENT_KEY, created);
+      return created;
+    } catch (err) {
+      return `anon-${Math.random().toString(36).slice(2, 12)}`;
+    }
+  }
+
+  function formatStarCount(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 0) return "0";
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")}k`;
+    return String(Math.round(n));
+  }
+
+  function renderFavoriteButton(starEl, active, count) {
+    if (!starEl) return;
+    starEl.classList.toggle("active", Boolean(active));
+    const symbol = active ? "★" : "☆";
+    const safeCount = Number.isFinite(Number(count)) ? Math.max(0, Math.round(Number(count))) : 0;
+    const countLabel = formatStarCount(safeCount);
+    starEl.innerHTML = `
+      <span class="wallet-fav-star">${symbol}</span>
+      <span class="wallet-fav-count">${countLabel}</span>
+    `;
+  }
+
+  function setFavoriteStarChipCount(wallet, count) {
+    if (!favoritesListEl) return;
+    const key = walletStarKey(wallet);
+    const chip = favoritesListEl.querySelector(`.favorites-stars[data-wallet-stars="${key}"]`);
+    if (!chip) return;
+    const safeCount = Number.isFinite(Number(count)) ? Math.max(0, Math.round(Number(count))) : 0;
+    const label = formatStarCount(safeCount);
+    chip.textContent = `★ ${label}`;
+  }
+
+  async function fetchWalletStarCount(wallet, { force = false } = {}) {
+    const key = walletStarKey(wallet);
+    if (!key) return null;
+    if (!force && walletStarCountCache.has(key)) return walletStarCountCache.get(key);
+    if (!force && walletStarFetchPromises.has(key)) return walletStarFetchPromises.get(key);
+    if (!WALLET_STAR_API_BASE) {
+      const fallback = walletStarCountCache.has(key) ? Number(walletStarCountCache.get(key)) : 0;
+      const safe = Number.isFinite(fallback) && fallback >= 0 ? Math.round(fallback) : 0;
+      walletStarCountCache.set(key, safe);
+      return safe;
+    }
+
+    const req = (async () => {
+      try {
+        const url = `${WALLET_STAR_API_BASE}/${encodeURIComponent(key)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`star get failed (${res.status})`);
+        const data = await res.json();
+        const count = Number(data?.count ?? data?.value);
+        const safe = Number.isFinite(count) && count >= 0 ? Math.round(count) : 0;
+        walletStarCountCache.set(key, safe);
+        return safe;
+      } catch (err) {
+        const fallback = walletStarCountCache.has(key) ? Number(walletStarCountCache.get(key)) : 0;
+        const safe = Number.isFinite(fallback) && fallback >= 0 ? Math.round(fallback) : 0;
+        walletStarCountCache.set(key, safe);
+        return safe;
+      } finally {
+        walletStarFetchPromises.delete(key);
+        syncWalletInputStars();
+        setFavoriteStarChipCount(wallet, walletStarCountCache.get(key));
+      }
+    })();
+    walletStarFetchPromises.set(key, req);
+    return req;
+  }
+
+  async function setWalletStarState(wallet, starred) {
+    const key = walletStarKey(wallet);
+    if (!key) return null;
+    const prev = walletStarAdjustPromises.get(key) || Promise.resolve();
+    const next = prev.then(async () => {
+      try {
+        if (!walletStarCountCache.has(key)) {
+          await fetchWalletStarCount(wallet);
+        }
+        if (!WALLET_STAR_API_BASE) return walletStarCountCache.get(key) || 0;
+        const url = `${WALLET_STAR_API_BASE}/${encodeURIComponent(key)}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: getOrCreateStarClientId(),
+            starred: Boolean(starred),
+          }),
+        });
+        if (!res.ok) throw new Error(`star update failed (${res.status})`);
+        const data = await res.json();
+        const count = Number(data?.count ?? data?.value);
+        const safe = Number.isFinite(count) && count >= 0 ? Math.round(count) : 0;
+        walletStarCountCache.set(key, safe);
+        return safe;
+      } catch (err) {
+        return fetchWalletStarCount(wallet, { force: true });
+      } finally {
+        syncWalletInputStars();
+        setFavoriteStarChipCount(wallet, walletStarCountCache.get(key));
+      }
+    });
+    walletStarAdjustPromises.set(key, next);
+    next.finally(() => {
+      if (walletStarAdjustPromises.get(key) === next) walletStarAdjustPromises.delete(key);
+    });
+    return next;
+  }
+
   function updateFavoriteToggle() {
     syncWalletInputStars();
   }
@@ -5196,8 +5365,13 @@
       if (!star) return;
       const value = input?.value || "";
       const active = isValidAddress(value) && isFavoriteWallet(value);
-      star.classList.toggle("active", active);
-      star.textContent = active ? "★" : "☆";
+      const count = isValidAddress(value)
+        ? (walletStarCountCache.has(walletStarKey(value)) ? walletStarCountCache.get(walletStarKey(value)) : 0)
+        : null;
+      renderFavoriteButton(star, active, count);
+      if (isValidAddress(value) && !walletStarCountCache.has(walletStarKey(value))) {
+        fetchWalletStarCount(value);
+      }
     });
   }
 
@@ -5208,15 +5382,18 @@
     favoriteWallets.push(norm);
     saveFavoriteWallets();
     updateFavoriteToggle();
+    setWalletStarState(norm, true);
     return true;
   }
 
   function removeFavoriteWallet(wallet) {
+    const existed = isFavoriteWallet(wallet);
     const norm = String(wallet || "").toLowerCase();
     favoriteWallets = favoriteWallets.filter((w) => String(w).toLowerCase() !== norm);
     favoriteMetricsCache.delete(normalizeWalletInput(wallet));
     saveFavoriteWallets();
     updateFavoriteToggle();
+    if (existed) setWalletStarState(wallet, false);
   }
 
   async function getFavoriteMetrics(wallet) {
@@ -5289,14 +5466,18 @@
         const showShort = !String(label || "").toLowerCase().includes("0x");
         const full = wallet;
         const tracked = primaryWallet && String(primaryWallet).toLowerCase() === String(wallet).toLowerCase();
-        const chip = tracked ? `<span class="favorites-chip">Tracked</span>` : "";
+        const trackedChip = tracked ? `<span class="favorites-chip">Tracked</span>` : "";
+        const starCount = walletStarCountCache.get(walletStarKey(wallet));
+        const safeStarCount = Number.isFinite(Number(starCount)) ? Math.max(0, Math.round(Number(starCount))) : 0;
+        const starChip = `<span class="favorites-chip favorites-stars" data-wallet-stars="${walletStarKey(wallet)}">★ ${formatStarCount(safeStarCount)}</span>`;
         return `
           <div class="favorites-item" data-wallet="${wallet}">
             <button class="favorites-wallet-btn" type="button" data-action="open" data-wallet="${wallet}">
               <span>${label}</span>
               ${showShort ? `<span class="favorites-wallet-sub">${short}</span>` : ""}
               ${showShort ? `<span class="favorites-wallet-full">${full}</span>` : ""}
-              ${chip}
+              ${trackedChip}
+              ${starChip}
               <span class="favorites-copy" data-action="copy" data-wallet="${wallet}" title="Copy address">⧉</span>
               <span class="favorites-copy-toast" aria-live="polite">Copied!</span>
             </button>
@@ -5313,6 +5494,7 @@
     favoriteWallets.forEach(async (wallet) => {
       const metricsEl = favoritesListEl.querySelector(`.favorites-metrics[data-wallet="${wallet}"]`);
       const itemEl = favoritesListEl.querySelector(`.favorites-item[data-wallet="${wallet}"]`);
+      fetchWalletStarCount(wallet);
       if (!metricsEl) return;
       const data = await getFavoriteMetrics(wallet);
       if (!data || data.loading) return;
@@ -5821,6 +6003,9 @@
   };
   let favoriteWallets = [];
   const favoriteMetricsCache = new Map();
+  const walletStarCountCache = new Map();
+  const walletStarFetchPromises = new Map();
+  const walletStarAdjustPromises = new Map();
 
   let lastComputedUpnlTotal = 0;
   let lastComputedTotalNotional = 0;
