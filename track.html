@@ -421,12 +421,16 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      min-width: 0;
     }
 
     .favorites-wallet-sub {
       color: var(--muted);
       font-weight: 400;
       font-size: 0.7rem;
+      white-space: nowrap;
     }
 
     .favorites-wallet-full {
@@ -435,6 +439,7 @@
       font-weight: 400;
       font-size: 0.7rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      white-space: nowrap;
     }
 
     @media (min-width: 720px) {
