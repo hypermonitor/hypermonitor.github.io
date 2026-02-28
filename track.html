@@ -13963,12 +13963,14 @@
     const labels = buildLabels(views[0].view.times, rangeKey);
     const weightedEquity = buildWeightedSeries(views, labels, "equity");
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
+    const weightedRawDeposits = buildWeightedSeries(views, labels, "rawDeposits");
     return {
       label: "Weighted",
       view: {
         times: views[0].view.times,
         equity: weightedEquity?.data || views[0].view.equity,
         pnl: weightedPnl?.data || views[0].view.pnl,
+        rawDeposits: weightedRawDeposits?.data || views[0].view.rawDeposits || [],
       },
     };
   }
@@ -14041,17 +14043,13 @@
     const baseDenom = baseEquity ? Math.abs(baseEquity) : null;
     const returnPct = baseDenom ? totalPnl / baseDenom : null;
 
-    let peak = -Infinity;
-    let maxDrawdownAbs = 0;
-    pnl.forEach((val) => {
-      const v = Number(val);
-      if (!Number.isFinite(v)) return;
-      const equityFromInitial = Number.isFinite(baseEquity) ? baseEquity + (v - pnlStart) : v;
-      if (equityFromInitial > peak) peak = equityFromInitial;
-      const drawdown = peak - equityFromInitial;
-      if (drawdown > maxDrawdownAbs) maxDrawdownAbs = drawdown;
-    });
-    const maxDrawdown = baseDenom ? maxDrawdownAbs / baseDenom : null;
+    const drawdownSeries = buildDrawdownSeries(equity, rawDeposits);
+    const minDrawdown = drawdownSeries.reduce((min, v) => {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return min;
+      return min === null || n < min ? n : min;
+    }, null);
+    const maxDrawdown = Number.isFinite(minDrawdown) ? Math.abs(minDrawdown) : null;
 
     const deltas = [];
     for (let i = 1; i < pnl.length; i += 1) {
