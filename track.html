@@ -5135,6 +5135,7 @@
   let timelineAsOfMs = null;
   let timelineTimestamps = [];
   let timelineSelectedIndex = -1;
+  let timelineUserPinned = false;
   let timelinePriceRequestId = 0;
   let timelinePriceRefreshTimer = null;
   const timelineCoinPriceCache = new Map();
@@ -6850,55 +6851,34 @@
     };
   }
 
-  function buildCashFlowAdjustedIndex(values, flowValues) {
-    if (!Array.isArray(values)) return [];
-    const out = [];
-    let prevEquity = null;
-    let prevFlow = null;
-    let index = 1;
-
-    values.forEach((rawEquity, i) => {
-      const equity = Number(rawEquity);
-      const flowRaw = Array.isArray(flowValues) ? Number(flowValues[i]) : NaN;
-      const currFlow = Number.isFinite(flowRaw) ? flowRaw : prevFlow;
-
-      if (!Number.isFinite(equity)) {
-        out.push(null);
-        return;
-      }
-
-      if (!Number.isFinite(prevEquity)) {
-        out.push(index);
-        prevEquity = equity;
-        prevFlow = Number.isFinite(currFlow) ? currFlow : 0;
-        return;
-      }
-
-      const intervalFlow =
-        Number.isFinite(currFlow) && Number.isFinite(prevFlow) ? currFlow - prevFlow : 0;
-      const denom = prevEquity;
-      let ret = 0;
-      if (Number.isFinite(denom) && Math.abs(denom) > 1e-9) {
-        ret = (equity - prevEquity - intervalFlow) / denom;
-        if (!Number.isFinite(ret)) ret = 0;
-        if (ret < -0.9999) ret = -0.9999;
-      }
-      index *= 1 + ret;
-      out.push(index);
-
-      prevEquity = equity;
-      prevFlow = Number.isFinite(currFlow) ? currFlow : prevFlow;
-    });
-
-    return out;
+  function resolveDrawdownBaseEquity(equityValues, flowValues) {
+    const firstEquity = Array.isArray(equityValues)
+      ? equityValues.map((v) => Number(v)).find((v) => Number.isFinite(v))
+      : null;
+    const firstPositiveFlow = Array.isArray(flowValues)
+      ? flowValues.map((v) => Number(v)).find((v) => Number.isFinite(v) && v > 0)
+      : null;
+    const base = Number.isFinite(firstPositiveFlow) ? firstPositiveFlow : firstEquity;
+    if (Number.isFinite(base) && Math.abs(base) > 1e-9) return Math.abs(base);
+    if (Number.isFinite(firstEquity) && Math.abs(firstEquity) > 1e-9) return Math.abs(firstEquity);
+    return 1;
   }
 
-  function buildDrawdownSeries(values, flowValues) {
-    const indexSeries = buildCashFlowAdjustedIndex(values, flowValues);
-    if (!indexSeries.length) return [];
+  function buildDrawdownSeries(equityValues, flowValues, pnlValues = null) {
+    const pnlSeries = Array.isArray(pnlValues) ? pnlValues : [];
+    if (!pnlSeries.length) return [];
+    const firstPnl = pnlSeries.map((v) => Number(v)).find((v) => Number.isFinite(v));
+    if (!Number.isFinite(firstPnl)) return [];
+    const baseEquity = resolveDrawdownBaseEquity(equityValues, flowValues);
+    const strategyEquitySeries = pnlSeries.map((rawPnl) => {
+      const p = Number(rawPnl);
+      if (!Number.isFinite(p)) return null;
+      return baseEquity + (p - firstPnl);
+    });
+
     const out = [];
     let peak = null;
-    indexSeries.forEach((raw) => {
+    strategyEquitySeries.forEach((raw) => {
       const n = Number(raw);
       if (!Number.isFinite(n)) {
         out.push(null);
@@ -6909,7 +6889,7 @@
         out.push(0);
         return;
       }
-      out.push(n / peak - 1);
+      out.push(Math.max(-0.9999, n / peak - 1));
     });
     return out;
   }
@@ -6920,7 +6900,7 @@
       const color = "#fb7185";
       return {
         ...ds,
-        data: buildDrawdownSeries(ds?.data || [], ds?.flowData || []),
+        data: buildDrawdownSeries(ds?.data || [], ds?.flowData || [], ds?.pnlData || []),
         borderColor: color,
         backgroundColor: "rgba(251, 113, 133, 0.22)",
         fill: { target: "origin" },
@@ -10042,6 +10022,16 @@
     positionsTimelineSliderEl.disabled = !hasHistory;
 
     const liveIndex = timelineTimestamps.length - 1;
+    // During partial loads we can temporarily have only a single "now" point.
+    // If user already picked a timeline point, keep it pinned instead of snapping back to Live.
+    if (isTimelineActive() && !hasHistory) {
+      timelineSelectedIndex = liveIndex;
+      positionsTimelineSliderEl.value = String(liveIndex);
+      positionsTimelineStampEl.textContent = fmtDateTime(timelineAsOfMs);
+      positionsTimelineLiveBtnEl.disabled = false;
+      return;
+    }
+
     if (!isTimelineActive()) {
       timelineSelectedIndex = liveIndex;
       positionsTimelineSliderEl.value = String(liveIndex);
@@ -10059,10 +10049,14 @@
         nearestIdx = idx;
       }
     });
+    if (timelineUserPinned && nearestIdx === liveIndex && hasHistory) {
+      nearestIdx = Math.max(0, liveIndex - 1);
+    }
+
     timelineSelectedIndex = nearestIdx;
     positionsTimelineSliderEl.value = String(nearestIdx);
     const asOf = timelineTimestamps[nearestIdx];
-    timelineAsOfMs = nearestIdx === liveIndex ? null : asOf;
+    timelineAsOfMs = nearestIdx === liveIndex && !timelineUserPinned ? null : asOf;
     positionsTimelineStampEl.textContent = timelineAsOfMs ? fmtDateTime(asOf) : "Live";
     positionsTimelineLiveBtnEl.disabled = !timelineAsOfMs;
   }
@@ -10079,20 +10073,24 @@
 
     if (safeIdx >= liveIndex) {
       timelineAsOfMs = null;
+      timelineUserPinned = false;
       timelinePriceByCoin.clear();
       if (positionsTimelineStampEl) positionsTimelineStampEl.textContent = "Live";
       if (positionsTimelineLiveBtnEl) positionsTimelineLiveBtnEl.disabled = true;
       renderPositions(currentAssetPositions, { preserveBase: true });
+      refreshPortfolioTimelineFade();
       return;
     }
 
     timelineAsOfMs = Number(timelineTimestamps[safeIdx]);
+    timelineUserPinned = Number.isFinite(timelineAsOfMs);
     if (positionsTimelineStampEl) {
       positionsTimelineStampEl.textContent = Number.isFinite(timelineAsOfMs) ? fmtDateTime(timelineAsOfMs) : "Live";
     }
     if (positionsTimelineLiveBtnEl) positionsTimelineLiveBtnEl.disabled = false;
     queueTimelinePriceRefresh();
     renderPositions(currentAssetPositions, { preserveBase: true });
+    refreshPortfolioTimelineFade();
   }
 
   function getTimelinePriceForCoin(coin) {
@@ -12339,6 +12337,7 @@
     timelineAsOfMs = null;
     timelineTimestamps = [];
     timelineSelectedIndex = -1;
+    timelineUserPinned = false;
     timelinePriceByCoin.clear();
     timelineCoinPriceCache.clear();
     timelinePriceRequestId += 1;
@@ -12628,15 +12627,61 @@
     return raw;
   }
 
+  function normalizeHistoryPairs(history) {
+    if (!Array.isArray(history)) return [];
+    return history
+      .map((row) => {
+        const t = Number(Array.isArray(row) ? row[0] : NaN);
+        const v = Number(Array.isArray(row) ? row[1] : NaN);
+        if (!Number.isFinite(t) || !Number.isFinite(v)) return null;
+        return [t, v];
+      })
+      .filter(Boolean)
+      .sort((a, b) => a[0] - b[0]);
+  }
+
+  function interpolateHistoryValue(historyPairs, targetTime) {
+    if (!Array.isArray(historyPairs) || !historyPairs.length) return null;
+    const t = Number(targetTime);
+    if (!Number.isFinite(t)) return null;
+    if (t <= historyPairs[0][0]) return historyPairs[0][1];
+    const last = historyPairs[historyPairs.length - 1];
+    if (t >= last[0]) return last[1];
+
+    let lo = 0;
+    let hi = historyPairs.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      const midT = historyPairs[mid][0];
+      if (midT === t) return historyPairs[mid][1];
+      if (midT < t) lo = mid + 1;
+      else hi = mid - 1;
+    }
+    const prev = historyPairs[Math.max(0, hi)];
+    const next = historyPairs[Math.min(historyPairs.length - 1, lo)];
+    if (!prev || !next) return null;
+    if (next[0] === prev[0]) return prev[1];
+    const w = (t - prev[0]) / (next[0] - prev[0]);
+    return prev[1] + (next[1] - prev[1]) * Math.max(0, Math.min(1, w));
+  }
+
   function buildViewFromSection(section) {
     if (!section) return null;
-    const equityHist = section.accountValueHistory || [];
-    const pnlHist = section.pnlHistory || [];
+    const equityHist = normalizeHistoryPairs(section.accountValueHistory || []);
+    const pnlHist = normalizeHistoryPairs(section.pnlHistory || []);
     if (!equityHist.length || !pnlHist.length) return null;
 
-    const times = equityHist.map(([t]) => new Date(Number(t)));
-    const equity = equityHist.map(([, v]) => Number(v ?? 0));
-    const pnl = pnlHist.map(([, v]) => Number(v ?? 0));
+    const times = [];
+    const equity = [];
+    const pnl = [];
+    equityHist.forEach(([t, eq]) => {
+      const pnlValue = interpolateHistoryValue(pnlHist, t);
+      if (!Number.isFinite(eq) || !Number.isFinite(pnlValue)) return;
+      times.push(new Date(t));
+      equity.push(eq);
+      pnl.push(pnlValue);
+    });
+    if (equity.length < 2 || pnl.length < 2 || times.length < 2) return null;
 
     const rawDeposits = equity.map((eq, i) => (eq - (pnl[i] ?? 0)));
 
@@ -12746,6 +12791,40 @@
       if (!(d instanceof Date) || isNaN(d.getTime())) return "";
       if (showTimeOnly) return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
       return d.toLocaleDateString();
+    });
+  }
+
+  function getTimelineFutureStartIndex(times) {
+    if (!Array.isArray(times) || !times.length || !isTimelineActive()) return null;
+    const asOf = Number(timelineAsOfMs);
+    if (!Number.isFinite(asOf)) return null;
+    for (let i = 0; i < times.length; i += 1) {
+      const ts = times[i] instanceof Date ? times[i].getTime() : normalizeTimestamp(times[i]);
+      if (Number.isFinite(ts) && ts > asOf) return i;
+    }
+    return null;
+  }
+
+  function applyTimelineFutureFade(chart, times = null) {
+    if (!chart) return;
+    if (Array.isArray(times)) {
+      chart.$timelineTimes = times.slice();
+    }
+    const sourceTimes = Array.isArray(chart.$timelineTimes) ? chart.$timelineTimes : [];
+    const futureStartIndex = getTimelineFutureStartIndex(sourceTimes);
+    if (!chart.options.plugins) chart.options.plugins = {};
+    chart.options.plugins.timelineFutureFade = {
+      enabled: Number.isInteger(futureStartIndex) && futureStartIndex >= 0,
+      futureStartIndex,
+    };
+  }
+
+  function refreshPortfolioTimelineFade() {
+    const { equity: equityChart, pnl: pnlChart, deposits: depositsChart } = portfolioCharts;
+    [equityChart, pnlChart, depositsChart].forEach((chart) => {
+      if (!chart) return;
+      applyTimelineFutureFade(chart);
+      chart.update("none");
     });
   }
 
@@ -13258,6 +13337,10 @@
         weightedEquity.flowData = Array.isArray(weightedFlows?.data)
           ? weightedFlows.data.slice(0, labels.length)
           : [];
+        const weightedPnl = buildWeightedSeries(views, labels, "pnl");
+        weightedEquity.pnlData = Array.isArray(weightedPnl?.data)
+          ? weightedPnl.data.slice(0, labels.length)
+          : [];
         datasets.push(weightedEquity);
       }
     }
@@ -13266,10 +13349,12 @@
       const color = singleWallet ? singleColor : getWalletColor(wallet);
       const equityValues = Array.isArray(view?.equity) ? view.equity : [];
       const flowValues = Array.isArray(view?.rawDeposits) ? view.rawDeposits : [];
+      const pnlValues = Array.isArray(view?.pnl) ? view.pnl : [];
       datasets.push({
         label: formatWalletLabel(wallet),
         data: equityValues.slice(0, labels.length),
         flowData: flowValues.slice(0, labels.length),
+        pnlData: pnlValues.slice(0, labels.length),
         borderColor: color,
         backgroundColor: color + "2a",
         pointRadius: 0,
@@ -14543,7 +14628,7 @@
     const baseDenom = baseEquity ? Math.abs(baseEquity) : null;
     const returnPct = baseDenom ? totalPnl / baseDenom : null;
 
-    const drawdownSeries = buildDrawdownSeries(equity, rawDeposits);
+    const drawdownSeries = buildDrawdownSeries(equity, rawDeposits, pnl);
     const minDrawdown = drawdownSeries.reduce((min, v) => {
       const n = Number(v);
       if (!Number.isFinite(n)) return min;
@@ -15303,6 +15388,32 @@
       },
     };
 
+    const timelineFutureFadePlugin = {
+      id: "timelineFutureFade",
+      afterDatasetsDraw(chart) {
+        const cfg = chart?.options?.plugins?.timelineFutureFade;
+        if (!cfg?.enabled) return;
+        const idx = Number(cfg.futureStartIndex);
+        if (!Number.isInteger(idx) || idx < 0) return;
+        const xScale = chart?.scales?.x;
+        const area = chart?.chartArea;
+        if (!xScale || !area) return;
+        let x = xScale.getPixelForValue(idx);
+        if (!Number.isFinite(x)) return;
+        x = Math.max(area.left, Math.min(area.right, x));
+        if (x >= area.right) return;
+
+        const fadeColor = document.body.classList.contains("light")
+          ? "rgba(148, 163, 184, 0.16)"
+          : "rgba(2, 6, 23, 0.34)";
+        const c = chart.ctx;
+        c.save();
+        c.fillStyle = fadeColor;
+        c.fillRect(x, area.top, area.right - x, area.bottom - area.top);
+        c.restore();
+      },
+    };
+
     return new Chart(ctx, {
       type: "line",
       data: {
@@ -15316,6 +15427,7 @@
         plugins: {
           legend: { display: datasets.length > 1, labels: { color: getChartTextColor() } },
           zeroBaseline: { enabled: false, color: "rgba(148, 163, 184, 0.7)", dash: [5, 4], lineWidth: 1 },
+          timelineFutureFade: { enabled: false, futureStartIndex: null },
           tooltip: {
             backgroundColor: "rgba(0, 0, 0, 0.7)",
             borderColor: "rgba(148,163,184,0.5)",
@@ -15355,7 +15467,7 @@
           },
         },
       },
-      plugins: [hoverLinePlugin, zeroBaselinePlugin],
+      plugins: [hoverLinePlugin, zeroBaselinePlugin, timelineFutureFadePlugin],
     });
   }
 
@@ -15396,6 +15508,7 @@
       labels,
       equityDatasets
     );
+    applyTimelineFutureFade(portfolioCharts.equity, views[0].view.times);
     applyEquityChartMode(portfolioCharts.equity, equityDatasets);
 
     portfolioCharts.pnl = createLineChart(
@@ -15403,6 +15516,7 @@
       labels,
       pnlDatasets
     );
+    applyTimelineFutureFade(portfolioCharts.pnl, views[0].view.times);
     applyPnlTooltipStyling(portfolioCharts.pnl);
 
     portfolioCharts.deposits = createLineChart(
@@ -15410,6 +15524,7 @@
       labels,
       depositsDatasets
     );
+    applyTimelineFutureFade(portfolioCharts.deposits, views[0].view.times);
     applyDepositsTooltipStyling(portfolioCharts.deposits);
 
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
@@ -15456,10 +15571,12 @@
     }
 
     equityChart.data.labels = labels;
+    applyTimelineFutureFade(equityChart, views[0].view.times);
     applyEquityChartMode(equityChart, equityDatasets);
 
     pnlChart.data.labels = labels;
     pnlChart.data.datasets = pnlDatasets;
+    applyTimelineFutureFade(pnlChart, views[0].view.times);
     if (pnlChart.options.plugins?.legend) {
       pnlChart.options.plugins.legend.display = pnlDatasets.length > 1;
     }
@@ -15468,6 +15585,7 @@
 
     depositsChart.data.labels = labels;
     depositsChart.data.datasets = depositsDatasets;
+    applyTimelineFutureFade(depositsChart, views[0].view.times);
     if (depositsChart.options.plugins?.legend) {
       depositsChart.options.plugins.legend.display = depositsDatasets.length > 1;
     }
