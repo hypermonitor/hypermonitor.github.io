@@ -1,1 +1,7 @@
 .DS_Store
+workers/wallet-stars/.wrangler/cache/wrangler-account.json
+workers/wallet-stars/migrations/0001_init.sql
+workers/wallet-stars/README.md
+workers/wallet-stars/src/index.js
+workers/wallet-stars/wrangler.toml
+wallet-stars-test.html
