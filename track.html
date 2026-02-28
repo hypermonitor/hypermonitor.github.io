@@ -1847,6 +1847,56 @@
       gap: 0.35rem;
     }
 
+    .pnl-card-title {
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .pnl-card-heading {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .pnl-view-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 2px;
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      background: rgba(10, 10, 12, 0.45);
+      height: 25px;
+    }
+
+    .pnl-view-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+      line-height: 1;
+      border-radius: 999px;
+      padding: 0 0.62rem;
+      cursor: pointer;
+      height: 100%;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .pnl-view-btn svg {
+      width: 12px;
+      height: 12px;
+      display: block;
+    }
+
+    .pnl-view-btn.active {
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .pnl-view-btn:not(.active):hover { color: #f8fafc; }
+
     .deposits-card-title {
       justify-content: space-between;
       gap: 0.5rem;
@@ -1884,6 +1934,12 @@
       transition: background 0.15s ease, color 0.15s ease;
     }
 
+    .third-panel-btn svg {
+      width: 12px;
+      height: 12px;
+      display: block;
+    }
+
     .third-panel-btn.active {
       color: #f8fafc;
       background: rgba(255, 255, 255, 0.08);
@@ -1913,6 +1969,159 @@
       width: 100% !important;
       height: 100% !important;
     }
+
+    .pnl-heatmap-wrap {
+      height: 170px;
+      min-height: 170px;
+      max-height: 170px;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: rgba(15, 23, 42, 0.08);
+      padding: 0.35rem 0.45rem 0.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .pnl-heatmap-toolbar {
+      display: grid;
+      grid-template-columns: 22px 1fr 22px;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .pnl-heatmap-nav {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .pnl-heatmap-nav:hover:not(:disabled) {
+      border-color: rgba(255,255,255,0.22);
+      color: #f8fafc;
+    }
+
+    .pnl-heatmap-nav:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .pnl-heatmap-title {
+      text-align: center;
+      font-size: 0.66rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pnl-heatmap-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: repeat(53, minmax(0, 1fr));
+      grid-template-rows: repeat(7, minmax(0, 1fr));
+      gap: 2px;
+    }
+
+    .pnl-heatmap-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 4px;
+      align-items: stretch;
+    }
+
+    .pnl-heatmap-months {
+      display: grid;
+      grid-template-columns: repeat(53, minmax(0, 1fr));
+      gap: 2px;
+      min-height: 12px;
+      padding-left: 22px;
+    }
+
+    .pnl-heatmap-month {
+      font-size: 0.55rem;
+      color: var(--muted);
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      overflow: visible;
+    }
+
+    .pnl-heatmap-weekdays {
+      display: grid;
+      grid-template-rows: repeat(7, minmax(0, 1fr));
+      gap: 2px;
+      min-height: 0;
+    }
+
+    .pnl-heatmap-weekday {
+      font-size: 0.52rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      user-select: none;
+    }
+
+    .pnl-heatmap-cell {
+      border-radius: 3px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(148, 163, 184, 0.08);
+      min-height: 0;
+      cursor: pointer;
+    }
+
+    .pnl-heatmap-cell.empty {
+      border-color: transparent;
+      background: transparent;
+      cursor: default;
+    }
+
+    .pnl-heatmap-hover {
+      font-size: 0.64rem;
+      color: var(--muted);
+      min-height: 1em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pnl-heatmap-hover .value {
+      font-weight: 600;
+    }
+
+    .pnl-heatmap-hover .value.positive { color: var(--accent); }
+    .pnl-heatmap-hover .value.negative { color: var(--danger); }
+    .pnl-heatmap-hover .value.neutral { color: var(--muted); }
+
+    .pnl-heatmap-legend {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .pnl-heatmap-legend .neg { color: #f87171; }
+    .pnl-heatmap-legend .neutral { color: #94a3b8; }
+    .pnl-heatmap-legend .pos { color: #4ade80; }
 
     .transfers-wrap {
       flex: 1 1 auto;
@@ -2223,6 +2432,44 @@
       background: #ffffff;
       border: 1px solid #e5e7eb;
     }
+
+    body.light .pnl-view-toggle {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .pnl-view-btn {
+      color: #475569;
+    }
+
+    body.light .pnl-view-btn.active {
+      color: #0f172a;
+      background: #f8fafc;
+    }
+
+    body.light .pnl-heatmap-wrap {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .pnl-heatmap-nav {
+      background: #ffffff;
+      border-color: #d1d5db;
+      color: #64748b;
+    }
+
+    body.light .pnl-heatmap-nav:hover:not(:disabled) {
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+
+    body.light .pnl-heatmap-title { color: #64748b; }
+    body.light .pnl-heatmap-month { color: #64748b; }
+    body.light .pnl-heatmap-weekday { color: #64748b; }
+    body.light .pnl-heatmap-cell { border-color: #d1d5db; background: #f8fafc; }
+    body.light .pnl-heatmap-legend { color: #64748b; }
+    body.light .pnl-heatmap-hover { color: #475569; }
+    body.light .pnl-heatmap-hover .value.neutral { color: #475569; }
 
     body.light .third-panel-toggle {
       background: #ffffff;
@@ -3926,9 +4173,38 @@
         </div>
 
         <div class="chart-card">
-          <h3>Profit & Loss <span class="spark-label" id="pnlTitleValue">[-]</span></h3>
-          <div class="chart-canvas-wrap">
+          <h3 class="pnl-card-title">
+            <span class="pnl-card-heading">Profit & Loss <span class="spark-label" id="pnlTitleValue">[-]</span></span>
+            <span class="pnl-view-toggle" role="tablist" aria-label="PnL view mode">
+              <button class="pnl-view-btn active" id="pnlLineViewBtn" type="button" data-pnl-view="line" role="tab" aria-selected="true" aria-label="Graph view" title="Graph view">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M5 15l4-4 3 2 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="pnl-view-btn" id="pnlHeatmapViewBtn" type="button" data-pnl-view="heatmap" role="tab" aria-selected="false" aria-label="Calendar view" title="Calendar view">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M8 3v4M16 3v4M4 9h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </span>
+          </h3>
+          <div class="chart-canvas-wrap" id="pnlChartWrap">
             <canvas id="pnlChart"></canvas>
+          </div>
+          <div class="pnl-heatmap-wrap is-hidden" id="pnlHeatmapWrap">
+            <div class="pnl-heatmap-toolbar">
+              <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous year">‹</button>
+              <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Yearly daily PnL</span>
+              <button class="pnl-heatmap-nav" id="pnlHeatmapNextBtn" type="button" aria-label="Next year">›</button>
+            </div>
+            <div class="pnl-heatmap-months" id="pnlHeatmapMonths"></div>
+            <div class="pnl-heatmap-body">
+              <div class="pnl-heatmap-weekdays" id="pnlHeatmapWeekdays"></div>
+              <div class="pnl-heatmap-grid" id="pnlHeatmapGrid"></div>
+            </div>
+            <div class="pnl-heatmap-hover" id="pnlHeatmapHover"></div>
           </div>
         </div>
 
@@ -3936,8 +4212,20 @@
           <h3 class="deposits-card-title">
             <span class="deposits-card-heading">Deposits & Withdrawals <span class="spark-label" id="depositsTitleValue">[-]</span></span>
             <span class="third-panel-toggle" role="tablist" aria-label="Third panel mode">
-              <button class="third-panel-btn active" id="thirdPanelChartBtn" type="button" data-panel-mode="chart" role="tab" aria-selected="true">Graph</button>
-              <button class="third-panel-btn" id="thirdPanelTransfersBtn" type="button" data-panel-mode="transfers" role="tab" aria-selected="false">Log</button>
+              <button class="third-panel-btn active" id="thirdPanelChartBtn" type="button" data-panel-mode="chart" role="tab" aria-selected="true" aria-label="Graph view" title="Graph view">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M5 15l4-4 3 2 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="third-panel-btn" id="thirdPanelTransfersBtn" type="button" data-panel-mode="transfers" role="tab" aria-selected="false" aria-label="Log view" title="Log view">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M7 6h10M7 12h10M7 18h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="5" cy="6" r="1" fill="currentColor"/>
+                  <circle cx="5" cy="12" r="1" fill="currentColor"/>
+                  <circle cx="5" cy="18" r="1" fill="currentColor"/>
+                </svg>
+              </button>
             </span>
           </h3>
           <div class="chart-canvas-wrap" id="depositsChartWrap">
@@ -4552,6 +4840,16 @@
 
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
+  const pnlChartWrapEl = document.getElementById("pnlChartWrap");
+  const pnlHeatmapWrapEl = document.getElementById("pnlHeatmapWrap");
+  const pnlHeatmapMonthsEl = document.getElementById("pnlHeatmapMonths");
+  const pnlHeatmapWeekdaysEl = document.getElementById("pnlHeatmapWeekdays");
+  const pnlHeatmapGridEl = document.getElementById("pnlHeatmapGrid");
+  const pnlHeatmapTitleEl = document.getElementById("pnlHeatmapTitle");
+  const pnlHeatmapHoverEl = document.getElementById("pnlHeatmapHover");
+  const pnlHeatmapPrevBtnEl = document.getElementById("pnlHeatmapPrevBtn");
+  const pnlHeatmapNextBtnEl = document.getElementById("pnlHeatmapNextBtn");
+  const pnlViewButtons = document.querySelectorAll(".pnl-view-btn");
   const depositsCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("depositsChart"));
   const depositsChartWrapEl = document.getElementById("depositsChartWrap");
   const transfersListWrapEl = document.getElementById("transfersListWrap");
@@ -5316,6 +5614,10 @@
 
   const portfolioDataByWallet = new Map();
   let currentRangeKey = "allTime";
+  let pnlViewMode = "line";
+  let pnlHeatmapMonths = [];
+  let pnlHeatmapMonthIndex = 0;
+  let pnlHeatmapRows = [];
   let thirdPanelMode = "chart";
   const transferHistoryByWallet = new Map();
   let transfersRequestToken = 0;
@@ -5783,7 +6085,7 @@
         renderTransfersList([], "No transfer events in this range.");
         return;
       }
-      renderTransfersList(allRows, `${allRows.length} most recent events`);
+      renderTransfersList(allRows, `${allRows.length} events`);
     } catch (err) {
       console.error("Transfers fetch failed", err);
       if (requestToken !== transfersRequestToken) return;
@@ -7002,10 +7304,19 @@
 
     ctx.strokeStyle = pnlValue !== null && pnlValue < 0 ? "rgba(251, 113, 133, 0.12)" : "rgba(151, 253, 229, 0.12)";
     ctx.lineWidth = 1;
+    const waveScaleX = canvas.width / 1080;
+    const waveScaleY = canvas.height / 1350;
     for (let i = 0; i < 14; i += 1) {
       ctx.beginPath();
-      ctx.moveTo(420, 220 + i * 40);
-      ctx.bezierCurveTo(620, 140 + i * 42, 840, 180 + i * 38, 1040, 120 + i * 34);
+      ctx.moveTo(420 * waveScaleX, (220 + i * 40) * waveScaleY);
+      ctx.bezierCurveTo(
+        620 * waveScaleX,
+        (140 + i * 42) * waveScaleY,
+        840 * waveScaleX,
+        (180 + i * 38) * waveScaleY,
+        1040 * waveScaleX,
+        (120 + i * 34) * waveScaleY
+      );
       ctx.stroke();
     }
 
@@ -11591,6 +11902,14 @@
     setPortfolioLoadingState(true, "Loading performance graphs…");
     clearPerformanceMetrics();
     renderTransfersList([], "Transfers will appear here.");
+    pnlHeatmapRows = [];
+    pnlHeatmapMonths = [];
+    pnlHeatmapMonthIndex = 0;
+    if (pnlHeatmapGridEl) pnlHeatmapGridEl.innerHTML = "";
+    if (pnlHeatmapTitleEl) pnlHeatmapTitleEl.textContent = "Yearly daily PnL";
+    if (pnlHeatmapHoverEl) pnlHeatmapHoverEl.textContent = "";
+    if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
+    if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
     if (portfolioCharts.equity) {
       portfolioCharts.equity.destroy();
       portfolioCharts.pnl.destroy();
@@ -11752,6 +12071,269 @@
 
   function getChartTextColor() {
     return document.body.classList.contains("light") ? "#0f172a" : "#e5e7eb";
+  }
+
+  function toLocalDayStartMs(value) {
+    const ts = value instanceof Date ? value.getTime() : normalizeTimestamp(value);
+    if (!Number.isFinite(ts)) return null;
+    const d = new Date(ts);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  }
+
+  function addLocalDays(dayMs, days = 1) {
+    const d = new Date(Number(dayMs));
+    if (Number.isNaN(d.getTime())) return null;
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() + Number(days || 0)).getTime();
+  }
+
+  function getYearKeyFromDayMs(dayMs) {
+    const d = new Date(dayMs);
+    if (Number.isNaN(d.getTime())) return "";
+    return String(d.getFullYear());
+  }
+
+  function formatYearKey(yearKey) {
+    const year = Number(yearKey);
+    if (!Number.isFinite(year)) return "Daily PnL Heatmap";
+    return `${year}`;
+  }
+
+  function interpolateRgb(a, b, t) {
+    const clamped = Math.max(0, Math.min(1, t));
+    const r = Math.round(a.r + (b.r - a.r) * clamped);
+    const g = Math.round(a.g + (b.g - a.g) * clamped);
+    const b2 = Math.round(a.b + (b.b - a.b) * clamped);
+    return `rgb(${r}, ${g}, ${b2})`;
+  }
+
+  function getHeatmapColor(value, maxAbs) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || !Number.isFinite(maxAbs) || maxAbs <= 0) {
+      return "rgb(148, 163, 184)";
+    }
+    const neutral = { r: 148, g: 163, b: 184 };
+    const negLow = { r: 248, g: 113, b: 113 };
+    const negHigh = { r: 220, g: 38, b: 38 };
+    const posLow = { r: 74, g: 222, b: 128 };
+    const posHigh = { r: 22, g: 163, b: 74 };
+    const clamped = Math.max(-maxAbs, Math.min(maxAbs, n));
+    if (clamped === 0) return interpolateRgb(neutral, neutral, 0);
+    const strength = Math.min(1, Math.abs(clamped) / maxAbs);
+    if (clamped > 0) return interpolateRgb(posLow, posHigh, strength);
+    return interpolateRgb(negLow, negHigh, strength);
+  }
+
+  function setPnlHeatmapHoverValue(dayMs, value) {
+    if (!pnlHeatmapHoverEl) return;
+    const dateText = fmtDateOnly(dayMs);
+    const amountText = formatSignedDollarWithPlus(value, 2);
+    let tone = "neutral";
+    if (Number(value) > 0) tone = "positive";
+    if (Number(value) < 0) tone = "negative";
+    pnlHeatmapHoverEl.innerHTML = `<span class="date">${dateText}: </span><span class="value ${tone}">${amountText}</span>`;
+  }
+
+  function buildPnlDailyDeltas(view) {
+    const times = Array.isArray(view?.times) ? view.times : [];
+    const pnl = Array.isArray(view?.pnl) ? view.pnl : [];
+    if (!times.length || !pnl.length || times.length !== pnl.length) return [];
+
+    const dayToPnl = new Map();
+    for (let i = 0; i < times.length; i += 1) {
+      const dayMs = toLocalDayStartMs(times[i]);
+      const pnlVal = Number(pnl[i]);
+      if (!Number.isFinite(dayMs) || !Number.isFinite(pnlVal)) continue;
+      dayToPnl.set(dayMs, pnlVal);
+    }
+
+    const days = Array.from(dayToPnl.keys()).sort((a, b) => a - b);
+    if (!days.length) return [];
+
+    const startDay = days[0];
+    const rows = [];
+    const startPnl = Number(dayToPnl.get(startDay));
+    if (!Number.isFinite(startPnl)) return [];
+    // Initial trading day: no previous day in-range, so neutral delta.
+    rows.push({ dayMs: startDay, delta: 0 });
+
+    for (let i = 1; i < days.length; i += 1) {
+      const prevDay = Number(days[i - 1]);
+      const currDay = Number(days[i]);
+      const prevPnl = Number(dayToPnl.get(prevDay));
+      const currPnl = Number(dayToPnl.get(currDay));
+      if (!Number.isFinite(prevDay) || !Number.isFinite(currDay)) continue;
+      if (!Number.isFinite(prevPnl) || !Number.isFinite(currPnl)) continue;
+      let gapDays = 0;
+      let cursor = prevDay;
+      while (true) {
+        const next = addLocalDays(cursor, 1);
+        if (!Number.isFinite(next) || next > currDay) break;
+        gapDays += 1;
+        cursor = next;
+      }
+      gapDays = Math.max(1, gapDays);
+      const perDayDelta = (currPnl - prevPnl) / gapDays;
+      let dayCursor = prevDay;
+      for (let step = 1; step <= gapDays; step += 1) {
+        dayCursor = addLocalDays(dayCursor, 1);
+        if (!Number.isFinite(dayCursor)) break;
+        rows.push({ dayMs: dayCursor, delta: perDayDelta });
+      }
+    }
+    return rows;
+  }
+
+  function setPnlViewMode(mode) {
+    const next = mode === "heatmap" ? "heatmap" : "line";
+    pnlViewMode = next;
+    pnlViewButtons.forEach((btn) => {
+      const isActive = btn.dataset.pnlView === next;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", String(isActive));
+    });
+    if (pnlChartWrapEl) pnlChartWrapEl.classList.toggle("is-hidden", next !== "line");
+    if (pnlHeatmapWrapEl) pnlHeatmapWrapEl.classList.toggle("is-hidden", next !== "heatmap");
+    if (next === "heatmap") {
+      renderPnlHeatmap(currentRangeKey);
+    }
+  }
+
+  function renderPnlHeatmap(rangeKey = currentRangeKey) {
+    if (!pnlHeatmapGridEl || !pnlHeatmapTitleEl) return;
+    if (pnlHeatmapWeekdaysEl && !pnlHeatmapWeekdaysEl.childElementCount) {
+      const weekdayLabels = ["S", "M", "T", "W", "T", "F", "S"];
+      const fragment = document.createDocumentFragment();
+      weekdayLabels.forEach((label) => {
+        const el = document.createElement("div");
+        el.className = "pnl-heatmap-weekday";
+        el.textContent = label;
+        fragment.appendChild(el);
+      });
+      pnlHeatmapWeekdaysEl.innerHTML = "";
+      pnlHeatmapWeekdaysEl.appendChild(fragment);
+    }
+    const source = getMetricsSource(rangeKey);
+    if (!source?.view) {
+      pnlHeatmapGridEl.innerHTML = "";
+      if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.innerHTML = "";
+      pnlHeatmapTitleEl.textContent = "No PnL data";
+      if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
+      if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
+      return;
+    }
+
+    pnlHeatmapRows = buildPnlDailyDeltas(source.view);
+    if (!pnlHeatmapRows.length) {
+      pnlHeatmapGridEl.innerHTML = "";
+      if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.innerHTML = "";
+      pnlHeatmapTitleEl.textContent = "Not enough daily data";
+      if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
+      if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
+      return;
+    }
+
+    const yearSet = new Set(pnlHeatmapRows.map((row) => getYearKeyFromDayMs(row.dayMs)));
+    pnlHeatmapMonths = Array.from(yearSet).filter(Boolean).sort((a, b) => Number(a) - Number(b));
+    if (!pnlHeatmapMonths.length) {
+      pnlHeatmapGridEl.innerHTML = "";
+      if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.innerHTML = "";
+      pnlHeatmapTitleEl.textContent = "No year data";
+      if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
+      if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
+      return;
+    }
+
+    if (!Number.isFinite(pnlHeatmapMonthIndex) || pnlHeatmapMonthIndex < 0 || pnlHeatmapMonthIndex >= pnlHeatmapMonths.length) {
+      pnlHeatmapMonthIndex = pnlHeatmapMonths.length - 1;
+    }
+
+    const yearKey = pnlHeatmapMonths[pnlHeatmapMonthIndex];
+    const year = Number(yearKey);
+    const yearStart = new Date(year, 0, 1);
+    const yearRows = pnlHeatmapRows.filter((row) => getYearKeyFromDayMs(row.dayMs) === yearKey);
+    const firstDataDay = yearRows.reduce((min, row) => {
+      const t = Number(row?.dayMs);
+      if (!Number.isFinite(t)) return min;
+      return min === null || t < min ? t : min;
+    }, null);
+    const lastDataDay = yearRows.reduce((max, row) => {
+      const t = Number(row?.dayMs);
+      if (!Number.isFinite(t)) return max;
+      return max === null || t > max ? t : max;
+    }, null);
+    const todayStartMs = toLocalDayStartMs(Date.now());
+    const maxAbs = yearRows.reduce((max, row) => Math.max(max, Math.abs(Number(row.delta) || 0)), 0);
+    const byDay = new Map(yearRows.map((row) => [row.dayMs, row.delta]));
+    const monthByWeek = new Map();
+    for (let m = 0; m < 12; m += 1) {
+      const monthStart = new Date(year, m, 1).getTime();
+      const dayOfYear = Math.floor((monthStart - yearStart.getTime()) / 86400000);
+      let weekIdx = Math.floor((dayOfYear + yearStart.getDay()) / 7);
+      if (weekIdx < 0) weekIdx = 0;
+      if (weekIdx > 52) weekIdx = 52;
+      if (!monthByWeek.has(weekIdx)) {
+        const label = new Date(year, m, 1).toLocaleDateString(undefined, { month: "short" });
+        monthByWeek.set(weekIdx, label);
+      }
+    }
+
+    if (pnlHeatmapMonthsEl) {
+      const monthFrag = document.createDocumentFragment();
+      for (let week = 0; week < 53; week += 1) {
+        const el = document.createElement("div");
+        el.className = "pnl-heatmap-month";
+        el.textContent = monthByWeek.get(week) || "";
+        monthFrag.appendChild(el);
+      }
+      pnlHeatmapMonthsEl.innerHTML = "";
+      pnlHeatmapMonthsEl.appendChild(monthFrag);
+    }
+
+    const cells = Array.from({ length: 53 * 7 }, () => null);
+    let dayMs = yearStart.getTime();
+    const yearEndMs = new Date(year + 1, 0, 1).getTime();
+    while (Number.isFinite(dayMs) && dayMs < yearEndMs) {
+      const beforeStart = Number.isFinite(firstDataDay) && dayMs < firstDataDay;
+      const inFuture = Number.isFinite(todayStartMs) && dayMs > todayStartMs;
+      const afterDataEnd = Number.isFinite(lastDataDay) && dayMs > lastDataDay;
+      if (!beforeStart && !inFuture && !afterDataEnd) {
+        const weekday = new Date(dayMs).getDay(); // 0..6
+        const dayOfYear = Math.floor((dayMs - yearStart.getTime()) / 86400000);
+        let weekIdx = Math.floor((dayOfYear + yearStart.getDay()) / 7);
+        if (weekIdx > 52) weekIdx = 52;
+        const index = weekday * 53 + weekIdx;
+        const val = byDay.has(dayMs) ? byDay.get(dayMs) : 0;
+        cells[index] = { dayMs, delta: val };
+      }
+      dayMs = addLocalDays(dayMs, 1);
+    }
+
+    const fragment = document.createDocumentFragment();
+    cells.forEach((entry) => {
+      const cell = document.createElement("div");
+      cell.className = "pnl-heatmap-cell";
+      if (!entry) {
+        cell.classList.add("empty");
+        fragment.appendChild(cell);
+        return;
+      }
+      const val = Number(entry.delta ?? 0);
+      cell.style.backgroundColor = getHeatmapColor(val, maxAbs);
+      cell.style.borderColor = "rgba(148, 163, 184, 0.35)";
+      const hoverText = `${fmtDateOnly(entry.dayMs)}: ${formatSignedDollarWithPlus(val, 2)}`;
+      cell.title = hoverText;
+      cell.addEventListener("mouseenter", () => {
+        setPnlHeatmapHoverValue(entry.dayMs, val);
+      });
+      fragment.appendChild(cell);
+    });
+
+    pnlHeatmapGridEl.innerHTML = "";
+    pnlHeatmapGridEl.appendChild(fragment);
+    pnlHeatmapTitleEl.textContent = `${formatYearKey(yearKey)} · Daily PnL`;
+
+    if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = pnlHeatmapMonthIndex <= 0;
+    if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = pnlHeatmapMonthIndex >= pnlHeatmapMonths.length - 1;
   }
 
   function getWalletColor(wallet) {
@@ -13893,6 +14475,7 @@
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
     updateChartTitleValues(latestLiveEquityValue);
     updatePerformanceMetrics(rangeKey);
+    renderPnlHeatmap(rangeKey);
   }
 
   function updatePortfolioCharts(rangeKey) {
@@ -13961,6 +14544,7 @@
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
     updateChartTitleValues(latestLiveEquityValue);
     updatePerformanceMetrics(rangeKey);
+    renderPnlHeatmap(rangeKey);
   }
 
   async function loadPortfolio(wallets = currentWallets) {
@@ -14631,8 +15215,36 @@
       if (thirdPanelMode === "transfers") {
         refreshTransfersPanel(currentRangeKey);
       }
+      if (pnlViewMode === "heatmap") {
+        pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
+        renderPnlHeatmap(currentRangeKey);
+      }
     });
   });
+
+  pnlViewButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.pnlView === "heatmap" ? "heatmap" : "line";
+      if (mode === "heatmap") pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
+      setPnlViewMode(mode);
+    });
+  });
+
+  if (pnlHeatmapPrevBtnEl) {
+    pnlHeatmapPrevBtnEl.addEventListener("click", () => {
+      if (pnlHeatmapMonthIndex <= 0) return;
+      pnlHeatmapMonthIndex -= 1;
+      renderPnlHeatmap(currentRangeKey);
+    });
+  }
+
+  if (pnlHeatmapNextBtnEl) {
+    pnlHeatmapNextBtnEl.addEventListener("click", () => {
+      if (pnlHeatmapMonthIndex >= pnlHeatmapMonths.length - 1) return;
+      pnlHeatmapMonthIndex += 1;
+      renderPnlHeatmap(currentRangeKey);
+    });
+  }
 
   thirdPanelModeButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
