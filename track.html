@@ -8426,11 +8426,16 @@
       const safe = symbol.replace(/\//g, "_");
       const pngOnly = new Set(["USA500", "COPPER"]);
       const localExt = pngOnly.has(upper) ? "png" : "svg";
+      const dexLower = String(dex || "").toLowerCase();
       candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(symbol)}.svg`);
       if (upper !== symbol) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
+      if (!pngOnly.has(upper) && !symbol.includes("/") && !NON_CRYPTO_PREFIXES.includes(dexLower)) {
+        // Some spot assets only exist as {symbol}_spot.svg (e.g. KNTQ, FEUSD).
+        candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(symbol)}_spot.svg`);
+        if (upper !== symbol) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}_spot.svg`);
+      }
       candidates.push(`images/coins/${encodeURIComponent(safe)}.${localExt}`);
       if (upper !== safe) candidates.push(`images/coins/${encodeURIComponent(upper)}.${localExt}`);
-      const dexLower = String(dex || "").toLowerCase();
       if (NON_CRYPTO_PREFIXES.includes(dexLower)) {
         // Generic HIP-3 ticker logo fallbacks (e.g. xyz:NVDA, xyz:MSTR, cash:SPY).
         candidates.push(`https://financialmodelingprep.com/image-stock/${encodeURIComponent(upper)}.png`);
