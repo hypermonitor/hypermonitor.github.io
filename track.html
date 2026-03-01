@@ -5623,8 +5623,15 @@
     const entry = logoCache.get(rawKey);
     if (!entry) return;
     const nextUrl = imgEl?.currentSrc || imgEl?.src || entry.urls?.[entry.idx];
+    const wasOk = entry.state === "ok" && entry.okUrl === nextUrl;
     entry.state = "ok";
     entry.okUrl = nextUrl;
+    if (!wasOk) {
+      const hasFallbackForKey = Array.from(
+        document.querySelectorAll("span.coinFallback[data-logo-key]")
+      ).some((el) => el.dataset.logoKey === rawKey);
+      if (hasFallbackForKey) scheduleLogoRefresh();
+    }
   };
 
   window.__logoErr = (rawKey, imgEl, fallbackLetter) => {
@@ -8553,9 +8560,10 @@
     const letter = (cleanName?.[0] || rawName?.[0] || "?").toUpperCase();
     const coinKey = xmlEscape(rawName || cleanName || "");
     const label = xmlEscape(cleanName || rawName || "");
+    const logoKeyAttr = xmlEscape(logoKey);
 
     if (entry.state === "bad" || !entry.urls.length) {
-      return `<span class="coinFallback coin-info-trigger" data-coin-key="${coinKey}" data-coin-label="${label}">${letter}</span>`;
+      return `<span class="coinFallback coin-info-trigger" data-logo-key="${logoKeyAttr}" data-coin-key="${coinKey}" data-coin-label="${label}">${letter}</span>`;
     }
 
     const src = (entry.state === "ok" && entry.okUrl) ? entry.okUrl : entry.urls[entry.idx || 0];
@@ -8566,6 +8574,7 @@
         class="coinIcon coin-info-trigger"
         src="${src}"
         alt="${xmlEscape(cleanName || rawName || "")}"
+        data-logo-key="${logoKeyAttr}"
         data-coin-key="${coinKey}"
         data-coin-label="${label}"
         loading="lazy"
