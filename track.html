@@ -4598,10 +4598,6 @@
         </div>
       </div>
       </div>
-      <div class="spot-performance-note is-hidden" id="spotPerformanceNote">
-        Spot charts are derived from total account value minus perps.
-      </div>
-
       <div class="chart-loading" id="portfolioLoading">Loading performance data…</div>
     </div>
     <div class="error" id="portfolioError"></div>
@@ -5627,10 +5623,8 @@
     const entry = logoCache.get(rawKey);
     if (!entry) return;
     const nextUrl = imgEl?.currentSrc || imgEl?.src || entry.urls?.[entry.idx];
-    const wasOk = entry.state === "ok" && entry.okUrl === nextUrl;
     entry.state = "ok";
     entry.okUrl = nextUrl;
-    if (!wasOk) scheduleLogoRefresh();
   };
 
   window.__logoErr = (rawKey, imgEl, fallbackLetter) => {
