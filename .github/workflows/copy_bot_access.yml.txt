@@ -15,7 +15,7 @@ jobs:
       - name: Checkout copy_trading_bot
         uses: actions/checkout@v4
         with:
-          repository: ShreehariBodas/copy_trading_bot
+          repository: hypermonitor/copy_trading_bot
           token: ${{ secrets.COPY_TRADING_BOT_PAT }}
           path: copy_trading_bot
 
