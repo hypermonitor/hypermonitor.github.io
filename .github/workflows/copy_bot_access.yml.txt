@@ -1,23 +1,23 @@
-name Access copy_trading_bot
+name: Access copy_trading_bot
 
-on
-  push
-    branches [ main ]
+on:
+  push:
+    branches: [ main ]
 
-jobs
-  access-copy-bot
-    runs-on ubuntu-latest
+jobs:
+  access-copy-bot:
+    runs-on: ubuntu-latest
 
-    steps
-      - name Checkout hypermonitor.github.io
-        uses actionscheckout@v4
+    steps:
+      - name: Checkout hypermonitor.github.io
+        uses: actions/checkout@v4
 
-      - name Checkout copy_trading_bot
-        uses actionscheckout@v4
-        with
-          repository your-usernamecopy_trading_bot
-          token ${{ secrets.COPY_TRADING_BOT_PAT }}
-          path copy_trading_bot
+      - name: Checkout copy_trading_bot
+        uses: actions/checkout@v4
+        with:
+          repository: ShreehariBodas/copy_trading_bot
+          token: ${{ secrets.COPY_TRADING_BOT_PAT }}
+          path: copy_trading_bot
 
-      - name List files in copy_trading_bot
-        run ls copy_trading_bot
+      - name: List files in copy_trading_bot
+        run: ls copy_trading_bot
