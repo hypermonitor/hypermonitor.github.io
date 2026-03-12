@@ -1594,7 +1594,7 @@
         </h2>
 
         <div class="muted" style="margin-bottom:.65rem; line-height:1.6;">
-          Live snapshot of the top wallets, provided by ASXN. Click a row to open the tracker for that wallet.
+          Live snapshot of your curated wallet leaderboard. Click a row to open the tracker for that wallet.
         </div>
 
         <div class="leaderboard-table-wrap loading" id="leaderboardPreviewWrap"
@@ -2005,7 +2005,16 @@
       const tableWrap = document.getElementById("leaderboardPreviewWrap");
       if (!tbody) return;
 
-      const LEADERBOARD_URL = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard";
+      const LEADERBOARD_URL =
+        window.HYPERMONITOR_LEADERBOARD_API_URL ||
+        (() => {
+          try {
+            return localStorage.getItem("hypermonitor-leaderboard-api-url") || "";
+          } catch (err) {
+            return "";
+          }
+        })() ||
+        "https://hypermonitor-private-leaderboard.hypermonitor.workers.dev/api/leaderboard";
       const DEST_BASE = "https://www.hypermonitor.org/track?wallet=";
       const PREVIEW_LIMIT = 10;
       const PREVIEW_WINDOW = "allTime";
@@ -2144,7 +2153,7 @@
           render(normalized);
         } catch (e) {
           console.error("Leaderboard preview failed:", e);
-          setStatus("Failed to load leaderboard preview.");
+          setStatus("Failed to load private leaderboard preview.");
         }
       };
 

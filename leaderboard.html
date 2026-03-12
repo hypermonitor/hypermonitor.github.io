@@ -306,7 +306,7 @@
           <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.8rem; height: auto; border-radius: 4px;" />
           <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
         </a>
-        <div class="tagline">Live leaderboard. Tap a row to open the wallet.</div>
+        <div class="tagline">Private leaderboard of your curated wallets. Tap a row to open the wallet.</div>
       </div>
 
       <div class="status" id="statusPill">
@@ -385,7 +385,16 @@
 
   <script>
     // ===== CONFIG =====
-    const LEADERBOARD_URL = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard";
+    const LEADERBOARD_URL =
+      window.HYPERMONITOR_LEADERBOARD_API_URL ||
+      (() => {
+        try {
+          return localStorage.getItem("hypermonitor-leaderboard-api-url") || "";
+        } catch (err) {
+          return "";
+        }
+      })() ||
+      "https://hypermonitor-private-leaderboard.hypermonitor.workers.dev/api/leaderboard";
     const DEST_BASE = "https://www.hypermonitor.org/track?wallet="; // you asked for this exact format
 
     // ===== DOM =====
@@ -600,9 +609,9 @@
             applyFiltersAndSort();
         } catch (e) {
             console.error("Leaderboard load failed:", e);
-            setStatus("err", "Failed to load leaderboard");
+            setStatus("err", "Failed to load private leaderboard");
             setLoadingState(false);
-            tbody.innerHTML = `<tr><td colspan="6" class="muted">Failed to load leaderboard. ${String(e?.message || e)}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="muted">Failed to load private leaderboard. ${String(e?.message || e)}</td></tr>`;
         }
         }
 
