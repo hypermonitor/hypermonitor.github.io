@@ -2185,7 +2185,7 @@
           const rawRows = parseRows(json);
           if (!rawRows) throw new Error("Unexpected leaderboard response.");
 
-          viewRows = normalize(rawRows);
+          viewRows = normalize(rawRows).slice(0, PREVIEW_LIMIT);
           setLoadingState(false);
           applySortAndRender();
         } catch (e) {
