@@ -306,7 +306,7 @@
           <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.8rem; height: auto; border-radius: 4px;" />
           <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
         </a>
-        <div class="tagline">Private leaderboard of your curated wallets. Tap a row to open the wallet.</div>
+        <div class="tagline">Wallet ranking fixed on January 1, 2026. Tap a row to open the wallet.</div>
       </div>
 
       <div class="status" id="statusPill">
@@ -461,6 +461,14 @@
       });
     }
 
+    function getScoreColor(v) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return "inherit";
+      const clamped = Math.max(0, Math.min(1, n));
+      const hue = clamped * 120;
+      return `hsl(${hue} 78% 60%)`;
+    }
+
     function shortAddr(a) {
       if (!a || typeof a !== "string") return "";
       if (a.length <= 12) return a;
@@ -569,10 +577,10 @@
             <td class="money" style="color:${pnlColor};">${Number.isFinite(r.pnl) ? fmtMoney(r.pnl) : ""}</td>
             <td class="money" style="color:${roiColor};">${Number.isFinite(r.roi) ? fmtPct(r.roi) : ""}</td>
             <td class="money hide-mobile">${Number.isFinite(r.volume) ? fmtMoney(r.volume, 0) : ""}</td>
-            <td class="money hide-mobile">${Number.isFinite(r.walletScore) ? fmtScore(r.walletScore) : ""}</td>
-            <td class="money hide-mobile">${Number.isFinite(r.trendScore) ? fmtScore(r.trendScore) : ""}</td>
-            <td class="money hide-mobile">${Number.isFinite(r.consistencyScore) ? fmtScore(r.consistencyScore) : ""}</td>
-            <td class="money hide-mobile">${Number.isFinite(r.activityScore) ? fmtScore(r.activityScore) : ""}</td>
+            <td class="money hide-mobile" style="color:${getScoreColor(r.walletScore)};">${Number.isFinite(r.walletScore) ? fmtScore(r.walletScore) : ""}</td>
+            <td class="money hide-mobile" style="color:${getScoreColor(r.trendScore)};">${Number.isFinite(r.trendScore) ? fmtScore(r.trendScore) : ""}</td>
+            <td class="money hide-mobile" style="color:${getScoreColor(r.consistencyScore)};">${Number.isFinite(r.consistencyScore) ? fmtScore(r.consistencyScore) : ""}</td>
+            <td class="money hide-mobile" style="color:${getScoreColor(r.activityScore)};">${Number.isFinite(r.activityScore) ? fmtScore(r.activityScore) : ""}</td>
           </tr>
         `;
       }).join("");
