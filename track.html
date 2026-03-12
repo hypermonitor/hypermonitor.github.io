@@ -2011,9 +2011,23 @@
       min-height: 170px;
     }
 
+    .chart-canvas-wrap.logo-watermark::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("images/logo.png");
+      background-repeat: no-repeat;
+      background-position: center 24%;
+      background-size: min(36%, 145px);
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
     .chart-canvas-wrap canvas {
       width: 100% !important;
       height: 100% !important;
+      position: relative;
+      z-index: 1;
     }
 
     .pnl-heatmap-wrap {
@@ -4424,7 +4438,7 @@
               </button>
             </span>
           </h3>
-          <div class="chart-canvas-wrap" id="pnlChartWrap">
+          <div class="chart-canvas-wrap logo-watermark" id="pnlChartWrap">
             <canvas id="pnlChart"></canvas>
           </div>
           <div class="pnl-heatmap-wrap is-hidden" id="pnlHeatmapWrap">
@@ -15413,7 +15427,7 @@
 
         const fadeColor = document.body.classList.contains("light")
           ? "rgba(148, 163, 184, 0.16)"
-          : "rgba(2, 6, 23, 0.34)";
+          : "rgba(0, 0, 0, 0.34)";
         const c = chart.ctx;
         c.save();
         c.fillStyle = fadeColor;
