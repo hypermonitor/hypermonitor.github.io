@@ -765,6 +765,14 @@
       color: var(--text-main);
     }
 
+    #leaderboard th.sortable {
+      cursor: pointer;
+    }
+
+    #leaderboard th.sortable:hover {
+      color: #97fde5;
+    }
+
     #leaderboard .muted {
       font-size: 0.9rem;
     }
@@ -1603,29 +1611,30 @@
           <table>
             <thead>
               <tr>
-                <th>#</th>
+                <th class="sortable" data-key="rank">#</th>
                 <th>Trader</th>
-                <th>Account Value</th>
-                <th>PnL</th>
-                <th>ROI</th>
-                <th>Volume</th>
+                <th class="sortable" data-key="accountValue">Account Value</th>
+                <th class="sortable" data-key="pnl">PnL</th>
+                <th class="sortable" data-key="roi">ROI</th>
+                <th class="sortable" data-key="volume">Volume</th>
+                <th class="sortable" data-key="walletScore">Quality</th>
               </tr>
             </thead>
             <tbody id="leaderboardPreviewBody">
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
+              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
             </tbody>
             <tfoot>
               <tr class="leaderboard-footer-row">
-                <td colspan="6">
+                <td colspan="7">
                   <a class="leaderboard-footer-link" href="/leaderboard.html">Open full leaderboard →</a>
                 </td>
               </tr>
@@ -2018,14 +2027,17 @@
       const DEST_BASE = "https://www.hypermonitor.org/track?wallet=";
       const PREVIEW_LIMIT = 10;
       const PREVIEW_WINDOW = "allTime";
+      let viewRows = [];
+      let sortKey = "rank";
+      let sortDir = "asc";
 
       const setStatus = (msg) => {
         if (tableWrap) tableWrap.classList.remove("loading");
-        tbody.innerHTML = `<tr><td colspan="6" class="muted">${msg}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="muted">${msg}</td></tr>`;
       };
       const renderLoadingRows = (count = 10) => {
         const rows = Array.from({ length: count }, () => (
-          `<tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>`
+          `<tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>`
         )).join("");
         tbody.innerHTML = rows;
       };
@@ -2048,6 +2060,12 @@
         const sign = n < 0 ? "-" : "";
         const abs = Math.abs(n * 100).toLocaleString(undefined, { maximumFractionDigits: 2 });
         return `${sign}${abs}%`;
+      };
+
+      const fmtScore = (v) => {
+        const n = Number(v);
+        if (!Number.isFinite(n)) return "";
+        return (n * 100).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
       };
 
       const shortAddr = (addr) => {
@@ -2080,9 +2098,27 @@
           const pnl = Number(p?.pnl ?? p?.pnlUsd ?? p?.pnl_usd ?? NaN);
           const roi = Number(p?.roi ?? p?.return ?? NaN);
           const volume = Number(p?.vlm ?? p?.vol ?? p?.tradeVolume ?? NaN);
+          const walletScore = Number(r?.wallet_score ?? r?.walletScore ?? NaN);
 
-          return { rank: idx + 1, address, accountValue, pnl, roi, volume };
+          return { rank: idx + 1, address, accountValue, pnl, roi, volume, walletScore };
         });
+      };
+
+      const applySortAndRender = () => {
+        const rows = viewRows.slice();
+        rows.sort((a, b) => {
+          const va = a?.[sortKey];
+          const vb = b?.[sortKey];
+          const na = Number(va);
+          const nb = Number(vb);
+          const aValid = Number.isFinite(na);
+          const bValid = Number.isFinite(nb);
+          if (!aValid && !bValid) return 0;
+          if (!aValid) return 1;
+          if (!bValid) return -1;
+          return sortDir === "asc" ? (na - nb) : (nb - na);
+        });
+        render(rows.slice(0, PREVIEW_LIMIT));
       };
 
       const render = (rows) => {
@@ -2105,6 +2141,7 @@
               <td class="mono" style="color:${pnlColor};">${Number.isFinite(r.pnl) ? fmtMoney(r.pnl) : ""}</td>
               <td class="mono" style="color:${roiColor};">${Number.isFinite(r.roi) ? fmtPct(r.roi) : ""}</td>
               <td class="mono">${Number.isFinite(r.volume) ? fmtMoney(r.volume, 0) : ""}</td>
+              <td class="mono">${Number.isFinite(r.walletScore) ? fmtScore(r.walletScore) : ""}</td>
             </tr>
           `;
         }).join("");
@@ -2148,14 +2185,27 @@
           const rawRows = parseRows(json);
           if (!rawRows) throw new Error("Unexpected leaderboard response.");
 
-          const normalized = normalize(rawRows).slice(0, PREVIEW_LIMIT);
+          viewRows = normalize(rawRows);
           setLoadingState(false);
-          render(normalized);
+          applySortAndRender();
         } catch (e) {
           console.error("Leaderboard preview failed:", e);
           setStatus("Failed to load private leaderboard preview.");
         }
       };
+
+      document.querySelectorAll("#leaderboardPreviewWrap th.sortable").forEach(th => {
+        th.addEventListener("click", () => {
+          const key = th.getAttribute("data-key");
+          if (!key) return;
+          if (sortKey === key) sortDir = (sortDir === "asc" ? "desc" : "asc");
+          else {
+            sortKey = key;
+            sortDir = "asc";
+          }
+          applySortAndRender();
+        });
+      });
 
       loadLeaderboardPreview();
     }
