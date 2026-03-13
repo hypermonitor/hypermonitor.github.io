@@ -2872,6 +2872,7 @@
       display: flex;
       align-items: center;
       gap: 0.25rem;
+      min-height: 1.95rem;
     }
 
     .orders-filter-label {
@@ -2893,6 +2894,25 @@
       outline: none;
     }
 
+    .orders-filter-check {
+      display: inline-flex;
+      align-items: center;
+      height: 1.95rem;
+      padding: 0 0.15rem;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      line-height: 1;
+      align-self: center;
+    }
+
+    .orders-filter-check input {
+      margin: 0;
+      width: 0.85rem;
+      height: 0.85rem;
+      transform: translateY(0);
+      flex: 0 0 auto;
+    }
+
     .orders-filter-input::placeholder {
       color: var(--muted);
       opacity: 0.7;
@@ -2904,6 +2924,7 @@
       border-color: #e5e7eb;
       color: #0f172a;
     }
+    body.light .orders-filter-check { color: #0f172a; }
     body.light .tagline { color: #0f172a; }
     body.light .wallet-input-row label { color: #0f172a; }
     body.light .brand-name { color: #0f172a; }
@@ -4759,6 +4780,13 @@
         </select>
       </div>
 
+      <div class="orders-filter-group">
+        <span class="orders-filter-label">Aggregate</span>
+        <label class="orders-filter-check" aria-label="Aggregate by Order ID" title="Aggregate by Order ID">
+          <input id="historyAggregateCheckbox" type="checkbox" />
+        </label>
+      </div>
+
       <div class="history-filter-orders">
         <div class="orders-filter-group">
           <span class="orders-filter-label">Asset</span>
@@ -5005,6 +5033,7 @@
   const historicalOrdersHeaderEls = Array.from(document.querySelectorAll("#ordersHistoryPanel thead th[data-sort]"));
   const historicalFillsHeaderEls = Array.from(document.querySelectorAll("#fillsHistoryPanel thead th[data-sort]"));
   const historyViewSelectEl = document.getElementById("historyViewSelect");
+  const historyAggregateCheckboxEl = document.getElementById("historyAggregateCheckbox");
   const historicalFillsAssetFilterEl = document.getElementById("historicalFillsAssetFilter");
   const historicalFillsSideFilterEl = document.getElementById("historicalFillsSideFilter");
 
@@ -11378,6 +11407,93 @@
     if (fillsCountEl) fillsCountEl.textContent = `${filtered.length}`;
   }
 
+  function isHistoryAggregatedByOrderId() {
+    return Boolean(historyAggregateCheckboxEl?.checked);
+  }
+
+  function formatFeeValue(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    return n.toLocaleString(undefined, {
+      maximumFractionDigits: 6,
+    });
+  }
+
+  function aggregateHistoricalOrdersByOrderId(entries) {
+    const grouped = new Map();
+    entries.forEach((order) => {
+      const oid = String(order?.oid ?? "");
+      if (!oid) return;
+      const existing = grouped.get(oid);
+      const ts = Number(order?.timestamp ?? 0);
+      const existingTs = Number(existing?.timestamp ?? 0);
+      if (!existing || (Number.isFinite(ts) && (!Number.isFinite(existingTs) || ts < existingTs))) {
+        grouped.set(oid, order);
+      }
+    });
+    return Array.from(grouped.values());
+  }
+
+  function aggregateHistoricalFillsByOrderId(entries, closedPnlMap) {
+    const grouped = new Map();
+    entries.forEach((fill) => {
+      const oid = String(fill?.oid ?? "");
+      if (!oid) return;
+      const existing = grouped.get(oid);
+      const time = Number(fill?.time ?? fill?.timestamp ?? 0);
+      const size = Math.abs(Number(fill?.sz ?? fill?.size ?? 0));
+      const price = Number(fill?.px ?? fill?.price ?? 0);
+      const fee = Number(fill?.fee ?? fill?.feeUsd ?? fill?.feeUSD ?? fill?.feePaid ?? fill?.feeAmount);
+      const builderFee = Number(fill?.builderFee ?? fill?.builder_fee);
+      const closedPnl = Number(closedPnlMap?.get(fill));
+
+      if (!existing) {
+        grouped.set(oid, {
+          ...fill,
+          time,
+          aggregateSize: Number.isFinite(size) ? size : 0,
+          aggregateNotional: Number.isFinite(size) && Number.isFinite(price) ? size * price : 0,
+          aggregateFee: Number.isFinite(fee) ? fee : 0,
+          aggregateBuilderFee: Number.isFinite(builderFee) ? builderFee : 0,
+          aggregateClosedPnl: Number.isFinite(closedPnl) ? closedPnl : 0,
+        });
+        return;
+      }
+
+      if (Number.isFinite(time) && (!Number.isFinite(existing.time) || time < existing.time)) {
+        Object.assign(existing, {
+          ...fill,
+          aggregateSize: existing.aggregateSize,
+          aggregateNotional: existing.aggregateNotional,
+          aggregateFee: existing.aggregateFee,
+          aggregateBuilderFee: existing.aggregateBuilderFee,
+          aggregateClosedPnl: existing.aggregateClosedPnl,
+        });
+      }
+
+      if (Number.isFinite(size)) existing.aggregateSize += size;
+      if (Number.isFinite(size) && Number.isFinite(price)) existing.aggregateNotional += size * price;
+      if (Number.isFinite(fee)) existing.aggregateFee += fee;
+      if (Number.isFinite(builderFee)) existing.aggregateBuilderFee += builderFee;
+      if (Number.isFinite(closedPnl)) existing.aggregateClosedPnl += closedPnl;
+    });
+
+    return Array.from(grouped.values()).map((fill) => {
+      const aggregatePrice =
+        Number.isFinite(fill.aggregateSize) && fill.aggregateSize > 0 && Number.isFinite(fill.aggregateNotional)
+          ? fill.aggregateNotional / fill.aggregateSize
+          : Number(fill.px ?? fill.price ?? NaN);
+      return {
+        ...fill,
+        sz: fill.aggregateSize,
+        px: aggregatePrice,
+        fee: fill.aggregateFee,
+        builderFee: fill.aggregateBuilderFee,
+        aggregateClosedPnl: fill.aggregateClosedPnl,
+      };
+    });
+  }
+
   function renderHistoricalFills() {
     if (!historicalFillsBodyEl) return;
 
@@ -11452,8 +11568,12 @@
       historicalFillsClosedPnl = closedPnlMap;
     }
 
+    const fillsViewRows = isHistoryAggregatedByOrderId()
+      ? aggregateHistoricalFillsByOrderId(filtered, historicalFillsClosedPnl)
+      : filtered.slice();
+
     updateTableSortHeaders(historicalFillsHeaderEls, currentHistoricalFillsSort);
-    const sorted = filtered.slice();
+    const sorted = fillsViewRows.slice();
     if (currentHistoricalFillsSort?.key) {
       const sortKey = currentHistoricalFillsSort.key;
       const sortDir = currentHistoricalFillsSort.dir;
@@ -11462,8 +11582,8 @@
         const bCoin = resolveCoinName(b.coin ?? "", b.asset ?? b.symbol ?? b.sym);
         const aSide = normalizeSideCode(a.side ?? (a.isBuy ? "B" : "S") ?? "");
         const bSide = normalizeSideCode(b.side ?? (b.isBuy ? "B" : "S") ?? "");
-        const aPnl = historicalFillsClosedPnl?.get(a);
-        const bPnl = historicalFillsClosedPnl?.get(b);
+        const aPnl = Number.isFinite(a?.aggregateClosedPnl) ? a.aggregateClosedPnl : historicalFillsClosedPnl?.get(a);
+        const bPnl = Number.isFinite(b?.aggregateClosedPnl) ? b.aggregateClosedPnl : historicalFillsClosedPnl?.get(b);
         const aMetrics = {
           orderId: String(a.oid ?? ""),
           time: Number(a.time ?? a.timestamp ?? 0),
@@ -11501,7 +11621,7 @@
         const coin = resolveCoinName(fill.coin ?? "", fill.asset ?? fill.symbol ?? fill.sym);
         const wallet = fill.wallet || primaryWallet;
         const forceSpot = entryMatchesMarketType(fill, "spot");
-        const closedPnl = historicalFillsClosedPnl?.get(fill);
+        const closedPnl = Number.isFinite(fill?.aggregateClosedPnl) ? fill.aggregateClosedPnl : historicalFillsClosedPnl?.get(fill);
         const closedPnlDisplay = Number.isFinite(closedPnl) ? formatSignedDollarWithPlus(closedPnl) : "";
         const dirLabel = String(fill.dir ?? "").trim();
         const crossed = Boolean(fill.crossed);
@@ -11512,15 +11632,15 @@
         const builderFeeValue = Number(builderFeeRaw);
         const feeDisplay =
           Number.isFinite(feeValue) && feeToken
-            ? `${feeValue} ${feeToken}`
+            ? `${formatFeeValue(feeValue)} ${feeToken}`
             : Number.isFinite(feeValue)
-              ? formatSignedDollar(feeValue)
+              ? formatFeeValue(feeValue)
               : "";
         const builderDisplay =
           Number.isFinite(builderFeeValue) && builderFeeValue !== 0
             ? feeToken
-              ? `${builderFeeValue} ${feeToken}`
-              : formatSignedDollar(builderFeeValue)
+              ? `${formatFeeValue(builderFeeValue)} ${feeToken}`
+              : formatFeeValue(builderFeeValue)
             : "";
         const startPosValue = Number(fill.startPosition ?? fill.startPos ?? fill.start_position);
         const startPosDisplay = Number.isFinite(startPosValue) ? fmtSize(startPosValue) : "";
@@ -11568,7 +11688,7 @@
       })
       .join("");
 
-    if (historicalFillsCountEl) historicalFillsCountEl.textContent = `${filtered.length}`;
+    if (historicalFillsCountEl) historicalFillsCountEl.textContent = `${sorted.length}`;
   }
 
   function pickOrderId(entry, order) {
@@ -12076,7 +12196,7 @@
     const statusFilter = (historicalStatusFilterEl?.value || "all").toLowerCase();
     const assetFilter = (historicalAssetFilterEl?.value || "").trim().toLowerCase();
 
-    const filtered = marketFiltered
+    let filtered = marketFiltered
       .map(normalizeHistoricalOrder)
       .filter((o) => {
         const sideRaw = o.side ?? (o.isBuy ? "B" : "S");
@@ -12090,6 +12210,10 @@
 
         return true;
       });
+
+    if (isHistoryAggregatedByOrderId()) {
+      filtered = aggregateHistoricalOrdersByOrderId(filtered);
+    }
 
     if (historicalOrdersCountEl) {
       if (historicalOrdersLoaded) historicalOrdersCountEl.textContent = `${filtered.length}`;
@@ -16051,6 +16175,17 @@
     historyViewSelectEl.addEventListener("change", () => {
       const value = historyViewSelectEl.value === "fills" ? "fills" : "orders";
       setHistoryMode(true, value);
+    });
+  }
+
+  if (historyAggregateCheckboxEl) {
+    historyAggregateCheckboxEl.addEventListener("change", () => {
+      const value = historyViewSelectEl?.value === "fills" ? "fills" : "orders";
+      if (value === "fills") {
+        if (historicalFillsLoaded) renderHistoricalFills();
+      } else if (historicalOrdersLoaded) {
+        renderHistoricalOrders();
+      }
     });
   }
 
