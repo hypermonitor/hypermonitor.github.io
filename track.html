@@ -5303,10 +5303,9 @@
     starEl.classList.toggle("active", Boolean(active));
     const symbol = active ? "★" : "☆";
     const safeCount = Number.isFinite(Number(count)) ? Math.max(0, Math.round(Number(count))) : 0;
-    const countLabel = formatStarCount(safeCount);
     starEl.innerHTML = `
       <span class="wallet-fav-star">${symbol}</span>
-      <span class="wallet-fav-count">${countLabel}</span>
+      ${safeCount > 0 ? `<span class="wallet-fav-count">${formatStarCount(safeCount)}</span>` : ""}
     `;
   }
 
