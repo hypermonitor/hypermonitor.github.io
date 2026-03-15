@@ -587,7 +587,7 @@
       tbody.querySelectorAll("tr[data-href]").forEach(tr => {
         tr.addEventListener("click", () => {
           const href = tr.getAttribute("data-href");
-          if (href) window.location.href = href;
+          if (href) window.open(href, "_blank", "noopener");
         });
       });
     }
