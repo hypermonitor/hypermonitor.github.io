@@ -106,6 +106,10 @@
       align-items: center;
     }
 
+    .left-tools {
+      flex: 1 1 auto;
+    }
+
     .pill-btn, .select, .input {
       border-radius: 999px;
       border: 1px solid transparent;
@@ -115,6 +119,11 @@
       padding: 0.5rem 1rem;
       outline: none;
       transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    #searchInput {
+      flex: 1 1 26rem;
+      min-width: 18rem;
     }
 
     .pill-btn:focus, .select:focus, .input:focus {
@@ -240,59 +249,79 @@
       text-decoration: underline;
     }
 
-    @media (max-width: 700px) {
-      #app { padding: 0.9rem; }
-      th, td { padding: 0.35rem 0.4rem; }
-      table { font-size: 0.75rem; }
-      .hide-mobile { display: none; }
-    }
-
     @media (max-width: 768px) {
+      #app {
+        padding: 0.9rem;
+      }
+
+      header {
+        align-items: flex-start;
+      }
+
+      .card {
+        padding: 0.9rem;
+      }
+
+      .toolbar,
+      .left-tools,
+      .right-tools {
+        width: 100%;
+      }
+
+      .left-tools,
+      .right-tools {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .select,
+      .input,
+      .pill-btn,
+      #searchInput {
+        width: 100%;
+      }
+
+      #searchInput {
+        min-width: 0;
+        flex-basis: auto;
+      }
+
       .leaderboard-table-wrap {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
       }
 
       table {
-        table-layout: fixed;
-        width: 100%;
-      }
-
-      table {
+        width: max-content;
+        min-width: 58rem;
+        table-layout: auto;
         font-size: 0.78rem;
       }
 
       th,
       td {
-        padding: 0.35rem 0.4rem;
+        padding: 0.4rem 0.55rem;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
 
-      th:first-child,
-      td:first-child {
-        width: 2.2rem;
+      .tagline {
+        line-height: 1.45;
       }
 
-      th:nth-child(2),
-      td:nth-child(2) {
-        width: 58%;
+      .status {
+        font-size: 0.74rem;
+      }
+    }
+
+    @media (max-width: 540px) {
+      table {
+        min-width: 52rem;
+        font-size: 0.75rem;
       }
 
-      th:nth-child(5),
-      td:nth-child(5) {
-        width: 26%;
-        text-align: right;
-      }
-
-      th:nth-child(3),
-      td:nth-child(3),
-      th:nth-child(4),
-      td:nth-child(4),
-      th:nth-child(6),
-      td:nth-child(6) {
-        display: none;
+      th,
+      td {
+        padding: 0.35rem 0.45rem;
       }
     }
   </style>
@@ -325,7 +354,7 @@
             <option value="allTime" selected>All Time</option>
           </select>
 
-          <input id="searchInput" class="input" style="min-width: 420px;"
+          <input id="searchInput" class="input"
                  placeholder="Search address (0x…), or filter…" autocomplete="off" />
 
           <select id="limitSelect" class="select" title="Rows to show">
