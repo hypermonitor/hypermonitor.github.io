@@ -1221,6 +1221,104 @@
       min-width: 100%;
     }
 
+    @media (min-width: 901px) {
+      .positions-card {
+        overflow-x: hidden !important;
+      }
+
+      .positions-card table {
+        table-layout: fixed;
+      }
+
+      .positions-card th,
+      .positions-card td {
+        font-size: clamp(0.69rem, 0.57vw, 0.88rem);
+        padding: 0.2rem 0.14rem;
+      }
+
+      .positions-card th:nth-child(1),
+      .positions-card td:nth-child(1) { width: 17%; }
+      .positions-card th:nth-child(2),
+      .positions-card td:nth-child(2) { width: 11%; }
+      .positions-card th:nth-child(3),
+      .positions-card td:nth-child(3) { width: 14%; }
+      .positions-card th:nth-child(4),
+      .positions-card td:nth-child(4) { width: 15%; }
+      .positions-card th:nth-child(5),
+      .positions-card td:nth-child(5) { width: 8%; }
+      .positions-card th:nth-child(6),
+      .positions-card td:nth-child(6) { width: 12%; }
+      .positions-card th:nth-child(7),
+      .positions-card td:nth-child(7) { width: 15%; }
+      .positions-card th:nth-child(8),
+      .positions-card td:nth-child(8) { width: 8%; }
+
+      .positions-card td.asset-cell > .asset-cell,
+      .positions-card .price-stack,
+      .positions-card .size-stack {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .positions-card td.asset-cell > .asset-cell {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .positions-card .asset-cell {
+        gap: 0.15rem;
+      }
+
+      .positions-card .coinIcon,
+      .positions-card .coinFallback {
+        width: 14px;
+        height: 14px;
+      }
+
+      .positions-card .price-stack {
+        gap: 0.08rem;
+      }
+
+      .positions-card td:nth-child(7),
+      .positions-card td:nth-child(8) {
+        overflow: hidden;
+      }
+
+      .positions-card .liq-distance {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .positions-card .current-price,
+      .positions-card .notional-sub,
+      .positions-card .timestamp,
+      .positions-card .size-ticker,
+      .positions-card .dex-tag,
+      .positions-card .wallet-tag {
+        font-size: 0.97em;
+      }
+
+      .positions-card .pill {
+        font-size: 0.95em;
+        padding: 0.06rem 0.24rem;
+      }
+
+      .positions-card .liq-meta,
+      .positions-card .liq-pct,
+      .positions-card .liq-price {
+        font-size: 0.97em;
+      }
+
+      .positions-card .liq-meta {
+        gap: 0.18rem;
+      }
+
+      .positions-card .liq-price {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
     @media (max-width: 900px) {
       .positions-card {
         grid-column: span 1;
@@ -3733,7 +3831,7 @@
       display: flex;
       align-items: center;
       gap: 0.8rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .price-list.clone {
@@ -3745,6 +3843,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
+      white-space: nowrap;
       font-size: 0.78rem;
       color: var(--text-main);
       font-weight: 400;
@@ -4272,7 +4371,7 @@
       <div class="error" id="snapshotError"></div>
     </section>
 
-    <section class="card positions-card" style="overflow: auto;">
+    <section class="card positions-card">
       <div class="section-title">
         <h2>Positions</h2>
         <div class="section-actions">
