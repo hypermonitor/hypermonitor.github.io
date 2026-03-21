@@ -6698,8 +6698,7 @@
     return null;
   }
 
-  function updateChartTitleValues(liveEquityValue = null) {
-    const liveEquity = Number.isFinite(liveEquityValue) ? liveEquityValue : null;
+  function updateChartTitleValues() {
     const equityChartValue = Number.isFinite(chartLastValues.equity) ? chartLastValues.equity : null;
     const equityDrawdownValue = Number.isFinite(chartLastValues.equityDrawdown) ? chartLastValues.equityDrawdown : null;
     const pnlChartValue = Number.isFinite(chartLastValues.pnl) ? chartLastValues.pnl : null;
@@ -6720,38 +6719,17 @@
           else equityTitleValueEl.classList.add("neutral");
         }
       } else {
-        const equityDisplay = liveEquity !== null ? liveEquity : equityChartValue;
-        equityTitleValueEl.textContent = equityDisplay !== null ? fmtMoney(equityDisplay, 0) : "-";
+        equityTitleValueEl.textContent = equityChartValue !== null ? fmtMoney(equityChartValue, 0) : "-";
         equityTitleValueEl.classList.add("neutral");
       }
     }
 
     if (pnlTitleValueEl) {
-      let pnlDisplay = pnlChartValue;
-      if (liveEquity !== null && equityChartValue !== null && pnlChartValue !== null) {
-        pnlDisplay = pnlChartValue + (liveEquity - equityChartValue);
-      }
-      latestLivePnlValue = Number.isFinite(pnlDisplay) ? pnlDisplay : null;
-      pnlTitleValueEl.textContent = pnlDisplay !== null ? formatSignedDollarWithPlus(pnlDisplay, 0) : "-";
+      latestLivePnlValue = Number.isFinite(pnlChartValue) ? pnlChartValue : null;
+      pnlTitleValueEl.textContent = pnlChartValue !== null ? formatSignedDollarWithPlus(pnlChartValue, 0) : "-";
       pnlTitleValueEl.classList.remove("positive", "negative");
-      if (Number.isFinite(pnlDisplay)) {
-        pnlTitleValueEl.classList.add(pnlDisplay >= 0 ? "positive" : "negative");
-      }
-    }
-
-    if (metricTotalPnlEl) {
-      const livePnl = Number.isFinite(latestLivePnlValue) ? latestLivePnlValue : null;
-      if (livePnl !== null) {
-        setMetricValue(metricTotalPnlEl, formatSignedDollarWithPlus(livePnl), livePnl);
-      }
-    }
-
-    if (metricReturnEl) {
-      const livePnl = Number.isFinite(latestLivePnlValue) ? latestLivePnlValue : null;
-      const baseEquity = Number.isFinite(latestBaseEquityValue) ? latestBaseEquityValue : null;
-      if (livePnl !== null && baseEquity && baseEquity !== 0) {
-        const returnPct = livePnl / baseEquity;
-        setMetricValue(metricReturnEl, formatSignedPercent(returnPct, 2), returnPct);
+      if (Number.isFinite(pnlChartValue)) {
+        pnlTitleValueEl.classList.add(pnlChartValue >= 0 ? "positive" : "negative");
       }
     }
 
@@ -10610,6 +10588,7 @@
 
             const rows = [
               ["Equity", fmtMoney(item.summary.accountValue)],
+              ["Unrealized PnL", formatSignedDollarWithPlus(item.upnlTotal ?? 0)],
               ["Notional Exposure", fmtMoney(item.summary.totalNtlPos)],
               ["Collateral", fmtMoney(item.summary.totalRawUsd)],
               ["Margin Used", fmtMoney(item.summary.totalMarginUsed)],
@@ -10645,7 +10624,7 @@
     if (!currentWallets.length) {
       renderMarginSummary([]);
       latestLiveEquityValue = null;
-      updateChartTitleValues(latestLiveEquityValue);
+      updateChartTitleValues();
       return;
     }
 
@@ -10681,19 +10660,18 @@
       const totals = totalsMap.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
       const base = snap.summary || null;
       if (!base) {
-        return { wallet, summary: null, withdrawable: snap.withdrawable };
+        return { wallet, summary: null, withdrawable: snap.withdrawable, upnlTotal: totals.upnlTotal ?? 0 };
       }
-      const snapshotAV = Number(base.accountValue ?? 0);
-      const deltaUpnl = (totals.upnlTotal ?? 0) - (snap.snapshotUpnlTotal ?? 0);
-      const liveAccountValue = snapshotAV + (Number.isNaN(deltaUpnl) ? 0 : deltaUpnl);
 
-      const summaryLive = {
-        ...base,
-        accountValue: liveAccountValue,
-        totalNtlPos: totals.notionalTotal || base.totalNtlPos,
+      return {
+        wallet,
+        summary: {
+          ...base,
+          totalNtlPos: totals.notionalTotal || base.totalNtlPos,
+        },
+        withdrawable: snap.withdrawable,
+        upnlTotal: totals.upnlTotal ?? 0,
       };
-
-      return { wallet, summary: summaryLive, withdrawable: snap.withdrawable };
     });
 
     if (isTimelineActive()) {
@@ -10710,6 +10688,7 @@
         return {
           wallet: item.wallet,
           withdrawable: item.withdrawable,
+          upnlTotal: item.upnlTotal,
           summary: {
             ...base,
             accountValue: equityValue,
@@ -10728,7 +10707,7 @@
       const weight = Number(weights[idx] ?? 0);
       return sum + (Number.isFinite(val) ? val * weight : 0);
     }, 0);
-    updateChartTitleValues(latestLiveEquityValue);
+    updateChartTitleValues();
   }
 
   function renderPositions(assetPositions, { preserveBase = false } = {}) {
@@ -13125,7 +13104,7 @@
         applyEquityChartMode(portfolioCharts.equity, equityDatasets);
       }
     }
-    updateChartTitleValues(latestLiveEquityValue);
+    updateChartTitleValues();
   }
 
   function renderPnlHeatmap(rangeKey = currentRangeKey) {
@@ -15193,8 +15172,7 @@
     });
     if (metrics) {
       latestBaseEquityValue = Number.isFinite(metrics.baseEquity) ? metrics.baseEquity : null;
-      const livePnl = Number.isFinite(latestLivePnlValue) ? latestLivePnlValue : null;
-      const totalPnlValue = livePnl !== null ? livePnl : metrics.totalPnl;
+      const totalPnlValue = metrics.totalPnl;
       setMetricValue(metricTotalPnlEl, formatSignedDollarWithPlus(totalPnlValue), totalPnlValue);
       setMetricValue(metricReturnEl, formatSignedPercent(metrics.returnPct), metrics.returnPct);
       setMetricValue(metricMaxDrawdownEl, formatPercent(metrics.maxDrawdown), null);
@@ -15626,7 +15604,7 @@
       chartLastValues.equityDrawdown = null;
       chartLastValues.pnl = null;
       chartLastValues.deposits = null;
-      updateChartTitleValues(latestLiveEquityValue);
+      updateChartTitleValues();
       return;
     }
 
@@ -15675,7 +15653,7 @@
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
     chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
-    updateChartTitleValues(latestLiveEquityValue);
+    updateChartTitleValues();
     updatePerformanceMetrics(rangeKey);
     renderPnlHeatmap(rangeKey);
   }
@@ -15689,7 +15667,7 @@
       chartLastValues.equityDrawdown = null;
       chartLastValues.pnl = null;
       chartLastValues.deposits = null;
-      updateChartTitleValues(latestLiveEquityValue);
+      updateChartTitleValues();
       return;
     }
     portfolioErrorEl.textContent = "";
@@ -15739,7 +15717,7 @@
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
     chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
-    updateChartTitleValues(latestLiveEquityValue);
+    updateChartTitleValues();
     updatePerformanceMetrics(rangeKey);
     renderPnlHeatmap(rangeKey);
   }
