@@ -6033,6 +6033,8 @@
   let pendingCanceledOrdersRender = false;
   let positionsLiveRenderTimer = null;
   let pendingPositionsLiveRender = false;
+  let liveSnapshotRefreshTimer = null;
+  let liveSnapshotRefreshInFlight = false;
   const liveMids = new Map();
   let allMidsSub = null;
   const footerChangePcts = new Map();
@@ -6123,6 +6125,33 @@
       }
       flushPendingOrderRenders();
     }, HFT_ORDER_RENDER_INTERVAL_MS);
+  }
+
+  function stopLiveSnapshotRefreshTimer() {
+    if (!liveSnapshotRefreshTimer) return;
+    clearInterval(liveSnapshotRefreshTimer);
+    liveSnapshotRefreshTimer = null;
+  }
+
+  async function refreshLiveSnapshotsForWallets(wallets = currentWallets) {
+    const walletList = Array.isArray(wallets) ? wallets : [wallets];
+    if (!walletList.length || liveSnapshotRefreshInFlight) return;
+    liveSnapshotRefreshInFlight = true;
+    try {
+      await Promise.all(walletList.map((wallet) => refreshPositionsAndMargin(wallet)));
+      await refreshSpotForWallets(walletList);
+    } finally {
+      liveSnapshotRefreshInFlight = false;
+    }
+  }
+
+  function startLiveSnapshotRefreshTimer(wallets = currentWallets) {
+    stopLiveSnapshotRefreshTimer();
+    const walletList = Array.isArray(wallets) ? wallets.slice() : [wallets];
+    if (!walletList.length) return;
+    liveSnapshotRefreshTimer = setInterval(() => {
+      refreshLiveSnapshotsForWallets(walletList);
+    }, 300000);
   }
 
   function updateHftOrderRenderMode(now = Date.now()) {
@@ -8678,11 +8707,12 @@
   }
 
   function combineTotalsForWallet(wallet) {
-    const perp = walletTotalsByType.perp.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
-    const spot = walletTotalsByType.spot.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
+    const perp = walletTotalsByType.perp.get(wallet) || { upnlTotal: 0, notionalTotal: 0, marginUsedTotal: 0 };
+    const spot = walletTotalsByType.spot.get(wallet) || { upnlTotal: 0, notionalTotal: 0, marginUsedTotal: 0 };
     return {
       upnlTotal: Number(perp.upnlTotal ?? 0) + Number(spot.upnlTotal ?? 0),
       notionalTotal: Number(perp.notionalTotal ?? 0) + Number(spot.notionalTotal ?? 0),
+      marginUsedTotal: Number(perp.marginUsedTotal ?? 0) + Number(spot.marginUsedTotal ?? 0),
     };
   }
 
@@ -10590,7 +10620,12 @@
               ["Equity", fmtMoney(item.summary.accountValue)],
               ["Unrealized PnL", formatSignedDollarWithPlus(item.upnlTotal ?? 0)],
               ["Notional Exposure", fmtMoney(item.summary.totalNtlPos)],
-              ["Collateral", fmtMoney(item.summary.totalRawUsd)],
+              (() => {
+                const equityValue = Number(item.summary.accountValue ?? 0);
+                const notionalValue = Number(item.summary.totalNtlPos ?? 0);
+                const collateralValue = equityValue + notionalValue;
+                return ["Collateral", fmtMoney(collateralValue)];
+              })(),
               ["Margin Used", fmtMoney(item.summary.totalMarginUsed)],
               ["Withdrawable", fmtMoney(item.withdrawable)],
             ];
@@ -10640,16 +10675,35 @@
         if (!Number.isFinite(szi) || szi === 0) return;
         const snapshotValue = Number(p.positionValue ?? 0);
         const entryPx = Number(p.entryPx ?? 0);
+        const coin = p.coin || "";
+        const contextPx = getMarkPriceForCoin(coin);
+        let markPx = Number.isFinite(contextPx) ? contextPx : undefined;
+        if ((markPx === undefined || Number.isNaN(markPx)) && szi !== 0 && !Number.isNaN(snapshotValue)) {
+          markPx = Math.abs(snapshotValue) / Math.abs(szi);
+        }
         let positionValue = snapshotValue;
-        if (!Number.isNaN(entryPx) && szi !== 0 && (!Number.isFinite(positionValue) || positionValue === 0)) {
+        if (markPx !== undefined && !Number.isNaN(markPx) && szi !== 0) {
+          positionValue = markPx * szi;
+        } else if (!Number.isNaN(entryPx) && szi !== 0 && (!Number.isFinite(positionValue) || positionValue === 0)) {
           positionValue = entryPx * szi;
         }
         let upnl = Number(p.unrealizedPnl ?? 0);
-        if (!Number.isFinite(upnl)) upnl = 0;
+        if (markPx !== undefined && !Number.isNaN(markPx) && !Number.isNaN(entryPx) && szi !== 0) {
+          upnl = (markPx - entryPx) * szi;
+        } else if (!Number.isFinite(upnl)) {
+          upnl = 0;
+        }
         const notional = Math.abs(Number(positionValue ?? 0));
-        const agg = totals.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
+        const leverageValue = p.leverage?.value ?? p.leverage ?? p.lever ?? p.leverageValue;
+        const leverageNum = Number(leverageValue);
+        const marginUsed =
+          item.marketType !== "spot" && Number.isFinite(leverageNum) && leverageNum > 0 && Number.isFinite(notional)
+            ? notional / leverageNum
+            : 0;
+        const agg = totals.get(wallet) || { upnlTotal: 0, notionalTotal: 0, marginUsedTotal: 0 };
         agg.upnlTotal += upnl;
         if (Number.isFinite(notional)) agg.notionalTotal += notional;
+        if (Number.isFinite(marginUsed)) agg.marginUsedTotal += marginUsed;
         totals.set(wallet, agg);
       });
       totalsMap = totals;
@@ -10657,27 +10711,49 @@
 
     const items = currentWallets.map((wallet) => {
       const snap = snapshots.get(wallet) || {};
-      const totals = totalsMap.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
+      const totals = totalsMap.get(wallet) || { upnlTotal: 0, notionalTotal: 0, marginUsedTotal: 0 };
       const base = snap.summary || null;
       if (!base) {
-        return { wallet, summary: null, withdrawable: snap.withdrawable, upnlTotal: totals.upnlTotal ?? 0 };
+        return {
+          wallet,
+          summary: null,
+          withdrawable: snap.withdrawable,
+          upnlTotal: totals.upnlTotal ?? 0,
+          liveUpnlTotal: totals.upnlTotal ?? 0,
+          snapshotUpnlTotal: snap.snapshotUpnlTotal ?? 0,
+          baselineAccountValue: 0,
+        };
       }
+
+      const portfolioAccountValue = Number(getPortfolioLatestEquityValue(wallet, currentMarketType));
+      const snapshotAccountValue = Number(base.accountValue ?? 0);
+      const baselineAccountValue = Number.isFinite(portfolioAccountValue) ? portfolioAccountValue : snapshotAccountValue;
+      const snapshotUpnlTotal = Number(snap.snapshotUpnlTotal ?? 0);
+      const liveUpnlTotal = Number(totals.upnlTotal ?? 0);
+      const liveAccountValue =
+        baselineAccountValue +
+        (Number.isFinite(liveUpnlTotal) && Number.isFinite(snapshotUpnlTotal) ? liveUpnlTotal - snapshotUpnlTotal : 0);
 
       return {
         wallet,
         summary: {
           ...base,
+          accountValue: Number.isFinite(liveAccountValue) ? liveAccountValue : baselineAccountValue,
           totalNtlPos: totals.notionalTotal || base.totalNtlPos,
+          totalMarginUsed: Number.isFinite(totals.marginUsedTotal) ? totals.marginUsedTotal : Number(base.totalMarginUsed ?? 0),
         },
         withdrawable: snap.withdrawable,
         upnlTotal: totals.upnlTotal ?? 0,
+        liveUpnlTotal,
+        snapshotUpnlTotal,
+        baselineAccountValue,
       };
     });
 
     if (isTimelineActive()) {
       const estimatedItems = items.map((item) => {
         const base = item?.summary || null;
-        const walletTotalsEntry = lastRenderedWalletTotals.get(item.wallet) || { upnlTotal: 0, notionalTotal: 0 };
+        const walletTotalsEntry = lastRenderedWalletTotals.get(item.wallet) || { upnlTotal: 0, notionalTotal: 0, marginUsedTotal: 0 };
         if (!base) return item;
         const accountValueFromHistory = getAccountValueAtTime(item.wallet, timelineAsOfMs, currentMarketType);
         const equityValue = Number.isFinite(accountValueFromHistory)
@@ -10689,11 +10765,15 @@
           wallet: item.wallet,
           withdrawable: item.withdrawable,
           upnlTotal: item.upnlTotal,
+          liveUpnlTotal: item.liveUpnlTotal,
+          snapshotUpnlTotal: item.snapshotUpnlTotal,
+          baselineAccountValue: item.baselineAccountValue,
           summary: {
             ...base,
             accountValue: equityValue,
             totalNtlPos: notionalValue,
             totalRawUsd: collateralValue,
+            totalMarginUsed: Number(walletTotalsEntry.marginUsedTotal ?? 0),
           },
         };
       });
@@ -10795,20 +10875,26 @@
         const notional = Math.abs(positionValue);
         if (!Number.isNaN(notional)) lastComputedTotalNotional += notional;
 
-        const totals = walletTotals.get(wallet) || { upnlTotal: 0, notionalTotal: 0 };
+        const leverageValue = p.leverage?.value ?? p.leverage ?? p.lever ?? p.leverageValue;
+        const leverageNum = Number(leverageValue);
+        const marginUsed =
+          !isSpot && Number.isFinite(leverageNum) && leverageNum > 0 && Number.isFinite(notional)
+            ? notional / leverageNum
+            : 0;
+
+        const totals = walletTotals.get(wallet) || { upnlTotal: 0, notionalTotal: 0, marginUsedTotal: 0 };
         if (!Number.isNaN(upnl)) totals.upnlTotal += upnl;
         if (!Number.isNaN(notional)) totals.notionalTotal += notional;
+        if (Number.isFinite(marginUsed)) totals.marginUsedTotal += marginUsed;
         walletTotals.set(wallet, totals);
 
         const isPerp = item.marketType !== "spot";
-        const leverageValue = p.leverage?.value ?? p.leverage ?? p.lever ?? p.leverageValue;
         const ageMs = isTimelineActive()
           ? computePositionAgeMsAtTime(coin, szi, wallet, timelineAsOfMs)
           : computePositionAgeMs(coin, szi, wallet);
         const ageDisplay = Number.isFinite(ageMs) ? formatDuration(ageMs) : "–";
         const upnlFormatted = formatSignedDollarWithPlus(upnl);
         const entryNotional = Number.isFinite(entryPx) && szi !== 0 ? Math.abs(entryPx * szi) : null;
-        const leverageNum = Number(leverageValue);
         const initialMargin =
           isPerp && Number.isFinite(entryNotional) && entryNotional !== 0 && Number.isFinite(leverageNum) && leverageNum > 0
             ? entryNotional / leverageNum
@@ -12448,6 +12534,8 @@
     stopOrderRenderTimer();
     pendingPositionsLiveRender = false;
     stopPositionsLiveRenderTimer();
+    stopLiveSnapshotRefreshTimer();
+    liveSnapshotRefreshInFlight = false;
     currentAssetPositions = [];
     expandedPositions.clear();
     liveMids.clear();
@@ -12872,6 +12960,12 @@
     const primary = getPortfolioSection(data, rangeKey, marketType);
     const fallback = getPortfolioSection(data, "allTime", marketType);
     return buildViewFromSection(primary) || buildViewFromSection(fallback) || null;
+  }
+
+  function getPortfolioLatestEquityValue(wallet, marketType = currentMarketType) {
+    const view = getPortfolioView(currentRangeKey, wallet, marketType) || getPortfolioView("allTime", wallet, marketType);
+    const equity = Array.isArray(view?.equity) ? view.equity : [];
+    return getLastFiniteValue(equity);
   }
 
   function getAccountValueAtTime(wallet, asOfMs, marketType = currentMarketType) {
@@ -15837,6 +15931,7 @@
       if (currentMarketType === "spot") {
         await spotLoadTask;
       }
+      startLiveSnapshotRefreshTimer(walletList);
     } finally {
       trackBtnEl.disabled = false;
     }
