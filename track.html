@@ -3931,6 +3931,8 @@
       flex: 1 1 auto;
       overflow: hidden;
       min-width: 0;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
     }
 
     .price-track {
@@ -5251,6 +5253,14 @@
   <button class="price-context-item" type="button" data-action="reset">Reset list</button>
   <button class="price-context-item" type="button" data-action="remove" data-requires-coin="true">Remove from bar</button>
   <button class="price-context-item" type="button" data-action="toggle-currency">Currency: USD</button>
+  <div class="price-context-group">
+    <button class="price-context-item" type="button" data-action="toggle-separators" data-has-submenu="true">Separators every</button>
+    <div class="price-context-submenu" aria-label="Separator cadence">
+      <button class="price-context-item" type="button" data-action="change-separators" data-count="3">3 coins</button>
+      <button class="price-context-item" type="button" data-action="change-separators" data-count="5">5 coins</button>
+      <button class="price-context-item" type="button" data-action="change-separators" data-count="7">7 coins</button>
+    </div>
+  </div>
   <div class="price-context-sep" role="separator" aria-hidden="true"></div>
   <div class="price-context-group">
     <button class="price-context-item" type="button" data-action="toggle-change" data-has-submenu="true">Show % change</button>
@@ -5950,6 +5960,8 @@
       if (typeof parsed?.range === "string" && FOOTER_CHANGE_RANGES[parsed.range]) {
         footerChangeRange = parsed.range;
       }
+      const separatorEvery = Number(parsed?.separatorEvery);
+      if (FOOTER_SEPARATOR_OPTIONS.has(separatorEvery)) footerSeparatorEvery = separatorEvery;
     } catch (e) {}
   }
 
@@ -5966,7 +5978,11 @@
     try {
       localStorage.setItem(
         FOOTER_CHANGE_STORAGE_KEY,
-        JSON.stringify({ enabled: footerChangeEnabled, range: footerChangeRange })
+        JSON.stringify({
+          enabled: footerChangeEnabled,
+          range: footerChangeRange,
+          separatorEvery: footerSeparatorEvery,
+        })
       );
     } catch (e) {}
   }
@@ -6469,6 +6485,8 @@
     "1d": { label: "1 day", interval: "1d", ms: 24 * 60 * 60 * 1000 },
     "1w": { label: "1 week", interval: "1w", ms: 7 * 24 * 60 * 60 * 1000 },
   };
+  const FOOTER_SEPARATOR_OPTIONS = new Set([3, 5, 7]);
+  let footerSeparatorEvery = 5;
   let footerAddCompactOpen = false;
   let favoriteWallets = [];
   const favoriteMetricsCache = new Map();
@@ -9564,6 +9582,10 @@
     if (currencyBtn) {
       currencyBtn.textContent = `Currency: ${footerPriceCurrency}`;
     }
+    const separatorsBtn = priceContextMenuEl.querySelector('[data-action="toggle-separators"]');
+    if (separatorsBtn) {
+      separatorsBtn.textContent = `Separators every ${footerSeparatorEvery}`;
+    }
     const toggleBtn = priceContextMenuEl.querySelector('[data-action="toggle-change"]');
     if (toggleBtn) {
       toggleBtn.textContent = `Show % change: ${footerChangeEnabled ? "On" : "Off"}`;
@@ -9573,6 +9595,11 @@
       const range = btn.getAttribute("data-range");
       const label = FOOTER_CHANGE_RANGES[range]?.label || btn.textContent.trim();
       btn.textContent = `${footerChangeRange === range ? "✓ " : ""}${label}`;
+    });
+    priceContextMenuEl.querySelectorAll('[data-action="change-separators"]').forEach((btn) => {
+      const count = Number(btn.getAttribute("data-count"));
+      const label = `${count} coins`;
+      btn.textContent = `${footerSeparatorEvery === count ? "✓ " : ""}${label}`;
     });
   }
 
@@ -10177,7 +10204,7 @@
 
       priceListEl.insertBefore(createFooterMarkerEl(), priceListEl.firstChild);
       desired.forEach((coin, idx) => {
-        if ((idx + 1) % 5 !== 0) return;
+        if ((idx + 1) % footerSeparatorEvery !== 0) return;
         if (idx === desired.length - 1) return;
         const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
         if (!item) return;
@@ -10234,6 +10261,7 @@
     if (!items.length) {
       priceFooterWrapEl.classList.remove("rolling");
       priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
+      priceTrackEl.style.animationDuration = "";
       return;
     }
     const tops = new Set(Array.from(items).map((el) => el.offsetTop));
@@ -10243,16 +10271,23 @@
     const shouldRoll = forceRoll || isWrapped || isOverflow;
     priceFooterWrapEl.classList.toggle("rolling", shouldRoll);
     if (shouldRoll) {
+      let scrollDistance = 0;
       const exactDistance = priceListCloneEl ? priceListCloneEl.offsetLeft - priceListEl.offsetLeft : 0;
       if (Number.isFinite(exactDistance) && exactDistance > 0) {
+        scrollDistance = exactDistance;
         priceTrackEl.style.setProperty("--price-scroll-distance", `${exactDistance}px`);
       } else {
         const trackStyle = getComputedStyle(priceTrackEl);
         const listGap = parseFloat(trackStyle.columnGap || trackStyle.gap || "0") || 0;
-        priceTrackEl.style.setProperty("--price-scroll-distance", `${priceListEl.scrollWidth + listGap}px`);
+        scrollDistance = priceListEl.scrollWidth + listGap;
+        priceTrackEl.style.setProperty("--price-scroll-distance", `${scrollDistance}px`);
       }
+      const pxPerSecond = 52;
+      const durationSeconds = Math.max(18, Math.min(42, scrollDistance / pxPerSecond));
+      priceTrackEl.style.animationDuration = `${durationSeconds.toFixed(2)}s`;
     } else {
       priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
+      priceTrackEl.style.animationDuration = "";
     }
   }
 
@@ -17153,6 +17188,14 @@
         const currencies = ["USD", "EUR", "JPY"];
         const idx = currencies.indexOf(footerPriceCurrency);
         setFooterPriceCurrency(currencies[(idx + 1 + currencies.length) % currencies.length], { forceRate: true });
+      } else if (action === "change-separators") {
+        const count = Number(btn.dataset.count);
+        if (FOOTER_SEPARATOR_OPTIONS.has(count)) {
+          footerSeparatorEvery = count;
+          saveFooterChangePrefs();
+          updateFooterChangeMenu();
+          renderFooterPrices();
+        }
       } else if (action === "change-range") {
         const range = btn.dataset.range;
         if (range && FOOTER_CHANGE_RANGES[range]) {
