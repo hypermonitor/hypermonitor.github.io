@@ -9807,7 +9807,7 @@
         FOOTER_PRICE_COLOR_OVERRIDES.get(coin) ??
         FOOTER_PRICE_COLOR_OVERRIDES.get(base);
       if (footerColorOverride) {
-        color = footerColorOverride;
+        color = isLightTheme && base === "XRP" ? "#000000" : footerColorOverride;
       }
       if (priceEl) {
         if (!Number.isFinite(price)) {
