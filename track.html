@@ -3852,13 +3852,9 @@
     @media (max-width: 600px) {
       .price-footer-inner {
         width: 100vw;
-        padding-left: 5.45rem;
+        padding-left: 0.8rem;
         padding-right: 0.8rem;
         gap: 0.45rem;
-      }
-
-      .price-currency-switch {
-        right: calc(100% + 0.28rem);
       }
 
       .price-currency-btn {
@@ -3868,7 +3864,8 @@
     }
 
     .price-brand-wrap {
-      position: relative;
+      display: inline-flex;
+      align-items: center;
       flex: 0 0 auto;
     }
 
@@ -3889,10 +3886,7 @@
       border-radius: 999px;
       border: 1px solid var(--glass-border);
       background: rgba(10, 10, 12, 0.45);
-      position: absolute;
-      right: calc(100% + 0.45rem);
-      top: 50%;
-      transform: translateY(-50%);
+      position: static;
       z-index: 2;
     }
 
@@ -5229,7 +5223,6 @@
         <button class="price-currency-btn" type="button" data-currency="EUR" aria-pressed="false">€</button>
         <button class="price-currency-btn" type="button" data-currency="USD" aria-pressed="true">$</button>
       </div>
-      <img class="price-logo" src="images/logo.png" alt="Hypermonitor" />
     </div>
     <!-- <span class="price-hint">Live prices</span> -->
     <div class="price-ticker" id="priceTicker">
@@ -5559,7 +5552,7 @@
   const WALLET_STAR_CLIENT_KEY = "hypermonitor-star-client-id";
   const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
   const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
-  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "cash:USA500", "xyz:GOLD", "xyz:SILVER", "xyz:MSTR", "xyz:NVDA"];
+  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
   let trackedFooterCoins = [...DEFAULT_FOOTER_COINS];
   const coinNameCache = new Map();
   const coinColorCache = new Map();
@@ -10160,15 +10153,26 @@
 
     priceListEl.querySelectorAll(".price-end-marker").forEach((el) => el.remove());
     if (desired.length) {
-      const endMarkerEl = document.createElement("span");
-      endMarkerEl.className = "price-end-marker";
-      endMarkerEl.setAttribute("aria-hidden", "true");
-      endMarkerEl.innerHTML = `
-        <img src="images/pulse.gif" alt="" />
-        <span>Hypermonitor</span>
-        <img src="images/pulse.gif" alt="" />
-      `;
-      priceListEl.appendChild(endMarkerEl);
+      const createFooterMarkerEl = () => {
+        const markerEl = document.createElement("span");
+        markerEl.className = "price-end-marker";
+        markerEl.setAttribute("aria-hidden", "true");
+        markerEl.innerHTML = `
+          <img src="images/pulse.gif" alt="" />
+          <span>Hypermonitor</span>
+          <img src="images/pulse.gif" alt="" />
+        `;
+        return markerEl;
+      };
+
+      priceListEl.insertBefore(createFooterMarkerEl(), priceListEl.firstChild);
+      desired.forEach((coin, idx) => {
+        if ((idx + 1) % 5 !== 0) return;
+        if (idx === desired.length - 1) return;
+        const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
+        if (!item) return;
+        item.insertAdjacentElement("afterend", createFooterMarkerEl());
+      });
     }
 
     priceListCloneEls.forEach((cloneEl) => {
@@ -10221,9 +10225,14 @@
     const shouldRoll = forceRoll || isWrapped || isOverflow;
     priceFooterWrapEl.classList.toggle("rolling", shouldRoll);
     if (shouldRoll) {
-      const trackStyle = getComputedStyle(priceTrackEl);
-      const listGap = parseFloat(trackStyle.columnGap || trackStyle.gap || "0") || 0;
-      priceTrackEl.style.setProperty("--price-scroll-distance", `${priceListEl.scrollWidth + listGap}px`);
+      const exactDistance = priceListCloneEl ? priceListCloneEl.offsetLeft - priceListEl.offsetLeft : 0;
+      if (Number.isFinite(exactDistance) && exactDistance > 0) {
+        priceTrackEl.style.setProperty("--price-scroll-distance", `${exactDistance}px`);
+      } else {
+        const trackStyle = getComputedStyle(priceTrackEl);
+        const listGap = parseFloat(trackStyle.columnGap || trackStyle.gap || "0") || 0;
+        priceTrackEl.style.setProperty("--price-scroll-distance", `${priceListEl.scrollWidth + listGap}px`);
+      }
     } else {
       priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
     }
