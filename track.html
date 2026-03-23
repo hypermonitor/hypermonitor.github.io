@@ -6387,6 +6387,8 @@
   const walletStarCountCache = new Map();
   const walletStarFetchPromises = new Map();
   const walletStarAdjustPromises = new Map();
+  let startedAtMs = Date.now();
+  let startedAtTimer = null;
 
   let lastComputedUpnlTotal = 0;
   let lastComputedTotalNotional = 0;
@@ -14592,6 +14594,15 @@
     el.style.color = `rgb(${red}, ${green}, ${blue})`;
   }
 
+  function setMetricLogScaledColor(el, value, min = 0, max = 1, invert = false, strength = 99) {
+    if (!el) return;
+    const clamped = Math.max(min, Math.min(max, value));
+    const raw = max === min ? 0 : (clamped - min) / (max - min);
+    const safeStrength = Math.max(1, Number(strength) || 1);
+    const logScaled = Math.log1p(raw * safeStrength) / Math.log1p(safeStrength);
+    setMetricScaledColor(el, logScaled, 0, 1, invert);
+  }
+
   function getScaledColor(value, min = 0, max = 1, invert = false) {
     const n = Number(value);
     if (!Number.isFinite(n)) return "inherit";
@@ -15846,7 +15857,7 @@
       setMetricValue(metricSkillPersistenceEl, metrics.skillPersistence !== null ? formatRatio(metrics.skillPersistence, 2) : "-", null);
 
       if (Number.isFinite(metrics.maxDrawdown)) {
-        setMetricScaledColor(metricMaxDrawdownEl, metrics.maxDrawdown, 0, 2);
+        setMetricLogScaledColor(metricMaxDrawdownEl, metrics.maxDrawdown, 0, 1, true);
       }
       if (Number.isFinite(metrics.sharpe)) {
         setMetricScaledColor(metricSharpeEl, metrics.sharpe, -1, 2);
@@ -16451,6 +16462,31 @@
     applyTheme(initial);
   }
 
+  function formatStartedAgo(ts) {
+    const diffMs = Math.max(0, Date.now() - Number(ts || 0));
+    if (diffMs < 5000) return "Started just now";
+    if (diffMs < 60 * 1000) return `Started ${Math.floor(diffMs / 1000)}s ago`;
+    if (diffMs < 60 * 60 * 1000) return `Started ${Math.floor(diffMs / (60 * 1000))}m ago`;
+    if (diffMs < 24 * 60 * 60 * 1000) return `Started ${Math.floor(diffMs / (60 * 60 * 1000))}h ago`;
+    return `Started ${Math.floor(diffMs / (24 * 60 * 60 * 1000))}d ago`;
+  }
+
+  function renderStartedAt() {
+    if (!startedAtEl) return;
+    const safeTs = Number(startedAtMs || Date.now());
+    const startedDate = new Date(safeTs);
+    const fullTimestamp = startedDate.toLocaleString();
+    startedAtEl.textContent = formatStartedAgo(safeTs);
+    startedAtEl.title = fullTimestamp;
+    startedAtEl.setAttribute("aria-label", `Started ${fullTimestamp}`);
+  }
+
+  function setStartedAt(ts = Date.now()) {
+    startedAtMs = Number(ts || Date.now());
+    renderStartedAt();
+    if (!startedAtTimer) startedAtTimer = setInterval(renderStartedAt, 60000);
+  }
+
   // ✅ add optional options so boot can "replace" instead of "push"
   async function trackWallets(config, { replaceUrl = false } = {}) {
     const wallets = config?.wallets || [];
@@ -16467,7 +16503,7 @@
     currentWallets = walletList;
     primaryWallet = walletList[0];
     updateFavoriteToggle();
-    startedAtEl.textContent = "Started: " + new Date().toLocaleString();
+    setStartedAt();
     setStatus("connecting", "Connecting…");
 
     resetState();
@@ -16532,7 +16568,7 @@
     // ✅ show them in the inputs immediately
     setWalletInputs(initialWallets);
 
-    startedAtEl.textContent = "Started: " + new Date().toLocaleString();
+    setStartedAt();
     setStatus("connecting", "Connecting…");
     updateFavoriteToggle();
 
