@@ -5339,6 +5339,7 @@
   const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
   const SPECIAL_LOGOS = new Map([
     ["ETH", "https://upload.wikimedia.org/wikipedia/commons/f/fd/Ethereum_Logo.png"],
+    ["USDT0", "https://app.hyperliquid.xyz/coins/USDT_spot.svg"],
     ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
     ["COPPER", "https://s3-symbol-logo.tradingview.com/metal/copper--600.png"],
     ["GOLD", "https://s3-symbol-logo.tradingview.com/metal/gold--600.png"],
@@ -10897,10 +10898,17 @@
     }, 0);
   }
 
+  function getSnapshotWithdrawableValue(snapshotLike) {
+    const equityValue = Number(snapshotLike?.summary?.accountValue ?? 0);
+    const marginUsedValue = Number(snapshotLike?.summary?.totalMarginUsed ?? 0);
+    if (currentMarketType === "perp") return equityValue - marginUsedValue;
+    return Number(snapshotLike?.withdrawable ?? 0);
+  }
+
   function getWithdrawableAmount() {
     const snapshots = getActiveSnapshots();
     return Array.from(snapshots.values()).reduce((sum, snap) => {
-      const w = Number(snap?.withdrawable ?? 0);
+      const w = getSnapshotWithdrawableValue(snap);
       return sum + (Number.isFinite(w) ? w : 0);
     }, 0);
   }
@@ -10986,18 +10994,36 @@
               `;
             }
 
+            const perpOverviewUpnlValue = Number(walletTotalsByType.perp.get(item.wallet)?.upnlTotal ?? 0);
+            const overviewUpnlValue =
+              currentMarketType === "spot"
+                ? 0
+                : currentMarketType === "all"
+                  ? perpOverviewUpnlValue
+                  : Number(item.upnlTotal ?? 0);
+
             const rows = [
-              ["Equity", fmtMoney(item.summary.accountValue)],
-              ["Unrealized PnL", formatSignedDollarWithPlus(item.upnlTotal ?? 0)],
-              ["Notional Exposure", fmtMoney(item.summary.totalNtlPos)],
+              { label: "Equity", value: fmtMoney(item.summary.accountValue), valueClass: "money" },
+              {
+                label: "Unrealized PnL",
+                value: formatSignedDollarWithPlus(overviewUpnlValue),
+                valueClass: `money ${
+                  overviewUpnlValue > 0
+                    ? "upnl-pos"
+                    : overviewUpnlValue < 0
+                      ? "upnl-neg"
+                      : ""
+                }`,
+              },
+              { label: "Notional Exposure", value: fmtMoney(item.summary.totalNtlPos), valueClass: "money" },
               (() => {
                 const equityValue = Number(item.summary.accountValue ?? 0);
                 const notionalValue = Number(item.summary.totalNtlPos ?? 0);
                 const collateralValue = equityValue + notionalValue;
-                return ["Collateral", fmtMoney(collateralValue)];
+                return { label: "Collateral", value: fmtMoney(collateralValue), valueClass: "money" };
               })(),
-              ["Margin Used", fmtMoney(item.summary.totalMarginUsed)],
-              ["Withdrawable", fmtMoney(item.withdrawable)],
+              { label: "Margin Used", value: fmtMoney(item.summary.totalMarginUsed), valueClass: "money" },
+              { label: "Withdrawable", value: fmtMoney(getSnapshotWithdrawableValue(item)), valueClass: "money" },
             ];
 
             return `
@@ -11009,9 +11035,9 @@
                 <div class="kv-list">
                   ${rows
                     .map(
-                      ([label, value]) => `
+                      ({ label, value, valueClass }) => `
                         <div class="kv-label">${label}</div>
-                        <div class="kv-value money">${value}</div>
+                        <div class="kv-value ${valueClass || ""}">${value}</div>
                       `
                     )
                     .join("")}
@@ -12314,7 +12340,7 @@
       totals.totalNtlPos += Number(summary.totalNtlPos ?? 0) || 0;
       totals.totalRawUsd += Number(summary.totalRawUsd ?? 0) || 0;
       totals.totalMarginUsed += Number(summary.totalMarginUsed ?? 0) || 0;
-      totals.withdrawable += Number(snap?.withdrawable ?? 0) || 0;
+      totals.withdrawable += getSnapshotWithdrawableValue(snap) || 0;
     });
 
     return [
