@@ -3829,6 +3829,13 @@
       border-top: 1px solid rgba(255, 255, 255, 0.12);
       backdrop-filter: blur(12px);
       box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.4);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .price-footer.pending {
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
     }
 
     .price-footer-inner {
@@ -4241,7 +4248,7 @@
     }
 
     .price-footer.rolling .price-track {
-      animation: priceScroll 24s linear infinite;
+      animation: priceScroll 30s linear infinite;
     }
 
     .price-context-menu {
@@ -4339,14 +4346,14 @@
       display: none;
       align-items: center;
       justify-content: center;
-      width: 30px;
-      height: 30px;
+      width: 26px;
+      height: 26px;
       padding: 0;
       border: 1px solid var(--glass-border);
       background: rgba(10, 10, 12, 0.45);
       color: #e2e8f0;
       border-radius: 999px;
-      font-size: 0.95rem;
+      font-size: 0.82rem;
       line-height: 1;
       cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
@@ -5216,7 +5223,7 @@
   </footer>
 </div>
 
-<div class="price-footer" aria-label="Live prices">
+<div class="price-footer pending" aria-label="Live prices">
   <div class="price-footer-inner" id="priceFooter">
     <div class="price-brand-wrap">
       <div class="price-currency-switch" id="priceCurrencySwitch" role="group" aria-label="Footer price currency">
@@ -6454,6 +6461,7 @@
   let footerChangeEnabled = true;
   let footerChangeRange = "1d";
   let footerChangeRangeKey = "1d";
+  let footerReady = false;
   const FOOTER_CHANGE_STORAGE_KEY = "hypermonitor-footer-change";
   const FOOTER_CHANGE_RANGES = {
     "5m": { label: "5 min", interval: "5m", ms: 5 * 60 * 1000 },
@@ -10039,6 +10047,7 @@
       Array.from(priceListEl.querySelectorAll(".price-item")).map((el) => [el.dataset.coin, el])
     );
     const desired = trackedFooterCoins.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
+    let allFooterPricesReady = desired.length > 0;
 
     existing.forEach((el, coin) => {
       if (!desired.includes(coin)) el.remove();
@@ -10072,6 +10081,7 @@
       const isLightTheme = document.body.classList.contains("light");
       const displayMeta = getDisplayCurrencyMeta(price);
       const displayPrice = displayMeta?.value ?? null;
+      if (!Number.isFinite(displayPrice)) allFooterPricesReady = false;
       const footerPriceCacheKey = `${footerPriceCurrency}:${coin}`;
       let color =
         coinColors[coin] ||
@@ -10182,7 +10192,15 @@
       });
     });
 
-    requestAnimationFrame(updatePriceTickerRolling);
+    requestAnimationFrame(() => {
+      updatePriceTickerRolling();
+      if (!footerReady && priceFooterWrapEl && allFooterPricesReady) {
+        footerReady = true;
+        requestAnimationFrame(() => {
+          priceFooterWrapEl.classList.remove("pending");
+        });
+      }
+    });
 
     desired.forEach(async (coin) => {
       const base = getFooterBase(coin);
