@@ -3935,8 +3935,9 @@
     .price-track {
       display: inline-flex;
       align-items: center;
-      gap: 1.2rem;
+      gap: 0.8rem;
       white-space: nowrap;
+      --price-scroll-distance: 50%;
     }
 
     .price-list {
@@ -4015,6 +4016,29 @@
 
     .price-item .coin-change.upnl-flat {
       color: var(--neutral-blue);
+    }
+
+    .price-end-marker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.88;
+      flex: 0 0 auto;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .price-end-marker img {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      object-fit: contain;
+      display: block;
     }
 
     .price-footer.hide-change .coin-change {
@@ -4307,7 +4331,7 @@
 
     @keyframes priceScroll {
       from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
+      to { transform: translateX(calc(-1 * var(--price-scroll-distance, 50%))); }
     }
 
     .price-controls {
@@ -4315,6 +4339,29 @@
       align-items: center;
       gap: 0.4rem;
       margin-left: auto;
+    }
+
+    .price-add-toggle-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .price-add-toggle-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(18, 18, 24, 0.6);
+      color: #f8fafc;
     }
 
     .price-input {
@@ -4352,6 +4399,23 @@
       color: #f8fafc;
     }
 
+    .price-controls.compact {
+      gap: 0;
+    }
+
+    .price-controls.compact .price-add-toggle-btn {
+      display: inline-flex;
+    }
+
+    .price-controls.compact .price-input,
+    .price-controls.compact .price-add-btn {
+      display: none;
+    }
+
+    .price-controls.compact-open .price-add-toggle-btn {
+      display: none;
+    }
+
     body.light .price-footer {
       background: rgba(255, 255, 255, 0.9);
       border-top-color: #e5e7eb;
@@ -4378,8 +4442,24 @@
       box-shadow: inset 0 0 0 1px #cbd5f5;
     }
 
+    body.light .price-add-toggle-btn {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #0f172a;
+    }
+
+    body.light .price-add-toggle-btn:hover {
+      border-color: #d1d5db;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
     body.light .price-item {
       color: #0f172a;
+    }
+
+    body.light .price-end-marker {
+      color: #475569;
     }
 
     body.light .price-input {
@@ -5156,9 +5236,11 @@
       <div class="price-track" id="priceTrack">
         <div class="price-list" id="priceList"></div>
         <div class="price-list clone" id="priceListClone" aria-hidden="true"></div>
+        <div class="price-list clone" id="priceListClone2" aria-hidden="true"></div>
       </div>
     </div>
-    <div class="price-controls">
+    <div class="price-controls" id="priceControls">
+      <button id="priceAddToggleBtn" class="price-add-toggle-btn" type="button" aria-label="Add coin">+</button>
       <input id="priceAddInput" class="price-input" type="text" placeholder="Add coin" autocomplete="off" />
       <button id="priceAddBtn" class="price-add-btn" type="button">Add</button>
     </div>
@@ -5267,8 +5349,12 @@
   const priceTrackEl = document.getElementById("priceTrack");
   const priceListEl = document.getElementById("priceList");
   const priceListCloneEl = document.getElementById("priceListClone");
+  const priceListClone2El = document.getElementById("priceListClone2");
+  const priceListCloneEls = [priceListCloneEl, priceListClone2El].filter(Boolean);
+  const priceControlsEl = document.getElementById("priceControls");
   const priceAddInputEl = document.getElementById("priceAddInput");
   const priceAddBtnEl = document.getElementById("priceAddBtn");
+  const priceAddToggleBtnEl = document.getElementById("priceAddToggleBtn");
   const priceContextMenuEl = document.getElementById("priceContextMenu");
   const favoritesBtnEl = document.getElementById("favoritesBtn");
   const favoritesPanelBtnEl = document.getElementById("favoritesPanelBtn");
@@ -6382,6 +6468,7 @@
     "1d": { label: "1 day", interval: "1d", ms: 24 * 60 * 60 * 1000 },
     "1w": { label: "1 week", interval: "1w", ms: 7 * 24 * 60 * 60 * 1000 },
   };
+  let footerAddCompactOpen = false;
   let favoriteWallets = [];
   const favoriteMetricsCache = new Map();
   const walletStarCountCache = new Map();
@@ -9719,7 +9806,7 @@
 
   function renderFooterPrices() {
     if (!priceFooterEl) return;
-    if (!priceListEl || !priceListCloneEl) return;
+    if (!priceListEl || !priceListCloneEls.length) return;
     if (footerPriceCurrency === "EUR") {
       ensureFooterEurUsdRate();
     } else if (footerPriceCurrency === "JPY") {
@@ -10071,9 +10158,24 @@
       }
     });
 
-    priceListCloneEl.innerHTML = priceListEl.innerHTML;
-    priceListCloneEl.querySelectorAll(".price-item").forEach((item) => {
-      item.removeAttribute("draggable");
+    priceListEl.querySelectorAll(".price-end-marker").forEach((el) => el.remove());
+    if (desired.length) {
+      const endMarkerEl = document.createElement("span");
+      endMarkerEl.className = "price-end-marker";
+      endMarkerEl.setAttribute("aria-hidden", "true");
+      endMarkerEl.innerHTML = `
+        <img src="images/pulse.gif" alt="" />
+        <span>Hypermonitor</span>
+        <img src="images/pulse.gif" alt="" />
+      `;
+      priceListEl.appendChild(endMarkerEl);
+    }
+
+    priceListCloneEls.forEach((cloneEl) => {
+      cloneEl.innerHTML = priceListEl.innerHTML;
+      cloneEl.querySelectorAll(".price-item").forEach((item) => {
+        item.removeAttribute("draggable");
+      });
     });
 
     requestAnimationFrame(updatePriceTickerRolling);
@@ -10097,23 +10199,34 @@
       saveCoinColorCache();
       const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
       if (item) item.style.color = displayColor;
-      const cloneItem = priceListCloneEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
-      if (cloneItem) cloneItem.style.color = displayColor;
+      priceListCloneEls.forEach((cloneEl) => {
+        const cloneItem = cloneEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
+        if (cloneItem) cloneItem.style.color = displayColor;
+      });
     });
   }
 
   function updatePriceTickerRolling() {
-    if (!priceFooterWrapEl || !priceListEl || !priceTickerEl) return;
+    if (!priceFooterWrapEl || !priceListEl || !priceTickerEl || !priceTrackEl) return;
     const items = priceListEl.querySelectorAll(".price-item");
     if (!items.length) {
       priceFooterWrapEl.classList.remove("rolling");
+      priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
       return;
     }
     const tops = new Set(Array.from(items).map((el) => el.offsetTop));
     const isWrapped = tops.size > 1;
     const isOverflow = priceListEl.scrollWidth > priceTickerEl.clientWidth + 4;
     const forceRoll = items.length >= 12;
-    priceFooterWrapEl.classList.toggle("rolling", forceRoll || isWrapped || isOverflow);
+    const shouldRoll = forceRoll || isWrapped || isOverflow;
+    priceFooterWrapEl.classList.toggle("rolling", shouldRoll);
+    if (shouldRoll) {
+      const trackStyle = getComputedStyle(priceTrackEl);
+      const listGap = parseFloat(trackStyle.columnGap || trackStyle.gap || "0") || 0;
+      priceTrackEl.style.setProperty("--price-scroll-distance", `${priceListEl.scrollWidth + listGap}px`);
+    } else {
+      priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
+    }
   }
 
   async function resolveCoinSymbol(input) {
@@ -10165,6 +10278,31 @@
     } else {
       priceAddBtnEl.textContent = "Add";
     }
+  }
+
+  function isCompactFooterAddMode() {
+    return true;
+  }
+
+  function syncFooterAddControls() {
+    if (!priceControlsEl) return;
+    const compact = isCompactFooterAddMode();
+    priceControlsEl.classList.toggle("compact", compact && !footerAddCompactOpen);
+    priceControlsEl.classList.toggle("compact-open", compact && footerAddCompactOpen);
+  }
+
+  function openFooterAddControls() {
+    if (!isCompactFooterAddMode()) return;
+    footerAddCompactOpen = true;
+    syncFooterAddControls();
+    requestAnimationFrame(() => priceAddInputEl?.focus());
+  }
+
+  function closeFooterAddControls(force = false) {
+    if (!isCompactFooterAddMode()) return;
+    if (!force && String(priceAddInputEl?.value || "").trim()) return;
+    footerAddCompactOpen = false;
+    syncFooterAddControls();
   }
 
   let priceContextCoin = null;
@@ -16555,6 +16693,7 @@
     loadCoinNameCache();
     loadCoinColorCache();
     syncFooterCurrencyButtons();
+    syncFooterAddControls();
 
     // ✅ Prefer: URL wallet > last saved wallet > default
     const urlWallets = uniqueWallets((getWalletsFromUrl() || []).filter(isValidAddress));
@@ -16641,9 +16780,20 @@
   if (priceAddBtnEl) {
     priceAddBtnEl.addEventListener("click", async () => {
       const value = priceAddInputEl?.value || "";
+      if (isCompactFooterAddMode() && !footerAddCompactOpen) {
+        openFooterAddControls();
+        return;
+      }
       await toggleFooterCoin(value);
       if (priceAddInputEl) priceAddInputEl.value = "";
       updateFooterActionLabel();
+      closeFooterAddControls(true);
+    });
+  }
+
+  if (priceAddToggleBtnEl) {
+    priceAddToggleBtnEl.addEventListener("click", () => {
+      openFooterAddControls();
     });
   }
 
@@ -16653,10 +16803,18 @@
         await toggleFooterCoin(priceAddInputEl.value);
         priceAddInputEl.value = "";
         updateFooterActionLabel();
+        closeFooterAddControls(true);
+      } else if (e.key === "Escape") {
+        priceAddInputEl.value = "";
+        updateFooterActionLabel();
+        closeFooterAddControls(true);
       }
     });
 
     priceAddInputEl.addEventListener("input", updateFooterActionLabel);
+    priceAddInputEl.addEventListener("blur", () => {
+      setTimeout(() => closeFooterAddControls(false), 0);
+    });
   }
 
   if (priceListEl) {
@@ -17080,6 +17238,12 @@
     hidePriceContextMenu();
   });
 
+  document.addEventListener("click", (e) => {
+    if (!priceControlsEl || !isCompactFooterAddMode()) return;
+    if (e.target.closest("#priceControls")) return;
+    closeFooterAddControls(false);
+  });
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") hidePriceContextMenu();
   });
@@ -17089,6 +17253,8 @@
 
   window.addEventListener("resize", () => {
     updatePriceTickerRolling();
+    if (!isCompactFooterAddMode()) footerAddCompactOpen = false;
+    syncFooterAddControls();
   });
 
   if (addWalletBtnEl) {
