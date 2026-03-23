@@ -5851,7 +5851,20 @@
     } else if (footerPriceCurrency === "JPY") {
       ensureFooterUsdJpyRate(forceRate);
     }
+    refreshCurrencyDisplay();
+  }
+
+  function refreshCurrencyDisplay() {
     renderFooterPrices();
+    updateChartTitleValues();
+    renderPositions(currentAssetPositions, { preserveBase: true });
+    renderOpenOrders();
+    renderCanceledOrders();
+    renderFills();
+    if (historicalOrdersLoaded) renderHistoricalOrders();
+    if (historicalFillsLoaded) renderHistoricalFills();
+    if (thirdPanelMode === "transfers") refreshTransfersPanel(currentRangeKey);
+    updatePerformanceMetrics(currentRangeKey);
   }
 
   function saveFooterCoins() {
@@ -6950,15 +6963,27 @@
     if (next === "transfers") refreshTransfersPanel(currentRangeKey);
   }
 
+  function getDisplayCurrencyMeta(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    if (footerPriceCurrency === "EUR" && Number.isFinite(footerEurUsdRate) && footerEurUsdRate > 0) {
+      return { value: n / footerEurUsdRate, symbol: "€", code: "EUR" };
+    }
+    if (footerPriceCurrency === "JPY" && Number.isFinite(footerUsdJpyRate) && footerUsdJpyRate > 0) {
+      return { value: n * footerUsdJpyRate, symbol: "¥", code: "JPY" };
+    }
+    return { value: n, symbol: "$", code: "USD" };
+  }
+
   function fmtMoney(v, decimals = 2) {
-    const n = Number(v);
-    if (Number.isNaN(n)) return "";
-    const sign = n < 0 ? "-" : "";
-    const abs = Math.abs(n).toLocaleString(undefined, {
+    const meta = getDisplayCurrencyMeta(v);
+    if (!meta) return "";
+    const sign = meta.value < 0 ? "-" : "";
+    const abs = Math.abs(meta.value).toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
-    return `${sign}$${abs}`;
+    return `${sign}${meta.symbol}${abs}`;
   }
 
   function getCssVar(name, fallback) {
@@ -7290,9 +7315,9 @@
 
   function fmtPrice(v) {
     if (v === null || v === undefined) return "";
-    const n = Number(v);
-    if (Number.isNaN(n)) return String(v);
-    const abs = Math.abs(n);
+    const meta = getDisplayCurrencyMeta(v);
+    if (!meta) return String(v);
+    const abs = Math.abs(meta.value);
     let decimals = 0;
     if (abs < 1) {
       // Continue the same granularity trend below 1 (up to 8 dp).
@@ -7303,48 +7328,48 @@
     else if (abs < 1000) decimals = 2;
     else if (abs < 10000) decimals = 1;
     else decimals = 0;
-    const formatted = n.toLocaleString(undefined, {
+    const formatted = meta.value.toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
       useGrouping: true,
     });
-    return `$${formatted}`;
+    return `${meta.symbol}${formatted}`;
   }
 
   function fmtPriceFixed(v, decimals) {
     if (v === null || v === undefined) return "";
-    const n = Number(v);
-    if (Number.isNaN(n)) return String(v);
-    const formatted = n.toLocaleString(undefined, {
+    const meta = getDisplayCurrencyMeta(v);
+    if (!meta) return String(v);
+    const formatted = meta.value.toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
       useGrouping: true,
     });
-    return `$${formatted}`;
+    return `${meta.symbol}${formatted}`;
   }
 
   function fmtLimitPrice(v) { return fmtPrice(v); }
 
   function formatSignedDollar(v, decimals = 2) {
-    const n = Number(v);
-    if (Number.isNaN(n)) return "";
-    const abs = Math.abs(n).toLocaleString(undefined, {
+    const meta = getDisplayCurrencyMeta(v);
+    if (!meta) return "";
+    const abs = Math.abs(meta.value).toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
-    return n < 0 ? "-$" + abs : "$" + abs;
+    return meta.value < 0 ? `-${meta.symbol}${abs}` : `${meta.symbol}${abs}`;
   }
 
   function formatSignedDollarWithPlus(v, decimals = 2) {
-    const n = Number(v);
-    if (Number.isNaN(n)) return "";
-    const abs = Math.abs(n).toLocaleString(undefined, {
+    const meta = getDisplayCurrencyMeta(v);
+    if (!meta) return "";
+    const abs = Math.abs(meta.value).toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
-    if (n > 0) return "+$" + abs;
-    if (n < 0) return "-$" + abs;
-    return "$" + abs;
+    if (meta.value > 0) return `+${meta.symbol}${abs}`;
+    if (meta.value < 0) return `-${meta.symbol}${abs}`;
+    return `${meta.symbol}${abs}`;
   }
 
   function formatLeverage(value) {
@@ -9902,18 +9927,8 @@
       const price = getLivePriceForCoin(coin);
       const base = getFooterBase(coin);
       const isLightTheme = document.body.classList.contains("light");
-      const displayPrice =
-        footerPriceCurrency === "EUR"
-          ? (Number.isFinite(price) && Number.isFinite(footerEurUsdRate) && footerEurUsdRate > 0
-              ? price / footerEurUsdRate
-              : null)
-          : footerPriceCurrency === "JPY"
-            ? (Number.isFinite(price) && Number.isFinite(footerUsdJpyRate) && footerUsdJpyRate > 0
-                ? price * footerUsdJpyRate
-                : null)
-            : price;
-      const pricePrefix =
-        footerPriceCurrency === "EUR" ? "€" : footerPriceCurrency === "JPY" ? "¥" : "$";
+      const displayMeta = getDisplayCurrencyMeta(price);
+      const displayPrice = displayMeta?.value ?? null;
       const footerPriceCacheKey = `${footerPriceCurrency}:${coin}`;
       let color =
         coinColors[coin] ||
@@ -9955,13 +9970,13 @@
             else decimals = 8;
             coinPriceDecimals.set(footerPriceCacheKey, decimals);
           }
-          const formattedNumber = fmtPriceFixed(displayPrice, decimals).replace(/^[€$£¥]+\s*/, "");
-          const formatted = `${pricePrefix}${formattedNumber}`;
+          const formatted = fmtPriceFixed(price, decimals);
           priceEl.textContent = formatted;
           lastFooterPrices.set(footerPriceCacheKey, formatted);
         } else {
-          const cached = String(lastFooterPrices.get(footerPriceCacheKey) || "").replace(/^[€$£¥]+\s*/, "");
-          priceEl.textContent = cached ? `${pricePrefix}${cached}` : `${pricePrefix}--`;
+          const fallbackSymbol =
+            footerPriceCurrency === "EUR" ? "€" : footerPriceCurrency === "JPY" ? "¥" : "$";
+          priceEl.textContent = lastFooterPrices.get(footerPriceCacheKey) || `${fallbackSymbol}--`;
         }
         priceEl.style.color = color;
       }
@@ -15369,7 +15384,7 @@
       if (Number.isFinite(rate) && rate > 0) {
         footerEurUsdRate = rate;
         footerEurUsdFetchedAt = Date.now();
-        renderFooterPrices();
+        refreshCurrencyDisplay();
       }
       return rate;
     })();
@@ -15395,7 +15410,7 @@
       if (Number.isFinite(rate) && rate > 0) {
         footerUsdJpyRate = rate;
         footerUsdJpyFetchedAt = Date.now();
-        renderFooterPrices();
+        refreshCurrencyDisplay();
       }
       return rate;
     })();
