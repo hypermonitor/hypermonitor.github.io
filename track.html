@@ -1148,6 +1148,10 @@
       height: 30px;
     }
 
+    .header-right-top .status-pill {
+      display: none;
+    }
+
     .status-dot {
       width: 0.55rem;
       height: 0.55rem;
@@ -1237,24 +1241,24 @@
 
       .positions-card th,
       .positions-card td {
-        font-size: clamp(0.69rem, 0.57vw, 0.88rem);
-        padding: 0.2rem 0.14rem;
+        font-size: clamp(0.76rem, 0.62vw, 0.96rem);
+        padding: 0.24rem 0.16rem;
       }
 
       .positions-card th:nth-child(1),
-      .positions-card td:nth-child(1) { width: 17%; }
+      .positions-card td:nth-child(1) { width: 14%; }
       .positions-card th:nth-child(2),
       .positions-card td:nth-child(2) { width: 11%; }
       .positions-card th:nth-child(3),
       .positions-card td:nth-child(3) { width: 14%; }
       .positions-card th:nth-child(4),
-      .positions-card td:nth-child(4) { width: 15%; }
+      .positions-card td:nth-child(4) { width: 16%; }
       .positions-card th:nth-child(5),
       .positions-card td:nth-child(5) { width: 8%; }
       .positions-card th:nth-child(6),
-      .positions-card td:nth-child(6) { width: 12%; }
+      .positions-card td:nth-child(6) { width: 13%; }
       .positions-card th:nth-child(7),
-      .positions-card td:nth-child(7) { width: 15%; }
+      .positions-card td:nth-child(7) { width: 16%; }
       .positions-card th:nth-child(8),
       .positions-card td:nth-child(8) { width: 8%; }
 
@@ -1271,13 +1275,13 @@
       }
 
       .positions-card .asset-cell {
-        gap: 0.15rem;
+        gap: 0.22rem;
       }
 
       .positions-card .coinIcon,
       .positions-card .coinFallback {
-        width: 14px;
-        height: 14px;
+        width: 15px;
+        height: 15px;
       }
 
       .positions-card .price-stack {
@@ -1291,7 +1295,8 @@
 
       .positions-card .liq-distance {
         min-width: 0;
-        width: 100%;
+        width: 92%;
+        max-width: 120px;
       }
 
       .positions-card .current-price,
@@ -1300,7 +1305,7 @@
       .positions-card .size-ticker,
       .positions-card .dex-tag,
       .positions-card .wallet-tag {
-        font-size: 0.97em;
+        font-size: 1em;
       }
 
       .positions-card .pill {
@@ -3895,8 +3900,13 @@
 
     .price-item .coin-price {
       font-weight: 400;
-      letter-spacing: 0.02em;
+      font-size: 0.76rem;
+      letter-spacing: 0.01em;
       font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
       display: inline;
       min-width: 0;
       text-align: left;
@@ -3914,11 +3924,11 @@
     }
 
     .price-item .coin-change.upnl-pos {
-      color: rgba(74, 222, 128, 0.85);
+      color: var(--accent);
     }
 
     .price-item .coin-change.upnl-neg {
-      color: rgba(251, 113, 133, 0.85);
+      color: var(--danger);
     }
 
     .price-footer.hide-change .coin-change {
@@ -3951,11 +3961,11 @@
       padding: 0;
       pointer-events: auto;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      opacity: 0.6;
+      opacity: 0.82;
       transition: opacity 0.2s ease;
     }
 
-    .position-row:hover .pnl-share-btn,
+    .pnl-share-btn:hover,
     .pnl-share-btn:focus-visible {
       opacity: 1;
     }
@@ -5270,11 +5280,28 @@
 
   const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
   const SPECIAL_LOGOS = new Map([
+    ["ETH", "https://upload.wikimedia.org/wikipedia/commons/f/fd/Ethereum_Logo.png"],
     ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
     ["COPPER", "https://s3-symbol-logo.tradingview.com/metal/copper--600.png"],
     ["GOLD", "https://s3-symbol-logo.tradingview.com/metal/gold--600.png"],
     ["SILVER", "https://s3-symbol-logo.tradingview.com/metal/silver--600.png"],
   ]);
+  const FOOTER_SPECIAL_LOGOS = new Map([
+    ["HYPE", "https://hyperfoundation.org/landing/blob_green.gif"],
+    ["LINK", "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif"],
+    ["XRP", "https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif"],
+    ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
+  ]);
+  const FOOTER_CIRCLE_LOGOS = new Set(["XRP"]);
+  const FOOTER_PRICE_COLOR_OVERRIDES = new Map([
+    ["BTC", "#f7931a"],
+    ["GOLD", "#f3c95a"],
+    ["SILVER", "#e3e8ef"],
+    ["SP500", "#e04f5f"],
+    ["USA500", "#e04f5f"],
+    ["XRP", "#ffffff"],
+  ]);
+  const GLOBAL_SPECIAL_LOGO_PRIORITY = new Set(["USA500"]);
   const DOMAIN_LOGOS = new Map([
     ["NVDA", "https://logo.clearbit.com/nvidia.com"],
     ["MSTR", "https://logo.clearbit.com/microstrategy.com"],
@@ -5333,6 +5360,7 @@
   const coinColorPending = new Set();
   const coinPriceDecimals = new Map();
   const lastFooterPrices = new Map();
+  let lastManualMidRefreshRequestMs = 0;
   let latestLiveEquityValue = null;
   let latestLivePnlValue = null;
   let latestBaseEquityValue = null;
@@ -8623,6 +8651,15 @@
       addSymbolCandidates(baseSymbol);
     };
 
+    const shouldPrioritizeSpecialLogo = [cleanName, rawName].some((name) => {
+      const { base } = splitDexCoin(name);
+      const upper = String(base || name || "").trim().toUpperCase();
+      return GLOBAL_SPECIAL_LOGO_PRIORITY.has(upper);
+    });
+
+    const specialLogo = getSpecialLogoUrl(rawName, cleanName);
+    if (shouldPrioritizeSpecialLogo && specialLogo) candidates.push(specialLogo);
+
     // Prefer exact prefixed Hyperliquid logos for HIP-3/non-crypto assets.
     addPrefixedCandidates(cleanName);
     addPrefixedCandidates(rawName);
@@ -8631,8 +8668,7 @@
     addWrappedSpotFallback(cleanName);
     addWrappedSpotFallback(rawName);
 
-    const specialLogo = getSpecialLogoUrl(rawName, cleanName);
-    if (specialLogo) candidates.push(specialLogo);
+    if (!shouldPrioritizeSpecialLogo && specialLogo) candidates.push(specialLogo);
     addSymbolCandidates(rawName);
     addSymbolCandidates(cleanName);
 
@@ -8754,6 +8790,29 @@
         referrerpolicy="no-referrer"
         onload="window.__logoOk('${safeKey}', this)"
         onerror="window.__logoErr('${safeKey}', this, '${letter}')"
+      />
+    `;
+  }
+
+  function footerCoinIconHtml(rawName, cleanName) {
+    const normalized = normalizeFooterCoinValue(rawName || cleanName);
+    const base = getFooterBase(normalized);
+    const footerLogoUrl = FOOTER_SPECIAL_LOGOS.get(base);
+    if (!footerLogoUrl) return coinIconHtml(rawName, cleanName);
+    const coinKey = xmlEscape(rawName || cleanName || "");
+    const label = xmlEscape(cleanName || rawName || "");
+    const extraStyle = FOOTER_CIRCLE_LOGOS.has(base) ? ' style="border-radius:50%;"' : "";
+    return `
+      <img
+        class="coinIcon coin-info-trigger"
+        src="${footerLogoUrl}"
+        alt="${label}"
+        data-logo-key="${xmlEscape(normalized)}"
+        data-coin-key="${coinKey}"
+        data-coin-label="${label}"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        ${extraStyle}
       />
     `;
   }
@@ -9031,7 +9090,18 @@
 
   function getLivePriceForCoin(raw) {
     const { dex, base } = splitDexCoin(raw);
-    const candidates = [raw, base, normalizeCoin(raw), normalizeCoin(base)];
+    const candidates = [
+      raw,
+      normalizeFooterCoinValue(raw),
+      base,
+      normalizeCoin(raw),
+      normalizeCoin(base),
+    ];
+    if (!dex && base && !HYPERLIQUID_TICKERS.has(String(base).toUpperCase())) {
+      getPrefixedCandidates(base).forEach((prefixed) => {
+        candidates.push(prefixed, normalizeFooterCoinValue(prefixed), normalizeCoin(prefixed));
+      });
+    }
     for (const key of candidates) {
       if (!key) continue;
       const px = liveMids.get(key);
@@ -9277,6 +9347,13 @@
     requestLivePositionsRender();
   }
 
+  function requestManualMidRefresh() {
+    const now = Date.now();
+    if (now - lastManualMidRefreshRequestMs < 5000) return;
+    lastManualMidRefreshRequestMs = now;
+    refreshManualMids();
+  }
+
   async function primeManualMidsForFooter() {
     const manualCoins = trackedFooterCoins.filter((coin) => coin.includes(":"));
     if (!manualCoins.length) return;
@@ -9506,7 +9583,7 @@
       "ENA": "#3a3a3a",
       "ENS": "#a0a8d4",
       "ETC": "#3ab83a",
-      "ETH": "#8c8c8c",
+      "ETH": "#627eea",
       "ETHFI": "#29bcfa",
       "FARTCOIN": "#9b9b9b",
       "FET": "#202944",
@@ -9693,7 +9770,7 @@
         item.dataset.coin = coin;
         item.setAttribute("draggable", "true");
         item.innerHTML = `
-          ${coinIconHtml(coin, coin)}
+          ${footerCoinIconHtml(coin, coin)}
           <span class="coin-price">--</span>
           <span class="coin-change">(--%)</span>
         `;
@@ -9722,7 +9799,21 @@
       } else if (isLightTheme && isColorTooLight(color)) {
         color = "#0f172a";
       }
+      const footerColorOverride =
+        FOOTER_PRICE_COLOR_OVERRIDES.get(coin) ??
+        FOOTER_PRICE_COLOR_OVERRIDES.get(base);
+      if (footerColorOverride) {
+        color = footerColorOverride;
+      }
       if (priceEl) {
+        if (!Number.isFinite(price)) {
+          const retryCoins = coin.includes(":") ? [normalizeFooterCoinValue(coin)] : getPrefixedCandidates(base);
+          retryCoins.forEach((retryCoin) => {
+            if (retryCoin) manualMidCoins.add(normalizeFooterCoinValue(retryCoin));
+          });
+          ensureManualMidTimer();
+          requestManualMidRefresh();
+        }
         if (Number.isFinite(price)) {
           let decimals = coinPriceDecimals.get(coin);
           if (decimals === undefined) {
@@ -9754,11 +9845,13 @@
         }
         const changePct = getFooterChangePct(coin);
         if (Number.isFinite(changePct)) {
-          changeEl.textContent = `(${formatSignedPercent(changePct, 2)})`;
+          const triangle = changePct > 0 ? "▲" : changePct < 0 ? "▼" : "";
+          const pctText = formatPercent(Math.abs(changePct), 2);
+          changeEl.textContent = triangle ? `${triangle} ${pctText}` : pctText;
           changeEl.classList.toggle("upnl-pos", changePct > 0);
           changeEl.classList.toggle("upnl-neg", changePct < 0);
         } else {
-          changeEl.textContent = "(--%)";
+          changeEl.textContent = "--%";
           changeEl.classList.remove("upnl-pos", "upnl-neg");
         }
       }
@@ -9772,7 +9865,14 @@
     requestAnimationFrame(updatePriceTickerRolling);
 
     desired.forEach(async (coin) => {
-      if (coinColors[coin] || coinColorCache.has(coin) || coinColorPending.has(coin)) return;
+      const base = getFooterBase(coin);
+      if (
+        FOOTER_PRICE_COLOR_OVERRIDES.has(coin) ||
+        FOOTER_PRICE_COLOR_OVERRIDES.has(base) ||
+        coinColors[coin] ||
+        coinColorCache.has(coin) ||
+        coinColorPending.has(coin)
+      ) return;
       coinColorPending.add(coin);
       const color = await extractDominantColorFromLogo(coin);
       coinColorPending.delete(coin);
