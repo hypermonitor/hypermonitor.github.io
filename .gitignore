@@ -1,5 +1,12 @@
 .DS_Store
+workers/
 workers/wallet-stars/.wrangler/cache/wrangler-account.json
+workers/*/.wrangler/
+workers/*/.dev.vars
+workers/*/.venv/
+workers/*/tmp/
+__pycache__/
+*.pyc
 workers/wallet-stars/migrations/0001_init.sql
 workers/wallet-stars/README.md
 workers/wallet-stars/src/index.js
