@@ -1230,6 +1230,13 @@
       min-width: 100%;
     }
 
+    .positions-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
     @media (min-width: 901px) {
       .positions-card {
         overflow-x: hidden !important;
@@ -1332,6 +1339,15 @@
     @media (max-width: 900px) {
       .positions-card {
         grid-column: span 1;
+        min-width: 100%;
+      }
+
+      .positions-table-wrap {
+        overflow-x: auto;
+      }
+
+      .positions-card table {
+        width: max-content;
         min-width: 100%;
       }
     }
@@ -1665,10 +1681,10 @@
       justify-self: center;
     }
 
-    #liveLayout > .section-title > .orders-started {
-      justify-self: end;
-      text-align: right;
-    }
+      #liveLayout > .section-title > .orders-started {
+        justify-self: end;
+        text-align: right;
+      }
 
     #historyLayout > .section-title {
       display: grid;
@@ -1851,6 +1867,9 @@
       background: transparent;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+      font-size: 0.67rem;
+      opacity: 0.68;
+      letter-spacing: 0.01em;
     }
 
     .orders-started:empty {
@@ -3830,6 +3849,24 @@
       }
     }
 
+    @media (max-width: 600px) {
+      .price-footer-inner {
+        width: 100vw;
+        padding-left: 5.45rem;
+        padding-right: 0.8rem;
+        gap: 0.45rem;
+      }
+
+      .price-currency-switch {
+        right: calc(100% + 0.28rem);
+      }
+
+      .price-currency-btn {
+        padding: 0.16rem 0.38rem;
+        font-size: 0.58rem;
+      }
+    }
+
     .price-brand-wrap {
       position: relative;
       flex: 0 0 auto;
@@ -4321,6 +4358,26 @@
       box-shadow: 0 -12px 24px rgba(15, 23, 42, 0.08);
     }
 
+    body.light .price-currency-switch {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    body.light .price-currency-btn {
+      color: #475569;
+    }
+
+    body.light .price-currency-btn:hover {
+      color: #0f172a;
+    }
+
+    body.light .price-currency-btn.active {
+      background: #f8fafc;
+      color: #0f172a;
+      box-shadow: inset 0 0 0 1px #cbd5f5;
+    }
+
     body.light .price-item {
       color: #0f172a;
     }
@@ -4396,12 +4453,12 @@
       </div>
     </div>
 
-    <div class="header-right">
+      <div class="header-right">
       <div class="header-right-top">
-        <button id="themeToggle" class="theme-toggle-btn">☀️</button>
         <button id="favoritesPanelBtn" class="theme-toggle-btn favorites-panel-btn" type="button" aria-label="Favorite wallets" title="Favorite wallets">
           ★
         </button>
+        <button id="themeToggle" class="theme-toggle-btn">☼</button>
         <div class="status-pill">
           <span id="statusDot" class="status-dot"></span>
           <span id="statusText"></span>
@@ -4486,40 +4543,42 @@
         </div>
         <button id="positionsTimelineLiveBtn" class="positions-timeline-live" type="button" disabled>Live</button>
       </div>
-      <table>
-        <thead>
-        <tr>
-          <th class="sortable" data-sort="asset">Asset</th>
-          <th class="sortable" data-sort="side">Side</th>
-          <th class="sortable" data-sort="size">Size</th>
-          <th class="sortable" data-sort="price">Price</th>
-          <th class="desktop-only sortable" data-sort="age">Age</th>
-          <th class="desktop-only sortable" data-sort="upnl">Unrealized PnL</th>
-          <th class="desktop-only sortable" data-sort="liq">Liq Distance</th>
-          <th class="desktop-only sortable" data-sort="funding">Funding</th>
-          <th class="mobile-only sortable" data-sort="upnl">PnL</th>
-        </tr>
-        </thead>
-        <tbody id="positionsBody">
-        <tr class="loading-row mobile-only">
-          <td class="muted">Loading…</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr class="loading-row desktop-only">
-          <td class="muted">Loading…</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-        </tbody>
-      </table>
+      <div class="positions-table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th class="sortable" data-sort="asset">Asset</th>
+            <th class="sortable" data-sort="side">Side</th>
+            <th class="sortable" data-sort="size">Size</th>
+            <th class="sortable" data-sort="price">Price</th>
+            <th class="desktop-only sortable" data-sort="age">Age</th>
+            <th class="desktop-only sortable" data-sort="upnl">Unrealized PnL</th>
+            <th class="desktop-only sortable" data-sort="liq">Liq Distance</th>
+            <th class="desktop-only sortable" data-sort="funding">Funding</th>
+            <th class="mobile-only sortable" data-sort="upnl">PnL</th>
+          </tr>
+          </thead>
+          <tbody id="positionsBody">
+          <tr class="loading-row mobile-only">
+            <td class="muted">Loading…</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr class="loading-row desktop-only">
+            <td class="muted">Loading…</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </div>
 
@@ -5354,6 +5413,7 @@
   const FOOTER_CIRCLE_LOGOS = new Set(["XRP"]);
   const FOOTER_PRICE_COLOR_OVERRIDES = new Map([
     ["BTC", "#f7931a"],
+    ["SOL", "#8173d3"],
     ["GOLD", "#f3c95a"],
     ["SILVER", "#e3e8ef"],
     ["SP500", "#e04f5f"],
@@ -9946,7 +10006,12 @@
         FOOTER_PRICE_COLOR_OVERRIDES.get(coin) ??
         FOOTER_PRICE_COLOR_OVERRIDES.get(base);
       if (footerColorOverride) {
-        color = isLightTheme && base === "XRP" ? "#000000" : footerColorOverride;
+        color =
+          isLightTheme && base === "XRP"
+            ? "#000000"
+            : isLightTheme && base === "SILVER"
+              ? "#6b7280"
+              : footerColorOverride;
       }
       if (priceEl) {
         if (!Number.isFinite(price)) {
@@ -16366,10 +16431,10 @@
     const bodyEl = document.body;
     if (theme === "light") {
       bodyEl.classList.add("light");
-      themeToggleBtn.textContent = "☀️";
+      themeToggleBtn.textContent = "☼";
     } else {
       bodyEl.classList.remove("light");
-      themeToggleBtn.textContent = "🌙";
+      themeToggleBtn.textContent = "◐";
     }
     try { localStorage.setItem("hypermonitor-theme", theme); } catch (e) {}
     updateSpinnerForTheme(theme);
