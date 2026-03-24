@@ -58,10 +58,10 @@
       padding: 0;
       background-color: var(--bg);
       background-image:
-        radial-gradient(circle at 16% 18%, rgba(0, 180, 216, 0.2), transparent 31%),
-        radial-gradient(circle at 80% 12%, rgba(0, 112, 243, 0.22), transparent 35%),
-        radial-gradient(circle at 56% 66%, rgba(45, 212, 191, 0.14), transparent 34%),
-        linear-gradient(145deg, #06070b 0%, #0b0b0f 36%, #09111a 70%, #081712 100%);
+        radial-gradient(circle at 16% 18%, rgba(0, 180, 216, 0.1), transparent 30%),
+        radial-gradient(circle at 80% 12%, rgba(0, 112, 243, 0.11), transparent 34%),
+        radial-gradient(circle at 56% 66%, rgba(45, 212, 191, 0.06), transparent 32%),
+        linear-gradient(145deg, rgba(6, 7, 11, 0.94) 0%, rgba(11, 11, 15, 0.98) 40%, rgba(9, 12, 18, 0.96) 72%, rgba(10, 12, 16, 0.98) 100%);
       background-attachment: fixed;
       color: var(--text-main);
     }
@@ -2162,8 +2162,8 @@
       position: relative;
       flex: 0 0 auto;
       width: 100%;
-      aspect-ratio: 16 / 9;
-      min-height: 160px;
+      aspect-ratio: 16 / 8;
+      min-height: 142px;
     }
 
     .chart-canvas-wrap.logo-watermark::before {
@@ -2186,14 +2186,17 @@
     }
 
     .pnl-heatmap-wrap {
-      height: 170px;
-      min-height: 170px;
-      max-height: 170px;
+      width: 100%;
+      min-height: 142px;
+      height: auto;
+      aspect-ratio: 16 / 8;
+      max-height: 240px;
       border: 1px solid var(--border);
       border-radius: 0.5rem;
       background: rgba(8, 14, 24, 0.18);
       padding: 0.35rem 0.45rem 0.4rem;
       display: flex;
+      flex: 0 0 auto;
       flex-direction: column;
       gap: 0.3rem;
     }
@@ -2243,7 +2246,7 @@
       flex: 1 1 auto;
       min-height: 0;
       display: grid;
-      grid-template-columns: repeat(53, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--pnl-heatmap-columns, 53), minmax(0, 1fr));
       grid-template-rows: repeat(7, minmax(0, 1fr));
       gap: 2px;
     }
@@ -2259,7 +2262,7 @@
 
     .pnl-heatmap-months {
       display: grid;
-      grid-template-columns: repeat(53, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--pnl-heatmap-columns, 53), minmax(0, 1fr));
       gap: 2px;
       min-height: 12px;
       padding-left: 22px;
@@ -2295,11 +2298,36 @@
     }
 
     .pnl-heatmap-cell {
+      position: relative;
       border-radius: 3px;
       border: 1px solid rgba(148, 163, 184, 0.22);
       background: rgba(148, 163, 184, 0.08);
       min-height: 0;
       cursor: pointer;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, filter 0.14s ease;
+      transform-origin: center;
+      will-change: transform, box-shadow;
+    }
+
+    .pnl-heatmap-cell:not(.empty):hover {
+      transform: translateY(-0.5px) scale(1.08);
+      border-color: rgba(255, 255, 255, 0.58);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 3px 10px rgba(0, 0, 0, 0.18);
+      filter: saturate(1.04) brightness(1.02);
+      z-index: 2;
+      animation: pnl-heatmap-cell-hover 140ms ease-out;
+    }
+
+    @keyframes pnl-heatmap-cell-hover {
+      0% {
+        transform: scale(1);
+      }
+      60% {
+        transform: translateY(-0.5px) scale(1.1);
+      }
+      100% {
+        transform: translateY(-0.5px) scale(1.08);
+      }
     }
 
     .pnl-heatmap-cell.empty {
@@ -2339,16 +2367,18 @@
     .pnl-heatmap-legend .pos { color: #4ade80; }
 
     .transfers-wrap {
-      flex: 1 1 auto;
-      height: 170px;
-      min-height: 170px;
-      max-height: 170px;
+      width: 100%;
+      min-height: 142px;
+      height: auto;
+      aspect-ratio: 16 / 8;
+      max-height: 240px;
       border: 1px solid var(--border);
       border-radius: 0.5rem;
       background: rgba(8, 14, 24, 0.18);
       padding: 0;
       overflow: hidden;
       display: flex;
+      flex: 0 0 auto;
       flex-direction: column;
     }
 
@@ -4801,9 +4831,9 @@
           </div>
           <div class="pnl-heatmap-wrap is-hidden" id="pnlHeatmapWrap">
             <div class="pnl-heatmap-toolbar">
-              <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous year">‹</button>
-              <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Yearly daily PnL</span>
-              <button class="pnl-heatmap-nav" id="pnlHeatmapNextBtn" type="button" aria-label="Next year">›</button>
+              <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous quarter">‹</button>
+              <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Quarterly daily PnL</span>
+              <button class="pnl-heatmap-nav" id="pnlHeatmapNextBtn" type="button" aria-label="Next quarter">›</button>
             </div>
             <div class="pnl-heatmap-months" id="pnlHeatmapMonths"></div>
             <div class="pnl-heatmap-body">
@@ -13485,7 +13515,7 @@
     pnlHeatmapMonths = [];
     pnlHeatmapMonthIndex = 0;
     if (pnlHeatmapGridEl) pnlHeatmapGridEl.innerHTML = "";
-    if (pnlHeatmapTitleEl) pnlHeatmapTitleEl.textContent = "Yearly daily PnL";
+    if (pnlHeatmapTitleEl) pnlHeatmapTitleEl.textContent = "Quarterly daily PnL";
     if (pnlHeatmapHoverEl) pnlHeatmapHoverEl.textContent = "";
     if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
     if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
@@ -13757,10 +13787,35 @@
     return String(d.getFullYear());
   }
 
+  function getQuarterKeyFromDayMs(dayMs) {
+    const d = new Date(dayMs);
+    if (Number.isNaN(d.getTime())) return "";
+    const quarter = Math.floor(d.getMonth() / 3) + 1;
+    return `${d.getFullYear()}-Q${quarter}`;
+  }
+
   function formatYearKey(yearKey) {
     const year = Number(yearKey);
     if (!Number.isFinite(year)) return "Daily PnL Heatmap";
     return `${year}`;
+  }
+
+  function formatQuarterKey(quarterKey) {
+    const match = String(quarterKey || "").match(/^(\d{4})-Q([1-4])$/);
+    if (!match) return "Daily PnL Heatmap";
+    return `${match[1]} Q${match[2]}`;
+  }
+
+  function getQuarterDateRange(quarterKey) {
+    const match = String(quarterKey || "").match(/^(\d{4})-Q([1-4])$/);
+    if (!match) return null;
+    const year = Number(match[1]);
+    const quarter = Number(match[2]);
+    if (!Number.isFinite(year) || !Number.isFinite(quarter)) return null;
+    const startMonth = (quarter - 1) * 3;
+    const startMs = new Date(year, startMonth, 1).getTime();
+    const endMs = new Date(year, startMonth + 3, 1).getTime();
+    return { year, quarter, startMonth, startMs, endMs };
   }
 
   function interpolateRgb(a, b, t) {
@@ -13774,18 +13829,17 @@
   function getHeatmapColor(value, maxAbs) {
     const n = Number(value);
     if (!Number.isFinite(n) || !Number.isFinite(maxAbs) || maxAbs <= 0) {
-      return "rgb(148, 163, 184)";
+      return "rgb(226, 232, 240)";
     }
-    const neutral = { r: 148, g: 163, b: 184 };
-    const negLow = { r: 248, g: 113, b: 113 };
+    const neutral = { r: 226, g: 232, b: 240 };
     const negHigh = { r: 220, g: 38, b: 38 };
-    const posLow = { r: 74, g: 222, b: 128 };
     const posHigh = { r: 22, g: 163, b: 74 };
     const clamped = Math.max(-maxAbs, Math.min(maxAbs, n));
     if (clamped === 0) return interpolateRgb(neutral, neutral, 0);
     const strength = Math.min(1, Math.abs(clamped) / maxAbs);
-    if (clamped > 0) return interpolateRgb(posLow, posHigh, strength);
-    return interpolateRgb(negLow, negHigh, strength);
+    const eased = Math.pow(strength, 0.82);
+    if (clamped > 0) return interpolateRgb(neutral, posHigh, eased);
+    return interpolateRgb(neutral, negHigh, eased);
   }
 
   function setPnlHeatmapHoverValue(dayMs, value) {
@@ -13917,12 +13971,12 @@
       return;
     }
 
-    const yearSet = new Set(pnlHeatmapRows.map((row) => getYearKeyFromDayMs(row.dayMs)));
-    pnlHeatmapMonths = Array.from(yearSet).filter(Boolean).sort((a, b) => Number(a) - Number(b));
+    const quarterSet = new Set(pnlHeatmapRows.map((row) => getQuarterKeyFromDayMs(row.dayMs)));
+    pnlHeatmapMonths = Array.from(quarterSet).filter(Boolean).sort((a, b) => String(a).localeCompare(String(b)));
     if (!pnlHeatmapMonths.length) {
       pnlHeatmapGridEl.innerHTML = "";
       if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.innerHTML = "";
-      pnlHeatmapTitleEl.textContent = "No year data";
+      pnlHeatmapTitleEl.textContent = "No quarter data";
       if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
       if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
       return;
@@ -13932,39 +13986,56 @@
       pnlHeatmapMonthIndex = pnlHeatmapMonths.length - 1;
     }
 
-    const yearKey = pnlHeatmapMonths[pnlHeatmapMonthIndex];
-    const year = Number(yearKey);
-    const yearStart = new Date(year, 0, 1);
-    const yearRows = pnlHeatmapRows.filter((row) => getYearKeyFromDayMs(row.dayMs) === yearKey);
-    const firstDataDay = yearRows.reduce((min, row) => {
+    const quarterKey = pnlHeatmapMonths[pnlHeatmapMonthIndex];
+    const quarterRange = getQuarterDateRange(quarterKey);
+    if (!quarterRange) {
+      pnlHeatmapGridEl.innerHTML = "";
+      if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.innerHTML = "";
+      pnlHeatmapTitleEl.textContent = "No quarter data";
+      if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
+      if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
+      return;
+    }
+
+    const { year, startMonth, startMs: quarterStartMs, endMs: quarterEndMs } = quarterRange;
+    const quarterStart = new Date(quarterStartMs);
+    const quarterRows = pnlHeatmapRows.filter((row) => getQuarterKeyFromDayMs(row.dayMs) === quarterKey);
+    const firstDataDay = quarterRows.reduce((min, row) => {
       const t = Number(row?.dayMs);
       if (!Number.isFinite(t)) return min;
       return min === null || t < min ? t : min;
     }, null);
-    const lastDataDay = yearRows.reduce((max, row) => {
+    const lastDataDay = quarterRows.reduce((max, row) => {
       const t = Number(row?.dayMs);
       if (!Number.isFinite(t)) return max;
       return max === null || t > max ? t : max;
     }, null);
     const todayStartMs = toLocalDayStartMs(Date.now());
-    const maxAbs = yearRows.reduce((max, row) => Math.max(max, Math.abs(Number(row.delta) || 0)), 0);
-    const byDay = new Map(yearRows.map((row) => [row.dayMs, row.delta]));
+    const maxAbs = quarterRows.reduce((max, row) => Math.max(max, Math.abs(Number(row.delta) || 0)), 0);
+    const byDay = new Map(quarterRows.map((row) => [row.dayMs, row.delta]));
     const monthByWeek = new Map();
-    for (let m = 0; m < 12; m += 1) {
+    let maxWeekIdx = 0;
+    for (let m = startMonth; m < startMonth + 3; m += 1) {
       const monthStart = new Date(year, m, 1).getTime();
-      const dayOfYear = Math.floor((monthStart - yearStart.getTime()) / 86400000);
-      let weekIdx = Math.floor((dayOfYear + yearStart.getDay()) / 7);
+      const dayOffset = Math.floor((monthStart - quarterStartMs) / 86400000);
+      let weekIdx = Math.floor((dayOffset + quarterStart.getDay()) / 7);
       if (weekIdx < 0) weekIdx = 0;
-      if (weekIdx > 52) weekIdx = 52;
+      maxWeekIdx = Math.max(maxWeekIdx, weekIdx);
       if (!monthByWeek.has(weekIdx)) {
         const label = new Date(year, m, 1).toLocaleDateString(undefined, { month: "short" });
         monthByWeek.set(weekIdx, label);
       }
     }
+    const totalQuarterDays = Math.max(1, Math.round((quarterEndMs - quarterStartMs) / 86400000));
+    maxWeekIdx = Math.max(maxWeekIdx, Math.floor((totalQuarterDays - 1 + quarterStart.getDay()) / 7));
+    const weekCount = Math.max(1, maxWeekIdx + 1);
+
+    if (pnlHeatmapGridEl) pnlHeatmapGridEl.style.setProperty("--pnl-heatmap-columns", String(weekCount));
+    if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.style.setProperty("--pnl-heatmap-columns", String(weekCount));
 
     if (pnlHeatmapMonthsEl) {
       const monthFrag = document.createDocumentFragment();
-      for (let week = 0; week < 53; week += 1) {
+      for (let week = 0; week < weekCount; week += 1) {
         const el = document.createElement("div");
         el.className = "pnl-heatmap-month";
         el.textContent = monthByWeek.get(week) || "";
@@ -13974,19 +14045,18 @@
       pnlHeatmapMonthsEl.appendChild(monthFrag);
     }
 
-    const cells = Array.from({ length: 53 * 7 }, () => null);
-    let dayMs = yearStart.getTime();
-    const yearEndMs = new Date(year + 1, 0, 1).getTime();
-    while (Number.isFinite(dayMs) && dayMs < yearEndMs) {
+    const cells = Array.from({ length: weekCount * 7 }, () => null);
+    let dayMs = quarterStartMs;
+    while (Number.isFinite(dayMs) && dayMs < quarterEndMs) {
       const beforeStart = Number.isFinite(firstDataDay) && dayMs < firstDataDay;
       const inFuture = Number.isFinite(todayStartMs) && dayMs > todayStartMs;
       const afterDataEnd = Number.isFinite(lastDataDay) && dayMs > lastDataDay;
       if (!beforeStart && !inFuture && !afterDataEnd) {
         const weekday = new Date(dayMs).getDay(); // 0..6
-        const dayOfYear = Math.floor((dayMs - yearStart.getTime()) / 86400000);
-        let weekIdx = Math.floor((dayOfYear + yearStart.getDay()) / 7);
-        if (weekIdx > 52) weekIdx = 52;
-        const index = weekday * 53 + weekIdx;
+        const dayOffset = Math.floor((dayMs - quarterStartMs) / 86400000);
+        let weekIdx = Math.floor((dayOffset + quarterStart.getDay()) / 7);
+        if (weekIdx > weekCount - 1) weekIdx = weekCount - 1;
+        const index = weekday * weekCount + weekIdx;
         const val = byDay.has(dayMs) ? byDay.get(dayMs) : 0;
         cells[index] = { dayMs, delta: val };
       }
@@ -14015,7 +14085,7 @@
 
     pnlHeatmapGridEl.innerHTML = "";
     pnlHeatmapGridEl.appendChild(fragment);
-    pnlHeatmapTitleEl.textContent = `${formatYearKey(yearKey)} · Daily PnL`;
+    pnlHeatmapTitleEl.textContent = `${formatQuarterKey(quarterKey)} · Daily PnL`;
 
     if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = pnlHeatmapMonthIndex <= 0;
     if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = pnlHeatmapMonthIndex >= pnlHeatmapMonths.length - 1;
