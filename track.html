@@ -2178,6 +2178,23 @@
       pointer-events: none;
     }
 
+    .chart-canvas-wrap.logo-watermark::after {
+      content: "HYPERMONITOR";
+      position: absolute;
+      left: 50%;
+      top: 67%;
+      transform: translateX(-50%);
+      font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: clamp(0.56rem, 1vw, 0.78rem);
+      text-transform: uppercase;
+      color: rgba(245, 245, 255, 0.16);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .chart-canvas-wrap canvas {
       width: 100% !important;
       height: 100% !important;
@@ -2578,12 +2595,12 @@
     }
 
     body.light {
-      background-color: #f8fbff;
+      background-color: #fbfcfe;
       background-image:
-        radial-gradient(circle at 14% 16%, rgba(56, 189, 248, 0.16), transparent 30%),
-        radial-gradient(circle at 84% 12%, rgba(59, 130, 246, 0.14), transparent 34%),
-        radial-gradient(circle at 58% 74%, rgba(45, 212, 191, 0.1), transparent 32%),
-        linear-gradient(145deg, #fbfdff 0%, #f8fbff 38%, #f3f8ff 72%, #f7fffd 100%);
+        radial-gradient(circle at 14% 16%, rgba(56, 189, 248, 0.08), transparent 28%),
+        radial-gradient(circle at 84% 12%, rgba(59, 130, 246, 0.07), transparent 32%),
+        radial-gradient(circle at 58% 74%, rgba(45, 212, 191, 0.05), transparent 30%),
+        linear-gradient(145deg, #feffff 0%, #fbfcfe 40%, #f8fbfe 72%, #fcfefd 100%);
       color: #0f172a;
       color-scheme: light;
     }
@@ -2681,6 +2698,10 @@
     body.light .chart-card {
       background: #ffffff;
       border: 1px solid #e5e7eb;
+    }
+
+    body.light .chart-canvas-wrap.logo-watermark::after {
+      color: rgba(15, 23, 42, 0.14);
     }
 
     body.light .equity-view-toggle,
@@ -5295,7 +5316,14 @@
   <button class="price-context-item" type="button" data-action="pin" data-requires-coin="true">Pin left</button>
   <button class="price-context-item" type="button" data-action="reset">Reset list</button>
   <button class="price-context-item" type="button" data-action="remove" data-requires-coin="true">Remove from bar</button>
-  <button class="price-context-item" type="button" data-action="toggle-currency">Currency: USD</button>
+  <div class="price-context-group">
+    <button class="price-context-item" type="button" data-action="toggle-currency" data-has-submenu="true">Currency</button>
+    <div class="price-context-submenu" aria-label="Footer price currency">
+      <button class="price-context-item" type="button" data-action="change-currency" data-currency="USD">USD</button>
+      <button class="price-context-item" type="button" data-action="change-currency" data-currency="EUR">EUR</button>
+      <button class="price-context-item" type="button" data-action="change-currency" data-currency="JPY">JPY</button>
+    </div>
+  </div>
   <div class="price-context-group">
     <button class="price-context-item" type="button" data-action="toggle-separators" data-has-submenu="true">Separators every</button>
     <div class="price-context-submenu" aria-label="Separator cadence">
@@ -5545,11 +5573,14 @@
   ]);
   const FOOTER_SPECIAL_LOGOS = new Map([
     ["HYPE", "https://hyperfoundation.org/landing/blob_green.gif"],
+    ["DOGE", "https://s2.coinmarketcap.com/static/img/coins/64x64/74.gif"],
+    ["DOT", "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.gif"],
     ["LINK", "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif"],
+    ["RENDER", "https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif"],
     ["XRP", "https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif"],
     ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
   ]);
-  const FOOTER_CIRCLE_LOGOS = new Set(["XRP"]);
+  const FOOTER_CIRCLE_LOGOS = new Set(["DOGE", "DOT", "RENDER", "XRP"]);
   const FOOTER_PRICE_COLOR_OVERRIDES = new Map([
     ["BTC", "#f7931a"],
     ["SOL", "#8173d3"],
@@ -9623,11 +9654,11 @@
     if (!priceContextMenuEl) return;
     const currencyBtn = priceContextMenuEl.querySelector('[data-action="toggle-currency"]');
     if (currencyBtn) {
-      currencyBtn.textContent = `Currency: ${footerPriceCurrency}`;
+      currencyBtn.textContent = "Currency";
     }
     const separatorsBtn = priceContextMenuEl.querySelector('[data-action="toggle-separators"]');
     if (separatorsBtn) {
-      separatorsBtn.textContent = `Separators every ${footerSeparatorEvery}`;
+      separatorsBtn.textContent = "Separate";
     }
     const toggleBtn = priceContextMenuEl.querySelector('[data-action="toggle-change"]');
     if (toggleBtn) {
@@ -9643,6 +9674,10 @@
       const count = Number(btn.getAttribute("data-count"));
       const label = `${count} coins`;
       btn.textContent = `${footerSeparatorEvery === count ? "✓ " : ""}${label}`;
+    });
+    priceContextMenuEl.querySelectorAll('[data-action="change-currency"]').forEach((btn) => {
+      const currency = String(btn.getAttribute("data-currency") || "").toUpperCase();
+      btn.textContent = `${footerPriceCurrency === currency ? "✓ " : ""}${currency}`;
     });
   }
 
@@ -17267,10 +17302,12 @@
         applyFooterChangeVisibility();
         updateFooterChangeMenu();
         refreshFooterChanges();
-      } else if (action === "toggle-currency") {
-        const currencies = ["USD", "EUR", "JPY"];
-        const idx = currencies.indexOf(footerPriceCurrency);
-        setFooterPriceCurrency(currencies[(idx + 1 + currencies.length) % currencies.length], { forceRate: true });
+      } else if (action === "change-currency") {
+        const currency = String(btn.dataset.currency || "").toUpperCase();
+        if (currency === "USD" || currency === "EUR" || currency === "JPY") {
+          setFooterPriceCurrency(currency, { forceRate: true });
+          updateFooterChangeMenu();
+        }
       } else if (action === "change-separators") {
         const count = Number(btn.dataset.count);
         if (FOOTER_SEPARATOR_OPTIONS.has(count)) {
