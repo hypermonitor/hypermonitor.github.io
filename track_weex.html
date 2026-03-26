@@ -40,6 +40,8 @@
       --accent-cyan: #00b4d8;
       --neutral-blue: rgba(124, 176, 255, 0.95);
       --shadow: 0 20px 50px rgba(0, 0, 0, 0.34);
+      --switch-height: 30px;
+      --control-height: 25px;
     }
 
     * { box-sizing: border-box; }
@@ -247,6 +249,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
+      width: 100%;
       padding: 0.5rem 0.55rem;
       border: 1px solid var(--glass-border);
       border-radius: 12px;
@@ -277,6 +280,7 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       gap: 0.35rem;
+      width: 100%;
       max-height: 196px;
       overflow: auto;
       padding-right: 0.1rem;
@@ -435,7 +439,7 @@
       cursor: pointer;
       line-height: 1;
       min-width: 32px;
-      height: 25px;
+      height: var(--control-height);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -450,6 +454,10 @@
       background: #f8fafc;
       color: #334155;
       border-color: #d1d5db;
+    }
+
+    .performance-title .metrics-toggle {
+      height: 25px;
     }
 
     #positionsTimelineToggle .timeline-toggle-icon {
@@ -646,22 +654,108 @@
       letter-spacing: 0.01em;
     }
 
+    .metrics-card {
+      margin-top: 0.35rem;
+      padding-top: 0.3rem;
+      position: relative;
+    }
+
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.65rem;
+      overflow: visible;
     }
 
-    @media (max-width: 980px) {
-      .metrics-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    .metrics-card.collapsed .metrics-grid {
+      max-height: none;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.65rem;
+      padding-bottom: 0.65rem;
+      position: relative;
+      cursor: grab;
+      user-select: none;
+      scrollbar-width: none;
     }
 
-    @media (max-width: 640px) {
-      .metrics-grid {
-        grid-template-columns: 1fr;
-      }
+    .metrics-card.collapsed .metrics-grid::-webkit-scrollbar {
+      height: 0;
+    }
+
+    .metrics-card.collapsed .metric {
+      min-width: 170px;
+      flex: 0 0 auto;
+    }
+
+    .metrics-card.collapsed .metrics-grid:active {
+      cursor: grabbing;
+    }
+
+    .metrics-card.collapsed .metrics-grid::before,
+    .metrics-card.collapsed .metrics-grid::after {
+      content: "";
+      position: sticky;
+      top: 0;
+      width: 28px;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .metrics-card.collapsed .metrics-grid::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(11, 11, 15, 0.85), rgba(11, 11, 15, 0));
+    }
+
+    .metrics-card.collapsed .metrics-grid::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(11, 11, 15, 0.85), rgba(11, 11, 15, 0));
+    }
+
+    body.light .metrics-card.collapsed .metrics-grid::before {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+    }
+
+    body.light .metrics-card.collapsed .metrics-grid::after {
+      background: linear-gradient(270deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+    }
+
+    .metrics-scroll-arrow {
+      position: absolute;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.6);
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      z-index: 5;
+      pointer-events: auto;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+
+    .metrics-scroll-arrow.left { left: 6px; }
+    .metrics-scroll-arrow.right { right: 6px; }
+
+    .metrics-card.show-left .metrics-scroll-arrow.left,
+    .metrics-card.show-right .metrics-scroll-arrow.right {
+      opacity: 0.85;
+    }
+
+    body.light .metrics-scroll-arrow {
+      background: rgba(255, 255, 255, 0.85);
+      color: #0f172a;
+      border-color: #e5e7eb;
     }
 
     .metric {
@@ -677,24 +771,32 @@
     }
 
     .metric-label {
-      color: var(--muted);
-      font-size: 0.72rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.45rem;
+      color: var(--muted);
+      position: relative;
+      cursor: inherit;
     }
 
     .metric-value {
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 0.35rem;
+      font-variant-numeric: tabular-nums;
       line-height: 1.2;
       word-break: break-word;
     }
 
     .metric-sub {
-      margin-top: 0.3rem;
+      margin-top: 0.25rem;
+      font-size: 0.7rem;
       color: var(--muted);
-      font-size: 0.74rem;
+    }
+
+    body.light .metric-label,
+    body.light .metric-sub {
+      color: #64748b;
     }
 
     .positive { color: var(--accent); }
@@ -761,6 +863,10 @@
       display: none;
     }
 
+    .overview-meta.no-image {
+      grid-template-columns: 1fr;
+    }
+
     .overview-meta-image {
       width: 108px;
       height: 108px;
@@ -824,7 +930,7 @@
     }
 
     .orders-table-scroll {
-      height: 180px;
+      height: 320px;
       overflow: auto;
       margin-bottom: 0.75rem;
       -webkit-overflow-scrolling: touch;
@@ -1388,8 +1494,83 @@
       color: #0f172a;
     }
 
+    body.light .chart-range-btn {
+      background: transparent;
+      color: #475569;
+      border-color: transparent;
+    }
+
+    body.light .chart-range-btn:hover {
+      border-color: #d1d5db;
+    }
+
+    body.light .chart-range-btn.active {
+      color: #0f172a;
+    }
+
+    body.light .range-toggle {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .range-toggle .chart-range-btn.active {
+      background: #f8fafc;
+    }
+
+    body.light .range-toggle-indicator {
+      background: #f8fafc;
+      border-color: #cbd5f5;
+    }
+
+    .performance-title {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .performance-title h2 {
+      order: initial;
+    }
+
+    .performance-title .performance-toolbar {
+      order: initial;
+      width: auto;
+      justify-self: center;
+      justify-content: center;
+    }
+
+    .performance-title .chart-actions {
+      order: initial;
+      margin-left: 0;
+      justify-self: end;
+    }
+
+    .performance-toolbar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 0;
+    }
+
+    .chart-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    @media (max-width: 900px) {
+      .performance-title {
+        grid-template-columns: 1fr auto;
+      }
+
+      .performance-title .performance-toolbar {
+        grid-column: 1 / -1;
+      }
+    }
+
     .orders-tabs,
-    .range-toggle,
     .view-toggle {
       position: relative;
       display: inline-flex;
@@ -1402,7 +1583,6 @@
     }
 
     .orders-tab-btn,
-    .chart-range-btn,
     .view-toggle button {
       position: relative;
       z-index: 1;
@@ -1419,10 +1599,80 @@
     }
 
     .orders-tab-btn.active,
-    .chart-range-btn.active,
     .view-toggle button.active {
       color: var(--text-main);
       background: rgba(255,255,255,0.08);
+    }
+
+    .range-toggle {
+      margin: 0;
+      padding: 2px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      gap: 0.2rem;
+      display: inline-flex;
+      align-items: stretch;
+      justify-content: center;
+      width: fit-content;
+      max-width: 100%;
+      position: relative;
+      overflow: visible;
+      height: var(--switch-height);
+    }
+
+    .range-toggle .chart-range-btn {
+      border-color: transparent;
+      background: transparent;
+      position: relative;
+      z-index: 2;
+    }
+
+    .range-toggle .chart-range-btn.active {
+      border-color: transparent;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .range-toggle-indicator {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      left: 0;
+      width: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.45);
+      z-index: 1;
+      opacity: 0;
+      transition: transform 220ms ease, width 220ms ease, opacity 120ms ease;
+    }
+
+    .range-toggle.ready .range-toggle-indicator {
+      opacity: 1;
+    }
+
+    .chart-range-btn {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding: 0 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.75rem;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      height: 100%;
+    }
+
+    .chart-range-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      color: #f8fafc;
+      background: rgba(18, 18, 24, 0.6);
+    }
+
+    .chart-range-btn.active {
+      border-color: transparent;
+      color: #f8fafc;
     }
 
     .trades-section-title {
@@ -1777,7 +2027,7 @@
           <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.8rem; height: auto; border-radius: 4px;" />
           <h1 class="brand-name"><span>Hypermonitor</span> <img class="brand-logo" src="images/weex.png" alt="WEEX" /></h1>
         </a>
-        <div class="tagline">Track WEEX copy traders. No login required.</div>
+        <div class="tagline">Track WEEX elite traders. No login required.</div>
         <div class="wallet-inputs-label">Trader ID or name</div>
         <div class="wallet-inputs-row">
           <div class="wallet-inputs">
@@ -1895,15 +2145,24 @@
     </div>
 
     <section class="card">
-      <div class="section-title">
+      <div class="section-title performance-title">
         <h2>Performance</h2>
-        <div class="chart-actions">
-          <div class="range-toggle" role="tablist" aria-label="Performance range">
-            <button class="chart-range-btn" data-range="day" type="button">Day</button>
-            <button class="chart-range-btn" data-range="week" type="button">Week</button>
-            <button class="chart-range-btn" data-range="month" type="button">Month</button>
-            <button class="chart-range-btn active" data-range="allTime" type="button">All</button>
+        <div class="performance-toolbar" id="performanceToolbar">
+          <div class="chart-toolbar">
+            <span class="range-toggle" role="tablist" aria-label="Performance range">
+              <span class="range-toggle-indicator" aria-hidden="true"></span>
+              <button class="chart-range-btn" data-range="day" type="button">Day</button>
+              <button class="chart-range-btn" data-range="week" type="button">Week</button>
+              <button class="chart-range-btn" data-range="month" type="button">Month</button>
+              <button class="chart-range-btn active" data-range="allTime" type="button">All</button>
+            </span>
           </div>
+        </div>
+        <div class="chart-actions" id="performanceActions">
+          <button class="metrics-toggle" id="metricsToggle" type="button" aria-expanded="false">
+            <span class="sr-only">Toggle metrics</span>
+            <span aria-hidden="true">▾</span>
+          </button>
         </div>
       </div>
 
@@ -1953,7 +2212,9 @@
         </div>
       </div>
 
-      <div style="margin-top:0.9rem;">
+      <div class="metrics-card collapsed" id="metricsCard">
+        <button class="metrics-scroll-arrow left" type="button" aria-label="Scroll metrics left">‹</button>
+        <button class="metrics-scroll-arrow right" type="button" aria-label="Scroll metrics right">›</button>
         <div class="metrics-grid" id="metricsGrid">
           <div class="metric">
             <div class="metric-label">Total PnL</div>
@@ -2219,6 +2480,11 @@
       overviewHistoryCount: document.getElementById("overviewHistoryCount"),
       overviewRealizedPnl: document.getElementById("overviewRealizedPnl"),
       overviewNetUnrealizedPnl: document.getElementById("overviewNetUnrealizedPnl"),
+      performanceToolbar: document.getElementById("performanceToolbar"),
+      performanceActions: document.getElementById("performanceActions"),
+      metricsCard: document.getElementById("metricsCard"),
+      metricsGrid: document.getElementById("metricsGrid"),
+      metricsToggle: document.getElementById("metricsToggle"),
       equityTitleValue: document.getElementById("equityTitleValue"),
       pnlTitleValue: document.getElementById("pnlTitleValue"),
       activityTitleValue: document.getElementById("activityTitleValue"),
@@ -2263,6 +2529,35 @@
     let liveRefreshTimer = null;
     let priceSocket = null;
     let priceSocketSymbolsKey = "";
+    let metricsDragging = false;
+    let metricsDragStartX = 0;
+    let metricsDragScrollLeft = 0;
+
+    function updateRangeToggleIndicator(container = document.querySelector(".range-toggle")) {
+      if (!container) return;
+      const indicator = container.querySelector(".range-toggle-indicator");
+      const active = container.querySelector(".chart-range-btn.active");
+      if (!indicator || !active) return;
+      const parentRect = container.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      const left = activeRect.left - parentRect.left;
+      indicator.style.width = `${activeRect.width}px`;
+      indicator.style.transform = `translateX(${left}px)`;
+      container.classList.add("ready");
+    }
+
+    function updateMetricsScrollArrows() {
+      if (!els.metricsCard || !els.metricsGrid) return;
+      if (!els.metricsCard.classList.contains("collapsed")) {
+        els.metricsCard.classList.remove("show-left", "show-right");
+        return;
+      }
+      const maxScroll = els.metricsGrid.scrollWidth - els.metricsGrid.clientWidth;
+      const leftOk = els.metricsGrid.scrollLeft > 2;
+      const rightOk = els.metricsGrid.scrollLeft < maxScroll - 2;
+      els.metricsCard.classList.toggle("show-left", leftOk);
+      els.metricsCard.classList.toggle("show-right", rightOk);
+    }
 
     function setStatus(text, kind = "loading") {
       els.statusText.textContent = text;
@@ -2287,12 +2582,10 @@
 
     function fmtMoney(value, decimals = 2) {
       if (!Number.isFinite(value)) return "-";
-      return value.toLocaleString(undefined, {
-        style: "currency",
-        currency: "USD",
+      return `$${value.toLocaleString(undefined, {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals,
-      });
+      })}`;
     }
 
     function fmtDollar(value, decimals = 2) {
@@ -2559,7 +2852,7 @@
 
     function addTraderFromPicker(traderId) {
       applyTraderSelection([traderId]);
-      els.traderInput.focus();
+      els.traderInput.blur();
     }
 
     function coinIconHtml(iconUrl, label) {
@@ -3635,7 +3928,7 @@
 
     function renderOpenTradesTable(rows) {
       if (!rows.length) {
-        els.liveTradesBody.innerHTML = `<tr><td colspan="7" class="muted">No open trades for this selection.</td></tr>`;
+        els.liveTradesBody.innerHTML = `<tr><td colspan="7" class="muted">No open trades.</td></tr>`;
         return;
       }
       els.liveTradesBody.innerHTML = rows.map((row) => {
@@ -4085,7 +4378,14 @@
 
       updateBenchmarkMetrics(source);
 
-      els.overviewTrader.textContent = getSelectedTraderSummary();
+      const summaryTrader = getSelectedTraderRow();
+      const summaryTraderId = summaryTrader?.traderUserId || state.selectedTraderIds[0] || "";
+      const summaryDetailUrl = summaryTrader?.detailUrl || (summaryTraderId ? `https://www.weex.com/copy-trading/trader/${summaryTraderId}` : "");
+      if (summaryDetailUrl) {
+        els.overviewTrader.innerHTML = `<a class="overview-trader-link" href="${escapeHtml(summaryDetailUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(getSelectedTraderSummary())}</a>`;
+      } else {
+        els.overviewTrader.textContent = getSelectedTraderSummary();
+      }
       els.overviewRealizedPnl.textContent = formatSignedPlainDollarWithPlus(totalPnl, 2);
       els.overviewRealizedPnl.className = `kv-value ${getSignedClass(totalPnl)}`;
       els.overviewCurrentCount.textContent = fmtNumber(rangeCurrent.length, 0);
@@ -4423,17 +4723,19 @@
       els.overviewNetUnrealizedPnl.textContent = formatSignedPlainDollarWithPlus(totalUnrealized, 2);
       els.overviewNetUnrealizedPnl.className = `kv-value ${getSignedClass(totalUnrealized)}`;
 
-      const head = String((meta?.headings || []).find((item) => item && item !== trader?.traderNickName) || trader?.traderNickName || traderId || "").trim();
+      const head = String(meta?.title || (meta?.headings || []).find((item) => item && item !== trader?.traderNickName) || trader?.traderNickName || traderId || "").trim();
       const facts = buildOverviewFacts(trader, meta);
-      const profile = String(trader?.profile || "").trim();
+      const profile = String(meta?.profileText || trader?.profile || "").trim();
       const imageUrl = String(meta?.imageUrl || "").trim();
       const hasMeta = Boolean(imageUrl || head || facts || profile);
       els.overviewMeta.classList.toggle("hidden", !hasMeta);
+      els.overviewMeta.classList.toggle("no-image", !imageUrl);
       els.overviewMetaHead.textContent = head || "-";
       els.overviewMetaFacts.textContent = facts || "-";
       els.overviewMetaProfile.textContent = profile || "-";
       if (imageUrl) {
         els.overviewMetaImage.src = imageUrl;
+        els.overviewMetaImage.alt = String(meta?.imageAlt || head || "Trader profile");
         els.overviewMetaImage.classList.remove("hidden");
       } else {
         els.overviewMetaImage.removeAttribute("src");
@@ -4828,6 +5130,10 @@
       renderCharts(source);
       renderPnlHeatmap(source);
       updateMetrics(source);
+      requestAnimationFrame(() => {
+        updateRangeToggleIndicator();
+        updateMetricsScrollArrows();
+      });
     }
 
     function renderLiveDataOnly() {
@@ -4932,6 +5238,7 @@
         btn.addEventListener("click", () => {
           state.currentRangeKey = btn.dataset.range || "allTime";
           document.querySelectorAll(".chart-range-btn").forEach((item) => item.classList.toggle("active", item === btn));
+          updateRangeToggleIndicator(btn.closest(".range-toggle"));
           renderAll();
         });
       });
@@ -4965,8 +5272,105 @@
         els.historyLayout.classList.toggle("hidden", state.activeTab !== "history");
         updateTabSwitchIndicator(els.modeTabs);
       });
-      requestAnimationFrame(() => updateTabSwitchIndicator(els.modeTabs));
-      window.addEventListener("resize", () => updateTabSwitchIndicator(els.modeTabs));
+      requestAnimationFrame(() => {
+        updateTabSwitchIndicator(els.modeTabs);
+        updateRangeToggleIndicator();
+        updateMetricsScrollArrows();
+      });
+      window.addEventListener("resize", () => {
+        updateTabSwitchIndicator(els.modeTabs);
+        updateRangeToggleIndicator();
+        updateMetricsScrollArrows();
+      });
+
+      if (els.metricsToggle && els.metricsCard) {
+        els.metricsToggle.addEventListener("click", () => {
+          const isCollapsed = els.metricsCard.classList.toggle("collapsed");
+          const icon = els.metricsToggle.querySelector("[aria-hidden='true']");
+          if (icon) icon.textContent = isCollapsed ? "▾" : "▴";
+          els.metricsToggle.setAttribute("aria-expanded", String(!isCollapsed));
+          updateMetricsScrollArrows();
+        });
+      }
+
+      if (els.metricsGrid && els.metricsCard) {
+        const scrollMetricsBy = (dir = 1, multiplier = 1) => {
+          const base = Math.max(els.metricsGrid.clientWidth * 0.6, 180);
+          els.metricsGrid.scrollBy({ left: base * dir * multiplier, behavior: "smooth" });
+        };
+        const scrollMetricsStep = (dir = 1) => scrollMetricsBy(dir, 0.25);
+        const leftArrow = els.metricsCard.querySelector(".metrics-scroll-arrow.left");
+        const rightArrow = els.metricsCard.querySelector(".metrics-scroll-arrow.right");
+        let metricsHoldTimer = null;
+
+        const clearMetricsHold = () => {
+          if (metricsHoldTimer) {
+            clearInterval(metricsHoldTimer);
+            metricsHoldTimer = null;
+          }
+        };
+
+        if (leftArrow) {
+          leftArrow.addEventListener("click", (event) => {
+            event.preventDefault();
+            scrollMetricsBy(-1);
+          });
+          leftArrow.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            clearMetricsHold();
+            metricsHoldTimer = setInterval(() => scrollMetricsStep(-1), 120);
+          });
+          leftArrow.addEventListener("mouseup", clearMetricsHold);
+          leftArrow.addEventListener("mouseleave", clearMetricsHold);
+          leftArrow.addEventListener("touchstart", (event) => {
+            event.preventDefault();
+            clearMetricsHold();
+            metricsHoldTimer = setInterval(() => scrollMetricsStep(-1), 120);
+          }, { passive: false });
+          leftArrow.addEventListener("touchend", clearMetricsHold);
+        }
+
+        if (rightArrow) {
+          rightArrow.addEventListener("click", (event) => {
+            event.preventDefault();
+            scrollMetricsBy(1);
+          });
+          rightArrow.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            clearMetricsHold();
+            metricsHoldTimer = setInterval(() => scrollMetricsStep(1), 120);
+          });
+          rightArrow.addEventListener("mouseup", clearMetricsHold);
+          rightArrow.addEventListener("mouseleave", clearMetricsHold);
+          rightArrow.addEventListener("touchstart", (event) => {
+            event.preventDefault();
+            clearMetricsHold();
+            metricsHoldTimer = setInterval(() => scrollMetricsStep(1), 120);
+          }, { passive: false });
+          rightArrow.addEventListener("touchend", clearMetricsHold);
+        }
+
+        els.metricsGrid.addEventListener("mousedown", (event) => {
+          if (!els.metricsCard.classList.contains("collapsed")) return;
+          metricsDragging = true;
+          metricsDragStartX = event.pageX - els.metricsGrid.offsetLeft;
+          metricsDragScrollLeft = els.metricsGrid.scrollLeft;
+        });
+        els.metricsGrid.addEventListener("mouseleave", () => {
+          metricsDragging = false;
+        });
+        els.metricsGrid.addEventListener("mouseup", () => {
+          metricsDragging = false;
+        });
+        els.metricsGrid.addEventListener("mousemove", (event) => {
+          if (!metricsDragging) return;
+          event.preventDefault();
+          const x = event.pageX - els.metricsGrid.offsetLeft;
+          const walk = x - metricsDragStartX;
+          els.metricsGrid.scrollLeft = metricsDragScrollLeft - walk;
+        });
+        els.metricsGrid.addEventListener("scroll", updateMetricsScrollArrows);
+      }
 
       if (els.positionsTimelineSlider) {
         els.positionsTimelineSlider.addEventListener("input", async () => {
