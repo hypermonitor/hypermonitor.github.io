@@ -157,7 +157,10 @@
     }
 
     .wallet-inputs-row {
-      display: block;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.4rem;
+      align-items: start;
       width: 100%;
     }
 
@@ -546,7 +549,6 @@
       box-shadow: none;
       height: 38px;
       min-width: 38px;
-      width: 100%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -2150,12 +2152,6 @@
           <div class="wallet-inputs">
             <div class="wallet-input-row">
               <input id="traderInput" type="text" placeholder="e.g. 7216746409 or Wealth Helmsman" autocomplete="off" aria-label="Trader ID or name" />
-              <div class="wallet-actions">
-                <button id="trackBtn" class="wallet-track-btn" aria-label="Track traders">
-                  <span class="sr-only">Track traders</span>
-                  ⏎
-                </button>
-              </div>
             </div>
             <div class="trader-picker" aria-label="Available traders">
               <div class="trader-picker-head">
@@ -2168,6 +2164,12 @@
                 </button>
               </div>
             </div>
+          </div>
+          <div class="wallet-actions">
+            <button id="trackBtn" class="wallet-track-btn" aria-label="Track traders">
+              <span class="sr-only">Track traders</span>
+              ⏎
+            </button>
           </div>
         </div>
       </div>
