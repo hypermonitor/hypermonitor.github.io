@@ -165,9 +165,7 @@
     }
 
     .wallet-inputs {
-      display: grid;
-      gap: 0.4rem;
-      min-width: 0;
+      display: contents;
     }
 
     .wallet-input-row {
@@ -176,6 +174,8 @@
       gap: 0.4rem;
       align-items: stretch;
       width: 100%;
+      grid-column: 1;
+      grid-row: 1;
     }
 
     .wallet-input-row input,
@@ -245,11 +245,18 @@
       align-items: center;
     }
 
+    .wallet-actions {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
     .trader-picker {
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
       width: 100%;
+      grid-column: 1 / -1;
+      grid-row: 2;
       padding: 0.5rem 0.55rem;
       border: 1px solid var(--glass-border);
       border-radius: 12px;
@@ -2540,6 +2547,11 @@
     const TRADER_META_BRIDGE_URL = "http://127.0.0.1:8765/api/weex/trader";
     const LIVE_REFRESH_INTERVAL_MS = 30000;
     const BINANCE_STREAM_BASE = "wss://stream.binance.com:9443/stream?streams=";
+    const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1"]);
+    const IS_LOCAL_CONTEXT =
+      window.location.protocol === "file:" ||
+      LOCAL_HOSTNAMES.has(window.location.hostname);
+    const SHOULD_USE_LOCAL_BRIDGE = IS_LOCAL_CONTEXT;
 
     const THEME_KEY = "hypermonitor-theme";
 
@@ -3192,6 +3204,7 @@
     }
 
     function startLiveAutoRefresh() {
+      if (!SHOULD_USE_LOCAL_BRIDGE) return;
       if (liveRefreshTimer) clearInterval(liveRefreshTimer);
       liveRefreshTimer = window.setInterval(() => {
         if (!state.selectedTraderIds.length) return;
@@ -3659,6 +3672,7 @@
     }
 
     function buildLiveBridgeUrl(traderUserId) {
+      if (!SHOULD_USE_LOCAL_BRIDGE) return "";
       const url = new URL(LIVE_BRIDGE_URL);
       url.searchParams.set("trader", traderUserId);
       url.searchParams.set("_", String(Date.now()));
@@ -3666,6 +3680,7 @@
     }
 
     function buildTraderMetaBridgeUrl(traderUserId) {
+      if (!SHOULD_USE_LOCAL_BRIDGE) return "";
       const url = new URL(TRADER_META_BRIDGE_URL);
       url.searchParams.set("trader", traderUserId);
       url.searchParams.set("_", String(Date.now()));
@@ -3676,6 +3691,7 @@
       const traderId = String(traderUserId || "").trim();
       if (!traderId) return null;
       if (!force && state.traderMetaById.has(traderId)) return state.traderMetaById.get(traderId) || null;
+      if (!SHOULD_USE_LOCAL_BRIDGE) return null;
       const requestToken = ++state.traderMetaRequestToken;
       try {
         const payload = await fetchJsonNoStore(buildTraderMetaBridgeUrl(traderId));
@@ -3692,6 +3708,16 @@
     async function refreshLiveCurrentRows(force = false) {
       const traderUserId = state.selectedTraderIds[0];
       if (!traderUserId) {
+        state.liveCurrentRows = [];
+        state.liveCurrentTraderId = "";
+        state.liveCurrentFetchedAt = null;
+        state.liveCurrentLoading = false;
+        state.liveCurrentError = "";
+        updateLiveBridgeStatus();
+        renderLiveDataOnly();
+        return;
+      }
+      if (!SHOULD_USE_LOCAL_BRIDGE) {
         state.liveCurrentRows = [];
         state.liveCurrentTraderId = "";
         state.liveCurrentFetchedAt = null;
