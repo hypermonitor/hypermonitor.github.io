@@ -1,0 +1,5043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hypermonitor WEEX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="WEEX copy-trader tracker" />
+  <meta property="og:title" content="Hypermonitor WEEX" />
+  <meta property="og:description" content="Track WEEX copy traders: current trades, history, and performance." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Hypermonitor" />
+  <meta property="og:image" content="https://www.hypermonitor.org/images/track.png" />
+  <meta property="og:url" content="https://www.hypermonitor.org/track_weex.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hypermonitor WEEX" />
+  <meta name="twitter:description" content="Track WEEX copy traders: current trades, history, and performance." />
+  <meta name="twitter:image" content="https://www.hypermonitor.org/images/track.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    :root {
+      font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: dark;
+      --bg: #0b0b0f;
+      --card-bg: rgba(8, 11, 18, 0.68);
+      --accent: #26d97f;
+      --accent-soft: rgba(38, 217, 127, 0.18);
+      --danger: #f25f5c;
+      --warning: #fbbf24;
+      --border: rgba(255,255,255,0.08);
+      --muted: rgba(245,245,255,0.62);
+      --text-main: #f5f5ff;
+      --glass: rgba(10, 10, 12, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --accent-blue: #0070f3;
+      --accent-cyan: #00b4d8;
+      --neutral-blue: rgba(124, 176, 255, 0.95);
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.34);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 16% 18%, rgba(0, 180, 216, 0.1), transparent 30%),
+        radial-gradient(circle at 80% 12%, rgba(0, 112, 243, 0.11), transparent 34%),
+        radial-gradient(circle at 56% 66%, rgba(45, 212, 191, 0.06), transparent 32%),
+        linear-gradient(145deg, rgba(6, 7, 11, 0.94) 0%, rgba(11, 11, 15, 0.98) 40%, rgba(9, 12, 18, 0.96) 72%, rgba(10, 12, 16, 0.98) 100%);
+      background-attachment: fixed;
+      color: var(--text-main);
+    }
+
+    body.light {
+      color-scheme: light;
+      --bg: #eef4fb;
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --accent: #179c5b;
+      --accent-soft: rgba(23, 156, 91, 0.12);
+      --danger: #dc2626;
+      --warning: #d97706;
+      --border: rgba(15, 23, 42, 0.08);
+      --muted: rgba(51, 65, 85, 0.72);
+      --text-main: #0f172a;
+      --glass: rgba(255, 255, 255, 0.82);
+      --glass-border: rgba(15, 23, 42, 0.1);
+      --accent-blue: #2563eb;
+      --accent-cyan: #0891b2;
+      --neutral-blue: rgba(37, 99, 235, 0.92);
+      background-image:
+        radial-gradient(circle at 16% 18%, rgba(37, 99, 235, 0.08), transparent 30%),
+        radial-gradient(circle at 80% 12%, rgba(6, 182, 212, 0.08), transparent 34%),
+        linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+    }
+
+    #app {
+      max-width: 1520px;
+      width: min(1520px, 88vw);
+      margin: 0 auto;
+      padding: 1.1rem 1.5rem 3rem;
+    }
+
+    @media (max-width: 900px) {
+      #app {
+        width: 100vw;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1.2rem;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .brand-name {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      margin: 0;
+      color: #fff;
+    }
+
+    body.light .brand-name { color: #0f172a; }
+
+    .brand-logo {
+      height: 20px;
+      width: auto;
+      display: inline-block;
+      object-fit: contain;
+      vertical-align: middle;
+      transform: translateY(-1px);
+      margin-left: 0.15rem;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0.2rem 0 0.8rem;
+    }
+
+    .wallet-controls {
+      display: flex;
+      flex-direction: column;
+      gap: .45rem;
+      max-width: 860px;
+      width: 100%;
+    }
+
+    .wallet-inputs-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .wallet-inputs-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.4rem;
+      align-items: start;
+      width: 100%;
+    }
+
+    .wallet-inputs {
+      display: grid;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+
+    .wallet-input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.4rem;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .wallet-input-row input,
+    .filter-input,
+    .filter-select {
+      padding: 0.55rem 0.75rem;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--text-main);
+      font-size: 0.82rem;
+      min-height: 38px;
+      outline: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    body.light .wallet-input-row input,
+    body.light .filter-input,
+    body.light .filter-select {
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    body.light .wallet-track-btn {
+      border-color: #e5e7eb;
+      background: #f8fafc;
+      color: #475569;
+    }
+
+    body.light .trader-picker-item.active {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    body.light .orders-tabs.switch {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    body.light .orders-tabs.switch .orders-tab-btn.active {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    body.light .orders-tabs-indicator {
+      background: #f8fafc;
+      border-color: #cbd5f5;
+    }
+
+    body.light .live-dot {
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    }
+
+    .wallet-input-row input:focus,
+    .filter-input:focus,
+    .filter-select:focus {
+      border-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+    }
+
+    .wallet-input-actions,
+    .wallet-actions,
+    .header-right-top,
+    .section-actions,
+    .chart-actions {
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .trader-picker {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 0.5rem 0.55rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      background: rgba(10, 10, 12, 0.3);
+    }
+
+    .trader-picker-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .trader-picker-title {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .trader-picker-meta {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .trader-picker-list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.35rem;
+      max-height: 196px;
+      overflow: auto;
+      padding-right: 0.1rem;
+    }
+
+    .trader-picker-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "name id"
+        "sub sub";
+      flex-direction: column;
+      align-items: start;
+      gap: 0.18rem 0.5rem;
+      text-align: left;
+      padding: 0.55rem 0.65rem;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.4);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+      font: inherit;
+    }
+
+    .trader-picker-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .trader-picker-item.active {
+      border-color: rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .trader-picker-item-name {
+      grid-area: name;
+      font-size: 0.84rem;
+      font-weight: 600;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .trader-picker-item-id,
+    .trader-picker-item-sub {
+      font-size: 0.73rem;
+      color: var(--muted);
+    }
+
+    .trader-picker-item-id {
+      grid-area: id;
+      white-space: nowrap;
+    }
+
+    .trader-picker-item-sub {
+      grid-area: sub;
+    }
+
+    .wallet-icon-btn,
+    .pill-action-btn,
+    .mode-btn,
+    .favorites-item-btn,
+    .heatmap-nav,
+    .metric-toggle {
+      min-width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+      font: inherit;
+    }
+
+    .wallet-icon-btn:hover,
+    .pill-action-btn:hover,
+    .mode-btn:hover,
+    .favorites-item-btn:hover,
+    .heatmap-nav:hover,
+    .metric-toggle:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.24);
+    }
+
+    .theme-toggle-btn {
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      font-size: 0.75rem;
+      padding: 0 0.7rem;
+      height: 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(18, 18, 24, 0.6);
+      color: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    body.light .theme-toggle-btn {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #e5e7eb;
+    }
+
+    .export-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+    }
+
+    .export-btn {
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #e2e8f0;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      font: inherit;
+    }
+
+    .export-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(18, 18, 24, 0.6);
+    }
+
+    body.light .export-btn {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #475569;
+    }
+
+    .metrics-toggle {
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0 0.55rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      line-height: 1;
+      min-width: 32px;
+      height: 25px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .metrics-toggle:hover {
+      color: #f8fafc;
+      border-color: rgba(255,255,255,0.22);
+    }
+
+    body.light .metrics-toggle {
+      background: #f8fafc;
+      color: #334155;
+      border-color: #d1d5db;
+    }
+
+    #positionsTimelineToggle .timeline-toggle-icon {
+      width: 12px;
+      height: 12px;
+      display: block;
+    }
+
+    .positions-timeline-wrap {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.15rem 0 0.55rem;
+      padding: 0.38rem 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 10px;
+      background: rgba(148, 163, 184, 0.05);
+    }
+
+    .positions-timeline-label {
+      font-size: 0.67rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      opacity: 0.85;
+    }
+
+    .positions-timeline-controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+      min-width: 0;
+    }
+
+    .positions-timeline-slider {
+      width: 100%;
+      accent-color: #f8fafc;
+      opacity: 0.5;
+    }
+
+    .positions-timeline-stamp {
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+      min-width: 0;
+    }
+
+    .positions-timeline-live {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(148, 163, 184, 0.03);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.18rem 0.45rem;
+      font-size: 0.66rem;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .positions-timeline-live:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    @media (max-width: 900px) {
+      .positions-timeline-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .positions-timeline-label {
+        margin-bottom: -0.1rem;
+      }
+    }
+
+    .wallet-track-btn {
+      padding: 0.45rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex: 0 0 auto;
+      box-shadow: none;
+      height: 38px;
+      min-width: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transform: none;
+      transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .wallet-track-btn:hover:not(:disabled) {
+      color: #f8fafc;
+      border-color: rgba(255,255,255,0.22);
+    }
+
+    .wallet-track-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .wallet-track-btn:focus-visible {
+      outline: none;
+      border-color: rgba(255,255,255,0.7);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      align-items: flex-end;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 38px;
+      padding: 0 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .status-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: var(--warning);
+      box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+    }
+
+    .status-dot.ready {
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(38, 217, 127, 0.42);
+    }
+
+    .status-dot.error {
+      background: var(--danger);
+      box-shadow: 0 0 0 0 rgba(242, 95, 92, 0.35);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.7fr) minmax(520px, 1.3fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 1080px) {
+      header,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-right {
+        align-items: flex-start;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+      padding: 1rem 1rem 1.1rem;
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .section-title h2,
+    .section-title h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 980px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .metric {
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.02);
+      padding: 0.85rem 0.95rem;
+      min-width: 0;
+    }
+
+    body.light .metric {
+      background: rgba(15, 23, 42, 0.02);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.45rem;
+    }
+
+    .metric-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .metric-sub {
+      margin-top: 0.3rem;
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .positive { color: var(--accent); }
+    .negative { color: var(--danger); }
+    .neutral { color: var(--neutral-blue); }
+
+    .kv-list {
+      font-size: 0.85rem;
+      display: grid;
+      grid-template-columns: 1.1fr 1.3fr;
+      gap: 0.25rem 0.5rem;
+    }
+
+    .kv-label {
+      color: var(--muted);
+    }
+
+    .kv-value {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .overview-stack {
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .overview-item {
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 0.75rem 0.8rem;
+      background: rgba(7, 11, 18, 0.24);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
+    }
+
+    body.light .overview-item {
+      background: #f8fafc;
+      border-color: #e5e7eb;
+      box-shadow: none;
+    }
+
+    .overview-trader-link {
+      color: var(--text-main);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .overview-trader-link:hover {
+      border-color: currentColor;
+    }
+
+    .overview-meta {
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--glass-border);
+      display: grid;
+      grid-template-columns: 108px minmax(0, 1fr);
+      gap: 0.85rem;
+      align-items: start;
+    }
+
+    .overview-meta.hidden {
+      display: none;
+    }
+
+    .overview-meta-image {
+      width: 108px;
+      height: 108px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .overview-meta-copy {
+      display: grid;
+      gap: 0.32rem;
+      min-width: 0;
+    }
+
+    .overview-meta-head {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .overview-meta-facts {
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .overview-meta-profile {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    @media (max-width: 720px) {
+      .overview-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .overview-meta-image {
+        width: 100%;
+        max-width: 240px;
+        height: auto;
+        aspect-ratio: 1 / 1;
+      }
+    }
+
+    .positions-card table {
+      width: 100%;
+      min-width: 100%;
+    }
+
+    .positions-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .orders-table-scroll {
+      height: 180px;
+      overflow: auto;
+      margin-bottom: 0.75rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    thead {
+      background: #17181f;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th, td {
+      padding: 0.35rem 0.45rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th[data-sort] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    body.light thead {
+      background: #f8fafc;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #14141c;
+    }
+
+    body.light tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.035);
+    }
+
+    tbody tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    tbody tr.loading-row {
+      background: transparent;
+    }
+
+    @media (min-width: 901px) {
+      .positions-card {
+        overflow-x: hidden !important;
+      }
+
+      .positions-card table {
+        table-layout: fixed;
+      }
+
+      .positions-card th,
+      .positions-card td {
+        font-size: clamp(0.76rem, 0.62vw, 0.96rem);
+        padding: 0.24rem 0.16rem;
+      }
+
+      .positions-card th:nth-child(1),
+      .positions-card td:nth-child(1) { width: 15%; }
+      .positions-card th:nth-child(2),
+      .positions-card td:nth-child(2) { width: 14%; }
+      .positions-card th:nth-child(3),
+      .positions-card td:nth-child(3) { width: 16%; }
+      .positions-card th:nth-child(4),
+      .positions-card td:nth-child(4) { width: 18%; }
+      .positions-card th:nth-child(5),
+      .positions-card td:nth-child(5) { width: 13%; }
+      .positions-card th:nth-child(6),
+      .positions-card td:nth-child(6) { width: 16%; }
+      .positions-card th:nth-child(7),
+      .positions-card td:nth-child(7) { width: 8%; }
+
+      .positions-card .asset-cell,
+      .positions-card .price-stack,
+      .positions-card .size-stack {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .positions-card .asset-cell {
+        gap: 0.22rem;
+      }
+
+      .positions-card .coinIcon,
+      .positions-card .coinFallback {
+        width: 15px;
+        height: 15px;
+      }
+
+      .positions-card .liq-distance {
+        min-width: 0;
+        width: 92%;
+        max-width: 120px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .positions-card {
+        grid-column: span 1;
+        min-width: 100%;
+      }
+
+      .positions-card table {
+        width: max-content;
+        min-width: 100%;
+      }
+
+      .desktop-only {
+        display: none !important;
+      }
+
+      .mobile-only {
+        display: revert !important;
+      }
+    }
+
+    .live-orders-table,
+    .history-orders-table {
+      font-size: clamp(0.64rem, 0.55vw + 0.35rem, 0.8rem);
+    }
+
+    .live-orders-table th,
+    .live-orders-table td,
+    .history-orders-table th,
+    .history-orders-table td {
+      padding: clamp(0.2rem, 0.4vw, 0.35rem) clamp(0.25rem, 0.5vw, 0.45rem);
+    }
+
+    .live-orders-table {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .live-orders-table th,
+    .live-orders-table td,
+    .history-orders-table th,
+    .history-orders-table td {
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    .positions-card th[data-sort],
+    .table-sortable th[data-sort] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .table-sortable th[data-sort][data-sort-dir="asc"]::after,
+    .table-sortable th[data-sort][data-sort-dir="desc"]::after,
+    .positions-card th[data-sort][data-sort-dir="asc"]::after,
+    .positions-card th[data-sort][data-sort-dir="desc"]::after {
+      content: "";
+    }
+
+    .positions-card .sort-indicator,
+    .table-sortable .sort-indicator {
+      margin-left: 0.25rem;
+      font-size: 0.5rem;
+      letter-spacing: 0.02em;
+      opacity: 0.9;
+    }
+
+    @media (min-width: 720px) {
+      .live-orders-table thead th:nth-child(1) { width: 14%; }
+      .live-orders-table thead th:nth-child(2) { width: 19%; }
+      .live-orders-table thead th:nth-child(3) { width: 12%; }
+      .live-orders-table thead th:nth-child(4) { width: 12%; }
+      .live-orders-table thead th:nth-child(5) { width: 17%; }
+      .live-orders-table thead th:nth-child(6) { width: 13%; }
+      .live-orders-table thead th:nth-child(7) { width: 13%; }
+
+      .history-orders-table thead th:nth-child(1) { width: 13%; }
+      .history-orders-table thead th:nth-child(2) { width: 19%; }
+      .history-orders-table thead th:nth-child(3) { width: 12%; }
+      .history-orders-table thead th:nth-child(4) { width: 12%; }
+      .history-orders-table thead th:nth-child(5) { width: 17%; }
+      .history-orders-table thead th:nth-child(6) { width: 12%; }
+      .history-orders-table thead th:nth-child(7) { width: 15%; }
+    }
+
+    .position-row {
+      cursor: pointer;
+    }
+
+    .position-row:hover td {
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .position-row.expanded .chevron {
+      transform: rotate(-135deg);
+      border-color: var(--accent);
+    }
+
+    .chevron {
+      display: inline-block;
+      width: 0.55rem;
+      height: 0.55rem;
+      border-right: 1.6px solid var(--muted);
+      border-bottom: 1.6px solid var(--muted);
+      transform: rotate(45deg);
+      transition: transform 120ms ease, border-color 120ms ease;
+      flex: 0 0 auto;
+    }
+
+    .position-details td {
+      padding: 0.4rem 0.5rem;
+      width: 100%;
+    }
+
+    .position-breakdown {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem 0.5rem;
+      background: transparent;
+    }
+
+    .position-subtable {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 0;
+      font-size: 0.75rem;
+    }
+
+    .position-subtable th,
+    .position-subtable td {
+      padding: 0.2rem 0.25rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .position-subtable th {
+      color: var(--muted);
+      font-weight: 600;
+      position: static;
+      background: transparent;
+      cursor: default;
+      font-size: 0.75rem;
+    }
+
+    .position-subtable tr:last-child td {
+      border-bottom: none;
+    }
+
+    .position-subtable .money {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .position-subtable th:nth-child(1),
+    .position-subtable td:nth-child(1) {
+      width: 25%;
+    }
+
+    .position-subtable th:nth-child(3),
+    .position-subtable td:nth-child(3) {
+      width: 11%;
+    }
+
+    .price-stack,
+    .size-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.08rem;
+      line-height: 1.15;
+    }
+
+    .size-main {
+      font-weight: 600;
+    }
+
+    .size-ticker {
+      font-size: 0.72rem;
+      color: inherit;
+      opacity: 0.7;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .notional-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .roe-sub {
+      color: inherit;
+      opacity: 0.7;
+    }
+
+    .timestamp {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .time-line {
+      display: inline-flex;
+      gap: 0.35rem;
+      white-space: nowrap;
+      align-items: baseline;
+    }
+
+    .time-line-strong {
+      color: var(--text-main);
+    }
+
+    .order-id {
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+      color: var(--text-main);
+    }
+
+    .order-type {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .desktop-only {
+      display: revert;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+
+    .size-cell {
+      text-align: left;
+      color: var(--muted);
+    }
+
+    .size-cell .size-main {
+      color: var(--text-main);
+    }
+
+    .pill {
+      display: inline-flex;
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-weight: 600;
+    }
+
+    .pill-buy {
+      color: #4ade80;
+      border-color: rgba(22, 163, 74, 0.8);
+      background: rgba(22, 163, 74, 0.18);
+      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.2);
+    }
+
+    .pill-sell {
+      color: #f97373;
+      border-color: rgba(248, 113, 113, 0.6);
+      background: rgba(220, 38, 38, 0.18);
+      box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+    }
+
+    .pill-neutral {
+      color: var(--neutral-blue);
+      border-color: rgba(96, 165, 250, 0.45);
+      background: rgba(59, 130, 246, 0.14);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.14);
+    }
+
+    .liq-distance {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 110px;
+    }
+
+    .liq-bar {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .liq-bar span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .liq-distance.liq-danger .liq-bar span { background: var(--danger); }
+    .liq-distance.liq-warn .liq-bar span { background: #f59e0b; }
+    .liq-distance.liq-safe .liq-bar span { background: var(--accent); }
+    .liq-distance.liq-high {
+      box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35);
+      border-radius: 8px;
+      padding: 0.2rem 0.3rem;
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .liq-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .liq-pct {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .liq-price {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .liq-flag {
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #fbbf24;
+      margin-left: 0.35rem;
+    }
+
+    body.light .liq-bar {
+      background: rgba(15, 23, 42, 0.1);
+    }
+
+    body.light .liq-meta,
+    body.light .liq-pct,
+    body.light .liq-price {
+      color: #0f172a;
+      opacity: 0.7;
+    }
+
+    .asset-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-weight: 600;
+    }
+
+    .coinIcon,
+    .coinFallback {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      object-fit: cover;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.08);
+      color: var(--text-main);
+      font-size: 0.72rem;
+      flex: 0 0 auto;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    body.light .timestamp {
+      color: #6b7280;
+    }
+
+    .filter-bar,
+    .performance-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      align-items: center;
+      margin-bottom: 0.9rem;
+    }
+
+    .history-filter-bar {
+      margin-top: -0.15rem;
+      margin-bottom: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 0.75rem;
+    }
+
+    .orders-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      min-height: 1.95rem;
+    }
+
+    .orders-filter-label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .orders-filter-input,
+    .orders-filter-select {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #17181f;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      min-width: 80px;
+      max-width: 140px;
+      outline: none;
+    }
+
+    .orders-filter-input::placeholder {
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    .orders-filter-check {
+      display: inline-flex;
+      align-items: center;
+      height: 1.95rem;
+      padding: 0 0.15rem;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      line-height: 1;
+      align-self: center;
+    }
+
+    .orders-filter-check input {
+      margin: 0;
+      width: 0.85rem;
+      height: 0.85rem;
+      transform: translateY(0);
+      flex: 0 0 auto;
+    }
+
+    body.light .orders-filter-input,
+    body.light .orders-filter-select {
+      background: #ffffff;
+      border-color: #e5e7eb;
+      color: #0f172a;
+    }
+
+    body.light .orders-filter-check {
+      color: #0f172a;
+    }
+
+    .orders-tabs,
+    .range-toggle,
+    .view-toggle {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.15rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--glass-border);
+    }
+
+    .orders-tab-btn,
+    .chart-range-btn,
+    .view-toggle button {
+      position: relative;
+      z-index: 1;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      height: 34px;
+      padding: 0 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.82rem;
+      transition: color 0.2s ease;
+    }
+
+    .orders-tab-btn.active,
+    .chart-range-btn.active,
+    .view-toggle button.active {
+      color: var(--text-main);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .trades-section-title {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+    }
+
+    .trades-section-title .orders-tabs {
+      justify-self: center;
+      margin: 0;
+    }
+
+    .trades-section-spacer {
+      justify-self: end;
+      min-width: 1px;
+      min-height: 1px;
+    }
+
+    .trades-mode-count {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1;
+      align-self: center;
+    }
+
+    .orders-tabs.switch {
+      margin: 0;
+      padding: 2px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      gap: 0.2rem;
+      align-items: stretch;
+      justify-content: center;
+      width: fit-content;
+      max-width: 100%;
+      position: relative;
+      overflow: visible;
+      height: var(--switch-height);
+    }
+
+    .orders-tabs.switch .orders-tab-btn {
+      border-color: transparent;
+      background: transparent;
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .orders-tabs.switch .orders-tab-btn.active {
+      border-color: transparent;
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .orders-tabs-indicator {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      left: 0;
+      width: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.45);
+      z-index: 1;
+      opacity: 0;
+      transition: transform 220ms ease, width 220ms ease, opacity 120ms ease;
+    }
+
+    .orders-tabs.switch.ready .orders-tabs-indicator {
+      opacity: 1;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #ef4444;
+      display: inline-block;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+      position: relative;
+    }
+
+    .live-dot::after {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      border-radius: 999px;
+      background: rgba(239, 68, 68, 0.35);
+      opacity: 0.6;
+      display: none;
+    }
+
+    .history-icon {
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .history-icon svg {
+      width: 14px;
+      height: 14px;
+      transform-origin: center;
+      animation: none;
+    }
+
+    .orders-tab-btn.active .live-dot::after {
+      display: block;
+      animation: livePulse 1.6s ease-out infinite;
+    }
+
+    .orders-tab-btn.active .history-icon svg {
+      animation: historyTick 2.8s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0% { transform: scale(0.6); opacity: 0.6; }
+      70% { transform: scale(1.6); opacity: 0; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    @keyframes historyTick {
+      0% { transform: rotate(0deg) scale(1); }
+      10% { transform: rotate(-12deg) scale(1.03); }
+      20% { transform: rotate(6deg) scale(1.01); }
+      30% { transform: rotate(0deg) scale(1); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    @media (max-width: 1180px) {
+      .chart-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      min-height: 320px;
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 0.8rem;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .chart-card h3 {
+      margin: 0 0 0.8rem;
+      font-size: 0.94rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .chart-canvas-wrap {
+      position: relative;
+      min-height: 250px;
+      height: 250px;
+    }
+
+    .chart-canvas-wrap canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .pnl-heatmap-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .is-hidden,
+    .hidden {
+      display: none !important;
+    }
+
+    .pnl-heatmap-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .pnl-heatmap-title {
+      font-size: 0.84rem;
+      color: var(--muted);
+      text-align: center;
+      flex: 1 1 auto;
+    }
+
+    .pnl-heatmap-body {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.5rem;
+      align-items: start;
+    }
+
+    .pnl-heatmap-weekdays,
+    .pnl-heatmap-grid,
+    .pnl-heatmap-months {
+      display: grid;
+      gap: 0.22rem;
+    }
+
+    .pnl-heatmap-weekdays {
+      grid-template-rows: repeat(7, 1fr);
+      align-items: center;
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .pnl-heatmap-months,
+    .pnl-heatmap-grid {
+      grid-template-columns: repeat(var(--pnl-heatmap-columns, 13), minmax(0, 1fr));
+    }
+
+    .pnl-heatmap-month {
+      min-height: 14px;
+      font-size: 0.66rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .pnl-heatmap-grid {
+      grid-template-rows: repeat(7, 1fr);
+    }
+
+    .pnl-heatmap-cell {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 6px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .pnl-heatmap-cell.empty {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .pnl-heatmap-hover {
+      min-height: 1rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .layout-two {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+    }
+
+    .favorites-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(420px, 92vw);
+      height: 100vh;
+      background: rgba(10, 10, 14, 0.96);
+      border-left: 1px solid var(--glass-border);
+      box-shadow: -20px 0 50px rgba(0, 0, 0, 0.35);
+      z-index: 50;
+      transform: translateX(100%);
+      transition: transform 0.24s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.light .favorites-drawer {
+      background: rgba(248, 250, 252, 0.98);
+    }
+
+    .favorites-drawer.open {
+      transform: translateX(0);
+    }
+
+    .favorites-header,
+    .favorites-list {
+      padding: 1rem;
+    }
+
+    .favorites-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .favorites-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      overflow: auto;
+    }
+
+    .favorite-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.45rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 0.7rem 0.8rem;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .favorite-name {
+      font-weight: 600;
+      font-size: 0.84rem;
+      color: var(--text-main);
+    }
+
+    .favorite-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+      word-break: break-word;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="wallet-controls">
+        <a class="brand" href="/" aria-label="Hypermonitor home">
+          <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.8rem; height: auto; border-radius: 4px;" />
+          <h1 class="brand-name"><span>Hypermonitor</span> <img class="brand-logo" src="images/weex.png" alt="WEEX" /></h1>
+        </a>
+        <div class="tagline">Track WEEX copy traders. No login required.</div>
+        <div class="wallet-inputs-label">Trader ID or name</div>
+        <div class="wallet-inputs-row">
+          <div class="wallet-inputs">
+            <div class="wallet-input-row">
+              <input id="traderInput" type="text" placeholder="e.g. 7216746409 or Wealth Helmsman" autocomplete="off" aria-label="Trader ID or name" />
+            </div>
+            <div class="trader-picker" aria-label="Available traders">
+              <div class="trader-picker-head">
+                <div class="trader-picker-title">Traders</div>
+                <div class="trader-picker-meta" id="traderPickerMeta">Loading traders…</div>
+              </div>
+              <div class="trader-picker-list" id="traderPickerList">
+                <button class="trader-picker-item" type="button" disabled>
+                  <span class="trader-picker-item-name">Loading traders…</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="wallet-actions">
+            <button id="trackBtn" class="wallet-track-btn" aria-label="Track traders">
+              <span class="sr-only">Track traders</span>
+              ⏎
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-right-top">
+          <button id="themeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle theme">☼</button>
+          <div class="status-pill">
+            <span id="statusDot" class="status-dot"></span>
+            <span id="statusText"></span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="section-title">
+          <h2>Account Overview</h2>
+        </div>
+        <div class="overview-stack">
+          <div class="overview-item">
+            <div class="kv-list">
+              <div class="kv-label">Trader</div>
+              <div class="kv-value" id="overviewTrader">-</div>
+              <div class="kv-label">Current Trades</div>
+              <div class="kv-value" id="overviewCurrentCount">-</div>
+              <div class="kv-label">Closed Trades</div>
+              <div class="kv-value" id="overviewHistoryCount">-</div>
+              <div class="kv-label">Realized PnL</div>
+              <div class="kv-value" id="overviewRealizedPnl">-</div>
+              <div class="kv-label">Net Unrealized PnL</div>
+              <div class="kv-value" id="overviewNetUnrealizedPnl">-</div>
+            </div>
+            <div id="overviewMeta" class="overview-meta hidden">
+              <img id="overviewMetaImage" class="overview-meta-image hidden" alt="Trader profile" />
+              <div class="overview-meta-copy">
+                <div id="overviewMetaHead" class="overview-meta-head">-</div>
+                <div id="overviewMetaFacts" class="overview-meta-facts">-</div>
+                <div id="overviewMetaProfile" class="overview-meta-profile">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card positions-card">
+        <div class="section-title">
+          <h2>Positions</h2>
+          <div class="section-actions">
+            <span class="muted" id="liveBridgeStatus">Snapshot current trades</span>
+            <button id="exportCurrentBtn" class="export-btn" type="button" aria-label="Export Excel">
+              <svg class="export-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path d="M12 3v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 10l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 18h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span class="sr-only">Export Excel</span>
+            </button>
+            <button class="metrics-toggle" id="positionsTimelineToggle" type="button" aria-expanded="false" title="Toggle timeline">
+              <span class="sr-only">Toggle timeline</span>
+              <span aria-hidden="true">▾</span>
+            </button>
+          </div>
+        </div>
+        <div class="positions-timeline-wrap hidden" id="positionsTimelineWrap">
+          <div class="positions-timeline-label">Timeline</div>
+          <div class="positions-timeline-controls">
+            <input id="positionsTimelineSlider" class="positions-timeline-slider" type="range" min="0" max="0" step="1" value="0" disabled />
+            <span id="positionsTimelineStamp" class="positions-timeline-stamp">Live</span>
+          </div>
+          <button id="positionsTimelineLiveBtn" class="positions-timeline-live" type="button" disabled>Live</button>
+        </div>
+        <div class="positions-table-wrap">
+          <table class="table-sortable positions-table">
+            <thead>
+              <tr>
+                <th data-table="current" data-sort="asset">Asset</th>
+                <th data-table="current" data-sort="positionSide">Side</th>
+                <th data-table="current" data-sort="openSize">Size</th>
+                <th>Price</th>
+                <th data-table="current" data-sort="estimatedPnl">Unrealized PnL</th>
+                <th>Liq Distance</th>
+                <th data-table="current" data-sort="openTimeMs">Age</th>
+              </tr>
+            </thead>
+            <tbody id="currentTradesBody">
+              <tr class="loading-row"><td colspan="7" class="muted">Loading current trades…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="section-title">
+        <h2>Performance</h2>
+        <div class="chart-actions">
+          <div class="range-toggle" role="tablist" aria-label="Performance range">
+            <button class="chart-range-btn" data-range="day" type="button">Day</button>
+            <button class="chart-range-btn" data-range="week" type="button">Week</button>
+            <button class="chart-range-btn" data-range="month" type="button">Month</button>
+            <button class="chart-range-btn active" data-range="allTime" type="button">All</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>
+            <span>Equity <span id="equityTitleValue" class="muted">[-]</span></span>
+          </h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="equityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>
+            <span>Profit & Loss <span id="pnlTitleValue" class="muted">[-]</span></span>
+            <span class="view-toggle" role="tablist" aria-label="PnL view mode">
+              <button id="pnlLineViewBtn" class="active" type="button" data-pnl-view="line">Line</button>
+              <button id="pnlHeatmapViewBtn" type="button" data-pnl-view="heatmap">Heatmap</button>
+            </span>
+          </h3>
+          <div class="chart-canvas-wrap" id="pnlChartWrap">
+            <canvas id="pnlChart"></canvas>
+          </div>
+          <div class="pnl-heatmap-wrap is-hidden" id="pnlHeatmapWrap">
+            <div class="pnl-heatmap-toolbar">
+              <button class="heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous quarter">‹</button>
+              <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Quarterly daily PnL</span>
+              <button class="heatmap-nav" id="pnlHeatmapNextBtn" type="button" aria-label="Next quarter">›</button>
+            </div>
+            <div class="pnl-heatmap-months" id="pnlHeatmapMonths"></div>
+            <div class="pnl-heatmap-body">
+              <div class="pnl-heatmap-weekdays" id="pnlHeatmapWeekdays"></div>
+              <div class="pnl-heatmap-grid" id="pnlHeatmapGrid"></div>
+            </div>
+            <div class="pnl-heatmap-hover" id="pnlHeatmapHover"></div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>
+            <span>Trading Activity <span id="activityTitleValue" class="muted">[-]</span></span>
+          </h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="activityChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:0.9rem;">
+        <div class="metrics-grid" id="metricsGrid">
+          <div class="metric">
+            <div class="metric-label">Total PnL</div>
+            <div class="metric-value" id="metricTotalPnl">-</div>
+            <div class="metric-sub">Cumulative realized PnL</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Return</div>
+            <div class="metric-value" id="metricReturn">-</div>
+            <div class="metric-sub">PnL / gross margin used</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Max Drawdown</div>
+            <div class="metric-value" id="metricMaxDrawdown">-</div>
+            <div class="metric-sub">Peak-to-trough drop</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Sharpe (PnL)</div>
+            <div class="metric-value" id="metricSharpe">-</div>
+            <div class="metric-sub">Mean / stdev of daily PnL</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">PnL Volatility</div>
+            <div class="metric-value" id="metricVolatility">-</div>
+            <div class="metric-sub">Daily stdev</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Best Day</div>
+            <div class="metric-value" id="metricBestInterval">-</div>
+            <div class="metric-sub">Largest positive daily delta</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Win Rate</div>
+            <div class="metric-value" id="metricWinRate">-</div>
+            <div class="metric-sub">Closed trades with profit</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Profit Factor</div>
+            <div class="metric-value" id="metricProfitFactor">-</div>
+            <div class="metric-sub">Gross gains / losses</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Trades / Day</div>
+            <div class="metric-value" id="metricTradesPerDay">-</div>
+            <div class="metric-sub">Average closed trades per active day</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Active Days Ratio</div>
+            <div class="metric-value" id="metricActiveDays">-</div>
+            <div class="metric-sub">Days with trades / observed</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Product Count</div>
+            <div class="metric-value" id="metricProductCount">-</div>
+            <div class="metric-sub">Unique traded products</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Avg Leverage</div>
+            <div class="metric-value" id="metricAvgLeverage">-</div>
+            <div class="metric-sub">Closed trades only</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Median Holding Time</div>
+            <div class="metric-value" id="metricMedianHolding">-</div>
+            <div class="metric-sub">Open to close</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Long/Short Bias</div>
+            <div class="metric-value" id="metricSideBias">-</div>
+            <div class="metric-sub">Net notional bias</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Excess PnL</div>
+            <div class="metric-value" id="metricExcessPnl">-</div>
+            <div class="metric-sub">Vs BTC benchmark</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Beta & Alpha</div>
+            <div class="metric-value" id="metricBetaAlpha">-</div>
+            <div class="metric-sub">Daily PnL vs BTC</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:1rem;">
+      <div class="section-title trades-section-title">
+        <h2>Trades</h2>
+        <div class="orders-tabs switch" id="modeTabs">
+          <span class="orders-tabs-indicator" aria-hidden="true"></span>
+          <button class="orders-tab-btn active" type="button" data-tab="live" aria-label="Open trades">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span>Open</span>
+          </button>
+          <button class="orders-tab-btn" type="button" data-tab="history" aria-label="Closed trades">
+            <span class="history-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                <path d="M12 8v5l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M4 12a8 8 0 1 0 3-6.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                <path d="M4 4v4h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </span>
+            <span>Closed</span>
+          </button>
+        </div>
+        <div class="trades-section-spacer">
+          <small id="tradesModeCount" class="trades-mode-count muted">-</small>
+        </div>
+      </div>
+
+      <div id="liveLayout" class="trades-live-panel">
+        <div class="orders-table-scroll">
+          <table class="table-sortable live-orders-table">
+            <thead>
+              <tr>
+                <th data-table="live" data-sort="currentOrderId">Order ID</th>
+                <th data-table="live" data-sort="openTimeMs">Time</th>
+                <th data-table="live" data-sort="asset">Asset</th>
+                <th data-table="live" data-sort="positionSide">Side</th>
+                <th data-table="live" data-sort="openSize">Size</th>
+                <th data-table="live" data-sort="averageOpenPrice">Price</th>
+                <th data-table="live" data-sort="estimatedPnl">Unrealized PnL</th>
+              </tr>
+            </thead>
+            <tbody id="liveTradesBody">
+              <tr class="loading-row"><td colspan="7" class="muted">Loading live trades…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="historyLayout" class="hidden">
+        <div class="history-filter-bar">
+          <div class="orders-filter-group">
+            <span class="orders-filter-label">Aggregate</span>
+            <label class="orders-filter-check" aria-label="Aggregate consecutive trades at the same price" title="Aggregate consecutive trades at the same price">
+              <input id="historyAggregateCheckbox" type="checkbox" />
+            </label>
+          </div>
+          <div class="orders-filter-group">
+            <span class="orders-filter-label">Asset</span>
+            <input id="historyAssetFilter" class="orders-filter-input" type="text" placeholder="e.g. BTC" />
+          </div>
+          <div class="orders-filter-group">
+            <span class="orders-filter-label">Side</span>
+            <select id="historySideFilter" class="orders-filter-select">
+              <option value="all">All</option>
+              <option value="LONG">Long</option>
+              <option value="SHORT">Short</option>
+            </select>
+          </div>
+          <div class="orders-filter-group">
+            <span class="orders-filter-label">PnL</span>
+            <select id="historyPnlFilter" class="orders-filter-select">
+              <option value="all">All</option>
+              <option value="wins">Wins</option>
+              <option value="losses">Losses</option>
+            </select>
+          </div>
+        </div>
+        <div class="orders-table-scroll">
+          <table class="table-sortable history-orders-table">
+            <thead>
+              <tr>
+                <th data-table="history" data-sort="historyOrderId">Order ID</th>
+                <th data-table="history" data-sort="closeTimeMs">Time</th>
+                <th data-table="history" data-sort="asset">Asset</th>
+                <th data-table="history" data-sort="positionSide">Side</th>
+                <th data-table="history" data-sort="openSize">Size</th>
+                <th data-table="history" data-sort="averageOpenPrice">Price</th>
+                <th data-table="history" data-sort="realizedPnl">Closed PnL</th>
+              </tr>
+            </thead>
+            <tbody id="historyTradesBody">
+              <tr class="loading-row"><td colspan="7" class="muted">Loading historical trades…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="data/weex_copy_bundle.js"></script>
+  <script>
+    const DATA_URLS = {
+      traders: "data/weex_copy_traders.csv",
+      history: "data/weex_copy_trading_history.csv",
+      current: "data/weex_copy_current_trades.csv",
+      contracts: "data/weex_contract_meta.json",
+    };
+    const LIVE_BRIDGE_URL = "http://127.0.0.1:8765/api/weex/current";
+    const TRADER_META_BRIDGE_URL = "http://127.0.0.1:8765/api/weex/trader";
+    const LIVE_REFRESH_INTERVAL_MS = 30000;
+    const BINANCE_STREAM_BASE = "wss://stream.binance.com:9443/stream?streams=";
+
+    const THEME_KEY = "hypermonitor-theme";
+
+    const state = {
+      traders: [],
+      historyRows: [],
+      currentRows: [],
+      contractMap: new Map(),
+      selectedTraderIds: [],
+      selectedTraders: [],
+      currentRangeKey: "allTime",
+      pnlViewMode: "line",
+      activeTab: "live",
+      liveCurrentRows: [],
+      liveCurrentTraderId: "",
+      liveCurrentFetchedAt: null,
+      liveCurrentLoading: false,
+      liveCurrentError: "",
+      liveCurrentRequestToken: 0,
+      traderMetaById: new Map(),
+      traderMetaRequestToken: 0,
+      expandedCurrentAssets: new Set(),
+      charts: {
+        equity: null,
+        pnl: null,
+        activity: null,
+      },
+      tableSorts: {
+        current: { key: "asset", dir: "asc" },
+        live: { key: "currentOrderId", dir: "desc" },
+        history: { key: "asset", dir: "asc" },
+      },
+      priceMap: new Map(),
+      priceFetchPromise: null,
+      timelineTimestamps: [],
+      timelineSelectedIndex: 0,
+      timelineAsOfMs: null,
+      timelinePriceMap: new Map(),
+      timelinePriceRequestToken: 0,
+      pnlHeatmapRows: [],
+      pnlHeatmapQuarters: [],
+      pnlHeatmapQuarterIndex: -1,
+    };
+
+    const els = {
+      traderInput: document.getElementById("traderInput"),
+      traderPickerMeta: document.getElementById("traderPickerMeta"),
+      traderPickerList: document.getElementById("traderPickerList"),
+      trackBtn: document.getElementById("trackBtn"),
+      themeToggle: document.getElementById("themeToggle"),
+      statusText: document.getElementById("statusText"),
+      statusDot: document.getElementById("statusDot"),
+      currentTradesBody: document.getElementById("currentTradesBody"),
+      liveTradesBody: document.getElementById("liveTradesBody"),
+      historyTradesBody: document.getElementById("historyTradesBody"),
+      liveBridgeStatus: document.getElementById("liveBridgeStatus"),
+      tradesModeCount: document.getElementById("tradesModeCount"),
+      historyAggregateCheckbox: document.getElementById("historyAggregateCheckbox"),
+      historyAssetFilter: document.getElementById("historyAssetFilter"),
+      historySideFilter: document.getElementById("historySideFilter"),
+      historyPnlFilter: document.getElementById("historyPnlFilter"),
+      overviewTrader: document.getElementById("overviewTrader"),
+      overviewMeta: document.getElementById("overviewMeta"),
+      overviewMetaImage: document.getElementById("overviewMetaImage"),
+      overviewMetaHead: document.getElementById("overviewMetaHead"),
+      overviewMetaFacts: document.getElementById("overviewMetaFacts"),
+      overviewMetaProfile: document.getElementById("overviewMetaProfile"),
+      overviewCurrentCount: document.getElementById("overviewCurrentCount"),
+      overviewHistoryCount: document.getElementById("overviewHistoryCount"),
+      overviewRealizedPnl: document.getElementById("overviewRealizedPnl"),
+      overviewNetUnrealizedPnl: document.getElementById("overviewNetUnrealizedPnl"),
+      equityTitleValue: document.getElementById("equityTitleValue"),
+      pnlTitleValue: document.getElementById("pnlTitleValue"),
+      activityTitleValue: document.getElementById("activityTitleValue"),
+      metricTotalPnl: document.getElementById("metricTotalPnl"),
+      metricReturn: document.getElementById("metricReturn"),
+      metricMaxDrawdown: document.getElementById("metricMaxDrawdown"),
+      metricSharpe: document.getElementById("metricSharpe"),
+      metricVolatility: document.getElementById("metricVolatility"),
+      metricBestInterval: document.getElementById("metricBestInterval"),
+      metricWinRate: document.getElementById("metricWinRate"),
+      metricProfitFactor: document.getElementById("metricProfitFactor"),
+      metricTradesPerDay: document.getElementById("metricTradesPerDay"),
+      metricActiveDays: document.getElementById("metricActiveDays"),
+      metricProductCount: document.getElementById("metricProductCount"),
+      metricAvgLeverage: document.getElementById("metricAvgLeverage"),
+      metricMedianHolding: document.getElementById("metricMedianHolding"),
+      metricSideBias: document.getElementById("metricSideBias"),
+      metricExcessPnl: document.getElementById("metricExcessPnl"),
+      metricBetaAlpha: document.getElementById("metricBetaAlpha"),
+      pnlLineViewBtn: document.getElementById("pnlLineViewBtn"),
+      pnlHeatmapViewBtn: document.getElementById("pnlHeatmapViewBtn"),
+      pnlChartWrap: document.getElementById("pnlChartWrap"),
+      pnlHeatmapWrap: document.getElementById("pnlHeatmapWrap"),
+      pnlHeatmapPrevBtn: document.getElementById("pnlHeatmapPrevBtn"),
+      pnlHeatmapNextBtn: document.getElementById("pnlHeatmapNextBtn"),
+      pnlHeatmapTitle: document.getElementById("pnlHeatmapTitle"),
+      pnlHeatmapMonths: document.getElementById("pnlHeatmapMonths"),
+      pnlHeatmapWeekdays: document.getElementById("pnlHeatmapWeekdays"),
+      pnlHeatmapGrid: document.getElementById("pnlHeatmapGrid"),
+      pnlHeatmapHover: document.getElementById("pnlHeatmapHover"),
+      modeTabs: document.getElementById("modeTabs"),
+      liveLayout: document.getElementById("liveLayout"),
+      historyLayout: document.getElementById("historyLayout"),
+      exportCurrentBtn: document.getElementById("exportCurrentBtn"),
+      positionsTimelineWrap: document.getElementById("positionsTimelineWrap"),
+      positionsTimelineSlider: document.getElementById("positionsTimelineSlider"),
+      positionsTimelineStamp: document.getElementById("positionsTimelineStamp"),
+      positionsTimelineLiveBtn: document.getElementById("positionsTimelineLiveBtn"),
+      positionsTimelineToggle: document.getElementById("positionsTimelineToggle"),
+    };
+
+    let liveRefreshTimer = null;
+    let priceSocket = null;
+    let priceSocketSymbolsKey = "";
+
+    function setStatus(text, kind = "loading") {
+      els.statusText.textContent = text;
+      els.statusDot.classList.remove("ready", "error");
+      if (kind === "ready") els.statusDot.classList.add("ready");
+      if (kind === "error") els.statusDot.classList.add("error");
+      const pill = els.statusText.closest(".status-pill");
+      if (pill) {
+        pill.classList.toggle("hidden", !text || (kind === "ready" && text === "Ready"));
+      }
+    }
+
+    function safeNumber(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function normalizeTimestamp(value) {
+      const n = safeNumber(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function fmtMoney(value, decimals = 2) {
+      if (!Number.isFinite(value)) return "-";
+      return value.toLocaleString(undefined, {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+    }
+
+    function fmtDollar(value, decimals = 2) {
+      if (!Number.isFinite(value)) return "-";
+      const abs = Math.abs(value).toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+      return value < 0 ? `-$${abs}` : `$${abs}`;
+    }
+
+    function fmtDisplayPrice(value) {
+      if (!Number.isFinite(value)) return "-";
+      const abs = Math.abs(value);
+      let decimals = 0;
+      if (abs < 1) {
+        const extra = abs > 0 ? Math.ceil(Math.log10(1 / abs)) : 0;
+        decimals = Math.min(8, 4 + Math.max(0, extra));
+      } else if (abs < 10) {
+        decimals = 4;
+      } else if (abs < 100) {
+        decimals = 3;
+      } else if (abs < 1000) {
+        decimals = 2;
+      } else if (abs < 10000) {
+        decimals = 1;
+      } else {
+        decimals = 0;
+      }
+      const formatted = abs.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+      return value < 0 ? `-$${formatted}` : `$${formatted}`;
+    }
+
+    function formatSignedDollarWithPlus(value, decimals = 2) {
+      if (!Number.isFinite(value)) return "-";
+      const abs = fmtMoney(Math.abs(value), decimals);
+      if (value > 0) return `+${abs}`;
+      if (value < 0) return `-${abs.replace("-", "")}`;
+      return abs;
+    }
+
+    function formatSignedPlainDollarWithPlus(value, decimals = 2) {
+      if (!Number.isFinite(value)) return "-";
+      const abs = fmtDollar(Math.abs(value), decimals);
+      if (value > 0) return `+${abs}`;
+      if (value < 0) return `-${abs.replace("-", "")}`;
+      return abs;
+    }
+
+    function formatSignedPlainDollar(value, decimals = 2) {
+      if (!Number.isFinite(value)) return "-";
+      const abs = fmtDollar(Math.abs(value), decimals);
+      if (value < 0) return `-${abs.replace("-", "")}`;
+      return abs;
+    }
+
+    function fmtNumber(value, decimals = 2) {
+      if (!Number.isFinite(value)) return "-";
+      return value.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals,
+      });
+    }
+
+    function fmtPositionSize(value, decimals = 4) {
+      if (!Number.isFinite(value)) return "-";
+      const abs = Math.abs(value).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals,
+      });
+      return value < 0 ? `-${abs}` : abs;
+    }
+
+    function fmtPercent(value, decimals = 2) {
+      if (!Number.isFinite(value)) return "-";
+      return `${value.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}%`;
+    }
+
+    function formatSignedPercent(value, decimals = 2) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "";
+      const pct = n * 100;
+      const abs = Math.abs(pct).toFixed(decimals);
+      if (pct > 0) return `+${abs}%`;
+      if (pct < 0) return `-${abs}%`;
+      return `${abs}%`;
+    }
+
+    function fmtDateTime(ms) {
+      if (!ms && ms !== 0) return "-";
+      const d = new Date(Number(ms));
+      if (Number.isNaN(d.getTime())) return "-";
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = months[d.getMonth()] || "";
+      const year = d.getFullYear();
+      const hour = String(d.getHours()).padStart(2, "0");
+      const minute = String(d.getMinutes()).padStart(2, "0");
+      const second = String(d.getSeconds()).padStart(2, "0");
+      return `${day} ${month} ${year} ${hour}:${minute}:${second}`;
+    }
+
+    function fmtDateOnly(ms) {
+      if (!Number.isFinite(ms) || ms <= 0) return "-";
+      return new Date(ms).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    }
+
+    function fmtTimeOnly(ms) {
+      if (!Number.isFinite(ms) || ms <= 0) return "-";
+      return new Date(ms).toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    }
+
+    function formatDuration(ms) {
+      if (!Number.isFinite(ms) || ms <= 0) return "-";
+      const mins = Math.floor(ms / 60000);
+      const days = Math.floor(mins / 1440);
+      const hours = Math.floor((mins % 1440) / 60);
+      const remMins = mins % 60;
+      if (days > 0) return `${days}d ${hours}h`;
+      if (hours > 0) return `${hours}h ${remMins}m`;
+      return `${remMins}m`;
+    }
+
+    function toLocalDayStartMs(value) {
+      const ms = value instanceof Date ? value.getTime() : normalizeTimestamp(value);
+      if (!Number.isFinite(ms)) return null;
+      const d = new Date(ms);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    }
+
+    function addLocalDays(dayMs, days) {
+      if (!Number.isFinite(dayMs) || !Number.isFinite(days)) return null;
+      const d = new Date(dayMs);
+      d.setDate(d.getDate() + days);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    }
+
+    function parseCsvText(text) {
+      const parsed = Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      return parsed.data || [];
+    }
+
+    async function fetchText(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+      return await res.text();
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+      return await res.json();
+    }
+
+    async function fetchJsonNoStore(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+      return await res.json();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function getTraderDisplayLabel(row) {
+      if (!row) return "";
+      return `${row.traderNickName} (${row.traderUserId})`;
+    }
+
+    function getSelectedTraderRow() {
+      const traderId = state.selectedTraderIds[0];
+      if (!traderId) return null;
+      return state.traders.find((row) => row.traderUserId === traderId) || null;
+    }
+
+    function buildTraderInputValue(ids) {
+      const id = ids[0];
+      if (!id) return "";
+      const trader = state.traders.find((row) => row.traderUserId === id);
+      return trader ? getTraderDisplayLabel(trader) : id;
+    }
+
+    function getTraderInputTokens(raw) {
+      const value = String(raw || "").trim();
+      return value ? [value] : [];
+    }
+
+    function getActiveTraderPickerQuery() {
+      const raw = String(els.traderInput.value || "").trim();
+      if (!raw) return "";
+      if (raw === buildTraderInputValue(state.selectedTraderIds)) return "";
+      const tokens = getTraderInputTokens(raw);
+      return String(tokens[tokens.length - 1] || "").trim().toLowerCase();
+    }
+
+    function sortTraderRows(rows) {
+      return rows.slice().sort((a, b) => {
+        const followDiff = Number(b.followCount || 0) - Number(a.followCount || 0);
+        if (followDiff) return followDiff;
+        return String(a.traderNickName || "").localeCompare(String(b.traderNickName || ""));
+      });
+    }
+
+    function renderTraderPicker() {
+      const selectedIds = new Set(state.selectedTraderIds);
+      const query = getActiveTraderPickerQuery();
+      let rows = sortTraderRows(state.traders);
+      if (query) {
+        rows = rows.filter((row) => `${row.traderUserId} ${row.traderNickName}`.toLowerCase().includes(query));
+      }
+      rows.sort((a, b) => {
+        const aSelected = selectedIds.has(a.traderUserId) ? 1 : 0;
+        const bSelected = selectedIds.has(b.traderUserId) ? 1 : 0;
+        if (aSelected !== bSelected) return bSelected - aSelected;
+        const followDiff = Number(b.followCount || 0) - Number(a.followCount || 0);
+        if (followDiff) return followDiff;
+        return String(a.traderNickName || "").localeCompare(String(b.traderNickName || ""));
+      });
+
+      els.traderPickerMeta.textContent = query
+        ? `${rows.length} matches · ${state.traders.length} total`
+        : `${state.traders.length} traders available`;
+
+      if (!rows.length) {
+        els.traderPickerList.innerHTML = `<div class="muted">No traders match that search.</div>`;
+        return;
+      }
+
+      els.traderPickerList.innerHTML = rows.map((row) => `
+        <button
+          class="trader-picker-item${selectedIds.has(row.traderUserId) ? " active" : ""}"
+          type="button"
+          data-trader-id="${escapeHtml(row.traderUserId)}"
+          title="${escapeHtml(getTraderDisplayLabel(row))}"
+        >
+          <span class="trader-picker-item-name">${escapeHtml(row.traderNickName || row.traderUserId)}</span>
+          <span class="trader-picker-item-id">${escapeHtml(row.traderUserId)}</span>
+          <span class="trader-picker-item-sub">${fmtNumber(row.followCount, 0)} followers · ${Number.isFinite(row.totalReturnRate) ? fmtPercent(row.totalReturnRate, 2) : "return n/a"}</span>
+        </button>
+      `).join("");
+    }
+
+    function addTraderFromPicker(traderId) {
+      applyTraderSelection([traderId]);
+      els.traderInput.focus();
+    }
+
+    function coinIconHtml(iconUrl, label) {
+      const fallback = String(label || "?").slice(0, 1).toUpperCase();
+      if (iconUrl) {
+        return `<img class="coinIcon" src="${escapeHtml(iconUrl)}" alt="${escapeHtml(label)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;coinFallback&quot;>${fallback}</span>'" />`;
+      }
+      return `<span class="coinFallback">${fallback}</span>`;
+    }
+
+    function getSignedClass(value) {
+      if (!Number.isFinite(value)) return "muted";
+      if (value > 0) return "positive";
+      if (value < 0) return "negative";
+      return "neutral";
+    }
+
+    function sidePillClass(side) {
+      if (side === "LONG") return "pill pill-buy";
+      if (side === "SHORT") return "pill pill-sell";
+      return "pill pill-neutral";
+    }
+
+    function getBinanceSymbolForRow(row) {
+      return String(row?.binanceSymbol || String(row?.symbol || "").replace("/", "")).trim().toUpperCase();
+    }
+
+    function computeEstimatedPnl(row, markPrice) {
+      const openSize = safeNumber(row?.openSize);
+      const averageOpenPrice = safeNumber(row?.averageOpenPrice);
+      const side = String(row?.positionSide || "").trim().toUpperCase();
+      if (!Number.isFinite(markPrice) || !Number.isFinite(averageOpenPrice) || !Number.isFinite(openSize)) return null;
+      const diff = side === "SHORT" ? averageOpenPrice - markPrice : markPrice - averageOpenPrice;
+      return diff * openSize;
+    }
+
+    function computeUpnlPercentRatio(row) {
+      const upnl = safeNumber(row?.estimatedPnl);
+      const entry = safeNumber(row?.averageOpenPrice);
+      const size = Math.abs(Number(row?.openSize || 0));
+      const leverage = safeNumber(row?.openLeverage);
+      if (!Number.isFinite(upnl) || !Number.isFinite(entry) || !Number.isFinite(size) || !Number.isFinite(leverage) || leverage <= 0) {
+        return null;
+      }
+      const entryNotional = Math.abs(entry * size);
+      if (!Number.isFinite(entryNotional) || entryNotional === 0) return null;
+      const initialMargin = entryNotional / leverage;
+      if (!Number.isFinite(initialMargin) || initialMargin === 0) return null;
+      return upnl / initialMargin;
+    }
+
+    function computeLiqDistanceRatio(entryPx, markPx, liqPx, size) {
+      const entry = Number(entryPx);
+      const mark = Number(markPx);
+      const liq = Number(liqPx);
+      const szi = Number(size);
+      if (!Number.isFinite(entry) || !Number.isFinite(mark) || !Number.isFinite(liq) || !Number.isFinite(szi)) return null;
+      if (szi > 0) {
+        const denom = entry - liq;
+        if (!(denom > 0)) return null;
+        return (mark - liq) / denom;
+      }
+      if (szi < 0) {
+        const denom = liq - entry;
+        if (!(denom > 0)) return null;
+        return (liq - mark) / denom;
+      }
+      return null;
+    }
+
+    function getSignedSizeForRow(row) {
+      const size = Number(row?.openSize || 0);
+      if (!Number.isFinite(size)) return null;
+      if (row?.isAggregated) return size;
+      return String(row?.positionSide || "").toUpperCase() === "SHORT" ? -size : size;
+    }
+
+    function computeIsolatedLiqPrice(row) {
+      const entry = Number(row?.averageOpenPrice);
+      const leverage = Number(row?.openLeverage);
+      const side = String(row?.positionSide || "").trim().toUpperCase();
+      if (!Number.isFinite(entry) || !(entry > 0) || !Number.isFinite(leverage) || !(leverage > 0)) return null;
+      if (side === "LONG") return entry * (1 - 1 / leverage);
+      if (side === "SHORT") return entry * (1 + 1 / leverage);
+      return null;
+    }
+
+    function buildLiqDistanceHtml(row) {
+      const signedSize = getSignedSizeForRow(row);
+      const markPrice = Number(row?.markPrice);
+      const liqPrice = computeIsolatedLiqPrice(row);
+      if (!Number.isFinite(signedSize) || !Number.isFinite(markPrice) || !Number.isFinite(liqPrice)) return "-";
+      const pnl = Number(row?.estimatedPnl);
+      let display = Number.isFinite(pnl) && pnl >= 0 ? 0 : null;
+      if (!Number.isFinite(display)) {
+        const raw = computeLiqDistanceRatio(row?.averageOpenPrice, markPrice, liqPrice, signedSize);
+        const clamped = Number.isFinite(raw) ? Math.max(0, Math.min(1, raw)) : null;
+        display = clamped === null ? null : Math.max(0, Math.min(1, 1 - clamped));
+      }
+      const liqDistanceClass =
+        display === null
+          ? ""
+          : display <= 0.25
+            ? "liq-danger"
+            : display <= 0.5
+              ? "liq-warn"
+              : display >= 0.9
+                ? "liq-high"
+                : "liq-safe";
+      const liqDistancePct = display === null ? "–" : fmtPercent(display * 100, 0);
+      const liqDistanceWidth = display === null ? 0 : Math.round(display * 100);
+      const liqHue = display === null ? 120 : Math.round((1 - display) * 120);
+      const liqHighFlag = display !== null && display >= 0.9 ? `<span class="liq-flag">HIGH</span>` : "";
+      return `
+        <div class="liq-distance ${liqDistanceClass}">
+          <div class="liq-bar" role="img" aria-label="Distance to liquidation ${liqDistancePct}">
+            <span style="width:${liqDistanceWidth}%;background-color:hsl(${liqHue} 70% 55%);"></span>
+          </div>
+          <div class="liq-meta">
+            <span class="liq-pct">${liqDistancePct}${liqHighFlag}</span>
+            <span class="liq-price">${fmtDisplayPrice(liqPrice)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function refreshRowMarketValues(rows) {
+      rows.forEach((row) => {
+        const symbol = getBinanceSymbolForRow(row);
+        const markPrice = state.priceMap.get(symbol) ?? null;
+        row.markPrice = Number.isFinite(markPrice) ? markPrice : null;
+        row.estimatedPnl = computeEstimatedPnl(row, row.markPrice);
+      });
+    }
+
+    function getPriceRowsForSelection() {
+      if (state.liveCurrentRows.length && state.liveCurrentTraderId === state.selectedTraderIds[0]) {
+        return state.liveCurrentRows;
+      }
+      return state.currentRows.filter((row) => row.traderUserId === state.selectedTraderIds[0]);
+    }
+
+    function getActivePriceSymbols() {
+      const rows = getPriceRowsForSelection();
+      return Array.from(new Set(rows.map(getBinanceSymbolForRow).filter(Boolean))).sort();
+    }
+
+    function closePriceSocket() {
+      if (priceSocket) {
+        priceSocket.onopen = null;
+        priceSocket.onmessage = null;
+        priceSocket.onerror = null;
+        priceSocket.onclose = null;
+        try {
+          priceSocket.close();
+        } catch (err) {
+          console.warn("price socket close failed", err);
+        }
+      }
+      priceSocket = null;
+      priceSocketSymbolsKey = "";
+    }
+
+    function syncPriceSocket() {
+      const symbols = getActivePriceSymbols();
+      const key = symbols.join(",");
+      if (!symbols.length) {
+        closePriceSocket();
+        return;
+      }
+      if (priceSocket && priceSocket.readyState <= 1 && priceSocketSymbolsKey === key) {
+        return;
+      }
+      closePriceSocket();
+      const streamUrl = `${BINANCE_STREAM_BASE}${symbols.map((symbol) => `${symbol.toLowerCase()}@miniTicker`).join("/")}`;
+      try {
+        priceSocket = new WebSocket(streamUrl);
+        priceSocketSymbolsKey = key;
+        priceSocket.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+            const data = payload?.data || payload;
+            const symbol = String(data?.s || "").trim().toUpperCase();
+            const price = safeNumber(data?.c);
+            if (!symbol || !Number.isFinite(price)) return;
+            state.priceMap.set(symbol, price);
+            refreshRowMarketValues(state.currentRows);
+            refreshRowMarketValues(state.liveCurrentRows);
+            renderOrdersPanels();
+          } catch (err) {
+            console.warn("price socket message failed", err);
+          }
+        };
+        priceSocket.onclose = () => {
+          if (priceSocketSymbolsKey !== key) return;
+          priceSocket = null;
+          setTimeout(() => {
+            if (state.selectedTraderIds.length && getActivePriceSymbols().join(",") === key) {
+              syncPriceSocket();
+            }
+          }, 3000);
+        };
+      } catch (err) {
+        console.warn("price socket init failed", err);
+      }
+    }
+
+    function startLiveAutoRefresh() {
+      if (liveRefreshTimer) clearInterval(liveRefreshTimer);
+      liveRefreshTimer = window.setInterval(() => {
+        if (!state.selectedTraderIds.length) return;
+        refreshLiveCurrentRows(true);
+      }, LIVE_REFRESH_INTERVAL_MS);
+    }
+
+    function updateTheme(theme) {
+      document.body.classList.toggle("light", theme === "light");
+      els.themeToggle.textContent = theme === "light" ? "☼" : "◐";
+      try {
+        localStorage.setItem(THEME_KEY, theme);
+      } catch (err) {
+        console.warn("theme persist failed", err);
+      }
+      Object.values(state.charts).forEach((chart) => chart && chart.update());
+      renderAll();
+    }
+
+    function loadTheme() {
+      try {
+        return localStorage.getItem(THEME_KEY) || "dark";
+      } catch (err) {
+        return "dark";
+      }
+    }
+
+    function getCurrentSelectionQuery() {
+      return state.selectedTraderIds[0] || "";
+    }
+
+    function updateUrl() {
+      const url = new URL(window.location.href);
+      const query = getCurrentSelectionQuery();
+      if (query) url.searchParams.set("trader", query);
+      else url.searchParams.delete("trader");
+      window.history.replaceState({}, "", url.toString());
+    }
+
+    function getSelectionFromUrl() {
+      const url = new URL(window.location.href);
+      const value = url.searchParams.get("trader");
+      if (!value) return [];
+      const first = value.split(",").map((item) => item.trim()).find(Boolean);
+      return first ? [first] : [];
+    }
+
+    function resolveTraderIdsFromText(raw) {
+      const matches = String(raw || "").match(/\d{6,}/g) || [];
+      return matches.filter(Boolean);
+    }
+
+    function resolveTraderSelection(tokens) {
+      const ids = [];
+      const seen = new Set();
+      tokens.forEach((token) => {
+        const raw = String(token || "").trim();
+        if (!raw) return;
+        const explicitIds = resolveTraderIdsFromText(raw);
+        if (explicitIds.length) {
+          let matchedExplicitId = false;
+          explicitIds.forEach((candidate) => {
+            const exact = state.traders.find((row) => row.traderUserId === candidate);
+            if (exact && !seen.has(exact.traderUserId)) {
+              seen.add(exact.traderUserId);
+              ids.push(exact.traderUserId);
+              matchedExplicitId = true;
+            }
+          });
+          if (matchedExplicitId) return;
+        }
+        const exact = state.traders.find((row) => row.traderUserId === raw);
+        if (exact && !seen.has(exact.traderUserId)) {
+          seen.add(exact.traderUserId);
+          ids.push(exact.traderUserId);
+          return;
+        }
+        const cleaned = raw.replace(/\(\s*\d{6,}\s*\)/g, "").trim();
+        const lower = cleaned.toLowerCase();
+        if (!lower) return;
+        state.traders.forEach((row) => {
+          const haystack = `${row.traderUserId} ${row.traderNickName}`.toLowerCase();
+          if (haystack.includes(lower) && !seen.has(row.traderUserId)) {
+            seen.add(row.traderUserId);
+            ids.push(row.traderUserId);
+          }
+        });
+      });
+      return ids.slice(0, 1);
+    }
+
+    function applyTraderSelection(tokens) {
+      let ids = resolveTraderSelection(tokens);
+      if (!ids.length && state.traders.length) {
+        ids = [state.traders[0].traderUserId];
+      }
+      ids = ids.slice(0, 1);
+      state.selectedTraderIds = ids;
+      state.selectedTraders = ids
+        .map((id) => state.traders.find((row) => row.traderUserId === id))
+        .filter(Boolean);
+      state.expandedCurrentAssets.clear();
+      state.timelineAsOfMs = null;
+      state.timelineTimestamps = [];
+      state.timelineSelectedIndex = 0;
+      state.timelinePriceMap.clear();
+      els.traderInput.value = buildTraderInputValue(ids);
+      updateUrl();
+      renderTraderPicker();
+      renderAll();
+      syncPriceSocket();
+      refreshLiveCurrentRows();
+      ensureTraderMeta(ids[0]);
+    }
+
+    function getBundledExports() {
+      const bundle = window.__WEEX_EXPORTS__;
+      if (!bundle) return null;
+      if (typeof bundle.tradersText !== "string") return null;
+      if (typeof bundle.historyText !== "string") return null;
+      if (typeof bundle.currentText !== "string") return null;
+      if (!Array.isArray(bundle.contractRows)) return null;
+      return bundle;
+    }
+
+    async function ensurePriceMap() {
+      if (state.priceMap.size) return state.priceMap;
+      if (state.priceFetchPromise) return state.priceFetchPromise;
+      state.priceFetchPromise = (async () => {
+        try {
+          const data = await fetchJson("https://api.binance.com/api/v3/ticker/price");
+          if (Array.isArray(data)) {
+            data.forEach((item) => {
+              const symbol = String(item?.symbol || "").trim().toUpperCase();
+              const price = safeNumber(item?.price);
+              if (symbol && Number.isFinite(price)) state.priceMap.set(symbol, price);
+            });
+          }
+        } catch (err) {
+          console.warn("price map failed", err);
+        }
+        return state.priceMap;
+      })();
+      try {
+        return await state.priceFetchPromise;
+      } finally {
+        state.priceFetchPromise = null;
+      }
+    }
+
+    function contractToIconUrl(meta) {
+      if (!meta || !meta.iconPath) return "";
+      return `${meta.iconUrlPrefix}${meta.iconPath}`;
+    }
+
+    function normalizeTraderRow(row) {
+      return {
+        traderUserId: String(row.trader_user_id || "").trim(),
+        traderNickName: String(row.trader_nick_name || "").trim(),
+        traderLevel: safeNumber(row.trader_level),
+        followCount: safeNumber(row.follow_count),
+        maxFollowCount: safeNumber(row.max_follow_count),
+        totalReturnRate: safeNumber(row.total_return_rate),
+        threeWeeksPnl: safeNumber(row.three_weeks_pnl),
+        distributeRatio: safeNumber(row.distribute_ratio),
+        profile: String(row.profile || ""),
+        detailUrl: String(row.detail_url || ""),
+      };
+    }
+
+    function normalizeHistoryRow(row) {
+      const contractId = String(row.contract_id || "").trim();
+      const meta = state.contractMap.get(contractId) || null;
+      const symbol = meta?.symbol || contractId;
+      const asset = symbol.split("/")[0] || symbol;
+      return {
+        traderUserId: String(row.trader_user_id || "").trim(),
+        traderName: String(row.trader_name || "").trim(),
+        detailUrl: String(row.detail_url || "").trim(),
+        historyOrderId: String(row.history_order_id || "").trim(),
+        contractId,
+        symbol,
+        asset,
+        iconUrl: contractToIconUrl(meta),
+        positionSide: String(row.position_side || "").trim().toUpperCase(),
+        openLeverage: safeNumber(row.open_leverage),
+        openSize: safeNumber(row.open_size),
+        openFillSize: safeNumber(row.open_fill_size),
+        averageOpenPrice: safeNumber(row.average_open_price),
+        openMarginAmount: safeNumber(row.open_margin_amount),
+        openFee: safeNumber(row.open_fee),
+        openTimeMs: normalizeTimestamp(row.open_time_ms),
+        closeFillSize: safeNumber(row.close_fill_size),
+        averageClosePrice: safeNumber(row.average_close_price),
+        closeTimeMs: normalizeTimestamp(row.close_time_ms),
+        closeOrderId: String(row.close_order_id || "").trim(),
+        realizedPnl: safeNumber(row.realized_pnl),
+        closeFee: safeNumber(row.close_fee),
+        fundingFee: safeNumber(row.funding_fee),
+        profitRate: safeNumber(row.profit_rate),
+        profitRateText: String(row.profit_rate_text || "").trim(),
+        netProfit: safeNumber(row.net_profit),
+        status: String(row.status || "").trim(),
+        closedBy: String(row.closed_by || "").trim(),
+        marginMode: String(row.margin_mode || "").trim(),
+        createdTimeMs: normalizeTimestamp(row.created_time_ms),
+        updatedTimeMs: normalizeTimestamp(row.updated_time_ms),
+      };
+    }
+
+    function normalizeCurrentRow(row) {
+      const contractId = String(row.contract_id || row.contractId || "").trim();
+      const meta = state.contractMap.get(contractId) || null;
+      const symbol = meta?.symbol || contractId;
+      const asset = symbol.split("/")[0] || symbol;
+      const traderUserId = String(row.trader_user_id || row.traderUserId || "").trim();
+      const openSize = safeNumber(row.open_size ?? row.openSize);
+      const averageOpenPrice = safeNumber(row.average_open_price ?? row.averageOpenPrice);
+      const binanceSymbol = symbol.replace("/", "");
+      const markPrice = state.priceMap.get(binanceSymbol) ?? null;
+      const side = String(row.position_side || row.positionSide || "").trim().toUpperCase();
+      const estimatedPnl = computeEstimatedPnl({ openSize, averageOpenPrice, positionSide: side }, markPrice);
+      return {
+        traderUserId,
+        traderName: String(row.trader_name || row.traderName || "").trim(),
+        detailUrl: String(row.detail_url || row.detailUrl || (traderUserId ? `https://www.weex.com/copy-trading/trader/${traderUserId}` : "")).trim(),
+        currentOrderId: String(row.current_order_id || row.currentOrderId || row.id || "").trim(),
+        contractId,
+        symbol,
+        binanceSymbol,
+        asset,
+        iconUrl: contractToIconUrl(meta),
+        positionSide: side,
+        openLeverage: safeNumber(row.open_leverage ?? row.openLeverage),
+        openSize,
+        openFillSize: safeNumber(row.open_fill_size ?? row.openFillSize),
+        averageOpenPrice,
+        openMarginAmount: safeNumber(row.open_margin_amount ?? row.openMarginAmount),
+        openFee: safeNumber(row.open_fee ?? row.openFee),
+        openTimeMs: normalizeTimestamp(row.open_time_ms ?? row.openTime),
+        closeFillSize: safeNumber(row.close_fill_size ?? row.closeFillSize),
+        averageClosePrice: safeNumber(row.average_close_price ?? row.averageClosePrice),
+        closeTimeMs: normalizeTimestamp(row.close_time_ms ?? row.closeTime),
+        closeOrderId: String(row.close_order_id || row.closeOrderId || "").trim(),
+        realizedPnl: safeNumber(row.realized_pnl ?? row.realizedPnl),
+        closeFee: safeNumber(row.close_fee ?? row.closeFee),
+        fundingFee: safeNumber(row.funding_fee ?? row.fundingFee),
+        profitsShareRatio: safeNumber(row.profits_share_ratio ?? row.profitsShareRatio),
+        status: String(row.status || "").trim(),
+        closedBy: String(row.closed_by || row.closedBy || "").trim(),
+        takeProfitPrice: safeNumber(row.take_profit_price ?? row.takeProfitPrice),
+        takeProfitTrigger: String((row.take_profit_trigger ?? row.takeProfitTrigger) || "") === "True" || String((row.take_profit_trigger ?? row.takeProfitTrigger) || "") === "true",
+        stopLossPrice: safeNumber(row.stop_loss_price ?? row.stopLossPrice),
+        stopLossTrigger: String((row.stop_loss_trigger ?? row.stopLossTrigger) || "") === "True" || String((row.stop_loss_trigger ?? row.stopLossTrigger) || "") === "true",
+        separatedMode: String(row.separated_mode || row.separatedMode || "").trim(),
+        marginMode: String(row.margin_mode || row.marginMode || "").trim(),
+        createdTimeMs: normalizeTimestamp(row.created_time_ms ?? row.createdTime),
+        updatedTimeMs: normalizeTimestamp(row.updated_time_ms ?? row.updatedTime),
+        markPrice,
+        estimatedPnl,
+      };
+    }
+
+    function getSelectedHistoryRows() {
+      const ids = new Set(state.selectedTraderIds);
+      return state.historyRows.filter((row) => ids.has(row.traderUserId));
+    }
+
+    function getSelectedCurrentRows() {
+      const ids = new Set(state.selectedTraderIds);
+      if (
+        state.liveCurrentTraderId &&
+        ids.has(state.liveCurrentTraderId) &&
+        !state.liveCurrentError &&
+        state.liveCurrentRows.length
+      ) {
+        return state.liveCurrentRows.slice();
+      }
+      return state.currentRows.filter((row) => ids.has(row.traderUserId));
+    }
+
+    function isTimelineActive() {
+      return Number.isFinite(state.timelineAsOfMs);
+    }
+
+    function getHistoryRowsForTimeline() {
+      const ids = new Set(state.selectedTraderIds);
+      return state.historyRows.filter((row) => ids.has(row.traderUserId));
+    }
+
+    function buildTimelineCurrentRowFromHistory(row, asOfMs) {
+      const binanceSymbol = String(row.symbol || "").replace("/", "");
+      const timelineMark = state.timelinePriceMap.get(binanceSymbol);
+      const markPrice = Number.isFinite(timelineMark) ? timelineMark : Number(row.averageClosePrice || row.averageOpenPrice || 0);
+      const currentLike = {
+        traderUserId: row.traderUserId,
+        traderName: row.traderName,
+        detailUrl: row.detailUrl,
+        currentOrderId: row.historyOrderId || row.closeOrderId || "",
+        contractId: row.contractId,
+        symbol: row.symbol,
+        binanceSymbol,
+        asset: row.asset,
+        iconUrl: row.iconUrl,
+        positionSide: row.positionSide,
+        openLeverage: row.openLeverage,
+        openSize: row.openSize,
+        openFillSize: row.openFillSize,
+        averageOpenPrice: row.averageOpenPrice,
+        openMarginAmount: row.openMarginAmount,
+        openFee: row.openFee,
+        openTimeMs: row.openTimeMs,
+        closeFillSize: row.closeFillSize,
+        averageClosePrice: row.averageClosePrice,
+        closeTimeMs: row.closeTimeMs,
+        closeOrderId: row.closeOrderId,
+        realizedPnl: row.realizedPnl,
+        closeFee: row.closeFee,
+        fundingFee: row.fundingFee,
+        profitsShareRatio: row.profitsShareRatio,
+        status: row.status,
+        closedBy: row.closedBy,
+        marginMode: row.marginMode,
+        createdTimeMs: row.createdTimeMs,
+        updatedTimeMs: row.updatedTimeMs,
+        markPrice: Number.isFinite(markPrice) ? markPrice : null,
+      };
+      currentLike.estimatedPnl = computeEstimatedPnl(currentLike, currentLike.markPrice);
+      currentLike.timelineAsOfMs = asOfMs;
+      return currentLike;
+    }
+
+    function getPositionsRowsAtTime(asOfMs) {
+      if (!Number.isFinite(asOfMs)) return getSelectedCurrentRows();
+      const currentRows = getSelectedCurrentRows()
+        .filter((row) => Number.isFinite(row.openTimeMs) && row.openTimeMs <= asOfMs)
+        .map((row) => {
+          const nextRow = { ...row };
+          const timelineMark = state.timelinePriceMap.get(getBinanceSymbolForRow(nextRow));
+          if (Number.isFinite(timelineMark)) {
+            nextRow.markPrice = timelineMark;
+            nextRow.estimatedPnl = computeEstimatedPnl(nextRow, timelineMark);
+          }
+          nextRow.timelineAsOfMs = asOfMs;
+          return nextRow;
+        });
+      const historicalRows = getHistoryRowsForTimeline()
+        .filter((row) => Number.isFinite(row.openTimeMs) && row.openTimeMs <= asOfMs)
+        .filter((row) => !Number.isFinite(row.closeTimeMs) || row.closeTimeMs > asOfMs)
+        .map((row) => buildTimelineCurrentRowFromHistory(row, asOfMs));
+      return [...currentRows, ...historicalRows];
+    }
+
+    function getTimelineEventTimes() {
+      const now = Date.now();
+      const currentTimes = getSelectedCurrentRows().map((row) => Number(row.openTimeMs)).filter(Number.isFinite);
+      const historyTimes = getHistoryRowsForTimeline()
+        .flatMap((row) => [Number(row.openTimeMs), Number(row.closeTimeMs)])
+        .filter(Number.isFinite);
+      return Array.from(new Set([...currentTimes, ...historyTimes, now])).sort((a, b) => a - b);
+    }
+
+    function recomputePositionsTimelineControls() {
+      if (!els.positionsTimelineSlider || !els.positionsTimelineStamp || !els.positionsTimelineLiveBtn) return;
+      const timestamps = getTimelineEventTimes();
+      const now = Date.now();
+      state.timelineTimestamps = timestamps.length ? timestamps : [now];
+      const liveIndex = state.timelineTimestamps.length - 1;
+      els.positionsTimelineSlider.min = "0";
+      els.positionsTimelineSlider.max = String(Math.max(0, liveIndex));
+      const hasHistory = state.timelineTimestamps.length > 1;
+      els.positionsTimelineSlider.disabled = !hasHistory;
+      if (!isTimelineActive()) {
+        state.timelineSelectedIndex = liveIndex;
+        els.positionsTimelineSlider.value = String(liveIndex);
+        els.positionsTimelineStamp.textContent = "Live";
+        els.positionsTimelineLiveBtn.disabled = true;
+        return;
+      }
+      let nearestIdx = liveIndex;
+      let nearestDist = Number.POSITIVE_INFINITY;
+      state.timelineTimestamps.forEach((ts, idx) => {
+        const dist = Math.abs(ts - state.timelineAsOfMs);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearestIdx = idx;
+        }
+      });
+      state.timelineSelectedIndex = nearestIdx;
+      els.positionsTimelineSlider.value = String(nearestIdx);
+      const asOf = state.timelineTimestamps[nearestIdx];
+      state.timelineAsOfMs = nearestIdx === liveIndex ? null : asOf;
+      els.positionsTimelineStamp.textContent = state.timelineAsOfMs ? fmtDateTime(asOf) : "Live";
+      els.positionsTimelineLiveBtn.disabled = !state.timelineAsOfMs;
+    }
+
+    async function fetchTimelinePrice(symbol, asOfMs) {
+      const clean = String(symbol || "").trim().toUpperCase();
+      if (!clean || !Number.isFinite(asOfMs)) return null;
+      const ageMs = Math.max(0, Date.now() - asOfMs);
+      const interval = ageMs <= 14 * 86400000 ? "1h" : ageMs <= 90 * 86400000 ? "4h" : "1d";
+      const intervalMs = interval === "1h" ? 3600000 : interval === "4h" ? 14400000 : 86400000;
+      const params = new URLSearchParams({
+        symbol: clean,
+        interval,
+        limit: "1",
+        startTime: String(Math.max(0, asOfMs - intervalMs)),
+        endTime: String(asOfMs + 1),
+      });
+      try {
+        const rows = await fetchJsonWithTimeout(`https://api.binance.com/api/v3/klines?${params.toString()}`);
+        const row = Array.isArray(rows) && rows.length ? rows[rows.length - 1] : null;
+        const price = safeNumber(row?.[4]);
+        return Number.isFinite(price) ? price : null;
+      } catch (err) {
+        console.warn("timeline price fetch failed", clean, err);
+        return null;
+      }
+    }
+
+    async function refreshTimelinePrices(asOfMs, rows) {
+      const token = state.timelinePriceRequestToken + 1;
+      state.timelinePriceRequestToken = token;
+      if (!Number.isFinite(asOfMs)) {
+        state.timelinePriceMap.clear();
+        return;
+      }
+      const symbols = Array.from(new Set((rows || []).map(getBinanceSymbolForRow).filter(Boolean)));
+      const entries = await Promise.all(symbols.map(async (symbol) => [symbol, await fetchTimelinePrice(symbol, asOfMs)]));
+      if (state.timelinePriceRequestToken !== token) return;
+      state.timelinePriceMap.clear();
+      entries.forEach(([symbol, price]) => {
+        if (Number.isFinite(price)) state.timelinePriceMap.set(symbol, price);
+      });
+    }
+
+    async function setPositionsTimelineIndex(index) {
+      if (!state.timelineTimestamps.length) {
+        recomputePositionsTimelineControls();
+        return;
+      }
+      const liveIndex = state.timelineTimestamps.length - 1;
+      const safeIdx = Math.max(0, Math.min(liveIndex, Number(index) || 0));
+      state.timelineSelectedIndex = safeIdx;
+      if (els.positionsTimelineSlider) els.positionsTimelineSlider.value = String(safeIdx);
+      if (safeIdx >= liveIndex) {
+        state.timelineAsOfMs = null;
+        state.timelinePriceMap.clear();
+        if (els.positionsTimelineStamp) els.positionsTimelineStamp.textContent = "Live";
+        if (els.positionsTimelineLiveBtn) els.positionsTimelineLiveBtn.disabled = true;
+        renderOrdersPanels();
+        return;
+      }
+      state.timelineAsOfMs = Number(state.timelineTimestamps[safeIdx]);
+      if (els.positionsTimelineStamp) els.positionsTimelineStamp.textContent = fmtDateTime(state.timelineAsOfMs);
+      if (els.positionsTimelineLiveBtn) els.positionsTimelineLiveBtn.disabled = false;
+      const rows = getPositionsRowsAtTime(state.timelineAsOfMs);
+      await refreshTimelinePrices(state.timelineAsOfMs, rows);
+      renderOrdersPanels();
+    }
+
+    function updateLiveBridgeStatus() {
+      if (!els.liveBridgeStatus) return;
+      els.liveBridgeStatus.textContent = "";
+    }
+
+    function buildLiveBridgeUrl(traderUserId) {
+      const url = new URL(LIVE_BRIDGE_URL);
+      url.searchParams.set("trader", traderUserId);
+      url.searchParams.set("_", String(Date.now()));
+      return url.toString();
+    }
+
+    function buildTraderMetaBridgeUrl(traderUserId) {
+      const url = new URL(TRADER_META_BRIDGE_URL);
+      url.searchParams.set("trader", traderUserId);
+      url.searchParams.set("_", String(Date.now()));
+      return url.toString();
+    }
+
+    async function ensureTraderMeta(traderUserId, force = false) {
+      const traderId = String(traderUserId || "").trim();
+      if (!traderId) return null;
+      if (!force && state.traderMetaById.has(traderId)) return state.traderMetaById.get(traderId) || null;
+      const requestToken = ++state.traderMetaRequestToken;
+      try {
+        const payload = await fetchJsonNoStore(buildTraderMetaBridgeUrl(traderId));
+        if (requestToken !== state.traderMetaRequestToken) return null;
+        state.traderMetaById.set(traderId, payload || {});
+        renderOverview(getMetricSource());
+        return payload || null;
+      } catch (err) {
+        console.warn("trader meta failed", err);
+        return null;
+      }
+    }
+
+    async function refreshLiveCurrentRows(force = false) {
+      const traderUserId = state.selectedTraderIds[0];
+      if (!traderUserId) {
+        state.liveCurrentRows = [];
+        state.liveCurrentTraderId = "";
+        state.liveCurrentFetchedAt = null;
+        state.liveCurrentLoading = false;
+        state.liveCurrentError = "";
+        updateLiveBridgeStatus();
+        renderLiveDataOnly();
+        return;
+      }
+      if (!force && state.liveCurrentLoading && state.liveCurrentTraderId === traderUserId) return;
+      const isSameTrader = state.liveCurrentTraderId === traderUserId;
+      const requestToken = state.liveCurrentRequestToken + 1;
+      state.liveCurrentRequestToken = requestToken;
+      state.liveCurrentLoading = true;
+      state.liveCurrentError = "";
+      state.liveCurrentTraderId = traderUserId;
+      if (!isSameTrader) {
+        state.liveCurrentRows = [];
+        state.liveCurrentFetchedAt = null;
+      }
+      updateLiveBridgeStatus();
+      try {
+        const payload = await fetchJsonNoStore(buildLiveBridgeUrl(traderUserId));
+        if (state.liveCurrentRequestToken !== requestToken) return;
+        const trader = state.selectedTraders[0] || state.traders.find((row) => row.traderUserId === traderUserId) || null;
+        const enrichedRows = Array.isArray(payload?.rows)
+          ? payload.rows.map((row) => ({
+              ...row,
+              traderUserId,
+              traderName: trader?.traderNickName || traderUserId,
+              detailUrl: `https://www.weex.com/copy-trading/trader/${traderUserId}`,
+            }))
+          : [];
+        state.liveCurrentRows = enrichedRows.map(normalizeCurrentRow);
+        refreshRowMarketValues(state.liveCurrentRows);
+        state.liveCurrentFetchedAt = safeNumber(payload?.fetchedAt) || Date.now();
+        state.liveCurrentError = "";
+        syncPriceSocket();
+      } catch (err) {
+        if (state.liveCurrentRequestToken !== requestToken) return;
+        state.liveCurrentRows = [];
+        state.liveCurrentFetchedAt = null;
+        state.liveCurrentError = "live bridge unavailable";
+        syncPriceSocket();
+      } finally {
+        if (state.liveCurrentRequestToken === requestToken) {
+          state.liveCurrentLoading = false;
+          updateLiveBridgeStatus();
+          renderLiveDataOnly();
+        }
+      }
+    }
+
+    function getHistoryFilterState() {
+      return {
+        asset: String(els.historyAssetFilter.value || "").trim().toLowerCase(),
+        side: els.historySideFilter.value,
+        pnl: els.historyPnlFilter.value,
+      };
+    }
+
+    function isHistoryAggregatedByPrice() {
+      return Boolean(els.historyAggregateCheckbox?.checked);
+    }
+
+    function getHistoryAggregateMargin(row) {
+      const direct = Number(row?.openMarginAmount);
+      if (Number.isFinite(direct) && direct > 0) return direct;
+      const size = Math.abs(Number(row?.openSize || 0));
+      const entry = Number(row?.averageOpenPrice || 0);
+      const leverage = Number(row?.openLeverage || 0);
+      if (!Number.isFinite(size) || !Number.isFinite(entry) || !Number.isFinite(leverage) || leverage <= 0) return 0;
+      return (size * entry) / leverage;
+    }
+
+    function aggregateConsecutiveHistoryRows(rows) {
+      const aggregated = [];
+      let current = null;
+      const flush = () => {
+        if (!current) return;
+        const totalMargin = Number(current.aggregateMargin || 0);
+        if (totalMargin > 0) {
+          current.profitRate = (Number(current.realizedPnl || 0) / totalMargin) * 100;
+        }
+        current.openMarginAmount = totalMargin || current.openMarginAmount;
+        aggregated.push(current);
+        current = null;
+      };
+
+      rows.forEach((row) => {
+        const priceKey = Number.isFinite(Number(row.averageOpenPrice))
+          ? Number(row.averageOpenPrice).toFixed(12)
+          : "";
+        const leverageKey = Number.isFinite(Number(row.openLeverage))
+          ? Number(row.openLeverage).toFixed(4)
+          : "";
+        const key = [
+          String(row.asset || ""),
+          String(row.positionSide || ""),
+          leverageKey,
+          priceKey,
+        ].join("|");
+        if (!current || current.aggregateKey !== key) {
+          flush();
+          current = {
+            ...row,
+            aggregateKey: key,
+            aggregateCount: 1,
+            aggregateMargin: getHistoryAggregateMargin(row),
+          };
+          return;
+        }
+        current.aggregateCount += 1;
+        current.openSize = Number(current.openSize || 0) + Number(row.openSize || 0);
+        current.realizedPnl = Number(current.realizedPnl || 0) + Number(row.realizedPnl || 0);
+        current.aggregateMargin += getHistoryAggregateMargin(row);
+        current.openTimeMs = Math.min(Number(current.openTimeMs || Infinity), Number(row.openTimeMs || Infinity));
+        current.closeTimeMs = Math.max(Number(current.closeTimeMs || -Infinity), Number(row.closeTimeMs || -Infinity));
+      });
+      flush();
+      return aggregated;
+    }
+
+    function sortRows(rows, tableName) {
+      const sort = state.tableSorts[tableName];
+      if (!sort) return rows.slice();
+      const dir = sort.dir === "asc" ? 1 : -1;
+      return rows.slice().sort((a, b) => {
+        let av = a?.[sort.key];
+        let bv = b?.[sort.key];
+        if (sort.key === "asset") {
+          av = String(a.asset || a.symbol || "");
+          bv = String(b.asset || b.symbol || "");
+        }
+        if (sort.key === "currentOrderId" || sort.key === "historyOrderId") {
+          const avNum = Number(av);
+          const bvNum = Number(bv);
+          if (Number.isFinite(avNum) && Number.isFinite(bvNum) && avNum !== bvNum) {
+            return avNum > bvNum ? dir : -dir;
+          }
+        }
+        if (typeof av === "string" || typeof bv === "string") {
+          return String(av || "").localeCompare(String(bv || "")) * dir;
+        }
+        const aNum = Number.isFinite(av) ? av : -Infinity;
+        const bNum = Number.isFinite(bv) ? bv : -Infinity;
+        if (aNum === bNum) return 0;
+        return aNum > bNum ? dir : -dir;
+      });
+    }
+
+    function updateSortHeaders(tableName) {
+      const headerEls = Array.from(document.querySelectorAll(`th[data-table="${tableName}"][data-sort]`));
+      if (!headerEls.length) return;
+      const sortState = state.tableSorts[tableName];
+      headerEls.forEach((th) => {
+        let indicator = th.querySelector(".sort-indicator");
+        if (!indicator) {
+          indicator = document.createElement("span");
+          indicator.className = "sort-indicator";
+          th.appendChild(indicator);
+        }
+        if (th.dataset.sort === sortState?.key) {
+          th.setAttribute("data-sort-dir", sortState.dir);
+          indicator.textContent = sortState.dir === "asc" ? " ↑" : " ↓";
+        } else {
+          th.removeAttribute("data-sort-dir");
+          indicator.textContent = "";
+        }
+      });
+    }
+
+    function updateAllSortHeaders() {
+      Object.keys(state.tableSorts).forEach(updateSortHeaders);
+    }
+
+    function aggregateCurrentRows(rows) {
+      const byAsset = new Map();
+      rows.forEach((row) => {
+        const key = String(row.asset || row.symbol || row.contractId || "").trim();
+        if (!key) return;
+        const signedSize = Number(row.openSize || 0) * (row.positionSide === "SHORT" ? -1 : 1);
+        const signedNotional = signedSize * Number(row.averageOpenPrice || 0);
+        const bucket = byAsset.get(key) || {
+          ...row,
+          isAggregated: true,
+          positionCount: 0,
+          signedSize: 0,
+          signedNotional: 0,
+          longSize: 0,
+          shortSizeAbs: 0,
+          longNotional: 0,
+          shortNotionalAbs: 0,
+          estimatedPnl: 0,
+          openLeverageWeighted: 0,
+          leverageWeight: 0,
+          openTimeMs: null,
+          detailUrl: row.detailUrl,
+          traderName: row.traderName,
+          aggregateKey: `${row.traderUserId || ""}:${key}`,
+          componentRows: [],
+        };
+        const leverageWeight = Math.abs(Number(row.openSize || 0));
+        bucket.positionCount += 1;
+        bucket.signedSize += signedSize;
+        bucket.signedNotional += signedNotional;
+        if (row.positionSide === "SHORT") {
+          bucket.shortSizeAbs += Math.abs(Number(row.openSize || 0));
+          bucket.shortNotionalAbs += Math.abs(Number(row.openSize || 0) * Number(row.averageOpenPrice || 0));
+        } else {
+          bucket.longSize += Math.abs(Number(row.openSize || 0));
+          bucket.longNotional += Math.abs(Number(row.openSize || 0) * Number(row.averageOpenPrice || 0));
+        }
+        bucket.estimatedPnl += Number(row.estimatedPnl || 0);
+        bucket.openLeverageWeighted += Number(row.openLeverage || 0) * leverageWeight;
+        bucket.leverageWeight += leverageWeight;
+        if (!Number.isFinite(bucket.markPrice) && Number.isFinite(row.markPrice)) bucket.markPrice = row.markPrice;
+        if (!Number.isFinite(bucket.openTimeMs) || (Number.isFinite(row.openTimeMs) && row.openTimeMs < bucket.openTimeMs)) {
+          bucket.openTimeMs = row.openTimeMs;
+        }
+        bucket.componentRows.push(row);
+        byAsset.set(key, bucket);
+      });
+
+      return Array.from(byAsset.values()).map((bucket) => {
+        const signedSize = Number(bucket.signedSize || 0);
+        const longAvgEntry = bucket.longSize > 0 ? bucket.longNotional / bucket.longSize : null;
+        const shortAvgEntry = bucket.shortSizeAbs > 0 ? bucket.shortNotionalAbs / bucket.shortSizeAbs : null;
+        const totalAbsSize = bucket.longSize + bucket.shortSizeAbs;
+        let netEntry = null;
+        if (bucket.longSize > 0 && bucket.shortSizeAbs > 0 && totalAbsSize > 0) {
+          netEntry = (
+            (bucket.longSize / totalAbsSize) * longAvgEntry +
+            (bucket.shortSizeAbs / totalAbsSize) * shortAvgEntry
+          );
+        } else if (bucket.longSize > 0) {
+          netEntry = longAvgEntry;
+        } else if (bucket.shortSizeAbs > 0) {
+          netEntry = shortAvgEntry;
+        }
+        const side = signedSize > 0 ? "LONG" : signedSize < 0 ? "SHORT" : "HEDGED";
+        return {
+          ...bucket,
+          positionSide: side,
+          openSize: signedSize,
+          averageOpenPrice: netEntry,
+          openLeverage: bucket.leverageWeight > 0 ? bucket.openLeverageWeighted / bucket.leverageWeight : null,
+        };
+      });
+    }
+
+    function renderCurrentBreakdownRow(row) {
+      const signedSize = Number(row.openSize || 0) * (row.positionSide === "SHORT" ? -1 : 1);
+      const notional = Number.isFinite(signedSize) && Number.isFinite(row.averageOpenPrice)
+        ? signedSize * Number(row.averageOpenPrice)
+        : null;
+      const sideLabel = Number.isFinite(row.openLeverage)
+        ? `${row.positionSide} ${fmtNumber(row.openLeverage, 0)}X`
+        : row.positionSide;
+      return `
+        <tr>
+          <td class="timestamp">${escapeHtml(fmtDateTime(row.openTimeMs))}</td>
+          <td><span class="${sidePillClass(row.positionSide)}">${escapeHtml(sideLabel)}</span></td>
+          <td class="money">${fmtPositionSize(signedSize, 4)}</td>
+          <td class="money">${fmtDollar(row.averageOpenPrice, 4)}</td>
+          <td class="money">${Number.isFinite(notional) ? formatSignedPlainDollar(notional, 2) : "-"}</td>
+          <td class="money ${getSignedClass(row.estimatedPnl)}">${Number.isFinite(row.estimatedPnl) ? formatSignedPlainDollarWithPlus(row.estimatedPnl, 2) : "-"}</td>
+        </tr>
+      `;
+    }
+
+    function getFilteredCurrentRows() {
+      const sourceRows = getPositionsRowsAtTime(state.timelineAsOfMs);
+      return sortRows(aggregateCurrentRows(sourceRows), "current");
+    }
+
+    function getFilteredHistoryRows() {
+      const filters = getHistoryFilterState();
+      let rows = getSelectedHistoryRows().filter((row) => {
+        if (filters.asset && !String(row.asset || "").toLowerCase().includes(filters.asset)) return false;
+        if (filters.side !== "all" && row.positionSide !== filters.side) return false;
+        if (filters.pnl === "wins" && !(Number(row.realizedPnl) > 0)) return false;
+        if (filters.pnl === "losses" && !(Number(row.realizedPnl) < 0)) return false;
+        return true;
+      });
+      rows = rows.slice().sort((a, b) => Number(b.closeTimeMs || 0) - Number(a.closeTimeMs || 0));
+      if (isHistoryAggregatedByPrice()) rows = aggregateConsecutiveHistoryRows(rows);
+      return sortRows(rows, "history");
+    }
+
+    function getSelectedTraderSummary() {
+      const trader = getSelectedTraderRow();
+      return trader ? getTraderDisplayLabel(trader) : (state.selectedTraderIds[0] || "-");
+    }
+
+    function formatTradeOrderId(value) {
+      const text = String(value || "").trim();
+      return text ? text : "-";
+    }
+
+    function formatTradeTimeCell(ms) {
+      if (!Number.isFinite(ms)) return `<span class="timestamp">-</span>`;
+      return `
+        <div class="price-stack">
+          <span class="timestamp">${escapeHtml(fmtDateTime(ms))}</span>
+          <span class="timestamp time-line time-line-strong"><span>Opened:</span><span>${escapeHtml(formatDuration(Date.now() - ms))}</span></span>
+        </div>
+      `;
+    }
+
+    function formatTradeTimelineCell(entries) {
+      const lines = entries
+        .filter((entry) => Number.isFinite(entry?.ms))
+        .map((entry) => `<span class="timestamp time-line"><span>${escapeHtml(entry.label)}:</span><span>${escapeHtml(fmtDateTime(entry.ms))}</span></span>`);
+      if (!lines.length) return `<span class="timestamp">-</span>`;
+      return `<div class="price-stack">${lines.join("")}</div>`;
+    }
+
+    function buildTradeSideLabel(row) {
+      return Number.isFinite(row.openLeverage)
+        ? `${row.positionSide} ${fmtNumber(row.openLeverage, 0)}X`
+        : row.positionSide;
+    }
+
+    function buildTradeSizeHtml(row) {
+      const sizeAbs = Math.abs(Number(row.openSize || 0));
+      const priceForNotional = Number(row.averageOpenPrice || 0);
+      const sideSign = String(row.positionSide || "").toUpperCase() === "SHORT" ? -1 : 1;
+      const signedNotional = Number.isFinite(sizeAbs) && Number.isFinite(priceForNotional)
+        ? sideSign * sizeAbs * priceForNotional
+        : null;
+      return `
+        <div class="price-stack size-stack">
+          <span class="notional-sub">${Number.isFinite(signedNotional) ? formatSignedPlainDollar(signedNotional, 2) : "-"}</span>
+          <span class="size-main">${fmtNumber(sizeAbs, 4)} <span class="size-ticker">${escapeHtml(row.asset)}</span></span>
+        </div>
+      `;
+    }
+
+    function buildTradePriceHtml(row, includeLivePrice = false) {
+      const entryPriceDisplay = Number.isFinite(row.averageOpenPrice) ? fmtDisplayPrice(row.averageOpenPrice) : "-";
+      const livePriceDisplay = Number.isFinite(row.markPrice) ? fmtDisplayPrice(row.markPrice) : "-";
+      if (!includeLivePrice) {
+        return `<div class="price-stack"><span>${entryPriceDisplay}</span></div>`;
+      }
+      return `
+        <div class="price-stack">
+          <span class="notional-sub">Live: ${livePriceDisplay}</span>
+          <span>Entry: ${entryPriceDisplay}</span>
+        </div>
+      `;
+    }
+
+    function formatSignedPercentValue(value, decimals = 2) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "";
+      const abs = Math.abs(n).toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+      if (n > 0) return `+${abs}%`;
+      if (n < 0) return `-${abs}%`;
+      return `${abs}%`;
+    }
+
+    function renderOpenTradesTable(rows) {
+      if (!rows.length) {
+        els.liveTradesBody.innerHTML = `<tr><td colspan="7" class="muted">No open trades for this selection.</td></tr>`;
+        return;
+      }
+      els.liveTradesBody.innerHTML = rows.map((row) => {
+        const upnlPercentRatio = computeUpnlPercentRatio(row);
+        const upnlPercentDisplay = formatSignedPercent(upnlPercentRatio, 2);
+        return `
+          <tr>
+            <td><span class="order-id">${escapeHtml(formatTradeOrderId(row.currentOrderId))}</span></td>
+            <td>${formatTradeTimeCell(row.openTimeMs)}</td>
+            <td><span class="asset-cell">${coinIconHtml(row.iconUrl, row.asset)} <span>${escapeHtml(row.asset)}</span></span></td>
+            <td><span class="${sidePillClass(row.positionSide)}">${escapeHtml(buildTradeSideLabel(row))}</span></td>
+            <td class="money size-cell">${buildTradeSizeHtml(row)}</td>
+            <td class="money">${buildTradePriceHtml(row, true)}</td>
+            <td class="${getSignedClass(row.estimatedPnl)}">
+              <div class="price-stack">
+                <span>${Number.isFinite(row.estimatedPnl) ? formatSignedPlainDollarWithPlus(row.estimatedPnl, 2) : "-"}</span>
+                <span class="notional-sub roe-sub ${getSignedClass(upnlPercentRatio)}">${upnlPercentDisplay || ""}</span>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function updateTabSwitchIndicator(container) {
+      if (!container) return;
+      const indicator = container.querySelector(".orders-tabs-indicator");
+      const active = container.querySelector(".orders-tab-btn.active");
+      if (!indicator || !active) return;
+      const parentRect = container.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      const left = activeRect.left - parentRect.left;
+      indicator.style.width = `${activeRect.width}px`;
+      indicator.style.transform = `translateX(${left}px)`;
+      container.classList.add("ready");
+    }
+
+    function renderCurrentTable(targetBody, rows, options = {}) {
+      const expandable = Boolean(options.expandable);
+      const showTrader = options.showTrader !== false;
+      const showLiqDistance = options.showLiqDistance === true;
+      const showLev = options.showLev !== false;
+      const mergePrice = options.mergePrice === true;
+      const traderFirst = options.traderFirst === true;
+      const ageAnchorMs = Number.isFinite(options.ageAnchorMs) ? Number(options.ageAnchorMs) : Date.now();
+      const livePriceLabel = options.livePriceLabel || "Live";
+      const colspan = mergePrice
+        ? 6 + (showTrader ? 1 : 0) + (showLiqDistance ? 1 : 0) + (showLev ? 1 : 0)
+        : 7 + (showTrader ? 1 : 0) + (showLiqDistance ? 1 : 0) + (showLev ? 1 : 0);
+      if (!rows.length) {
+        const emptyMessage = expandable ? "No open positions." : "No current trades for this selection.";
+        targetBody.innerHTML = `<tr><td colspan="${colspan}" class="muted">${emptyMessage}</td></tr>`;
+        return;
+      }
+      targetBody.innerHTML = rows.map((row) => {
+        const isExpanded = expandable && row.isAggregated && state.expandedCurrentAssets.has(row.aggregateKey);
+        const sideLabel = !showLev && Number.isFinite(row.openLeverage)
+          ? `${row.positionSide} ${fmtNumber(row.openLeverage, 0)}X`
+          : row.positionSide;
+        const sideText = `<span class="${sidePillClass(row.positionSide)}">${escapeHtml(sideLabel)}</span>`;
+        const notionalValue = Number(row.openSize || 0) * Number(row.markPrice || 0);
+        const sizeText = row.isAggregated ? fmtPositionSize(row.openSize, 4) : fmtNumber(row.openSize, 4);
+        const livePriceDisplay = Number.isFinite(row.markPrice) ? fmtDisplayPrice(row.markPrice) : "-";
+        const entryPriceDisplay = Number.isFinite(row.averageOpenPrice) ? fmtDisplayPrice(row.averageOpenPrice) : "-";
+        const upnlPercentRatio = computeUpnlPercentRatio(row);
+        const upnlPercentDisplay = formatSignedPercent(upnlPercentRatio, 2);
+        const assetCell = `<td>${coinIconHtml(row.iconUrl, row.asset)} <span class="asset-cell"><span>${escapeHtml(row.asset)}</span>${expandable && row.isAggregated ? '<span class="chevron" aria-hidden="true"></span>' : ""}</span></td>`;
+        const traderCell = showTrader ? `<td><a href="${escapeHtml(row.detailUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(row.traderName)}</a></td>` : "";
+        const mainRow = `
+          <tr class="${expandable && row.isAggregated ? `position-row${isExpanded ? " expanded" : ""}` : ""}" ${expandable && row.isAggregated ? `data-aggregate-key="${escapeHtml(row.aggregateKey)}"` : ""}>
+            ${traderFirst ? traderCell + assetCell : assetCell + traderCell}
+            <td>${sideText}</td>
+            <td class="size-cell">
+              <div class="price-stack size-stack">
+                <span class="notional-sub">${Number.isFinite(notionalValue) ? formatSignedPlainDollar(notionalValue, 2) : "-"}</span>
+                <span class="size-main">${sizeText} <span class="size-ticker">${escapeHtml(row.asset)}</span></span>
+              </div>
+            </td>
+            ${mergePrice ? `
+            <td class="money">
+              <div class="price-stack">
+                <span class="notional-sub">${escapeHtml(livePriceLabel)}: ${livePriceDisplay}</span>
+                <span>Entry: ${entryPriceDisplay}</span>
+              </div>
+            </td>` : `
+            <td class="money">${entryPriceDisplay}</td>
+            <td class="money">${livePriceDisplay}</td>`}
+            <td class="${getSignedClass(row.estimatedPnl)}">
+              <div class="price-stack">
+                <span>${Number.isFinite(row.estimatedPnl) ? formatSignedPlainDollarWithPlus(row.estimatedPnl, 2) : "-"}</span>
+                <span class="notional-sub roe-sub ${getSignedClass(upnlPercentRatio)}">${upnlPercentDisplay || ""}</span>
+              </div>
+            </td>
+            ${showLiqDistance ? `<td>${buildLiqDistanceHtml(row)}</td>` : ""}
+            ${showLev ? `<td>${fmtNumber(row.openLeverage, 0)}X</td>` : ""}
+            <td title="${escapeHtml(fmtDateTime(row.openTimeMs))}">${formatDuration(ageAnchorMs - row.openTimeMs)}</td>
+          </tr>
+        `;
+        if (!isExpanded) return mainRow;
+        const detailRows = (row.componentRows || [])
+          .slice()
+          .sort((a, b) => Number(b.openTimeMs || 0) - Number(a.openTimeMs || 0))
+          .map(renderCurrentBreakdownRow)
+          .join("");
+        return `${mainRow}
+          <tr class="position-details">
+            <td colspan="${colspan}">
+              <div class="position-breakdown">
+                <table class="position-subtable">
+                  <thead>
+                    <tr>
+                      <th>Execution Time</th>
+                      <th>Side</th>
+                      <th>Size</th>
+                      <th>Price</th>
+                      <th>Notional</th>
+                      <th>Unrealized PnL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${detailRows || `<tr><td colspan="6" class="muted">No underlying trades found.</td></tr>`}
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>`;
+      }).join("");
+    }
+
+    function renderHistoryTable(rows) {
+      if (!rows.length) {
+        els.historyTradesBody.innerHTML = `<tr><td colspan="7" class="muted">No historical trades for this selection.</td></tr>`;
+        return;
+      }
+      els.historyTradesBody.innerHTML = rows.map((row) => `
+        <tr>
+          <td>
+            <div class="price-stack">
+              <span class="order-id">${escapeHtml(formatTradeOrderId(row.historyOrderId))}</span>
+              ${Number(row.aggregateCount || 1) > 1 ? `<span class="notional-sub">${fmtNumber(row.aggregateCount, 0)} trades</span>` : ""}
+            </div>
+          </td>
+          <td>${formatTradeTimelineCell([{ label: "Opened", ms: row.openTimeMs }, { label: "Closed", ms: row.closeTimeMs }])}</td>
+          <td><span class="asset-cell">${coinIconHtml(row.iconUrl, row.asset)} <span>${escapeHtml(row.asset)}</span></span></td>
+          <td><span class="${sidePillClass(row.positionSide)}">${escapeHtml(buildTradeSideLabel(row))}</span></td>
+          <td class="money size-cell">${buildTradeSizeHtml(row)}</td>
+          <td class="money">${buildTradePriceHtml(row, false)}</td>
+          <td class="${getSignedClass(row.realizedPnl)}">
+            <div class="price-stack">
+              <span>${formatSignedDollarWithPlus(row.realizedPnl, 2)}</span>
+              <span class="notional-sub roe-sub ${getSignedClass(row.profitRate)}">${Number.isFinite(row.profitRate) ? formatSignedPercentValue(row.profitRate, 2) : ""}</span>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function buildDailySeries(rows) {
+      const map = new Map();
+      rows.forEach((row) => {
+        const dayMs = toLocalDayStartMs(row.closeTimeMs);
+        if (!Number.isFinite(dayMs)) return;
+        const bucket = map.get(dayMs) || { dayMs, dailyPnl: 0, trades: 0, grossMargin: 0 };
+        bucket.dailyPnl += Number(row.realizedPnl || 0);
+        bucket.trades += 1;
+        bucket.grossMargin += Math.abs(Number(row.openMarginAmount || 0));
+        map.set(dayMs, bucket);
+      });
+      const sorted = Array.from(map.values()).sort((a, b) => a.dayMs - b.dayMs);
+      let cumulative = 0;
+      return sorted.map((entry) => {
+        cumulative += entry.dailyPnl;
+        return {
+          ...entry,
+          pnl: cumulative,
+          equity: cumulative,
+        };
+      });
+    }
+
+    function getRangeStart(rangeKey, series) {
+      const end = series.length ? series[series.length - 1].dayMs : Date.now();
+      if (rangeKey === "day") return end - 86400000;
+      if (rangeKey === "week") return end - 7 * 86400000;
+      if (rangeKey === "month") return end - 30 * 86400000;
+      return series.length ? series[0].dayMs : null;
+    }
+
+    function filterSeriesByRange(series, rangeKey) {
+      if (!series.length) return [];
+      const start = getRangeStart(rangeKey, series);
+      return series.filter((row) => !Number.isFinite(start) || row.dayMs >= start);
+    }
+
+    function getMetricSource() {
+      const series = buildDailySeries(getSelectedHistoryRows());
+      const rangeSeries = filterSeriesByRange(series, state.currentRangeKey);
+      const rangeStart = rangeSeries.length ? rangeSeries[0].dayMs : null;
+      const rangeHistory = getSelectedHistoryRows().filter((row) => !Number.isFinite(rangeStart) || row.closeTimeMs >= rangeStart);
+      const rangeCurrent = getSelectedCurrentRows();
+      return { series, rangeSeries, rangeHistory, rangeCurrent };
+    }
+
+    function computeMedian(values) {
+      if (!values.length) return null;
+      const sorted = values.slice().sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      if (sorted.length % 2) return sorted[mid];
+      return (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
+    function computeCorrelation(a, b) {
+      if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length || a.length < 2) return null;
+      const meanA = a.reduce((sum, v) => sum + v, 0) / a.length;
+      const meanB = b.reduce((sum, v) => sum + v, 0) / b.length;
+      let numerator = 0;
+      let denomA = 0;
+      let denomB = 0;
+      for (let i = 0; i < a.length; i += 1) {
+        const da = a[i] - meanA;
+        const db = b[i] - meanB;
+        numerator += da * db;
+        denomA += da * da;
+        denomB += db * db;
+      }
+      if (!denomA || !denomB) return null;
+      return numerator / Math.sqrt(denomA * denomB);
+    }
+
+    async function fetchJsonWithTimeout(url, timeoutMs = 8000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } finally {
+        clearTimeout(id);
+      }
+    }
+
+    async function fetchBitcoinHistory(rangeKey, startTime, endTime) {
+      const sources = [
+        async () => {
+          const granularity = rangeKey === "day" ? 3600 : rangeKey === "week" ? 14400 : 86400;
+          const url = `https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=${granularity}`;
+          const data = await fetchJsonWithTimeout(url);
+          if (!Array.isArray(data)) return [];
+          return data
+            .map((row) => [Number(row?.[0]) * 1000, Number(row?.[4])])
+            .filter(([t, p]) => Number.isFinite(t) && Number.isFinite(p))
+            .filter(([t]) => (!Number.isFinite(startTime) || t >= startTime) && (!Number.isFinite(endTime) || t <= endTime));
+        },
+        async () => {
+          const interval = rangeKey === "day" ? "1h" : rangeKey === "week" ? "4h" : "1d";
+          const params = new URLSearchParams({
+            symbol: "BTCUSDT",
+            interval,
+            limit: rangeKey === "allTime" ? "1000" : "500",
+          });
+          const url = `https://api.binance.com/api/v3/klines?${params.toString()}`;
+          const data = await fetchJsonWithTimeout(url);
+          if (!Array.isArray(data)) return [];
+          return data
+            .map((row) => [Number(row?.[0]), Number(row?.[4])])
+            .filter(([t, p]) => Number.isFinite(t) && Number.isFinite(p))
+            .filter(([t]) => (!Number.isFinite(startTime) || t >= startTime) && (!Number.isFinite(endTime) || t <= endTime));
+        },
+      ];
+      for (const source of sources) {
+        try {
+          const result = await source();
+          if (result.length) return result.sort((a, b) => a[0] - b[0]);
+        } catch (err) {
+          console.warn("btc history source failed", err);
+        }
+      }
+      return [];
+    }
+
+    function findNearestPrice(priceSeries, time) {
+      if (!priceSeries.length || !Number.isFinite(time)) return null;
+      let best = null;
+      let bestDist = Infinity;
+      priceSeries.forEach(([t, p]) => {
+        const dist = Math.abs(t - time);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = p;
+        }
+      });
+      return best;
+    }
+
+    async function updateBenchmarkMetrics(source) {
+      const { rangeSeries, rangeHistory } = source;
+      if (!rangeSeries.length || !rangeHistory.length) {
+        els.metricExcessPnl.textContent = "-";
+        els.metricBetaAlpha.textContent = "-";
+        return;
+      }
+      const grossMargin = rangeHistory.reduce((sum, row) => sum + Math.abs(Number(row.openMarginAmount || 0)), 0);
+      const base = grossMargin || 1;
+      const start = rangeSeries[0].dayMs;
+      const end = rangeSeries[rangeSeries.length - 1].dayMs;
+      const btc = await fetchBitcoinHistory(state.currentRangeKey, start, end);
+      if (!btc.length) {
+        els.metricExcessPnl.textContent = "N/A";
+        els.metricBetaAlpha.textContent = "N/A";
+        return;
+      }
+
+      const walletReturns = [];
+      for (let i = 1; i < rangeSeries.length; i += 1) {
+        walletReturns.push({
+          time: rangeSeries[i].dayMs,
+          value: rangeSeries[i].dailyPnl / base,
+        });
+      }
+      const benchmarkReturns = walletReturns.map((entry, index) => {
+        const prevTime = index === 0 ? rangeSeries[0].dayMs : walletReturns[index - 1].time;
+        const prevPrice = findNearestPrice(btc, prevTime);
+        const currPrice = findNearestPrice(btc, entry.time);
+        if (!Number.isFinite(prevPrice) || !Number.isFinite(currPrice) || prevPrice === 0) {
+          return { time: entry.time, value: null };
+        }
+        return { time: entry.time, value: (currPrice - prevPrice) / prevPrice };
+      });
+
+      const pairs = walletReturns
+        .map((row) => [row.value, benchmarkReturns.find((b) => b.time === row.time)?.value])
+        .filter(([w, b]) => Number.isFinite(w) && Number.isFinite(b));
+
+      if (pairs.length < 2) {
+        els.metricExcessPnl.textContent = "N/A";
+        els.metricBetaAlpha.textContent = "N/A";
+        return;
+      }
+
+      const walletVals = pairs.map((item) => item[0]);
+      const benchVals = pairs.map((item) => item[1]);
+      const meanWallet = walletVals.reduce((sum, value) => sum + value, 0) / walletVals.length;
+      const meanBench = benchVals.reduce((sum, value) => sum + value, 0) / benchVals.length;
+      let cov = 0;
+      let varBench = 0;
+      for (let i = 0; i < pairs.length; i += 1) {
+        cov += (walletVals[i] - meanWallet) * (benchVals[i] - meanBench);
+        varBench += (benchVals[i] - meanBench) ** 2;
+      }
+      const beta = varBench ? cov / varBench : null;
+      const alpha = Number.isFinite(beta) ? meanWallet - beta * meanBench : null;
+      const benchmarkPnl = base * benchVals.reduce((sum, value) => sum + value, 0);
+      const totalPnl = rangeSeries.reduce((sum, value) => sum + value.dailyPnl, 0);
+      const excessPnl = totalPnl - benchmarkPnl;
+      els.metricExcessPnl.textContent = formatSignedDollarWithPlus(excessPnl, 2);
+      els.metricExcessPnl.className = `metric-value ${getSignedClass(excessPnl)}`;
+      els.metricBetaAlpha.textContent = Number.isFinite(beta) && Number.isFinite(alpha)
+        ? `β ${fmtNumber(beta, 2)} · α ${fmtPercent(alpha * 100, 2)}`
+        : "N/A";
+      els.metricBetaAlpha.className = "metric-value neutral";
+    }
+
+    function setMetric(el, text, tone = "") {
+      el.textContent = text;
+      el.className = `metric-value ${tone}`.trim();
+    }
+
+    function updateMetrics(source) {
+      const { rangeSeries, rangeHistory, rangeCurrent } = source;
+      if (!rangeSeries.length || !rangeHistory.length) {
+        [
+          els.metricTotalPnl,
+          els.metricReturn,
+          els.metricMaxDrawdown,
+          els.metricSharpe,
+          els.metricVolatility,
+          els.metricBestInterval,
+          els.metricWinRate,
+          els.metricProfitFactor,
+          els.metricTradesPerDay,
+          els.metricActiveDays,
+          els.metricProductCount,
+          els.metricAvgLeverage,
+          els.metricMedianHolding,
+          els.metricSideBias,
+          els.metricExcessPnl,
+          els.metricBetaAlpha,
+        ].forEach((el) => setMetric(el, "-"));
+        return;
+      }
+
+      const daily = rangeSeries.map((row) => row.dailyPnl);
+      const totalPnl = daily.reduce((sum, value) => sum + value, 0);
+      const grossMargin = rangeHistory.reduce((sum, row) => sum + Math.abs(Number(row.openMarginAmount || 0)), 0);
+      const returnPct = grossMargin ? (totalPnl / grossMargin) * 100 : null;
+      let peak = -Infinity;
+      let drawdown = 0;
+      rangeSeries.forEach((row) => {
+        peak = Math.max(peak, row.pnl);
+        drawdown = Math.min(drawdown, row.pnl - peak);
+      });
+      const mean = daily.reduce((sum, value) => sum + value, 0) / daily.length;
+      const variance = daily.reduce((sum, value) => sum + (value - mean) ** 2, 0) / daily.length;
+      const volatility = Math.sqrt(variance);
+      const sharpe = volatility ? mean / volatility : null;
+      const bestInterval = Math.max(...daily);
+      const wins = rangeHistory.filter((row) => Number(row.realizedPnl) > 0);
+      const losses = rangeHistory.filter((row) => Number(row.realizedPnl) < 0);
+      const grossProfit = wins.reduce((sum, row) => sum + Number(row.realizedPnl || 0), 0);
+      const grossLoss = losses.reduce((sum, row) => sum + Math.abs(Number(row.realizedPnl || 0)), 0);
+      const winRate = rangeHistory.length ? (wins.length / rangeHistory.length) * 100 : null;
+      const profitFactor = grossLoss ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : null;
+      const observedDays = Math.max(1, Math.round((rangeSeries[rangeSeries.length - 1].dayMs - rangeSeries[0].dayMs) / 86400000) + 1);
+      const tradesPerDay = rangeHistory.length / observedDays;
+      const activeDays = (rangeSeries.length / observedDays) * 100;
+      const productCount = new Set(rangeHistory.map((row) => row.symbol)).size;
+      const avgLeverage = rangeHistory.reduce((sum, row) => sum + Number(row.openLeverage || 0), 0) / rangeHistory.length;
+      const holdingMs = rangeHistory
+        .map((row) => Number(row.closeTimeMs || 0) - Number(row.openTimeMs || 0))
+        .filter((value) => Number.isFinite(value) && value > 0);
+      const medianHolding = computeMedian(holdingMs);
+      const sideNotional = rangeHistory.reduce((acc, row) => {
+        const notion = Math.abs(Number(row.openSize || 0) * Number(row.averageOpenPrice || 0));
+        if (row.positionSide === "LONG") acc.long += notion;
+        if (row.positionSide === "SHORT") acc.short += notion;
+        return acc;
+      }, { long: 0, short: 0 });
+      const totalNotional = sideNotional.long + sideNotional.short;
+      const sideBias = totalNotional ? ((sideNotional.long - sideNotional.short) / totalNotional) * 100 : null;
+
+      setMetric(els.metricTotalPnl, formatSignedDollarWithPlus(totalPnl, 2), getSignedClass(totalPnl));
+      setMetric(els.metricReturn, Number.isFinite(returnPct) ? fmtPercent(returnPct, 2) : "-", getSignedClass(returnPct));
+      setMetric(els.metricMaxDrawdown, formatSignedDollarWithPlus(drawdown, 2), getSignedClass(drawdown));
+      setMetric(els.metricSharpe, Number.isFinite(sharpe) ? fmtNumber(sharpe, 2) : "-", getSignedClass(sharpe));
+      setMetric(els.metricVolatility, Number.isFinite(volatility) ? fmtMoney(volatility, 2) : "-", getSignedClass(-volatility));
+      setMetric(els.metricBestInterval, Number.isFinite(bestInterval) ? formatSignedDollarWithPlus(bestInterval, 2) : "-", getSignedClass(bestInterval));
+      setMetric(els.metricWinRate, Number.isFinite(winRate) ? `${fmtPercent(winRate, 2)} (${wins.length}/${rangeHistory.length})` : "-", getSignedClass(winRate - 50));
+      setMetric(els.metricProfitFactor, profitFactor === Infinity ? "Inf" : Number.isFinite(profitFactor) ? fmtNumber(profitFactor, 2) : "-", getSignedClass(profitFactor - 1));
+      setMetric(els.metricTradesPerDay, fmtNumber(tradesPerDay, 2));
+      setMetric(els.metricActiveDays, fmtPercent(activeDays, 1), getSignedClass(activeDays - 50));
+      setMetric(els.metricProductCount, String(productCount));
+      setMetric(els.metricAvgLeverage, Number.isFinite(avgLeverage) ? `${fmtNumber(avgLeverage, 1)}X` : "-");
+      setMetric(els.metricMedianHolding, formatDuration(medianHolding));
+      setMetric(els.metricSideBias, Number.isFinite(sideBias) ? fmtPercent(sideBias, 1) : "-", getSignedClass(sideBias));
+      setMetric(els.metricExcessPnl, "Loading…");
+      setMetric(els.metricBetaAlpha, "Loading…");
+
+      updateBenchmarkMetrics(source);
+
+      els.overviewTrader.textContent = getSelectedTraderSummary();
+      els.overviewRealizedPnl.textContent = formatSignedPlainDollarWithPlus(totalPnl, 2);
+      els.overviewRealizedPnl.className = `kv-value ${getSignedClass(totalPnl)}`;
+      els.overviewCurrentCount.textContent = fmtNumber(rangeCurrent.length, 0);
+      els.overviewHistoryCount.textContent = fmtNumber(rangeHistory.length, 0);
+      const netUnrealized = rangeCurrent.reduce((sum, row) => sum + Number(row.estimatedPnl || 0), 0);
+      els.overviewNetUnrealizedPnl.textContent = formatSignedPlainDollarWithPlus(netUnrealized, 2);
+      els.overviewNetUnrealizedPnl.className = `kv-value ${getSignedClass(netUnrealized)}`;
+    }
+
+    function getChartPalette() {
+      const light = document.body.classList.contains("light");
+      return {
+        grid: light ? "rgba(15, 23, 42, 0.08)" : "rgba(255,255,255,0.08)",
+        text: light ? "#475569" : "rgba(245,245,255,0.72)",
+        card: light ? "rgba(255,255,255,0.92)" : "rgba(10,10,14,0.84)",
+      };
+    }
+
+    function buildChartLabels(series, rangeKey) {
+      const showTimeOnly = rangeKey === "day";
+      return series.map((row) => {
+        const d = new Date(row.dayMs);
+        if (Number.isNaN(d.getTime())) return "";
+        if (showTimeOnly) {
+          return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+        }
+        return d.toLocaleDateString();
+      });
+    }
+
+    function ensureChart(canvasId, type, data, options) {
+      const ctx = document.getElementById(canvasId).getContext("2d");
+      const key = canvasId.replace("Chart", "");
+      const existing = state.charts[key];
+      if (existing && existing.config?.type !== type) {
+        existing.destroy();
+        state.charts[key] = null;
+      }
+      const active = state.charts[key];
+      if (active) {
+        active.data = data;
+        active.options = options;
+        active.update();
+        return active;
+      }
+      const chart = new Chart(ctx, { type, data, options });
+      state.charts[key] = chart;
+      return chart;
+    }
+
+    function createCommonChartOptions(palette, money = false) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            borderColor: "rgba(148,163,184,0.5)",
+            borderWidth: 1,
+            titleColor: "#e5e7eb",
+            bodyColor: "#e5e7eb",
+            displayColors: false,
+            padding: 8,
+            cornerRadius: 6,
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: palette.text,
+              autoSkip: true,
+              maxTicksLimit: 6,
+              minRotation: 0,
+              maxRotation: 0,
+            },
+            grid: { display: false },
+            border: { display: false },
+          },
+          y: {
+            ticks: money ? {
+              color: palette.text,
+              maxTicksLimit: 6,
+              callback: (value) => {
+                const n = Number(value);
+                if (!Number.isFinite(n)) return "";
+                const abs = Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+                return n < 0 ? `-$${abs}` : `$${abs}`;
+              },
+            } : {
+              color: palette.text,
+              maxTicksLimit: 6,
+            },
+            grid: { color: palette.grid },
+            border: { display: false },
+          },
+        },
+      };
+    }
+
+    function createMoneyLineDataset(label, data, borderColor, backgroundColor) {
+      return {
+        label,
+        data,
+        borderColor,
+        backgroundColor,
+        fill: true,
+        tension: 0.25,
+        pointRadius: 0,
+        pointHoverRadius: 3,
+        borderWidth: 2,
+      };
+    }
+
+    function clearChartIfPresent(canvasId) {
+      const key = canvasId.replace("Chart", "");
+      const existing = state.charts[key];
+      if (existing) {
+        existing.destroy();
+        state.charts[key] = null;
+      }
+    }
+
+    function renderCharts(source) {
+      const { rangeSeries } = source;
+      const palette = getChartPalette();
+      if (!rangeSeries.length) {
+        clearChartIfPresent("equityChart");
+        clearChartIfPresent("pnlChart");
+        clearChartIfPresent("activityChart");
+        els.equityTitleValue.textContent = "-";
+        els.pnlTitleValue.textContent = "-";
+        els.activityTitleValue.textContent = "-";
+        return;
+      }
+      const labels = buildChartLabels(rangeSeries, state.currentRangeKey);
+      const equityData = rangeSeries.map((row) => row.equity);
+      const pnlData = rangeSeries.map((row) => row.dailyPnl);
+      const activityData = rangeSeries.map((row) => row.trades);
+      const equityTone = equityData[equityData.length - 1] || 0;
+      const pnlTone = pnlData.reduce((sum, value) => sum + value, 0);
+
+      els.equityTitleValue.textContent = formatSignedDollarWithPlus(equityData[equityData.length - 1], 2);
+      els.equityTitleValue.className = getSignedClass(equityTone);
+      els.pnlTitleValue.textContent = formatSignedDollarWithPlus(pnlTone, 2);
+      els.pnlTitleValue.className = getSignedClass(pnlTone);
+      els.activityTitleValue.textContent = `${activityData.reduce((sum, value) => sum + value, 0)} trades`;
+
+      ensureChart("equityChart", "line", {
+        labels,
+        datasets: [createMoneyLineDataset(
+          "Equity",
+          equityData,
+          "rgba(38, 217, 127, 0.95)",
+          "rgba(38, 217, 127, 0.18)",
+        )],
+      }, createCommonChartOptions(palette, true));
+
+      ensureChart("pnlChart", "line", {
+        labels,
+        datasets: [createMoneyLineDataset(
+          "PnL",
+          pnlData,
+          "rgba(245, 158, 11, 0.95)",
+          "rgba(245, 158, 11, 0.18)",
+        )],
+      }, createCommonChartOptions(palette, true));
+
+      ensureChart("activityChart", "bar", {
+        labels,
+        datasets: [{
+          label: "Trades",
+          data: activityData,
+          backgroundColor: "rgba(0, 180, 216, 0.72)",
+          borderRadius: 3,
+          borderSkipped: false,
+        }],
+      }, createCommonChartOptions(palette, false));
+    }
+
+    function buildPnlHeatmapRows(source) {
+      return source.rangeSeries.map((row) => ({
+        dayMs: row.dayMs,
+        delta: row.dailyPnl,
+      }));
+    }
+
+    function getQuarterKey(dayMs) {
+      if (!Number.isFinite(dayMs)) return null;
+      const d = new Date(dayMs);
+      const quarter = Math.floor(d.getMonth() / 3) + 1;
+      return `${d.getFullYear()}-Q${quarter}`;
+    }
+
+    function formatQuarterKey(key) {
+      const match = /^(\d{4})-Q(\d)$/.exec(String(key || ""));
+      if (!match) return "Quarter";
+      return `Q${match[2]} ${match[1]}`;
+    }
+
+    function getQuarterRange(key) {
+      const match = /^(\d{4})-Q(\d)$/.exec(String(key || ""));
+      if (!match) return null;
+      const year = Number(match[1]);
+      const quarter = Number(match[2]);
+      const startMonth = (quarter - 1) * 3;
+      const start = new Date(year, startMonth, 1).getTime();
+      const end = new Date(year, startMonth + 3, 1).getTime();
+      return { year, startMonth, start, end };
+    }
+
+    function getHeatmapColor(value, maxAbs) {
+      if (!Number.isFinite(value) || maxAbs <= 0) return "rgba(255,255,255,0.04)";
+      const intensity = Math.min(1, Math.abs(value) / maxAbs);
+      if (value > 0) return `rgba(38, 217, 127, ${0.16 + intensity * 0.72})`;
+      if (value < 0) return `rgba(242, 95, 92, ${0.16 + intensity * 0.72})`;
+      return "rgba(124, 176, 255, 0.22)";
+    }
+
+    function renderPnlHeatmap(source) {
+      if (els.pnlHeatmapWeekdays.childElementCount === 0) {
+        ["S", "M", "T", "W", "T", "F", "S"].forEach((label) => {
+          const el = document.createElement("div");
+          el.textContent = label;
+          els.pnlHeatmapWeekdays.appendChild(el);
+        });
+      }
+
+      state.pnlHeatmapRows = buildPnlHeatmapRows(source);
+      const quarters = Array.from(new Set(state.pnlHeatmapRows.map((row) => getQuarterKey(row.dayMs)).filter(Boolean))).sort();
+      state.pnlHeatmapQuarters = quarters;
+      if (!quarters.length) {
+        els.pnlHeatmapTitle.textContent = "No PnL data";
+        els.pnlHeatmapMonths.innerHTML = "";
+        els.pnlHeatmapGrid.innerHTML = "";
+        return;
+      }
+      if (state.pnlHeatmapQuarterIndex < 0 || state.pnlHeatmapQuarterIndex >= quarters.length) {
+        state.pnlHeatmapQuarterIndex = quarters.length - 1;
+      }
+      const quarterKey = quarters[state.pnlHeatmapQuarterIndex];
+      const range = getQuarterRange(quarterKey);
+      if (!range) return;
+      const quarterRows = state.pnlHeatmapRows.filter((row) => getQuarterKey(row.dayMs) === quarterKey);
+      const maxAbs = quarterRows.reduce((max, row) => Math.max(max, Math.abs(Number(row.delta || 0))), 0);
+      const byDay = new Map(quarterRows.map((row) => [row.dayMs, row.delta]));
+      const quarterStartDate = new Date(range.start);
+      const totalDays = Math.round((range.end - range.start) / 86400000);
+      const weekCount = Math.ceil((totalDays + quarterStartDate.getDay()) / 7);
+      els.pnlHeatmapMonths.style.setProperty("--pnl-heatmap-columns", String(weekCount));
+      els.pnlHeatmapGrid.style.setProperty("--pnl-heatmap-columns", String(weekCount));
+      els.pnlHeatmapMonths.innerHTML = "";
+      const monthLabels = new Map();
+      for (let month = range.startMonth; month < range.startMonth + 3; month += 1) {
+        const first = new Date(range.year, month, 1);
+        const offset = Math.floor((first.getTime() - range.start) / 86400000);
+        const week = Math.floor((offset + quarterStartDate.getDay()) / 7);
+        monthLabels.set(week, first.toLocaleDateString(undefined, { month: "short" }));
+      }
+      for (let i = 0; i < weekCount; i += 1) {
+        const el = document.createElement("div");
+        el.className = "pnl-heatmap-month";
+        el.textContent = monthLabels.get(i) || "";
+        els.pnlHeatmapMonths.appendChild(el);
+      }
+
+      const cells = Array.from({ length: weekCount * 7 }, () => null);
+      let dayMs = range.start;
+      while (dayMs < range.end) {
+        const offset = Math.floor((dayMs - range.start) / 86400000);
+        const week = Math.floor((offset + quarterStartDate.getDay()) / 7);
+        const day = new Date(dayMs).getDay();
+        cells[day * weekCount + week] = { dayMs, delta: byDay.get(dayMs) ?? 0 };
+        dayMs = addLocalDays(dayMs, 1);
+      }
+
+      els.pnlHeatmapGrid.innerHTML = "";
+      cells.forEach((entry) => {
+        const cell = document.createElement("div");
+        cell.className = "pnl-heatmap-cell";
+        if (!entry) {
+          cell.classList.add("empty");
+          els.pnlHeatmapGrid.appendChild(cell);
+          return;
+        }
+        cell.style.backgroundColor = getHeatmapColor(entry.delta, maxAbs);
+        cell.title = `${fmtDateOnly(entry.dayMs)}: ${formatSignedDollarWithPlus(entry.delta, 2)}`;
+        cell.addEventListener("mouseenter", () => {
+          els.pnlHeatmapHover.innerHTML = `<span class="muted">${fmtDateOnly(entry.dayMs)}:</span> <span class="${getSignedClass(entry.delta)}">${formatSignedDollarWithPlus(entry.delta, 2)}</span>`;
+        });
+        els.pnlHeatmapGrid.appendChild(cell);
+      });
+
+      els.pnlHeatmapTitle.textContent = `${formatQuarterKey(quarterKey)} · Daily PnL`;
+      els.pnlHeatmapPrevBtn.disabled = state.pnlHeatmapQuarterIndex <= 0;
+      els.pnlHeatmapNextBtn.disabled = state.pnlHeatmapQuarterIndex >= quarters.length - 1;
+    }
+
+    function buildOverviewFacts(trader, meta) {
+      const level = Number(meta?.level ?? trader?.traderLevel);
+      const copiers = Number(meta?.copiers ?? trader?.followCount);
+      const copiersMax = Number(meta?.copiersMax ?? trader?.maxFollowCount);
+      const joinedText = String(meta?.joinedText || "").trim();
+      const parts = [];
+      if (Number.isFinite(level) && level > 0) parts.push(`Lv ${fmtNumber(level, 0)}`);
+      if (joinedText) parts.push(joinedText);
+      if (Number.isFinite(copiers) && Number.isFinite(copiersMax) && copiersMax > 0) {
+        parts.push(`Copiers: ${fmtNumber(copiers, 0)}/${fmtNumber(copiersMax, 0)}`);
+      } else if (Number.isFinite(copiers)) {
+        parts.push(`Copiers: ${fmtNumber(copiers, 0)}`);
+      }
+      return parts.join(" · ");
+    }
+
+    function renderOverview(source) {
+      const historyRows = getSelectedHistoryRows();
+      const currentRows = getSelectedCurrentRows();
+      const trader = getSelectedTraderRow();
+      const traderId = trader?.traderUserId || state.selectedTraderIds[0] || "";
+      const detailUrl = trader?.detailUrl || (traderId ? `https://www.weex.com/copy-trading/trader/${traderId}` : "");
+      const meta = state.traderMetaById.get(traderId) || null;
+      if (detailUrl) {
+        const label = escapeHtml(getSelectedTraderSummary());
+        els.overviewTrader.innerHTML = `<a class="overview-trader-link" href="${escapeHtml(detailUrl)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+      } else {
+        els.overviewTrader.textContent = getSelectedTraderSummary();
+      }
+      els.overviewCurrentCount.textContent = fmtNumber(currentRows.length, 0);
+      els.overviewHistoryCount.textContent = fmtNumber(historyRows.length, 0);
+      const totalRealized = historyRows.reduce((sum, row) => sum + Number(row.realizedPnl || 0), 0);
+      const totalUnrealized = currentRows.reduce((sum, row) => sum + Number(row.estimatedPnl || 0), 0);
+      els.overviewRealizedPnl.textContent = formatSignedPlainDollarWithPlus(totalRealized, 2);
+      els.overviewRealizedPnl.className = `kv-value ${getSignedClass(totalRealized)}`;
+      els.overviewNetUnrealizedPnl.textContent = formatSignedPlainDollarWithPlus(totalUnrealized, 2);
+      els.overviewNetUnrealizedPnl.className = `kv-value ${getSignedClass(totalUnrealized)}`;
+
+      const head = String((meta?.headings || []).find((item) => item && item !== trader?.traderNickName) || trader?.traderNickName || traderId || "").trim();
+      const facts = buildOverviewFacts(trader, meta);
+      const profile = String(trader?.profile || "").trim();
+      const imageUrl = String(meta?.imageUrl || "").trim();
+      const hasMeta = Boolean(imageUrl || head || facts || profile);
+      els.overviewMeta.classList.toggle("hidden", !hasMeta);
+      els.overviewMetaHead.textContent = head || "-";
+      els.overviewMetaFacts.textContent = facts || "-";
+      els.overviewMetaProfile.textContent = profile || "-";
+      if (imageUrl) {
+        els.overviewMetaImage.src = imageUrl;
+        els.overviewMetaImage.classList.remove("hidden");
+      } else {
+        els.overviewMetaImage.removeAttribute("src");
+        els.overviewMetaImage.classList.add("hidden");
+      }
+    }
+
+    function renderOrdersPanels() {
+      const currentRows = getFilteredCurrentRows();
+      const historyRows = getFilteredHistoryRows();
+      updateAllSortHeaders();
+      recomputePositionsTimelineControls();
+      updateLiveBridgeStatus();
+      renderCurrentTable(els.currentTradesBody, currentRows, {
+        expandable: true,
+        showTrader: false,
+        showLiqDistance: true,
+        mergePrice: true,
+        showLev: false,
+        ageAnchorMs: Number.isFinite(state.timelineAsOfMs) ? state.timelineAsOfMs : Date.now(),
+        livePriceLabel: Number.isFinite(state.timelineAsOfMs) ? "At Time" : "Live",
+      });
+      renderOpenTradesTable(sortRows(getSelectedCurrentRows(), "live"));
+      renderHistoryTable(historyRows);
+      if (els.tradesModeCount) {
+        els.tradesModeCount.textContent = state.activeTab === "history"
+          ? `${historyRows.length} trades`
+          : `${getSelectedCurrentRows().length} trades`;
+      }
+    }
+
+    function exportRows(filename, rows) {
+      if (!rows.length) return;
+      const csv = Papa.unparse(rows);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function xmlEscape(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    }
+
+    function formatExportSize(row, signed = false) {
+      const size = Number(row?.openSize || 0);
+      const signedSize = signed && row?.positionSide === "SHORT" ? -Math.abs(size) : size;
+      return fmtPositionSize(signedSize, 4);
+    }
+
+    function computeExportNotional(row, price) {
+      const size = Number(row?.openSize || 0);
+      if (!Number.isFinite(size) || !Number.isFinite(price)) return "";
+      return fmtDollar(size * price, 2);
+    }
+
+    function buildWeexSummaryRows() {
+      const currentRows = getSelectedCurrentRows();
+      const historyRows = getSelectedHistoryRows();
+      const unrealized = currentRows.reduce((sum, row) => sum + Number(row.estimatedPnl || 0), 0);
+      const realized = historyRows.reduce((sum, row) => sum + Number(row.realizedPnl || 0), 0);
+      const start = historyRows.reduce((min, row) => min === null || row.openTimeMs < min ? row.openTimeMs : min, null);
+      const end = historyRows.reduce((max, row) => max === null || row.closeTimeMs > max ? row.closeTimeMs : max, null);
+      return [
+        ["Selected Traders", state.selectedTraders.map((row) => row.traderNickName || row.traderUserId).join(", ") || "None"],
+        ["Current Trades", fmtNumber(currentRows.length, 0)],
+        ["Closed Trades", fmtNumber(historyRows.length, 0)],
+        ["Open Symbols", String(new Set(currentRows.map((row) => row.asset || row.symbol)).size)],
+        ["Realized PnL", formatSignedDollarWithPlus(realized, 2)],
+        ["Unrealized PnL", formatSignedDollarWithPlus(unrealized, 2)],
+        ["Observed Start", start ? fmtDateTime(start) : "-"],
+        ["Observed End", end ? fmtDateTime(end) : "-"],
+      ];
+    }
+
+    function buildWeexPositionsRowsForExport() {
+      const rows = sortRows(aggregateCurrentRows(getSelectedCurrentRows()), "current");
+      if (!rows.length) return [];
+      return rows.map((row) => {
+        const mark = Number.isFinite(row.markPrice) ? row.markPrice : Number(row.averageOpenPrice || 0);
+        const signedSize = Number(row.openSize || 0);
+        const notional = Number.isFinite(mark) && Number.isFinite(signedSize) ? mark * signedSize : null;
+        return [
+          row.traderUserId || row.traderName || "",
+          row.asset || "",
+          row.positionSide || "",
+          fmtPositionSize(signedSize, 4),
+          fmtDollar(row.averageOpenPrice, 4),
+          Number.isFinite(notional) ? fmtDollar(notional, 2) : "",
+          formatSignedPlainDollarWithPlus(row.estimatedPnl, 2),
+        ];
+      });
+    }
+
+    function buildWeexLiveOrdersRowsForExport() {
+      const rows = sortRows(getSelectedCurrentRows(), "live");
+      if (!rows.length) return [];
+      return rows.map((row) => [
+        row.traderUserId || row.traderName || "",
+        row.currentOrderId || "",
+        fmtDateTime(row.openTimeMs),
+        row.positionSide || "",
+        row.asset || "",
+        formatExportSize(row),
+        fmtDollar(row.averageOpenPrice, 4),
+        computeExportNotional(row, Number(row.averageOpenPrice || 0)),
+      ]);
+    }
+
+    function buildWeexHistoricalOrdersRowsForExport() {
+      const rows = sortRows(getSelectedHistoryRows(), "history");
+      if (!rows.length) return [];
+      return rows.map((row) => [
+        row.traderUserId || row.traderName || "",
+        row.historyOrderId || row.closeOrderId || "",
+        fmtDateTime(row.closeTimeMs || row.openTimeMs),
+        row.positionSide || "",
+        row.asset || "",
+        formatExportSize(row),
+        fmtDollar(row.averageClosePrice, 4),
+        computeExportNotional(row, Number(row.averageClosePrice || 0)),
+        row.status || row.closedBy || "closed",
+      ]);
+    }
+
+    function buildWeexLiveTradesRowsForExport() {
+      const rows = sortRows(getSelectedCurrentRows(), "live");
+      if (!rows.length) return [];
+      return rows.map((row) => [
+        row.traderUserId || row.traderName || "",
+        row.currentOrderId || "",
+        fmtDateTime(row.openTimeMs),
+        row.positionSide || "",
+        row.asset || "",
+        formatExportSize(row),
+        fmtDollar(row.averageOpenPrice, 4),
+        computeExportNotional(row, Number(row.averageOpenPrice || 0)),
+      ]);
+    }
+
+    function buildWeexHistoricalTradesRowsForExport() {
+      const rows = sortRows(getSelectedHistoryRows(), "history");
+      if (!rows.length) return [];
+      return rows.map((row) => [
+        row.traderUserId || row.traderName || "",
+        row.historyOrderId || row.closeOrderId || "",
+        fmtDateTime(row.closeTimeMs),
+        row.positionSide || "",
+        row.asset || "",
+        formatExportSize(row),
+        fmtDollar(row.averageClosePrice, 4),
+        computeExportNotional(row, Number(row.averageClosePrice || 0)),
+      ]);
+    }
+
+    function toColumnName(idx) {
+      let n = idx + 1;
+      let name = "";
+      while (n > 0) {
+        const rem = (n - 1) % 26;
+        name = String.fromCharCode(65 + rem) + name;
+        n = Math.floor((n - 1) / 26);
+      }
+      return name;
+    }
+
+    function buildSheetXml(rows) {
+      const safeRows = (rows && rows.length ? rows : [["No data"]]).map((row) => Array.isArray(row) ? row : [row]);
+      const rowXml = safeRows.map((row, rowIdx) => {
+        const cells = row.map((cell, colIdx) => {
+          const ref = `${toColumnName(colIdx)}${rowIdx + 1}`;
+          return `<c r="${ref}" t="inlineStr"><is><t>${xmlEscape(cell)}</t></is></c>`;
+        }).join("");
+        return `<row r="${rowIdx + 1}">${cells}</row>`;
+      }).join("");
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${rowXml}</sheetData></worksheet>`;
+    }
+
+    function buildWeexSheets() {
+      const generatedAt = fmtDateTime(Date.now());
+      const traderList = state.selectedTraders.map((row) => row.traderNickName || row.traderUserId).join(", ") || "";
+      return [
+        { name: "Metadata", rows: [["Traders", "Generated At", "Source"], [traderList, generatedAt, window.location.href]] },
+        { name: "Portfolio Summary", rows: [["Metric", "Value"], ...buildWeexSummaryRows()] },
+        {
+          name: "Positions",
+          rows: [
+            ["Trader", "Asset", "Side", "Size", "Avg Entry", "Notional", "Unrealized PnL"],
+            ...buildWeexPositionsRowsForExport(),
+          ],
+        },
+        {
+          name: "Live Orders",
+          rows: [
+            ["Trader", "Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Notional"],
+            ...buildWeexLiveOrdersRowsForExport(),
+          ],
+        },
+        {
+          name: "Historical Orders",
+          rows: [
+            ["Trader", "Order ID", "Date/Time", "Side", "Asset", "Size", "Limit Price", "Notional", "Status"],
+            ...buildWeexHistoricalOrdersRowsForExport(),
+          ],
+        },
+        {
+          name: "Live Trades",
+          rows: [
+            ["Trader", "Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Notional"],
+            ...buildWeexLiveTradesRowsForExport(),
+          ],
+        },
+        {
+          name: "Historical Trades",
+          rows: [
+            ["Trader", "Order ID", "Date/Time", "Side", "Asset", "Size", "Price", "Notional"],
+            ...buildWeexHistoricalTradesRowsForExport(),
+          ],
+        },
+      ];
+    }
+
+    function buildWorkbookXml(sheets) {
+      const sheetsXml = sheets.map((sheet, idx) =>
+        `<sheet name="${xmlEscape(sheet.name)}" sheetId="${idx + 1}" r:id="rId${idx + 1}"/>`
+      ).join("");
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheetsXml}</sheets></workbook>`;
+    }
+
+    function buildWorkbookRels(sheets) {
+      const relsXml = sheets.map((_sheet, idx) =>
+        `<Relationship Id="rId${idx + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${idx + 1}.xml"/>`
+      ).join("");
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${relsXml}</Relationships>`;
+    }
+
+    function buildRootRels() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+    }
+
+    function buildContentTypes(sheets) {
+      const sheetOverrides = sheets.map((_sheet, idx) =>
+        `<Override PartName="/xl/worksheets/sheet${idx + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`
+      ).join("");
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheetOverrides}</Types>`;
+    }
+
+    const CRC_TABLE = (() => {
+      const table = new Uint32Array(256);
+      for (let n = 0; n < 256; n += 1) {
+        let c = n;
+        for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        table[n] = c >>> 0;
+      }
+      return table;
+    })();
+
+    function crc32Uint8(data) {
+      let crc = 0xffffffff;
+      for (let i = 0; i < data.length; i += 1) crc = CRC_TABLE[(crc ^ data[i]) & 0xff] ^ (crc >>> 8);
+      return (crc ^ 0xffffffff) >>> 0;
+    }
+
+    function createZip(files) {
+      const encoder = new TextEncoder();
+      let offset = 0;
+      const localChunks = [];
+      const centralChunks = [];
+      files.forEach((file) => {
+        const nameBytes = encoder.encode(file.path);
+        const dataBytes = typeof file.data === "string" ? encoder.encode(file.data) : file.data;
+        const crc = crc32Uint8(dataBytes);
+
+        const local = new Uint8Array(30 + nameBytes.length + dataBytes.length);
+        const lv = new DataView(local.buffer);
+        lv.setUint32(0, 0x04034b50, true);
+        lv.setUint16(4, 20, true);
+        lv.setUint16(6, 0, true);
+        lv.setUint16(8, 0, true);
+        lv.setUint16(10, 0, true);
+        lv.setUint16(12, 0, true);
+        lv.setUint32(14, crc, true);
+        lv.setUint32(18, dataBytes.length, true);
+        lv.setUint32(22, dataBytes.length, true);
+        lv.setUint16(26, nameBytes.length, true);
+        lv.setUint16(28, 0, true);
+        local.set(nameBytes, 30);
+        local.set(dataBytes, 30 + nameBytes.length);
+        localChunks.push(local);
+
+        const central = new Uint8Array(46 + nameBytes.length);
+        const cv = new DataView(central.buffer);
+        cv.setUint32(0, 0x02014b50, true);
+        cv.setUint16(4, 0x031e, true);
+        cv.setUint16(6, 20, true);
+        cv.setUint16(8, 0, true);
+        cv.setUint16(10, 0, true);
+        cv.setUint16(12, 0, true);
+        cv.setUint16(14, 0, true);
+        cv.setUint32(16, crc, true);
+        cv.setUint32(20, dataBytes.length, true);
+        cv.setUint32(24, dataBytes.length, true);
+        cv.setUint16(28, nameBytes.length, true);
+        cv.setUint16(30, 0, true);
+        cv.setUint16(32, 0, true);
+        cv.setUint16(34, 0, true);
+        cv.setUint16(36, 0, true);
+        cv.setUint32(38, 0, true);
+        cv.setUint32(42, offset, true);
+        central.set(nameBytes, 46);
+        centralChunks.push(central);
+
+        offset += local.length;
+      });
+
+      const centralSize = centralChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+      const end = new Uint8Array(22);
+      const ev = new DataView(end.buffer);
+      ev.setUint32(0, 0x06054b50, true);
+      ev.setUint16(4, 0, true);
+      ev.setUint16(6, 0, true);
+      ev.setUint16(8, files.length, true);
+      ev.setUint16(10, files.length, true);
+      ev.setUint32(12, centralSize, true);
+      ev.setUint32(16, offset, true);
+      ev.setUint16(20, 0, true);
+
+      const out = new Uint8Array(offset + centralSize + end.length);
+      let pointer = 0;
+      localChunks.forEach((chunk) => {
+        out.set(chunk, pointer);
+        pointer += chunk.length;
+      });
+      let centralPointer = offset;
+      centralChunks.forEach((chunk) => {
+        out.set(chunk, centralPointer);
+        centralPointer += chunk.length;
+      });
+      out.set(end, centralPointer);
+      return out;
+    }
+
+    function buildWeexXlsxFile() {
+      const sheets = buildWeexSheets();
+      const sheetFiles = sheets.map((sheet, idx) => ({
+        path: `xl/worksheets/sheet${idx + 1}.xml`,
+        data: buildSheetXml(sheet.rows),
+      }));
+      return createZip([
+        { path: "[Content_Types].xml", data: buildContentTypes(sheets) },
+        { path: "_rels/.rels", data: buildRootRels() },
+        { path: "xl/workbook.xml", data: buildWorkbookXml(sheets) },
+        { path: "xl/_rels/workbook.xml.rels", data: buildWorkbookRels(sheets) },
+        ...sheetFiles,
+      ]);
+    }
+
+    async function triggerWeexExcelDownload() {
+      try {
+        const archive = buildWeexXlsxFile();
+        const traderSlug = state.selectedTraderIds.length === 1 ? state.selectedTraderIds[0] : "multi-traders";
+        const filename = `hypermonitor-weex-${traderSlug}.xlsx`;
+        const blob = new Blob([archive], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error("WEEX export error", err);
+        alert("Failed to export Excel. See console for details.");
+      }
+    }
+
+    function renderAll() {
+      const source = getMetricSource();
+      renderOverview(source);
+      renderOrdersPanels();
+      renderCharts(source);
+      renderPnlHeatmap(source);
+      updateMetrics(source);
+    }
+
+    function renderLiveDataOnly() {
+      const source = getMetricSource();
+      renderOverview(source);
+      renderOrdersPanels();
+    }
+
+    async function loadData() {
+      setStatus("");
+      let tradersText;
+      let historyText;
+      let currentText;
+      let contractRows;
+      try {
+        [tradersText, historyText, currentText, contractRows] = await Promise.all([
+          fetchText(DATA_URLS.traders),
+          fetchText(DATA_URLS.history),
+          fetchText(DATA_URLS.current),
+          fetchJson(DATA_URLS.contracts),
+          ensurePriceMap(),
+        ]);
+      } catch (err) {
+        const bundle = getBundledExports();
+        if (!bundle) {
+          if (window.location.protocol === "file:") {
+            throw new Error("Open track_weex.html through http:// or keep data/weex_copy_bundle.js beside it.");
+          }
+          throw err;
+        }
+        console.warn("Local WEEX exports fetch failed; using bundled data instead.", err);
+        tradersText = bundle.tradersText;
+        historyText = bundle.historyText;
+        currentText = bundle.currentText;
+        contractRows = bundle.contractRows;
+        await ensurePriceMap();
+      }
+
+      state.contractMap = new Map((contractRows || []).map((row) => [String(row.contractId || "").trim(), row]));
+      state.traders = parseCsvText(tradersText).map(normalizeTraderRow);
+      state.historyRows = parseCsvText(historyText).map(normalizeHistoryRow);
+      state.currentRows = parseCsvText(currentText).map(normalizeCurrentRow);
+      refreshRowMarketValues(state.currentRows);
+      renderTraderPicker();
+      syncPriceSocket();
+      setStatus("Ready", "ready");
+    }
+
+    function setupEvents() {
+      els.trackBtn.addEventListener("click", () => {
+        applyTraderSelection(getTraderInputTokens(els.traderInput.value));
+      });
+
+      els.traderInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          els.trackBtn.click();
+        }
+      });
+      els.traderInput.addEventListener("input", renderTraderPicker);
+      els.traderPickerList.addEventListener("click", (event) => {
+        const btn = event.target.closest("button[data-trader-id]");
+        if (!btn) return;
+        addTraderFromPicker(String(btn.dataset.traderId || ""));
+      });
+      els.currentTradesBody.addEventListener("click", (event) => {
+        const row = event.target.closest("tr[data-aggregate-key]");
+        if (!row) return;
+        const link = event.target.closest("a");
+        if (link) return;
+        const key = String(row.dataset.aggregateKey || "");
+        if (!key) return;
+        if (state.expandedCurrentAssets.has(key)) state.expandedCurrentAssets.delete(key);
+        else state.expandedCurrentAssets.add(key);
+        renderOrdersPanels();
+      });
+
+      els.themeToggle.addEventListener("click", () => {
+        updateTheme(document.body.classList.contains("light") ? "dark" : "light");
+      });
+
+      [els.historyAssetFilter, els.historySideFilter, els.historyPnlFilter, els.historyAggregateCheckbox].forEach((el) => {
+        el.addEventListener("input", renderAll);
+        el.addEventListener("change", renderAll);
+      });
+
+      document.querySelectorAll("[data-table][data-sort]").forEach((th) => {
+        th.addEventListener("click", () => {
+          const table = th.dataset.table;
+          const key = th.dataset.sort;
+          const current = state.tableSorts[table];
+          if (current?.key === key) {
+            current.dir = current.dir === "asc" ? "desc" : "asc";
+          } else {
+            state.tableSorts[table] = { key, dir: "desc" };
+          }
+          renderAll();
+        });
+      });
+
+      document.querySelectorAll(".chart-range-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.currentRangeKey = btn.dataset.range || "allTime";
+          document.querySelectorAll(".chart-range-btn").forEach((item) => item.classList.toggle("active", item === btn));
+          renderAll();
+        });
+      });
+
+      [els.pnlLineViewBtn, els.pnlHeatmapViewBtn].forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.pnlViewMode = btn.dataset.pnlView === "heatmap" ? "heatmap" : "line";
+          els.pnlLineViewBtn.classList.toggle("active", state.pnlViewMode === "line");
+          els.pnlHeatmapViewBtn.classList.toggle("active", state.pnlViewMode === "heatmap");
+          els.pnlChartWrap.classList.toggle("is-hidden", state.pnlViewMode !== "line");
+          els.pnlHeatmapWrap.classList.toggle("is-hidden", state.pnlViewMode !== "heatmap");
+          renderAll();
+        });
+      });
+
+      els.pnlHeatmapPrevBtn.addEventListener("click", () => {
+        state.pnlHeatmapQuarterIndex = Math.max(0, state.pnlHeatmapQuarterIndex - 1);
+        renderPnlHeatmap(getMetricSource());
+      });
+      els.pnlHeatmapNextBtn.addEventListener("click", () => {
+        state.pnlHeatmapQuarterIndex = Math.min(state.pnlHeatmapQuarters.length - 1, state.pnlHeatmapQuarterIndex + 1);
+        renderPnlHeatmap(getMetricSource());
+      });
+
+      els.modeTabs.addEventListener("click", (event) => {
+        const btn = event.target.closest("button[data-tab]");
+        if (!btn) return;
+        state.activeTab = btn.dataset.tab === "history" ? "history" : "live";
+        els.modeTabs.querySelectorAll("button").forEach((item) => item.classList.toggle("active", item === btn));
+        els.liveLayout.classList.toggle("hidden", state.activeTab !== "live");
+        els.historyLayout.classList.toggle("hidden", state.activeTab !== "history");
+        updateTabSwitchIndicator(els.modeTabs);
+      });
+      requestAnimationFrame(() => updateTabSwitchIndicator(els.modeTabs));
+      window.addEventListener("resize", () => updateTabSwitchIndicator(els.modeTabs));
+
+      if (els.positionsTimelineSlider) {
+        els.positionsTimelineSlider.addEventListener("input", async () => {
+          await setPositionsTimelineIndex(Number(els.positionsTimelineSlider.value || 0));
+        });
+      }
+
+      if (els.positionsTimelineLiveBtn) {
+        els.positionsTimelineLiveBtn.addEventListener("click", async () => {
+          if (!state.timelineTimestamps.length) return;
+          await setPositionsTimelineIndex(state.timelineTimestamps.length - 1);
+        });
+      }
+
+      function setPositionsTimelineToggleVisual(expanded) {
+        if (!els.positionsTimelineToggle) return;
+        const icon = els.positionsTimelineToggle.querySelector("[aria-hidden='true']");
+        if (!icon) return;
+        if (!expanded) {
+          icon.innerHTML = `
+            <svg class="timeline-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 8v4l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+              <path d="M21 3v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          `;
+          return;
+        }
+        icon.textContent = "▴";
+      }
+
+      if (els.positionsTimelineToggle && els.positionsTimelineWrap) {
+        els.positionsTimelineToggle.addEventListener("click", () => {
+          const isHidden = els.positionsTimelineWrap.classList.toggle("hidden");
+          const expanded = !isHidden;
+          els.positionsTimelineToggle.setAttribute("aria-expanded", String(expanded));
+          setPositionsTimelineToggleVisual(expanded);
+        });
+        setPositionsTimelineToggleVisual(!els.positionsTimelineWrap.classList.contains("hidden"));
+      }
+
+      els.exportCurrentBtn.addEventListener("click", async () => {
+        els.exportCurrentBtn.disabled = true;
+        await triggerWeexExcelDownload();
+        els.exportCurrentBtn.disabled = false;
+      });
+    }
+
+    async function init() {
+      try {
+        updateTheme(loadTheme());
+        startLiveAutoRefresh();
+        window.addEventListener("beforeunload", () => {
+          if (liveRefreshTimer) clearInterval(liveRefreshTimer);
+          closePriceSocket();
+        });
+        setupEvents();
+        await loadData();
+        const fromUrl = getSelectionFromUrl();
+        applyTraderSelection(fromUrl.length ? fromUrl : [state.traders[0]?.traderUserId].filter(Boolean));
+      } catch (err) {
+        console.error(err);
+        const message = err?.message ? `Failed to load WEEX tracker: ${err.message}` : "Failed to load WEEX tracker";
+        setStatus(message, "error");
+        els.currentTradesBody.innerHTML = `<tr><td colspan="7" class="muted">${escapeHtml(message)}</td></tr>`;
+        els.liveTradesBody.innerHTML = `<tr><td colspan="8" class="muted">${escapeHtml(message)}</td></tr>`;
+        els.historyTradesBody.innerHTML = `<tr><td colspan="7" class="muted">${escapeHtml(message)}</td></tr>`;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
