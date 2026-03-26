@@ -157,10 +157,7 @@
     }
 
     .wallet-inputs-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.4rem;
-      align-items: start;
+      display: block;
       width: 100%;
     }
 
@@ -172,7 +169,7 @@
 
     .wallet-input-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr);
       gap: 0.4rem;
       align-items: stretch;
       width: 100%;
@@ -549,6 +546,7 @@
       box-shadow: none;
       height: 38px;
       min-width: 38px;
+      width: 100%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -1978,43 +1976,6 @@
       gap: 0.6rem;
     }
 
-    .chart-loading-wrap {
-      position: relative;
-      --pulse-size: 220px;
-      background-image: url("images/pulse.gif");
-      background-repeat: no-repeat;
-      background-position: center 50%;
-      background-size: var(--pulse-size) auto;
-      overflow: hidden;
-    }
-
-    .chart-loading-wrap.loading .chart-grid {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .chart-loading-wrap.loading .metrics-card {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .chart-loading {
-      position: absolute;
-      left: 50%;
-      top: calc(50% + (var(--pulse-size) * 0.35));
-      transform: translate(-50%, -50%);
-      font-size: 0.85rem;
-      color: var(--muted);
-      pointer-events: none;
-      display: none;
-      text-align: center;
-      width: 100%;
-    }
-
-    .chart-loading-wrap.loading .chart-loading {
-      display: block;
-    }
-
     .is-hidden,
     .hidden {
       display: none !important;
@@ -2189,6 +2150,12 @@
           <div class="wallet-inputs">
             <div class="wallet-input-row">
               <input id="traderInput" type="text" placeholder="e.g. 7216746409 or Wealth Helmsman" autocomplete="off" aria-label="Trader ID or name" />
+              <div class="wallet-actions">
+                <button id="trackBtn" class="wallet-track-btn" aria-label="Track traders">
+                  <span class="sr-only">Track traders</span>
+                  ⏎
+                </button>
+              </div>
             </div>
             <div class="trader-picker" aria-label="Available traders">
               <div class="trader-picker-head">
@@ -2201,12 +2168,6 @@
                 </button>
               </div>
             </div>
-          </div>
-          <div class="wallet-actions">
-            <button id="trackBtn" class="wallet-track-btn" aria-label="Track traders">
-              <span class="sr-only">Track traders</span>
-              ⏎
-            </button>
           </div>
         </div>
       </div>
@@ -2322,7 +2283,7 @@
         </div>
       </div>
 
-      <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
+      <div id="portfolioLoadingWrap">
       <div class="chart-grid">
         <div class="chart-card">
           <h3 class="equity-card-title">
@@ -2464,7 +2425,6 @@
             <div class="metric-sub">Daily PnL vs BTC</div>
           </div>
         </div>
-        <div class="chart-loading">Loading performance…</div>
       </div>
       </div>
     </section>
