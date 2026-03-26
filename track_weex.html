@@ -3371,6 +3371,11 @@
         threeWeeksPnl: safeNumber(row.three_weeks_pnl),
         distributeRatio: safeNumber(row.distribute_ratio),
         profile: String(row.profile || ""),
+        title: String(row.title || "").trim(),
+        joinedDays: safeNumber(row.joined_days),
+        joinedText: String(row.joined_text || "").trim(),
+        imageUrl: String(row.image_url || "").trim(),
+        imageAlt: String(row.image_alt || "").trim(),
         detailUrl: String(row.detail_url || ""),
       };
     }
@@ -4985,7 +4990,7 @@
       const level = Number(meta?.level ?? trader?.traderLevel);
       const copiers = Number(meta?.copiers ?? trader?.followCount);
       const copiersMax = Number(meta?.copiersMax ?? trader?.maxFollowCount);
-      const joinedText = String(meta?.joinedText || "").trim();
+      const joinedText = String(meta?.joinedText || trader?.joinedText || "").trim();
       const parts = [];
       if (Number.isFinite(level) && level > 0) parts.push(`Lv ${fmtNumber(level, 0)}`);
       if (joinedText) parts.push(joinedText);
@@ -5019,10 +5024,10 @@
       els.overviewNetUnrealizedPnl.textContent = formatSignedPlainDollarWithPlus(totalUnrealized, 2);
       els.overviewNetUnrealizedPnl.className = `kv-value ${getSignedClass(totalUnrealized)}`;
 
-      const head = String(meta?.title || (meta?.headings || []).find((item) => item && item !== trader?.traderNickName) || trader?.traderNickName || traderId || "").trim();
+      const head = String(meta?.title || trader?.title || (meta?.headings || []).find((item) => item && item !== trader?.traderNickName) || trader?.traderNickName || traderId || "").trim();
       const facts = buildOverviewFacts(trader, meta);
       const profile = String(meta?.profileText || trader?.profile || "").trim();
-      const imageUrl = String(meta?.imageUrl || "").trim();
+      const imageUrl = String(meta?.imageUrl || trader?.imageUrl || "").trim();
       const hasMeta = Boolean(imageUrl || head || facts || profile);
       els.overviewMeta.classList.toggle("hidden", !hasMeta);
       els.overviewMeta.classList.toggle("no-image", !imageUrl);
@@ -5031,7 +5036,7 @@
       els.overviewMetaProfile.textContent = profile || "-";
       if (imageUrl) {
         els.overviewMetaImage.src = imageUrl;
-        els.overviewMetaImage.alt = String(meta?.imageAlt || head || "Trader profile");
+        els.overviewMetaImage.alt = String(meta?.imageAlt || trader?.imageAlt || head || "Trader profile");
         els.overviewMetaImage.classList.remove("hidden");
       } else {
         els.overviewMetaImage.removeAttribute("src");
