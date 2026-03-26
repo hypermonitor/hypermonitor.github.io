@@ -4658,6 +4658,136 @@
       };
     }
 
+    function sameChartPoint(a, b) {
+      if (!a || !b) return false;
+      return Math.abs(Number(a.x) - Number(b.x)) < 1e-9 && Math.abs(Number(a.y) - Number(b.y)) < 1e-9;
+    }
+
+    function clipPnlSegment(p0, p1, keepPositive) {
+      const inside = (value) => keepPositive ? value >= 0 : value <= 0;
+      const inside0 = inside(p0.y);
+      const inside1 = inside(p1.y);
+      if (inside0 && inside1) return [p0, p1];
+      if (!inside0 && !inside1) return [];
+      const denominator = Number(p1.y) - Number(p0.y);
+      const ratio = denominator === 0 ? 0 : (0 - Number(p0.y)) / denominator;
+      const cross = {
+        x: Number(p0.x) + ((Number(p1.x) - Number(p0.x)) * ratio),
+        y: 0,
+        synthetic: true,
+      };
+      return inside0 ? [p0, cross] : [cross, p1];
+    }
+
+    function buildClippedPnlChunks(values, keepPositive) {
+      const chunks = [];
+      let current = [];
+      const flush = () => {
+        if (current.length >= 2) chunks.push(current);
+        current = [];
+      };
+
+      if (!values.length) return chunks;
+      if (values.length === 1) {
+        const y = Number(values[0]) || 0;
+        if ((keepPositive && y >= 0) || (!keepPositive && y <= 0)) {
+          chunks.push([{ x: 0, y, synthetic: false }]);
+        }
+        return chunks;
+      }
+
+      for (let index = 0; index < values.length - 1; index += 1) {
+        const p0 = { x: index, y: Number(values[index]) || 0, synthetic: false };
+        const p1 = { x: index + 1, y: Number(values[index + 1]) || 0, synthetic: false };
+        const clipped = clipPnlSegment(p0, p1, keepPositive);
+        if (!clipped.length) {
+          flush();
+          continue;
+        }
+
+        const [first, second] = clipped;
+        if (!current.length) {
+          current.push(first, second);
+          continue;
+        }
+
+        const last = current[current.length - 1];
+        if (!sameChartPoint(last, first)) {
+          flush();
+          current.push(first, second);
+          continue;
+        }
+
+        if (!sameChartPoint(last, second)) current.push(second);
+      }
+
+      flush();
+      return chunks;
+    }
+
+    function createClippedPnlDataset(label, data, color, fillColor) {
+      return {
+        label,
+        data,
+        borderColor: color,
+        backgroundColor: fillColor,
+        fill: {
+          target: "origin",
+          above: fillColor,
+          below: fillColor,
+        },
+        tension: 0.25,
+        pointRadius: 0,
+        pointHoverRadius: (ctx) => ctx?.raw && !ctx.raw.synthetic ? 3 : 0,
+        pointHitRadius: (ctx) => ctx?.raw && !ctx.raw.synthetic ? 6 : 0,
+        borderWidth: 2,
+        spanGaps: false,
+      };
+    }
+
+    function createPnlChartOptions(palette, labels) {
+      const options = createCommonChartOptions(palette, true);
+      options.interaction = {
+        mode: "nearest",
+        intersect: false,
+        axis: "x",
+      };
+      options.scales.x = {
+        type: "linear",
+        min: 0,
+        max: Math.max(0, labels.length - 1),
+        ticks: {
+          color: palette.text,
+          autoSkip: true,
+          maxTicksLimit: 6,
+          minRotation: 0,
+          maxRotation: 0,
+          callback: (value) => {
+            const numeric = Number(value);
+            const rounded = Math.round(numeric);
+            if (!Number.isFinite(numeric) || Math.abs(numeric - rounded) > 1e-6) return "";
+            return labels[rounded] || "";
+          },
+        },
+        grid: { display: false },
+        border: { display: false },
+      };
+      options.plugins.tooltip = {
+        ...options.plugins.tooltip,
+        mode: "nearest",
+        intersect: false,
+        filter: (item) => !item?.raw?.synthetic,
+        callbacks: {
+          title: (items) => {
+            const parsedX = Number(items?.[0]?.parsed?.x);
+            const rounded = Math.round(parsedX);
+            return labels[rounded] || "";
+          },
+        },
+      };
+      return options;
+    }
+
     function clearChartIfPresent(canvasId) {
       const key = canvasId.replace("Chart", "");
       const existing = state.charts[key];
@@ -4705,15 +4835,21 @@
       }, createCommonChartOptions(palette, true));
 
       ensureChart("pnlChart", "line", {
-        labels,
-        datasets: [createMoneyLineDataset(
-          "PnL",
-          pnlData,
-          "rgba(245, 158, 11, 0.95)",
-          "rgba(245, 158, 11, 0.18)",
-          false,
-        )],
-      }, createCommonChartOptions(palette, true));
+        datasets: [
+          ...buildClippedPnlChunks(pnlData, true).map((chunk, index) => createClippedPnlDataset(
+            index === 0 ? "PnL Positive" : "",
+            chunk,
+            "rgba(38, 217, 127, 0.95)",
+            "rgba(38, 217, 127, 0.18)",
+          )),
+          ...buildClippedPnlChunks(pnlData, false).map((chunk, index) => createClippedPnlDataset(
+            index === 0 ? "PnL Negative" : "",
+            chunk,
+            "rgba(242, 95, 92, 0.95)",
+            "rgba(242, 95, 92, 0.18)",
+          )),
+        ],
+      }, createPnlChartOptions(palette, labels));
 
       ensureChart("activityChart", "bar", {
         labels,

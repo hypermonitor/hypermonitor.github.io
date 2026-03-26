@@ -346,9 +346,6 @@
         transform: translateY(-6px) rotate(-45deg);
       }
 
-      .team-grid {
-        grid-template-columns: 1fr;
-      }
     }
 
     @media (max-width: 520px) {
@@ -372,10 +369,6 @@
       }
 
       .grid {
-        grid-template-columns: 1fr !important;
-      }
-
-      .team-grid {
         grid-template-columns: 1fr !important;
       }
 
@@ -807,14 +800,6 @@
       display: block;
     }
 
-    #team {
-      background: transparent;
-      width: 100vw;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
-    }
-
-
     .feature-list {
       display: flex;
       flex-direction: column;
@@ -910,126 +895,6 @@
     }
 
     /* Success popup */
-
-    /* Team */
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1.6rem;
-    }
-
-    .person {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      align-items: flex-start;
-      border-radius: 1.5rem;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      background: rgba(255, 255, 255, 0.02);
-      padding: 2rem;
-      transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
-      height: 100%;
-    }
-
-    .person:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.1);
-      transform: translateY(-5px);
-    }
-
-    .avatar {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 1.25rem;
-      border: none;
-      background: linear-gradient(135deg, rgba(38, 217, 127, 0.1), rgba(56, 189, 248, 0.1));
-      overflow: hidden;
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      filter: grayscale(100%);
-      transition: filter 0.5s ease;
-    }
-
-    .person:hover .avatar {
-      filter: grayscale(0%);
-    }
-
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      user-select: none;
-      -webkit-user-drag: none;
-    }
-
-    .person h4 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .person-name {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      flex-wrap: wrap;
-    }
-
-    .person p {
-      margin: .15rem 0 0;
-      color: var(--muted);
-      font-size: 1rem;
-      line-height: 1.5;
-    }
-
-    .person-role {
-      font-size: 1rem;
-      color: #fff;
-      font-weight: 600;
-      opacity: 0.9;
-    }
-
-    .person-details {
-      margin-top: .25rem;
-      font-size: 0.95rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .linkedin-badge {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 16px;
-      text-decoration: none;
-      vertical-align: middle;
-      color: var(--muted);
-      transition: color 0.15s ease, opacity 0.15s ease;
-    }
-
-    .linkedin-badge svg {
-      width: 14px;
-      height: 14px;
-      fill: currentColor;
-      transition: fill 0.15s ease;
-    }
-
-    body:not(.light) .linkedin-badge {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    body:not(.light) .linkedin-badge svg {
-      fill: #888;
-    }
-
-    body:not(.light) .linkedin-badge:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: #888;
-    }
 
     /* Footer */
     footer {
@@ -1143,7 +1008,7 @@
         <!-- TODO: point these to your real pages -->
         <a class="nav-link" href="#how">How it works</a>
         <a class="nav-link" href="/leaderboard.html">Leaderboard</a>
-        <a class="nav-link" href="#team">Team</a>
+        <a class="nav-link" href="/team.html">Team</a>
         <!-- TODO: set href to your tracker page -->
         <a class="nav-cta" href="https://www.hypermonitor.org/track">Open Tracker</a>
       </nav>
@@ -1644,95 +1509,6 @@
           </table>
         </div>
 
-      </div>
-    </section>
-
-    <!-- TEAM -->
-    <section id="team" class="bleed-panel center-vert panel-section panel-dark-alt section-gap"
-      aria-label="Who we are">
-
-      <div class="bleed-inner">
-        <div class="card compact-section center-stack" aria-label="Who we are">
-          <h2 class="section-title">Who we are</h2>
-
-          <p class="muted" style="margin-bottom: 2.5rem; max-width: 800px; line-height:1.6;">
-            We build professional-grade analytics that give users a clear, real-time view of their financial positions
-            and trading performance.
-            Our mission is to turn complex market data into intuitive insights so traders can make smarter, more
-            confident decisions.
-          </p>
-
-          <div class="team-grid">
-            <!-- Person 1 -->
-            <div class="person">
-              <div class="avatar" aria-label="Photo: Roshan">
-                <img src="images/mahes.png" alt="Roshan Mahes" onerror="this.remove();" draggable="false" />
-              </div>
-              <div>
-                <div class="person-name">
-                  <h4>Dr. Roshan Mahes</h4>
-                  <a class="linkedin-badge" href="https://www.linkedin.com/in/roshanmahes/" target="_blank"
-                    rel="noopener noreferrer" aria-label="Roshan on LinkedIn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                      <path
-                        d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z" />
-                    </svg>
-                  </a>
-                </div>
-                <p>
-                  <span class="person-role">Product & Quantitative Research</span><br>
-                  <span class="person-details">Data analysis, Product & web app development, Quantitative research.</span>
-                </p>
-              </div>
-            </div>
-
-            <!-- Person 2 -->
-            <div class="person">
-              <div class="avatar" aria-label="Photo: Shreehari">
-                <img src="images/bodas.png" alt="Shreehari Bodas" onerror="this.remove();" draggable="false" />
-              </div>
-              <div>
-                <div class="person-name">
-                  <h4>Shreehari Bodas</h4>
-                  <a class="linkedin-badge" href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/"
-                    target="_blank" rel="noopener noreferrer" aria-label="Shreehari on LinkedIn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                      <path
-                        d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z" />
-                    </svg>
-                  </a>
-                </div>
-                <p>
-                  <span class="person-role">Engineering & Quantitative Research</span><br>
-                  <span class="person-details">Copy trading systems, Real-time tracking, Infrastructure.</span>
-                </p>
-              </div>
-            </div>
-
-            <!-- Person 3 -->
-            <div class="person">
-              <div class="avatar" aria-label="Photo: Donato">
-                <img src="images/maragno.png" alt="Donato Maragno" onerror="this.remove();" draggable="false" />
-              </div>
-              <div>
-                <div class="person-name">
-                  <h4>Dr. Donato Maragno</h4>
-                  <a class="linkedin-badge" href="https://www.linkedin.com/in/donato-maragno/" target="_blank"
-                    rel="noopener noreferrer" aria-label="Donato on LinkedIn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                      <path
-                        d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z" />
-                    </svg>
-                  </a>
-                </div>
-                <p>
-                  <span class="person-role">Engineering & Quantitative Research</span><br>
-                  <span class="person-details">System design, Web app development, Performance metrics.</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 

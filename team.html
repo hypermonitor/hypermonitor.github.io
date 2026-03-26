@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Team — Hypermonitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description"
+    content="Meet the team behind Hypermonitor, building research-grade analytics and real-time monitoring for Hyperliquid traders." />
+
+  <meta property="og:title" content="Team — Hypermonitor" />
+  <meta property="og:description"
+    content="Meet the team behind Hypermonitor, building research-grade analytics and real-time monitoring for Hyperliquid traders." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Hypermonitor" />
+  <meta property="og:url" content="https://hypermonitor.org/team.html" />
+  <meta property="og:image" content="https://hypermonitor.org/images/index.png" />
+  <link rel="canonical" href="https://hypermonitor.org/team.html" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Team — Hypermonitor" />
+  <meta name="twitter:description"
+    content="Meet the team behind Hypermonitor, building research-grade analytics and real-time monitoring for Hyperliquid traders." />
+  <meta name="twitter:image" content="https://hypermonitor.org/images/index.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+
+  <style>
+    :root {
+      --apple-font: 'Outfit', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      --bg: #0a0a0a;
+      --panel: rgba(255, 255, 255, 0.03);
+      --panel-strong: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+      --text-main: #ededed;
+      --muted: #9aa0a6;
+      --accent: #0070f3;
+      --accent-2: #00b4d8;
+      --radius: 24px;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(0, 112, 243, 0.16), transparent 30%),
+        radial-gradient(circle at top right, rgba(0, 180, 216, 0.14), transparent 24%),
+        linear-gradient(180deg, #0d0d10 0%, #080809 44%, #050506 100%);
+      color: var(--text-main);
+      font-family: var(--apple-font);
+      font-size: 18px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 90px 90px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent 82%);
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    p {
+      margin-top: 0;
+    }
+
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 1rem;
+      z-index: 20;
+      margin-bottom: 1.2rem;
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      background: rgba(10, 10, 12, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(15px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .brand-name {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      margin: 0;
+      color: #fff;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link,
+    .nav-cta {
+      font-size: 0.9rem;
+      padding: 0.38rem 0.7rem;
+      border-radius: 999px;
+      transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .nav-link:hover,
+    .nav-link.is-active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-cta {
+      background: #fff;
+      color: #000;
+      font-weight: 600;
+    }
+
+    .nav-cta:hover {
+      background: #ddd;
+    }
+
+    .nav-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(10, 10, 12, 0.7);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .nav-toggle span,
+    .nav-toggle span::before,
+    .nav-toggle span::after {
+      display: block;
+      width: 18px;
+      height: 2px;
+      border-radius: 999px;
+      background: currentColor;
+      position: relative;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .nav-toggle span::before,
+    .nav-toggle span::after {
+      content: "";
+      position: absolute;
+      left: 0;
+    }
+
+    .nav-toggle span::before {
+      top: -6px;
+    }
+
+    .nav-toggle span::after {
+      bottom: -6px;
+    }
+
+    header.nav-open .nav-toggle span {
+      background: transparent;
+    }
+
+    header.nav-open .nav-toggle span::before {
+      transform: translateY(6px) rotate(45deg);
+    }
+
+    header.nav-open .nav-toggle span::after {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 36px;
+      padding: 4.5rem 3rem 3rem;
+      min-height: 540px;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.08), transparent 22%),
+        linear-gradient(135deg, rgba(16, 16, 20, 0.94), rgba(9, 9, 12, 0.82));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow);
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(30px);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .hero::before {
+      width: 320px;
+      height: 320px;
+      top: -80px;
+      right: -40px;
+      background: rgba(0, 112, 243, 0.22);
+    }
+
+    .hero::after {
+      width: 260px;
+      height: 260px;
+      bottom: -90px;
+      left: -40px;
+      background: rgba(0, 180, 216, 0.18);
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+      gap: 2rem;
+      align-items: end;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #d8dde2;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 6vw, 5.2rem);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+      margin-bottom: 1.1rem;
+      max-width: 10ch;
+    }
+
+    .hero p {
+      max-width: 38rem;
+      font-size: 1.08rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.8rem 1.15rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      font-weight: 500;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-primary {
+      background: #fff;
+      color: #000;
+      border-color: transparent;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: #ddd;
+    }
+
+    .hero-panel {
+      padding: 1.4rem;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero-panel h2 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #d8dde2;
+      margin-bottom: 1rem;
+    }
+
+    .hero-facts {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .fact {
+      display: grid;
+      gap: 0.2rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .fact:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .fact strong {
+      font-size: 1.6rem;
+      letter-spacing: -0.04em;
+    }
+
+    .fact span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    main {
+      display: grid;
+      gap: 1.6rem;
+      margin-top: 1.6rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .section-card {
+      position: relative;
+      overflow: hidden;
+      padding: 2rem;
+      border-radius: 32px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-label {
+      display: inline-flex;
+      margin-bottom: 0.9rem;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #d8dde2;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      margin-bottom: 0.85rem;
+    }
+
+    .section-copy {
+      max-width: 46rem;
+      color: var(--muted);
+      margin-bottom: 0;
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.6rem;
+    }
+
+    .principle {
+      padding: 1.2rem;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .principle h3 {
+      font-size: 1rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .principle p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.2rem;
+      margin-top: 1.6rem;
+    }
+
+    .person {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      min-height: 100%;
+      padding: 1.5rem;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 0.25s var(--ease), border-color 0.25s ease, background 0.25s ease;
+    }
+
+    .person:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255, 255, 255, 0.16);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+    }
+
+    .avatar {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 22px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(0, 112, 243, 0.18), rgba(0, 180, 216, 0.12));
+      filter: grayscale(100%);
+      transition: filter 0.35s ease;
+    }
+
+    .person:hover .avatar {
+      filter: grayscale(0%);
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .person-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+
+    .person h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .person-role {
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+
+    .person p {
+      color: var(--muted);
+      margin-bottom: 0;
+      font-size: 0.97rem;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.28rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      color: #d8dde2;
+      font-size: 0.78rem;
+      letter-spacing: 0.03em;
+    }
+
+    .linkedin-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: #a6adb5;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .linkedin-badge:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    .linkedin-badge svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .split-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .signal-box {
+      padding: 1.4rem;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .signal-box h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .signal-box p {
+      color: var(--muted);
+      margin-bottom: 0;
+    }
+
+    footer {
+      margin-top: 0;
+      padding: 2rem 1rem 1rem 1.75rem;
+      min-height: 140px;
+      background: #f3f3f3;
+      color: #666;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      position: relative;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+
+    footer a {
+      color: inherit;
+    }
+
+    footer a:hover {
+      color: #000;
+    }
+
+    .x-logo,
+    .li-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+    }
+
+    .x-logo svg,
+    .li-logo svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 420ms ease, transform 520ms ease;
+      transition-delay: var(--reveal-delay, 0ms);
+      will-change: opacity, transform;
+    }
+
+    .animate-on-scroll.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .animate-on-scroll {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+      header {
+        flex-wrap: wrap;
+        border-radius: 22px;
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+        margin-left: auto;
+      }
+
+      nav {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 0.5rem;
+      }
+
+      nav a {
+        width: 100%;
+      }
+
+      header.nav-open nav {
+        display: flex;
+      }
+
+      .hero {
+        padding: 4rem 1.4rem 1.4rem;
+        min-height: auto;
+      }
+
+      .hero-grid,
+      .split-grid,
+      .principles,
+      .team-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      #app {
+        padding: 0.9rem;
+      }
+
+      .brand-name {
+        font-size: 0.9rem;
+      }
+
+      .section-card {
+        padding: 1.4rem;
+        border-radius: 24px;
+      }
+
+      .hero h1 {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <header>
+      <a class="brand" href="/" aria-label="Hypermonitor home">
+        <img src="images/logo.png" alt="Hypermonitor logo" style="width: 2.8rem; height: auto; border-radius: 4px;" />
+        <h1 class="brand-name"><span>Hyper</span><em style="font-style: inherit;">monitor</em></h1>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false"
+        aria-controls="primary-nav">
+        <span></span>
+      </button>
+
+      <nav id="primary-nav" aria-label="Primary">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link" href="/#how">How it works</a>
+        <a class="nav-link" href="/leaderboard.html">Leaderboard</a>
+        <a class="nav-link is-active" href="/team.html" aria-current="page">Team</a>
+        <a class="nav-cta" href="https://www.hypermonitor.org/track">Open Tracker</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="animate-on-scroll">
+          <div class="eyebrow">Hypermonitor Team</div>
+          <h1>The people building clearer market intelligence.</h1>
+          <p>
+            Hypermonitor combines product thinking, quantitative research, and engineering discipline to make
+            Hyperliquid activity easier to analyze in real time. We focus on turning noisy on-chain and trading data
+            into tools that help traders act with more precision.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="mailto:info@hypermonitor.org">Contact the team</a>
+            <a class="btn" href="/leaderboard.html">View leaderboard</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel animate-on-scroll" style="--reveal-delay: 90ms;">
+          <h2>What we optimize for</h2>
+          <div class="hero-facts">
+            <div class="fact">
+              <strong>Real-time clarity</strong>
+              <span>Fast, readable signals for positions, fills, and wallet performance.</span>
+            </div>
+            <div class="fact">
+              <strong>Research depth</strong>
+              <span>Metrics that help distinguish durable edge from short-term noise.</span>
+            </div>
+            <div class="fact">
+              <strong>Execution quality</strong>
+              <span>Interfaces and systems designed for serious monitoring, not dashboards for their own sake.</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <main>
+      <section class="section-card animate-on-scroll">
+        <span class="section-label">Approach</span>
+        <h2 class="section-title">Built with the rigor of a research workflow.</h2>
+        <p class="section-copy">
+          We treat product decisions the way good trading systems treat signals: measure what matters, remove noise,
+          and keep the output actionable. Hypermonitor is designed for traders who need trustworthy monitoring,
+          understandable rankings, and a cleaner view of the market.
+        </p>
+
+        <div class="principles">
+          <div class="principle">
+            <h3>Signal over spectacle</h3>
+            <p>We prefer interpretable analytics and useful workflow design over crowded interfaces.</p>
+          </div>
+          <div class="principle">
+            <h3>Quantitative discipline</h3>
+            <p>Metrics, ranking logic, and monitoring surfaces are shaped around real decision-making needs.</p>
+          </div>
+          <div class="principle">
+            <h3>Fast iteration</h3>
+            <p>We ship improvements quickly while keeping the product grounded in clear operational value.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card animate-on-scroll" style="--reveal-delay: 60ms;">
+        <span class="section-label">Team</span>
+        <h2 class="section-title">A compact team across product, engineering, and quant research.</h2>
+        <p class="section-copy">
+          Hypermonitor is built by operators who care about data quality, system design, and interfaces that stand up
+          to daily use.
+        </p>
+
+        <div class="team-grid">
+          <article class="person">
+            <div class="avatar" aria-label="Photo: Roshan">
+              <img src="images/mahes.png" alt="Dr. Roshan Mahes" onerror="this.remove();" draggable="false" />
+            </div>
+            <div class="person-head">
+              <div>
+                <h3>Dr. Roshan Mahes</h3>
+                <div class="person-role">Product & Quantitative Research</div>
+              </div>
+              <a class="linkedin-badge" href="https://www.linkedin.com/in/roshanmahes/" target="_blank"
+                rel="noopener noreferrer" aria-label="Roshan on LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z" />
+                </svg>
+              </a>
+            </div>
+            <p>
+              Leads product direction and the translation of complex market behavior into usable research and
+              monitoring tools.
+            </p>
+            <div class="tag-list">
+              <span class="tag">Data analysis</span>
+              <span class="tag">Product design</span>
+              <span class="tag">Quant research</span>
+            </div>
+          </article>
+
+          <article class="person">
+            <div class="avatar" aria-label="Photo: Shreehari">
+              <img src="images/bodas.png" alt="Shreehari Bodas" onerror="this.remove();" draggable="false" />
+            </div>
+            <div class="person-head">
+              <div>
+                <h3>Shreehari Bodas</h3>
+                <div class="person-role">Engineering & Quantitative Research</div>
+              </div>
+              <a class="linkedin-badge" href="https://www.linkedin.com/in/shreehari-bodas-3ab4101b4/" target="_blank"
+                rel="noopener noreferrer" aria-label="Shreehari on LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z" />
+                </svg>
+              </a>
+            </div>
+            <p>
+              Focuses on real-time systems and the infrastructure needed to support reliable tracking and copy trading
+              workflows.
+            </p>
+            <div class="tag-list">
+              <span class="tag">Real-time tracking</span>
+              <span class="tag">Infrastructure</span>
+              <span class="tag">Execution systems</span>
+            </div>
+          </article>
+
+          <article class="person">
+            <div class="avatar" aria-label="Photo: Donato">
+              <img src="images/maragno.png" alt="Dr. Donato Maragno" onerror="this.remove();" draggable="false" />
+            </div>
+            <div class="person-head">
+              <div>
+                <h3>Dr. Donato Maragno</h3>
+                <div class="person-role">Engineering & Quantitative Research</div>
+              </div>
+              <a class="linkedin-badge" href="https://www.linkedin.com/in/donato-maragno/" target="_blank"
+                rel="noopener noreferrer" aria-label="Donato on LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z" />
+                </svg>
+              </a>
+            </div>
+            <p>
+              Works across architecture, application development, and performance measurement to keep the product
+              robust and readable.
+            </p>
+            <div class="tag-list">
+              <span class="tag">System design</span>
+              <span class="tag">Web apps</span>
+              <span class="tag">Performance metrics</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-card animate-on-scroll" style="--reveal-delay: 120ms;">
+        <span class="section-label">Why us</span>
+        <div class="split-grid">
+          <div class="signal-box">
+            <h3>What this team is building</h3>
+            <p>
+              A sharper operating layer for Hyperliquid traders: wallet discovery, live monitoring, ranking systems,
+              and the foundations for more advanced workflow tooling.
+            </p>
+          </div>
+          <div class="signal-box">
+            <h3>Open to conversations</h3>
+            <p>
+              If you are interested in product partnerships, research collaboration, or early access, reach us at
+              <a href="mailto:info@hypermonitor.org">info@hypermonitor.org</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div style="margin-top:0.35rem;">
+        <strong>Disclaimer:</strong> This website is for informational purposes only and does not constitute investment
+        advice.
+      </div>
+      <div style="margin-top:.35rem;">
+        © <span id="year"></span> Hypermonitor ·
+        <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> ·
+        <a href="mailto:info@hypermonitor.org">Email</a> ·
+        <a class="x-logo" href="https://x.com/HypermonitorX" target="_blank" rel="noopener noreferrer" aria-label="X">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M18.9 3H21l-6.5 7.4L22 21h-6.2l-4.9-6.2L5.4 21H3.2l6.9-7.9L2 3h6.3l4.4 5.6L18.9 3zm-2.2 16.2h1.9L7.4 4.7H5.4l11.3 14.5z" />
+          </svg>
+        </a>
+        ·
+        <a class="li-logo" href="https://www.linkedin.com/company/hypermonitor" target="_blank"
+          rel="noopener noreferrer" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z" />
+          </svg>
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const navToggle = document.querySelector(".nav-toggle");
+    const header = document.querySelector("header");
+    const primaryNav = document.getElementById("primary-nav");
+    if (navToggle && header && primaryNav) {
+      navToggle.addEventListener("click", () => {
+        const isOpen = header.classList.toggle("nav-open");
+        navToggle.setAttribute("aria-expanded", String(isOpen));
+      });
+
+      primaryNav.addEventListener("click", (event) => {
+        if (!(event.target instanceof HTMLElement)) return;
+        const link = event.target.closest("a");
+        if (!link) return;
+        header.classList.remove("nav-open");
+        navToggle.setAttribute("aria-expanded", "false");
+      });
+    }
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!prefersReducedMotion) {
+      const revealItems = document.querySelectorAll(".animate-on-scroll");
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          obs.unobserve(entry.target);
+        });
+      }, { threshold: 0.15 });
+
+      revealItems.forEach((item) => observer.observe(item));
+    } else {
+      document.querySelectorAll(".animate-on-scroll").forEach((item) => item.classList.add("is-visible"));
+    }
+  </script>
+</body>
+
+</html>
