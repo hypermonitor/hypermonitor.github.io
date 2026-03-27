@@ -51,16 +51,13 @@
 
     html {
       scroll-behavior: smooth;
-      background: #050506;
+      background: #0a0a0a;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
-      background:
-        radial-gradient(circle at top left, rgba(0, 112, 243, 0.16), transparent 30%),
-        radial-gradient(circle at top right, rgba(0, 180, 216, 0.14), transparent 24%),
-        linear-gradient(180deg, #0d0d10 0%, #080809 44%, #050506 100%);
+      background: #0a0a0a;
       color: var(--text-main);
       font-family: var(--apple-font);
       font-size: 18px;
@@ -69,16 +66,7 @@
     }
 
     body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-      background-size: 90px 90px;
-      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent 82%);
-      pointer-events: none;
-      opacity: 0.35;
+      content: none;
     }
 
     a {
