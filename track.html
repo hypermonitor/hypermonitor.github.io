@@ -51,6 +51,14 @@
       --glass-border: rgba(255, 255, 255, 0.08);
       --accent-blue: #0070f3;
       --accent-cyan: #00b4d8;
+      --equity-accent: #22d3ee;
+      --activity-accent: #3b82f6;
+      --activity-bar-bg: rgba(59, 130, 246, 0.72);
+      --activity-bar-border: rgba(59, 130, 246, 0.92);
+      --activity-volume-bar-bg: rgba(244, 114, 182, 0.72);
+      --activity-volume-bar-border: rgba(244, 114, 182, 0.92);
+      --deposits-accent: #f4b942;
+      --exposure-accent: #b794f4;
       --control-height: 32px;
       --switch-height: 30px;
       --neutral-blue: rgba(124, 176, 255, 0.95);
@@ -67,10 +75,19 @@
       color: var(--text-main);
     }
 
+    body.embed-popup {
+      overflow-x: hidden;
+    }
+
     #app {
       width: calc(100vw - 24px);
       margin: 0 auto;
       padding: 10px 0 32px;
+    }
+
+    body.embed-popup #app {
+      width: calc(100vw - 12px);
+      padding-top: 0;
     }
 
     @media (max-width: 720px) {
@@ -89,6 +106,10 @@
       padding: 4px 0 10px;
       margin-bottom: 0.8rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    body.embed-popup header {
+      display: none;
     }
 
     .brand {
@@ -1214,6 +1235,30 @@
         top: 1rem;
         align-self: start;
       }
+
+      .dashboard-sidebar .account-overview-card {
+        max-height: calc(100vh - 92px);
+        overflow: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+      }
+
+      .dashboard-sidebar .account-overview-card::-webkit-scrollbar {
+        width: 0;
+      }
+
+      .dashboard-sidebar .account-overview-card.is-scrolling {
+        scrollbar-width: thin;
+      }
+
+      .dashboard-sidebar .account-overview-card.is-scrolling::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .dashboard-sidebar .account-overview-card.is-scrolling::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+      }
     }
 
     .card {
@@ -1611,12 +1656,12 @@
 
     .overview-direction-fill.long {
       left: 0;
-      background: linear-gradient(90deg, rgba(34, 197, 94, 0.92), rgba(74, 222, 128, 0.72));
+      background: var(--accent);
     }
 
     .overview-direction-fill.short {
       right: 0;
-      background: linear-gradient(270deg, rgba(248, 113, 113, 0.92), rgba(251, 146, 60, 0.72));
+      background: var(--danger);
     }
 
     .overview-direction-values {
@@ -2634,29 +2679,33 @@
     .chart-card h3 span.spark-label.positive { color: var(--accent); }
     .chart-card h3 span.spark-label.negative { color: var(--danger); }
     .chart-card h3 span.spark-label.neutral { color: var(--neutral-blue); }
+    .chart-card h3 span.spark-label.equity-accent { color: var(--equity-accent); }
+    .chart-card h3 span.spark-label.activity-accent { color: var(--activity-accent); }
+    .chart-card h3 span.spark-label.deposits-accent { color: var(--deposits-accent); }
+    .chart-card h3 span.spark-label.exposure-accent { color: var(--exposure-accent); }
 
     .chart-canvas-wrap {
       position: relative;
       flex: 0 0 auto;
       width: 100%;
-      aspect-ratio: 16 / 8;
-      min-height: 142px;
+      aspect-ratio: 16 / 9;
+      min-height: 0;
     }
 
     .exposure-chart-wrap {
-      aspect-ratio: 16 / 6.8;
-      min-height: 168px;
+      aspect-ratio: 16 / 9;
+      min-height: 0;
     }
 
     .heatmap-card {
-      min-height: 270px;
+      min-height: 0;
     }
 
     .heatmap-card .pnl-heatmap-wrap {
       flex: 1 1 auto;
-      min-height: 220px;
+      min-height: 0;
       max-height: none;
-      aspect-ratio: auto;
+      aspect-ratio: 16 / 9;
     }
 
     @media (max-width: 1180px) {
@@ -2671,7 +2720,8 @@
       }
     }
 
-    .chart-canvas-wrap.logo-watermark::before {
+    .chart-canvas-wrap.logo-watermark::before,
+    .pnl-heatmap-wrap.logo-watermark::before {
       content: "";
       position: absolute;
       inset: 0;
@@ -2683,7 +2733,8 @@
       pointer-events: none;
     }
 
-    .chart-canvas-wrap.logo-watermark::after {
+    .chart-canvas-wrap.logo-watermark::after,
+    .pnl-heatmap-wrap.logo-watermark::after {
       content: "HYPERMONITOR";
       position: absolute;
       left: 50%;
@@ -2707,12 +2758,17 @@
       z-index: 1;
     }
 
+    .pnl-heatmap-wrap.logo-watermark > * {
+      position: relative;
+      z-index: 1;
+    }
+
     .pnl-heatmap-wrap {
       width: 100%;
-      min-height: 142px;
+      min-height: 0;
       height: auto;
-      aspect-ratio: 16 / 8;
-      max-height: 240px;
+      aspect-ratio: 16 / 9;
+      max-height: none;
       border: 1px solid var(--border);
       border-radius: 0.5rem;
       background: rgba(8, 14, 24, 0.18);
@@ -2890,10 +2946,10 @@
 
     .transfers-wrap {
       width: 100%;
-      min-height: 142px;
+      min-height: 0;
       height: auto;
-      aspect-ratio: 16 / 8;
-      max-height: 240px;
+      aspect-ratio: 16 / 9;
+      max-height: none;
       border: 1px solid var(--border);
       border-radius: 0.5rem;
       background: rgba(8, 14, 24, 0.18);
@@ -4523,6 +4579,7 @@
     }
 
     .price-footer {
+      display: none !important;
       position: fixed;
       left: 0;
       right: 0;
@@ -4955,6 +5012,7 @@
     }
 
     .price-context-menu {
+      display: none !important;
       position: fixed;
       z-index: 220;
       min-width: 150px;
@@ -5199,6 +5257,11 @@
 </head>
 
   <body>
+    <script>
+      if (new URLSearchParams(window.location.search).get("embed") === "popup") {
+        document.body.classList.add("embed-popup");
+      }
+    </script>
     <div class="mobile-loading-overlay" id="mobileLoadingOverlay" aria-hidden="true">
       <div class="mobile-loading-content">
         <div class="mobile-loading-pulse" aria-hidden="true"></div>
@@ -5443,38 +5506,57 @@
       <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
       <div class="chart-grid" id="portfolioCharts">
         <div class="chart-card">
-          <h3 class="equity-card-title">
-            <span class="equity-card-heading">Drawdown <span class="spark-label" id="drawdownTitleValue">[-]</span></span>
+          <h3 class="pnl-card-title">
+            <span class="pnl-card-heading"><span id="primaryChartLabel">Profit &amp; Loss</span> <span class="spark-label" id="primaryChartTitleValue">[-]</span></span>
+            <span class="equity-view-toggle" role="tablist" aria-label="Primary performance chart">
+              <button class="equity-view-btn active" type="button" data-performance-view="pnl" aria-selected="true">P&amp;L</button>
+              <button class="equity-view-btn" type="button" data-performance-view="equity" aria-selected="false">Equity</button>
+            </span>
           </h3>
-          <div class="chart-canvas-wrap">
-            <canvas id="drawdownChart"></canvas>
+          <div class="chart-canvas-wrap logo-watermark" id="pnlChartWrap">
+            <canvas id="pnlChart"></canvas>
           </div>
-        </div>
-
-        <div class="chart-card">
-          <h3 class="equity-card-title">
-            <span class="equity-card-heading">Equity <span class="spark-label" id="equityTitleValue">[-]</span></span>
-          </h3>
-          <div class="chart-canvas-wrap">
+          <div class="chart-canvas-wrap logo-watermark is-hidden" id="equityChartWrap">
             <canvas id="equityChart"></canvas>
           </div>
         </div>
 
         <div class="chart-card">
           <h3 class="pnl-card-title">
-            <span class="pnl-card-heading">Profit &amp; Loss <span class="spark-label" id="pnlTitleValue">[-]</span></span>
+            <span>Trading Activity <span class="spark-label" id="activityTitleValue">[-]</span></span>
+            <span class="equity-view-toggle" role="tablist" aria-label="Trading activity chart">
+              <button class="equity-view-btn active" type="button" data-activity-view="trades" aria-selected="true">Trades</button>
+              <button class="equity-view-btn" type="button" data-activity-view="volume" aria-selected="false">Volume</button>
+            </span>
           </h3>
-          <div class="chart-canvas-wrap logo-watermark" id="pnlChartWrap">
-            <canvas id="pnlChart"></canvas>
+          <div class="chart-canvas-wrap logo-watermark" id="activityChartWrap">
+            <canvas id="activityChart"></canvas>
           </div>
         </div>
 
         <div class="chart-card">
           <h3 class="deposits-card-title">
             <span class="deposits-card-heading">Deposits <span class="spark-label" id="depositsTitleValue">[-]</span></span>
+            <span class="third-panel-toggle" role="tablist" aria-label="Deposits panel mode">
+              <button class="third-panel-btn active" type="button" data-panel-mode="chart" aria-selected="true">Chart</button>
+              <button class="third-panel-btn" type="button" data-panel-mode="transfers" aria-selected="false">List</button>
+            </span>
           </h3>
-          <div class="chart-canvas-wrap" id="depositsChartWrap">
+          <div class="chart-canvas-wrap logo-watermark" id="depositsChartWrap">
             <canvas id="depositsChart"></canvas>
+          </div>
+          <div class="transfers-wrap is-hidden" id="transfersListWrap">
+            <div class="transfers-list-status" id="transfersListStatus">Transfers will appear here.</div>
+            <ul class="transfers-list" id="transfersListBody"></ul>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="equity-card-title">
+            <span class="equity-card-heading">Drawdown <span class="spark-label" id="drawdownTitleValue">[-]</span></span>
+          </h3>
+          <div class="chart-canvas-wrap logo-watermark">
+            <canvas id="drawdownChart"></canvas>
           </div>
         </div>
 
@@ -5482,7 +5564,7 @@
           <h3 class="exposure-card-title">
             <span class="exposure-card-heading">Exposure <span class="spark-label" id="exposureTitleValue">[-]</span></span>
           </h3>
-          <div class="chart-canvas-wrap exposure-chart-wrap">
+          <div class="chart-canvas-wrap logo-watermark exposure-chart-wrap">
             <canvas id="exposureChart"></canvas>
           </div>
         </div>
@@ -5491,7 +5573,7 @@
           <h3 class="pnl-card-title">
             <span class="pnl-card-heading">Heatmap</span>
           </h3>
-          <div class="pnl-heatmap-wrap" id="pnlHeatmapWrap">
+          <div class="pnl-heatmap-wrap logo-watermark" id="pnlHeatmapWrap">
             <div class="pnl-heatmap-toolbar">
               <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous quarter">‹</button>
               <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Quarterly daily PnL</span>
@@ -5995,6 +6077,7 @@
   const DEFAULT_WALLET = "0x0b1ace05eb9ef1c3a1951b763700ecad24f27741";
 
   const MAX_FILL_ROWS = 100;
+  const USER_FILLS_HISTORY_CAP = 2000;
   const PORTFOLIO_API_URL = "https://api.hyperliquid.xyz/info";
   const PERP_ANNOTATION_API_URL = "https://api-ui.hyperliquid.xyz/info";
 
@@ -6016,6 +6099,7 @@
 
   const marginSummaryEl = document.getElementById("marginSummary");
   const snapshotErrorEl = document.getElementById("snapshotError");
+  const accountOverviewCardEl = document.querySelector(".account-overview-card");
 
   const positionsBodyEl = document.getElementById("positionsBody");
   const positionsChartBtn = document.getElementById("positionsChartBtn");
@@ -6149,10 +6233,16 @@
 
   const drawdownCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("drawdownChart"));
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
-  const equityViewButtons = document.querySelectorAll(".equity-view-btn");
+  const equityChartWrapEl = document.getElementById("equityChartWrap");
+  const equityViewButtons = document.querySelectorAll("[data-equity-view]");
+  const primaryPerformanceButtons = document.querySelectorAll("[data-performance-view]");
+  const activityViewButtons = document.querySelectorAll("[data-activity-view]");
+  const primaryChartLabelEl = document.getElementById("primaryChartLabel");
+  const primaryChartTitleValueEl = document.getElementById("primaryChartTitleValue");
   const exposureCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("exposureChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
   const pnlChartWrapEl = document.getElementById("pnlChartWrap");
+  const activityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("activityChart"));
   const pnlHeatmapWrapEl = document.getElementById("pnlHeatmapWrap");
   const pnlHeatmapMonthsEl = document.getElementById("pnlHeatmapMonths");
   const pnlHeatmapWeekdaysEl = document.getElementById("pnlHeatmapWeekdays");
@@ -6168,6 +6258,7 @@
   const transfersListBodyEl = document.getElementById("transfersListBody");
   const transfersListStatusEl = document.getElementById("transfersListStatus");
   const thirdPanelModeButtons = document.querySelectorAll(".third-panel-btn");
+  const activityTitleValueEl = document.getElementById("activityTitleValue");
   const drawdownTitleValueEl = document.getElementById("drawdownTitleValue");
   const equityTitleValueEl = document.getElementById("equityTitleValue");
   const exposureTitleValueEl = document.getElementById("exposureTitleValue");
@@ -6275,11 +6366,19 @@
   let latestLiveEquityValue = null;
   let latestLivePnlValue = null;
   let latestBaseEquityValue = null;
+  let isAccountOverviewReady = false;
+  let portfolioLoadSettled = false;
+  let historicalFillsLoadSettled = false;
+  let accountOverviewScrollHideTimer = null;
+  let primaryPerformanceMode = "pnl";
+  let activityViewMode = "trades";
   const chartLastValues = {
     equity: null,
     equityDrawdown: null,
     exposure: null,
     pnl: null,
+    activityTrades: null,
+    activityVolume: null,
     deposits: null,
   };
   const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl", "cash"];
@@ -7204,7 +7303,7 @@
   const transferHistoryByWallet = new Map();
   let transfersRequestToken = 0;
   const TRANSFERS_MAX_ROWS = 120;
-  const portfolioCharts = { drawdown: null, equity: null, exposure: null, pnl: null, deposits: null };
+  const portfolioCharts = { drawdown: null, equity: null, exposure: null, pnl: null, activity: null, deposits: null };
   const portfolioBreakdownChart = { chart: null };
   const WALLET_COLOR_PALETTE = ["#38bdf8", "#f59e0b", "#f472b6", "#22d3ee", "#a78bfa", "#34d399", "#f97316", "#60a5fa"];
   const walletColorMap = new Map();
@@ -7889,11 +7988,27 @@
     return null;
   }
 
+  function formatTradeCountLabel(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "-";
+    const formatted = n.toLocaleString();
+    return n >= USER_FILLS_HISTORY_CAP ? `${formatted}+ trades` : `${formatted} trades`;
+  }
+
+  function formatActivityVolumeLabel(value, isLowerBound = false) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "-";
+    const formatted = fmtMoneyCompact(n, 1);
+    return isLowerBound ? `${formatted}+` : formatted;
+  }
+
   function updateChartTitleValues() {
     const equityChartValue = Number.isFinite(chartLastValues.equity) ? chartLastValues.equity : null;
     const equityDrawdownValue = Number.isFinite(chartLastValues.equityDrawdown) ? chartLastValues.equityDrawdown : null;
     const exposureChartValue = Number.isFinite(chartLastValues.exposure) ? chartLastValues.exposure : null;
     const pnlChartValue = Number.isFinite(chartLastValues.pnl) ? chartLastValues.pnl : null;
+    const activityTradesValue = Number.isFinite(chartLastValues.activityTrades) ? chartLastValues.activityTrades : null;
+    const activityVolumeValue = Number.isFinite(chartLastValues.activityVolume) ? chartLastValues.activityVolume : null;
     const depositsChartValue = Number.isFinite(chartLastValues.deposits) ? chartLastValues.deposits : null;
 
     if (drawdownTitleValueEl) {
@@ -7907,39 +8022,48 @@
       }
     }
 
-    if (equityTitleValueEl) {
-      equityTitleValueEl.textContent = equityChartValue !== null ? fmtMoney(equityChartValue, 0) : "-";
-      equityTitleValueEl.classList.remove("positive", "negative", "neutral");
-      equityTitleValueEl.classList.add("neutral");
-    }
-
     if (exposureTitleValueEl) {
       exposureTitleValueEl.textContent = exposureChartValue !== null ? formatExposureMultiple(exposureChartValue, 2) : "-";
-      exposureTitleValueEl.classList.remove("positive", "negative", "neutral");
+      exposureTitleValueEl.classList.remove("positive", "negative", "neutral", "exposure-accent");
       if (Number.isFinite(exposureChartValue)) {
-        exposureTitleValueEl.classList.add(exposureChartValue > 0 ? "positive" : "neutral");
+        exposureTitleValueEl.classList.add("exposure-accent");
       }
     }
 
-    if (pnlTitleValueEl) {
+    if (primaryChartLabelEl && primaryChartTitleValueEl) {
       latestLivePnlValue = Number.isFinite(pnlChartValue) ? pnlChartValue : null;
-      pnlTitleValueEl.textContent = pnlChartValue !== null ? formatSignedDollarWithPlus(pnlChartValue, 0) : "-";
-      pnlTitleValueEl.classList.remove("positive", "negative");
-      if (Number.isFinite(pnlChartValue)) {
-        pnlTitleValueEl.classList.add(pnlChartValue >= 0 ? "positive" : "negative");
+      primaryChartLabelEl.textContent = primaryPerformanceMode === "equity" ? "Equity" : "Profit & Loss";
+      primaryChartTitleValueEl.classList.remove("positive", "negative", "neutral", "equity-accent");
+      if (primaryPerformanceMode === "equity") {
+        primaryChartTitleValueEl.textContent = equityChartValue !== null ? fmtMoney(equityChartValue, 0) : "-";
+        primaryChartTitleValueEl.classList.add("equity-accent");
+      } else {
+        primaryChartTitleValueEl.textContent = pnlChartValue !== null ? formatSignedDollarWithPlus(pnlChartValue, 0) : "-";
+        if (Number.isFinite(pnlChartValue)) {
+          primaryChartTitleValueEl.classList.add(pnlChartValue >= 0 ? "positive" : "negative");
+        }
+      }
+    }
+
+    if (activityTitleValueEl) {
+      activityTitleValueEl.textContent =
+        activityViewMode === "volume"
+          ? (activityVolumeValue !== null
+              ? formatActivityVolumeLabel(activityVolumeValue, Number(activityTradesValue) >= USER_FILLS_HISTORY_CAP)
+              : "-")
+          : (activityTradesValue !== null ? formatTradeCountLabel(activityTradesValue) : "-");
+      activityTitleValueEl.classList.remove("positive", "negative", "neutral", "activity-accent");
+      if (Number.isFinite(activityTradesValue) || Number.isFinite(activityVolumeValue)) {
+        activityTitleValueEl.classList.add("activity-accent");
       }
     }
 
     if (depositsTitleValueEl) {
       depositsTitleValueEl.textContent =
         depositsChartValue !== null ? formatSignedDollarWithPlus(depositsChartValue, 0) : "-";
-      depositsTitleValueEl.classList.remove("positive", "negative", "neutral");
+      depositsTitleValueEl.classList.remove("positive", "negative", "neutral", "deposits-accent");
       if (Number.isFinite(depositsChartValue)) {
-        if (depositsChartValue === 0) {
-          depositsTitleValueEl.classList.add("neutral");
-        } else {
-          depositsTitleValueEl.classList.add(depositsChartValue >= 0 ? "negative" : "positive");
-        }
+        depositsTitleValueEl.classList.add("deposits-accent");
       }
     }
   }
@@ -12225,7 +12349,7 @@
       : "Live posture across the selected wallets.";
     const overviewMainMeta = estimated
       ? `${walletCountLabel}. Historical account value for the selected timeline point.`
-      : `${walletCountLabel}. Current account value across the visible account buckets.`;
+      : "";
 
     const stats = [
       {
@@ -12293,7 +12417,7 @@
             </div>
           </div>
 
-          <div class="overview-main-value">${selectedEquity !== null ? fmtMoney(selectedEquity, 2) : "-"}</div>
+          <div class="overview-main-value">${selectedEquity !== null ? fmtMoney(selectedEquity, 0) : "-"}</div>
           <div class="overview-main-meta">${xmlEscape(overviewMainMeta)}</div>
 
           <div class="overview-section">
@@ -12369,6 +12493,13 @@
   function recomputeAndRenderMarginSummary() {
     if (!currentWallets.length) {
       renderMarginSummary([]);
+      latestLiveEquityValue = null;
+      updateChartTitleValues();
+      return;
+    }
+
+    if (!isAccountOverviewReady) {
+      marginSummaryEl.innerHTML = "<span class='muted'>Loading…</span>";
       latestLiveEquityValue = null;
       updateChartTitleValues();
       return;
@@ -14187,6 +14318,7 @@
     if (!walletList.length) return;
 
     historicalFillsLoaded = false;
+    historicalFillsLoadSettled = false;
     if (historicalFillsCountEl) historicalFillsCountEl.textContent = "–";
     historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
 
@@ -14218,6 +14350,7 @@
       }
 
       historicalFillsLoaded = true;
+      historicalFillsLoadSettled = true;
       renderHistoricalFills();
       recomputeTimelineControls();
       if (isTimelineActive()) queueTimelinePriceRefresh();
@@ -14226,16 +14359,20 @@
       } else {
         updatePerformanceMetrics(currentRangeKey);
       }
+      syncPerformanceLoadingState();
     } catch (err) {
       console.error("Historical fills error", err);
+      historicalFillsLoadSettled = true;
       if (historicalFillsBodyEl) {
         historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Failed to load historical fills.</td></tr>";
       }
       if (fillsErrorEl) fillsErrorEl.textContent = "Failed to load historical fills: " + (err?.message || err);
+      syncPerformanceLoadingState();
     }
   }
 
   function resetState() {
+    isAccountOverviewReady = false;
     Object.values(walletSnapshotsByType).forEach((map) => map.clear());
     Object.values(walletTotalsByType).forEach((map) => map.clear());
     Object.values(walletPositionsByType).forEach((map) => map.clear());
@@ -14380,6 +14517,15 @@
         setWalletPositions("perp", wallet, combined);
       });
 
+      loadInitialOpenOrders(wallet);
+    } catch (err) {
+      console.error("Snapshot error", err);
+      snapshotErrorEl.textContent = "Failed to load initial snapshot: " + (err?.message || err);
+    }
+  }
+
+  async function loadInitialOpenOrders(wallet) {
+    try {
       const existingOpen = await infoClient.frontendOpenOrders({ user: wallet });
       existingOpen.forEach((order) => {
         const key = `${wallet}:${order.oid}`;
@@ -14388,8 +14534,8 @@
       });
       requestOrderRenders({ open: true });
     } catch (err) {
-      console.error("Snapshot error", err);
-      snapshotErrorEl.textContent = "Failed to load initial snapshot: " + (err?.message || err);
+      console.error("Open orders bootstrap error", err);
+      ordersErrorEl.textContent = "Failed to load initial open orders: " + (err?.message || err);
     }
   }
 
@@ -14512,10 +14658,17 @@
     }
   }
 
+  function syncPerformanceLoadingState(message = "Loading performance graphs…") {
+    const shouldKeepLoading = !portfolioLoadSettled || !historicalFillsLoadSettled;
+    setPortfolioLoadingState(shouldKeepLoading, shouldKeepLoading ? message : "");
+  }
+
   function resetPortfolioSection() {
     portfolioDataByWallet.clear();
     transferHistoryByWallet.clear();
     transfersRequestToken += 1;
+    portfolioLoadSettled = false;
+    historicalFillsLoadSettled = false;
     portfolioErrorEl.textContent = "";
     setPortfolioLoadingState(true, "Loading performance graphs…");
     clearPerformanceMetrics();
@@ -14537,6 +14690,8 @@
     chartLastValues.equityDrawdown = null;
     chartLastValues.exposure = null;
     chartLastValues.pnl = null;
+    chartLastValues.activityTrades = null;
+    chartLastValues.activityVolume = null;
     chartLastValues.deposits = null;
     updateChartTitleValues();
   }
@@ -14734,6 +14889,114 @@
       if (showTimeOnly) return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
       return d.toLocaleDateString();
     });
+  }
+
+  function formatActivityDayLabel(dayMs) {
+    const date = new Date(dayMs);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  function buildActivitySeries(rangeKey = currentRangeKey, marketType = currentMarketType) {
+    const walletSet = new Set(currentWallets.map((wallet) => String(wallet || "").toLowerCase()).filter(Boolean));
+    const rangeWindow = getRangeWindowForKey(rangeKey);
+    const fillsForRange = getAllFillsForMetrics({
+      walletSet,
+      startTime: rangeWindow.start,
+      endTime: rangeWindow.end,
+      marketType,
+    });
+    const source = getMetricsSource(rangeKey);
+    const sourceTimes = Array.isArray(source?.view?.times)
+      ? source.view.times
+          .map((time) => (time instanceof Date ? time.getTime() : normalizeTimestamp(time)))
+          .filter(Number.isFinite)
+      : [];
+
+    let startDay = Number.isFinite(rangeWindow.start) ? toLocalDayStartMs(rangeWindow.start) : null;
+    let endDay = Number.isFinite(rangeWindow.end) ? toLocalDayStartMs(rangeWindow.end) : null;
+
+    if (!Number.isFinite(startDay)) {
+      const firstFillTime = fillsForRange.reduce((min, fill) => {
+        const time = Number(fill?.time);
+        if (!Number.isFinite(time)) return min;
+        return min === null || time < min ? time : min;
+      }, null);
+      const firstSourceTime = sourceTimes.length ? Math.min(...sourceTimes) : null;
+      startDay = toLocalDayStartMs(firstFillTime ?? firstSourceTime);
+    }
+
+    if (!Number.isFinite(endDay)) {
+      const lastFillTime = fillsForRange.reduce((max, fill) => {
+        const time = Number(fill?.time);
+        if (!Number.isFinite(time)) return max;
+        return max === null || time > max ? time : max;
+      }, null);
+      const lastSourceTime = sourceTimes.length ? Math.max(...sourceTimes) : null;
+      endDay = toLocalDayStartMs(lastFillTime ?? lastSourceTime);
+    }
+
+    if (!Number.isFinite(startDay) || !Number.isFinite(endDay) || endDay < startDay) {
+      return { labels: [], trades: [], volume: [], totalTrades: 0, totalVolume: 0 };
+    }
+
+    const countsByDay = new Map();
+    const volumeByDay = new Map();
+    fillsForRange.forEach((fill) => {
+      const dayMs = toLocalDayStartMs(fill?.time);
+      if (!Number.isFinite(dayMs)) return;
+      countsByDay.set(dayMs, (countsByDay.get(dayMs) || 0) + 1);
+      const size = Math.abs(Number(fill?.size ?? 0));
+      const price = Number(fill?.price ?? 0);
+      const notional = Number.isFinite(size) && Number.isFinite(price) ? size * price : 0;
+      volumeByDay.set(dayMs, (volumeByDay.get(dayMs) || 0) + (Number.isFinite(notional) ? notional : 0));
+    });
+
+    const labels = [];
+    const trades = [];
+    const volume = [];
+    let totalTrades = 0;
+    let totalVolume = 0;
+    for (let dayMs = startDay; Number.isFinite(dayMs) && dayMs <= endDay; dayMs = addLocalDays(dayMs, 1)) {
+      const count = Number(countsByDay.get(dayMs) || 0);
+      const dayVolume = Number(volumeByDay.get(dayMs) || 0);
+      labels.push(formatActivityDayLabel(dayMs));
+      trades.push(count);
+      volume.push(dayVolume);
+      totalTrades += count;
+      totalVolume += dayVolume;
+      const nextDay = addLocalDays(dayMs, 1);
+      if (!Number.isFinite(nextDay) || nextDay === dayMs) break;
+    }
+
+    return { labels, trades, volume, totalTrades, totalVolume };
+  }
+
+  function setPrimaryPerformanceMode(mode) {
+    const next = mode === "equity" ? "equity" : "pnl";
+    primaryPerformanceMode = next;
+    primaryPerformanceButtons.forEach((btn) => {
+      const isActive = btn.dataset.performanceView === next;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", String(isActive));
+    });
+    if (pnlChartWrapEl) pnlChartWrapEl.classList.toggle("is-hidden", next !== "pnl");
+    if (equityChartWrapEl) equityChartWrapEl.classList.toggle("is-hidden", next !== "equity");
+    updateChartTitleValues();
+  }
+
+  function setActivityViewMode(mode) {
+    const next = mode === "volume" ? "volume" : "trades";
+    activityViewMode = next;
+    activityViewButtons.forEach((btn) => {
+      const isActive = btn.dataset.activityView === next;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", String(isActive));
+    });
+    if (portfolioCharts.activity?.$activitySeries) {
+      setActivityChartMode(portfolioCharts.activity, portfolioCharts.activity.$activitySeries, next);
+    }
+    updateChartTitleValues();
   }
 
   function getTimelineFutureStartIndex(times) {
@@ -15269,6 +15532,104 @@
       .filter(Boolean);
   }
 
+  function toAlphaColor(color, alpha = 0.18) {
+    const value = String(color || "").trim();
+    const safeAlpha = Math.max(0, Math.min(1, Number(alpha)));
+    if (!value) return `rgba(255, 255, 255, ${safeAlpha})`;
+    if (value.startsWith("#")) {
+      const hex = value.slice(1);
+      const normalized = hex.length === 3
+        ? hex.split("").map((part) => part + part).join("")
+        : hex.length === 6
+          ? hex
+          : "";
+      if (normalized) {
+        const red = parseInt(normalized.slice(0, 2), 16);
+        const green = parseInt(normalized.slice(2, 4), 16);
+        const blue = parseInt(normalized.slice(4, 6), 16);
+        return `rgba(${red}, ${green}, ${blue}, ${safeAlpha})`;
+      }
+    }
+    const rgbMatch = value.match(/^rgba?\(([^)]+)\)$/i);
+    if (rgbMatch) {
+      const parts = rgbMatch[1].split(",").map((part) => part.trim());
+      if (parts.length >= 3) {
+        return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${safeAlpha})`;
+      }
+    }
+    return value;
+  }
+
+  function decorateAreaDataset(dataset, alpha = 0.18) {
+    if (!dataset || typeof dataset !== "object") return dataset;
+    const borderColor = String(dataset.borderColor || "#f8fafc");
+    return {
+      ...dataset,
+      backgroundColor: toAlphaColor(borderColor, alpha),
+      fill: { target: "origin" },
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      pointHitRadius: 10,
+    };
+  }
+
+  function getSignedPnlColor(value, alpha = 1) {
+    const safeAlpha = Math.max(0, Math.min(1, Number(alpha)));
+    const n = Number(value);
+    if (!Number.isFinite(n)) return `rgba(148, 163, 184, ${safeAlpha})`;
+    if (n > 0) return `rgba(38, 217, 127, ${safeAlpha})`;
+    if (n < 0) return `rgba(242, 95, 92, ${safeAlpha})`;
+    return `rgba(196, 202, 215, ${safeAlpha})`;
+  }
+
+  function resolveSignedSegmentColor(ctx) {
+    const start = Number(ctx?.p0?.parsed?.y);
+    const end = Number(ctx?.p1?.parsed?.y);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return getSignedPnlColor(0, 0.88);
+    if ((start >= 0 && end >= 0) || (start <= 0 && end <= 0)) {
+      return getSignedPnlColor((start + end) / 2, 0.92);
+    }
+
+    const chartCtx = ctx?.chart?.ctx;
+    const x0 = Number(ctx?.p0?.x);
+    const y0 = Number(ctx?.p0?.y);
+    const x1 = Number(ctx?.p1?.x);
+    const y1 = Number(ctx?.p1?.y);
+    if (!chartCtx || !Number.isFinite(x0) || !Number.isFinite(y0) || !Number.isFinite(x1) || !Number.isFinite(y1)) {
+      return getSignedPnlColor(end, 0.92);
+    }
+
+    const gradient = chartCtx.createLinearGradient(x0, y0, x1, y1);
+    const ratio = Math.max(0, Math.min(1, (0 - start) / (end - start)));
+    const startColor = getSignedPnlColor(start, 0.92);
+    const endColor = getSignedPnlColor(end, 0.92);
+    gradient.addColorStop(0, startColor);
+    gradient.addColorStop(ratio, startColor);
+    gradient.addColorStop(ratio, endColor);
+    gradient.addColorStop(1, endColor);
+    return gradient;
+  }
+
+  function decorateSignedPnlDataset(dataset) {
+    if (!dataset || typeof dataset !== "object") return dataset;
+    return {
+      ...dataset,
+      borderColor: getSignedPnlColor(1, 0.92),
+      backgroundColor: getSignedPnlColor(1, 0.18),
+      fill: {
+        target: "origin",
+        above: getSignedPnlColor(1, 0.16),
+        below: getSignedPnlColor(-1, 0.16),
+      },
+      segment: {
+        borderColor: resolveSignedSegmentColor,
+      },
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      pointHitRadius: 10,
+    };
+  }
+
   function buildWalletDatasets(views, labels, key, colorOverride) {
     return views.map(({ wallet, view }) => {
       const color = colorOverride || getWalletColor(wallet);
@@ -15279,13 +15640,15 @@
         borderColor: color,
         backgroundColor: color + "2a",
         pointRadius: 0,
+        pointHoverRadius: 0,
+        pointHitRadius: 10,
         borderWidth: 1.7,
         tension: 0.25,
       };
     });
   }
 
-  function buildWeightedSeries(views, labels, key) {
+  function buildWeightedSeries(views, labels, key, colorOverride = null) {
     if (views.length < 2) return null;
     const weights = getNormalizedWeights(views.map((v) => v.wallet));
     const values = labels.map((_, idx) => {
@@ -15298,9 +15661,11 @@
     return {
       label: "Weighted",
       data: values,
-      borderColor: "#f8fafc",
-      backgroundColor: "rgba(248, 250, 252, 0.08)",
+      borderColor: colorOverride || "#f8fafc",
+      backgroundColor: colorOverride ? `${colorOverride}2a` : "rgba(248, 250, 252, 0.08)",
       pointRadius: 0,
+      pointHoverRadius: 0,
+      pointHitRadius: 10,
       borderWidth: 2.4,
       tension: 0.25,
     };
@@ -15461,10 +15826,12 @@
       data: ratioData,
       openValueData,
       equityData,
-      borderColor: "#8bd26a",
-      backgroundColor: "rgba(139, 210, 106, 0.18)",
+      borderColor: getCssVar("--exposure-accent", "#b794f4"),
+      backgroundColor: "rgba(183, 148, 244, 0.18)",
       pointRadius: 0,
-      borderWidth: 2.5,
+      pointHoverRadius: 0,
+      pointHitRadius: 10,
+      borderWidth: 1.7,
       tension: 0.25,
       fill: { target: "origin" },
     };
@@ -15478,7 +15845,7 @@
 
   function buildEquityDatasets(views, labels) {
     const singleWallet = views.length === 1;
-    const singleColor = "#8b5cf6";
+    const singleColor = getCssVar("--equity-accent", "#22d3ee");
     const datasets = [];
 
     if (views.length > 1) {
@@ -15509,6 +15876,8 @@
         borderColor: color,
         backgroundColor: color + "2a",
         pointRadius: 0,
+        pointHoverRadius: 0,
+        pointHitRadius: 10,
         borderWidth: 1.7,
         tension: 0.25,
       });
@@ -17761,39 +18130,149 @@
     });
   }
 
+  function setActivityChartMode(chart, activitySeries, mode = activityViewMode) {
+    if (!chart) return;
+    const next = mode === "volume" ? "volume" : "trades";
+    const labels = Array.isArray(activitySeries?.labels) ? activitySeries.labels : [];
+    const values = Array.isArray(activitySeries?.[next]) ? activitySeries[next] : [];
+    chart.$activityMode = next;
+    chart.$activitySeries = activitySeries || { labels: [], trades: [], volume: [], totalTrades: 0, totalVolume: 0 };
+    chart.data.labels = labels;
+    if (!chart.data.datasets?.[0]) {
+      chart.data.datasets = [{
+        label: next === "volume" ? "Volume" : "Trades",
+        data: values,
+      }];
+    } else {
+      chart.data.datasets[0].label = next === "volume" ? "Volume" : "Trades";
+      chart.data.datasets[0].data = values;
+    }
+    chart.data.datasets[0].backgroundColor =
+      next === "volume"
+        ? getCssVar("--activity-volume-bar-bg", "rgba(244, 114, 182, 0.72)")
+        : getCssVar("--activity-bar-bg", "rgba(59, 130, 246, 0.72)");
+    chart.data.datasets[0].borderColor =
+      next === "volume"
+        ? getCssVar("--activity-volume-bar-border", "rgba(244, 114, 182, 0.92)")
+        : getCssVar("--activity-bar-border", "rgba(59, 130, 246, 0.92)");
+    chart.options.scales.y.ticks.callback = (value) => {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "";
+      if (next === "volume") return fmtMoneyCompact(n, 1);
+      return Number.isInteger(n) ? `${n}` : n.toFixed(0);
+    };
+    chart.update();
+  }
+
+  function createActivityChart(ctx, activitySeries, mode = activityViewMode) {
+    const chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: Array.isArray(activitySeries?.labels) ? activitySeries.labels : [],
+        datasets: [{
+          label: "Trades",
+          data: Array.isArray(activitySeries?.trades) ? activitySeries.trades : [],
+          backgroundColor: getCssVar("--activity-bar-bg", "rgba(59, 130, 246, 0.72)"),
+          borderColor: getCssVar("--activity-bar-border", "rgba(59, 130, 246, 0.92)"),
+          borderWidth: 1,
+          borderRadius: 3,
+          borderSkipped: false,
+          maxBarThickness: 18,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            borderColor: "rgba(148,163,184,0.5)",
+            borderWidth: 1,
+            titleColor: "#e5e7eb",
+            bodyColor: "#e5e7eb",
+            displayColors: false,
+            padding: 8,
+            cornerRadius: 6,
+            callbacks: {
+              label: (ctx) => {
+                const value = Number(ctx.parsed?.y ?? ctx.raw ?? 0);
+                if (ctx.chart?.$activityMode === "volume") {
+                  return `Volume: ${fmtMoney(value, 2)}`;
+                }
+                return `${Number.isFinite(value) ? value.toLocaleString() : "0"} trades`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              maxTicksLimit: 6,
+              minRotation: 0,
+              maxRotation: 0,
+              autoSkip: true,
+            },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              maxTicksLimit: 5,
+            },
+            grid: { color: getChartGridColor() },
+          },
+        },
+      },
+    });
+    setActivityChartMode(chart, activitySeries, mode);
+    return chart;
+  }
+
   function initPortfolioCharts(rangeKey) {
     const views = getWalletViews(rangeKey, currentMarketType);
     if (!views.length) {
-      setPortfolioLoadingState(false, "");
       portfolioErrorEl.textContent = "No performance data available for the selected wallets.";
       if (currentMarketType === "perp") clearPerformanceMetrics();
       chartLastValues.equity = null;
       chartLastValues.equityDrawdown = null;
       chartLastValues.exposure = null;
       chartLastValues.pnl = null;
+      chartLastValues.activityTrades = null;
+      chartLastValues.activityVolume = null;
       chartLastValues.deposits = null;
       updateChartTitleValues();
       return;
     }
 
-    setPortfolioLoadingState(false, "");
     const labels = buildLabels(views[0].view.times, rangeKey);
     const singleWallet = views.length === 1;
-    const singleColors = { equity: "#8b5cf6", pnl: "#f59e0b", deposits: "#14b8a6" };
+    const singleColors = {
+      equity: getCssVar("--equity-accent", "#22d3ee"),
+      pnl: "#f59e0b",
+      deposits: getCssVar("--deposits-accent", "#f4b942"),
+    };
 
-    const equityDatasets = buildEquityDatasets(views, labels);
+    const equityDatasets = buildEquityDatasets(views, labels).map((dataset) => decorateAreaDataset(dataset, 0.14));
     const exposureDataset = getExposureDatasetForRange(views, labels, currentMarketType);
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
-    const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
+    const weightedDeposits = buildWeightedSeries(
+      views,
+      labels,
+      "deposits",
+      getCssVar("--deposits-accent", "#f4b942")
+    );
+    const activitySeries = buildActivitySeries(rangeKey, currentMarketType);
 
     const pnlDatasets = [
       ...(weightedPnl ? [weightedPnl] : []),
       ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
-    ];
+    ].map((dataset) => decorateSignedPnlDataset(dataset));
     const depositsDatasets = [
       ...(weightedDeposits ? [weightedDeposits] : []),
       ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
-    ];
+    ].map((dataset) => decorateAreaDataset(dataset, 0.12));
 
     portfolioCharts.drawdown = createLineChart(
       drawdownCanvas.getContext("2d"),
@@ -17827,6 +18306,12 @@
     applyTimelineFutureFade(portfolioCharts.pnl, views[0].view.times);
     applyPnlTooltipStyling(portfolioCharts.pnl);
 
+    portfolioCharts.activity = createActivityChart(
+      activityCanvas.getContext("2d"),
+      activitySeries,
+      activityViewMode
+    );
+
     portfolioCharts.deposits = createLineChart(
       depositsCanvas.getContext("2d"),
       labels,
@@ -17838,6 +18323,8 @@
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
     chartLastValues.exposure = getLastFiniteValue(exposureDataset?.data || []);
     chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
+    chartLastValues.activityTrades = Number.isFinite(activitySeries.totalTrades) ? activitySeries.totalTrades : null;
+    chartLastValues.activityVolume = Number.isFinite(activitySeries.totalVolume) ? activitySeries.totalVolume : null;
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
     updateChartTitleValues();
     updatePerformanceMetrics(rangeKey);
@@ -17853,6 +18340,8 @@
       chartLastValues.equityDrawdown = null;
       chartLastValues.exposure = null;
       chartLastValues.pnl = null;
+      chartLastValues.activityTrades = null;
+      chartLastValues.activityVolume = null;
       chartLastValues.deposits = null;
       updateChartTitleValues();
       return;
@@ -17861,28 +18350,39 @@
 
     const labels = buildLabels(views[0].view.times, rangeKey);
     const singleWallet = views.length === 1;
-    const singleColors = { equity: "#8b5cf6", pnl: "#f59e0b", deposits: "#14b8a6" };
-    const equityDatasets = buildEquityDatasets(views, labels);
+    const singleColors = {
+      equity: getCssVar("--equity-accent", "#22d3ee"),
+      pnl: "#f59e0b",
+      deposits: getCssVar("--deposits-accent", "#f4b942"),
+    };
+    const equityDatasets = buildEquityDatasets(views, labels).map((dataset) => decorateAreaDataset(dataset, 0.14));
     const exposureDataset = getExposureDatasetForRange(views, labels, currentMarketType);
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
-    const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
+    const weightedDeposits = buildWeightedSeries(
+      views,
+      labels,
+      "deposits",
+      getCssVar("--deposits-accent", "#f4b942")
+    );
+    const activitySeries = buildActivitySeries(rangeKey, currentMarketType);
     const pnlDatasets = [
       ...(weightedPnl ? [weightedPnl] : []),
       ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
-    ];
+    ].map((dataset) => decorateSignedPnlDataset(dataset));
     const depositsDatasets = [
       ...(weightedDeposits ? [weightedDeposits] : []),
       ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
-    ];
+    ].map((dataset) => decorateAreaDataset(dataset, 0.12));
 
     const {
       drawdown: drawdownChart,
       equity: equityChart,
       exposure: exposureChart,
       pnl: pnlChart,
+      activity: activityChart,
       deposits: depositsChart,
     } = portfolioCharts;
-    if (!drawdownChart || !equityChart || !exposureChart || !pnlChart || !depositsChart) {
+    if (!drawdownChart || !equityChart || !exposureChart || !pnlChart || !activityChart || !depositsChart) {
       initPortfolioCharts(rangeKey);
       return;
     }
@@ -17908,6 +18408,10 @@
     applyPnlTooltipStyling(pnlChart);
     pnlChart.update();
 
+    setActivityChartMode(activityChart, activitySeries, activityViewMode);
+    activityChart.options.scales.y.grid.color = getChartGridColor();
+    activityChart.update();
+
     depositsChart.data.labels = labels;
     depositsChart.data.datasets = depositsDatasets;
     applyTimelineFutureFade(depositsChart, views[0].view.times);
@@ -17919,6 +18423,8 @@
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
     chartLastValues.exposure = getLastFiniteValue(exposureDataset?.data || []);
     chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
+    chartLastValues.activityTrades = Number.isFinite(activitySeries.totalTrades) ? activitySeries.totalTrades : null;
+    chartLastValues.activityVolume = Number.isFinite(activitySeries.totalVolume) ? activitySeries.totalVolume : null;
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
     updateChartTitleValues();
     updatePerformanceMetrics(rangeKey);
@@ -17928,7 +18434,6 @@
   async function loadPortfolio(wallets = currentWallets) {
     try {
       portfolioErrorEl.textContent = "";
-      setPortfolioLoadingState(true, "Loading performance graphs…");
       portfolioDataByWallet.clear();
       const walletList = Array.isArray(wallets) ? wallets : [wallets];
 
@@ -17943,13 +18448,16 @@
         })
       );
 
+      portfolioLoadSettled = true;
       initPortfolioCharts(currentRangeKey);
+      syncPerformanceLoadingState();
       if (thirdPanelMode === "transfers") {
         refreshTransfersPanel(currentRangeKey);
       }
     } catch (err) {
       console.error("Portfolio error", err);
-      setPortfolioLoadingState(false, "");
+      portfolioLoadSettled = true;
+      syncPerformanceLoadingState();
       portfolioErrorEl.textContent = "Failed to load performance data: " + (err?.message || err);
     }
   }
@@ -18061,8 +18569,18 @@
       await initClients();
       await spotMetaTask;
       const spotLoadTask = refreshSpotForWallets(walletList);
+      const snapshotTask = Promise.all(walletList.map((wallet) => loadSnapshot(wallet)));
+      const accountOverviewReadyTask = (async () => {
+        await snapshotTask;
+        if (currentMarketType === "spot" || currentMarketType === "all") {
+          await spotLoadTask;
+        }
+        isAccountOverviewReady = true;
+        recomputeAndRenderMarginSummary();
+      })();
+
       await Promise.all([
-        Promise.all(walletList.map((wallet) => loadSnapshot(wallet))),
+        snapshotTask,
         loadPortfolio(walletList),
         startStreams(walletList),
         ensureHistoricalDataLoaded(),
@@ -18076,9 +18594,7 @@
       if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalFills(walletList);
       }
-      if (currentMarketType === "spot") {
-        await spotLoadTask;
-      }
+      await accountOverviewReadyTask;
       startLiveSnapshotRefreshTimer(walletList);
     } finally {
       trackBtnEl.disabled = false;
@@ -18614,6 +19130,24 @@
     });
   }
 
+  if (accountOverviewCardEl) {
+    const revealAccountOverviewScrollbar = () => {
+      accountOverviewCardEl.classList.add("is-scrolling");
+      clearTimeout(accountOverviewScrollHideTimer);
+      accountOverviewScrollHideTimer = setTimeout(() => {
+        accountOverviewCardEl.classList.remove("is-scrolling");
+      }, 700);
+    };
+
+    accountOverviewCardEl.addEventListener("scroll", revealAccountOverviewScrollbar, { passive: true });
+    accountOverviewCardEl.addEventListener("mouseenter", () => {
+      clearTimeout(accountOverviewScrollHideTimer);
+    });
+    accountOverviewCardEl.addEventListener("mouseleave", () => {
+      accountOverviewCardEl.classList.remove("is-scrolling");
+    });
+  }
+
   document.addEventListener("click", (e) => {
     if (!priceContextMenuEl || !priceContextMenuEl.classList.contains("show")) return;
     if (e.target.closest("#priceContextMenu")) return;
@@ -18673,6 +19207,18 @@
     });
   });
 
+  primaryPerformanceButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setPrimaryPerformanceMode(btn.dataset.performanceView);
+    });
+  });
+
+  activityViewButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setActivityViewMode(btn.dataset.activityView);
+    });
+  });
+
   equityViewButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const mode = btn.dataset.equityView === "drawdown" ? "drawdown" : "line";
@@ -18710,6 +19256,9 @@
       setThirdPanelMode(mode);
     });
   });
+
+  setPrimaryPerformanceMode(primaryPerformanceMode);
+  setActivityViewMode(activityViewMode);
 
   if (transfersListBodyEl) {
     transfersListBodyEl.addEventListener("click", async (e) => {

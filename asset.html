@@ -72,7 +72,7 @@
         #coin-btn {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 6px;
@@ -84,6 +84,35 @@
             white-space: nowrap;
             user-select: none;
             transition: border-color 0.15s;
+        }
+
+        .coin-btn-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        #coin-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .coin-btn-badge {
+            display: inline-flex;
+            align-items: center;
+            height: 18px;
+            padding: 0 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--muted);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            flex-shrink: 0;
         }
 
         #coin-btn:hover {
@@ -104,6 +133,63 @@
             flex-shrink: 0;
             background: #1e2329;
             padding: 1px;
+        }
+
+        .mini-coin-select {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(6,7,9,0.8);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            margin-bottom: 4px;
+            max-width: max-content;
+        }
+
+        .mini-coin-logo {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: #1e2329;
+            padding: 1px;
+            flex-shrink: 0;
+        }
+
+        .mini-coin-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .mini-coin-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text);
+            letter-spacing: 0.5px;
+        }
+
+        .mini-coin-badge {
+            display: inline-flex;
+            align-items: center;
+            height: 16px;
+            padding: 0 5px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.04);
+            color: var(--muted);
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            flex-shrink: 0;
         }
 
         #coin-dropdown {
@@ -345,16 +431,84 @@
             background: var(--surface2);
         }
 
-        #chart-wrap {
+        .chart-loading-wrap {
             flex: 1;
             position: relative;
             overflow: hidden;
             min-height: 0;
         }
 
+        .chart-loading-wrap.is-loading > :not(.chart-loading-overlay) {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .chart-loading-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 8;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+            background: #060709;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .chart-loading-wrap.is-loading .chart-loading-overlay {
+            display: flex;
+        }
+
+        .chart-loading-overlay img {
+            width: min(148px, 38%);
+            max-width: 148px;
+            height: auto;
+            opacity: 0.96;
+            object-fit: contain;
+        }
+
+        .chart-loading-overlay span {
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
         #chart-canvas {
             width: 100%;
             height: 100%;
+        }
+
+        #chart-wrap a[href*="tradingview"],
+        #chart-wrap a[title*="TradingView"],
+        #chart-wrap a[aria-label*="TradingView"],
+        #chart-wrap-2 a[href*="tradingview"],
+        #chart-wrap-2 a[title*="TradingView"],
+        #chart-wrap-2 a[aria-label*="TradingView"] {
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        #chart-wrap a[href*="tradingview"] svg,
+        #chart-wrap a[title*="TradingView"] svg,
+        #chart-wrap a[aria-label*="TradingView"] svg,
+        #chart-wrap a[href*="tradingview"] img,
+        #chart-wrap a[title*="TradingView"] img,
+        #chart-wrap a[aria-label*="TradingView"] img,
+        #chart-wrap-2 a[href*="tradingview"] svg,
+        #chart-wrap-2 a[title*="TradingView"] svg,
+        #chart-wrap-2 a[aria-label*="TradingView"] svg,
+        #chart-wrap-2 a[href*="tradingview"] img,
+        #chart-wrap-2 a[title*="TradingView"] img,
+        #chart-wrap-2 a[aria-label*="TradingView"] img {
+            filter: brightness(0) invert(1);
+            opacity: 0.92;
         }
 
 
@@ -850,7 +1004,10 @@
             <div id="coin-picker-wrap">
                 <div id="coin-btn" onclick="toggleDropdown()">
                     <img id="coin-logo" src="images/coins/BTC.svg" data-coin="BTC" data-fallback-tried="0" onerror="handleCoinImgError(this)">
-                    <span id="coin-label">BTC</span>
+                    <span class="coin-btn-meta">
+                        <span id="coin-label">BTC</span>
+                        <span id="coin-badge" class="coin-btn-badge" style="display:none;"></span>
+                    </span>
                     <span id="coin-perc" style="font-size: 13px; font-weight: 500; margin-left: 2px;"></span>
                     <span class="caret">▼</span>
                 </div>
@@ -895,7 +1052,7 @@
                 <div id="charts-container" style="display:flex; flex:1; min-height:0; background:var(--border); gap:1px;">
                     <!-- Primary Chart -->
                     <div id="chart-container-1" style="flex:1; background:var(--bg); display:flex; flex-direction:column; position:relative; min-width:0;">
-                        <div id="chart-wrap" style="flex:1; min-height:0; position:relative;">
+                        <div id="chart-wrap" class="chart-loading-wrap is-loading" style="flex:1; min-height:0; position:relative;">
                             <div id="chart-canvas"></div>
                             <div id="chart-legend">
                                 <span id="legend-name">BTC/USD • 15m</span>
@@ -907,6 +1064,10 @@
                                     <span class="v" id="leg-pct" style="margin-left: 2px;"></span>
                                 </div>
                             </div>
+                            <div class="chart-loading-overlay" id="chart-loading-1" aria-hidden="true">
+                                <img src="images/pulse.gif" alt="Hypermonitor loading logo">
+                                <span>Loading...</span>
+                            </div>
                         </div>
                     </div>
 
@@ -915,16 +1076,20 @@
 
                         
                         <!-- Second Coin Dropdown Instance -->
-                        <div id="coin-dropdown-2" style="display:none; position:absolute; top:42px; left:12px; z-index:10; background:var(--surface); border:1px solid var(--border); border-radius:8px; width:220px; box-shadow:0 10px 24px rgba(0,0,0,0.4);">
+                        <div id="coin-dropdown-2" style="display:none; position:fixed; top:42px; left:12px; z-index:10; background:var(--surface); border:1px solid var(--border); border-radius:8px; width:220px; box-shadow:0 10px 24px rgba(0,0,0,0.4);">
                             <input id="coin-search-2" type="text" placeholder="Search coin…" autocomplete="off" oninput="filterCoins2(this.value)" style="width:100%; border:none; background:transparent; padding:12px; font-size:14px; border-bottom:1px solid var(--border); color:var(--text); outline:none;">
                             <div id="coin-list-2" style="max-height:300px; overflow-y:auto; padding:4px;"></div>
                         </div>
 
-                        <div id="chart-wrap-2" style="flex:1; display:flex; flex-direction:column; position:relative; min-height:0;">
+                        <div id="chart-wrap-2" class="chart-loading-wrap" style="flex:1; display:flex; flex-direction:column; position:relative; min-height:0;">
                             <div id="chart-canvas-2" style="flex:1;"></div>
                             <div id="chart-legend" style="pointer-events:none; z-index:5;"> <!-- inherit styles -->
-                                <div onclick="toggleDropdown2()" style="pointer-events:auto; display:inline-flex; align-items:center; gap:6px; background:rgba(6,7,9,0.8); padding:4px 8px; border-radius:6px; border:1px solid var(--border); cursor:pointer; margin-bottom:4px; max-width: max-content;">
-                                    <span id="coin-label-2" style="font-weight:600; font-size:13px; color:var(--text); letter-spacing:0.5px;">ETH</span>
+                                <div id="coin-toggle-2" class="mini-coin-select" onclick="toggleDropdown2()">
+                                    <img id="coin-logo-2" class="mini-coin-logo" src="images/coins/ETH.svg" data-coin="ETH" data-fallback-tried="0" onerror="handleCoinImgError(this)" alt="ETH">
+                                    <span class="mini-coin-meta">
+                                        <span id="coin-label-2" class="mini-coin-label">ETH</span>
+                                        <span id="coin-badge-2" class="mini-coin-badge" style="display:none;"></span>
+                                    </span>
                                     <span style="font-size:10px; color:var(--muted);">▼</span>
                                 </div>
                                 <span id="legend-name-2" style="display:none;">ETH/USD • 15m</span>
@@ -935,6 +1100,10 @@
                                     <span>C <span class="v" id="leg-c-2">–</span></span>
                                     <span class="v" id="leg-pct-2" style="margin-left: 2px;"></span>
                                 </div>
+                            </div>
+                            <div class="chart-loading-overlay" id="chart-loading-2" aria-hidden="true">
+                                <img src="images/pulse.gif" alt="Hypermonitor loading logo">
+                                <span>Loading...</span>
                             </div>
                         </div>
                     </div>
@@ -1023,6 +1192,29 @@
         const API = 'https://api.hyperliquid.xyz/info';
         const WS = 'wss://api.hyperliquid.xyz/ws';
         const COIN_ICON_BASE = 'https://app.hyperliquid.xyz/coins/';
+        const NON_CRYPTO_PREFIXES = ['xyz', 'flx', 'hyna', 'km', 'vntl', 'cash'];
+        const SPECIAL_LOGOS = new Map([
+            ['USA500', 'images/coins/USA500.png'],
+            ['COPPER', 'images/coins/COPPER.png'],
+            ['GOLD', 'images/coins/GOLD.svg'],
+            ['SILVER', 'images/coins/SILVER.svg'],
+            ['CRCL', 'images/coins/CRCL.svg'],
+            ['OIL', 'images/coins/OIL.svg'],
+            ['USOIL', 'images/coins/USOIL.svg']
+        ]);
+        const DOMAIN_LOGOS = new Map([
+            ['NVDA', 'https://logo.clearbit.com/nvidia.com'],
+            ['MSTR', 'https://logo.clearbit.com/microstrategy.com'],
+            ['TSLA', 'https://logo.clearbit.com/tesla.com'],
+            ['AAPL', 'https://logo.clearbit.com/apple.com'],
+            ['AMZN', 'https://logo.clearbit.com/amazon.com'],
+            ['GOOGL', 'https://logo.clearbit.com/google.com'],
+            ['MSFT', 'https://logo.clearbit.com/microsoft.com'],
+            ['META', 'https://logo.clearbit.com/meta.com'],
+            ['SPY', 'https://logo.clearbit.com/ssga.com'],
+            ['QQQ', 'https://logo.clearbit.com/invesco.com'],
+            ['CRCL', 'https://logo.clearbit.com/circle.com']
+        ]);
         const TF_MS = { '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3 };
         const ROWS = 14;
         const MAX_TRADES = 80;
@@ -1080,7 +1272,7 @@
 
         // ── DOM refs ───────────────────────────────────────────────
         const $ = id => document.getElementById(id);
-        const coinLabel = $('coin-label'), sMark = $('s-mark'), sChg = $('s-chg');
+        const sMark = $('s-mark'), sChg = $('s-chg');
         const sVol = $('s-vol'), sOi = $('s-oi'), sFund = $('s-fund');
         const obAsks = $('ob-asks-inner'), obBids = $('ob-bids-inner');
         const obMid = $('ob-mid'), obSprdInfo = $('ob-spread-info');
@@ -1100,6 +1292,18 @@
         const obOpenBtn = $('ob-open-btn');
         const chartCont2 = $('chart-container-2');
         const addChartBtn = $('add-chart-btn');
+        const chartLoadingWrap1 = $('chart-wrap');
+        const chartLoadingWrap2 = $('chart-wrap-2');
+
+        function setChartLoading(targetNum, isLoading, message = 'Loading...') {
+            const wrap = targetNum === 2 ? chartLoadingWrap2 : chartLoadingWrap1;
+            const overlay = $(`chart-loading-${targetNum}`);
+            if (!wrap || !overlay) return;
+            wrap.classList.toggle('is-loading', Boolean(isLoading));
+            overlay.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
+            const textEl = overlay.querySelector('span');
+            if (textEl) textEl.textContent = message;
+        }
 
         function toggleOb() {
             if (rightPanel.style.display === 'none') {
@@ -1116,6 +1320,7 @@
             if (S.chart2Active) {
                 chartCont2.style.display = 'flex';
                 addChartBtn.textContent = '- Remove Chart';
+                syncSelectedCoinUi(2);
                 fetchCandles2();
             } else {
                 chartCont2.style.display = 'none';
@@ -1142,7 +1347,7 @@
         // ── Chart 1 Setup ──────────────────────────────────────────
         const chartWrap = $('chart-wrap');
         const chart = LightweightCharts.createChart($('chart-canvas'), {
-            layout: { background: { color: '#060709' }, textColor: '#7d8590' },
+            layout: { background: { color: '#060709' }, textColor: '#7d8590', attributionLogo: false },
             grid: { vertLines: { color: '#111318' }, horzLines: { color: '#111318' } },
             crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#58a6ff44', labelBackgroundColor: '#1e2329' }, horzLine: { color: '#58a6ff44', labelBackgroundColor: '#1e2329' } },
             rightPriceScale: { borderColor: '#1e2329' },
@@ -1169,7 +1374,7 @@
         // ── Chart 2 Setup ──────────────────────────────────────────
         const chartWrap2 = $('chart-wrap-2');
         const chart2 = LightweightCharts.createChart($('chart-canvas-2'), {
-            layout: { background: { color: '#060709' }, textColor: '#7d8590' },
+            layout: { background: { color: '#060709' }, textColor: '#7d8590', attributionLogo: false },
             grid: { vertLines: { color: '#111318' }, horzLines: { color: '#111318' } },
             crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#58a6ff44', labelBackgroundColor: '#1e2329' }, horzLine: { color: '#58a6ff44', labelBackgroundColor: '#1e2329' } },
             rightPriceScale: { borderColor: '#1e2329' },
@@ -1214,6 +1419,7 @@
 
         async function fetchCandles() {
             const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
+            setChartLoading(1, true);
             try {
                 const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin, interval: S.tf, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
@@ -1228,16 +1434,19 @@
                     legO.textContent = fmt(last.open, d); legH.textContent = fmt(last.high, d); legL.textContent = fmt(last.low, d);
                     legC.textContent = fmt(last.close, d); legC.style.color = last.close >= last.open ? 'var(--up)' : 'var(--down)';
                 }
-            } catch(e) {}
+            } catch(e) {} finally {
+                setChartLoading(1, false);
+            }
         }
         
         async function fetchCandles2() {
             if (!S.chart2Active) return;
             const coinLabel = getSelectedCoinLabel(S.coin2);
             $(`legend-name-2`).textContent = `${coinLabel}/USD • ${S.tf}`;
-            $('coin-label-2').textContent = coinLabel;
+            syncSelectedCoinUi(2);
             
             const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
+            setChartLoading(2, true);
             try {
                 const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin2, interval: S.tf, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
@@ -1252,7 +1461,9 @@
                     legO2.textContent = fmt(last.open, d); legH2.textContent = fmt(last.high, d); legL2.textContent = fmt(last.low, d);
                     legC2.textContent = fmt(last.close, d); legC2.style.color = last.close >= last.open ? 'var(--up)' : 'var(--down)';
                 }
-            } catch(e) {}
+            } catch(e) {} finally {
+                setChartLoading(2, false);
+            }
         }
 
         async function loadOlderCandles(targetChart) {
@@ -1389,8 +1600,8 @@
             sFund.className = 'val ' + (fund >= 0 ? 'up' : 'dn');
             sFund.dataset.base = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
             document.title = `${market.label} — Asset Terminal`;
-            coinLabel.textContent = market.label; legName.textContent = `${market.label}/USD • ${S.tf}`;
-            setCoinLogo($('coin-logo'), S.coin);
+            legName.textContent = `${market.label}/USD • ${S.tf}`;
+            syncSelectedCoinUi(1);
             buildAggBar(mark);
         }
 
@@ -1658,10 +1869,27 @@
                 if (url && !urls.includes(url)) urls.push(url);
             };
 
-            if (exact.includes(':')) push(`${COIN_ICON_BASE}${encodeURIComponent(exact)}.svg`);
-            push(`${COIN_ICON_BASE}${encodeURIComponent(baseName)}.svg`);
+            const hyperliquidLogoKeys = [];
+            if (exact.includes(':')) hyperliquidLogoKeys.push(exact);
+            NON_CRYPTO_PREFIXES.forEach(prefix => {
+                const prefixed = `${prefix}:${baseName}`;
+                if (!hyperliquidLogoKeys.includes(prefixed)) hyperliquidLogoKeys.push(prefixed);
+            });
+            if (!hyperliquidLogoKeys.includes(baseName)) hyperliquidLogoKeys.push(baseName);
+
+            hyperliquidLogoKeys.forEach(key => {
+                push(`${COIN_ICON_BASE}${encodeURIComponent(key)}.svg`);
+                push(`${COIN_ICON_BASE}${encodeURIComponent(key)}.png`);
+            });
+
+            push(SPECIAL_LOGOS.get(exact));
+            push(SPECIAL_LOGOS.get(baseName));
+            push(DOMAIN_LOGOS.get(exact));
+            push(DOMAIN_LOGOS.get(baseName));
             push(coinLogoPath(baseName, 'svg'));
             push(coinLogoPath(baseName, 'png'));
+            push(`https://financialmodelingprep.com/image-stock/${encodeURIComponent(baseName)}.png`);
+            push(`https://eodhd.com/img/logos/US/${encodeURIComponent(baseName)}.png`);
             return urls;
         }
 
@@ -1721,6 +1949,35 @@
             return market?.label || getCoinDisplayLabel(key);
         }
 
+        function setCoinBadge(el, marketKey) {
+            if (!el) return;
+            const dex = getCoinDexLabel(marketKey);
+            if (!dex) {
+                el.textContent = '';
+                el.style.display = 'none';
+                return;
+            }
+            el.textContent = dex;
+            el.style.display = 'inline-flex';
+        }
+
+        function syncSelectedCoinUi(targetNum = 1) {
+            const suffix = targetNum === 2 ? '-2' : '';
+            const selectedKey = targetNum === 2 ? S.coin2 : S.coin;
+            const market = getSelectedCoinMarket(selectedKey);
+            const marketKey = market?.key || selectedKey;
+            const label = market?.name || getSelectedCoinName(selectedKey);
+            const toggle = targetNum === 2 ? $('coin-toggle-2') : $('coin-btn');
+            const logo = $(`coin-logo${suffix}`);
+            const labelEl = $(`coin-label${suffix}`);
+            const badgeEl = $(`coin-badge${suffix}`);
+
+            if (labelEl) labelEl.textContent = label;
+            setCoinBadge(badgeEl, marketKey);
+            setCoinLogo(logo, marketKey);
+            if (toggle) toggle.title = getSelectedCoinLabel(marketKey);
+        }
+
         function resolveCoinSelection(value) {
             const normalized = buildMarketKey(value);
             if (availableCoinNames.has(normalized)) return normalized;
@@ -1761,13 +2018,17 @@
             syncSelectedCoins();
             renderCoinList(allCoins, 1);
             renderCoinList(allCoins, 2);
+            syncSelectedCoinUi(1);
+            syncSelectedCoinUi(2);
         }
 
         function renderCoinList(list, targetNum) {
-            $(`coin-list${targetNum===2?'-2':''}`).innerHTML = list.map(c => `
-                <div class="coin-option" onclick="selectCoin('${c.key}', ${targetNum})" title="${c.key}">
+            $(`coin-list${targetNum===2?'-2':''}`).innerHTML = list.map(c => {
+                const logoCandidates = JSON.stringify(coinLogoCandidates(c.key)).replace(/'/g, '&#39;');
+                return `
+                <div class="coin-option" data-coin-key="${c.key}" data-target-num="${targetNum}" tabindex="0" title="${c.key}">
                     <span class="coin-option-main">
-                        <img class="coin-option-logo" src="${coinLogoCandidates(c.key)[0] || coinLogoPath(c.key)}" data-coin="${c.key}" data-logo-candidates='${JSON.stringify(coinLogoCandidates(c.key))}' data-logo-index="0" onerror="handleCoinImgError(this)" alt="${c.name}">
+                        <img class="coin-option-logo" src="${coinLogoCandidates(c.key)[0] || coinLogoPath(c.key)}" data-coin="${c.key}" data-logo-candidates='${logoCandidates}' data-logo-index="0" onerror="handleCoinImgError(this)" alt="${c.name}">
                         <span class="coin-option-text">
                             <span class="coin-option-name">${c.name}</span>
                             ${c.dex ? `<span class="coin-option-badge">${c.dex}</span>` : ''}
@@ -1775,7 +2036,8 @@
                     </span>
                     <span class="coin-px">$${fmt(c.markPx, pxDec(c.markPx))}</span>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function filterCoins(q) {
@@ -1790,14 +2052,21 @@
         function toggleDropdown() {
             const dd = $('coin-dropdown'), btn = $('coin-btn');
             if (dd.classList.contains('open')) { dd.classList.remove('open'); return; }
-            const r = btn.getBoundingClientRect(); dd.style.top = r.top + 'px'; dd.style.left = r.left + 'px';
-            dd.classList.add('open'); $('coin-search').value = ''; renderCoinList(allCoins, 1); $('coin-search').focus();
+            dd.classList.add('open');
+            positionDropdown(dd, btn);
+            $('coin-search').value = '';
+            renderCoinList(allCoins, 1);
+            $('coin-search').focus();
         }
 
         function toggleDropdown2() {
             const dd = $('coin-dropdown-2');
             if (dd.style.display === 'block') { dd.style.display = 'none'; return; }
-            dd.style.display = 'block'; $('coin-search-2').value = ''; renderCoinList(allCoins, 2); $('coin-search-2').focus();
+            dd.style.display = 'block';
+            positionDropdown(dd, $('coin-toggle-2'));
+            $('coin-search-2').value = '';
+            renderCoinList(allCoins, 2);
+            $('coin-search-2').focus();
         }
 
         function selectCoin(name, targetNum) {
@@ -1809,14 +2078,49 @@
                 resetTrades();
                 $('coin-dropdown').classList.remove('open');
                 syncPrimaryCoinUrl();
+                syncSelectedCoinUi(1);
                 reinit();
             } else {
                 S.coin2 = selected;
                 $('coin-dropdown-2').style.display = 'none';
+                syncSelectedCoinUi(2);
                 fetchCandles2();
                 connectWs();
             }
         }
+
+        function positionDropdown(dd, anchor) {
+            if (!dd || !anchor) return;
+            dd.style.visibility = 'hidden';
+            dd.style.minWidth = `${Math.max(anchor.offsetWidth, 220)}px`;
+            const rect = anchor.getBoundingClientRect();
+            const width = dd.offsetWidth || 220;
+            const height = dd.offsetHeight || 280;
+            const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+            const top = Math.max(8, Math.min(rect.bottom + 6, window.innerHeight - height - 8));
+            dd.style.left = `${left}px`;
+            dd.style.top = `${top}px`;
+            dd.style.visibility = '';
+        }
+
+        function handleCoinListActivation(event) {
+            const option = event.target.closest('.coin-option[data-coin-key]');
+            if (!option) return;
+            selectCoin(option.dataset.coinKey || '', Number(option.dataset.targetNum || '1'));
+        }
+
+        function handleCoinListKeydown(event) {
+            const option = event.target.closest('.coin-option[data-coin-key]');
+            if (!option) return;
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            selectCoin(option.dataset.coinKey || '', Number(option.dataset.targetNum || '1'));
+        }
+
+        $('coin-list').addEventListener('click', handleCoinListActivation);
+        $('coin-list-2').addEventListener('click', handleCoinListActivation);
+        $('coin-list').addEventListener('keydown', handleCoinListKeydown);
+        $('coin-list-2').addEventListener('keydown', handleCoinListKeydown);
 
         document.addEventListener('click', e => {
             if (!$('coin-picker-wrap').contains(e.target)) $('coin-dropdown').classList.remove('open');

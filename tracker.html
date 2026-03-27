@@ -27,6 +27,7 @@
       --border: rgba(255, 255, 255, 0.08);
       --border-strong: rgba(255, 255, 255, 0.18);
       --text: #f5f5ff;
+      --text-main: #f5f5ff;
       --muted: rgba(245, 245, 255, 0.62);
       --muted-strong: rgba(245, 245, 255, 0.82);
       --accent: #ffffff;
@@ -38,6 +39,8 @@
       --accent-amber: #f3c969;
       --danger: #f25f5c;
       --danger-soft: rgba(242, 95, 92, 0.16);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --neutral-blue: rgba(124, 176, 255, 0.95);
       --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
       --radius-xl: 16px;
       --radius-lg: 12px;
@@ -84,7 +87,7 @@
     #app {
       width: min(1840px, calc(100vw - 24px));
       margin: 0 auto;
-      padding: 10px 0 24px;
+      padding: 10px 0 88px;
     }
 
     .shell-header {
@@ -352,6 +355,10 @@
       display: block;
     }
 
+    main {
+      min-height: 0;
+    }
+
     .section-intro {
       display: none;
     }
@@ -453,6 +460,9 @@
     }
 
     .trade-frame-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
       overflow: hidden;
     }
 
@@ -463,11 +473,46 @@
 
     .trade-frame {
       width: 100%;
-      height: min(84vh, 1200px);
-      min-height: 820px;
+      height: 100%;
+      min-height: 0;
       border: none;
       display: block;
       background: #060709;
+    }
+
+    .trade-view-stack {
+      display: grid;
+      grid-template-rows: minmax(0, 3fr) minmax(0, 2fr);
+      gap: 16px;
+      height: calc(100vh - var(--header-height) - 114px);
+      min-height: 780px;
+    }
+
+    .trade-leaderboard-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      background: #0a0a0a;
+      border-color: #1e2329;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .trade-leaderboard-panel .active-filters-bar {
+      padding-bottom: 12px;
+    }
+
+    .trade-leaderboard-panel .table-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+      padding-bottom: 14px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 10%);
+    }
+
+    .trade-leaderboard-panel .table-wrap.loading {
+      min-height: 0;
     }
 
     .trade-footnote {
@@ -483,6 +528,12 @@
       grid-template-columns: 320px minmax(0, 1fr);
       gap: 16px;
       align-items: start;
+    }
+
+    .explore-main {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
     }
 
     .sidebar {
@@ -709,10 +760,356 @@
 
     .leaderboard-panel {
       overflow: hidden;
+      background: #0a0a0a;
+      border-color: #1e2329;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .market-heatmap-panel {
+      overflow: hidden;
       background:
-        radial-gradient(circle at top right, rgba(38, 217, 127, 0.08), transparent 24%),
-        radial-gradient(circle at top left, rgba(0, 112, 243, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(38, 217, 127, 0.06), transparent 24%),
+        radial-gradient(circle at top left, rgba(242, 95, 92, 0.08), transparent 28%),
         var(--panel);
+    }
+
+    .market-heatmap-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .market-heatmap-copy {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .market-heatmap-meta {
+      display: grid;
+      gap: 8px;
+      justify-items: end;
+      min-width: 240px;
+    }
+
+    .market-heatmap-summary {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .market-heatmap-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 0.68rem;
+      color: var(--muted-strong);
+      white-space: nowrap;
+    }
+
+    .market-heatmap-stat strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .market-heatmap-status {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-align: right;
+    }
+
+    .market-heatmap-legend {
+      display: inline-grid;
+      gap: 6px;
+      justify-items: end;
+    }
+
+    .market-heatmap-legend-scale {
+      width: 180px;
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(90deg, #7b232c 0%, #b53a45 30%, #2c3138 50%, #1f6f4d 70%, #2ebd85 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .market-heatmap-legend-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.66rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .market-heatmap-wrap {
+      padding: 18px;
+    }
+
+    .market-heatmap-board {
+      position: relative;
+      height: min(54vh, 560px);
+      min-height: 360px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #111318;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .market-heatmap-tiles {
+      position: absolute;
+      inset: 0;
+    }
+
+    .market-heatmap-board.is-loading .market-heatmap-tile {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .market-heatmap-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(10, 12, 18, 0.75), rgba(10, 12, 18, 0.42));
+      color: var(--muted);
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      text-align: center;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .market-heatmap-board.is-loading .market-heatmap-overlay,
+    .market-heatmap-board.is-empty .market-heatmap-overlay {
+      display: flex;
+    }
+
+    .market-heatmap-overlay img {
+      width: 76px;
+      height: 76px;
+      object-fit: contain;
+      opacity: 0.96;
+    }
+
+    .market-heatmap-tile {
+      position: absolute;
+      margin: 0;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 0;
+      padding: 9px 10px;
+      background: linear-gradient(180deg, var(--heat-start, #2a2e34), var(--heat-end, #191c21));
+      color: #fff;
+      overflow: hidden;
+      text-align: left;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .market-heatmap-tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 42%);
+      pointer-events: none;
+    }
+
+    .market-heatmap-tile:hover {
+      transform: scale(1.01);
+      z-index: 2;
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .market-heatmap-tile-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      align-content: space-between;
+      gap: 6px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .market-heatmap-tile-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .market-heatmap-tile-symbol {
+      display: block;
+      min-width: 0;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .market-heatmap-tile-dex {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 5px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.12);
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      flex: 0 0 auto;
+    }
+
+    .market-heatmap-tile-body {
+      display: grid;
+      gap: 2px;
+      align-content: end;
+    }
+
+    .market-heatmap-tile-change {
+      font-weight: 700;
+      line-height: 1;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .market-heatmap-tile-price,
+    .market-heatmap-tile-volume {
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 0.72rem;
+      line-height: 1.15;
+    }
+
+    .market-heatmap-tile.size-xl {
+      padding: 16px 18px;
+    }
+
+    .market-heatmap-tile.size-xl .market-heatmap-tile-symbol {
+      font-size: clamp(1.6rem, 2.6vw, 3.4rem);
+    }
+
+    .market-heatmap-tile.size-xl .market-heatmap-tile-change {
+      font-size: clamp(1rem, 1.55vw, 1.7rem);
+    }
+
+    .market-heatmap-tile.size-xl .market-heatmap-tile-price {
+      font-size: 0.92rem;
+    }
+
+    .market-heatmap-tile.size-lg .market-heatmap-tile-symbol {
+      font-size: clamp(1rem, 1.45vw, 1.8rem);
+    }
+
+    .market-heatmap-tile.size-lg .market-heatmap-tile-change {
+      font-size: 0.92rem;
+    }
+
+    .market-heatmap-tile.size-md .market-heatmap-tile-symbol {
+      font-size: 0.9rem;
+    }
+
+    .market-heatmap-tile.size-md .market-heatmap-tile-change {
+      font-size: 0.8rem;
+    }
+
+    .market-heatmap-tile.size-sm {
+      padding: 7px 8px;
+    }
+
+    .market-heatmap-tile.size-sm .market-heatmap-tile-symbol {
+      font-size: 0.76rem;
+    }
+
+    .market-heatmap-tile.size-sm .market-heatmap-tile-price,
+    .market-heatmap-tile.size-sm .market-heatmap-tile-volume,
+    .market-heatmap-tile.size-sm .market-heatmap-tile-dex {
+      display: none;
+    }
+
+    .market-heatmap-tile.size-xs {
+      padding: 5px 6px;
+    }
+
+    .market-heatmap-tile.size-xs .market-heatmap-tile-symbol {
+      font-size: 0.62rem;
+    }
+
+    .market-heatmap-tile.size-xs .market-heatmap-tile-change,
+    .market-heatmap-tile.size-xs .market-heatmap-tile-price,
+    .market-heatmap-tile.size-xs .market-heatmap-tile-volume,
+    .market-heatmap-tile.size-xs .market-heatmap-tile-dex {
+      display: none;
+    }
+
+    .explore-market-panel {
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .explore-market-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .explore-market-copy {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .explore-market-eyebrow {
+      color: rgba(226, 232, 240, 0.56);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .explore-market-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .explore-market-subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .explore-market-frame {
+      width: 100%;
+      height: min(62vh, 760px);
+      min-height: 520px;
+      border: none;
+      display: block;
+      background: #060709;
     }
 
     .leaderboard-hero {
@@ -921,50 +1318,46 @@
 
     .active-filters-bar {
       display: grid;
-      gap: 10px;
-      padding: 16px 18px 18px;
+      gap: 4px;
+      padding: 10px 14px 0;
       border-bottom: 1px solid var(--border);
+      background: #0a0a0a;
     }
 
-    .active-filters-label {
-      color: rgba(226, 232, 240, 0.56);
-      font-size: 0.68rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
+    .active-filters-bar.is-hidden {
+      display: none;
     }
 
     .active-filters {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .active-filters:empty::after {
-      content: "No extra filters applied";
-      color: var(--muted);
-      font-size: 0.8rem;
+      gap: 4px;
+      min-width: 0;
     }
 
     .filter-chip {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
+      gap: 4px;
+      max-width: min(100%, 180px);
+      padding: 3px 6px;
       border: 1px solid var(--border);
-      border-radius: 999px;
-      background:
-        linear-gradient(180deg, rgba(15, 23, 42, 0.16), rgba(2, 6, 23, 0.1)),
-        rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
       color: var(--muted-strong);
-      font-size: 0.78rem;
+      font-size: 0.58rem;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .table-wrap {
       position: relative;
       overflow: auto;
       max-height: min(72vh, 1080px);
-      padding: 0 18px 18px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 12%);
+      padding: 0 14px 14px;
+      background: transparent;
     }
 
     .table-wrap.loading {
@@ -978,11 +1371,12 @@
       display: none;
       align-items: center;
       justify-content: center;
+      flex-direction: column;
+      gap: 10px;
       pointer-events: none;
       color: var(--muted);
-      font-size: 0.95rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-size: 0.88rem;
+      letter-spacing: 0.02em;
       background: linear-gradient(180deg, rgba(10, 12, 18, 0.4), rgba(10, 12, 18, 0.16));
     }
 
@@ -990,36 +1384,98 @@
       display: flex;
     }
 
+    .loading-overlay img {
+      width: 74px;
+      height: 74px;
+      object-fit: contain;
+      opacity: 0.96;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 980px;
+      min-width: 820px;
+      table-layout: fixed;
+      font-size: 0.8rem;
     }
 
     thead {
       position: sticky;
       top: 0;
       z-index: 5;
-      background: rgba(10, 12, 18, 0.96);
-      backdrop-filter: blur(12px);
+      background: #17181f;
+      backdrop-filter: none;
     }
 
     th,
     td {
-      padding: 14px 12px;
+      padding: 0.3rem 0.32rem;
       border-bottom: 1px solid var(--border);
       text-align: left;
-      font-size: 0.88rem;
+      font-size: clamp(0.76rem, 0.62vw, 0.92rem);
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: middle;
     }
 
     th {
       color: var(--muted);
-      font-size: 0.74rem;
-      letter-spacing: 0.1em;
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       font-weight: 600;
     }
+
+    .leaderboard-panel th:nth-child(1),
+    .trade-leaderboard-panel th:nth-child(1),
+    .leaderboard-panel td:nth-child(1),
+    .trade-leaderboard-panel td:nth-child(1) { width: 7%; }
+
+    .leaderboard-panel th:nth-child(2),
+    .trade-leaderboard-panel th:nth-child(2),
+    .leaderboard-panel td:nth-child(2),
+    .trade-leaderboard-panel td:nth-child(2) { width: 17%; }
+
+    .leaderboard-panel th:nth-child(3),
+    .trade-leaderboard-panel th:nth-child(3),
+    .leaderboard-panel td:nth-child(3),
+    .trade-leaderboard-panel td:nth-child(3) { width: 12%; }
+
+    .leaderboard-panel th:nth-child(4),
+    .trade-leaderboard-panel th:nth-child(4),
+    .leaderboard-panel td:nth-child(4),
+    .trade-leaderboard-panel td:nth-child(4) { width: 11%; }
+
+    .leaderboard-panel th:nth-child(5),
+    .trade-leaderboard-panel th:nth-child(5),
+    .leaderboard-panel td:nth-child(5),
+    .trade-leaderboard-panel td:nth-child(5) { width: 9%; }
+
+    .leaderboard-panel th:nth-child(6),
+    .trade-leaderboard-panel th:nth-child(6),
+    .leaderboard-panel td:nth-child(6),
+    .trade-leaderboard-panel td:nth-child(6) { width: 10%; }
+
+    .leaderboard-panel th:nth-child(7),
+    .trade-leaderboard-panel th:nth-child(7),
+    .leaderboard-panel td:nth-child(7),
+    .trade-leaderboard-panel td:nth-child(7) { width: 8.5%; }
+
+    .leaderboard-panel th:nth-child(8),
+    .trade-leaderboard-panel th:nth-child(8),
+    .leaderboard-panel td:nth-child(8),
+    .trade-leaderboard-panel td:nth-child(8) { width: 8.5%; }
+
+    .leaderboard-panel th:nth-child(9),
+    .trade-leaderboard-panel th:nth-child(9),
+    .leaderboard-panel td:nth-child(9),
+    .trade-leaderboard-panel td:nth-child(9) { width: 8.5%; }
+
+    .leaderboard-panel th:nth-child(10),
+    .trade-leaderboard-panel th:nth-child(10),
+    .leaderboard-panel td:nth-child(10),
+    .trade-leaderboard-panel td:nth-child(10) { width: 8.5%; }
 
     th.sortable {
       cursor: pointer;
@@ -1034,25 +1490,34 @@
       transition: background 160ms ease, transform 160ms ease;
     }
 
+    tbody tr:nth-child(even) {
+      background: #14141c;
+    }
+
+    tbody tr[data-wallet] {
+      cursor: pointer;
+    }
+
     tbody tr:hover {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+      background: rgba(255, 255, 255, 0.04);
     }
 
     tbody tr.is-selected {
-      background: linear-gradient(90deg, rgba(38, 217, 127, 0.12), rgba(0, 112, 243, 0.08));
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .rank-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 38px;
-      padding: 7px 10px;
+      min-width: 30px;
+      padding: 0.18rem 0.38rem;
       border-radius: var(--radius-sm);
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
       font-weight: 600;
       font-variant-numeric: tabular-nums;
+      font-size: 0.72rem;
     }
 
     tbody tr:nth-child(1) .rank-badge {
@@ -1072,13 +1537,13 @@
 
     .wallet-link {
       display: inline-grid;
-      gap: 4px;
+      gap: 2px;
       max-width: 100%;
       cursor: pointer;
     }
 
     .wallet-link strong {
-      font-size: 0.96rem;
+      font-size: clamp(0.78rem, 0.62vw, 0.92rem);
       font-weight: 600;
       color: var(--text);
     }
@@ -1089,18 +1554,18 @@
       flex-wrap: wrap;
       gap: 6px;
       color: var(--muted);
-      font-size: 0.76rem;
+      font-size: 0.64rem;
     }
 
     .mini-chip {
       display: inline-flex;
       align-items: center;
-      padding: 4px 8px;
+      padding: 0.14rem 0.38rem;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
       background: rgba(255, 255, 255, 0.03);
       color: var(--muted-strong);
-      font-size: 0.72rem;
+      font-size: 0.62rem;
     }
 
     .mini-chip.good {
@@ -1134,8 +1599,8 @@
 
     .score-cell {
       display: grid;
-      gap: 6px;
-      min-width: 120px;
+      gap: 4px;
+      min-width: 0;
     }
 
     .score-cell-top {
@@ -1145,10 +1610,15 @@
       gap: 10px;
     }
 
+    .score-value {
+      font-size: 0.76rem;
+      line-height: 1;
+    }
+
     .score-bar {
       position: relative;
       width: 100%;
-      height: 6px;
+      height: 5px;
       border-radius: 6px;
       overflow: hidden;
       background: rgba(255, 255, 255, 0.06);
@@ -1158,7 +1628,12 @@
       position: absolute;
       inset: 0 auto 0 0;
       border-radius: inherit;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(150, 150, 150, 0.92));
+      background: var(--score-fill, linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(150, 150, 150, 0.92)));
+      box-shadow: 0 0 16px var(--score-glow, transparent);
+    }
+
+    .score-value {
+      color: var(--score-color, var(--text));
     }
 
     .table-empty {
@@ -1173,6 +1648,392 @@
       font-size: 0.8rem;
       border-top: 1px solid var(--border);
       line-height: 1.5;
+    }
+
+    .price-footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      background: var(--panel-strong);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.5);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .price-footer.pending {
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+    }
+
+    .price-footer-inner {
+      width: calc(100vw - 24px);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: nowrap;
+      position: relative;
+      padding: 0.15rem 0.8rem;
+    }
+
+    .price-brand-wrap {
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    .price-currency-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.08rem;
+      padding: 0.12rem;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      position: static;
+      z-index: 2;
+    }
+
+    .price-currency-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.62rem;
+      line-height: 1;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .price-currency-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+    }
+
+    .price-currency-btn:hover {
+      color: var(--text-main);
+    }
+
+    .price-ticker {
+      flex: 1 1 auto;
+      overflow: hidden;
+      min-width: 0;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
+    }
+
+    .price-track {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      white-space: nowrap;
+      --price-scroll-distance: 50%;
+    }
+
+    .price-list {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: nowrap;
+    }
+
+    .price-list.clone {
+      pointer-events: none;
+      display: none;
+    }
+
+    .price-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      white-space: nowrap;
+      font-size: 0.78rem;
+      color: var(--text-main);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      cursor: grab;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .price-item.dragging {
+      opacity: 0.6;
+      transform: scale(0.96);
+      cursor: grabbing;
+    }
+
+    .price-item img,
+    .price-item .coinIcon {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      object-fit: contain;
+      background: transparent;
+      padding: 0;
+    }
+
+    .price-item .coinFallback {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+      text-transform: uppercase;
+      overflow: hidden;
+      flex: 0 0 16px;
+    }
+
+    .price-item .coin-price {
+      font-weight: 400;
+      font-size: 0.76rem;
+      letter-spacing: 0.01em;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
+      display: inline;
+      min-width: 0;
+      text-align: left;
+    }
+
+    .price-item .coin-change {
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      display: inline;
+      min-width: 0;
+      text-align: left;
+      color: var(--muted);
+      margin-left: 0;
+    }
+
+    .price-item .coin-change.upnl-pos {
+      color: var(--accent-green);
+    }
+
+    .price-item .coin-change.upnl-neg {
+      color: var(--danger);
+    }
+
+    .price-item .coin-change.upnl-flat {
+      color: var(--neutral-blue);
+    }
+
+    .price-end-marker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.88;
+      flex: 0 0 auto;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .price-end-marker img {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .price-footer.hide-change .coin-change {
+      display: none;
+    }
+
+    .price-footer.rolling .price-list {
+      flex-wrap: nowrap;
+    }
+
+    .price-footer.rolling .price-list.clone {
+      display: inline-flex;
+    }
+
+    .price-footer.rolling .price-track {
+      animation: priceScroll 30s linear infinite;
+    }
+
+    .price-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: auto;
+    }
+
+    .price-add-toggle-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .price-add-toggle-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(18, 18, 24, 0.6);
+      color: #f8fafc;
+    }
+
+    .price-input {
+      padding: 0.3rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.35);
+      color: #e2e8f0;
+      font-size: 0.72rem;
+      outline: none;
+      width: 90px;
+      text-transform: uppercase;
+    }
+
+    .price-input:focus {
+      border-color: rgba(255,255,255,0.7);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.35);
+    }
+
+    .price-add-btn {
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 10, 12, 0.45);
+      color: #e2e8f0;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .price-add-btn:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(18, 18, 24, 0.6);
+      color: #f8fafc;
+    }
+
+    .price-controls.compact {
+      gap: 0;
+    }
+
+    .price-controls.compact .price-add-toggle-btn {
+      display: inline-flex;
+    }
+
+    .price-controls.compact .price-input,
+    .price-controls.compact .price-add-btn {
+      display: none;
+    }
+
+    .price-controls.compact-open .price-add-toggle-btn {
+      display: none;
+    }
+
+    .price-context-menu {
+      position: fixed;
+      z-index: 220;
+      min-width: 150px;
+      background: var(--panel-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 0.25rem;
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+      display: none;
+    }
+
+    .price-context-menu.show {
+      display: block;
+    }
+
+    .price-context-menu[data-has-coin="false"] .price-context-item[data-requires-coin="true"] {
+      display: none;
+    }
+
+    .price-context-item {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text-main);
+      text-align: left;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .price-context-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .price-context-sep {
+      height: 1px;
+      background: rgba(148, 163, 184, 0.2);
+      margin: 0.25rem 0.1rem;
+    }
+
+    .price-context-menu.hide-change-options [data-action="change-range"],
+    .price-context-menu.hide-change-options .price-context-submenu,
+    .price-context-menu.hide-change-options .price-context-sep {
+      display: none;
+    }
+
+    .price-context-group {
+      position: relative;
+      padding-right: 6px;
+    }
+
+    .price-context-submenu {
+      position: absolute;
+      top: auto;
+      bottom: 0;
+      left: 100%;
+      margin-left: -2px;
+      min-width: 150px;
+      background: var(--panel-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 0.25rem;
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
+      display: none;
+    }
+
+    .price-context-group:hover .price-context-submenu,
+    .price-context-group:focus-within .price-context-submenu {
+      display: block;
+    }
+
+    .price-context-item[data-has-submenu="true"]::after {
+      content: "›";
+      float: right;
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    @keyframes priceScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(calc(-1 * var(--price-scroll-distance, 50%))); }
     }
 
     .wallet-modal-backdrop {
@@ -1314,6 +2175,7 @@
       #app {
         width: min(calc(100vw - 20px), 100%);
         padding-top: 10px;
+        padding-bottom: 88px;
       }
 
       .shell-header {
@@ -1335,6 +2197,14 @@
       .leaderboard-hero {
         padding-bottom: 16px;
       }
+
+      .explore-market-head {
+        align-items: start;
+      }
+
+      .market-heatmap-head {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 860px) {
@@ -1344,7 +2214,7 @@
 
       #app {
         width: calc(100vw - 12px);
-        padding-bottom: 18px;
+        padding-bottom: 82px;
       }
 
       .shell-header {
@@ -1374,8 +2244,48 @@
       }
 
       .trade-frame {
-        min-height: 620px;
-        height: 74vh;
+        min-height: 0;
+        height: 100%;
+      }
+
+      .trade-frame-panel {
+        min-height: 52vh;
+      }
+
+      .trade-leaderboard-panel {
+        min-height: 34vh;
+      }
+
+      .explore-market-frame {
+        min-height: 420px;
+        height: 54vh;
+      }
+
+      .market-heatmap-head {
+        display: grid;
+      }
+
+      .market-heatmap-meta {
+        min-width: 0;
+        justify-items: start;
+      }
+
+      .market-heatmap-summary {
+        justify-content: flex-start;
+      }
+
+      .market-heatmap-status {
+        text-align: left;
+      }
+
+      .market-heatmap-board {
+        min-height: 280px;
+        height: 46vh;
+      }
+
+      .trade-view-stack {
+        height: auto;
+        min-height: 0;
       }
 
       .summary-grid,
@@ -1424,6 +2334,30 @@
         padding: 9px;
         align-items: flex-end;
       }
+
+      .price-footer-inner {
+        width: calc(100vw - 8px);
+      }
+
+      .price-footer-inner {
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+        gap: 0.45rem;
+      }
+
+      .price-currency-btn {
+        padding: 0.16rem 0.38rem;
+        font-size: 0.58rem;
+      }
+
+      .price-controls.compact .price-add-toggle-btn {
+        display: inline-flex;
+      }
+
+      .price-controls.compact .price-input,
+      .price-controls.compact .price-add-btn {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -1464,14 +2398,50 @@
       <section class="view is-active" id="tradeView" aria-labelledby="tradeTitle">
         <h1 class="sr-only" id="tradeTitle">Trade</h1>
 
-        <section class="panel trade-frame-panel">
-          <iframe
-            class="trade-frame"
-            id="tradeFrame"
-            title="Hypermonitor trade terminal"
-            loading="eager"
-          ></iframe>
-        </section>
+        <div class="trade-view-stack">
+          <section class="panel trade-frame-panel">
+            <iframe
+              class="trade-frame"
+              id="tradeFrame"
+              title="Hypermonitor trade terminal"
+              loading="eager"
+            ></iframe>
+          </section>
+
+          <section class="panel trade-leaderboard-panel">
+            <div class="active-filters-bar is-hidden">
+              <div class="active-filters" id="tradeActiveFilters"></div>
+            </div>
+
+            <div class="table-wrap loading" id="tradeTableWrap">
+              <div class="loading-overlay">
+                <img src="images/pulse.gif" alt="Hypermonitor loading logo" />
+                <span>Loading leaderboard...</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Wallet</th>
+                    <th>Account value</th>
+                    <th>PnL</th>
+                    <th>ROI</th>
+                    <th class="hide-mobile">Volume</th>
+                    <th>Quality</th>
+                    <th class="hide-tablet">Trend</th>
+                    <th class="hide-tablet">Consistency</th>
+                    <th class="hide-mobile">Activity</th>
+                  </tr>
+                </thead>
+                <tbody id="tradeTbody">
+                  <tr>
+                    <td colspan="10" class="table-empty">Loading leaderboard...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
       </section>
 
       <section class="view" id="exploreView" aria-labelledby="exploreTitle">
@@ -1479,41 +2449,6 @@
 
         <div class="explore-layout">
           <aside class="sidebar">
-            <section class="panel sidebar-card sidebar-hero-card">
-              <div class="sidebar-card-head">
-                <div class="sidebar-card-eyebrow">Explore desk</div>
-                <h2 class="sidebar-card-title">Find strong wallets, then open them in the full Hypermonitor tracker.</h2>
-                <p class="sidebar-card-copy">
-                  Filter by profitability and wallet size, compare quality signals, and move directly from the
-                  leaderboard into a pinned wallet overlay without leaving this page.
-                </p>
-              </div>
-
-              <div class="sidebar-hero-pills">
-                <span class="sidebar-hero-pill">Live leaderboard</span>
-                <span class="sidebar-hero-pill">Quality + trend signals</span>
-              </div>
-
-              <div class="stats-grid">
-                <div class="metric-tile metric-tile-green">
-                  <div class="metric-label">Visible wallets</div>
-                  <div class="metric-value" id="metricVisible">-</div>
-                </div>
-                <div class="metric-tile metric-tile-cyan">
-                  <div class="metric-label">Median equity</div>
-                  <div class="metric-value" id="metricMedian">-</div>
-                </div>
-                <div class="metric-tile metric-tile-blue">
-                  <div class="metric-label">Average quality</div>
-                  <div class="metric-value" id="metricQuality">-</div>
-                </div>
-                <div class="metric-tile metric-tile-amber">
-                  <div class="metric-label">Top pnl</div>
-                  <div class="metric-value" id="metricLeader">-</div>
-                </div>
-              </div>
-            </section>
-
             <section class="panel sidebar-card">
               <div class="sidebar-card-head">
                 <div class="sidebar-section-title">Profit profile</div>
@@ -1531,125 +2466,163 @@
             </section>
           </aside>
 
-          <section class="panel leaderboard-panel">
-            <div class="leaderboard-hero">
-              <div class="leaderboard-hero-copy">
-                <div class="leaderboard-hero-eyebrow">Leaderboard explorer</div>
-                <h2 class="leaderboard-hero-title">Scan the board with the same glassy dashboard feel as the wallet tracker.</h2>
-                <p class="leaderboard-hero-subtitle">
-                  Search by wallet or tier, switch performance windows, and keep the best addresses in focus before
-                  opening the embedded tracker.
-                </p>
-                <div class="leaderboard-hero-tags">
-                  <span class="leaderboard-hero-tag">Searchable</span>
-                  <span class="leaderboard-hero-tag">Sortable</span>
-                  <span class="leaderboard-hero-tag">Opens in overlay</span>
+          <div class="explore-main">
+            <section class="panel market-heatmap-panel">
+              <div class="market-heatmap-head">
+                <div class="market-heatmap-copy">
+                  <div class="explore-market-eyebrow">Market breadth</div>
+                  <h2 class="explore-market-title">Hyperliquid heatmap</h2>
+                  <p class="explore-market-subtitle">Size by 24h volume, color by 24h move. Click any tile to open that market in the trade shell.</p>
+                </div>
+                <div class="market-heatmap-meta">
+                  <div class="market-heatmap-summary" id="marketHeatmapSummary"></div>
+                  <div class="market-heatmap-legend">
+                    <div class="market-heatmap-legend-scale" aria-hidden="true"></div>
+                    <div class="market-heatmap-legend-labels">
+                      <span>Losers</span>
+                      <span>Flat</span>
+                      <span>Gainers</span>
+                    </div>
+                  </div>
+                  <div class="market-heatmap-status" id="marketHeatmapStatus">Loading live market breadth…</div>
                 </div>
               </div>
-
-              <div class="leaderboard-hero-note">
-                <div class="leaderboard-hero-note-label">Workflow</div>
-                <div class="leaderboard-hero-note-title">Filter, compare, inspect</div>
-                <div class="leaderboard-hero-note-copy">
-                  Once a wallet stands out, opening its row keeps you in the same shell while loading the full
-                  positions, fills, and performance view inside the overlay.
+              <div class="market-heatmap-wrap">
+                <div class="market-heatmap-board is-loading" id="marketHeatmapBoard">
+                  <div class="market-heatmap-tiles" id="marketHeatmapTiles"></div>
+                  <div class="market-heatmap-overlay" id="marketHeatmapOverlay">
+                    <img src="images/pulse.png" alt="Hypermonitor loading logo" />
+                    <span>Loading market heatmap...</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div class="toolbar">
-              <div class="toolbar-left">
-                <label class="sr-only" for="searchInput">Search wallets</label>
-                <input
-                  id="searchInput"
-                  class="search-input"
-                  type="search"
-                  placeholder="Search wallet address or tier"
-                  autocomplete="off"
-                />
-
-                <label class="sr-only" for="windowSelect">Performance window</label>
-                <select id="windowSelect" class="control" title="Performance window">
-                  <option value="day">Day</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-                  <option value="allTime" selected>All time</option>
-                </select>
+            <section class="panel leaderboard-panel">
+              <div class="active-filters-bar is-hidden">
+                <div class="active-filters" id="activeFilters"></div>
               </div>
 
-              <div class="toolbar-right">
-                <label class="sr-only" for="limitSelect">Row limit</label>
-                <select id="limitSelect" class="control" title="Rows to show">
-                  <option value="50">Top 50</option>
-                  <option value="100" selected>Top 100</option>
-                  <option value="250">Top 250</option>
-                  <option value="100000">All</option>
-                </select>
-                <button class="refresh-btn" type="button" id="refreshBtn">Refresh</button>
+              <div class="table-wrap loading" id="tableWrap">
+                <div class="loading-overlay" id="loadingOverlay">
+                  <img src="images/pulse.gif" alt="Hypermonitor loading logo" />
+                  <span>Loading leaderboard...</span>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-key="rank">Rank<span class="sort-indicator" id="sort-rank"></span></th>
+                      <th>Wallet</th>
+                      <th class="sortable" data-key="accountValue">Account value<span class="sort-indicator" id="sort-accountValue"></span></th>
+                      <th class="sortable" data-key="pnl">PnL<span class="sort-indicator" id="sort-pnl"></span></th>
+                      <th class="sortable" data-key="roi">ROI<span class="sort-indicator" id="sort-roi"></span></th>
+                      <th class="sortable hide-mobile" data-key="volume">Volume<span class="sort-indicator" id="sort-volume"></span></th>
+                      <th class="sortable" data-key="walletScore">Quality<span class="sort-indicator" id="sort-walletScore"></span></th>
+                      <th class="sortable hide-tablet" data-key="trendScore">Trend<span class="sort-indicator" id="sort-trendScore"></span></th>
+                      <th class="sortable hide-tablet" data-key="consistencyScore">Consistency<span class="sort-indicator" id="sort-consistencyScore"></span></th>
+                      <th class="sortable hide-mobile" data-key="activityScore">Activity<span class="sort-indicator" id="sort-activityScore"></span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody">
+                    <tr>
+                      <td colspan="10" class="table-empty">Loading leaderboard...</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-            </div>
 
-            <div class="summary-grid">
-              <div class="summary-card summary-card-green">
-                <div class="summary-label">Wallets loaded</div>
-                <div class="summary-value" id="summaryLoaded">-</div>
-                <div class="summary-subvalue" id="summaryLoadedSub">Awaiting leaderboard data</div>
+              <div class="footer-note">
+                Wallet rows now open the standalone <code>track.html</code> page directly. Ranking data continues to use
+                the current Hypermonitor leaderboard feed.
               </div>
-              <div class="summary-card summary-card-cyan">
-                <div class="summary-label">Positive pnl share</div>
-                <div class="summary-value" id="summaryPositive">-</div>
-                <div class="summary-subvalue">Across the current filtered view</div>
-              </div>
-              <div class="summary-card summary-card-blue">
-                <div class="summary-label">Whale concentration</div>
-                <div class="summary-value" id="summaryWhales">-</div>
-                <div class="summary-subvalue">Wallets above $1M account value</div>
-              </div>
-              <div class="summary-card summary-card-amber">
-                <div class="summary-label">Top wallet</div>
-                <div class="summary-value" id="summaryTopWallet">-</div>
-                <div class="summary-subvalue" id="summaryTopWalletSub">Best pnl in view</div>
-              </div>
-            </div>
+            </section>
 
-            <div class="active-filters-bar">
-              <div class="active-filters-label">Active filters</div>
-              <div class="active-filters" id="activeFilters"></div>
-            </div>
-
-            <div class="table-wrap loading" id="tableWrap">
-              <div class="loading-overlay" id="loadingOverlay">Loading leaderboard</div>
-              <table>
-                <thead>
-                  <tr>
-                    <th class="sortable" data-key="rank">Rank<span class="sort-indicator" id="sort-rank"></span></th>
-                    <th>Wallet</th>
-                    <th class="sortable" data-key="accountValue">Account value<span class="sort-indicator" id="sort-accountValue"></span></th>
-                    <th class="sortable" data-key="pnl">PnL<span class="sort-indicator" id="sort-pnl"></span></th>
-                    <th class="sortable" data-key="roi">ROI<span class="sort-indicator" id="sort-roi"></span></th>
-                    <th class="sortable hide-mobile" data-key="volume">Volume<span class="sort-indicator" id="sort-volume"></span></th>
-                    <th class="sortable" data-key="walletScore">Quality<span class="sort-indicator" id="sort-walletScore"></span></th>
-                    <th class="sortable hide-tablet" data-key="trendScore">Trend<span class="sort-indicator" id="sort-trendScore"></span></th>
-                    <th class="sortable hide-tablet" data-key="consistencyScore">Consistency<span class="sort-indicator" id="sort-consistencyScore"></span></th>
-                    <th class="sortable hide-mobile" data-key="activityScore">Activity<span class="sort-indicator" id="sort-activityScore"></span></th>
-                  </tr>
-                </thead>
-                <tbody id="tbody">
-                  <tr>
-                    <td colspan="10" class="table-empty">Loading leaderboard...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="footer-note">
-              Wallet rows open <code>tracker.html</code> with the wallet pinned, then the full tracker loads inside the
-              wallet overlay. Ranking data continues to use the current Hypermonitor leaderboard feed.
-            </div>
-          </section>
+            <section class="panel explore-market-panel">
+              <div class="explore-market-head">
+                <div class="explore-market-copy">
+                  <div class="explore-market-eyebrow">Market context</div>
+                  <h2 class="explore-market-title">Live trade terminal</h2>
+                  <p class="explore-market-subtitle">A shorter terminal view under the leaderboard for quick market context.</p>
+                </div>
+              </div>
+              <iframe
+                class="explore-market-frame"
+                id="exploreTradeFrame"
+                title="Hypermonitor market context"
+                loading="lazy"
+              ></iframe>
+            </section>
+          </div>
         </div>
       </section>
     </main>
+  </div>
+
+  <div class="price-footer pending" aria-label="Live prices">
+    <div class="price-footer-inner" id="priceFooter">
+      <div class="price-brand-wrap">
+        <div class="price-currency-switch" id="priceCurrencySwitch" role="group" aria-label="Footer price currency">
+          <button class="price-currency-btn" type="button" data-currency="EUR" aria-pressed="false">€</button>
+          <button class="price-currency-btn" type="button" data-currency="USD" aria-pressed="true">$</button>
+        </div>
+      </div>
+      <div class="price-ticker" id="priceTicker">
+        <div class="price-track" id="priceTrack">
+          <div class="price-list" id="priceList">
+            <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
+            <span class="price-item" data-coin="BTC"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/BTC.svg" alt="BTC" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="ETH"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/ETH.svg" alt="ETH" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="SOL"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/SOL.svg" alt="SOL" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="HYPE"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/HYPE.svg" alt="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="LINK"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/LINK.svg" alt="LINK" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
+            <span class="price-item" data-coin="xyz:GOLD"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/xyz:GOLD.svg" alt="GOLD" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/xyz:SILVER.svg" alt="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="cash:USA500"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/cash:USA500.svg" alt="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:NVDA"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/xyz:NVDA.svg" alt="NVDA" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:MSTR"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/xyz:MSTR.svg" alt="MSTR" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+          </div>
+          <div class="price-list clone" id="priceListClone" aria-hidden="true"></div>
+          <div class="price-list clone" id="priceListClone2" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="price-controls" id="priceControls">
+        <button id="priceAddToggleBtn" class="price-add-toggle-btn" type="button" aria-label="Add coin">+</button>
+        <input id="priceAddInput" class="price-input" type="text" placeholder="Add coin" autocomplete="off" />
+        <button id="priceAddBtn" class="price-add-btn" type="button">Add</button>
+      </div>
+    </div>
+  </div>
+  <div class="price-context-menu" id="priceContextMenu" role="menu" aria-hidden="true">
+    <button class="price-context-item" type="button" data-action="pin" data-requires-coin="true">Pin left</button>
+    <button class="price-context-item" type="button" data-action="reset">Reset list</button>
+    <button class="price-context-item" type="button" data-action="remove" data-requires-coin="true">Remove from bar</button>
+    <div class="price-context-group">
+      <button class="price-context-item" type="button" data-action="toggle-currency" data-has-submenu="true">Currency</button>
+      <div class="price-context-submenu" aria-label="Footer price currency">
+        <button class="price-context-item" type="button" data-action="change-currency" data-currency="USD">USD</button>
+        <button class="price-context-item" type="button" data-action="change-currency" data-currency="EUR">EUR</button>
+        <button class="price-context-item" type="button" data-action="change-currency" data-currency="JPY">JPY</button>
+      </div>
+    </div>
+    <div class="price-context-group">
+      <button class="price-context-item" type="button" data-action="toggle-separators" data-has-submenu="true">Separators every</button>
+      <div class="price-context-submenu" aria-label="Separator cadence">
+        <button class="price-context-item" type="button" data-action="change-separators" data-count="3">3 coins</button>
+        <button class="price-context-item" type="button" data-action="change-separators" data-count="5">5 coins</button>
+        <button class="price-context-item" type="button" data-action="change-separators" data-count="7">7 coins</button>
+      </div>
+    </div>
+    <div class="price-context-sep" role="separator" aria-hidden="true"></div>
+    <div class="price-context-group">
+      <button class="price-context-item" type="button" data-action="toggle-change" data-has-submenu="true">Show % change</button>
+      <div class="price-context-submenu" aria-label="Percent change range">
+        <button class="price-context-item" type="button" data-action="change-range" data-range="5m">5 min</button>
+        <button class="price-context-item" type="button" data-action="change-range" data-range="1h">1 hr</button>
+        <button class="price-context-item" type="button" data-action="change-range" data-range="1d">1 day</button>
+        <button class="price-context-item" type="button" data-action="change-range" data-range="1w">1 week</button>
+      </div>
+    </div>
   </div>
 
   <div class="wallet-modal-backdrop" id="walletModalBackdrop" aria-hidden="true">
@@ -1673,16 +2646,10 @@
 
   <script>
     const HYPERLIQUID_INFO_URL = "https://api.hyperliquid.xyz/info";
-    const LEADERBOARD_URL =
-      window.HYPERMONITOR_LEADERBOARD_API_URL ||
-      (() => {
-        try {
-          return localStorage.getItem("hypermonitor-leaderboard-api-url") || "";
-        } catch (err) {
-          return "";
-        }
-      })() ||
-      "https://hypermonitor-private-leaderboard.hypermonitor.workers.dev/api/leaderboard";
+    const HYPERLIQUID_WS_URL = "wss://api.hyperliquid.xyz/ws";
+    const DEFAULT_LEADERBOARD_URL = "https://hypermonitor-private-leaderboard.hypermonitor.workers.dev/api/leaderboard";
+    const LEADERBOARD_OVERRIDE_STORAGE_KEY = "hypermonitor-leaderboard-api-url";
+    const LEADERBOARD_CACHE_KEY = "hypermonitor-leaderboard-cache-v1";
 
     const PROFIT_FILTERS = [
       {
@@ -1776,12 +2743,15 @@
       windowKey: "allTime",
       profitFilter: "all",
       sizeFilter: "all",
+      marketHeatmapRows: [],
       headerSuggestions: [],
       headerSuggestionIndex: -1
     };
 
     let headerCoinOptions = [];
     let headerCoinOptionsPromise = null;
+    let marketHeatmapPromise = null;
+    let marketHeatmapRefreshTimer = null;
 
     const menuButtons = Array.from(document.querySelectorAll(".nav-link"));
     const viewPanels = {
@@ -1790,6 +2760,7 @@
     };
 
     const tradeFrame = document.getElementById("tradeFrame");
+    const exploreTradeFrame = document.getElementById("exploreTradeFrame");
     const openTradeTabLink = document.getElementById("openTradeTabLink");
     const marketChipGroup = document.getElementById("marketChipGroup");
     const tradeWalletInline = document.getElementById("tradeWalletInline");
@@ -1805,26 +2776,41 @@
 
     const profitFilterList = document.getElementById("profitFilterList");
     const sizeFilterList = document.getElementById("sizeFilterList");
-    const searchInput = document.getElementById("searchInput");
-    const windowSelect = document.getElementById("windowSelect");
-    const limitSelect = document.getElementById("limitSelect");
-    const refreshBtn = document.getElementById("refreshBtn");
+    const marketHeatmapBoard = document.getElementById("marketHeatmapBoard");
+    const marketHeatmapTiles = document.getElementById("marketHeatmapTiles");
+    const marketHeatmapOverlay = document.getElementById("marketHeatmapOverlay");
+    const marketHeatmapStatus = document.getElementById("marketHeatmapStatus");
+    const marketHeatmapSummary = document.getElementById("marketHeatmapSummary");
     const tbody = document.getElementById("tbody");
+    const tradeTbody = document.getElementById("tradeTbody");
     const tableWrap = document.getElementById("tableWrap");
+    const tradeTableWrap = document.getElementById("tradeTableWrap");
     const activeFilters = document.getElementById("activeFilters");
+    const tradeActiveFilters = document.getElementById("tradeActiveFilters");
+    const leaderboardBodies = [tbody, tradeTbody].filter(Boolean);
+    const leaderboardWraps = [tableWrap, tradeTableWrap].filter(Boolean);
+    const activeFilterTargets = [activeFilters, tradeActiveFilters].filter(Boolean);
+    const activeFilterBars = activeFilterTargets
+      .map((target) => target && target.closest(".active-filters-bar"))
+      .filter(Boolean);
 
     const statusDot = document.getElementById("statusDot");
     const statusText = document.getElementById("statusText");
-    const metricVisible = document.getElementById("metricVisible");
-    const metricMedian = document.getElementById("metricMedian");
-    const metricQuality = document.getElementById("metricQuality");
-    const metricLeader = document.getElementById("metricLeader");
-    const summaryLoaded = document.getElementById("summaryLoaded");
-    const summaryLoadedSub = document.getElementById("summaryLoadedSub");
-    const summaryPositive = document.getElementById("summaryPositive");
-    const summaryWhales = document.getElementById("summaryWhales");
-    const summaryTopWallet = document.getElementById("summaryTopWallet");
-    const summaryTopWalletSub = document.getElementById("summaryTopWalletSub");
+    const priceFooterEl = document.getElementById("priceFooter");
+    const priceFooterWrapEl = document.querySelector(".price-footer");
+    const priceCurrencySwitchEl = document.getElementById("priceCurrencySwitch");
+    const priceCurrencyBtnEls = Array.from(document.querySelectorAll(".price-currency-btn"));
+    const priceTickerEl = document.getElementById("priceTicker");
+    const priceTrackEl = document.getElementById("priceTrack");
+    const priceListEl = document.getElementById("priceList");
+    const priceListCloneEl = document.getElementById("priceListClone");
+    const priceListClone2El = document.getElementById("priceListClone2");
+    const priceListCloneEls = [priceListCloneEl, priceListClone2El].filter(Boolean);
+    const priceControlsEl = document.getElementById("priceControls");
+    const priceAddInputEl = document.getElementById("priceAddInput");
+    const priceAddBtnEl = document.getElementById("priceAddBtn");
+    const priceAddToggleBtnEl = document.getElementById("priceAddToggleBtn");
+    const priceContextMenuEl = document.getElementById("priceContextMenu");
 
     const walletModalBackdrop = document.getElementById("walletModalBackdrop");
     const walletTrackerFrame = document.getElementById("walletTrackerFrame");
@@ -1832,6 +2818,98 @@
     const closeWalletModalBtn = document.getElementById("closeWalletModalBtn");
     const openStandaloneWallet = document.getElementById("openStandaloneWallet");
     const copyWalletLinkBtn = document.getElementById("copyWalletLinkBtn");
+    const FOOTER_COINS_KEY = "hypermonitor-footer-coins";
+    const FOOTER_PRICE_CURRENCY_KEY = "hypermonitor-footer-price-currency";
+    const FOOTER_CHANGE_STORAGE_KEY = "hypermonitor-footer-change";
+    const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
+    const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
+    const TRACKER_FOOTER_DEFAULT_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
+    const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl", "cash"];
+    const FOOTER_SPECIAL_LOGOS = new Map([
+      ["HYPE", "https://hyperfoundation.org/landing/blob_green.gif"],
+      ["DOGE", "https://s2.coinmarketcap.com/static/img/coins/64x64/74.gif"],
+      ["DOT", "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.gif"],
+      ["LINK", "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif"],
+      ["RENDER", "https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif"],
+      ["XRP", "https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif"],
+      ["GOLD", "https://s3-symbol-logo.tradingview.com/metal/gold--600.png"],
+      ["SILVER", "https://s3-symbol-logo.tradingview.com/metal/silver--600.png"],
+      ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"]
+    ]);
+    const DOMAIN_LOGOS = new Map([
+      ["NVDA", "https://logo.clearbit.com/nvidia.com"],
+      ["MSTR", "https://logo.clearbit.com/microstrategy.com"],
+      ["TSLA", "https://logo.clearbit.com/tesla.com"],
+      ["AAPL", "https://logo.clearbit.com/apple.com"],
+      ["AMZN", "https://logo.clearbit.com/amazon.com"],
+      ["GOOGL", "https://logo.clearbit.com/google.com"],
+      ["MSFT", "https://logo.clearbit.com/microsoft.com"],
+      ["META", "https://logo.clearbit.com/meta.com"],
+      ["SPY", "https://logo.clearbit.com/ssga.com"],
+      ["QQQ", "https://logo.clearbit.com/invesco.com"]
+    ]);
+    const SPECIAL_LOGOS = new Map([
+      ["ETH", "https://upload.wikimedia.org/wikipedia/commons/f/fd/Ethereum_Logo.png"],
+      ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
+      ["COPPER", "https://s3-symbol-logo.tradingview.com/metal/copper--600.png"],
+      ["GOLD", "https://s3-symbol-logo.tradingview.com/metal/gold--600.png"],
+      ["SILVER", "https://s3-symbol-logo.tradingview.com/metal/silver--600.png"]
+    ]);
+    const FOOTER_CIRCLE_LOGOS = new Set(["DOGE", "DOT", "RENDER", "XRP"]);
+    const FOOTER_PRICE_COLOR_OVERRIDES = new Map([
+      ["BTC", "#f7931a"],
+      ["SOL", "#8173d3"],
+      ["GOLD", "#f3c95a"],
+      ["SILVER", "#e3e8ef"],
+      ["SP500", "#e04f5f"],
+      ["USA500", "#e04f5f"],
+      ["XRP", "#ffffff"]
+    ]);
+    const GLOBAL_SPECIAL_LOGO_PRIORITY = new Set(["USA500"]);
+    const FOOTER_CHANGE_RANGES = {
+      "5m": { label: "5 min", ms: 5 * 60 * 1000, interval: "1m" },
+      "1h": { label: "1 hr", ms: 60 * 60 * 1000, interval: "5m" },
+      "1d": { label: "1 day", ms: 24 * 60 * 60 * 1000, interval: "1h" },
+      "1w": { label: "1 week", ms: 7 * 24 * 60 * 60 * 1000, interval: "4h" }
+    };
+    const FOOTER_SEPARATOR_OPTIONS = new Set([3, 5, 7]);
+    let trackedFooterCoins = TRACKER_FOOTER_DEFAULT_COINS.slice();
+    let footerRefreshTimer = null;
+    let footerReady = false;
+    let footerChangeEnabled = true;
+    let footerChangeRange = "1d";
+    let footerChangeRangeKey = "1d";
+    let footerSeparatorEvery = 5;
+    let footerPriceCurrency = "USD";
+    let footerEurUsdRate = null;
+    let footerEurUsdFetchedAt = 0;
+    let footerEurUsdPromise = null;
+    let footerUsdJpyRate = null;
+    let footerUsdJpyFetchedAt = 0;
+    let footerUsdJpyPromise = null;
+    let footerAddCompactOpen = false;
+    let priceContextCoin = null;
+    let footerQuotesByCoin = new Map();
+    const coinNameCache = new Map();
+    const coinColorCache = new Map();
+    const coinColorPending = new Set();
+    const coinPriceDecimals = new Map();
+    const lastFooterPrices = new Map();
+    const logoCache = new Map();
+    const liveMids = new Map();
+    const footerPrefixedMarketsByBase = new Map();
+    const footerChangePcts = new Map();
+    const footerChangeRefs = new Map();
+    const footerChangeProvisional = new Set();
+    let footerChangeBaselineToken = "";
+    const manualMidCoins = new Set();
+    const footerWsByDex = new Map();
+    let logoRetryTimer = null;
+    let logoRefreshTimer = null;
+    let footerChangeTimer = null;
+    let manualMidTimer = null;
+    let lastManualMidRefreshRequestMs = 0;
+    let footerDexNames = null;
 
     function parseView() {
       const params = new URLSearchParams(window.location.search);
@@ -1858,6 +2936,123 @@
       return { dex: "", base: value };
     }
 
+    function sanitizeLeaderboardUrl(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+      try {
+        const url = new URL(raw, window.location.href);
+        if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+        return url.toString();
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function getStoredLeaderboardUrl() {
+      try {
+        return sanitizeLeaderboardUrl(localStorage.getItem(LEADERBOARD_OVERRIDE_STORAGE_KEY) || "");
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function clearStoredLeaderboardUrl() {
+      try {
+        localStorage.removeItem(LEADERBOARD_OVERRIDE_STORAGE_KEY);
+      } catch (error) {}
+    }
+
+    function getLeaderboardSources() {
+      const sources = [];
+      const seen = new Set();
+      const push = (url, source) => {
+        const normalized = sanitizeLeaderboardUrl(url);
+        if (!normalized || seen.has(normalized)) return;
+        seen.add(normalized);
+        sources.push({ url: normalized, source });
+      };
+
+      push(window.HYPERMONITOR_LEADERBOARD_API_URL, "window");
+      push(getStoredLeaderboardUrl(), "storage");
+      push(DEFAULT_LEADERBOARD_URL, "default");
+      return sources;
+    }
+
+    async function fetchLeaderboardPayload(url, timeoutMs = 12000) {
+      const controller = typeof AbortController === "function" ? new AbortController() : null;
+      let timer = null;
+      if (controller) {
+        timer = window.setTimeout(() => controller.abort(), timeoutMs);
+      }
+
+      try {
+        const response = await fetch(url, {
+          cache: "no-store",
+          mode: "cors",
+          credentials: "omit",
+          signal: controller ? controller.signal : undefined
+        });
+        const rawText = await response.text();
+
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status + " " + response.statusText + " - " + rawText.slice(0, 120));
+        }
+
+        try {
+          return JSON.parse(rawText);
+        } catch (error) {
+          throw new Error("Non-JSON leaderboard response");
+        }
+      } catch (error) {
+        if (error && error.name === "AbortError") {
+          throw new Error("Leaderboard request timed out");
+        }
+        throw error;
+      } finally {
+        if (timer) window.clearTimeout(timer);
+      }
+    }
+
+    function parseLeaderboardRows(json) {
+      if (Array.isArray(json)) return json;
+      if (json && typeof json === "object") {
+        if (Array.isArray(json.data)) return json.data;
+        if (Array.isArray(json.leaderboard)) return json.leaderboard;
+        if (Array.isArray(json.leaderboardRows)) return json.leaderboardRows;
+        if (Array.isArray(json.result)) return json.result;
+        if (Array.isArray(json.payload)) return json.payload;
+        if (json.error || json.message) {
+          throw new Error(String(json.error || json.message));
+        }
+      }
+      throw new Error("Unexpected leaderboard response shape");
+    }
+
+    function saveCachedLeaderboardRows(rows) {
+      try {
+        localStorage.setItem(LEADERBOARD_CACHE_KEY, JSON.stringify({
+          savedAt: Date.now(),
+          rows
+        }));
+      } catch (error) {}
+    }
+
+    function loadCachedLeaderboardRows() {
+      try {
+        const raw = localStorage.getItem(LEADERBOARD_CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const rows = Array.isArray(parsed?.rows) ? parsed.rows : Array.isArray(parsed) ? parsed : null;
+        if (!Array.isArray(rows) || !rows.length) return null;
+        return {
+          rows,
+          savedAt: Number(parsed?.savedAt) || 0
+        };
+      } catch (error) {
+        return null;
+      }
+    }
+
     function buildCoinKey(name, dex = "") {
       const value = String(name || "").trim();
       if (!value) return "";
@@ -1882,6 +3077,12 @@
       const base = getCoinBaseName(key);
       const dex = getCoinDexName(key);
       return dex ? `${dex}:${base}` : base;
+    }
+
+    function getPrefixedCandidates(base) {
+      const normalizedBase = String(base || "").trim().toUpperCase();
+      if (!normalizedBase) return [];
+      return NON_CRYPTO_PREFIXES.map((prefix) => prefix + ":" + normalizedBase);
     }
 
     function isWalletAddress(value) {
@@ -1911,7 +3112,9 @@
     }
 
     function setLoadingState(isLoading) {
-      tableWrap.classList.toggle("loading", isLoading);
+      leaderboardWraps.forEach((wrap) => {
+        wrap.classList.toggle("loading", isLoading);
+      });
       if (isLoading) {
         renderLoadingRows();
       }
@@ -1932,7 +3135,9 @@
           "<td class='hide-mobile'>-</td>" +
         "</tr>"
       )).join("");
-      tbody.innerHTML = rows;
+      leaderboardBodies.forEach((body) => {
+        body.innerHTML = rows;
+      });
     }
 
     function moneyFormat(value, decimals = 2) {
@@ -1974,20 +3179,6 @@
       return Math.max(0, Math.min(100, value * 100));
     }
 
-    function average(values) {
-      const valid = values.filter((value) => Number.isFinite(value));
-      if (!valid.length) return NaN;
-      return valid.reduce((sum, value) => sum + value, 0) / valid.length;
-    }
-
-    function median(values) {
-      const valid = values.filter((value) => Number.isFinite(value)).sort((a, b) => a - b);
-      if (!valid.length) return NaN;
-      const mid = Math.floor(valid.length / 2);
-      if (valid.length % 2) return valid[mid];
-      return (valid[mid - 1] + valid[mid]) / 2;
-    }
-
     function findFilterMeta(list, id) {
       return list.find((item) => item.id === id) || list[0];
     }
@@ -2012,6 +3203,375 @@
     function pnlChipClass(value) {
       if (!Number.isFinite(value)) return "";
       return value >= 0 ? "good" : "bad";
+    }
+
+    function mixChannel(start, end, weight) {
+      const t = Math.max(0, Math.min(1, Number(weight)));
+      return Math.round(start + (end - start) * t);
+    }
+
+    function rgbString(red, green, blue) {
+      return "rgb(" + red + ", " + green + ", " + blue + ")";
+    }
+
+    function rgbaFromRgb(rgb, alpha) {
+      const match = String(rgb || "").match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i);
+      if (!match) return rgb;
+      return "rgba(" + match[1] + ", " + match[2] + ", " + match[3] + ", " + alpha + ")";
+    }
+
+    function getSignedToneColor(value, maxAbs = 100) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "rgb(226, 232, 240)";
+      const weight = Math.min(1, Math.abs(n) / Math.max(1, maxAbs));
+      if (n >= 0) {
+        return rgbString(
+          mixChannel(214, 74, weight),
+          mixChannel(219, 222, weight),
+          mixChannel(231, 128, weight)
+        );
+      }
+      return rgbString(
+        mixChannel(214, 251, weight),
+        mixChannel(219, 113, weight),
+        mixChannel(231, 133, weight)
+      );
+    }
+
+    function getScoreToneColor(percent) {
+      const safePercent = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : NaN;
+      if (!Number.isFinite(safePercent)) return "rgb(226, 232, 240)";
+      if (safePercent >= 50) {
+        const weight = (safePercent - 50) / 50;
+        return rgbString(
+          mixChannel(214, 74, weight),
+          mixChannel(219, 222, weight),
+          mixChannel(231, 128, weight)
+        );
+      }
+      const weight = safePercent / 50;
+      return rgbString(
+        mixChannel(251, 214, weight),
+        mixChannel(113, 219, weight),
+        mixChannel(133, 231, weight)
+      );
+    }
+
+    function getScoreFillStyle(percent) {
+      const color = getScoreToneColor(percent);
+      return "linear-gradient(90deg, " + rgbaFromRgb(color, 0.94) + ", " + rgbaFromRgb(color, 0.62) + ")";
+    }
+
+    function setMarketHeatmapState(isLoading, message = "", isEmpty = false) {
+      if (!marketHeatmapBoard) return;
+      marketHeatmapBoard.classList.toggle("is-loading", Boolean(isLoading));
+      marketHeatmapBoard.classList.toggle("is-empty", Boolean(isEmpty));
+      if (marketHeatmapOverlay) {
+        const textEl = marketHeatmapOverlay.querySelector("span");
+        if (textEl && message) textEl.textContent = message;
+      }
+      if (marketHeatmapStatus && message) {
+        marketHeatmapStatus.textContent = message;
+      }
+    }
+
+    function formatHeatmapPrice(value) {
+      const amount = Number(value);
+      if (!Number.isFinite(amount)) return "";
+      const abs = Math.abs(amount);
+      let digits = 2;
+      if (abs >= 10000) digits = 0;
+      else if (abs >= 1000) digits = 1;
+      else if (abs >= 100) digits = 2;
+      else if (abs >= 1) digits = 3;
+      else digits = 4;
+      return "$" + abs.toLocaleString(undefined, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      });
+    }
+
+    function formatHeatmapChange(value) {
+      const amount = Number(value);
+      if (!Number.isFinite(amount)) return "";
+      return (amount >= 0 ? "+" : "") + amount.toFixed(2) + "%";
+    }
+
+    function getHeatmapPalette(changePct) {
+      const value = Number(changePct);
+      if (!Number.isFinite(value)) {
+        return {
+          start: "rgb(46, 50, 58)",
+          end: "rgb(26, 28, 34)"
+        };
+      }
+      const weight = Math.min(1, Math.abs(value) / 12);
+      if (value >= 0) {
+        const r = mixChannel(36, 46, weight);
+        const g = mixChannel(46, 189, weight);
+        const b = mixChannel(42, 133, weight);
+        return {
+          start: rgbString(r, g, b),
+          end: rgbString(Math.max(18, r - 18), Math.max(28, g - 30), Math.max(24, b - 22))
+        };
+      }
+      const r = mixChannel(56, 246, weight);
+      const g = mixChannel(44, 70, weight);
+      const b = mixChannel(48, 93, weight);
+      return {
+        start: rgbString(r, g, b),
+        end: rgbString(Math.max(26, r - 22), Math.max(22, g - 20), Math.max(24, b - 18))
+      };
+    }
+
+    function splitTreemapItems(items) {
+      const total = items.reduce((sum, item) => sum + (Number(item.weight) || 0), 0);
+      if (!items.length || total <= 0) {
+        const mid = Math.ceil(items.length / 2);
+        return [items.slice(0, mid), items.slice(mid)];
+      }
+      let running = 0;
+      let splitIndex = 1;
+      for (let index = 0; index < items.length; index += 1) {
+        running += Number(items[index].weight) || 0;
+        if (running >= total / 2) {
+          splitIndex = index + 1;
+          break;
+        }
+      }
+      splitIndex = Math.max(1, Math.min(items.length - 1, splitIndex));
+      return [items.slice(0, splitIndex), items.slice(splitIndex)];
+    }
+
+    function layoutTreemap(items, x, y, width, height, output) {
+      if (!items.length || width <= 0 || height <= 0) return;
+      if (items.length === 1) {
+        output.push({
+          item: items[0],
+          x,
+          y,
+          width,
+          height
+        });
+        return;
+      }
+
+      const [first, second] = splitTreemapItems(items);
+      const firstWeight = first.reduce((sum, item) => sum + (Number(item.weight) || 0), 0);
+      const secondWeight = second.reduce((sum, item) => sum + (Number(item.weight) || 0), 0);
+      const totalWeight = firstWeight + secondWeight || items.length;
+      const ratio = firstWeight > 0 ? firstWeight / totalWeight : first.length / items.length;
+
+      if (width >= height) {
+        const firstWidth = width * ratio;
+        layoutTreemap(first, x, y, firstWidth, height, output);
+        layoutTreemap(second, x + firstWidth, y, width - firstWidth, height, output);
+        return;
+      }
+
+      const firstHeight = height * ratio;
+      layoutTreemap(first, x, y, width, firstHeight, output);
+      layoutTreemap(second, x, y + firstHeight, width, height - firstHeight, output);
+    }
+
+    function getHeatmapTileSizeClass(tile) {
+      const area = Number(tile.width) * Number(tile.height);
+      if (area >= 360) return "size-xl";
+      if (area >= 120) return "size-lg";
+      if (area >= 42) return "size-md";
+      if (area >= 14) return "size-sm";
+      return "size-xs";
+    }
+
+    function renderMarketHeatmapSummary(markets) {
+      if (!marketHeatmapSummary) return;
+      const scored = markets.filter((item) => Number.isFinite(item.changePct));
+      if (!scored.length) {
+        marketHeatmapSummary.innerHTML = "";
+        return;
+      }
+      const gainers = scored.filter((item) => item.changePct >= 0).sort((a, b) => b.changePct - a.changePct);
+      const losers = scored.filter((item) => item.changePct < 0).sort((a, b) => a.changePct - b.changePct);
+      const summaryBits = [];
+      if (losers[0]) {
+        summaryBits.push(
+          "<span class='market-heatmap-stat'><strong>Worst 24h</strong><span style='color:" +
+            escapeHtml(getSignedToneColor(losers[0].changePct, 12)) +
+            ";'>" +
+            escapeHtml(getCoinLabel(losers[0].key)) +
+            " " +
+            escapeHtml(formatHeatmapChange(losers[0].changePct)) +
+            "</span></span>"
+        );
+      }
+      if (gainers[0]) {
+        summaryBits.push(
+          "<span class='market-heatmap-stat'><strong>Best 24h</strong><span style='color:" +
+            escapeHtml(getSignedToneColor(gainers[0].changePct, 12)) +
+            ";'>" +
+            escapeHtml(getCoinLabel(gainers[0].key)) +
+            " " +
+            escapeHtml(formatHeatmapChange(gainers[0].changePct)) +
+            "</span></span>"
+        );
+      }
+      summaryBits.push(
+        "<span class='market-heatmap-stat'><strong>Markets</strong><span>" +
+          escapeHtml(markets.length.toLocaleString()) +
+          "</span></span>"
+      );
+      marketHeatmapSummary.innerHTML = summaryBits.join("");
+    }
+
+    function renderMarketHeatmap() {
+      if (!marketHeatmapTiles || !marketHeatmapBoard) return;
+      const markets = Array.isArray(state.marketHeatmapRows) ? state.marketHeatmapRows.slice() : [];
+      if (!markets.length) {
+        marketHeatmapTiles.innerHTML = "";
+        renderMarketHeatmapSummary([]);
+        setMarketHeatmapState(false, "No market heatmap data available.", true);
+        return;
+      }
+
+      const items = markets
+        .map((item) => ({
+          ...item,
+          weight: Math.max(1, Number(item.weight) || 1)
+        }))
+        .sort((left, right) => (Number(right.weight) || 0) - (Number(left.weight) || 0));
+
+      const layout = [];
+      layoutTreemap(items, 0, 0, 100, 100, layout);
+
+      marketHeatmapTiles.innerHTML = layout.map((tile) => {
+        const sizeClass = getHeatmapTileSizeClass(tile);
+        const palette = getHeatmapPalette(tile.item.changePct);
+        const label = escapeHtml(tile.item.base || getCoinBaseName(tile.item.key));
+        const dex = escapeHtml(tile.item.dex || "");
+        const fullLabel = escapeHtml(getCoinLabel(tile.item.key));
+        const changeText = escapeHtml(formatHeatmapChange(tile.item.changePct));
+        const priceText = escapeHtml(formatHeatmapPrice(tile.item.markPx));
+        const volumeText = escapeHtml(compactMoney(tile.item.volume));
+        return (
+          "<button class='market-heatmap-tile " + sizeClass + "' type='button' data-heatmap-coin='" + escapeHtml(tile.item.key) + "'" +
+            " title='" + fullLabel + " · " + changeText + " · " + priceText + "'" +
+            " style='left:" + tile.x.toFixed(4) + "%;top:" + tile.y.toFixed(4) + "%;width:" + tile.width.toFixed(4) + "%;height:" + tile.height.toFixed(4) + "%;--heat-start:" + escapeHtml(palette.start) + ";--heat-end:" + escapeHtml(palette.end) + ";'>" +
+            "<span class='market-heatmap-tile-content'>" +
+              "<span class='market-heatmap-tile-top'>" +
+                "<span class='market-heatmap-tile-symbol'>" + label + "</span>" +
+                (dex ? "<span class='market-heatmap-tile-dex'>" + dex + "</span>" : "") +
+              "</span>" +
+              "<span class='market-heatmap-tile-body'>" +
+                "<span class='market-heatmap-tile-change'>" + changeText + "</span>" +
+                "<span class='market-heatmap-tile-price'>" + priceText + "</span>" +
+                "<span class='market-heatmap-tile-volume'>Vol " + volumeText + "</span>" +
+              "</span>" +
+            "</span>" +
+          "</button>"
+        );
+      }).join("");
+
+      renderMarketHeatmapSummary(markets);
+      setMarketHeatmapState(false, "Updated " + new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      }), false);
+    }
+
+    async function loadMarketHeatmap(force = false) {
+      if (!marketHeatmapBoard) return [];
+      if (!force && marketHeatmapPromise) return marketHeatmapPromise;
+
+      setMarketHeatmapState(true, "Loading market heatmap…", false);
+
+      marketHeatmapPromise = (async () => {
+        let dexNames = [""];
+        try {
+          const dexData = await fetchHyperliquidInfo({ type: "perpDexs" });
+          const names = (Array.isArray(dexData) ? dexData : [])
+            .map((entry) => entry && entry.name)
+            .filter((value) => typeof value === "string" && value.length > 0);
+          dexNames = ["", ...names.filter((value, index, list) => list.indexOf(value) === index)];
+        } catch (error) {
+          dexNames = [""];
+        }
+
+        const marketMap = new Map();
+        const results = await Promise.allSettled(
+          dexNames.map((dex) => fetchHyperliquidInfo(dex ? { type: "metaAndAssetCtxs", dex } : { type: "metaAndAssetCtxs" }))
+        );
+
+        results.forEach((result, resultIndex) => {
+          if (result.status !== "fulfilled") return;
+          const dex = dexNames[resultIndex] || "";
+          const data = result.value;
+          const meta = Array.isArray(data) ? data[0] : data && data.meta;
+          const assetCtxs = Array.isArray(data) ? data[1] : data && data.assetCtxs;
+          const universe = Array.isArray(meta && meta.universe) ? meta.universe : [];
+          const ctxs = Array.isArray(assetCtxs) ? assetCtxs : [];
+          const length = Math.max(universe.length, ctxs.length);
+
+          for (let index = 0; index < length; index += 1) {
+            const entry = universe[index] || {};
+            const ctx = ctxs[index] || {};
+            const rawName = String(ctx.coin ?? ctx.symbol ?? ctx.asset ?? entry.name ?? "").trim();
+            const key = buildCoinKey(rawName, dex);
+            const markPx = Number(ctx.markPx ?? ctx.mark ?? ctx.midPx ?? ctx.mid ?? ctx.px);
+            if (!key || entry.isDelisted || !Number.isFinite(markPx) || markPx <= 0) continue;
+
+            const prevDayPx = Number(ctx.prevDayPx ?? ctx.prevDay ?? ctx.prevPx ?? ctx.openPx);
+            const changePct = Number.isFinite(prevDayPx) && prevDayPx > 0
+              ? ((markPx - prevDayPx) / prevDayPx) * 100
+              : NaN;
+            const volume = Number(ctx.dayNtlVlm ?? 0);
+            const oi = Number(ctx.openInterest ?? 0);
+            const weight = Number.isFinite(volume) && volume > 0
+              ? volume
+              : Number.isFinite(oi) && oi > 0
+                ? oi * markPx
+                : markPx;
+
+            marketMap.set(key, {
+              key,
+              base: getCoinBaseName(key),
+              dex: getCoinDexName(key),
+              markPx,
+              prevDayPx,
+              changePct,
+              volume,
+              weight
+            });
+          }
+        });
+
+        state.marketHeatmapRows = Array.from(marketMap.values()).sort((left, right) => {
+          const volumeDiff = (Number(right.weight) || 0) - (Number(left.weight) || 0);
+          if (volumeDiff !== 0) return volumeDiff;
+          return getCoinLabel(left.key).localeCompare(getCoinLabel(right.key));
+        });
+
+        renderMarketHeatmap();
+        return state.marketHeatmapRows;
+      })().catch((error) => {
+        console.error("Failed to load market heatmap", error);
+        state.marketHeatmapRows = [];
+        if (marketHeatmapTiles) marketHeatmapTiles.innerHTML = "";
+        renderMarketHeatmapSummary([]);
+        setMarketHeatmapState(false, "Failed to load market heatmap.", true);
+        return [];
+      }).finally(() => {
+        marketHeatmapPromise = null;
+      });
+
+      return marketHeatmapPromise;
+    }
+
+    function ensureMarketHeatmapRefresh() {
+      if (marketHeatmapRefreshTimer || !marketHeatmapBoard) return;
+      marketHeatmapRefreshTimer = window.setInterval(() => {
+        if (document.hidden) return;
+        loadMarketHeatmap(true);
+      }, 180000);
     }
 
     function getNumericSortValue(row, key) {
@@ -2041,6 +3601,10 @@
       return "track.html?wallet=" + encodeURIComponent(wallet);
     }
 
+    function buildWalletPopupHref(wallet) {
+      return buildWalletTrackerHref(wallet) + "&embed=popup";
+    }
+
     async function fetchHyperliquidInfo(payload) {
       const response = await fetch(HYPERLIQUID_INFO_URL, {
         method: "POST",
@@ -2051,6 +3615,1939 @@
         throw new Error("Hyperliquid info request failed");
       }
       return response.json();
+    }
+
+    const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
+    const HYPERLIQUID_TICKERS = new Set();
+
+    function loadFooterCoins() {
+        try {
+          const raw = localStorage.getItem(FOOTER_COINS_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length) {
+            trackedFooterCoins = parsed.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
+          }
+          if (!trackedFooterCoins.length) trackedFooterCoins = TRACKER_FOOTER_DEFAULT_COINS.slice();
+        } catch (e) {}
+      }
+
+  
+    function loadFooterChangePrefs() {
+        try {
+          const raw = localStorage.getItem(FOOTER_CHANGE_STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (typeof parsed?.enabled === "boolean") footerChangeEnabled = parsed.enabled;
+          if (typeof parsed?.range === "string" && FOOTER_CHANGE_RANGES[parsed.range]) {
+            footerChangeRange = parsed.range;
+          }
+          const separatorEvery = Number(parsed?.separatorEvery);
+          if (FOOTER_SEPARATOR_OPTIONS.has(separatorEvery)) footerSeparatorEvery = separatorEvery;
+        } catch (e) {}
+      }
+
+      function loadFooterCurrencyPref() {
+        try {
+          const raw = localStorage.getItem(FOOTER_PRICE_CURRENCY_KEY);
+          if (!raw) return;
+          const value = String(raw).trim().toUpperCase();
+          if (value === "USD" || value === "EUR" || value === "JPY") footerPriceCurrency = value;
+        } catch (e) {}
+      }
+
+      function saveFooterChangePrefs() {
+        try {
+          localStorage.setItem(
+            FOOTER_CHANGE_STORAGE_KEY,
+            JSON.stringify({
+              enabled: footerChangeEnabled,
+              range: footerChangeRange,
+              separatorEvery: footerSeparatorEvery,
+            })
+          );
+        } catch (e) {}
+      }
+
+      function saveFooterCurrencyPref() {
+        try {
+          localStorage.setItem(FOOTER_PRICE_CURRENCY_KEY, footerPriceCurrency);
+        } catch (e) {}
+      }
+
+      function getDisplayCurrencyMeta(value) {
+        const amount = Number(value);
+        if (!Number.isFinite(amount)) return null;
+        if (footerPriceCurrency === "EUR" && Number.isFinite(footerEurUsdRate) && footerEurUsdRate > 0) {
+          return { value: amount / footerEurUsdRate, symbol: "€", code: "EUR" };
+        }
+        if (footerPriceCurrency === "JPY" && Number.isFinite(footerUsdJpyRate) && footerUsdJpyRate > 0) {
+          return { value: amount * footerUsdJpyRate, symbol: "¥", code: "JPY" };
+        }
+        return { value: amount, symbol: "$", code: "USD" };
+      }
+
+      async function fetchJsonWithTimeout(url, timeoutMs = 8000) {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const response = await fetch(url, { signal: controller.signal });
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        } finally {
+          window.clearTimeout(timer);
+        }
+      }
+
+      async function fetchFooterEurUsdRate() {
+        const sources = [
+          async () => {
+            const data = await fetchJsonWithTimeout("https://api.exchange.coinbase.com/products/EUR-USD/ticker");
+            const price = Number(data?.price);
+            return Number.isFinite(price) && price > 0 ? price : null;
+          },
+          async () => {
+            const data = await fetchJsonWithTimeout("https://api.coinbase.com/v2/exchange-rates?currency=EUR");
+            const price = Number(data?.data?.rates?.USD);
+            return Number.isFinite(price) && price > 0 ? price : null;
+          }
+        ];
+        for (const source of sources) {
+          try {
+            const rate = await source();
+            if (Number.isFinite(rate) && rate > 0) return rate;
+          } catch (error) {}
+        }
+        return null;
+      }
+
+      async function fetchFooterUsdJpyRate() {
+        const sources = [
+          async () => {
+            const data = await fetchJsonWithTimeout("https://api.exchange.coinbase.com/products/USD-JPY/ticker");
+            const price = Number(data?.price);
+            return Number.isFinite(price) && price > 0 ? price : null;
+          },
+          async () => {
+            const data = await fetchJsonWithTimeout("https://api.coinbase.com/v2/exchange-rates?currency=USD");
+            const price = Number(data?.data?.rates?.JPY);
+            return Number.isFinite(price) && price > 0 ? price : null;
+          }
+        ];
+        for (const source of sources) {
+          try {
+            const rate = await source();
+            if (Number.isFinite(rate) && rate > 0) return rate;
+          } catch (error) {}
+        }
+        return null;
+      }
+
+      async function ensureFooterEurUsdRate(force = false) {
+        const staleMs = 10 * 60 * 1000;
+        const freshEnough = Number.isFinite(footerEurUsdRate) && footerEurUsdRate > 0 && Date.now() - footerEurUsdFetchedAt < staleMs;
+        if (!force && freshEnough) return footerEurUsdRate;
+        if (!force && footerEurUsdPromise) return footerEurUsdPromise;
+        footerEurUsdPromise = (async () => {
+          const rate = await fetchFooterEurUsdRate();
+          if (Number.isFinite(rate) && rate > 0) {
+            footerEurUsdRate = rate;
+            footerEurUsdFetchedAt = Date.now();
+            refreshCurrencyDisplay();
+          }
+          return rate;
+        })();
+        try {
+          return await footerEurUsdPromise;
+        } finally {
+          footerEurUsdPromise = null;
+        }
+      }
+
+      async function ensureFooterUsdJpyRate(force = false) {
+        const staleMs = 10 * 60 * 1000;
+        const freshEnough = Number.isFinite(footerUsdJpyRate) && footerUsdJpyRate > 0 && Date.now() - footerUsdJpyFetchedAt < staleMs;
+        if (!force && freshEnough) return footerUsdJpyRate;
+        if (!force && footerUsdJpyPromise) return footerUsdJpyPromise;
+        footerUsdJpyPromise = (async () => {
+          const rate = await fetchFooterUsdJpyRate();
+          if (Number.isFinite(rate) && rate > 0) {
+            footerUsdJpyRate = rate;
+            footerUsdJpyFetchedAt = Date.now();
+            refreshCurrencyDisplay();
+          }
+          return rate;
+        })();
+        try {
+          return await footerUsdJpyPromise;
+        } finally {
+          footerUsdJpyPromise = null;
+        }
+      }
+
+  
+    function syncFooterCurrencyButtons() {
+        if (!priceCurrencyBtnEls.length) return;
+        priceCurrencyBtnEls.forEach((btn) => {
+          const active = btn.dataset.currency === footerPriceCurrency;
+          btn.classList.toggle("active", active);
+          btn.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      }
+
+      function setFooterPriceCurrency(nextCurrency, { forceRate = false } = {}) {
+        const next = String(nextCurrency || "").trim().toUpperCase();
+        if (!["USD", "EUR", "JPY"].includes(next)) return;
+        footerPriceCurrency = next;
+        saveFooterCurrencyPref();
+        updateFooterChangeMenu();
+        syncFooterCurrencyButtons();
+        if (footerPriceCurrency === "EUR") {
+          ensureFooterEurUsdRate(forceRate);
+        } else if (footerPriceCurrency === "JPY") {
+          ensureFooterUsdJpyRate(forceRate);
+        }
+        refreshCurrencyDisplay();
+      }
+
+      function refreshCurrencyDisplay() {
+        renderFooterPrices();
+
+      }
+
+      function saveFooterCoins() {
+        try {
+          localStorage.setItem(FOOTER_COINS_KEY, JSON.stringify(trackedFooterCoins));
+        } catch (e) {}
+      }
+
+      function resetFooterCoins() {
+        trackedFooterCoins = [...TRACKER_FOOTER_DEFAULT_COINS];
+        saveFooterCoins();
+        renderFooterPrices();
+      }
+
+  
+    function loadCoinNameCache() {
+        try {
+          const raw = localStorage.getItem(COIN_NAME_CACHE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== "object") return;
+          Object.entries(parsed).forEach(([name, symbol]) => {
+            if (!name || !symbol) return;
+            coinNameCache.set(String(name), String(symbol));
+          });
+        } catch (e) {}
+      }
+
+      function saveCoinNameCache() {
+        try {
+          const obj = {};
+          coinNameCache.forEach((value, key) => {
+            obj[key] = value;
+          });
+          localStorage.setItem(COIN_NAME_CACHE_KEY, JSON.stringify(obj));
+        } catch (e) {}
+      }
+
+      function loadCoinColorCache() {
+        try {
+          const raw = localStorage.getItem(COIN_COLOR_CACHE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== "object") return;
+          Object.entries(parsed).forEach(([symbol, color]) => {
+            if (!symbol || !color) return;
+            coinColorCache.set(normalizeFooterCoinValue(symbol), String(color));
+          });
+        } catch (e) {}
+      }
+
+      function saveCoinColorCache() {
+        try {
+          const obj = {};
+          coinColorCache.forEach((value, key) => {
+            obj[key] = value;
+          });
+          localStorage.setItem(COIN_COLOR_CACHE_KEY, JSON.stringify(obj));
+        } catch (e) {}
+      }
+
+  
+    window.__logoOk = (rawKey, imgEl) => {
+        const entry = logoCache.get(rawKey);
+        if (!entry) return;
+        const nextUrl = imgEl?.currentSrc || imgEl?.src || entry.urls?.[entry.idx];
+        const wasOk = entry.state === "ok" && entry.okUrl === nextUrl;
+        entry.state = "ok";
+        entry.okUrl = nextUrl;
+        if (!wasOk) {
+          const hasFallbackForKey = Array.from(
+            document.querySelectorAll("span.coinFallback[data-logo-key]")
+          ).some((el) => el.dataset.logoKey === rawKey);
+          if (hasFallbackForKey) scheduleLogoRefresh();
+        }
+      };
+
+      window.__logoErr = (rawKey, imgEl, fallbackLetter) => {
+        const entry = logoCache.get(rawKey);
+        if (!entry) return;
+
+        if (window.location?.protocol === "file:") {
+          entry.state = "bad";
+          entry.permaFail = true;
+          entry.retryCount = 999;
+          try {
+            if (imgEl && imgEl.outerHTML) {
+              imgEl.outerHTML = `<span class="coinFallback">${fallbackLetter || "?"}</span>`;
+            }
+          } catch {}
+          return;
+        }
+
+        const nextIdx = (entry.idx ?? 0) + 1;
+        if (entry.urls && nextIdx < entry.urls.length) {
+          entry.idx = nextIdx;
+          const nextUrl = entry.urls[nextIdx];
+          try {
+            if (imgEl && imgEl.src !== nextUrl) imgEl.src = nextUrl;
+          } catch {}
+          return;
+        }
+
+        entry.state = "bad";
+        entry.retryCount = (entry.retryCount || 0) + 1;
+        scheduleLogoRetry();
+        try {
+          if (imgEl && imgEl.outerHTML) {
+            imgEl.outerHTML = `<span class="coinFallback">${fallbackLetter || "?"}</span>`;
+          }
+        } catch {}
+      };
+
+  
+    function fmtPriceFixed(v, decimals) {
+        if (v === null || v === undefined) return "";
+        const meta = getDisplayCurrencyMeta(v);
+        if (!meta) return String(v);
+        const formatted = meta.value.toLocaleString(undefined, {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+          useGrouping: true,
+        });
+        return `${meta.symbol}${formatted}`;
+      }
+
+  
+    function isSameOriginAsset(url) {
+        if (!url) return false;
+        if (url.startsWith("images/") || url.startsWith("./") || url.startsWith("/")) return true;
+        try {
+          const parsed = new URL(url, window.location.href);
+          return parsed.origin === window.location.origin;
+        } catch (e) {
+          return false;
+        }
+      }
+
+  
+    function formatPercent(value, decimals = 2) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return "";
+        return `${(n * 100).toFixed(decimals)}%`;
+      }
+
+  
+    function xmlEscape(v) {
+      const s = v === null || v === undefined ? "" : String(v);
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&apos;");
+    }
+
+    function getIconCandidates(rawName, cleanName) {
+        const candidates = [];
+        const addPrefixedCandidates = (name) => {
+          const raw = String(name || "").trim();
+          if (!raw) return;
+          if (!raw.includes(":")) return;
+          // Keep exact prefixed path first for HIP-3/non-crypto assets (e.g. xyz:NVDA).
+          candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(raw)}.svg`);
+          const upper = raw.toUpperCase();
+          if (upper !== raw) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
+        };
+        const getWrappedBaseSymbol = (name) => {
+          const raw = String(name || "").trim();
+          if (!raw) return "";
+          const { base } = splitDexCoin(raw);
+          const symbol = String(base || raw).trim().toUpperCase();
+          if (!symbol.startsWith("U") || symbol.length <= 1) return "";
+          const unwrapped = symbol.slice(1);
+          if (!unwrapped) return "";
+          if (HYPERLIQUID_TICKERS.has(unwrapped) || SPECIAL_LOGOS.has(unwrapped)) return unwrapped;
+          return "";
+        };
+
+        const addSymbolCandidates = (name) => {
+          const raw = String(name || "").trim();
+          if (!raw) return;
+          const { dex, base } = splitDexCoin(raw);
+          const symbol = String(base || raw).trim();
+          if (!symbol) return;
+          const upper = symbol.toUpperCase();
+          const safe = symbol.replace(/\//g, "_");
+          const pngOnly = new Set(["USA500", "COPPER"]);
+          const localExt = pngOnly.has(upper) ? "png" : "svg";
+          const dexLower = String(dex || "").toLowerCase();
+          candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(symbol)}.svg`);
+          if (upper !== symbol) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
+          if (!pngOnly.has(upper) && !symbol.includes("/") && !NON_CRYPTO_PREFIXES.includes(dexLower)) {
+            // Some spot assets only exist as {symbol}_spot.svg (e.g. KNTQ, FEUSD).
+            candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(symbol)}_spot.svg`);
+            if (upper !== symbol) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}_spot.svg`);
+          }
+          candidates.push(`images/coins/${encodeURIComponent(safe)}.${localExt}`);
+          if (upper !== safe) candidates.push(`images/coins/${encodeURIComponent(upper)}.${localExt}`);
+          if (NON_CRYPTO_PREFIXES.includes(dexLower)) {
+            // Generic HIP-3 ticker logo fallbacks (e.g. xyz:NVDA, xyz:MSTR, cash:SPY).
+            candidates.push(`https://financialmodelingprep.com/image-stock/${encodeURIComponent(upper)}.png`);
+            candidates.push(`https://eodhd.com/img/logos/US/${encodeURIComponent(upper)}.png`);
+          }
+        };
+
+        const addWrappedSpotFallback = (name) => {
+          const baseSymbol = getWrappedBaseSymbol(name);
+          if (!baseSymbol) return;
+          addSymbolCandidates(baseSymbol);
+        };
+
+        const addKnownPrefixedAlternatives = (name) => {
+          const raw = String(name || "").trim();
+          if (!raw || raw.includes(":")) return;
+          const base = String(splitDexCoin(raw).base || raw).trim().toUpperCase();
+          if (!base || HYPERLIQUID_TICKERS.has(base)) return;
+          getPrefixedCandidates(base).forEach((prefixed) => {
+            candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(prefixed)}.svg`);
+            const upper = prefixed.toUpperCase();
+            if (upper !== prefixed) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
+          });
+        };
+
+        const shouldPrioritizeSpecialLogo = [cleanName, rawName].some((name) => {
+          const { base } = splitDexCoin(name);
+          const upper = String(base || name || "").trim().toUpperCase();
+          return GLOBAL_SPECIAL_LOGO_PRIORITY.has(upper);
+        });
+
+        const specialLogo = getSpecialLogoUrl(rawName, cleanName);
+        if (shouldPrioritizeSpecialLogo && specialLogo) candidates.push(specialLogo);
+
+        // Prefer exact prefixed Hyperliquid logos for HIP-3/non-crypto assets.
+        addPrefixedCandidates(cleanName);
+        addPrefixedCandidates(rawName);
+        addKnownPrefixedAlternatives(cleanName);
+        addKnownPrefixedAlternatives(rawName);
+
+        // Prefer canonical base logo for wrapped spot symbols (e.g. UBTC -> BTC).
+        addWrappedSpotFallback(cleanName);
+        addWrappedSpotFallback(rawName);
+
+        if (!shouldPrioritizeSpecialLogo && specialLogo) candidates.push(specialLogo);
+        addSymbolCandidates(rawName);
+        addSymbolCandidates(cleanName);
+
+        return Array.from(new Set(candidates));
+      }
+
+      function getSpecialLogoUrl(rawName, cleanName) {
+        const keys = [cleanName, rawName];
+        for (const key of keys) {
+          if (!key) continue;
+          const upper = String(key).trim().toUpperCase();
+          if (SPECIAL_LOGOS.has(upper)) return SPECIAL_LOGOS.get(upper);
+          if (DOMAIN_LOGOS.has(upper)) return DOMAIN_LOGOS.get(upper);
+          if (upper.includes(":")) {
+            const base = upper.split(":").pop();
+            if (SPECIAL_LOGOS.has(base)) return SPECIAL_LOGOS.get(base);
+            if (DOMAIN_LOGOS.has(base)) return DOMAIN_LOGOS.get(base);
+          }
+        }
+        return null;
+      }
+
+      function ensureLogoCache(rawKey, rawName, cleanName) {
+        const urls = getIconCandidates(rawName, cleanName);
+        const existing = logoCache.get(rawKey);
+        if (existing) {
+          const oldList = Array.isArray(existing.urls) ? existing.urls : [];
+          const sameLength = oldList.length === urls.length;
+          const sameUrls = sameLength && oldList.every((url, idx) => url === urls[idx]);
+          if (!sameUrls) {
+            existing.urls = urls;
+            existing.idx = 0;
+            existing.okUrl = null;
+            existing.state = "unknown";
+            existing.permaFail = false;
+            existing.retryCount = 0;
+          } else if (
+            existing.state === "bad" &&
+            !existing.permaFail &&
+            Array.isArray(existing.urls) &&
+            existing.urls.length > 0
+          ) {
+            // Allow stale bad entries to recover on subsequent renders.
+            existing.state = "unknown";
+            existing.idx = 0;
+          }
+          return existing;
+        }
+        const entry = { state: "unknown", idx: 0, urls, okUrl: null };
+        logoCache.set(rawKey, entry);
+        return entry;
+      }
+
+      function scheduleLogoRetry() {
+        if (logoRetryTimer) return;
+        logoRetryTimer = setTimeout(() => {
+          logoRetryTimer = null;
+          retryFailedLogos();
+        }, 3000);
+      }
+
+      function scheduleLogoRefresh() {
+        if (logoRefreshTimer) return;
+        logoRefreshTimer = setTimeout(() => {
+          logoRefreshTimer = null;
+          renderFooterPrices();
+        }, 120);
+      }
+
+      function retryFailedLogos() {
+        let changed = false;
+        logoCache.forEach((entry) => {
+          if (entry.state !== "bad") return;
+          if (entry.permaFail) return;
+          if ((entry.retryCount || 0) > 2) return;
+          entry.state = "unknown";
+          entry.idx = 0;
+          entry.okUrl = null;
+          changed = true;
+        });
+        if (!changed) return;
+        renderFooterPrices();
+      }
+
+      function coinIconHtml(rawName, cleanName) {
+        const logoKey = normalizeLogoKey(rawName || cleanName);
+        const entry = ensureLogoCache(logoKey, rawName, cleanName);
+        const letter = (cleanName?.[0] || rawName?.[0] || "?").toUpperCase();
+        const coinKey = xmlEscape(rawName || cleanName || "");
+        const label = xmlEscape(cleanName || rawName || "");
+        const logoKeyAttr = xmlEscape(logoKey);
+
+        if (entry.state === "bad" || !entry.urls.length) {
+          return `<span class="coinFallback coin-info-trigger" data-logo-key="${logoKeyAttr}" data-coin-key="${coinKey}" data-coin-label="${label}">${letter}</span>`;
+        }
+
+        const src = (entry.state === "ok" && entry.okUrl) ? entry.okUrl : entry.urls[entry.idx || 0];
+        const safeKey = logoKey.replace(/'/g, "\\'");
+
+        return `
+          <img
+            class="coinIcon coin-info-trigger"
+            src="${src}"
+            alt="${xmlEscape(cleanName || rawName || "")}"
+            data-logo-key="${logoKeyAttr}"
+            data-coin-key="${coinKey}"
+            data-coin-label="${label}"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            onload="window.__logoOk('${safeKey}', this)"
+            onerror="window.__logoErr('${safeKey}', this, '${letter}')"
+          />
+        `;
+      }
+
+      function footerCoinIconHtml(rawName, cleanName) {
+        const normalized = normalizeFooterCoinValue(rawName || cleanName);
+        const base = getFooterBase(normalized);
+        const footerLogoUrl = FOOTER_SPECIAL_LOGOS.get(base);
+        if (!footerLogoUrl) return coinIconHtml(rawName, cleanName);
+        const coinKey = xmlEscape(rawName || cleanName || "");
+        const label = xmlEscape(cleanName || rawName || "");
+        const extraStyle = FOOTER_CIRCLE_LOGOS.has(base) ? ' style="border-radius:50%;"' : "";
+        return `
+          <img
+            class="coinIcon coin-info-trigger"
+            src="${footerLogoUrl}"
+            alt="${label}"
+            data-logo-key="${xmlEscape(normalized)}"
+            data-coin-key="${coinKey}"
+            data-coin-label="${label}"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            ${extraStyle}
+          />
+        `;
+      }
+
+  
+    function normalizeCoin(coin) {
+        return (coin || "").toUpperCase();
+      }
+
+      function normalizeFooterCoinValue(value) {
+        const cleaned = String(value || "").trim();
+        if (!cleaned) return "";
+        const { dex, base } = splitDexCoin(cleaned);
+        if (dex) return `${dex.toLowerCase()}:${String(base || "").toUpperCase()}`;
+        const upper = cleaned.toUpperCase();
+        if (upper === "USA500") return "cash:USA500";
+        return upper;
+      }
+
+      function normalizeLogoKey(value) {
+        const cleaned = String(value || "").trim();
+        if (!cleaned) return "";
+        const { dex, base } = splitDexCoin(cleaned);
+        let normalizedBase = String(base || "").toUpperCase();
+        if (normalizedBase.startsWith("U") && normalizedBase.length > 1) {
+          const unwrapped = normalizedBase.slice(1);
+          if (HYPERLIQUID_TICKERS.has(unwrapped) || SPECIAL_LOGOS.has(unwrapped)) {
+            normalizedBase = unwrapped;
+          }
+        }
+        if (dex) return `${dex.toLowerCase()}:${normalizedBase}`;
+        if (!normalizedBase) return cleaned.toUpperCase();
+        return normalizedBase;
+      }
+
+      function getFooterBase(coin) {
+        const { base } = splitDexCoin(coin);
+        return String(base || "").toUpperCase();
+      }
+
+      function formatPrefixedCoin(prefix, base) {
+        return `${prefix}:${String(base || "").toUpperCase()}`;
+      }
+
+      function rememberPrefixedFooterMarket(coin) {
+        const normalized = normalizeFooterCoinValue(coin);
+        const { dex, base } = splitDexCoin(normalized);
+        const normalizedBase = String(base || "").toUpperCase();
+        if (!dex || !normalizedBase) return;
+        const existing = footerPrefixedMarketsByBase.get(normalizedBase) || [];
+        if (!existing.includes(normalized)) {
+          existing.push(normalized);
+          footerPrefixedMarketsByBase.set(normalizedBase, existing);
+        }
+      }
+
+      function getPrefixedCandidates(base) {
+        const normalizedBase = String(base || "").toUpperCase();
+        const available = footerPrefixedMarketsByBase.get(normalizedBase) || [];
+        const ordered = [];
+        NON_CRYPTO_PREFIXES.forEach((prefix) => {
+          const exact = formatPrefixedCoin(prefix, normalizedBase);
+          if (available.includes(exact)) ordered.push(exact);
+        });
+        available.forEach((coin) => {
+          if (!ordered.includes(coin)) ordered.push(coin);
+        });
+        NON_CRYPTO_PREFIXES.forEach((prefix) => {
+          const exact = formatPrefixedCoin(prefix, normalizedBase);
+          if (!ordered.includes(exact)) ordered.push(exact);
+        });
+        return ordered;
+      }
+
+      function isNonCryptoPrefixed(coin) {
+        const { dex } = splitDexCoin(coin);
+        if (!dex) return false;
+        return NON_CRYPTO_PREFIXES.includes(String(dex).toLowerCase());
+      }
+
+      function findTrackedFooterCoinByBase(base) {
+        const normBase = String(base || "").toUpperCase();
+        return trackedFooterCoins.find((coin) => getFooterBase(coin) === normBase) || null;
+      }
+
+      function getExactLivePriceForCoin(raw) {
+        const normalized = normalizeFooterCoinValue(raw);
+        const { dex, base } = splitDexCoin(normalized);
+        const candidates = [raw, normalized];
+        if (!dex && base) {
+          candidates.push(base, normalizeCoin(base));
+        }
+        for (const key of candidates) {
+          if (!key) continue;
+          const px = liveMids.get(key);
+          if (Number.isFinite(px)) return px;
+        }
+        return undefined;
+      }
+
+      function getLivePriceForCoin(raw) {
+        const direct = getExactLivePriceForCoin(raw);
+        if (Number.isFinite(direct)) return direct;
+        const { dex, base } = splitDexCoin(raw);
+        for (const prefixed of !dex && base && !HYPERLIQUID_TICKERS.has(String(base).toUpperCase()) ? getPrefixedCandidates(base) : []) {
+          const px = getExactLivePriceForCoin(prefixed);
+          if (Number.isFinite(px)) return px;
+        }
+        return undefined;
+      }
+
+      function normalizeFooterChangeRefKey(raw) {
+        const normalized = normalizeFooterCoinValue(raw);
+        const { dex, base } = splitDexCoin(normalized);
+        const normalizedBase = String(base || normalized).toUpperCase();
+        if (!normalizedBase) return "";
+        return dex ? `${String(dex).toUpperCase()}:${normalizedBase}` : normalizedBase;
+      }
+
+      function getFooterChangeBaselineToken() {
+        if (footerChangeRange !== "1d") return footerChangeRange;
+        const now = new Date();
+        return `1d:${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
+      }
+
+      function getFooterChangePct(raw) {
+        const coin = normalizeFooterChangeRefKey(raw);
+        const base = getFooterBase(coin);
+        const key = footerChangeRefs.has(coin) ? coin : footerChangeRefs.has(base) ? base : null;
+          if (!key) {
+            if (footerChangePcts.has(coin)) return footerChangePcts.get(coin);
+            if (footerChangePcts.has(base)) return footerChangePcts.get(base);
+            const live = getLivePriceForCoin(coin);
+            if (Number.isFinite(live)) {
+              footerChangeRefs.set(coin, { prev: live, last: live });
+              footerChangeProvisional.add(coin);
+              return null;
+            }
+            return null;
+          }
+        const ref = footerChangeRefs.get(key);
+        const prev = Number(ref?.prev);
+        if (!Number.isFinite(prev) || prev === 0) return null;
+        const live = getLivePriceForCoin(coin);
+        const last = Number.isFinite(live) ? live : Number(ref?.last);
+        if (!Number.isFinite(last)) return null;
+        return (last - prev) / prev;
+      }
+
+      async function fetchChangeFromCandles(rawCoin, rangeKey) {
+        const coin = String(rawCoin || "").trim();
+        const range = FOOTER_CHANGE_RANGES[rangeKey] || FOOTER_CHANGE_RANGES["1d"];
+        if (!coin || !range) return null;
+        const end = Date.now();
+        const start = end - range.ms * 4;
+        const res = await fetch(HYPERLIQUID_INFO_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "candleSnapshot", req: { coin, interval: range.interval, startTime: start, endTime: end } }),
+        });
+        if (!res.ok) throw new Error(`candleSnapshot error: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        const candles = (Array.isArray(data) ? data : [])
+          .map((c) => ({
+            time: Number(c.t),
+            open: Number(c.o),
+            close: Number(c.c),
+          }))
+          .filter((c) => Number.isFinite(c.time) && Number.isFinite(c.open) && Number.isFinite(c.close))
+          .sort((a, b) => a.time - b.time);
+        if (candles.length >= 2) {
+          const prev = candles[candles.length - 2].close;
+          const last = candles[candles.length - 1].close;
+          if (Number.isFinite(prev) && prev !== 0 && Number.isFinite(last)) return { prev, last };
+        }
+        if (candles.length === 1) {
+          const prev = candles[0].open;
+          const last = candles[0].close;
+          if (Number.isFinite(prev) && prev !== 0 && Number.isFinite(last)) return { prev, last };
+        }
+        return null;
+      }
+
+      async function refreshFooterChanges() {
+        try {
+          if (!footerChangeEnabled) {
+            footerChangePcts.clear();
+            renderFooterPrices();
+            return;
+          }
+
+          const nextBaselineToken = getFooterChangeBaselineToken();
+          if (footerChangeRangeKey !== footerChangeRange || footerChangeBaselineToken !== nextBaselineToken) {
+            footerChangeRangeKey = footerChangeRange;
+            footerChangeBaselineToken = nextBaselineToken;
+            footerChangeRefs.clear();
+            footerChangeProvisional.clear();
+          }
+
+          const dexes = new Set();
+          trackedFooterCoins.forEach((coin) => {
+            const { dex } = splitDexCoin(coin);
+            if (!dex) return;
+            dexes.add(dex);
+          });
+
+          const fetchCtxs = async (dex = "") => {
+            const payload = dex ? { type: "metaAndAssetCtxs", dex } : { type: "metaAndAssetCtxs" };
+            const res = await fetch(HYPERLIQUID_INFO_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            if (!res.ok) throw new Error(`metaAndAssetCtxs error: ${res.status} ${res.statusText}`);
+            const data = await res.json();
+            return {
+              dex,
+              universe: Array.isArray(data) ? data?.[0]?.universe : data?.meta?.universe,
+              assetCtxs: Array.isArray(data) ? data[1] : data?.assetCtxs,
+            };
+          };
+
+          footerChangePcts.clear();
+
+          const missing = trackedFooterCoins
+            .map((c) => normalizeFooterCoinValue(c))
+            .filter(Boolean)
+            .filter((coin) => {
+              const changeKey = normalizeFooterChangeRefKey(coin);
+              return !footerChangeRefs.has(changeKey) || footerChangeProvisional.has(changeKey);
+            });
+
+          if (!missing.length) {
+            renderFooterPrices();
+            return;
+          }
+
+          if (footerChangeRange === "1d") {
+            const results = await Promise.allSettled([fetchCtxs(), ...Array.from(dexes).map((d) => fetchCtxs(d))]);
+            results.forEach((res) => {
+              if (res.status !== "fulfilled") return;
+              const { dex, universe, assetCtxs } = res.value || {};
+              if (!Array.isArray(assetCtxs)) return;
+              assetCtxs.forEach((ctx, idx) => {
+                if (!ctx || typeof ctx !== "object") return;
+                const fallbackName = Array.isArray(universe) ? universe[idx]?.name : "";
+                const coinRaw = String(ctx.coin ?? ctx.symbol ?? ctx.asset ?? fallbackName ?? "").trim();
+                const coinKey = buildCoinKey(coinRaw, dex);
+                const changeKey = normalizeFooterChangeRefKey(coinKey);
+                const baseKey = normalizeFooterChangeRefKey(getFooterBase(coinKey));
+                if (!changeKey) return;
+                const mark = Number(ctx.markPx ?? ctx.mark ?? ctx.midPx ?? ctx.mid ?? ctx.px);
+                const prev = Number(ctx.prevDayPx ?? ctx.prevDay ?? ctx.prevPx ?? ctx.openPx);
+                if (!Number.isFinite(mark) || !Number.isFinite(prev) || prev === 0) return;
+                if (!footerChangeRefs.has(changeKey) || footerChangeProvisional.has(changeKey)) {
+                  footerChangeRefs.set(changeKey, { prev, last: mark });
+                  footerChangeProvisional.delete(changeKey);
+                }
+                if (!dex && baseKey && (!footerChangeRefs.has(baseKey) || footerChangeProvisional.has(baseKey))) {
+                  footerChangeRefs.set(baseKey, { prev, last: mark });
+                  footerChangeProvisional.delete(baseKey);
+                }
+              });
+            });
+          }
+
+          const unresolved = trackedFooterCoins
+            .map((c) => normalizeFooterCoinValue(c))
+            .filter(Boolean)
+            .filter((coin) => {
+              const changeKey = normalizeFooterChangeRefKey(coin);
+              return !footerChangeRefs.has(changeKey) || footerChangeProvisional.has(changeKey);
+            });
+
+          await Promise.allSettled(
+            unresolved.map(async (coin) => {
+              try {
+                let change = await fetchChangeFromCandles(coin, footerChangeRange);
+                if ((!change || !Number.isFinite(change.prev)) && coin.includes(":")) {
+                  const base = getFooterBase(coin);
+                  if (base) change = await fetchChangeFromCandles(base, footerChangeRange);
+                }
+                if (!change || !Number.isFinite(change.prev)) return;
+                const key = normalizeFooterChangeRefKey(coin);
+                footerChangeRefs.set(key, change);
+                footerChangeProvisional.delete(key);
+                const base = getFooterBase(coin);
+                const baseKey = normalizeFooterChangeRefKey(base);
+                if (base && !coin.includes(":")) {
+                  footerChangeRefs.set(baseKey, change);
+                  footerChangeProvisional.delete(baseKey);
+                }
+              } catch (err) {
+                console.warn("Footer candle fallback failed", coin, err);
+              }
+            })
+          );
+
+          renderFooterPrices();
+        } catch (err) {
+          console.warn("Footer 24h change fetch failed", err);
+        }
+      }
+
+      function ensureFooterChangeTimer() {
+        if (footerChangeTimer) return;
+        footerChangeTimer = setInterval(refreshFooterChanges, 60000);
+      }
+
+      function applyFooterChangeVisibility() {
+        if (!priceFooterWrapEl) return;
+        priceFooterWrapEl.classList.toggle("hide-change", !footerChangeEnabled);
+      }
+
+      function updateFooterChangeMenu() {
+        if (!priceContextMenuEl) return;
+        const currencyBtn = priceContextMenuEl.querySelector('[data-action="toggle-currency"]');
+        if (currencyBtn) {
+          currencyBtn.textContent = "Currency";
+        }
+        const separatorsBtn = priceContextMenuEl.querySelector('[data-action="toggle-separators"]');
+        if (separatorsBtn) {
+          separatorsBtn.textContent = "Separate";
+        }
+        const toggleBtn = priceContextMenuEl.querySelector('[data-action="toggle-change"]');
+        if (toggleBtn) {
+          toggleBtn.textContent = `Show % change: ${footerChangeEnabled ? "On" : "Off"}`;
+        }
+        priceContextMenuEl.classList.toggle("hide-change-options", !footerChangeEnabled);
+        priceContextMenuEl.querySelectorAll('[data-action="change-range"]').forEach((btn) => {
+          const range = btn.getAttribute("data-range");
+          const label = FOOTER_CHANGE_RANGES[range]?.label || btn.textContent.trim();
+          btn.textContent = `${footerChangeRange === range ? "✓ " : ""}${label}`;
+        });
+        priceContextMenuEl.querySelectorAll('[data-action="change-separators"]').forEach((btn) => {
+          const count = Number(btn.getAttribute("data-count"));
+          const label = `${count} coins`;
+          btn.textContent = `${footerSeparatorEvery === count ? "✓ " : ""}${label}`;
+        });
+        priceContextMenuEl.querySelectorAll('[data-action="change-currency"]').forEach((btn) => {
+          const currency = String(btn.getAttribute("data-currency") || "").toUpperCase();
+          btn.textContent = `${footerPriceCurrency === currency ? "✓ " : ""}${currency}`;
+        });
+      }
+
+      function ensureManualMidTimer() {
+        if (manualMidTimer || manualMidCoins.size === 0) return;
+        manualMidTimer = setInterval(() => {
+          refreshManualMids();
+        }, 12000);
+      }
+
+      function stopManualMidTimerIfIdle() {
+        if (!manualMidTimer) return;
+        if (manualMidCoins.size > 0) return;
+        clearInterval(manualMidTimer);
+        manualMidTimer = null;
+      }
+
+      async function fetchL2BookMid(coin) {
+        try {
+          const res = await fetch(HYPERLIQUID_INFO_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: "l2Book", coin }),
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          const levels = data?.levels;
+          if (!Array.isArray(levels) || levels.length < 2) return null;
+          const getPx = (entry) => {
+            if (!entry) return null;
+            if (typeof entry.px !== "undefined") return Number(entry.px);
+            if (Array.isArray(entry)) return Number(entry[0]);
+            return null;
+          };
+          const bestBid = getPx(levels[0]?.[0]);
+          const bestAsk = getPx(levels[1]?.[0]);
+          if (!Number.isFinite(bestBid) || !Number.isFinite(bestAsk)) return null;
+          return (bestBid + bestAsk) / 2;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      async function refreshManualMids() {
+        const coins = Array.from(manualMidCoins);
+        if (!coins.length) {
+          stopManualMidTimerIfIdle();
+          return;
+        }
+        const updates = await Promise.all(coins.map((coin) => fetchL2BookMid(coin)));
+        updates.forEach((mid, idx) => {
+          const coin = coins[idx];
+          if (!Number.isFinite(mid)) return;
+          liveMids.set(coin, mid);
+        });
+        renderFooterPrices();
+      }
+
+      function requestManualMidRefresh() {
+        const now = Date.now();
+        if (now - lastManualMidRefreshRequestMs < 5000) return;
+        lastManualMidRefreshRequestMs = now;
+        refreshManualMids();
+      }
+
+      async function primeManualMidsForFooter() {
+        const manualCoins = trackedFooterCoins.filter((coin) => coin.includes(":"));
+        if (!manualCoins.length) return;
+        manualCoins.forEach((coin) => manualMidCoins.add(coin));
+        ensureManualMidTimer();
+        await refreshManualMids();
+      }
+
+      async function sanitizeFooterCoins() {
+        const next = [];
+        const seenBases = new Set();
+        for (const raw of trackedFooterCoins) {
+          const normalized = normalizeFooterCoinValue(raw);
+          const base = getFooterBase(normalized);
+          if (!base || seenBases.has(base)) continue;
+          if (normalized.includes(":") || HYPERLIQUID_TICKERS.has(base)) {
+            next.push(normalized);
+            seenBases.add(base);
+            continue;
+          }
+          // eslint-disable-next-line no-await-in-loop
+          const baseResult = await evaluateFooterCandidate(base);
+          if (baseResult) {
+            next.push(baseResult.coinKey);
+            seenBases.add(base);
+            continue;
+          }
+          let added = false;
+          for (const prefixed of getPrefixedCandidates(base)) {
+            // eslint-disable-next-line no-await-in-loop
+            const prefixedResult = await evaluateFooterCandidate(prefixed);
+            if (prefixedResult) {
+              next.push(prefixedResult.coinKey);
+              seenBases.add(base);
+              added = true;
+              break;
+            }
+          }
+          if (!added) {
+            // Drop coins that have no logo and no price data.
+          }
+        }
+        trackedFooterCoins = next;
+        saveFooterCoins();
+      }
+
+      function rememberLogoOk(rawKey, okUrl) {
+        const normalized = normalizeLogoKey(rawKey);
+        const entry = ensureLogoCache(normalized, rawKey, rawKey);
+        entry.state = "ok";
+        entry.idx = 0;
+        entry.okUrl = okUrl;
+        entry.urls = [okUrl];
+      }
+
+      function checkLogoUrl(url) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          let done = false;
+          const finish = (ok) => {
+            if (done) return;
+            done = true;
+            resolve(ok);
+          };
+          const timer = setTimeout(() => finish(false), 3000);
+          img.onload = () => {
+            clearTimeout(timer);
+            finish(true);
+          };
+          img.onerror = () => {
+            clearTimeout(timer);
+            finish(false);
+          };
+          img.referrerPolicy = "no-referrer";
+          img.src = url;
+        });
+      }
+
+    async function findAvailableLogoUrl(rawName) {
+      const candidates = getIconCandidates(rawName, rawName);
+      for (const url of candidates) {
+        // eslint-disable-next-line no-await-in-loop
+        const ok = await checkLogoUrl(url);
+        if (ok) return url;
+      }
+      return null;
+    }
+
+    function revealFooter(force = false) {
+      if (footerReady || !priceFooterWrapEl) return;
+      const hasItems = Boolean(priceListEl?.querySelector(".price-item"));
+      if (!force && !hasItems) return;
+      footerReady = true;
+      requestAnimationFrame(() => {
+        priceFooterWrapEl.classList.remove("pending");
+      });
+    }
+
+      async function evaluateFooterCandidate(coinKey) {
+        const normalizedCoin = normalizeFooterCoinValue(coinKey);
+        const { dex, base } = splitDexCoin(normalizedCoin);
+        const existing = getExactLivePriceForCoin(coinKey);
+        let mid = Number.isFinite(existing) ? existing : null;
+        let logoUrl = null;
+        if (Number.isFinite(existing) && coinKey.includes(":")) {
+          manualMidCoins.add(coinKey);
+          ensureManualMidTimer();
+        }
+        if (!Number.isFinite(existing)) {
+          logoUrl = await findAvailableLogoUrl(coinKey);
+          if (logoUrl) rememberLogoOk(coinKey, logoUrl);
+          mid = await fetchL2BookMid(coinKey);
+          if (Number.isFinite(mid)) {
+            liveMids.set(coinKey, mid);
+            manualMidCoins.add(coinKey);
+            ensureManualMidTimer();
+          }
+        }
+        if (!logoUrl && Number.isFinite(existing)) {
+          return { coinKey, hasLogo: false, hasPrice: true };
+        }
+        if (!dex && base && !HYPERLIQUID_TICKERS.has(String(base).toUpperCase()) && !Number.isFinite(mid) && !Number.isFinite(existing)) {
+          return null;
+        }
+        if (logoUrl || Number.isFinite(mid)) {
+          return { coinKey, hasLogo: Boolean(logoUrl), hasPrice: Number.isFinite(mid) || Number.isFinite(existing) };
+        }
+        return null;
+      }
+
+      async function extractDominantColorFromLogo(symbol) {
+        if (window.location?.protocol === "file:") return null;
+        const normalized = normalizeFooterCoinValue(symbol);
+        if (!normalized) return null;
+        const { base } = splitDexCoin(normalized);
+        const local = String(base || normalized).replace("/", "_");
+        if (local === "USA500" || local === "COPPER") return null;
+        const iconUrl = `images/coins/${encodeURIComponent(local)}.svg`;
+        if (!isSameOriginAsset(iconUrl)) return null;
+        try {
+          const res = await fetch(iconUrl);
+          if (!res.ok) return null;
+          const svgText = await res.text();
+          const matches = svgText.match(/#[0-9a-fA-F]{3,6}/g) || [];
+          if (!matches.length) return null;
+
+          const counts = new Map();
+          const normalizeHex = (hex) => {
+            const h = hex.replace("#", "");
+            if (h.length === 3) return `#${h[0]}${h[0]}${h[1]}${h[1]}${h[2]}${h[2]}`.toLowerCase();
+            return `#${h.padEnd(6, "0").slice(0, 6)}`.toLowerCase();
+          };
+          const brightness = (hex) => {
+            const h = normalizeHex(hex).slice(1);
+            const r = parseInt(h.slice(0, 2), 16);
+            const g = parseInt(h.slice(2, 4), 16);
+            const b = parseInt(h.slice(4, 6), 16);
+            return (r * 299 + g * 587 + b * 114) / 1000;
+          };
+
+          matches.forEach((hex) => {
+            const norm = normalizeHex(hex);
+            const b = brightness(norm);
+            if (b > 240 || b < 20) return;
+            counts.set(norm, (counts.get(norm) || 0) + 1);
+          });
+
+          let best = null;
+          let bestCount = 0;
+          counts.forEach((count, color) => {
+            if (count > bestCount) {
+              best = color;
+              bestCount = count;
+            }
+          });
+          return best;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function renderFooterPrices() {
+        if (!priceFooterEl) return;
+        if (!priceListEl || !priceListCloneEls.length) return;
+        if (footerPriceCurrency === "EUR") {
+          ensureFooterEurUsdRate();
+        } else if (footerPriceCurrency === "JPY") {
+          ensureFooterUsdJpyRate();
+        }
+        const coinColors = {
+          "0G": "#b75fff",
+          "2Z": "#747474",
+          "AAVE": "#b6509e",
+          "ACE": "#aabbcc",
+          "ADA": "#0033ad",
+          "AERO": "#ebe8e1",
+          "AI": "#f45b5b",
+          "AI16Z": "#7c625f",
+          "AIXBT": "#ac77f0",
+          "ALGO": "#e5e7eb",
+          "ALT": "#8f96e8",
+          "ANIME": "#fdd274",
+          "APE": "#89d0ff",
+          "APEX": "#fed702",
+          "APT": "#e5e7eb",
+          "AR": "#222326",
+          "ARB": "#213147",
+          "ARK": "#f70000",
+          "ASTER": "#f4d4af",
+          "ATOM": "#b7b9c8",
+          "AVAX": "#e84142",
+          "AVNT": "#7e11fd",
+          "AXS": "#303030",
+          "BABY": "#7c8f86",
+          "BADGER": "#c1c1c3",
+          "BANANA": "#efcf8c",
+          "BCH": "#0ac18e",
+          "BERA": "#814625",
+          "BIGTIME": "#e5e7eb",
+          "BIO": "#324224",
+          "BLAST": "#fcfc03",
+          "BLUR": "#650901",
+          "BLZ": "#ff00ff",
+          "BNB": "#f0b90b",
+          "BNT": "#e5e7eb",
+          "BOME": "#50832b",
+          "BRETT": "#007c9e",
+          "BSV": "#eab300",
+          "BTC": "#f7931a",
+          "CAKE": "#633001",
+          "CANTO": "#303030",
+          "CATI": "#d4a44b",
+          "CC": "#f3ff97",
+          "CELO": "#fcff52",
+          "CFX": "#181818",
+          "CHILLGUY": "#435136",
+          "COMP": "#00d395",
+          "CRV": "#80ff77",
+          "CYBER": "#e5e7eb",
+          "DASH": "#303030",
+          "DOGE": "#cfb66c",
+          "DOOD": "#8c8c8c",
+          "DOT": "#e6007a",
+          "DYDX": "#6966ff",
+          "DYM": "#24201f",
+          "EIGEN": "#1a0c6d",
+          "ENA": "#3a3a3a",
+          "ENS": "#a0a8d4",
+          "ETC": "#3ab83a",
+          "ETH": "#627eea",
+          "ETHFI": "#29bcfa",
+          "FARTCOIN": "#9b9b9b",
+          "FET": "#202944",
+          "FIL": "#0090ff",
+          "FOGO": "#303030",
+          "FRIEND": "#a3effd",
+          "FTM": "#1969ff",
+          "FTT": "#02a6c2",
+          "FXS": "#e5e7eb",
+          "GALA": "#e5e7eb",
+          "GAS": "#01e397",
+          "GMT": "#776942",
+          "GMX": "#03d1cf",
+          "GOAT": "#86958c",
+          "GRASS": "#acf601",
+          "GRIFFAIN": "#9ffa9f",
+          "HBAR": "#e5e7eb",
+          "HEMI": "#ff6a00",
+          "HMSTR": "#fea404",
+          "HPOS": "#bc1e2d",
+          "HYPE": "#97fce4",
+          "HYPER": "#dc6cc9",
+          "ICP": "#d74d59",
+          "ILV": "#500586",
+          "IMX": "#e5e7eb",
+          "INIT": "#898989",
+          "INJ": "#4d3dff",
+          "IO": "#e5e7eb",
+          "IOTA": "#e5e7eb",
+          "IP": "#ffe8ae",
+          "JELLY": "#514f4f",
+          "JTO": "#807f80",
+          "JUP": "#c7f284",
+          "KAITO": "#32ffdc",
+          "KAS": "#49eacb",
+          "LAUNCHCOIN": "#5ecc57",
+          "LAYER": "#2b6558",
+          "LDO": "#f89791",
+          "LINEA": "#61dfff",
+          "LINK": "#2a5ada",
+          "LISTA": "#201a8a",
+          "LIT": "#e5e7eb",
+          "LOOM": "#4bc0c8",
+          "LTC": "#345d9d",
+          "MANTA": "#29ccb9",
+          "MATIC": "#8247e5",
+          "MAV": "#780eff",
+          "MAVIA": "#1c54c2",
+          "ME": "#f30676",
+          "MEGA": "#19191a",
+          "MELANIA": "#939393",
+          "MEME": "#451834",
+          "MERL": "#2a2cbf",
+          "MET": "#f5bd00",
+          "MEW": "#ec1c24",
+          "MINA": "#2d2d2d",
+          "MKR": "#4fa89b",
+          "MNT": "#2ec1a1",
+          "MON": "#836ef9",
+          "MOODENG": "#1f5926",
+          "MORPHO": "#2470ff",
+          "MOVE": "#f1bb15",
+          "MYRO": "#303030",
+          "NEAR": "#e5e7eb",
+          "NEIROETH": "#b99f32",
+          "NEO": "#00e599",
+          "NFTI": "#29796e",
+          "NIL": "#e5e7eb",
+          "NOT": "#e5e7eb",
+          "NTRN": "#e5e7eb",
+          "NXPC": "#47f0c9",
+          "OGN": "#0074f0",
+          "OM": "#373535",
+          "OMNI": "#0564ff",
+          "ONDO": "#e5e7eb",
+          "OP": "#ff0420",
+          "ORBS": "#556195",
+          "ORDI": "#e5e7eb",
+          "OX": "#ffb7a5",
+          "PANDORA": "#9a9a9a",
+          "PAXG": "#ede70a",
+          "PENDLE": "#dedede",
+          "PENGU": "#575b5f",
+          "PEOPLE": "#303030",
+          "PIXEL": "#69bd00",
+          "PNUT": "#e1d2c8",
+          "POL": "#8247e5",
+          "POLYX": "#ff2e72",
+          "POPCAT": "#a49793",
+          "PROMPT": "#121b13",
+          "PROVE": "#fe11c5",
+          "PUMP": "#e8f2f1",
+          "PURR": "#88d4ee",
+          "PYTH": "#e5e7eb",
+          "RDNT": "#00ffaa",
+          "RENDER": "#cf1011",
+          "REQ": "#008c62",
+          "RESOLV": "#ffedd7",
+          "REZ": "#c4ff61",
+          "RLB": "#fea101",
+          "RNDR": "#cf1011",
+          "RSR": "#e5e7eb",
+          "RUNE": "#00ccff",
+          "S": "#e5e7eb",
+          "SAGA": "#e5e7eb",
+          "SAND": "#00adef",
+          "SCR": "#ebc28e",
+          "SEI": "#9d1f19",
+          "SHIA": "#361d0c",
+          "SKY": "#a273ff",
+          "SNX": "#00d1ff",
+          "SOL": "#00ffa3",
+          "SOPH": "#e5e7eb",
+          "SPX": "#d5a141",
+          "STABLE": "#e5e7eb",
+          "STBL": "#bb93e9",
+          "STG": "#a6a6a6",
+          "STRAX": "#21bbc0",
+          "STRK": "#ec796b",
+          "STX": "#5546ff",
+          "SUI": "#4ca3ff",
+          "SUPER": "#00eaea",
+          "SUSHI": "#03b8ff",
+          "SYRUP": "#fc784a",
+          "TAO": "#e5e7eb",
+          "TIA": "#7b2bf9",
+          "TNSR": "#404040",
+          "TON": "#0098ea",
+          "TRB": "#00ff8f",
+          "TRUMP": "#9a9a9a",
+          "TRX": "#ec0927",
+          "TST": "#eeb207",
+          "TURBO": "#cfab7f",
+          "UMA": "#ff4a4a",
+          "UNI": "#ff007a",
+          "UNIBOT": "#a13987",
+          "USTC": "#093dac",
+          "USUAL": "#e5e7eb",
+          "VINE": "#01bf8f",
+          "VIRTUAL": "#44bcc3",
+          "VVV": "#042d48",
+          "W": "#7168be",
+          "WCT": "#0c88f0",
+          "WIF": "#e5e7eb",
+          "WLD": "#e5e7eb",
+          "WLFI": "#eaac08",
+          "XAI": "#f30019",
+          "XLM": "#e5e7eb",
+          "XMR": "#f26822",
+          "XPL": "#e5e7eb",
+          "XRP": "#23292f",
+          "YGG": "#1d1f22",
+          "YZY": "#303030",
+          "ZEC": "#cf8724",
+          "ZEN": "#0e9de5",
+          "ZEREBRO": "#1b1b19",
+          "ZETA": "#005741",
+          "ZK": "#e5e7eb",
+          "ZORA": "#7f8ee9",
+          "ZRO": "#575757",
+          "KBONK": "#303030",
+          "KDOGS": "#303030",
+          "KFLOKI": "#303030",
+          "KLUNC": "#303030",
+          "KNEIRO": "#303030",
+          "KPEPE": "#303030",
+          "KSHIB": "#303030",
+        };
+
+        const existing = new Map(
+          Array.from(priceListEl.querySelectorAll(".price-item")).map((el) => [el.dataset.coin, el])
+        );
+        const desired = trackedFooterCoins.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
+        let allFooterPricesReady = desired.length > 0;
+
+        existing.forEach((el, coin) => {
+          if (!desired.includes(coin)) el.remove();
+        });
+
+        desired.forEach((coin) => {
+          let item = existing.get(coin);
+          if (!item) {
+            item = document.createElement("span");
+            item.className = "price-item";
+            item.dataset.coin = coin;
+            item.setAttribute("draggable", "true");
+            item.innerHTML = `
+              ${footerCoinIconHtml(coin, coin)}
+              <span class="coin-price">--</span>
+              <span class="coin-change"></span>
+            `;
+            priceListEl.appendChild(item);
+          } else {
+            priceListEl.appendChild(item);
+          }
+        });
+
+        desired.forEach((coin) => {
+          const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
+          if (!item) return;
+          const priceEl = item.querySelector(".coin-price");
+          const changeEl = item.querySelector(".coin-change");
+          const price = getLivePriceForCoin(coin);
+          const base = getFooterBase(coin);
+          const isLightTheme = document.body.classList.contains("light");
+          const displayMeta = getDisplayCurrencyMeta(price);
+          const displayPrice = displayMeta?.value ?? null;
+          if (!Number.isFinite(displayPrice)) allFooterPricesReady = false;
+          const footerPriceCacheKey = `${footerPriceCurrency}:${coin}`;
+          let color =
+            coinColors[coin] ||
+            coinColors[base] ||
+            coinColorCache.get(coin) ||
+            coinColorCache.get(base) ||
+            "#e5e7eb";
+          if (isNonCryptoPrefixed(coin)) {
+            color = isLightTheme ? "#0f172a" : "#e5e7eb";
+          } else if (isLightTheme && isColorTooLight(color)) {
+            color = "#0f172a";
+          }
+          const footerColorOverride =
+            FOOTER_PRICE_COLOR_OVERRIDES.get(coin) ??
+            FOOTER_PRICE_COLOR_OVERRIDES.get(base);
+          if (footerColorOverride) {
+            color =
+              isLightTheme && base === "XRP"
+                ? "#000000"
+                : isLightTheme && base === "SILVER"
+                  ? "#6b7280"
+                  : footerColorOverride;
+          }
+          if (priceEl) {
+            if (!Number.isFinite(price)) {
+              const retryCoins = coin.includes(":") ? [normalizeFooterCoinValue(coin)] : getPrefixedCandidates(base);
+              retryCoins.forEach((retryCoin) => {
+                if (retryCoin) manualMidCoins.add(normalizeFooterCoinValue(retryCoin));
+              });
+              ensureManualMidTimer();
+              requestManualMidRefresh();
+            }
+            if (Number.isFinite(displayPrice)) {
+              let decimals = coinPriceDecimals.get(footerPriceCacheKey);
+              if (decimals === undefined) {
+                const abs = Math.abs(displayPrice);
+                if (abs >= 10000) decimals = 0;
+                else if (abs >= 1000) decimals = 1;
+                else if (abs >= 100) decimals = 2;
+                else if (abs >= 10) decimals = 3;
+                else if (abs >= 1) decimals = 4;
+                else if (abs >= 0.1) decimals = 5;
+                else if (abs >= 0.01) decimals = 6;
+                else decimals = 8;
+                coinPriceDecimals.set(footerPriceCacheKey, decimals);
+              }
+              const formatted = fmtPriceFixed(price, decimals);
+              priceEl.textContent = formatted;
+              lastFooterPrices.set(footerPriceCacheKey, formatted);
+            } else {
+              const fallbackSymbol =
+                footerPriceCurrency === "EUR" ? "€" : footerPriceCurrency === "JPY" ? "¥" : "$";
+              priceEl.textContent = lastFooterPrices.get(footerPriceCacheKey) || `${fallbackSymbol}--`;
+            }
+            priceEl.style.color = color;
+          }
+
+          if (changeEl) {
+            if (!footerChangeEnabled) {
+              changeEl.textContent = "";
+              changeEl.classList.remove("upnl-pos", "upnl-neg", "upnl-flat");
+              return;
+            }
+            const changePct = getFooterChangePct(coin);
+            if (Number.isFinite(changePct)) {
+              const isFlatChange = Math.abs(changePct) < 0.00005;
+              const triangle = isFlatChange ? "■" : changePct > 0 ? "▲" : "▼";
+              const pctText = formatPercent(Math.abs(changePct), 2);
+              changeEl.textContent = `${triangle} ${pctText}`;
+              changeEl.classList.toggle("upnl-pos", changePct > 0 && !isFlatChange);
+              changeEl.classList.toggle("upnl-neg", changePct < 0 && !isFlatChange);
+              changeEl.classList.toggle("upnl-flat", isFlatChange);
+            } else {
+              changeEl.textContent = "";
+              changeEl.classList.remove("upnl-pos", "upnl-neg", "upnl-flat");
+            }
+          }
+        });
+
+        priceListEl.querySelectorAll(".price-end-marker").forEach((el) => el.remove());
+        if (desired.length) {
+          const createFooterMarkerEl = () => {
+            const markerEl = document.createElement("span");
+            markerEl.className = "price-end-marker";
+            markerEl.setAttribute("aria-hidden", "true");
+            markerEl.innerHTML = `
+              <img src="images/pulse.gif" alt="" />
+              <span>Hypermonitor</span>
+              <img src="images/pulse.gif" alt="" />
+            `;
+            return markerEl;
+          };
+
+          priceListEl.insertBefore(createFooterMarkerEl(), priceListEl.firstChild);
+          desired.forEach((coin, idx) => {
+            if ((idx + 1) % footerSeparatorEvery !== 0) return;
+            if (idx === desired.length - 1) return;
+            const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
+            if (!item) return;
+            item.insertAdjacentElement("afterend", createFooterMarkerEl());
+          });
+        }
+
+        priceListCloneEls.forEach((cloneEl) => {
+          cloneEl.innerHTML = priceListEl.innerHTML;
+          cloneEl.querySelectorAll(".price-item").forEach((item) => {
+            item.removeAttribute("draggable");
+          });
+        });
+
+        requestAnimationFrame(() => {
+          updatePriceTickerRolling();
+          if (!footerReady && priceFooterWrapEl && allFooterPricesReady) {
+            revealFooter(true);
+          }
+        });
+
+        desired.forEach(async (coin) => {
+          const base = getFooterBase(coin);
+          if (
+            FOOTER_PRICE_COLOR_OVERRIDES.has(coin) ||
+            FOOTER_PRICE_COLOR_OVERRIDES.has(base) ||
+            coinColors[coin] ||
+            coinColorCache.has(coin) ||
+            coinColorPending.has(coin)
+          ) return;
+          coinColorPending.add(coin);
+          const color = await extractDominantColorFromLogo(coin);
+          coinColorPending.delete(coin);
+          if (!color) return;
+          const isLightTheme = document.body.classList.contains("light");
+          const displayColor = isLightTheme && isColorTooLight(color) ? "#0f172a" : color;
+          coinColorCache.set(normalizeFooterCoinValue(coin), color);
+          saveCoinColorCache();
+          const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
+          if (item) item.style.color = displayColor;
+          priceListCloneEls.forEach((cloneEl) => {
+            const cloneItem = cloneEl.querySelector(`.price-item[data-coin="${coin}"] .coin-price`);
+            if (cloneItem) cloneItem.style.color = displayColor;
+          });
+        });
+      }
+
+      function updatePriceTickerRolling() {
+        if (!priceFooterWrapEl || !priceListEl || !priceTickerEl || !priceTrackEl) return;
+        const items = priceListEl.querySelectorAll(".price-item");
+        if (!items.length) {
+          priceFooterWrapEl.classList.remove("rolling");
+          priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
+          priceTrackEl.style.animationDuration = "";
+          return;
+        }
+        const tops = new Set(Array.from(items).map((el) => el.offsetTop));
+        const isWrapped = tops.size > 1;
+        const isOverflow = priceListEl.scrollWidth > priceTickerEl.clientWidth + 4;
+        const forceRoll = items.length >= 12;
+        const shouldRoll = forceRoll || isWrapped || isOverflow;
+        priceFooterWrapEl.classList.toggle("rolling", shouldRoll);
+        if (shouldRoll) {
+          let scrollDistance = 0;
+          const exactDistance = priceListCloneEl ? priceListCloneEl.offsetLeft - priceListEl.offsetLeft : 0;
+          if (Number.isFinite(exactDistance) && exactDistance > 0) {
+            scrollDistance = exactDistance;
+            priceTrackEl.style.setProperty("--price-scroll-distance", `${exactDistance}px`);
+          } else {
+            const trackStyle = getComputedStyle(priceTrackEl);
+            const listGap = parseFloat(trackStyle.columnGap || trackStyle.gap || "0") || 0;
+            scrollDistance = priceListEl.scrollWidth + listGap;
+            priceTrackEl.style.setProperty("--price-scroll-distance", `${scrollDistance}px`);
+          }
+          const pxPerSecond = 52;
+          const durationSeconds = Math.max(18, Math.min(42, scrollDistance / pxPerSecond));
+          priceTrackEl.style.animationDuration = `${durationSeconds.toFixed(2)}s`;
+        } else {
+          priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
+          priceTrackEl.style.animationDuration = "";
+        }
+      }
+
+      async function resolveCoinSymbol(input) {
+        const cleaned = String(input || "").trim();
+        if (!cleaned) return null;
+        if (cleaned.includes(":")) return normalizeFooterCoinValue(cleaned);
+        const lookup = cleaned.toLowerCase();
+        if (coinNameCache.has(lookup)) return coinNameCache.get(lookup);
+
+        const simple = lookup.replace(/[^a-z0-9]/g, "");
+        if (simple && simple === lookup && simple.length <= 6) {
+          return simple.toUpperCase();
+        }
+
+        try {
+          const res = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(cleaned)}`);
+          if (!res.ok) throw new Error("search failed");
+          const data = await res.json();
+          const first = data?.coins?.[0];
+          const symbol = first?.symbol ? String(first.symbol).toUpperCase() : null;
+          if (symbol) {
+            coinNameCache.set(lookup, symbol);
+            const name = first?.name ? String(first.name).toLowerCase() : "";
+            if (name) coinNameCache.set(name, symbol);
+            saveCoinNameCache();
+            return symbol;
+          }
+        } catch (e) {}
+
+        return cleaned.toUpperCase();
+      }
+
+      function getInputCandidateSymbol(input) {
+        const cleaned = String(input || "").trim();
+        if (!cleaned) return null;
+        if (cleaned.includes(":")) return normalizeFooterCoinValue(cleaned);
+        const lookup = cleaned.toLowerCase();
+        if (coinNameCache.has(lookup)) return coinNameCache.get(lookup);
+        const simple = lookup.replace(/[^a-z0-9]/g, "");
+        if (simple && simple === lookup && simple.length <= 6) return simple.toUpperCase();
+        return cleaned.toUpperCase();
+      }
+
+      function updateFooterActionLabel() {
+        if (!priceAddBtnEl || !priceAddInputEl) return;
+        const candidate = getInputCandidateSymbol(priceAddInputEl.value);
+        if (candidate && findTrackedFooterCoinByBase(getFooterBase(candidate))) {
+          priceAddBtnEl.textContent = "Remove";
+        } else {
+          priceAddBtnEl.textContent = "Add";
+        }
+      }
+
+      function isCompactFooterAddMode() {
+        return true;
+      }
+
+      function syncFooterAddControls() {
+        if (!priceControlsEl) return;
+        const compact = isCompactFooterAddMode();
+        priceControlsEl.classList.toggle("compact", compact && !footerAddCompactOpen);
+        priceControlsEl.classList.toggle("compact-open", compact && footerAddCompactOpen);
+      }
+
+      function openFooterAddControls() {
+        if (!isCompactFooterAddMode()) return;
+        footerAddCompactOpen = true;
+        syncFooterAddControls();
+        requestAnimationFrame(() => priceAddInputEl?.focus());
+      }
+
+      function closeFooterAddControls(force = false) {
+        if (!isCompactFooterAddMode()) return;
+        if (!force && String(priceAddInputEl?.value || "").trim()) return;
+        footerAddCompactOpen = false;
+        syncFooterAddControls();
+      }
+
+      function hidePriceContextMenu() {
+        if (!priceContextMenuEl) return;
+        priceContextMenuEl.classList.remove("show");
+        priceContextMenuEl.setAttribute("aria-hidden", "true");
+        priceContextMenuEl.setAttribute("data-has-coin", "false");
+        priceContextCoin = null;
+      }
+
+      function showPriceContextMenu(x, y, coin) {
+        if (!priceContextMenuEl) return;
+        priceContextCoin = coin || null;
+        priceContextMenuEl.classList.add("show");
+        priceContextMenuEl.setAttribute("aria-hidden", "false");
+        priceContextMenuEl.setAttribute("data-has-coin", coin ? "true" : "false");
+        updateFooterChangeMenu();
+        const rect = priceContextMenuEl.getBoundingClientRect();
+        const padding = 8;
+        const left = Math.min(x, window.innerWidth - rect.width - padding);
+        const top = Math.min(y, window.innerHeight - rect.height - padding);
+        priceContextMenuEl.style.left = `${Math.max(padding, left)}px`;
+        priceContextMenuEl.style.top = `${Math.max(padding, top)}px`;
+      }
+
+      async function addFooterCoin(raw) {
+        const symbol = await resolveCoinSymbol(raw);
+        if (!symbol) return;
+        const normalized = normalizeFooterCoinValue(symbol);
+        const base = getFooterBase(normalized);
+        if (!base) return;
+        if (findTrackedFooterCoinByBase(base)) return;
+
+        const baseResult = await evaluateFooterCandidate(base);
+        if (baseResult) {
+          trackedFooterCoins.push(baseResult.coinKey);
+          saveFooterCoins();
+          renderFooterPrices();
+          return;
+        }
+
+        for (const prefixed of getPrefixedCandidates(base)) {
+          // eslint-disable-next-line no-await-in-loop
+          const prefixedResult = await evaluateFooterCandidate(prefixed);
+          if (prefixedResult) {
+            trackedFooterCoins.push(prefixedResult.coinKey);
+            saveFooterCoins();
+            renderFooterPrices();
+            return;
+          }
+        }
+      }
+
+      function removeFooterCoin(symbol) {
+        trackedFooterCoins = trackedFooterCoins.filter((c) => c !== symbol);
+        manualMidCoins.delete(symbol);
+        liveMids.delete(symbol);
+        coinPriceDecimals.delete(symbol);
+        stopManualMidTimerIfIdle();
+        saveFooterCoins();
+        renderFooterPrices();
+      }
+
+      async function toggleFooterCoin(raw) {
+        const symbol = await resolveCoinSymbol(raw);
+        if (!symbol) return;
+        const normalized = normalizeFooterCoinValue(symbol);
+        const base = getFooterBase(normalized);
+        if (!base) return;
+        const existing = findTrackedFooterCoinByBase(base);
+        if (existing) {
+          removeFooterCoin(existing);
+        } else {
+          addFooterCoin(normalized);
+        }
+      }
+
+  
+    function parseColorToRgb(color) {
+        if (!color) return null;
+        const raw = String(color).trim();
+        const hexMatch = raw.match(/^#([a-f0-9]{6})$/i);
+        if (hexMatch) {
+          const hex = hexMatch[1];
+          const r = parseInt(hex.slice(0, 2), 16);
+          const g = parseInt(hex.slice(2, 4), 16);
+          const b = parseInt(hex.slice(4, 6), 16);
+          return { r, g, b };
+        }
+        const rgbMatch = raw.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+        if (rgbMatch) {
+          return { r: Number(rgbMatch[1]), g: Number(rgbMatch[2]), b: Number(rgbMatch[3]) };
+        }
+        return null;
+      }
+
+      function isColorTooLight(color) {
+        const rgb = parseColorToRgb(color);
+        if (!rgb) return false;
+        const { r, g, b } = rgb;
+        const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        return luminance > 0.82;
+      }
+
+  
+
+    async function fetchFooterDexNames(force = false) {
+      if (!force && Array.isArray(footerDexNames) && footerDexNames.length) return footerDexNames.slice();
+      let names = [];
+      try {
+        const dexData = await fetchHyperliquidInfo({ type: "perpDexs" });
+        names = (Array.isArray(dexData) ? dexData : [])
+          .map((entry) => entry && entry.name)
+          .filter((value) => typeof value === "string" && value.length > 0);
+      } catch (error) {
+        names = [];
+      }
+      footerDexNames = ["", ...names.filter((value, index, list) => list.indexOf(value) === index)];
+      return footerDexNames.slice();
+    }
+
+    async function bootstrapFooterCatalog(force = false) {
+      const dexNames = await fetchFooterDexNames(force);
+      if (force) {
+        HYPERLIQUID_TICKERS.clear();
+        footerPrefixedMarketsByBase.clear();
+      }
+      const results = await Promise.allSettled(
+        dexNames.map((dex) => fetchHyperliquidInfo(dex ? { type: "metaAndAssetCtxs", dex } : { type: "metaAndAssetCtxs" }))
+      );
+
+      results.forEach((result, index) => {
+        if (result.status !== "fulfilled") return;
+        const dex = dexNames[index] || "";
+        const data = result.value;
+        const meta = Array.isArray(data) ? data[0] : data && data.meta;
+        const assetCtxs = Array.isArray(data) ? data[1] : data && data.assetCtxs;
+        const universe = Array.isArray(meta?.universe) ? meta.universe : [];
+        const ctxs = Array.isArray(assetCtxs) ? assetCtxs : [];
+        const length = Math.max(universe.length, ctxs.length);
+
+        for (let idx = 0; idx < length; idx += 1) {
+          const entry = universe[idx] || {};
+          const ctx = ctxs[idx] || {};
+          const rawName = String(ctx.coin ?? ctx.symbol ?? ctx.asset ?? entry.name ?? "").trim();
+          const key = buildCoinKey(rawName, dex);
+          const base = getFooterBase(key);
+          const markPx = Number(ctx.markPx ?? ctx.mark ?? ctx.midPx ?? ctx.mid ?? ctx.px);
+          if (!key || entry.isDelisted) continue;
+          if (!dex && base) HYPERLIQUID_TICKERS.add(base);
+          else rememberPrefixedFooterMarket(key);
+          if (Number.isFinite(markPx) && markPx > 0) {
+            liveMids.set(key, markPx);
+            if (!dex && !liveMids.has(base)) liveMids.set(base, markPx);
+          }
+        }
+      });
+    }
+
+    function connectFooterWsForDex(dex = "") {
+      const wsKey = String(dex || "");
+      const existing = footerWsByDex.get(wsKey);
+      if (existing && (existing.readyState === WebSocket.OPEN || existing.readyState === WebSocket.CONNECTING)) return;
+
+      const ws = new WebSocket(HYPERLIQUID_WS_URL);
+      footerWsByDex.set(wsKey, ws);
+
+      ws.addEventListener("open", () => {
+        const subscription = wsKey ? { type: "allMids", dex: wsKey } : { type: "allMids" };
+        ws.send(JSON.stringify({ method: "subscribe", subscription }));
+      });
+
+      ws.addEventListener("message", (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg?.channel !== "allMids") return;
+          const mids = msg?.data || {};
+          Object.entries(mids).forEach(([rawName, value]) => {
+            if (String(rawName || "").startsWith("@")) return;
+            const px = Number(value);
+            if (!Number.isFinite(px)) return;
+            const key = buildCoinKey(rawName, wsKey);
+            const base = getFooterBase(key);
+            liveMids.set(key, px);
+            if (!wsKey) liveMids.set(base, px);
+          });
+          renderFooterPrices();
+        } catch (error) {}
+      });
+
+      ws.addEventListener("close", () => {
+        if (footerWsByDex.get(wsKey) === ws) footerWsByDex.delete(wsKey);
+        window.setTimeout(() => connectFooterWsForDex(wsKey), 2000);
+      });
+
+      ws.addEventListener("error", () => {
+        try { ws.close(); } catch (error) {}
+      });
+    }
+
+    async function ensureFooterPriceStream() {
+      const dexNames = await fetchFooterDexNames();
+      dexNames.forEach((dex) => connectFooterWsForDex(dex));
+    }
+
+    async function refreshFooterBar() {
+      await ensureFooterPriceStream();
+      await bootstrapFooterCatalog(true);
+      await refreshFooterChanges();
+      await primeManualMidsForFooter();
+      renderFooterPrices();
+    }
+
+    async function initFooterStream() {
+      await ensureFooterPriceStream();
+      applyFooterChangeVisibility();
+      await refreshFooterChanges();
+      await sanitizeFooterCoins();
+      await primeManualMidsForFooter();
+      syncFooterCurrencyButtons();
+      if (footerPriceCurrency === "EUR") {
+        ensureFooterEurUsdRate();
+      } else if (footerPriceCurrency === "JPY") {
+        ensureFooterUsdJpyRate();
+      }
+      renderFooterPrices();
+      updateFooterActionLabel();
+    }
+
+    async function initFooterBar() {
+      loadFooterCoins();
+      loadFooterCurrencyPref();
+      loadFooterChangePrefs();
+      loadCoinNameCache();
+      loadCoinColorCache();
+      syncFooterCurrencyButtons();
+      applyFooterChangeVisibility();
+      updateFooterChangeMenu();
+      syncFooterAddControls();
+      renderFooterPrices();
+      await bootstrapFooterCatalog();
+      renderFooterPrices();
+      await initFooterStream();
+      ensureFooterChangeTimer();
     }
 
     async function ensureHeaderCoinOptions() {
@@ -2067,6 +5564,7 @@
         } catch (error) {
           dexNames = [""];
         }
+        footerDexNames = dexNames.slice();
 
         const marketMap = new Map();
         const results = await Promise.allSettled(
@@ -2090,6 +5588,10 @@
             const key = buildCoinKey(rawName, dex);
             const markPx = Number(ctx.markPx ?? ctx.mark ?? ctx.midPx ?? ctx.mid ?? ctx.px);
             if (!key || entry.isDelisted || !Number.isFinite(markPx) || markPx <= 0) continue;
+            if (!dex) HYPERLIQUID_TICKERS.add(getCoinBaseName(key));
+            else rememberPrefixedFooterMarket(key);
+            if (!liveMids.has(key)) liveMids.set(key, markPx);
+            if (!dex && !liveMids.has(getCoinBaseName(key))) liveMids.set(getCoinBaseName(key), markPx);
 
             if (!marketMap.has(key)) {
               const dexName = getCoinDexName(key);
@@ -2173,6 +5675,9 @@
       if (tradeFrame.getAttribute("src") !== src) {
         tradeFrame.setAttribute("src", src);
       }
+      if (exploreTradeFrame && exploreTradeFrame.getAttribute("src") !== src) {
+        exploreTradeFrame.setAttribute("src", src);
+      }
       if (openTradeTabLink) openTradeTabLink.href = src;
     }
 
@@ -2199,9 +5704,10 @@
       syncWalletUi();
 
       const trackerHref = buildWalletTrackerHref(targetWallet);
+      const popupHref = buildWalletPopupHref(targetWallet);
       walletModalSubtitle.textContent = targetWallet;
       openStandaloneWallet.href = trackerHref;
-      walletTrackerFrame.src = trackerHref;
+      walletTrackerFrame.src = popupHref;
       walletModalBackdrop.classList.add("is-open");
       walletModalBackdrop.setAttribute("aria-hidden", "false");
       document.body.classList.add("modal-open");
@@ -2229,9 +5735,11 @@
     }
 
     function highlightSelectedWallet() {
-      const rows = tbody.querySelectorAll("tr[data-wallet]");
-      rows.forEach((row) => {
-        row.classList.toggle("is-selected", row.dataset.wallet === state.wallet);
+      leaderboardBodies.forEach((body) => {
+        const rows = body.querySelectorAll("tr[data-wallet]");
+        rows.forEach((row) => {
+          row.classList.toggle("is-selected", row.dataset.wallet === state.wallet);
+        });
       });
     }
 
@@ -2343,53 +5851,29 @@
 
       const limit = Number(state.limit) || 100;
       state.displayRows = rows.slice(0, limit);
-      renderSummaryCards(rows);
       renderActiveFilters(rows.length);
       renderTable(state.displayRows);
       renderSortIndicators();
       renderSidebarFilters();
     }
 
-    function renderSummaryCards(filteredRows) {
-      const loadedCount = state.normalizedRows.length;
-      const visibleCount = filteredRows.length;
-      const positiveCount = filteredRows.filter((row) => Number.isFinite(row.pnl) && row.pnl >= 0).length;
-      const whaleCount = filteredRows.filter((row) => SIZE_FILTERS[2].test(row) || SIZE_FILTERS[1].test(row)).length;
-      const topRow = filteredRows
-        .filter((row) => Number.isFinite(row.pnl))
-        .sort((a, b) => b.pnl - a.pnl)[0];
-      const avgQuality = average(filteredRows.map((row) => scorePercent(row.walletScore)));
-      const medianEquity = median(filteredRows.map((row) => row.accountValue));
-
-      summaryLoaded.textContent = loadedCount.toLocaleString();
-      summaryLoadedSub.textContent = visibleCount.toLocaleString() + " visible after filters";
-      summaryPositive.textContent = visibleCount ? Math.round((positiveCount / visibleCount) * 100) + "%" : "-";
-      summaryWhales.textContent = whaleCount.toLocaleString();
-      summaryTopWallet.textContent = topRow ? shortAddress(topRow.address) : "-";
-      summaryTopWalletSub.textContent = topRow ? compactMoney(topRow.pnl) + " pnl" : "No wallet in view";
-
-      metricVisible.textContent = visibleCount.toLocaleString();
-      metricMedian.textContent = Number.isFinite(medianEquity) ? compactMoney(medianEquity) : "-";
-      metricQuality.textContent = Number.isFinite(avgQuality) ? avgQuality.toFixed(1) : "-";
-      metricLeader.textContent = topRow ? compactMoney(topRow.pnl) : "-";
-    }
-
     function renderActiveFilters(filteredCount) {
       const chips = [];
-      if (state.windowKey !== "allTime") {
-        chips.push("<span class='filter-chip'>Window: " + escapeHtml(windowSelect.options[windowSelect.selectedIndex].text) + "</span>");
-      }
-      if (state.search) {
-        chips.push("<span class='filter-chip'>Search: " + escapeHtml(state.search) + "</span>");
-      }
       if (state.profitFilter !== "all") {
-        chips.push("<span class='filter-chip'>Profit: " + escapeHtml(findFilterMeta(PROFIT_FILTERS, state.profitFilter).label) + "</span>");
+        const text = "Profit: " + findFilterMeta(PROFIT_FILTERS, state.profitFilter).label;
+        chips.push("<span class='filter-chip' title='" + escapeHtml(text) + "'>" + escapeHtml(text) + "</span>");
       }
       if (state.sizeFilter !== "all") {
-        chips.push("<span class='filter-chip'>Size: " + escapeHtml(findFilterMeta(SIZE_FILTERS, state.sizeFilter).label) + "</span>");
+        const text = "Size: " + findFilterMeta(SIZE_FILTERS, state.sizeFilter).label;
+        chips.push("<span class='filter-chip' title='" + escapeHtml(text) + "'>" + escapeHtml(text) + "</span>");
       }
-      chips.push("<span class='filter-chip'>Showing: " + filteredCount.toLocaleString() + " wallet" + (filteredCount === 1 ? "" : "s") + "</span>");
-      activeFilters.innerHTML = chips.join("");
+      const markup = chips.join("");
+      activeFilterTargets.forEach((target) => {
+        target.innerHTML = markup;
+      });
+      activeFilterBars.forEach((bar) => {
+        bar.classList.toggle("is-hidden", chips.length === 0);
+      });
     }
 
     function renderSortIndicators() {
@@ -2402,18 +5886,22 @@
 
     function renderTable(rows) {
       if (!rows.length) {
-        tbody.innerHTML = "<tr><td colspan='10' class='table-empty'>No wallets matched the current filters.</td></tr>";
+        leaderboardBodies.forEach((body) => {
+          body.innerHTML = "<tr><td colspan='10' class='table-empty'>No wallets matched the current filters.</td></tr>";
+        });
         return;
       }
 
-      tbody.innerHTML = rows.map((row) => {
+      const markup = rows.map((row) => {
         const pnlClass = Number.isFinite(row.pnl) ? (row.pnl >= 0 ? "positive" : "negative") : "neutral";
         const roiClass = Number.isFinite(row.roi) ? (row.roi >= 0 ? "positive" : "negative") : "neutral";
         const qualityPct = scorePercent(row.walletScore);
         const trendPct = scorePercent(row.trendScore);
         const consistencyPct = scorePercent(row.consistencyScore);
         const activityPct = scorePercent(row.activityScore);
-        const href = buildWalletShellHref(row.address);
+        const roiTone = Number.isFinite(row.roi) ? getSignedToneColor(row.roi * 100, 180) : "";
+        const pnlTone = Number.isFinite(row.roi) ? getSignedToneColor(row.roi * 100, 180) : "";
+        const href = buildWalletTrackerHref(row.address);
         const selectedClass = row.address === state.wallet ? " is-selected" : "";
 
         return (
@@ -2429,8 +5917,8 @@
               "</a>" +
             "</td>" +
             "<td class='money'>" + moneyFormat(row.accountValue) + "</td>" +
-            "<td class='money " + pnlClass + "'>" + moneyFormat(row.pnl) + "</td>" +
-            "<td class='money " + roiClass + "'>" + percentFormat(row.roi) + "</td>" +
+            "<td class='money " + pnlClass + "'" + (pnlTone ? " style='color:" + escapeHtml(pnlTone) + "'" : "") + ">" + moneyFormat(row.pnl) + "</td>" +
+            "<td class='money " + roiClass + "'" + (roiTone ? " style='color:" + escapeHtml(roiTone) + "'" : "") + ">" + percentFormat(row.roi) + "</td>" +
             "<td class='money hide-mobile'>" + compactMoney(row.volume) + "</td>" +
             "<td>" + renderScoreCell(qualityPct) + "</td>" +
             "<td class='hide-tablet'>" + renderScoreCell(trendPct) + "</td>" +
@@ -2440,16 +5928,22 @@
         );
       }).join("");
 
+      leaderboardBodies.forEach((body) => {
+        body.innerHTML = markup;
+      });
+
       highlightSelectedWallet();
     }
 
     function renderScoreCell(percent) {
       const safePercent = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0;
       const label = Number.isFinite(percent) ? safePercent.toFixed(1) : "-";
+      const toneColor = getScoreToneColor(safePercent);
+      const fillStyle = getScoreFillStyle(safePercent);
       return (
         "<div class='score-cell'>" +
-          "<div class='score-cell-top'><span class='score-value'>" + label + "</span></div>" +
-          "<div class='score-bar'><span style='width:" + safePercent + "%'></span></div>" +
+          "<div class='score-cell-top'><span class='score-value' style='--score-color:" + escapeHtml(toneColor) + ";'>" + label + "</span></div>" +
+          "<div class='score-bar'><span style='width:" + safePercent + "%; --score-fill:" + escapeHtml(fillStyle) + "; --score-glow:" + escapeHtml(rgbaFromRgb(toneColor, 0.22)) + ";'></span></div>" +
         "</div>"
       );
     }
@@ -2459,37 +5953,45 @@
       setLoadingState(true);
 
       try {
-        const response = await fetch(LEADERBOARD_URL, { cache: "no-store" });
-        const rawText = await response.text();
-
-        if (!response.ok) {
-          throw new Error("HTTP " + response.status + " " + response.statusText + " - " + rawText.slice(0, 120));
-        }
-
-        let json;
-        try {
-          json = JSON.parse(rawText);
-        } catch (error) {
-          throw new Error("Non-JSON leaderboard response");
-        }
-
+        const sources = getLeaderboardSources();
         let rows = null;
-        if (Array.isArray(json)) rows = json;
-        else if (json && typeof json === "object") {
-          if (Array.isArray(json.data)) rows = json.data;
-          else if (Array.isArray(json.leaderboard)) rows = json.leaderboard;
-          else if (Array.isArray(json.leaderboardRows)) rows = json.leaderboardRows;
-          else if (Array.isArray(json.result)) rows = json.result;
-          else if (Array.isArray(json.payload)) rows = json.payload;
-          else if (json.error || json.message) throw new Error(String(json.error || json.message));
+        let usedSource = null;
+        let lastError = null;
+        let storageSourceFailed = false;
+
+        for (const candidate of sources) {
+          try {
+            const json = await fetchLeaderboardPayload(candidate.url);
+            rows = parseLeaderboardRows(json);
+            usedSource = candidate.source;
+            break;
+          } catch (error) {
+            lastError = error;
+            if (candidate.source === "storage") storageSourceFailed = true;
+          }
         }
 
         if (!rows) {
-          throw new Error("Unexpected leaderboard response shape");
+          const cached = loadCachedLeaderboardRows();
+          if (cached?.rows?.length) {
+            state.rawRows = cached.rows;
+            state.normalizedRows = normalizeLeaderboardRows(cached.rows);
+            setStatus("ok", "Showing cached leaderboard");
+            setLoadingState(false);
+            applyFiltersAndSort();
+            updateHeaderSuggestions();
+            return;
+          }
+          throw lastError || new Error("Failed to fetch leaderboard");
+        }
+
+        if (storageSourceFailed && usedSource === "default") {
+          clearStoredLeaderboardUrl();
         }
 
         state.rawRows = rows;
         state.normalizedRows = normalizeLeaderboardRows(rows);
+        saveCachedLeaderboardRows(rows);
         setStatus("ok", "Loaded " + state.normalizedRows.length.toLocaleString() + " wallets");
         setLoadingState(false);
         applyFiltersAndSort();
@@ -2498,23 +6000,24 @@
         console.error("Failed to load leaderboard", error);
         setStatus("err", "Leaderboard failed to load");
         setLoadingState(false);
-        tbody.innerHTML =
+        const markup =
           "<tr><td colspan='10' class='table-empty'>Failed to load the leaderboard. " +
           escapeHtml(String(error && error.message ? error.message : error)) +
           "</td></tr>";
+        leaderboardBodies.forEach((body) => {
+          body.innerHTML = markup;
+        });
       }
     }
 
     function handleTableClick(event) {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
-
-      const link = target.closest("[data-wallet-link]");
-      if (!link) return;
-
-      event.preventDefault();
-      const wallet = link.getAttribute("data-wallet-link");
+      const row = target.closest("tr[data-wallet]");
+      if (!row) return;
+      const wallet = row.getAttribute("data-wallet") || "";
       if (!wallet) return;
+      event.preventDefault();
       openWalletOverlay(wallet, { pushHistory: true });
     }
 
@@ -2846,26 +6349,6 @@
       });
     }
 
-    searchInput.addEventListener("input", () => {
-      state.search = searchInput.value;
-      applyFiltersAndSort();
-    });
-
-    windowSelect.addEventListener("change", () => {
-      state.windowKey = windowSelect.value;
-      state.normalizedRows = normalizeLeaderboardRows(state.rawRows);
-      applyFiltersAndSort();
-    });
-
-    limitSelect.addEventListener("change", () => {
-      state.limit = Number(limitSelect.value) || 100;
-      applyFiltersAndSort();
-    });
-
-    refreshBtn.addEventListener("click", () => {
-      loadLeaderboard();
-    });
-
     profitFilterList.addEventListener("click", (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
@@ -2898,6 +6381,19 @@
     });
 
     tbody.addEventListener("click", handleTableClick);
+    if (tradeTbody) tradeTbody.addEventListener("click", handleTableClick);
+
+    if (marketHeatmapTiles) {
+      marketHeatmapTiles.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const tile = target.closest("[data-heatmap-coin]");
+        if (!tile) return;
+        const coin = tile.getAttribute("data-heatmap-coin");
+        if (!coin) return;
+        openCoinInShell(coin);
+      });
+    }
 
     walletModalBackdrop.addEventListener("click", (event) => {
       if (event.target === walletModalBackdrop) {
@@ -2932,18 +6428,227 @@
       syncFromUrl();
     });
 
+    if (priceAddBtnEl) {
+      priceAddBtnEl.addEventListener("click", async () => {
+        const value = priceAddInputEl?.value || "";
+        if (isCompactFooterAddMode() && !footerAddCompactOpen) {
+          openFooterAddControls();
+          return;
+        }
+        await toggleFooterCoin(value);
+        if (priceAddInputEl) priceAddInputEl.value = "";
+        updateFooterActionLabel();
+        closeFooterAddControls(true);
+      });
+    }
+
+    if (priceAddToggleBtnEl) {
+      priceAddToggleBtnEl.addEventListener("click", () => {
+        openFooterAddControls();
+      });
+    }
+
+    if (priceAddInputEl) {
+      priceAddInputEl.addEventListener("keydown", async (event) => {
+        if (event.key === "Enter") {
+          await toggleFooterCoin(priceAddInputEl.value);
+          priceAddInputEl.value = "";
+          updateFooterActionLabel();
+          closeFooterAddControls(true);
+        } else if (event.key === "Escape") {
+          priceAddInputEl.value = "";
+          updateFooterActionLabel();
+          closeFooterAddControls(true);
+        }
+      });
+      priceAddInputEl.addEventListener("input", updateFooterActionLabel);
+      priceAddInputEl.addEventListener("blur", () => {
+        window.setTimeout(() => closeFooterAddControls(false), 0);
+      });
+    }
+
+    if (priceListEl) {
+      let draggingCoin = null;
+      let draggingEl = null;
+      let lastDragOrder = null;
+
+      const commitFooterOrder = (order) => {
+        const ordered = Array.isArray(order)
+          ? order
+          : Array.from(priceListEl.querySelectorAll(".price-item")).map((item) => item.dataset.coin).filter(Boolean);
+        if (!ordered.length) return;
+        trackedFooterCoins = ordered;
+        saveFooterCoins();
+        renderFooterPrices();
+      };
+
+      const getDragAfterElement = (container, x) => {
+        const items = Array.from(container.querySelectorAll(".price-item:not(.dragging)"));
+        let closest = null;
+        let closestOffset = Number.NEGATIVE_INFINITY;
+        items.forEach((item) => {
+          const rect = item.getBoundingClientRect();
+          const offset = x - rect.left - rect.width / 2;
+          if (offset < 0 && offset > closestOffset) {
+            closestOffset = offset;
+            closest = item;
+          }
+        });
+        return closest;
+      };
+
+      priceListEl.addEventListener("dragstart", (event) => {
+        const item = event.target.closest(".price-item");
+        if (!item) return;
+        draggingCoin = item.dataset.coin;
+        draggingEl = item;
+        lastDragOrder = null;
+        item.classList.add("dragging");
+        event.dataTransfer.effectAllowed = "move";
+        try { event.dataTransfer.setData("text/plain", draggingCoin); } catch (error) {}
+      });
+
+      priceListEl.addEventListener("dragend", (event) => {
+        const item = event.target.closest(".price-item");
+        if (item) item.classList.remove("dragging");
+        if (lastDragOrder) commitFooterOrder(lastDragOrder);
+        draggingCoin = null;
+        draggingEl = null;
+        lastDragOrder = null;
+      });
+
+      priceListEl.addEventListener("dragover", (event) => {
+        if (!draggingEl) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        const after = getDragAfterElement(priceListEl, event.clientX);
+        if (after === draggingEl) return;
+        if (after == null) priceListEl.appendChild(draggingEl);
+        else priceListEl.insertBefore(draggingEl, after);
+        lastDragOrder = Array.from(priceListEl.querySelectorAll(".price-item")).map((item) => item.dataset.coin).filter(Boolean);
+      });
+
+      priceListEl.addEventListener("drop", (event) => {
+        const item = event.target.closest(".price-item");
+        if (!item || !draggingCoin) return;
+        event.preventDefault();
+        trackedFooterCoins = Array.from(priceListEl.querySelectorAll(".price-item")).map((entry) => entry.dataset.coin).filter(Boolean);
+        saveFooterCoins();
+        renderFooterPrices();
+      });
+    }
+
+    if (priceFooterWrapEl) {
+      priceFooterWrapEl.addEventListener("contextmenu", (event) => {
+        if (
+          event.target.closest(".price-currency-switch") ||
+          event.target.closest(".price-controls") ||
+          event.target.closest(".price-input") ||
+          event.target.closest(".price-add-btn")
+        ) {
+          return;
+        }
+        const item = event.target.closest(".price-item");
+        event.preventDefault();
+        showPriceContextMenu(event.clientX, event.clientY, item ? item.dataset.coin : null);
+      });
+    }
+
+    if (priceCurrencySwitchEl) {
+      priceCurrencySwitchEl.addEventListener("click", (event) => {
+        const btn = event.target.closest(".price-currency-btn");
+        if (!btn) return;
+        setFooterPriceCurrency(btn.dataset.currency, { forceRate: true });
+      });
+    }
+
+    if (priceContextMenuEl) {
+      priceContextMenuEl.addEventListener("click", (event) => {
+        const btn = event.target.closest("[data-action]");
+        if (!btn) return;
+        const action = btn.dataset.action;
+        if (action === "remove" && priceContextCoin) {
+          removeFooterCoin(priceContextCoin);
+        } else if (action === "pin" && priceContextCoin) {
+          trackedFooterCoins = [priceContextCoin].concat(trackedFooterCoins.filter((coin) => coin !== priceContextCoin));
+          saveFooterCoins();
+          renderFooterPrices();
+        } else if (action === "reset") {
+          if (window.confirm("Reset the bottom bar to the default coins?")) {
+            resetFooterCoins();
+            refreshFooterBar();
+          }
+        } else if (action === "toggle-change") {
+          footerChangeEnabled = !footerChangeEnabled;
+          saveFooterChangePrefs();
+          applyFooterChangeVisibility();
+          updateFooterChangeMenu();
+          refreshFooterBar();
+        } else if (action === "change-currency") {
+          setFooterPriceCurrency(btn.dataset.currency, { forceRate: true });
+          updateFooterChangeMenu();
+        } else if (action === "change-separators") {
+          const count = Number(btn.dataset.count);
+          if (FOOTER_SEPARATOR_OPTIONS.has(count)) {
+            footerSeparatorEvery = count;
+            saveFooterChangePrefs();
+            updateFooterChangeMenu();
+            renderFooterPrices();
+          }
+        } else if (action === "change-range") {
+          const range = btn.dataset.range;
+          if (range && FOOTER_CHANGE_RANGES[range]) {
+            footerChangeRange = range;
+            saveFooterChangePrefs();
+            updateFooterChangeMenu();
+            refreshFooterBar();
+          }
+        }
+        hidePriceContextMenu();
+      });
+    }
+
+    document.addEventListener("click", (event) => {
+      if (priceContextMenuEl && priceContextMenuEl.classList.contains("show") && !event.target.closest("#priceContextMenu")) {
+        hidePriceContextMenu();
+      }
+      if (priceControlsEl && isCompactFooterAddMode() && !event.target.closest("#priceControls")) {
+        closeFooterAddControls(false);
+      }
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") hidePriceContextMenu();
+    });
+
+    window.addEventListener("resize", () => {
+      hidePriceContextMenu();
+      updatePriceTickerRolling();
+      if (!isCompactFooterAddMode()) footerAddCompactOpen = false;
+      syncFooterAddControls();
+    });
+
+    window.addEventListener("scroll", hidePriceContextMenu, true);
+
     state.view = parseView();
     state.coin = parseCoin();
     state.wallet = parseWallet();
-    state.windowKey = windowSelect.value;
-    state.limit = Number(limitSelect.value) || 100;
 
     setView(state.view, { fromPopState: true });
     setCoin(state.coin, { fromPopState: true });
     syncWalletUi();
 
+    initFooterBar();
     ensureHeaderCoinOptions().then(() => {
       updateHeaderSuggestions();
+    });
+    loadMarketHeatmap();
+    ensureMarketHeatmapRefresh();
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        refreshFooterBar();
+        loadMarketHeatmap(true);
+      }
     });
 
     if (state.wallet) {
