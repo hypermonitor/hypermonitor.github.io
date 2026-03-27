@@ -35,20 +35,26 @@
       font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color-scheme: dark;
       --bg: #0b0b0f;
-      --card-bg: rgba(8, 11, 18, 0.68);
+      --bg-soft: #111319;
+      --panel: rgba(8, 11, 18, 0.68);
+      --panel-strong: rgba(10, 10, 12, 0.88);
+      --panel-muted: rgba(255, 255, 255, 0.03);
+      --card-bg: rgba(10, 10, 12, 0.88);
       --accent: #26d97f;
       --accent-soft: rgba(38, 217, 127, 0.18);
       --danger: #f25f5c;
       --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255, 255, 255, 0.18);
       --muted: rgba(245,245,255,0.62);
       --text-main: #f5f5ff;
-      --glass: rgba(10, 10, 12, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass: rgba(10, 10, 12, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.08);
       --accent-blue: #0070f3;
       --accent-cyan: #00b4d8;
       --control-height: 32px;
       --switch-height: 30px;
       --neutral-blue: rgba(124, 176, 255, 0.95);
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
     }
 
     * { box-sizing: border-box; }
@@ -56,28 +62,22 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: var(--bg);
-      background-image:
-        radial-gradient(circle at 16% 18%, rgba(0, 180, 216, 0.1), transparent 30%),
-        radial-gradient(circle at 80% 12%, rgba(0, 112, 243, 0.11), transparent 34%),
-        radial-gradient(circle at 56% 66%, rgba(45, 212, 191, 0.06), transparent 32%),
-        linear-gradient(145deg, rgba(6, 7, 11, 0.94) 0%, rgba(11, 11, 15, 0.98) 40%, rgba(9, 12, 18, 0.96) 72%, rgba(10, 12, 16, 0.98) 100%);
+      background: #0a0a0a;
       background-attachment: fixed;
       color: var(--text-main);
     }
 
     #app {
-      max-width: 1520px;
-      width: min(1520px, 86vw);
+      width: calc(100vw - 24px);
       margin: 0 auto;
-      padding: 1.1rem 1.5rem 3rem;
+      padding: 10px 0 32px;
     }
 
     @media (max-width: 720px) {
       #app {
-        width: 100vw;
-        padding-left: 0.4rem;
-        padding-right: 0.4rem;
+        width: calc(100vw - 8px);
+        padding-left: 0;
+        padding-right: 0;
       }
     }
 
@@ -86,7 +86,9 @@
       grid-template-columns: minmax(0, 1fr) auto;
       column-gap: 1rem;
       align-items: start;
-      margin-bottom: 1.2rem;
+      padding: 4px 0 10px;
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .brand {
@@ -176,9 +178,9 @@
 
     .wallet-input-row input {
       padding: 0.55rem 0.75rem;
-      border-radius: 12px;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel-muted);
       color: var(--text-main);
       font-size: 0.82rem;
       height: 38px;
@@ -187,8 +189,9 @@
     }
 
     .wallet-input-row input:focus {
-      border-color: rgba(255, 255, 255, 0.7);
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.34);
+      box-shadow: none;
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .wallet-inputs {
@@ -215,9 +218,9 @@
     .wallet-fav-btn {
       min-width: 38px;
       height: 38px;
-      border-radius: 10px;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel-muted);
       color: #e2e8f0;
       display: inline-flex;
       align-items: center;
@@ -294,7 +297,6 @@
       inset: 0;
       z-index: 240;
       background: rgba(8, 10, 14, 0.65);
-      backdrop-filter: blur(6px);
       display: none;
       align-items: flex-start;
       justify-content: flex-end;
@@ -307,10 +309,10 @@
 
     .favorites-card {
       width: min(360px, 90vw);
-      background: rgba(10, 10, 12, 0.96);
-      border: 1px solid var(--glass-border);
-      border-radius: 16px;
-      box-shadow: 0 22px 40px rgba(0, 0, 0, 0.5);
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.72);
       padding: 1rem;
       display: flex;
       flex-direction: column;
@@ -675,9 +677,9 @@
 
     .wallet-track-btn {
       padding: 0.45rem 0.8rem;
-      border-radius: 10px;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel-muted);
       color: var(--muted);
       font-size: 0.75rem;
       font-weight: 600;
@@ -701,9 +703,9 @@
 
     .wallet-input-row .wallet-icon-btn {
       padding: 0.35rem 0.65rem;
-      border-radius: 10px;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel-muted);
       color: #e2e8f0;
       font-size: 0.8rem;
       font-weight: 600;
@@ -748,10 +750,10 @@
     }
 
     @media (max-width: 600px) {
-      #app { padding: 0.75rem 0.9rem; }
+      #app { padding: 0.5rem 0; }
       header { margin-bottom: 1rem; }
       .card { padding: 0.85rem; border-radius: 12px; }
-      .grid { gap: 0.75rem; margin-bottom: 1rem; }
+      .dashboard-shell { gap: 0.75rem; margin-bottom: 1rem; }
     }
 
     @media (max-width: 600px) {
@@ -766,6 +768,8 @@
     @media (max-width: 600px) {
       .chart-grid { grid-template-columns: 1fr; }
       .chart-card { min-height: 0; }
+      .exposure-card-stats { grid-template-columns: 1fr; }
+      .exposure-chart-wrap { aspect-ratio: 16 / 8.2; min-height: 152px; }
     }
 
     @media (max-width: 600px) {
@@ -821,10 +825,10 @@
 
       /* --- Positions table: hide less critical columns --- */
       /* columns: Asset(1) Size(2) Direction(3) Entry(4) Value(5) uPnL(6) */
-      .grid section.card table th:nth-child(4),
-      .grid section.card table td:nth-child(4),
-      .grid section.card table th:nth-child(5),
-      .grid section.card table td:nth-child(5) {
+      .positions-card table th:nth-child(4),
+      .positions-card table td:nth-child(4),
+      .positions-card table th:nth-child(5),
+      .positions-card table td:nth-child(5) {
         display: none; /* hide Entry Price + Value on phones */
       }
 
@@ -1146,10 +1150,10 @@
       align-items: center;
       gap: 0.4rem;
       padding: 0 0.7rem;
-      border-radius: 9999px;
+      border-radius: 8px;
       font-size: 0.75rem;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      border: 1px solid var(--border);
+      background: var(--panel-muted);
       color: #e2e8f0;
       height: 30px;
     }
@@ -1185,22 +1189,41 @@
       margin-left: 0.15rem;
     }
 
-    .grid {
+    .dashboard-shell {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
       gap: 1rem;
       margin-bottom: 1.5rem;
+      align-items: start;
+    }
+
+    .dashboard-sidebar,
+    .dashboard-main {
+      min-width: 0;
+    }
+
+    .dashboard-main {
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }
+
+    @media (min-width: 901px) {
+      .dashboard-sidebar {
+        position: sticky;
+        top: 1rem;
+        align-self: start;
+      }
     }
 
     .card {
       background: var(--card-bg);
-      border: 1px solid rgba(148, 163, 184, 0.12);
-      border-radius: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
       padding: 1rem;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
     }
 
     .card::before {
@@ -1228,8 +1251,8 @@
     }
 
     .positions-card {
-      grid-column: span 2;
-      min-width: 640px;
+      width: 100%;
+      min-width: 0;
     }
 
     .positions-card table {
@@ -1345,7 +1368,6 @@
 
     @media (max-width: 900px) {
       .positions-card {
-        grid-column: span 1;
         min-width: 100%;
       }
 
@@ -1361,49 +1383,360 @@
 
     /* Stack snapshot + positions for mobile and landscape tablets */
     @media (max-width: 900px), (max-width: 1100px) and (orientation: landscape) {
-      .grid {
+      .dashboard-shell {
         grid-template-columns: 1fr;
       }
+      .dashboard-main {
+        gap: 0.75rem;
+      }
+      .dashboard-sidebar {
+        position: static;
+      }
       .positions-card {
-        grid-column: span 1;
         min-width: 100%;
       }
     }
 
-    .kv-list {
-      font-size: 0.85rem;
+    .overview-dashboard {
+      display: block;
+    }
+
+    .overview-panel {
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.025);
+      padding: 0.95rem 1rem 1rem;
       display: grid;
-      grid-template-columns: 1.1fr 1.3fr;
-      gap: .25rem .5rem;
+      gap: 0.95rem;
     }
 
-    .kv-label { color: var(--muted); }
-    .kv-value { text-align: right; }
-
-    .overview-stack {
+    .overview-panel-header {
       display: grid;
-      gap: 0.7rem;
+      gap: 0.45rem;
     }
 
-    .overview-item {
-      border: 1px solid var(--glass-border);
-      border-radius: 14px;
-      padding: 0.75rem 0.8rem;
-      background: rgba(7, 11, 18, 0.24);
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
-    }
-
-    .overview-wallet {
+    .overview-eyebrow {
       font-size: 0.68rem;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: rgba(226, 232, 240, 0.54);
+      margin-bottom: 0.32rem;
+    }
+
+    .overview-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f8fafc;
+      line-height: 1.2;
+    }
+
+    .overview-subtitle {
+      margin-top: 0.28rem;
+      font-size: 0.76rem;
       color: var(--muted);
-      margin-bottom: 0.5rem;
+      line-height: 1.35;
+    }
+
+    .overview-main-value {
+      margin: 0;
+      font-size: clamp(2rem, 3.6vw, 2.7rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      font-weight: 700;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .overview-main-meta {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .overview-section {
+      padding-top: 1rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .overview-section-head {
+      display: grid;
+      gap: 0.45rem;
+      margin-bottom: 0.72rem;
+    }
+
+    .overview-section-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #f8fafc;
+      letter-spacing: 0.02em;
+    }
+
+    .overview-section-subtitle {
+      margin-top: 0.2rem;
+      font-size: 0.73rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .overview-allocation-track {
+      position: relative;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(148, 163, 184, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+      margin-bottom: 0.78rem;
+    }
+
+    .overview-allocation-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: inherit;
+      background: var(--overview-fill-color, #4f7cff);
+    }
+
+    .overview-allocation-list {
+      display: grid;
+      gap: 0.52rem;
+    }
+
+    .overview-allocation-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.65rem;
+      align-items: flex-start;
+      font-size: 0.82rem;
+    }
+
+    .overview-allocation-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.48rem;
+      min-width: 0;
+      color: rgba(226, 232, 240, 0.8);
+    }
+
+    .overview-allocation-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .overview-allocation-values {
+      display: grid;
+      justify-items: end;
+      gap: 0.12rem;
+      text-align: right;
+    }
+
+    .overview-allocation-value,
+    .overview-allocation-share {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .overview-allocation-value {
+      font-weight: 600;
+      color: #f8fafc;
+      text-align: right;
+    }
+
+    .overview-allocation-share {
+      color: var(--muted);
+      text-align: right;
+      font-size: 0.76rem;
+      min-width: 46px;
+    }
+
+    .overview-bias-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 0.8rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.035);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      justify-self: start;
+    }
+
+    .overview-direction-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.7rem;
+      margin-bottom: 0.55rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .overview-direction-head strong {
+      color: #f8fafc;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .overview-direction-track {
+      position: relative;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.14);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+    }
+
+    .overview-direction-track::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .overview-direction-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+
+    .overview-direction-fill.long {
+      left: 0;
+      background: linear-gradient(90deg, rgba(34, 197, 94, 0.92), rgba(74, 222, 128, 0.72));
+    }
+
+    .overview-direction-fill.short {
+      right: 0;
+      background: linear-gradient(270deg, rgba(248, 113, 113, 0.92), rgba(251, 146, 60, 0.72));
+    }
+
+    .overview-direction-values {
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 0.4rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      margin-top: 0.7rem;
+    }
+
+    .overview-direction-value {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.8rem;
+      padding-top: 0.48rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .overview-direction-value span {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .overview-direction-value strong {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .overview-direction-value .tone-long {
+      color: #4ade80;
+    }
+
+    .overview-direction-value .tone-short {
+      color: #f87171;
+    }
+
+    .overview-metric-list {
+      display: grid;
+      gap: 0.2rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .overview-metric-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.9rem;
+      align-items: center;
+      padding: 0.52rem 0;
+    }
+
+    .overview-metric-main {
+      display: grid;
+      gap: 0.14rem;
+      min-width: 0;
+    }
+
+    .overview-metric-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: rgba(226, 232, 240, 0.82);
+    }
+
+    .overview-metric-meta {
+      font-size: 0.71rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .overview-metric-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .overview-metric-value.overview-negative {
+      color: #fb7185;
+    }
+
+    .overview-metric-value.overview-positive {
+      color: #4ade80;
+    }
+
+    @media (max-width: 720px) {
+      .overview-panel {
+        padding: 0.88rem 0.9rem 0.92rem;
+      }
+
+      .overview-panel-header,
+      .overview-section-head,
+      .overview-direction-head,
+      .overview-metric-row {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .overview-allocation-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.3rem;
+      }
+
+      .overview-allocation-values {
+        justify-items: start;
+        text-align: left;
+      }
+
+      .overview-direction-values {
+        gap: 0.52rem;
+      }
+
+      .overview-allocation-value,
+      .overview-allocation-share,
+      .overview-metric-value {
+        text-align: left;
+      }
     }
 
     .asset-cell {
@@ -1785,60 +2118,144 @@
 
     .positions-timeline-wrap {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto minmax(0, 1fr);
       align-items: center;
-      gap: 0.5rem;
-      margin: 0.15rem 0 0.55rem;
-      padding: 0.38rem 0.5rem;
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      border-radius: 10px;
-      background: rgba(148, 163, 184, 0.05);
+      gap: 0.8rem;
+      margin: 0.2rem 0 0.85rem;
+      padding: 0.72rem 0.82rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.018));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .positions-timeline-wrap.is-time-travel {
+      border-color: rgba(255, 255, 255, 0.14);
+      background:
+        linear-gradient(180deg, rgba(245, 158, 11, 0.08), rgba(255, 255, 255, 0.02));
+    }
+
+    .positions-timeline-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-width: 0;
+      white-space: nowrap;
     }
 
     .positions-timeline-label {
-      font-size: 0.67rem;
-      letter-spacing: 0.02em;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: rgba(226, 232, 240, 0.64);
       white-space: nowrap;
-      opacity: 0.85;
     }
 
     .positions-timeline-controls {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.2rem;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.65rem;
       min-width: 0;
+    }
+
+    .positions-timeline-edge {
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(226, 232, 240, 0.52);
+      white-space: nowrap;
+      user-select: none;
     }
 
     .positions-timeline-slider {
+      -webkit-appearance: none;
+      appearance: none;
       width: 100%;
-      accent-color: #f8fafc;
-      opacity: 0.5;
+      height: 18px;
+      margin: 0;
+      background: transparent;
+      accent-color: #94a3b8;
+      opacity: 1;
+    }
+
+    .positions-timeline-slider:focus {
+      outline: none;
+    }
+
+    .positions-timeline-slider::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(148, 163, 184, 0.18), rgba(148, 163, 184, 0.3));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .positions-timeline-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      margin-top: -4.5px;
+      border: 2px solid rgba(226, 232, 240, 0.88);
+      border-radius: 50%;
+      background: #f8fafc;
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.14);
+    }
+
+    .positions-timeline-slider::-moz-range-track {
+      height: 6px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(148, 163, 184, 0.18), rgba(148, 163, 184, 0.3));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .positions-timeline-slider::-moz-range-thumb {
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(226, 232, 240, 0.88);
+      border-radius: 50%;
+      background: #f8fafc;
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.14);
     }
 
     .positions-timeline-stamp {
-      font-size: 0.68rem;
-      color: var(--muted);
-      white-space: normal;
-      overflow-wrap: anywhere;
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      width: fit-content;
+      max-width: 100%;
+      padding: 0.32rem 0.62rem;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 0.71rem;
+      font-weight: 600;
       line-height: 1.2;
+      color: rgba(248, 250, 252, 0.92);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
       min-width: 0;
     }
 
-    .positions-timeline-live {
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      background: rgba(148, 163, 184, 0.03);
-      color: var(--muted);
-      border-radius: 999px;
-      padding: 0.18rem 0.45rem;
-      font-size: 0.66rem;
-      cursor: pointer;
+    .positions-timeline-wrap.is-time-travel .positions-timeline-stamp {
+      border-color: rgba(245, 158, 11, 0.22);
+      background: rgba(245, 158, 11, 0.08);
+      color: #f8fafc;
     }
 
-    .positions-timeline-live:disabled {
-      opacity: 0.45;
-      cursor: default;
+    .positions-timeline-slider:disabled::-webkit-slider-runnable-track,
+    .positions-timeline-slider:disabled::-moz-range-track {
+      background: rgba(148, 163, 184, 0.16);
+    }
+
+    .positions-timeline-slider:disabled::-webkit-slider-thumb,
+    .positions-timeline-slider:disabled::-moz-range-thumb {
+      border-color: rgba(148, 163, 184, 0.4);
+      background: rgba(226, 232, 240, 0.8);
+      box-shadow: none;
     }
 
     .timeline-estimate-note {
@@ -1855,12 +2272,14 @@
       }
 
       .positions-timeline-wrap {
-        grid-template-columns: 1fr auto;
-        gap: 0.4rem;
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        padding: 0.74rem 0.78rem;
       }
 
-      .positions-timeline-label {
-        display: none;
+      .positions-timeline-meta,
+      .positions-timeline-controls {
+        width: 100%;
       }
     }
 
@@ -2013,22 +2432,23 @@
 
     .chart-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      align-items: start;
-      gap: 0.75rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 0.8rem;
       margin-top: 0.5rem;
     }
 
     .chart-card {
       border-radius: 0.75rem;
       border: 1px solid var(--border);
-      background: rgba(7, 11, 18, 0.18);
-      padding: 0.6rem 0.75rem 0.75rem;
+      background: var(--panel-strong);
+      padding: 0.72rem 0.8rem 0.8rem;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       min-height: 0;
+      box-shadow: var(--shadow);
     }
 
     .chart-card h3 {
@@ -2040,17 +2460,74 @@
     }
 
     .equity-card-title,
-    .pnl-card-title {
+    .pnl-card-title,
+    .exposure-card-title {
       justify-content: space-between;
       gap: 0.5rem;
       flex-wrap: wrap;
     }
 
     .equity-card-heading,
-    .pnl-card-heading {
+    .pnl-card-heading,
+    .exposure-card-heading {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+    }
+
+    .chart-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%);
+      pointer-events: none;
+    }
+
+    .chart-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .exposure-card-subtitle {
+      font-size: 0.64rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(226, 232, 240, 0.58);
+    }
+
+    .exposure-card-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin: 0.12rem 0 0.45rem;
+    }
+
+    .exposure-stat {
+      display: grid;
+      gap: 0.14rem;
+      padding: 0.52rem 0.65rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .exposure-stat-label {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(226, 232, 240, 0.54);
+    }
+
+    .exposure-stat-value {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #f8fafc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-variant-numeric: tabular-nums;
     }
 
     .equity-view-toggle,
@@ -2164,6 +2641,34 @@
       width: 100%;
       aspect-ratio: 16 / 8;
       min-height: 142px;
+    }
+
+    .exposure-chart-wrap {
+      aspect-ratio: 16 / 6.8;
+      min-height: 168px;
+    }
+
+    .heatmap-card {
+      min-height: 270px;
+    }
+
+    .heatmap-card .pnl-heatmap-wrap {
+      flex: 1 1 auto;
+      min-height: 220px;
+      max-height: none;
+      aspect-ratio: auto;
+    }
+
+    @media (max-width: 1180px) {
+      .chart-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .chart-canvas-wrap.logo-watermark::before {
@@ -2656,10 +3161,60 @@
       color: #6b7280;
     }
 
-    body.light .kv-label { color: #6b7280; }
     body.light .muted { color: #6b7280; }
-    body.light .overview-item { background: #f8fafc; border-color: #e5e7eb; box-shadow: none; }
-    body.light .overview-wallet { color: #0f172a; }
+    body.light .overview-panel {
+      border-color: #e5e7eb;
+      background: #f8fafc;
+      box-shadow: none;
+    }
+
+    body.light .overview-eyebrow {
+      color: #64748b;
+    }
+
+    body.light .overview-title,
+    body.light .overview-main-value,
+    body.light .overview-section-title,
+    body.light .overview-allocation-value,
+    body.light .overview-bias-pill,
+    body.light .overview-direction-head strong,
+    body.light .overview-direction-value strong,
+    body.light .overview-metric-value {
+      color: #0f172a;
+    }
+
+    body.light .overview-subtitle,
+    body.light .overview-main-meta,
+    body.light .overview-section-subtitle,
+    body.light .overview-allocation-label,
+    body.light .overview-allocation-share,
+    body.light .overview-direction-head,
+    body.light .overview-direction-value span,
+    body.light .overview-metric-meta {
+      color: #64748b;
+    }
+
+    body.light .overview-bias-pill {
+      border-color: #e5e7eb;
+      background: rgba(255, 255, 255, 0.9);
+      color: #334155;
+    }
+
+    body.light .overview-section,
+    body.light .overview-metric-list {
+      border-top-color: #e5e7eb;
+    }
+
+    body.light .overview-allocation-track,
+    body.light .overview-direction-track {
+      background: #e2e8f0;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+
+    body.light .overview-metric-label {
+      color: #0f172a;
+    }
+
     body.light .wallet-tag { border-color: #e5e7eb; color: #6b7280; }
 
     body.light table { color: #0f172a; }
@@ -2695,9 +3250,72 @@
       border-color: #cbd5f5;
     }
 
+    body.light .positions-timeline-wrap {
+      border-color: #e5e7eb;
+      background: #f8fafc;
+    }
+
+    body.light .positions-timeline-wrap.is-time-travel {
+      border-color: #cbd5e1;
+      background: #f1f5f9;
+    }
+
+    body.light .positions-timeline-label {
+      color: #475569;
+    }
+
+    body.light .positions-timeline-edge {
+      color: #64748b;
+    }
+
+    body.light .positions-timeline-slider::-webkit-slider-runnable-track,
+    body.light .positions-timeline-slider::-moz-range-track {
+      background: rgba(148, 163, 184, 0.26);
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+    }
+
+    body.light .positions-timeline-slider::-webkit-slider-thumb,
+    body.light .positions-timeline-slider::-moz-range-thumb {
+      border-color: #94a3b8;
+      background: #ffffff;
+    }
+
+    body.light .positions-timeline-scale {
+      color: #64748b;
+    }
+
+    body.light .positions-timeline-stamp {
+      border-color: #e5e7eb;
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    body.light .positions-timeline-wrap.is-time-travel .positions-timeline-stamp {
+      border-color: rgba(245, 158, 11, 0.24);
+      background: rgba(245, 158, 11, 0.1);
+      color: #0f172a;
+    }
+
     body.light .chart-card {
       background: #ffffff;
       border: 1px solid #e5e7eb;
+    }
+
+    body.light .exposure-card-subtitle {
+      color: #64748b;
+    }
+
+    body.light .exposure-stat {
+      border-color: #e5e7eb;
+      background: #f8fafc;
+    }
+
+    body.light .exposure-stat-label {
+      color: #64748b;
+    }
+
+    body.light .exposure-stat-value {
+      color: #0f172a;
     }
 
     body.light .chart-canvas-wrap.logo-watermark::after {
@@ -3277,13 +3895,12 @@
     .portfolio-modal.open { display: flex; }
 
     .portfolio-modal .modal-card {
-      background: var(--card-bg);
+      background: var(--panel-strong);
       border: 1px solid var(--border);
       border-radius: 14px;
       width: min(460px, 100%);
       padding: 1rem;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(8px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
     }
 
     body.light .portfolio-modal .modal-card {
@@ -3641,12 +4258,6 @@
       height: 25px;
     }
 
-    #positionsTimelineToggle .timeline-toggle-icon {
-      width: 12px;
-      height: 12px;
-      display: block;
-    }
-
     .metric {
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -3751,6 +4362,21 @@
       border-color: transparent transparent rgba(15, 23, 42, 0.85) transparent;
     }
 
+    body.light .pnl-tooltip {
+      background: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      border-color: rgba(148, 163, 184, 0.42);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.14);
+    }
+
+    body.light .pnl-tooltip .pnl-tooltip-title {
+      color: #0f172a;
+    }
+
+    body.light .pnl-tooltip .pnl-tooltip-meta {
+      color: #475569;
+    }
+
     .pnl-tooltip {
       position: absolute;
       transform: translate(-50%, -100%);
@@ -3772,6 +4398,19 @@
       color: #e5e7eb;
       font-weight: 600;
       margin-bottom: 4px;
+    }
+
+    .pnl-tooltip .pnl-tooltip-meta {
+      display: block;
+      font-size: 0.66rem;
+      line-height: 1.4;
+      color: rgba(226, 232, 240, 0.72);
+    }
+
+    @media (max-width: 1100px) {
+      .exposure-card {
+        grid-column: span 1;
+      }
     }
 
     /* Orders/Fills tables: auto scale to reduce horizontal scrolling */
@@ -3889,10 +4528,9 @@
       right: 0;
       bottom: 0;
       z-index: 50;
-      background: rgba(10, 10, 12, 0.9);
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.4);
+      background: var(--panel-strong);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.5);
       transition: opacity 0.18s ease, transform 0.18s ease;
     }
 
@@ -3903,10 +4541,9 @@
     }
 
     .price-footer-inner {
-      max-width: 1520px;
-      width: min(1520px, 86vw);
+      width: calc(100vw - 24px);
       margin: 0 auto;
-      padding: 0.15rem 1.2rem;
+      padding: 0.15rem 0.8rem;
       display: flex;
       align-items: center;
       gap: 0.6rem;
@@ -3916,15 +4553,15 @@
 
     @media (max-width: 720px) {
       .price-footer-inner {
-        width: 96vw;
+        width: calc(100vw - 8px);
       }
     }
 
     @media (max-width: 600px) {
       .price-footer-inner {
-        width: 100vw;
-        padding-left: 0.8rem;
-        padding-right: 0.8rem;
+        width: calc(100vw - 8px);
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
         gap: 0.45rem;
       }
 
@@ -4321,13 +4958,12 @@
       position: fixed;
       z-index: 220;
       min-width: 150px;
-      background: rgba(12, 12, 16, 0.95);
+      background: var(--panel-strong);
       border: 1px solid var(--glass-border);
       border-radius: 10px;
       padding: 0.25rem;
       box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
       display: none;
-      backdrop-filter: blur(10px);
     }
 
     .price-context-menu.show { display: block; }
@@ -4376,13 +5012,12 @@
       left: 100%;
       margin-left: -2px;
       min-width: 150px;
-      background: rgba(12, 12, 16, 0.95);
+      background: var(--panel-strong);
       border: 1px solid var(--glass-border);
       border-radius: 10px;
       padding: 0.25rem;
       box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
       display: none;
-      backdrop-filter: blur(10px);
     }
 
     .price-context-group:hover .price-context-submenu,
@@ -4640,8 +5275,9 @@
     </div>
   </header>
 
-  <div class="grid">
-    <section class="card">
+  <div class="dashboard-shell">
+    <aside class="dashboard-sidebar">
+    <section class="card account-overview-card">
       <div class="section-title">
         <h2>Account Overview</h2>
         <span class="market-toggle no-label" role="group" aria-label="Market type">
@@ -4657,7 +5293,9 @@
       <div id="marginSummary"><span class="muted">Loading…</span></div>
       <div class="error" id="snapshotError"></div>
     </section>
+    </aside>
 
+    <div class="dashboard-main">
     <section class="card positions-card">
       <div class="section-title">
         <h2>Positions</h2>
@@ -4676,20 +5314,19 @@
             </svg>
             <span class="sr-only">Export Excel</span>
           </button>
-          <button class="metrics-toggle" id="positionsTimelineToggle" type="button" aria-expanded="false" title="Toggle timeline">
-            <span class="sr-only">Toggle timeline</span>
-            <span aria-hidden="true">▾</span>
-          </button>
         </div>
       </div>
-      <div class="positions-timeline-wrap hidden" id="positionsTimelineWrap">
-        <div class="positions-timeline-label">Timeline</div>
-        <div class="positions-timeline-controls">
-          <input id="positionsTimelineSlider" class="positions-timeline-slider" type="range" min="0" max="0" step="1" value="0" disabled />
-          <span id="positionsTimelineStamp" class="positions-timeline-stamp">Live</span>
-        </div>
-        <button id="positionsTimelineLiveBtn" class="positions-timeline-live" type="button" disabled>Live</button>
+      <div class="positions-timeline-wrap" id="positionsTimelineWrap">
+      <div class="positions-timeline-meta">
+        <div class="positions-timeline-label">History</div>
+        <span id="positionsTimelineStamp" class="positions-timeline-stamp">Live</span>
       </div>
+      <div class="positions-timeline-controls">
+        <span class="positions-timeline-edge">Past</span>
+        <input id="positionsTimelineSlider" class="positions-timeline-slider" type="range" min="0" max="0" step="1" value="0" disabled />
+        <span class="positions-timeline-edge">Now</span>
+      </div>
+    </div>
       <div class="positions-table-wrap">
         <table>
           <thead>
@@ -4727,7 +5364,6 @@
         </table>
       </div>
     </section>
-  </div>
 
   <div class="portfolio-modal" id="portfolioModal">
     <div class="modal-card">
@@ -4804,25 +5440,20 @@
       </div>
     </div>
 
-    <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
+      <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
       <div class="chart-grid" id="portfolioCharts">
         <div class="chart-card">
           <h3 class="equity-card-title">
-            <span class="equity-card-heading"><span id="equityHeadingLabel">Equity</span> <span class="spark-label" id="equityTitleValue">[-]</span></span>
-            <span class="equity-view-toggle" role="tablist" aria-label="Equity view mode">
-              <button class="equity-view-btn active" id="equityLineViewBtn" type="button" data-equity-view="line" role="tab" aria-selected="true" aria-label="Graph view" title="Graph view">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                  <path d="M5 15l4-4 3 2 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <button class="equity-view-btn" id="equityDrawdownViewBtn" type="button" data-equity-view="drawdown" role="tab" aria-selected="false" aria-label="Drawdown view" title="Drawdown view">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M4 7h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                  <path d="M5 11l4 7 3-4 3 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </span>
+            <span class="equity-card-heading">Drawdown <span class="spark-label" id="drawdownTitleValue">[-]</span></span>
+          </h3>
+          <div class="chart-canvas-wrap">
+            <canvas id="drawdownChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="equity-card-title">
+            <span class="equity-card-heading">Equity <span class="spark-label" id="equityTitleValue">[-]</span></span>
           </h3>
           <div class="chart-canvas-wrap">
             <canvas id="equityChart"></canvas>
@@ -4831,26 +5462,36 @@
 
         <div class="chart-card">
           <h3 class="pnl-card-title">
-            <span class="pnl-card-heading">Profit & Loss <span class="spark-label" id="pnlTitleValue">[-]</span></span>
-            <span class="pnl-view-toggle" role="tablist" aria-label="PnL view mode">
-              <button class="pnl-view-btn active" id="pnlLineViewBtn" type="button" data-pnl-view="line" role="tab" aria-selected="true" aria-label="Graph view" title="Graph view">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                  <path d="M5 15l4-4 3 2 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <button class="pnl-view-btn" id="pnlHeatmapViewBtn" type="button" data-pnl-view="heatmap" role="tab" aria-selected="false" aria-label="Calendar view" title="Calendar view">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
-                  <path d="M8 3v4M16 3v4M4 9h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-              </button>
-            </span>
+            <span class="pnl-card-heading">Profit &amp; Loss <span class="spark-label" id="pnlTitleValue">[-]</span></span>
           </h3>
           <div class="chart-canvas-wrap logo-watermark" id="pnlChartWrap">
             <canvas id="pnlChart"></canvas>
           </div>
-          <div class="pnl-heatmap-wrap is-hidden" id="pnlHeatmapWrap">
+        </div>
+
+        <div class="chart-card">
+          <h3 class="deposits-card-title">
+            <span class="deposits-card-heading">Deposits <span class="spark-label" id="depositsTitleValue">[-]</span></span>
+          </h3>
+          <div class="chart-canvas-wrap" id="depositsChartWrap">
+            <canvas id="depositsChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card exposure-card">
+          <h3 class="exposure-card-title">
+            <span class="exposure-card-heading">Exposure <span class="spark-label" id="exposureTitleValue">[-]</span></span>
+          </h3>
+          <div class="chart-canvas-wrap exposure-chart-wrap">
+            <canvas id="exposureChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card heatmap-card">
+          <h3 class="pnl-card-title">
+            <span class="pnl-card-heading">Heatmap</span>
+          </h3>
+          <div class="pnl-heatmap-wrap" id="pnlHeatmapWrap">
             <div class="pnl-heatmap-toolbar">
               <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous quarter">‹</button>
               <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Quarterly daily PnL</span>
@@ -4862,35 +5503,6 @@
               <div class="pnl-heatmap-grid" id="pnlHeatmapGrid"></div>
             </div>
             <div class="pnl-heatmap-hover" id="pnlHeatmapHover"></div>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h3 class="deposits-card-title">
-            <span class="deposits-card-heading">Deposits & Withdrawals <span class="spark-label" id="depositsTitleValue">[-]</span></span>
-            <span class="third-panel-toggle" role="tablist" aria-label="Third panel mode">
-              <button class="third-panel-btn active" id="thirdPanelChartBtn" type="button" data-panel-mode="chart" role="tab" aria-selected="true" aria-label="Graph view" title="Graph view">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                  <path d="M5 15l4-4 3 2 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <button class="third-panel-btn" id="thirdPanelTransfersBtn" type="button" data-panel-mode="transfers" role="tab" aria-selected="false" aria-label="Log view" title="Log view">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M7 6h10M7 12h10M7 18h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                  <circle cx="5" cy="6" r="1" fill="currentColor"/>
-                  <circle cx="5" cy="12" r="1" fill="currentColor"/>
-                  <circle cx="5" cy="18" r="1" fill="currentColor"/>
-                </svg>
-              </button>
-            </span>
-          </h3>
-          <div class="chart-canvas-wrap" id="depositsChartWrap">
-            <canvas id="depositsChart"></canvas>
-          </div>
-          <div class="transfers-wrap is-hidden" id="transfersListWrap">
-            <div class="transfers-list-status" id="transfersListStatus">Transfers will appear here.</div>
-            <ul class="transfers-list" id="transfersListBody"></ul>
           </div>
         </div>
       </div>
@@ -5027,8 +5639,6 @@
   </section>
 
   <div class="metric-tooltip" id="metricTooltip" role="tooltip" aria-hidden="true"></div>
-
-  <p></p>
 
   <section class="card" id="liveLayout">
     <div class="section-title">
@@ -5283,6 +5893,9 @@
     </div>
   </section>
 
+    </div>
+  </div>
+
   <footer>
     <div style="margin-top:.1rem;">
     </div>
@@ -5409,8 +6022,6 @@
   const positionsTimelineWrapEl = document.getElementById("positionsTimelineWrap");
   const positionsTimelineSliderEl = document.getElementById("positionsTimelineSlider");
   const positionsTimelineStampEl = document.getElementById("positionsTimelineStamp");
-  const positionsTimelineLiveBtnEl = document.getElementById("positionsTimelineLiveBtn");
-  const positionsTimelineToggleEl = document.getElementById("positionsTimelineToggle");
   const portfolioModalEl = document.getElementById("portfolioModal");
   const portfolioModalCloseEl = document.getElementById("portfolioModalClose");
   const coinInfoModalEl = document.getElementById("coinInfoModal");
@@ -5536,8 +6147,10 @@
   const shareNativeBtnEl = document.getElementById("shareNativeBtn");
   const shareModalCloseEl = document.getElementById("shareModalClose");
 
+  const drawdownCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("drawdownChart"));
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const equityViewButtons = document.querySelectorAll(".equity-view-btn");
+  const exposureCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("exposureChart"));
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
   const pnlChartWrapEl = document.getElementById("pnlChartWrap");
   const pnlHeatmapWrapEl = document.getElementById("pnlHeatmapWrap");
@@ -5555,8 +6168,9 @@
   const transfersListBodyEl = document.getElementById("transfersListBody");
   const transfersListStatusEl = document.getElementById("transfersListStatus");
   const thirdPanelModeButtons = document.querySelectorAll(".third-panel-btn");
-  const equityHeadingLabelEl = document.getElementById("equityHeadingLabel");
+  const drawdownTitleValueEl = document.getElementById("drawdownTitleValue");
   const equityTitleValueEl = document.getElementById("equityTitleValue");
+  const exposureTitleValueEl = document.getElementById("exposureTitleValue");
   const pnlTitleValueEl = document.getElementById("pnlTitleValue");
   const depositsTitleValueEl = document.getElementById("depositsTitleValue");
 
@@ -5661,7 +6275,13 @@
   let latestLiveEquityValue = null;
   let latestLivePnlValue = null;
   let latestBaseEquityValue = null;
-  const chartLastValues = { equity: null, equityDrawdown: null, pnl: null, deposits: null };
+  const chartLastValues = {
+    equity: null,
+    equityDrawdown: null,
+    exposure: null,
+    pnl: null,
+    deposits: null,
+  };
   const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl", "cash"];
   const manualMidCoins = new Set();
   let manualMidTimer = null;
@@ -6578,13 +7198,13 @@
   let equityViewMode = "line";
   let pnlViewMode = "line";
   let pnlHeatmapMonths = [];
-  let pnlHeatmapMonthIndex = 0;
+  let pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
   let pnlHeatmapRows = [];
   let thirdPanelMode = "chart";
   const transferHistoryByWallet = new Map();
   let transfersRequestToken = 0;
   const TRANSFERS_MAX_ROWS = 120;
-  const portfolioCharts = { equity: null, pnl: null, deposits: null };
+  const portfolioCharts = { drawdown: null, equity: null, exposure: null, pnl: null, deposits: null };
   const portfolioBreakdownChart = { chart: null };
   const WALLET_COLOR_PALETTE = ["#38bdf8", "#f59e0b", "#f472b6", "#22d3ee", "#a78bfa", "#34d399", "#f97316", "#60a5fa"];
   const walletColorMap = new Map();
@@ -7229,6 +7849,23 @@
     return `${sign}${meta.symbol}${abs}`;
   }
 
+  function fmtMoneyCompact(v, decimals = 2) {
+    const meta = getDisplayCurrencyMeta(v);
+    if (!meta) return "";
+    const sign = meta.value < 0 ? "-" : "";
+    const absValue = Math.abs(meta.value);
+    try {
+      const formatted = absValue.toLocaleString(undefined, {
+        notation: "compact",
+        minimumFractionDigits: absValue >= 1000 ? 0 : Math.min(2, decimals),
+        maximumFractionDigits: absValue >= 1000 ? Math.min(2, decimals) : decimals,
+      });
+      return `${sign}${meta.symbol}${formatted}`;
+    } catch (err) {
+      return fmtMoney(v, decimals);
+    }
+  }
+
   function getCssVar(name, fallback) {
     const val = getComputedStyle(document.body).getPropertyValue(name).trim();
     return val || fallback;
@@ -7255,26 +7892,32 @@
   function updateChartTitleValues() {
     const equityChartValue = Number.isFinite(chartLastValues.equity) ? chartLastValues.equity : null;
     const equityDrawdownValue = Number.isFinite(chartLastValues.equityDrawdown) ? chartLastValues.equityDrawdown : null;
+    const exposureChartValue = Number.isFinite(chartLastValues.exposure) ? chartLastValues.exposure : null;
     const pnlChartValue = Number.isFinite(chartLastValues.pnl) ? chartLastValues.pnl : null;
     const depositsChartValue = Number.isFinite(chartLastValues.deposits) ? chartLastValues.deposits : null;
 
-    if (equityHeadingLabelEl) {
-      equityHeadingLabelEl.textContent = equityViewMode === "drawdown" ? "Drawdown" : "Equity";
+    if (drawdownTitleValueEl) {
+      drawdownTitleValueEl.textContent =
+        equityDrawdownValue !== null ? formatSignedPercent(equityDrawdownValue, 2) : "-";
+      drawdownTitleValueEl.classList.remove("positive", "negative", "neutral");
+      if (Number.isFinite(equityDrawdownValue)) {
+        if (equityDrawdownValue < 0) drawdownTitleValueEl.classList.add("negative");
+        else if (equityDrawdownValue > 0) drawdownTitleValueEl.classList.add("positive");
+        else drawdownTitleValueEl.classList.add("neutral");
+      }
     }
 
     if (equityTitleValueEl) {
+      equityTitleValueEl.textContent = equityChartValue !== null ? fmtMoney(equityChartValue, 0) : "-";
       equityTitleValueEl.classList.remove("positive", "negative", "neutral");
-      if (equityViewMode === "drawdown") {
-        equityTitleValueEl.textContent =
-          equityDrawdownValue !== null ? formatSignedPercent(equityDrawdownValue, 2) : "-";
-        if (Number.isFinite(equityDrawdownValue)) {
-          if (equityDrawdownValue < 0) equityTitleValueEl.classList.add("negative");
-          else if (equityDrawdownValue > 0) equityTitleValueEl.classList.add("positive");
-          else equityTitleValueEl.classList.add("neutral");
-        }
-      } else {
-        equityTitleValueEl.textContent = equityChartValue !== null ? fmtMoney(equityChartValue, 0) : "-";
-        equityTitleValueEl.classList.add("neutral");
+      equityTitleValueEl.classList.add("neutral");
+    }
+
+    if (exposureTitleValueEl) {
+      exposureTitleValueEl.textContent = exposureChartValue !== null ? formatExposureMultiple(exposureChartValue, 2) : "-";
+      exposureTitleValueEl.classList.remove("positive", "negative", "neutral");
+      if (Number.isFinite(exposureChartValue)) {
+        exposureTitleValueEl.classList.add(exposureChartValue > 0 ? "positive" : "neutral");
       }
     }
 
@@ -7426,6 +8069,38 @@
     };
   }
 
+  function applyExposureTooltipStyling(chart) {
+    if (!chart?.options?.plugins?.tooltip) return;
+    chart.options.plugins.tooltip.enabled = false;
+    chart.options.plugins.tooltip.external = (context) => {
+      const { chart, tooltip } = context;
+      let tooltipEl = chart.canvas.parentElement?.querySelector(".pnl-tooltip");
+      if (!tooltipEl) {
+        tooltipEl = document.createElement("div");
+        tooltipEl.className = "pnl-tooltip";
+        chart.canvas.parentElement?.appendChild(tooltipEl);
+      }
+      if (!tooltip || tooltip.opacity === 0) {
+        tooltipEl.style.opacity = "0";
+        return;
+      }
+
+      const point = tooltip.dataPoints?.[0];
+      const ratio = Number(point?.parsed?.y ?? point?.raw ?? 0);
+      const title = tooltip.title?.[0] || point?.label || "";
+
+      tooltipEl.innerHTML = `
+        <div class="pnl-tooltip-title">${title}</div>
+        <div class="pnl-tooltip-value">${formatExposureMultiple(ratio, 2)}</div>
+      `;
+
+      const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
+      if (valueEl) valueEl.style.color = getCssVar("--accent", "#26d97f");
+      positionChartTooltip(tooltipEl, chart, tooltip);
+      tooltipEl.style.opacity = "1";
+    };
+  }
+
   function resolveDrawdownBaseEquity(equityValues, flowValues) {
     const firstEquity = Array.isArray(equityValues)
       ? equityValues.map((v) => Number(v)).find((v) => Number.isFinite(v))
@@ -7469,7 +8144,7 @@
     return out;
   }
 
-  function buildEquityModeDatasets(baseDatasets, mode = equityViewMode) {
+  function buildEquityModeDatasets(baseDatasets, mode = "line") {
     if (mode !== "drawdown") return baseDatasets;
     return (Array.isArray(baseDatasets) ? baseDatasets : []).map((ds) => {
       const color = "#fb7185";
@@ -7483,10 +8158,10 @@
     });
   }
 
-  function applyEquityChartMode(chart, equityBaseDatasets) {
+  function applyEquityChartMode(chart, equityBaseDatasets, mode = equityViewMode) {
     if (!chart) return;
-    const isDrawdown = equityViewMode === "drawdown";
-    const modeDatasets = buildEquityModeDatasets(equityBaseDatasets, equityViewMode);
+    const isDrawdown = mode === "drawdown";
+    const modeDatasets = buildEquityModeDatasets(equityBaseDatasets, mode);
     const drawdownDatasets = buildEquityModeDatasets(equityBaseDatasets, "drawdown");
     chartLastValues.equityDrawdown = getLastFiniteFromDatasets(drawdownDatasets);
     chart.data.datasets = modeDatasets;
@@ -7529,7 +8204,52 @@
       delete chart.options.scales.y.suggestedMax;
       delete chart.options.scales.y.suggestedMin;
     }
-    applyEquityTooltipStyling(chart, equityViewMode);
+    chart.$equityMode = mode;
+    chart.$equityBaseDatasets = Array.isArray(equityBaseDatasets) ? equityBaseDatasets : [];
+    applyEquityTooltipStyling(chart, mode);
+    chart.update();
+  }
+
+  function applyExposureChartStyling(chart, exposureDatasets) {
+    if (!chart) return;
+    const datasets = Array.isArray(exposureDatasets) ? exposureDatasets : [];
+    chart.data.datasets = datasets;
+    if (chart.options.plugins?.legend) {
+      chart.options.plugins.legend.display = false;
+    }
+    if (chart.options.plugins?.zeroBaseline) {
+      chart.options.plugins.zeroBaseline.enabled = false;
+    }
+    if (chart.options.plugins?.referenceLine) {
+      chart.options.plugins.referenceLine.enabled = true;
+      chart.options.plugins.referenceLine.value = 1;
+      chart.options.plugins.referenceLine.color = document.body.classList.contains("light")
+        ? "rgba(148, 163, 184, 0.42)"
+        : "rgba(148, 163, 184, 0.34)";
+      chart.options.plugins.referenceLine.dash = [5, 5];
+    }
+    chart.options.scales.y.ticks.callback = (value) => {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "";
+      if (Math.abs(n) >= 10) return formatExposureMultiple(n, 0);
+      if (Math.abs(n) >= 1) return formatExposureMultiple(n, 1);
+      return formatExposureMultiple(n, 2);
+    };
+    chart.options.scales.y.suggestedMin = 0;
+    const maxExposure = datasets.reduce((max, ds) => {
+      const localMax = (Array.isArray(ds?.data) ? ds.data : []).reduce((acc, raw) => {
+        const n = Number(raw);
+        if (!Number.isFinite(n)) return acc;
+        return acc === null || n > acc ? n : acc;
+      }, null);
+      if (localMax === null) return max;
+      return max === null || localMax > max ? localMax : max;
+    }, null);
+    chart.options.scales.y.suggestedMax =
+      Number.isFinite(maxExposure) && maxExposure > 0
+        ? Math.max(1.25, maxExposure * 1.08)
+        : 1.25;
+    applyExposureTooltipStyling(chart);
     chart.update();
   }
 
@@ -8793,6 +9513,12 @@
     const n = Number(value);
     if (!Number.isFinite(n)) return "";
     return n.toFixed(decimals);
+  }
+
+  function formatExposureMultiple(value, decimals = 2) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    return `${n.toFixed(decimals)}x`;
   }
 
   function formatDuration(ms) {
@@ -10778,7 +11504,7 @@
   }
 
   function recomputeTimelineControls() {
-    if (!positionsTimelineSliderEl || !positionsTimelineStampEl || !positionsTimelineLiveBtnEl) return;
+    if (!positionsTimelineSliderEl || !positionsTimelineStampEl) return;
     const fillsForTimeline = collectTimelineFillsForCurrentContext();
     const rawTimes = fillsForTimeline.map((f) => Number(f.time)).filter(Number.isFinite);
     const now = Date.now();
@@ -10802,7 +11528,7 @@
       timelineSelectedIndex = liveIndex;
       positionsTimelineSliderEl.value = String(liveIndex);
       positionsTimelineStampEl.textContent = fmtDateTime(timelineAsOfMs);
-      positionsTimelineLiveBtnEl.disabled = false;
+      syncTimelineStateUi();
       return;
     }
 
@@ -10810,7 +11536,7 @@
       timelineSelectedIndex = liveIndex;
       positionsTimelineSliderEl.value = String(liveIndex);
       positionsTimelineStampEl.textContent = "Live";
-      positionsTimelineLiveBtnEl.disabled = true;
+      syncTimelineStateUi();
       return;
     }
 
@@ -10832,7 +11558,14 @@
     const asOf = timelineTimestamps[nearestIdx];
     timelineAsOfMs = nearestIdx === liveIndex && !timelineUserPinned ? null : asOf;
     positionsTimelineStampEl.textContent = timelineAsOfMs ? fmtDateTime(asOf) : "Live";
-    positionsTimelineLiveBtnEl.disabled = !timelineAsOfMs;
+    syncTimelineStateUi();
+  }
+
+  function syncTimelineStateUi() {
+    const timelineActive = isTimelineActive();
+    if (positionsTimelineWrapEl) {
+      positionsTimelineWrapEl.classList.toggle("is-time-travel", timelineActive);
+    }
   }
 
   async function setTimelineIndex(index) {
@@ -10850,7 +11583,7 @@
       timelineUserPinned = false;
       timelinePriceByCoin.clear();
       if (positionsTimelineStampEl) positionsTimelineStampEl.textContent = "Live";
-      if (positionsTimelineLiveBtnEl) positionsTimelineLiveBtnEl.disabled = true;
+      syncTimelineStateUi();
       renderPositions(currentAssetPositions, { preserveBase: true });
       refreshPortfolioTimelineFade();
       return;
@@ -10861,7 +11594,7 @@
     if (positionsTimelineStampEl) {
       positionsTimelineStampEl.textContent = Number.isFinite(timelineAsOfMs) ? fmtDateTime(timelineAsOfMs) : "Live";
     }
-    if (positionsTimelineLiveBtnEl) positionsTimelineLiveBtnEl.disabled = false;
+    syncTimelineStateUi();
     queueTimelinePriceRefresh();
     renderPositions(currentAssetPositions, { preserveBase: true });
     refreshPortfolioTimelineFade();
@@ -11315,84 +12048,321 @@
     });
   }
 
+  function getOverviewMarketAccountValue(wallet, marketType) {
+    const snapshot = walletSnapshotsByType[marketType]?.get(wallet) || {};
+    const snapshotValue = Number(snapshot?.summary?.accountValue ?? 0);
+    if (isTimelineActive() && Number.isFinite(timelineAsOfMs)) {
+      const historicalValue = getAccountValueAtTime(wallet, timelineAsOfMs, marketType);
+      if (Number.isFinite(historicalValue)) return historicalValue;
+    }
+    const liveValue = getPortfolioLatestEquityValue(wallet, marketType);
+    if (Number.isFinite(liveValue)) return liveValue;
+    return Number.isFinite(snapshotValue) ? snapshotValue : 0;
+  }
+
+  function buildOverviewPositionMetrics(assetPositions = currentAssetPositions) {
+    const source = isTimelineActive()
+      ? computeTimelineAdjustedPositions(assetPositions)
+      : Array.isArray(assetPositions)
+        ? assetPositions
+        : [];
+
+    let longNotional = 0;
+    let shortNotional = 0;
+    let positionCount = 0;
+    const assetSet = new Set();
+
+    source.forEach((item) => {
+      const p = item?.position || {};
+      const coin = String(p.coin || "").trim();
+      const size = Number(p.szi ?? 0);
+      if (!coin || !Number.isFinite(size) || size === 0) return;
+
+      const entryPx = Number(p.entryPx ?? 0);
+      const snapshotValue = Number(p.positionValue ?? 0);
+      const liveMarkPx = getMarkPriceForCoin(coin);
+      const timelineMarkPx = getTimelinePriceForCoin(coin);
+      let markPx = Number.isFinite(liveMarkPx) ? liveMarkPx : timelineMarkPx;
+      if ((!Number.isFinite(markPx) || Number.isNaN(markPx)) && !Number.isNaN(snapshotValue)) {
+        markPx = Math.abs(snapshotValue) / Math.abs(size);
+      }
+
+      let positionValue = snapshotValue;
+      if (Number.isFinite(markPx) && size !== 0) {
+        positionValue = markPx * size;
+      } else if (Number.isFinite(entryPx) && size !== 0) {
+        positionValue = entryPx * size;
+      }
+
+      const absValue = Math.abs(Number(positionValue));
+      if (!Number.isFinite(absValue) || absValue <= 0) return;
+
+      if (size > 0) longNotional += absValue;
+      else shortNotional += absValue;
+      positionCount += 1;
+      assetSet.add(coin);
+    });
+
+    return {
+      longNotional,
+      shortNotional,
+      grossExposure: longNotional + shortNotional,
+      netExposure: longNotional - shortNotional,
+      positionCount,
+      assetCount: assetSet.size,
+    };
+  }
+
+  function describeOverviewBias(longShare, shortShare, grossExposure) {
+    if (!Number.isFinite(grossExposure) || grossExposure <= 1e-9) return "No open exposure";
+    const delta = Number(longShare || 0) - Number(shortShare || 0);
+    if (Math.abs(delta) < 0.08) return "Balanced posture";
+    if (delta >= 0.4) return "Strong long bias";
+    if (delta >= 0.16) return "Long bias";
+    if (delta <= -0.4) return "Strong short bias";
+    if (delta <= -0.16) return "Short bias";
+    return delta > 0 ? "Slight long bias" : "Slight short bias";
+  }
+
+  function getOverviewToneClass(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n === 0) return "";
+    return n > 0 ? "overview-positive" : "overview-negative";
+  }
+
   function renderMarginSummary(items, { estimated = false } = {}) {
     if (!Array.isArray(items) || items.length === 0) {
       marginSummaryEl.innerHTML = "<span class='muted'>No margin summary.</span>";
       return;
     }
 
-    const weights = getNormalizedWeights(items.map((item) => item.wallet));
+    const populatedItems = items.filter((item) => item?.summary);
+    if (!populatedItems.length) {
+      marginSummaryEl.innerHTML = "<span class='muted'>No margin summary.</span>";
+      return;
+    }
+
+    const selectedEquity = populatedItems.reduce((sum, item) => {
+      const value = Number(item?.summary?.accountValue ?? 0);
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    const marginUsedTotal = populatedItems.reduce((sum, item) => {
+      const value = Number(item?.summary?.totalMarginUsed ?? 0);
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    const openPnlTotal = populatedItems.reduce((sum, item) => {
+      const value = Number(item?.upnlTotal ?? 0);
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+
+    const positionMetrics = buildOverviewPositionMetrics(currentAssetPositions);
+    const grossExposure = Number.isFinite(positionMetrics.grossExposure)
+      ? positionMetrics.grossExposure
+      : populatedItems.reduce((sum, item) => sum + Number(item?.summary?.totalNtlPos ?? 0), 0);
+    const longNotional = Number(positionMetrics.longNotional ?? 0);
+    const shortNotional = Number(positionMetrics.shortNotional ?? 0);
+    const netExposure = Number(positionMetrics.netExposure ?? 0);
+    const positionCount = Number(positionMetrics.positionCount ?? 0);
+    const assetCount = Number(positionMetrics.assetCount ?? 0);
+
+    const perpTotal = currentWallets.reduce((sum, wallet) => {
+      const value = getOverviewMarketAccountValue(wallet, "perp");
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    const spotTotal = currentWallets.reduce((sum, wallet) => {
+      const value = getOverviewMarketAccountValue(wallet, "spot");
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    const fullPortfolioValue = Math.max(0, perpTotal) + Math.max(0, spotTotal);
+
+    let mixPrimaryLabel = "Perps";
+    let mixSecondaryLabel = "Spot";
+    let mixPrimaryValue = perpTotal;
+    let mixSecondaryValue = spotTotal;
+    let mixPrimaryColor = "#4f7cff";
+    let mixSecondaryColor = "#2bb8a8";
+
+    if (currentMarketType === "perp") {
+      mixPrimaryLabel = "Perps";
+      mixSecondaryLabel = "Other";
+      mixPrimaryValue = perpTotal;
+      mixSecondaryValue = Math.max(0, fullPortfolioValue - perpTotal);
+      mixSecondaryColor = "#94a3b8";
+    } else if (currentMarketType === "spot") {
+      mixPrimaryLabel = "Spot";
+      mixSecondaryLabel = "Other";
+      mixPrimaryValue = spotTotal;
+      mixSecondaryValue = Math.max(0, fullPortfolioValue - spotTotal);
+      mixPrimaryColor = "#2bb8a8";
+      mixSecondaryColor = "#94a3b8";
+    }
+
+    const mixTotal = Math.max(0, mixPrimaryValue) + Math.max(0, mixSecondaryValue);
+    const mixPrimaryShare = mixTotal > 0 ? Math.max(0, Math.min(1, mixPrimaryValue / mixTotal)) : 0.5;
+    const longShare = grossExposure > 0 ? longNotional / grossExposure : 0;
+    const shortShare = grossExposure > 0 ? shortNotional / grossExposure : 0;
+    const longPct = Math.max(0, Math.min(100, longShare * 100));
+    const shortPct = Math.max(0, Math.min(100, shortShare * 100));
+    const marginUsedRatio = Math.abs(selectedEquity) > 1e-9 ? marginUsedTotal / Math.abs(selectedEquity) : null;
+    const exposureMultiple = Math.abs(selectedEquity) > 1e-9 ? grossExposure / Math.abs(selectedEquity) : null;
+    const walletCount = currentWallets.length || populatedItems.length;
+    const biasLabel = describeOverviewBias(longShare, shortShare, grossExposure);
+    const walletCountLabel = walletCount === 1 ? "1 wallet tracked" : `${walletCount} wallets tracked`;
+    const marketLabel =
+      currentMarketType === "spot"
+        ? "Spot"
+        : currentMarketType === "all"
+          ? "All Markets"
+          : "Perps";
+    const headline =
+      currentMarketType === "spot"
+        ? "Spot Total Value"
+        : currentMarketType === "all"
+          ? "Account Total Value"
+          : "Perp Total Value";
+    const overviewSubtitle = estimated
+      ? "Reconstructed from fills and historical equity."
+      : "Live posture across the selected wallets.";
+    const overviewMainMeta = estimated
+      ? `${walletCountLabel}. Historical account value for the selected timeline point.`
+      : `${walletCountLabel}. Current account value across the visible account buckets.`;
+
+    const stats = [
+      {
+        label: "Gross Exposure",
+        value: grossExposure > 0 ? fmtMoneyCompact(grossExposure, 2) : fmtMoney(0, 2),
+        meta: exposureMultiple !== null ? `${formatExposureMultiple(exposureMultiple, 2)} of equity` : "No active leverage",
+        tone: "",
+      },
+      {
+        label: "Net Exposure",
+        value: formatSignedDollarWithPlus(netExposure, 0),
+        meta: `${formatPercent(longShare, 0)} long / ${formatPercent(shortShare, 0)} short`,
+        tone: getOverviewToneClass(netExposure),
+      },
+      {
+        label: "Open PnL",
+        value: formatSignedDollarWithPlus(openPnlTotal, 0),
+        meta: "Mark-to-market across visible positions",
+        tone: getOverviewToneClass(openPnlTotal),
+      },
+      {
+        label: "Margin Used",
+        value: fmtMoneyCompact(marginUsedTotal, 2),
+        meta: marginUsedRatio !== null ? `${formatPercent(marginUsedRatio, 1)} of equity` : "No margin in use",
+        tone: "",
+      },
+      {
+        label: "Positions",
+        value: formatNumber(positionCount, 0),
+        meta: `${formatNumber(assetCount, 0)} assets currently open`,
+        tone: "",
+      },
+      {
+        label: "Tracked Wallets",
+        value: formatNumber(walletCount, 0),
+        meta: walletCount === 1 ? "Single wallet view" : "Combined wallet view",
+        tone: "",
+      },
+    ];
+
+    const metricHtml = stats
+      .map(
+        (stat) => `
+          <div class="overview-metric-row">
+            <div class="overview-metric-main">
+              <span class="overview-metric-label">${xmlEscape(stat.label)}</span>
+              <span class="overview-metric-meta">${xmlEscape(stat.meta)}</span>
+            </div>
+            <span class="overview-metric-value ${stat.tone || ""}">${xmlEscape(stat.value)}</span>
+          </div>
+        `
+      )
+      .join("");
+
+    const allocationTrackStyle = `background:linear-gradient(90deg, ${mixPrimaryColor} 0 ${mixPrimaryShare * 100}%, ${mixSecondaryColor} ${mixPrimaryShare * 100}% 100%);`;
 
     marginSummaryEl.innerHTML = `
-      <div class="overview-stack">
-        ${items
-          .map((item, idx) => {
-            if (!item?.summary) {
-              return `
-                <div class="overview-item">
-                  <div class="overview-wallet" title="${xmlEscape(item.wallet || "")}">
-                    ${xmlEscape(formatWalletLabel(item.wallet || ""))}
-                    <span>${Math.round((weights[idx] || 0) * 100)}%</span>
-                  </div>
-                  <div class="muted">No margin summary.</div>
-                </div>
-              `;
-            }
+      <div class="overview-dashboard">
+        <article class="overview-panel">
+          <div class="overview-panel-header">
+            <div>
+              <div class="overview-eyebrow">${xmlEscape(marketLabel)}</div>
+              <h3 class="overview-title">${xmlEscape(headline)}</h3>
+              <div class="overview-subtitle">${xmlEscape(overviewSubtitle)}</div>
+            </div>
+          </div>
 
-            const perpOverviewUpnlValue = Number(walletTotalsByType.perp.get(item.wallet)?.upnlTotal ?? 0);
-            const overviewUpnlValue =
-              currentMarketType === "spot"
-                ? 0
-                : currentMarketType === "all"
-                  ? perpOverviewUpnlValue
-                  : Number(item.upnlTotal ?? 0);
+          <div class="overview-main-value">${selectedEquity !== null ? fmtMoney(selectedEquity, 2) : "-"}</div>
+          <div class="overview-main-meta">${xmlEscape(overviewMainMeta)}</div>
 
-            const rows = [
-              { label: "Equity", value: fmtMoney(item.summary.accountValue), valueClass: "money" },
-              {
-                label: "Unrealized PnL",
-                value: formatSignedDollarWithPlus(overviewUpnlValue),
-                valueClass: `money ${
-                  overviewUpnlValue > 0
-                    ? "upnl-pos"
-                    : overviewUpnlValue < 0
-                      ? "upnl-neg"
-                      : ""
-                }`,
-              },
-              { label: "Notional Exposure", value: fmtMoney(item.summary.totalNtlPos), valueClass: "money" },
-              (() => {
-                const equityValue = Number(item.summary.accountValue ?? 0);
-                const notionalValue = Number(item.summary.totalNtlPos ?? 0);
-                const collateralValue = equityValue + notionalValue;
-                return { label: "Collateral", value: fmtMoney(collateralValue), valueClass: "money" };
-              })(),
-              { label: "Margin Used", value: fmtMoney(item.summary.totalMarginUsed), valueClass: "money" },
-              { label: "Withdrawable", value: fmtMoney(getSnapshotWithdrawableValue(item)), valueClass: "money" },
-            ];
-
-            return `
-              <div class="overview-item">
-                <div class="overview-wallet" title="${xmlEscape(item.wallet || "")}">
-                  ${xmlEscape(formatWalletLabel(item.wallet || ""))}
-                  <span>${Math.round((weights[idx] || 0) * 100)}%</span>
-                </div>
-                <div class="kv-list">
-                  ${rows
-                    .map(
-                      ({ label, value, valueClass }) => `
-                        <div class="kv-label">${label}</div>
-                        <div class="kv-value ${valueClass || ""}">${value}</div>
-                      `
-                    )
-                    .join("")}
-                </div>
+          <div class="overview-section">
+            <div class="overview-section-head">
+              <div>
+                <div class="overview-section-title">Portfolio Mix</div>
+                <div class="overview-section-subtitle">Allocation across the visible account buckets.</div>
               </div>
-            `;
-          })
-          .join("")}
+            </div>
+            <div class="overview-allocation-track" style="${allocationTrackStyle}">
+              <span class="overview-allocation-fill" style="width:${mixPrimaryShare * 100}%; --overview-fill-color:${mixPrimaryColor};"></span>
+            </div>
+            <div class="overview-allocation-list">
+              <div class="overview-allocation-row">
+                <span class="overview-allocation-label">
+                  <span class="overview-allocation-swatch" style="background:${xmlEscape(mixPrimaryColor)};"></span>
+                  ${xmlEscape(mixPrimaryLabel)}
+                </span>
+                <span class="overview-allocation-values">
+                  <span class="overview-allocation-value">${mixPrimaryValue !== null ? fmtMoneyCompact(mixPrimaryValue, 2) : "-"}</span>
+                  <span class="overview-allocation-share">${xmlEscape(formatPercent(mixPrimaryShare, 0))}</span>
+                </span>
+              </div>
+              <div class="overview-allocation-row">
+                <span class="overview-allocation-label">
+                  <span class="overview-allocation-swatch" style="background:${xmlEscape(mixSecondaryColor)};"></span>
+                  ${xmlEscape(mixSecondaryLabel)}
+                </span>
+                <span class="overview-allocation-values">
+                  <span class="overview-allocation-value">${mixSecondaryValue !== null ? fmtMoneyCompact(mixSecondaryValue, 2) : "-"}</span>
+                  <span class="overview-allocation-share">${xmlEscape(formatPercent(1 - mixPrimaryShare, 0))}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-section">
+            <div class="overview-section-head">
+              <div>
+                <div class="overview-section-title">Exposure Posture</div>
+                <div class="overview-section-subtitle">${xmlEscape(positionCount ? biasLabel : "Open a position to populate exposure posture.")}</div>
+              </div>
+              <div class="overview-bias-pill">${exposureMultiple !== null ? xmlEscape(formatExposureMultiple(exposureMultiple, 2)) : "-"}</div>
+            </div>
+            <div class="overview-direction-head">
+              <span>Long / Short Exposure</span>
+              <strong>${grossExposure > 0 ? fmtMoneyCompact(grossExposure, 2) : fmtMoney(0, 2)}</strong>
+            </div>
+            <div class="overview-direction-track">
+              <span class="overview-direction-fill long" style="width:${longPct}%;"></span>
+              <span class="overview-direction-fill short" style="width:${shortPct}%;"></span>
+            </div>
+            <div class="overview-direction-values">
+              <div class="overview-direction-value">
+                <span>Long</span>
+                <strong class="tone-long">${longNotional > 0 ? fmtMoneyCompact(longNotional, 2) : fmtMoney(0, 2)}</strong>
+              </div>
+              <div class="overview-direction-value">
+                <span>Short</span>
+                <strong class="tone-short">${shortNotional > 0 ? fmtMoneyCompact(shortNotional, 2) : fmtMoney(0, 2)}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="overview-metric-list">
+            ${metricHtml}
+          </div>
+        </article>
       </div>
-      ${estimated ? "" : ""}
     `;
   }
 
@@ -13251,7 +14221,11 @@
       renderHistoricalFills();
       recomputeTimelineControls();
       if (isTimelineActive()) queueTimelinePriceRefresh();
-      updatePerformanceMetrics(currentRangeKey);
+      if (portfolioDataByWallet.size) {
+        updatePortfolioCharts(currentRangeKey);
+      } else {
+        updatePerformanceMetrics(currentRangeKey);
+      }
     } catch (err) {
       console.error("Historical fills error", err);
       if (historicalFillsBodyEl) {
@@ -13548,20 +14522,23 @@
     renderTransfersList([], "Transfers will appear here.");
     pnlHeatmapRows = [];
     pnlHeatmapMonths = [];
-    pnlHeatmapMonthIndex = 0;
+    pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
     if (pnlHeatmapGridEl) pnlHeatmapGridEl.innerHTML = "";
     if (pnlHeatmapTitleEl) pnlHeatmapTitleEl.textContent = "Quarterly daily PnL";
     if (pnlHeatmapHoverEl) pnlHeatmapHoverEl.textContent = "";
     if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
     if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
-    if (portfolioCharts.equity) {
-      portfolioCharts.equity.destroy();
-      portfolioCharts.pnl.destroy();
-      portfolioCharts.deposits.destroy();
-      portfolioCharts.equity = null;
-      portfolioCharts.pnl = null;
-      portfolioCharts.deposits = null;
-    }
+    Object.keys(portfolioCharts).forEach((key) => {
+      const chart = portfolioCharts[key];
+      if (chart) chart.destroy();
+      portfolioCharts[key] = null;
+    });
+    chartLastValues.equity = null;
+    chartLastValues.equityDrawdown = null;
+    chartLastValues.exposure = null;
+    chartLastValues.pnl = null;
+    chartLastValues.deposits = null;
+    updateChartTitleValues();
   }
 
   async function fetchPortfolio(wallet) {
@@ -13785,8 +14762,7 @@
   }
 
   function refreshPortfolioTimelineFade() {
-    const { equity: equityChart, pnl: pnlChart, deposits: depositsChart } = portfolioCharts;
-    [equityChart, pnlChart, depositsChart].forEach((chart) => {
+    Object.values(portfolioCharts).forEach((chart) => {
       if (!chart) return;
       applyTimelineFutureFade(chart);
       chart.update("none");
@@ -14328,6 +15304,176 @@
       borderWidth: 2.4,
       tension: 0.25,
     };
+  }
+
+  function applyFillToLotsState(lotsByKey, fill) {
+    if (!lotsByKey || !fill) return;
+    const sideSign = fill.side === "B" ? 1 : fill.side === "S" ? -1 : 0;
+    const sizeAbs = Number(fill.size);
+    const price = Number(fill.price);
+    if (!sideSign || !Number.isFinite(sizeAbs) || sizeAbs <= 0 || !Number.isFinite(price) || price <= 0) return;
+
+    const key = getTimelinePositionKey(fill.wallet, fill.coin, fill.marketType);
+    const lots = lotsByKey.get(key) || [];
+    let remaining = sizeAbs;
+
+    while (remaining > 0 && lots.length > 0 && lots[0].sideSign !== sideSign) {
+      const lot = lots[0];
+      const matched = Math.min(remaining, Number(lot.size ?? 0));
+      lot.size -= matched;
+      remaining -= matched;
+      if (lot.size <= 1e-10) lots.shift();
+    }
+
+    if (remaining > 1e-10) {
+      lots.push({ sideSign, size: remaining, price });
+    }
+
+    if (lots.length) lotsByKey.set(key, lots);
+    else lotsByKey.delete(key);
+  }
+
+  function computeOpenNotionalFromLotsState(lotsByKey) {
+    if (!lotsByKey || typeof lotsByKey.forEach !== "function") return 0;
+    let total = 0;
+    lotsByKey.forEach((lots) => {
+      if (!Array.isArray(lots) || !lots.length) return;
+      const netSize = lots.reduce((sum, lot) => {
+        const sideSign = Number(lot?.sideSign ?? 0);
+        const lotSize = Number(lot?.size ?? 0);
+        if (!Number.isFinite(sideSign) || !Number.isFinite(lotSize)) return sum;
+        return sum + sideSign * lotSize;
+      }, 0);
+      if (!Number.isFinite(netSize) || Math.abs(netSize) <= 1e-10) return;
+      const entryPx = deriveEntryFromLots(lots);
+      if (!Number.isFinite(entryPx) || entryPx <= 0) return;
+      total += Math.abs(netSize) * entryPx;
+    });
+    return total;
+  }
+
+  function buildWalletExposureSeriesFromFills(view, fillsForWallet) {
+    const times = Array.isArray(view?.times) ? view.times : [];
+    const equityValues = Array.isArray(view?.equity) ? view.equity : [];
+    if (!times.length || !equityValues.length) return null;
+
+    const msTimes = times.map((t) => (t instanceof Date ? t.getTime() : normalizeTimestamp(t)));
+    if (!msTimes.length) return null;
+
+    const lotsByKey = new Map();
+    const openValue = [];
+    const equity = [];
+    const exposure = [];
+    let fillIdx = 0;
+
+    for (let i = 0; i < msTimes.length; i += 1) {
+      const sampleTime = Number(msTimes[i]);
+      if (!Number.isFinite(sampleTime)) {
+        openValue.push(null);
+        equity.push(null);
+        exposure.push(null);
+        continue;
+      }
+
+      while (fillIdx < fillsForWallet.length && Number(fillsForWallet[fillIdx]?.time) <= sampleTime) {
+        applyFillToLotsState(lotsByKey, fillsForWallet[fillIdx]);
+        fillIdx += 1;
+      }
+
+      const grossOpenValue = computeOpenNotionalFromLotsState(lotsByKey);
+      const eq = Number(equityValues[i]);
+      const safeOpenValue = Number.isFinite(grossOpenValue) ? grossOpenValue : null;
+      const safeEquity = Number.isFinite(eq) ? eq : null;
+      const ratio =
+        Number.isFinite(safeOpenValue) && Number.isFinite(safeEquity) && Math.abs(safeEquity) > 1e-9
+          ? safeOpenValue / Math.abs(safeEquity)
+          : null;
+
+      openValue.push(safeOpenValue);
+      equity.push(safeEquity);
+      exposure.push(Number.isFinite(ratio) ? ratio : null);
+    }
+
+    return { times: msTimes, openValue, equity, exposure };
+  }
+
+  function buildExposureDataset(views, labels, marketType = currentMarketType) {
+    if (!Array.isArray(views) || !views.length || !Array.isArray(labels) || !labels.length) return null;
+
+    const walletSet = new Set(views.map(({ wallet }) => String(wallet || "").toLowerCase()).filter(Boolean));
+    const fillsForExposure = getAllFillsForMetrics({ walletSet, marketType });
+    const fillsByWallet = new Map();
+    fillsForExposure.forEach((fill) => {
+      const walletKey = String(fill?.wallet || "").toLowerCase();
+      if (!walletKey) return;
+      const bucket = fillsByWallet.get(walletKey) || [];
+      bucket.push(fill);
+      fillsByWallet.set(walletKey, bucket);
+    });
+
+    const exposureViews = views
+      .map(({ wallet, view }) => {
+        const walletKey = String(wallet || "").toLowerCase();
+        const series = buildWalletExposureSeriesFromFills(view, fillsByWallet.get(walletKey) || []);
+        return series ? { wallet, series } : null;
+      })
+      .filter(Boolean);
+
+    if (!exposureViews.length) return null;
+
+    const ratioData = [];
+    const openValueData = [];
+    const equityData = [];
+
+    for (let idx = 0; idx < labels.length; idx += 1) {
+      let grossOpenValue = 0;
+      let grossEquity = 0;
+      let hasOpenValue = false;
+      let hasEquity = false;
+
+      exposureViews.forEach(({ series }) => {
+        const openValue = Number(series?.openValue?.[idx]);
+        const equityValue = Number(series?.equity?.[idx]);
+        if (Number.isFinite(openValue)) {
+          grossOpenValue += openValue;
+          hasOpenValue = true;
+        }
+        if (Number.isFinite(equityValue)) {
+          grossEquity += equityValue;
+          hasEquity = true;
+        }
+      });
+
+      const safeOpenValue = hasOpenValue ? grossOpenValue : null;
+      const safeEquity = hasEquity ? grossEquity : null;
+      const ratio =
+        Number.isFinite(safeOpenValue) && Number.isFinite(safeEquity) && Math.abs(safeEquity) > 1e-9
+          ? safeOpenValue / Math.abs(safeEquity)
+          : null;
+
+      openValueData.push(safeOpenValue);
+      equityData.push(safeEquity);
+      ratioData.push(Number.isFinite(ratio) ? ratio : null);
+    }
+
+    return {
+      label: exposureViews.length > 1 ? "Aggregate exposure" : "Exposure",
+      data: ratioData,
+      openValueData,
+      equityData,
+      borderColor: "#8bd26a",
+      backgroundColor: "rgba(139, 210, 106, 0.18)",
+      pointRadius: 0,
+      borderWidth: 2.5,
+      tension: 0.25,
+      fill: { target: "origin" },
+    };
+  }
+
+  function getExposureDatasetForRange(views, labels, marketType = currentMarketType) {
+    // Avoid rendering a fake 0x series before historical fills have loaded.
+    if (!historicalFillsLoaded) return null;
+    return buildExposureDataset(views, labels, marketType);
   }
 
   function buildEquityDatasets(views, labels) {
@@ -16529,6 +17675,34 @@
       },
     };
 
+    const referenceLinePlugin = {
+      id: "referenceLine",
+      afterDraw(chart) {
+        const cfg = chart?.options?.plugins?.referenceLine;
+        if (!cfg?.enabled) return;
+        const yScale = chart?.scales?.y;
+        const area = chart?.chartArea;
+        const value = Number(cfg?.value);
+        if (!yScale || !area || !Number.isFinite(value)) return;
+        if (!Number.isFinite(yScale.min) || !Number.isFinite(yScale.max)) return;
+        if (value < yScale.min || value > yScale.max) return;
+
+        const y = yScale.getPixelForValue(value);
+        if (!Number.isFinite(y)) return;
+
+        const c = chart.ctx;
+        c.save();
+        c.setLineDash(Array.isArray(cfg?.dash) ? cfg.dash : [5, 5]);
+        c.lineWidth = Number(cfg?.lineWidth || 1);
+        c.strokeStyle = cfg?.color || "rgba(148, 163, 184, 0.45)";
+        c.beginPath();
+        c.moveTo(area.left, y);
+        c.lineTo(area.right, y);
+        c.stroke();
+        c.restore();
+      },
+    };
+
     return new Chart(ctx, {
       type: "line",
       data: {
@@ -16543,6 +17717,7 @@
           legend: { display: datasets.length > 1, labels: { color: getChartTextColor() } },
           zeroBaseline: { enabled: false, color: "rgba(148, 163, 184, 0.7)", dash: [5, 4], lineWidth: 1 },
           timelineFutureFade: { enabled: false, futureStartIndex: null },
+          referenceLine: { enabled: false, value: null, color: "rgba(148, 163, 184, 0.45)", dash: [5, 5], lineWidth: 1 },
           tooltip: {
             backgroundColor: "rgba(0, 0, 0, 0.7)",
             borderColor: "rgba(148,163,184,0.5)",
@@ -16582,7 +17757,7 @@
           },
         },
       },
-      plugins: [hoverLinePlugin, zeroBaselinePlugin, timelineFutureFadePlugin],
+      plugins: [hoverLinePlugin, zeroBaselinePlugin, timelineFutureFadePlugin, referenceLinePlugin],
     });
   }
 
@@ -16594,6 +17769,7 @@
       if (currentMarketType === "perp") clearPerformanceMetrics();
       chartLastValues.equity = null;
       chartLastValues.equityDrawdown = null;
+      chartLastValues.exposure = null;
       chartLastValues.pnl = null;
       chartLastValues.deposits = null;
       updateChartTitleValues();
@@ -16606,6 +17782,7 @@
     const singleColors = { equity: "#8b5cf6", pnl: "#f59e0b", deposits: "#14b8a6" };
 
     const equityDatasets = buildEquityDatasets(views, labels);
+    const exposureDataset = getExposureDatasetForRange(views, labels, currentMarketType);
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
     const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
 
@@ -16618,13 +17795,29 @@
       ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
     ];
 
+    portfolioCharts.drawdown = createLineChart(
+      drawdownCanvas.getContext("2d"),
+      labels,
+      buildEquityModeDatasets(equityDatasets, "drawdown")
+    );
+    applyTimelineFutureFade(portfolioCharts.drawdown, views[0].view.times);
+    applyEquityChartMode(portfolioCharts.drawdown, equityDatasets, "drawdown");
+
     portfolioCharts.equity = createLineChart(
       equityCanvas.getContext("2d"),
       labels,
       equityDatasets
     );
     applyTimelineFutureFade(portfolioCharts.equity, views[0].view.times);
-    applyEquityChartMode(portfolioCharts.equity, equityDatasets);
+    applyEquityChartMode(portfolioCharts.equity, equityDatasets, "line");
+
+    portfolioCharts.exposure = createLineChart(
+      exposureCanvas.getContext("2d"),
+      labels,
+      exposureDataset ? [exposureDataset] : []
+    );
+    applyTimelineFutureFade(portfolioCharts.exposure, views[0].view.times);
+    applyExposureChartStyling(portfolioCharts.exposure, exposureDataset ? [exposureDataset] : []);
 
     portfolioCharts.pnl = createLineChart(
       pnlCanvas.getContext("2d"),
@@ -16643,6 +17836,7 @@
     applyDepositsTooltipStyling(portfolioCharts.deposits);
 
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
+    chartLastValues.exposure = getLastFiniteValue(exposureDataset?.data || []);
     chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
     updateChartTitleValues();
@@ -16657,6 +17851,7 @@
       if (currentMarketType === "perp") clearPerformanceMetrics();
       chartLastValues.equity = null;
       chartLastValues.equityDrawdown = null;
+      chartLastValues.exposure = null;
       chartLastValues.pnl = null;
       chartLastValues.deposits = null;
       updateChartTitleValues();
@@ -16668,6 +17863,7 @@
     const singleWallet = views.length === 1;
     const singleColors = { equity: "#8b5cf6", pnl: "#f59e0b", deposits: "#14b8a6" };
     const equityDatasets = buildEquityDatasets(views, labels);
+    const exposureDataset = getExposureDatasetForRange(views, labels, currentMarketType);
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
     const weightedDeposits = buildWeightedSeries(views, labels, "deposits");
     const pnlDatasets = [
@@ -16679,15 +17875,29 @@
       ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
     ];
 
-    const { equity: equityChart, pnl: pnlChart, deposits: depositsChart } = portfolioCharts;
-    if (!equityChart || !pnlChart || !depositsChart) {
+    const {
+      drawdown: drawdownChart,
+      equity: equityChart,
+      exposure: exposureChart,
+      pnl: pnlChart,
+      deposits: depositsChart,
+    } = portfolioCharts;
+    if (!drawdownChart || !equityChart || !exposureChart || !pnlChart || !depositsChart) {
       initPortfolioCharts(rangeKey);
       return;
     }
 
+    drawdownChart.data.labels = labels;
+    applyTimelineFutureFade(drawdownChart, views[0].view.times);
+    applyEquityChartMode(drawdownChart, equityDatasets, "drawdown");
+
     equityChart.data.labels = labels;
     applyTimelineFutureFade(equityChart, views[0].view.times);
-    applyEquityChartMode(equityChart, equityDatasets);
+    applyEquityChartMode(equityChart, equityDatasets, "line");
+
+    exposureChart.data.labels = labels;
+    applyTimelineFutureFade(exposureChart, views[0].view.times);
+    applyExposureChartStyling(exposureChart, exposureDataset ? [exposureDataset] : []);
 
     pnlChart.data.labels = labels;
     pnlChart.data.datasets = pnlDatasets;
@@ -16707,6 +17917,7 @@
     applyDepositsTooltipStyling(depositsChart);
     depositsChart.update();
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
+    chartLastValues.exposure = getLastFiniteValue(exposureDataset?.data || []);
     chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
     updateChartTitleValues();
@@ -16754,6 +17965,23 @@
       }
       chart.update();
     });
+    if (portfolioCharts.drawdown?.$equityBaseDatasets) {
+      applyEquityChartMode(
+        portfolioCharts.drawdown,
+        portfolioCharts.drawdown.$equityBaseDatasets,
+        portfolioCharts.drawdown.$equityMode || "drawdown"
+      );
+    }
+    if (portfolioCharts.equity?.$equityBaseDatasets) {
+      applyEquityChartMode(
+        portfolioCharts.equity,
+        portfolioCharts.equity.$equityBaseDatasets,
+        portfolioCharts.equity.$equityMode || "line"
+      );
+    }
+    if (portfolioCharts.exposure) {
+      applyExposureChartStyling(portfolioCharts.exposure, portfolioCharts.exposure.data?.datasets || []);
+    }
   }
 
   function applyTheme(theme) {
@@ -16841,9 +18069,6 @@
       ]);
       await initFooterStream();
       recomputeTimelineControls();
-      if (timelineTimestamps.length) {
-        await setTimelineIndex(timelineTimestamps.length - 1);
-      }
 
       if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalOrders(walletList);
@@ -17102,40 +18327,7 @@
       await setTimelineIndex(Number(positionsTimelineSliderEl.value || 0));
     });
   }
-
-  if (positionsTimelineLiveBtnEl) {
-    positionsTimelineLiveBtnEl.addEventListener("click", async () => {
-      if (!timelineTimestamps.length) return;
-      await setTimelineIndex(timelineTimestamps.length - 1);
-    });
-  }
-
-  function setPositionsTimelineToggleVisual(expanded) {
-    if (!positionsTimelineToggleEl) return;
-    const icon = positionsTimelineToggleEl.querySelector("[aria-hidden='true']");
-    if (!icon) return;
-    if (!expanded) {
-      icon.innerHTML = `
-        <svg class="timeline-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M12 8v4l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
-          <path d="M21 12a9 9 0 1 1-2.64-6.36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-          <path d="M21 3v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      `;
-      return;
-    }
-    icon.textContent = "▴";
-  }
-
-  if (positionsTimelineToggleEl && positionsTimelineWrapEl) {
-    positionsTimelineToggleEl.addEventListener("click", () => {
-      const isHidden = positionsTimelineWrapEl.classList.toggle("hidden");
-      const expanded = !isHidden;
-      positionsTimelineToggleEl.setAttribute("aria-expanded", String(expanded));
-      setPositionsTimelineToggleVisual(expanded);
-    });
-    setPositionsTimelineToggleVisual(!positionsTimelineWrapEl.classList.contains("hidden"));
-  }
+  syncTimelineStateUi();
 
   if (openOrdersHeaderEls.length) {
     openOrdersHeaderEls.forEach((th) => {
@@ -17460,6 +18652,7 @@
     btn.addEventListener("click", () => {
       const range = btn.dataset.range;
       currentRangeKey = range;
+      pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
 
       rangeButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
@@ -17474,8 +18667,7 @@
       if (thirdPanelMode === "transfers") {
         refreshTransfersPanel(currentRangeKey);
       }
-      if (pnlViewMode === "heatmap") {
-        pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
+      if (!portfolioDataByWallet.size) {
         renderPnlHeatmap(currentRangeKey);
       }
     });

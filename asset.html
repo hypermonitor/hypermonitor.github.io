@@ -10,8 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #060709;
-            --surface: #0a0c0f;
+            --bg: #0a0a0a;
+            --surface: #0a0a0a;
             --surface2: #111318;
             --border: #1e2329;
             --text: #e6edf3;
@@ -53,7 +53,7 @@
         #header {
             height: var(--header-h);
             min-height: var(--header-h);
-            background: var(--surface);
+            background: #0a0a0a;
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
@@ -150,6 +150,7 @@
             font-weight: 500;
             transition: background 0.1s;
             display: flex;
+            align-items: center;
             justify-content: space-between;
             gap: 8px;
         }
@@ -158,9 +159,56 @@
             background: var(--border);
         }
 
+        .coin-option-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .coin-option-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .coin-option-logo {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            object-fit: contain;
+            flex-shrink: 0;
+            background: #1e2329;
+            padding: 1px;
+        }
+
+        .coin-option-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .coin-option-badge {
+            display: inline-flex;
+            align-items: center;
+            height: 18px;
+            padding: 0 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--muted);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
         .coin-option .coin-px {
             color: var(--muted);
             font-size: 11px;
+            white-space: nowrap;
         }
 
         /* Header stats */
@@ -617,25 +665,44 @@
             font-variant-numeric: tabular-nums;
             line-height: 1.75;
             align-items: center;
-            animation: tradeIn 0.12s ease;
-        }
-
-        @keyframes tradeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-3px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .trade-row .t-time {
             color: var(--muted);
             flex: 0 0 56px;
             font-size: 10px;
+        }
+
+        .trade-row .t-wallet {
+            flex: 0 0 88px;
+            min-width: 0;
+        }
+
+        .trade-wallet-btn {
+            display: inline-flex;
+            align-items: center;
+            width: 100%;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            font: inherit;
+            font-size: 10px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .trade-wallet-btn:not(:disabled):hover {
+            color: var(--text);
+            text-decoration: underline;
+        }
+
+        .trade-wallet-btn:disabled {
+            cursor: default;
+            opacity: 0.5;
         }
 
         .trade-row .t-px {
@@ -662,6 +729,102 @@
             background: rgba(255, 255, 255, 0.01);
         }
 
+        .wallet-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(2, 4, 8, 0.8);
+            z-index: 12000;
+        }
+
+        .wallet-modal-backdrop.open {
+            display: flex;
+        }
+
+        .wallet-modal {
+            width: min(1480px, calc(100vw - 36px));
+            height: min(92vh, calc(100vh - 36px));
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.6);
+        }
+
+        .wallet-modal-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 44px;
+            padding: 0 12px 0 14px;
+            border-bottom: 1px solid var(--border);
+            background: #0c0f13;
+        }
+
+        .wallet-modal-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .wallet-modal-wallet {
+            color: var(--muted);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .wallet-modal-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .wallet-modal-link {
+            color: var(--muted);
+            font-size: 11px;
+            text-decoration: none;
+        }
+
+        .wallet-modal-link:hover {
+            color: var(--text);
+        }
+
+        .wallet-modal-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface2);
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1;
+        }
+
+        .wallet-modal-frame {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            border: 0;
+            background: #080a0d;
+        }
+
         /* scrollbar */
         ::-webkit-scrollbar {
             width: 3px;
@@ -686,7 +849,7 @@
         <header id="header">
             <div id="coin-picker-wrap">
                 <div id="coin-btn" onclick="toggleDropdown()">
-                    <img id="coin-logo" src="images/coins/BTC.svg" onerror="this.style.display='none'">
+                    <img id="coin-logo" src="images/coins/BTC.svg" data-coin="BTC" data-fallback-tried="0" onerror="handleCoinImgError(this)">
                     <span id="coin-label">BTC</span>
                     <span id="coin-perc" style="font-size: 13px; font-weight: 500; margin-left: 2px;"></span>
                     <span class="caret">▼</span>
@@ -823,6 +986,7 @@
                     <div class="tab-panel" id="tab-trades">
                         <div id="trades-hdr">
                             <span style="flex:0 0 56px">Time</span>
+                            <span style="flex:0 0 88px">Wallet</span>
                             <span style="flex:1">Price</span>
                             <span style="flex:1;text-align:right">Size</span>
                         </div>
@@ -834,6 +998,22 @@
         </div><!-- /main -->
     </div><!-- /layout -->
 
+    <div id="wallet-modal-backdrop" class="wallet-modal-backdrop" role="presentation">
+        <div class="wallet-modal" role="dialog" aria-modal="true" aria-labelledby="wallet-modal-title">
+            <div class="wallet-modal-bar">
+                <div class="wallet-modal-title" id="wallet-modal-title">
+                    <span>Wallet</span>
+                    <span class="wallet-modal-wallet" id="wallet-modal-wallet">–</span>
+                </div>
+                <div class="wallet-modal-actions">
+                    <a id="wallet-modal-link" class="wallet-modal-link" href="track.html" target="_blank" rel="noopener">Open in new tab</a>
+                    <button id="wallet-modal-close" class="wallet-modal-close" type="button" aria-label="Close wallet popup">✕</button>
+                </div>
+            </div>
+            <iframe id="wallet-modal-frame" class="wallet-modal-frame" title="Hypermonitor wallet tracker"></iframe>
+        </div>
+    </div>
+
 
 
     
@@ -842,19 +1022,56 @@
         // ── Config ──────────────────────────────────────────────────
         const API = 'https://api.hyperliquid.xyz/info';
         const WS = 'wss://api.hyperliquid.xyz/ws';
+        const COIN_ICON_BASE = 'https://app.hyperliquid.xyz/coins/';
         const TF_MS = { '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3 };
         const ROWS = 14;
         const MAX_TRADES = 80;
+        let perpDexNames = null;
+
+        function splitDexCoin(name) {
+            const s = String(name || '').trim();
+            const idx = s.indexOf(':');
+            if (idx > 0 && idx < s.length - 1) {
+                return { dex: s.slice(0, idx), base: s.slice(idx + 1) };
+            }
+            return { dex: '', base: s };
+        }
+
+        function buildMarketKey(name, dex = '') {
+            const raw = String(name || '').trim();
+            if (!raw) return '';
+            const parsed = splitDexCoin(raw);
+            const base = String(parsed.base || raw).trim().toUpperCase();
+            const prefix = String(parsed.dex || dex || '').trim().toLowerCase();
+            return prefix ? `${prefix}:${base}` : base;
+        }
+
+        function getCoinDisplayName(name) {
+            const { base } = splitDexCoin(name);
+            return String(base || name || '').trim().toUpperCase();
+        }
+
+        function getCoinDexLabel(name) {
+            const { dex } = splitDexCoin(name);
+            return String(dex || '').trim().toLowerCase();
+        }
+
+        function getCoinDisplayLabel(name) {
+            const normalized = buildMarketKey(name);
+            const base = getCoinDisplayName(normalized);
+            const dex = getCoinDexLabel(normalized);
+            return dex ? `${dex}:${base}` : base;
+        }
 
         function parseCoin() {
             const p = new URLSearchParams(location.search);
-            return (p.get('coin') || p.get('asset') || 'BTC').toUpperCase();
+            return buildMarketKey(p.get('coin') || p.get('asset') || 'BTC');
         }
 
         // ── State ──────────────────────────────────────────────────
         const S = {
             coin: parseCoin(), tf: '15m', markPx: 0, aggTick: 0,
-            universe: [], ctxs: [], tradeBuf: [], ws: null,
+            markets: [], tradeBuf: [], ws: null,
             
             // Dual chart
             chart2Active: false,
@@ -868,6 +1085,11 @@
         const obAsks = $('ob-asks-inner'), obBids = $('ob-bids-inner');
         const obMid = $('ob-mid'), obSprdInfo = $('ob-spread-info');
         const tradesList = $('trades-list');
+        const walletModalBackdrop = $('wallet-modal-backdrop');
+        const walletModalFrame = $('wallet-modal-frame');
+        const walletModalWallet = $('wallet-modal-wallet');
+        const walletModalLink = $('wallet-modal-link');
+        const walletModalClose = $('wallet-modal-close');
         
         // Legends
         const legName = $('legend-name'), legO = $('leg-o'), legH = $('leg-h'), legL = $('leg-l'), legC = $('leg-c'), legPct = $('leg-pct');
@@ -1011,8 +1233,9 @@
         
         async function fetchCandles2() {
             if (!S.chart2Active) return;
-            $(`legend-name-2`).textContent = `${S.coin2}/USD • ${S.tf}`;
-            $('coin-label-2').textContent = S.coin2;
+            const coinLabel = getSelectedCoinLabel(S.coin2);
+            $(`legend-name-2`).textContent = `${coinLabel}/USD • ${S.tf}`;
+            $('coin-label-2').textContent = coinLabel;
             
             const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
             try {
@@ -1063,17 +1286,95 @@
         chart2.timeScale().subscribeVisibleLogicalRangeChange(range => { if (range && range.from < 10) loadOlderCandles(2); });
 
         // ── API calls ─────────────────────────────────────────────
+        async function getPerpDexNames() {
+            if (perpDexNames) return perpDexNames;
+            try {
+                const r = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'perpDexs' })
+                });
+                const data = await r.json();
+                const names = (Array.isArray(data) ? data : [])
+                    .map(item => item?.name)
+                    .filter(name => typeof name === 'string' && name.length > 0);
+                perpDexNames = ['', ...names.filter((name, idx, arr) => arr.indexOf(name) === idx)];
+            } catch (_) {
+                perpDexNames = [''];
+            }
+            return perpDexNames;
+        }
+
+        async function fetchDexMeta(dex = '') {
+            const payload = dex ? { type: 'metaAndAssetCtxs', dex } : { type: 'metaAndAssetCtxs' };
+            const r = await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await r.json();
+            const [meta, ctxs] = Array.isArray(data) ? data : [data?.meta, data?.assetCtxs];
+            return {
+                dex,
+                universe: Array.isArray(meta?.universe) ? meta.universe : [],
+                ctxs: Array.isArray(ctxs) ? ctxs : []
+            };
+        }
+
+        function getCtxMarkPx(ctx) {
+            return Number(ctx?.markPx ?? ctx?.mark ?? ctx?.midPx ?? ctx?.mid ?? ctx?.px);
+        }
+
+        function getCtxPrevPx(ctx) {
+            return Number(ctx?.prevDayPx ?? ctx?.prevDay ?? ctx?.prevPx ?? ctx?.openPx);
+        }
+
+        function buildMarketEntry(entry, ctx, dex = '') {
+            const rawName = String(ctx?.coin ?? ctx?.symbol ?? ctx?.asset ?? entry?.name ?? '').trim();
+            const key = buildMarketKey(rawName, dex);
+            if (!key) return null;
+            return {
+                key,
+                dex: getCoinDexLabel(key),
+                name: getCoinDisplayName(key),
+                label: getCoinDisplayLabel(key),
+                markPx: getCtxMarkPx(ctx),
+                prevDayPx: getCtxPrevPx(ctx),
+                funding: Number(ctx?.funding),
+                dayNtlVlm: Number(ctx?.dayNtlVlm),
+                openInterest: Number(ctx?.openInterest),
+                isDelisted: Boolean(entry?.isDelisted)
+            };
+        }
+
         async function fetchMeta() {
-            const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'metaAndAssetCtxs' }) });
-            const [meta, ctxs] = await r.json();
-            S.universe = meta.universe; S.ctxs = ctxs;
+            const dexNames = await getPerpDexNames();
+            const results = await Promise.allSettled(dexNames.map(dex => fetchDexMeta(dex)));
+            const mergedMarkets = new Map();
+
+            results.forEach(result => {
+                if (result.status !== 'fulfilled') return;
+                const { dex, universe, ctxs } = result.value || {};
+                const len = Math.max(universe.length, ctxs.length);
+                for (let i = 0; i < len; i += 1) {
+                    const market = buildMarketEntry(universe[i], ctxs[i], dex);
+                    if (!isTradableCoin(market)) continue;
+                    if (!mergedMarkets.has(market.key)) mergedMarkets.set(market.key, market);
+                }
+            });
+
+            S.markets = [...mergedMarkets.values()].sort((a, b) => {
+                const volDiff = (Number(b.dayNtlVlm) || 0) - (Number(a.dayNtlVlm) || 0);
+                if (volDiff !== 0) return volDiff;
+                return a.name.localeCompare(b.name);
+            });
         }
 
         function applyStats() {
-            const idx = S.universe.findIndex(u => u.name.toUpperCase() === S.coin);
-            if (idx < 0) return;
-            const ctx = S.ctxs[idx], mark = Number(ctx.markPx), prev = Number(ctx.prevDayPx);
-            const fund = Number(ctx.funding) * 100, vol = Number(ctx.dayNtlVlm), oi = Number(ctx.openInterest) * mark;
+            const market = getSelectedCoinMarket(S.coin);
+            if (!market) return;
+            const mark = Number(market.markPx), prev = Number(market.prevDayPx);
+            const fund = Number(market.funding) * 100, vol = Number(market.dayNtlVlm), oi = Number(market.openInterest) * mark;
             S.markPx = mark; const d = pxDec(mark);
             sMark.textContent = '$' + fmt(mark, d); sMark.className = 'val ' + (mark >= prev ? 'up' : 'dn');
             if (prev > 0) {
@@ -1087,10 +1388,9 @@
             sFund.textContent = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
             sFund.className = 'val ' + (fund >= 0 ? 'up' : 'dn');
             sFund.dataset.base = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
-            document.title = `${S.coin} — Asset Terminal`;
-            coinLabel.textContent = S.coin; legName.textContent = `${S.coin}/USD • ${S.tf}`;
-            $('coin-logo').src = `images/coins/${S.coin}.svg`;
-            $('coin-logo').style.display = 'block';
+            document.title = `${market.label} — Asset Terminal`;
+            coinLabel.textContent = market.label; legName.textContent = `${market.label}/USD • ${S.tf}`;
+            setCoinLogo($('coin-logo'), S.coin);
             buildAggBar(mark);
         }
 
@@ -1148,15 +1448,151 @@
 
         // ── Trades renderer ────────────────────────────────────────
         function renderTrades() {
+            const fragment = document.createDocumentFragment();
+            S.tradeBuf.forEach(trade => fragment.appendChild(buildTradeRow(trade)));
+            tradesList.replaceChildren(fragment);
+        }
+
+        function formatWalletShort(wallet) {
+            const value = String(wallet || '').trim();
+            if (!value) return '—';
+            return value.length <= 8 ? value : `${value.slice(0, 8)}…`;
+        }
+
+        function buildWalletTrackerHref(wallet) {
+            return `track.html?wallet=${encodeURIComponent(wallet)}`;
+        }
+
+        function openWalletModal(wallet) {
+            const value = String(wallet || '').trim();
+            if (!value || !walletModalBackdrop || !walletModalFrame) return;
+            walletModalWallet.textContent = value;
+            walletModalLink.href = buildWalletTrackerHref(value);
+            walletModalFrame.src = buildWalletTrackerHref(value);
+            walletModalBackdrop.classList.add('open');
+        }
+
+        function closeWalletModal() {
+            if (!walletModalBackdrop || !walletModalFrame) return;
+            walletModalBackdrop.classList.remove('open');
+            walletModalFrame.src = 'about:blank';
+        }
+
+        function getTradeWallet(rawTrade) {
+            if (!rawTrade || typeof rawTrade !== 'object') return '';
+            const direct = String(rawTrade.wallet || rawTrade.user || '').trim();
+            if (direct) return direct;
+            const users = Array.isArray(rawTrade.users) ? rawTrade.users : [];
+            const side = String(rawTrade.side || '').toUpperCase();
+            if (side === 'B') return String(users[0] || users[1] || '').trim();
+            return String(users[1] || users[0] || '').trim();
+        }
+
+        function getTradeKey(rawTrade, wallet) {
+            const hash = String(rawTrade?.hash || rawTrade?.txHash || '').trim();
+            const tid = String(rawTrade?.tid ?? rawTrade?.tradeId ?? '').trim();
+            const time = String(rawTrade?.time ?? '').trim();
+            const side = String(rawTrade?.side || '').trim();
+            const px = String(rawTrade?.px ?? '').trim();
+            const sz = String(rawTrade?.sz ?? '').trim();
+            return [hash, tid, time, side, px, sz, wallet].join('|');
+        }
+
+        function normalizeTrade(rawTrade) {
+            const wallet = getTradeWallet(rawTrade);
+            const trade = {
+                key: getTradeKey(rawTrade, wallet),
+                time: Number(rawTrade?.time ?? Date.now()),
+                side: String(rawTrade?.side || '').toUpperCase(),
+                px: Number(rawTrade?.px),
+                sz: Number(rawTrade?.sz),
+                wallet
+            };
+            if (!trade.key || !Number.isFinite(trade.px) || !Number.isFinite(trade.sz)) return null;
+            return trade;
+        }
+
+        function compareTrades(a, b) {
+            const timeDiff = Number(b?.time || 0) - Number(a?.time || 0);
+            if (timeDiff !== 0) return timeDiff;
+            return String(b?.key || '').localeCompare(String(a?.key || ''));
+        }
+
+        function buildTradeRow(trade) {
             const d = pxDec(S.markPx || 1000);
-            tradesList.innerHTML = S.tradeBuf.map(t => {
-                const dt = new Date(Number(t.time));
-                const ts = `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}:${String(dt.getSeconds()).padStart(2, '0')}`;
-                return `<div class="trade-row"><span class="t-time">${ts}</span><span class="t-px ${t.side === 'B' ? 'buy' : 'sell'}">${fmt(Number(t.px), d)}</span><span class="t-sz">${fmtK(Number(t.sz) * Number(t.px))}</span></div>`;
-            }).join('');
+            const row = document.createElement('div');
+            row.className = 'trade-row';
+
+            const dt = new Date(Number(trade.time));
+            const ts = `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}:${String(dt.getSeconds()).padStart(2, '0')}`;
+
+            const timeEl = document.createElement('span');
+            timeEl.className = 't-time';
+            timeEl.textContent = ts;
+
+            const walletEl = document.createElement('button');
+            walletEl.type = 'button';
+            walletEl.className = 'trade-wallet-btn t-wallet';
+            walletEl.textContent = formatWalletShort(trade.wallet);
+            walletEl.title = trade.wallet || 'Wallet unavailable';
+            if (trade.wallet) walletEl.dataset.wallet = trade.wallet;
+            else walletEl.disabled = true;
+
+            const priceEl = document.createElement('span');
+            priceEl.className = `t-px ${trade.side === 'B' ? 'buy' : 'sell'}`;
+            priceEl.textContent = fmt(Number(trade.px), d);
+
+            const sizeEl = document.createElement('span');
+            sizeEl.className = 't-sz';
+            sizeEl.textContent = fmtK(Number(trade.sz) * Number(trade.px));
+
+            row.append(timeEl, walletEl, priceEl, sizeEl);
+            return row;
+        }
+
+        function syncTradeKeys() {
+            tradeKeys = new Set(S.tradeBuf.map(trade => trade.key));
+        }
+
+        function resetTrades() {
+            S.tradeBuf = [];
+            syncTradeKeys();
+            tradesList.replaceChildren();
+        }
+
+        function ingestTrades(rawTrades) {
+            const nextTrades = [];
+            for (const rawTrade of Array.isArray(rawTrades) ? rawTrades : []) {
+                const trade = normalizeTrade(rawTrade);
+                if (!trade || tradeKeys.has(trade.key)) continue;
+                tradeKeys.add(trade.key);
+                nextTrades.push(trade);
+            }
+            if (!nextTrades.length) return;
+
+            nextTrades.sort(compareTrades);
+            const currentTopTime = S.tradeBuf[0]?.time ?? -Infinity;
+            const canPrepend = !S.tradeBuf.length || nextTrades.every(trade => trade.time >= currentTopTime);
+
+            S.tradeBuf = nextTrades.concat(S.tradeBuf).sort(compareTrades).slice(0, MAX_TRADES);
+            syncTradeKeys();
+
+            if (!canPrepend) {
+                renderTrades();
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            nextTrades.forEach(trade => fragment.appendChild(buildTradeRow(trade)));
+            tradesList.prepend(fragment);
+            while (tradesList.childElementCount > S.tradeBuf.length) {
+                tradesList.removeChild(tradesList.lastElementChild);
+            }
         }
 
         // ── WebSocket ──────────────────────────────────────────────
+        let tradeKeys = new Set();
+
         function connectWs() {
             if (S.ws) { try { S.ws.close(); } catch (_) { } }
             S.ws = new WebSocket(WS);
@@ -1177,13 +1613,11 @@
                     if (ch === 'l2Book') {
                         renderBook(d?.levels?.[0] ?? d?.bids ?? [], d?.levels?.[1] ?? d?.asks ?? []);
                     } else if (ch === 'trades') {
-                        for (const t of (Array.isArray(d) ? d : []).reverse()) S.tradeBuf.unshift({ time: t.time ?? Date.now(), side: t.side, px: t.px, sz: t.sz });
-                        if (S.tradeBuf.length > MAX_TRADES) S.tradeBuf.length = MAX_TRADES;
-                        renderTrades();
+                        ingestTrades(d);
                     } else if (ch === 'candle') {
                         const arr = Array.isArray(d) ? d : [];
                         if (!arr.length) return;
-                        const coinStr = arr[0].s; 
+                        const coinStr = buildMarketKey(arr[0].s); 
                         
                         for (const c of arr) {
                             const bar = { time: Math.floor(c.t / 1000), open: +c.o, high: +c.h, low: +c.l, close: +c.c };
@@ -1206,18 +1640,152 @@
 
         // ── Coin Picker Maps ───────────────────────────────────────
         let allCoins = [];
+        let availableCoinNames = new Set();
+        let marketByKey = new Map();
+        let marketNameIndex = new Map();
+
+        function coinLogoPath(name, ext = 'svg') {
+            return `images/coins/${encodeURIComponent(getCoinDisplayName(name))}.${ext}`;
+        }
+
+        function coinLogoCandidates(name) {
+            const normalized = buildMarketKey(name);
+            const { dex, base } = splitDexCoin(normalized);
+            const baseName = String(base || normalized).trim().toUpperCase();
+            const exact = dex ? `${dex.toLowerCase()}:${baseName}` : baseName;
+            const urls = [];
+            const push = url => {
+                if (url && !urls.includes(url)) urls.push(url);
+            };
+
+            if (exact.includes(':')) push(`${COIN_ICON_BASE}${encodeURIComponent(exact)}.svg`);
+            push(`${COIN_ICON_BASE}${encodeURIComponent(baseName)}.svg`);
+            push(coinLogoPath(baseName, 'svg'));
+            push(coinLogoPath(baseName, 'png'));
+            return urls;
+        }
+
+        function setCoinLogo(el, name) {
+            if (!el) return;
+            const candidates = coinLogoCandidates(name);
+            el.dataset.coin = buildMarketKey(name);
+            el.dataset.logoCandidates = JSON.stringify(candidates);
+            el.dataset.logoIndex = '0';
+            if (!candidates.length) {
+                el.style.display = 'none';
+                return;
+            }
+            el.src = candidates[0];
+            el.style.display = 'block';
+            el.style.visibility = 'visible';
+        }
+
+        function handleCoinImgError(el) {
+            if (!el) return;
+            const coin = el.dataset.coin;
+            if (!coin) {
+                el.style.display = 'none';
+                return;
+            }
+            let candidates = [];
+            try {
+                candidates = JSON.parse(el.dataset.logoCandidates || '[]');
+            } catch (_) {
+                candidates = [];
+            }
+            const nextIdx = Number(el.dataset.logoIndex || '0') + 1;
+            if (nextIdx >= candidates.length) {
+                el.style.display = 'none';
+                return;
+            }
+            el.dataset.logoIndex = String(nextIdx);
+            el.src = candidates[nextIdx];
+        }
+
+        function isTradableCoin(market) {
+            if (!market?.key || market.isDelisted) return false;
+            return Number.isFinite(market.markPx) && market.markPx > 0;
+        }
+
+        function getSelectedCoinMarket(key) {
+            return marketByKey.get(buildMarketKey(key)) || null;
+        }
+
+        function getSelectedCoinName(key) {
+            const market = getSelectedCoinMarket(key);
+            return market?.name || getCoinDisplayName(key);
+        }
+
+        function getSelectedCoinLabel(key) {
+            const market = getSelectedCoinMarket(key);
+            return market?.label || getCoinDisplayLabel(key);
+        }
+
+        function resolveCoinSelection(value) {
+            const normalized = buildMarketKey(value);
+            if (availableCoinNames.has(normalized)) return normalized;
+            const displayName = getCoinDisplayName(value);
+            const matches = marketNameIndex.get(displayName);
+            return matches?.[0]?.key || null;
+        }
+
+        function syncPrimaryCoinUrl() {
+            if (!S.coin) return;
+            const url = new URL(location.href);
+            url.searchParams.set('coin', S.coin);
+            history.replaceState(null, '', url.toString());
+        }
+
+        function syncSelectedCoins() {
+            if (!allCoins.length) return;
+            S.coin = resolveCoinSelection(S.coin) || allCoins[0].key;
+            const secondary = resolveCoinSelection(S.coin2);
+            if (!secondary || secondary === S.coin) {
+                const fallback = allCoins.find(c => c.key !== S.coin);
+                S.coin2 = fallback ? fallback.key : S.coin;
+            } else {
+                S.coin2 = secondary;
+            }
+            syncPrimaryCoinUrl();
+        }
+
         function buildCoinList() {
-            allCoins = S.universe.map((u, i) => ({ name: u.name, markPx: Number(S.ctxs[i]?.markPx || 0) })).sort((a, b) => b.markPx - a.markPx);
+            allCoins = S.markets.slice();
+            marketByKey = new Map(allCoins.map(c => [c.key, c]));
+            marketNameIndex = new Map();
+            allCoins.forEach(coin => {
+                if (!marketNameIndex.has(coin.name)) marketNameIndex.set(coin.name, []);
+                marketNameIndex.get(coin.name).push(coin);
+            });
+            availableCoinNames = new Set(allCoins.map(c => c.key));
+            syncSelectedCoins();
             renderCoinList(allCoins, 1);
             renderCoinList(allCoins, 2);
         }
 
         function renderCoinList(list, targetNum) {
-            $(`coin-list${targetNum===2?'-2':''}`).innerHTML = list.map(c => `<div class="coin-option" onclick="selectCoin('${c.name}', ${targetNum})"><span>${c.name}</span><span class="coin-px">$${fmt(c.markPx, pxDec(c.markPx))}</span></div>`).join('');
+            $(`coin-list${targetNum===2?'-2':''}`).innerHTML = list.map(c => `
+                <div class="coin-option" onclick="selectCoin('${c.key}', ${targetNum})" title="${c.key}">
+                    <span class="coin-option-main">
+                        <img class="coin-option-logo" src="${coinLogoCandidates(c.key)[0] || coinLogoPath(c.key)}" data-coin="${c.key}" data-logo-candidates='${JSON.stringify(coinLogoCandidates(c.key))}' data-logo-index="0" onerror="handleCoinImgError(this)" alt="${c.name}">
+                        <span class="coin-option-text">
+                            <span class="coin-option-name">${c.name}</span>
+                            ${c.dex ? `<span class="coin-option-badge">${c.dex}</span>` : ''}
+                        </span>
+                    </span>
+                    <span class="coin-px">$${fmt(c.markPx, pxDec(c.markPx))}</span>
+                </div>
+            `).join('');
         }
 
-        function filterCoins(q) { q = q.trim().toUpperCase(); renderCoinList(q ? allCoins.filter(c => c.name.includes(q)) : allCoins, 1); }
-        function filterCoins2(q) { q = q.trim().toUpperCase(); renderCoinList(q ? allCoins.filter(c => c.name.includes(q)) : allCoins, 2); }
+        function filterCoins(q) {
+            q = q.trim().toUpperCase();
+            renderCoinList(q ? allCoins.filter(c => c.name.includes(q) || c.label.toUpperCase().includes(q) || c.key.toUpperCase().includes(q)) : allCoins, 1);
+        }
+        function filterCoins2(q) {
+            q = q.trim().toUpperCase();
+            renderCoinList(q ? allCoins.filter(c => c.name.includes(q) || c.label.toUpperCase().includes(q) || c.key.toUpperCase().includes(q)) : allCoins, 2);
+        }
 
         function toggleDropdown() {
             const dd = $('coin-dropdown'), btn = $('coin-btn');
@@ -1233,14 +1801,17 @@
         }
 
         function selectCoin(name, targetNum) {
+            const selected = resolveCoinSelection(name);
+            if (!selected || !availableCoinNames.has(selected)) return;
             if (targetNum === 1) {
-                if (name === S.coin) { $('coin-dropdown').classList.remove('open'); return; }
-                S.coin = name; S.tradeBuf = [];
+                if (selected === S.coin) { $('coin-dropdown').classList.remove('open'); return; }
+                S.coin = selected;
+                resetTrades();
                 $('coin-dropdown').classList.remove('open');
-                const url = new URL(location.href); url.searchParams.set('coin', name); history.replaceState(null, '', url.toString());
+                syncPrimaryCoinUrl();
                 reinit();
             } else {
-                S.coin2 = name;
+                S.coin2 = selected;
                 $('coin-dropdown-2').style.display = 'none';
                 fetchCandles2();
                 connectWs();
@@ -1252,6 +1823,30 @@
             if (!$('chart-container-2').contains(e.target)) $('coin-dropdown-2').style.display = 'none';
         });
 
+        tradesList.addEventListener('click', event => {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) return;
+            const button = target.closest('.trade-wallet-btn[data-wallet]');
+            if (!button) return;
+            openWalletModal(button.dataset.wallet || '');
+        });
+
+        if (walletModalClose) {
+            walletModalClose.addEventListener('click', closeWalletModal);
+        }
+
+        if (walletModalBackdrop) {
+            walletModalBackdrop.addEventListener('click', event => {
+                if (event.target === walletModalBackdrop) closeWalletModal();
+            });
+        }
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && walletModalBackdrop?.classList.contains('open')) {
+                closeWalletModal();
+            }
+        });
+
         // ── TF buttons ─────────────────────────────────────────────
         document.querySelectorAll('.tf-btn').forEach(btn => {
             if (btn.id === 'add-chart-btn') return;
@@ -1261,7 +1856,7 @@
                 S.tf = tf;
                 document.querySelectorAll('.tf-btn:not(#add-chart-btn)').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                legName.textContent = `${S.coin}/USD • ${S.tf}`;
+                legName.textContent = `${getSelectedCoinLabel(S.coin)}/USD • ${S.tf}`;
                 await fetchCandles();
                 await fetchCandles2();
                 connectWs();

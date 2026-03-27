@@ -294,29 +294,6 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      padding: 0.3rem 0.7rem;
-      border-radius: 9999px;
-      font-size: 0.78rem;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(17, 17, 17, 0.85);
-      color: var(--text-main);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-    }
-
-    .dot {
-      width: 0.55rem;
-      height: 0.55rem;
-      border-radius: 999px;
-      background: #fbbf24;
-      box-shadow: 0 0 4px rgba(251, 191, 36, 0.6);
-    }
-    .dot.ok { background: var(--accent); box-shadow: 0 0 6px rgba(34, 197, 94, 0.7); }
-    .dot.err { background: var(--danger); box-shadow: 0 0 6px rgba(248, 113, 113, 0.7); }
-
     .footer-note { margin-top: .75rem; font-size: .78rem; color: var(--muted); }
 
     /* Footer (from track.html) */
@@ -426,10 +403,6 @@
         line-height: 1.45;
         width: 100%;
       }
-
-      .status {
-        font-size: 0.74rem;
-      }
     }
 
     @media (max-width: 540px) {
@@ -469,10 +442,6 @@
 
     <div class="leaderboard-meta">
       <div class="tagline">Wallet ranking fixed on January 1, 2026. Tap a row to open the wallet.</div>
-      <div class="status" id="statusPill">
-        <span class="dot" id="statusDot"></span>
-        <span id="statusText">Idle</span>
-      </div>
     </div>
 
     <section class="card">
@@ -584,21 +553,11 @@
     const windowSelect = document.getElementById("windowSelect");
     const tableWrap = document.getElementById("tableWrap");
 
-    const statusDot = document.getElementById("statusDot");
-    const statusText = document.getElementById("statusText");
-
     // ===== STATE =====
     let rawRows = [];
     let viewRows = [];
     let sortKey = "rank";
     let sortDir = "asc";
-
-    function setStatus(kind, msg) {
-      statusDot.classList.remove("ok", "err");
-      if (kind === "ok") statusDot.classList.add("ok");
-      if (kind === "err") statusDot.classList.add("err");
-      statusText.textContent = msg || "";
-    }
 
     function renderLoadingRows(count = 20) {
       const rows = Array.from({ length: count }, () => (
@@ -771,7 +730,6 @@
     }
 
     async function loadLeaderboard() {
-        setStatus("", "Loading…");
         setLoadingState(true);
 
         try {
@@ -814,12 +772,10 @@
 
             rawRows = rows;
             viewRows = normalize(rawRows);
-            setStatus("ok", `Loaded ${rawRows.length} wallets`);
             setLoadingState(false);
             applyFiltersAndSort();
         } catch (e) {
             console.error("Leaderboard load failed:", e);
-            setStatus("err", "Failed to load private leaderboard");
             setLoadingState(false);
             tbody.innerHTML = `<tr><td colspan="10" class="muted">Failed to load private leaderboard. ${String(e?.message || e)}</td></tr>`;
         }

@@ -1,0 +1,2956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hypermonitor - Tracker Terminal</title>
+  <meta
+    name="description"
+    content="Hypermonitor trade terminal and explore leaderboard in one view."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #0b0b0f;
+      --bg-soft: #111319;
+      --panel: rgba(8, 11, 18, 0.68);
+      --panel-strong: rgba(10, 10, 12, 0.88);
+      --panel-muted: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.18);
+      --text: #f5f5ff;
+      --muted: rgba(245, 245, 255, 0.62);
+      --muted-strong: rgba(245, 245, 255, 0.82);
+      --accent: #ffffff;
+      --accent-soft: rgba(255, 255, 255, 0.08);
+      --accent-green: #26d97f;
+      --accent-green-soft: rgba(38, 217, 127, 0.16);
+      --accent-cyan: #00b4d8;
+      --accent-blue: #0070f3;
+      --accent-amber: #f3c969;
+      --danger: #f25f5c;
+      --danger-soft: rgba(242, 95, 92, 0.16);
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+      --radius-xl: 16px;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --radius-sm: 6px;
+      --header-height: 50px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: #0a0a0a;
+      background-attachment: fixed;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    #app {
+      width: min(1840px, calc(100vw - 24px));
+      margin: 0 auto;
+      padding: 10px 0 24px;
+    }
+
+    .shell-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      min-height: var(--header-height);
+      padding: 5px 0 7px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: #0a0a0a;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      white-space: nowrap;
+    }
+
+    a.brand,
+    a.brand:visited,
+    a.brand:hover,
+    a.brand:active {
+      text-decoration: none !important;
+      color: inherit;
+    }
+
+    .brand img {
+      width: 34px;
+      height: 34px;
+      border-radius: 0;
+      object-fit: cover;
+      box-shadow: none;
+    }
+
+    .brand-name {
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      font-size: 0.98rem;
+      text-transform: uppercase;
+      margin: 0;
+      color: #fff;
+      font-style: normal;
+    }
+
+    .brand-name .hyper,
+    .brand-name em {
+      font-style: inherit !important;
+      font-weight: 600;
+    }
+
+    .top-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .header-search-form {
+      position: relative;
+      margin-left: auto;
+      flex: 0 1 360px;
+      min-width: 280px;
+    }
+
+    .header-search-shell {
+      display: flex;
+      align-items: center;
+      min-height: 38px;
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    .header-search-shell:focus-within {
+      border-color: rgba(255, 255, 255, 0.34);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .header-search-icon {
+      flex: 0 0 auto;
+      padding: 0 0 0 12px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .header-search-input {
+      width: 100%;
+      min-width: 0;
+      padding: 9px 12px 9px 10px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.84rem;
+      outline: none;
+    }
+
+    .header-search-input::placeholder {
+      color: var(--muted);
+    }
+
+    .header-search-suggestions {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      display: grid;
+      gap: 0;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #101014;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+      z-index: 60;
+    }
+
+    .header-search-suggestions[hidden] {
+      display: none;
+    }
+
+    .header-search-suggestion {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .header-search-suggestion:hover,
+    .header-search-suggestion.is-active {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .header-search-suggestion-copy {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .header-search-suggestion-label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-search-suggestion-meta {
+      font-size: 0.74rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-search-suggestion-type {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted-strong);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.52);
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 160ms ease, opacity 160ms ease;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-link.is-active {
+      color: var(--text);
+      opacity: 1;
+    }
+
+    .header-btn,
+    .ghost-btn,
+    .primary-btn,
+    .sidebar-filter,
+    .market-chip,
+    .refresh-btn {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease, color 160ms ease;
+    }
+
+    .header-btn,
+    .primary-btn,
+    .ghost-btn,
+    .refresh-btn {
+      padding: 10px 14px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .ghost-btn:hover,
+    .header-btn:hover,
+    .refresh-btn:hover,
+    .sidebar-filter:hover,
+    .market-chip:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--border-strong);
+    }
+
+    .primary-btn {
+      border-color: #fff;
+      background: #fff;
+      color: #0a0a0a;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      border-color: #ddd;
+      background: #ddd;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.is-active {
+      display: block;
+    }
+
+    .section-intro {
+      display: none;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .panel-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .trade-top {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 0;
+    }
+
+    .context-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px;
+    }
+
+    .context-copy {
+      display: grid;
+      gap: 6px;
+    }
+
+    .context-copy strong {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .context-copy span {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .selected-wallet-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 100%;
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      color: var(--muted-strong);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trade-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+      justify-content: flex-end;
+    }
+
+    .market-chip {
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted-strong);
+    }
+
+    .market-chip.is-active {
+      border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .trade-frame-panel {
+      overflow: hidden;
+    }
+
+    .trade-frame-panel .panel-head,
+    .trade-footnote {
+      display: none;
+    }
+
+    .trade-frame {
+      width: 100%;
+      height: min(84vh, 1200px);
+      min-height: 820px;
+      border: none;
+      display: block;
+      background: #060709;
+    }
+
+    .trade-footnote {
+      padding: 12px 18px 16px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .explore-layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: calc(12px + var(--header-height) + 18px);
+      display: grid;
+      gap: 16px;
+    }
+
+    .sidebar-card,
+    .metric-tile,
+    .summary-card,
+    .leaderboard-hero-note {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-card > *,
+    .metric-tile > *,
+    .summary-card > *,
+    .leaderboard-hero-note > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar-card::before,
+    .metric-tile::before,
+    .summary-card::before,
+    .leaderboard-hero-note::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.045), transparent 52%);
+      pointer-events: none;
+    }
+
+    .sidebar-card {
+      padding: 18px;
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.18), rgba(2, 6, 23, 0.12)),
+        rgba(8, 11, 18, 0.76);
+    }
+
+    .sidebar-hero-card {
+      background:
+        radial-gradient(circle at top right, rgba(38, 217, 127, 0.18), transparent 38%),
+        radial-gradient(circle at bottom left, rgba(0, 112, 243, 0.16), transparent 42%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.16)),
+        rgba(8, 11, 18, 0.8);
+    }
+
+    .sidebar-card-head {
+      display: grid;
+      gap: 8px;
+    }
+
+    .sidebar-card-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(226, 232, 240, 0.56);
+    }
+
+    .sidebar-card-title {
+      margin: 0;
+      font-size: 1.12rem;
+      line-height: 1.2;
+      font-weight: 600;
+    }
+
+    .sidebar-card-copy,
+    .sidebar-section-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.83rem;
+      line-height: 1.5;
+    }
+
+    .sidebar-hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .sidebar-hero-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(245, 245, 255, 0.88);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .metric-tile {
+      min-height: 88px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.2), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .metric-tile-green {
+      border-color: rgba(38, 217, 127, 0.18);
+      background:
+        radial-gradient(circle at top right, rgba(38, 217, 127, 0.16), transparent 42%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .metric-tile-cyan {
+      border-color: rgba(0, 180, 216, 0.18);
+      background:
+        radial-gradient(circle at top right, rgba(0, 180, 216, 0.16), transparent 40%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .metric-tile-blue {
+      border-color: rgba(0, 112, 243, 0.18);
+      background:
+        radial-gradient(circle at top right, rgba(0, 112, 243, 0.16), transparent 40%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .metric-tile-amber {
+      border-color: rgba(243, 201, 105, 0.18);
+      background:
+        radial-gradient(circle at top right, rgba(243, 201, 105, 0.15), transparent 40%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .metric-label {
+      color: rgba(226, 232, 240, 0.56);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      margin-top: 10px;
+      font-size: 1.08rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sidebar-section {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .sidebar-section-title {
+      color: rgba(226, 232, 240, 0.6);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-filter {
+      width: 100%;
+      display: grid;
+      gap: 8px;
+      padding: 13px 14px;
+      text-align: left;
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.18), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .sidebar-filter.is-active {
+      border-color: rgba(38, 217, 127, 0.26);
+      background:
+        radial-gradient(circle at top right, rgba(38, 217, 127, 0.16), transparent 40%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.04);
+      box-shadow: inset 0 0 0 1px rgba(38, 217, 127, 0.06);
+    }
+
+    .sidebar-filter-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .sidebar-filter-top span:last-child {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      padding: 4px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(245, 245, 255, 0.88);
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sidebar-filter-meta {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .leaderboard-panel {
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(38, 217, 127, 0.08), transparent 24%),
+        radial-gradient(circle at top left, rgba(0, 112, 243, 0.08), transparent 28%),
+        var(--panel);
+    }
+
+    .leaderboard-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.95fr);
+      gap: 14px;
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+    }
+
+    .leaderboard-hero-copy {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .leaderboard-hero-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(226, 232, 240, 0.56);
+    }
+
+    .leaderboard-hero-title {
+      margin: 0;
+      font-size: clamp(1.28rem, 2vw, 1.7rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .leaderboard-hero-subtitle {
+      margin: 0;
+      max-width: 58ch;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .leaderboard-hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .leaderboard-hero-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted-strong);
+      font-size: 0.74rem;
+    }
+
+    .leaderboard-hero-note {
+      display: grid;
+      align-content: start;
+      gap: 8px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at top right, rgba(0, 180, 216, 0.16), transparent 42%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.14)),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .leaderboard-hero-note-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(226, 232, 240, 0.56);
+    }
+
+    .leaderboard-hero-note-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .leaderboard-hero-note-copy {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control,
+    .search-input {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      outline: none;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    .control {
+      padding: 10px 14px;
+      min-height: 44px;
+    }
+
+    .search-input {
+      width: min(420px, 100%);
+      min-width: 280px;
+      padding: 11px 16px;
+    }
+
+    .control:focus,
+    .search-input:focus {
+      border-color: rgba(255, 255, 255, 0.34);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-card {
+      min-height: 124px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.2), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.02);
+    }
+
+    .summary-card-green {
+      border-color: rgba(38, 217, 127, 0.18);
+      background:
+        radial-gradient(circle at top right, rgba(38, 217, 127, 0.15), transparent 40%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.02);
+    }
+
+    .summary-card-cyan {
+      border-color: rgba(0, 180, 216, 0.18);
+      background:
+        radial-gradient(circle at top right, rgba(0, 180, 216, 0.15), transparent 40%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.02);
+    }
+
+    .summary-card-blue {
+      border-color: rgba(0, 112, 243, 0.18);
+      background:
+        radial-gradient(circle at top right, rgba(0, 112, 243, 0.15), transparent 40%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.02);
+    }
+
+    .summary-card-amber {
+      border-color: rgba(243, 201, 105, 0.18);
+      background:
+        radial-gradient(circle at top right, rgba(243, 201, 105, 0.14), transparent 40%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
+        rgba(255, 255, 255, 0.02);
+    }
+
+    .summary-label {
+      color: rgba(226, 232, 240, 0.56);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .summary-value {
+      margin-top: 10px;
+      font-size: 1.22rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary-subvalue {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .active-filters-bar {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .active-filters-label {
+      color: rgba(226, 232, 240, 0.56);
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .active-filters:empty::after {
+      content: "No extra filters applied";
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.16), rgba(2, 6, 23, 0.1)),
+        rgba(255, 255, 255, 0.03);
+      color: var(--muted-strong);
+      font-size: 0.78rem;
+    }
+
+    .table-wrap {
+      position: relative;
+      overflow: auto;
+      max-height: min(72vh, 1080px);
+      padding: 0 18px 18px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 12%);
+    }
+
+    .table-wrap.loading {
+      min-height: 520px;
+      background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.06), transparent 42%);
+    }
+
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      color: var(--muted);
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, rgba(10, 12, 18, 0.4), rgba(10, 12, 18, 0.16));
+    }
+
+    .table-wrap.loading .loading-overlay {
+      display: flex;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(10, 12, 18, 0.96);
+      backdrop-filter: blur(12px);
+    }
+
+    th,
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.74rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th.sortable:hover {
+      color: var(--muted-strong);
+    }
+
+    tbody tr {
+      transition: background 160ms ease, transform 160ms ease;
+    }
+
+    tbody tr:hover {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+    }
+
+    tbody tr.is-selected {
+      background: linear-gradient(90deg, rgba(38, 217, 127, 0.12), rgba(0, 112, 243, 0.08));
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tbody tr:nth-child(1) .rank-badge {
+      border-color: rgba(38, 217, 127, 0.28);
+      background: rgba(38, 217, 127, 0.12);
+    }
+
+    tbody tr:nth-child(2) .rank-badge {
+      border-color: rgba(0, 180, 216, 0.28);
+      background: rgba(0, 180, 216, 0.12);
+    }
+
+    tbody tr:nth-child(3) .rank-badge {
+      border-color: rgba(243, 201, 105, 0.28);
+      background: rgba(243, 201, 105, 0.1);
+    }
+
+    .wallet-link {
+      display: inline-grid;
+      gap: 4px;
+      max-width: 100%;
+      cursor: pointer;
+    }
+
+    .wallet-link strong {
+      font-size: 0.96rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .wallet-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .mini-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted-strong);
+      font-size: 0.72rem;
+    }
+
+    .mini-chip.good {
+      border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .mini-chip.bad {
+      border-color: rgba(242, 95, 92, 0.28);
+      background: rgba(242, 95, 92, 0.08);
+      color: #ffdada;
+    }
+
+    .money,
+    .score-value {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .positive {
+      color: var(--text);
+    }
+
+    .negative {
+      color: var(--danger);
+    }
+
+    .neutral {
+      color: var(--muted-strong);
+    }
+
+    .score-cell {
+      display: grid;
+      gap: 6px;
+      min-width: 120px;
+    }
+
+    .score-cell-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .score-bar {
+      position: relative;
+      width: 100%;
+      height: 6px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .score-bar > span {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(150, 150, 150, 0.92));
+    }
+
+    .table-empty {
+      padding: 28px 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer-note {
+      padding: 12px 18px 18px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      line-height: 1.5;
+    }
+
+    .wallet-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(6px);
+    }
+
+    .wallet-modal-backdrop.is-open {
+      display: flex;
+    }
+
+    .wallet-modal {
+      width: min(1460px, calc(100vw - 36px));
+      height: min(92vh, 1020px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      overflow: hidden;
+      background: #101014;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.72);
+    }
+
+    .wallet-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel-strong);
+    }
+
+    .wallet-modal-headline {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .wallet-modal-headline strong {
+      font-size: 1rem;
+    }
+
+    .wallet-modal-headline span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .wallet-modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      font-size: 1.35rem;
+      line-height: 1;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--border-strong);
+    }
+
+    .wallet-modal iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #0b0b0f;
+    }
+
+    .sort-indicator {
+      margin-left: 6px;
+      color: var(--muted-strong);
+    }
+
+    .hide-tablet {
+      display: table-cell;
+    }
+
+    .hide-mobile {
+      display: table-cell;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1380px) {
+      .explore-layout {
+        grid-template-columns: 280px minmax(0, 1fr);
+      }
+
+      .leaderboard-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hide-tablet {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1120px) {
+      #app {
+        width: min(calc(100vw - 20px), 100%);
+        padding-top: 10px;
+      }
+
+      .shell-header {
+        gap: 10px;
+      }
+
+      .header-search-form {
+        flex-basis: 320px;
+      }
+
+      .explore-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .leaderboard-hero {
+        padding-bottom: 16px;
+      }
+    }
+
+    @media (max-width: 860px) {
+      body {
+        background-attachment: scroll;
+      }
+
+      #app {
+        width: calc(100vw - 12px);
+        padding-bottom: 18px;
+      }
+
+      .shell-header {
+        top: 0;
+        gap: 8px;
+        padding: 5px 0 7px;
+      }
+
+      .top-nav {
+        width: 100%;
+        gap: 0.9rem;
+      }
+
+      .header-search-form {
+        order: 3;
+        margin-left: 0;
+        flex: 1 0 100%;
+        min-width: 0;
+      }
+
+      .nav-link {
+        flex: 0 0 auto;
+      }
+
+      .trade-controls {
+        justify-content: flex-start;
+      }
+
+      .trade-frame {
+        min-height: 620px;
+        height: 74vh;
+      }
+
+      .summary-grid,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar-card,
+      .leaderboard-hero,
+      .toolbar,
+      .summary-grid,
+      .active-filters-bar,
+      .table-wrap,
+      .footer-note {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .toolbar {
+        align-items: stretch;
+      }
+
+      .toolbar-left,
+      .toolbar-right {
+        width: 100%;
+      }
+
+      .search-input,
+      .control,
+      .refresh-btn {
+        width: 100%;
+      }
+
+      .hide-mobile {
+        display: none;
+      }
+
+      .wallet-modal {
+        width: 100%;
+        height: calc(100vh - 18px);
+        max-height: none;
+        border-radius: var(--radius-lg);
+      }
+
+      .wallet-modal-backdrop {
+        padding: 9px;
+        align-items: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="shell-header">
+      <a class="brand" href="/" aria-label="Hypermonitor home">
+        <img src="images/logo.png" alt="Hypermonitor logo" />
+        <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
+      </a>
+
+      <nav class="top-nav" aria-label="Tracker sections">
+        <a class="nav-link is-active" href="?view=trade" data-view-target="trade">Trade</a>
+        <a class="nav-link" href="?view=explore" data-view-target="explore">Explore</a>
+      </nav>
+
+      <form class="header-search-form" id="headerSearchForm" autocomplete="off">
+        <label class="sr-only" for="headerSearchInput">Search wallet address or coin</label>
+        <div class="header-search-shell">
+          <span class="header-search-icon" aria-hidden="true">&#8981;</span>
+          <input
+            id="headerSearchInput"
+            class="header-search-input"
+            type="search"
+            placeholder="Wallet address or coin"
+            spellcheck="false"
+            autocapitalize="off"
+            autocomplete="off"
+            aria-expanded="false"
+            aria-controls="headerSearchSuggestions"
+          />
+        </div>
+        <div class="header-search-suggestions" id="headerSearchSuggestions" hidden></div>
+      </form>
+    </header>
+
+    <main>
+      <section class="view is-active" id="tradeView" aria-labelledby="tradeTitle">
+        <h1 class="sr-only" id="tradeTitle">Trade</h1>
+
+        <section class="panel trade-frame-panel">
+          <iframe
+            class="trade-frame"
+            id="tradeFrame"
+            title="Hypermonitor trade terminal"
+            loading="eager"
+          ></iframe>
+        </section>
+      </section>
+
+      <section class="view" id="exploreView" aria-labelledby="exploreTitle">
+        <h1 class="sr-only" id="exploreTitle">Explore</h1>
+
+        <div class="explore-layout">
+          <aside class="sidebar">
+            <section class="panel sidebar-card sidebar-hero-card">
+              <div class="sidebar-card-head">
+                <div class="sidebar-card-eyebrow">Explore desk</div>
+                <h2 class="sidebar-card-title">Find strong wallets, then open them in the full Hypermonitor tracker.</h2>
+                <p class="sidebar-card-copy">
+                  Filter by profitability and wallet size, compare quality signals, and move directly from the
+                  leaderboard into a pinned wallet overlay without leaving this page.
+                </p>
+              </div>
+
+              <div class="sidebar-hero-pills">
+                <span class="sidebar-hero-pill">Live leaderboard</span>
+                <span class="sidebar-hero-pill">Quality + trend signals</span>
+              </div>
+
+              <div class="stats-grid">
+                <div class="metric-tile metric-tile-green">
+                  <div class="metric-label">Visible wallets</div>
+                  <div class="metric-value" id="metricVisible">-</div>
+                </div>
+                <div class="metric-tile metric-tile-cyan">
+                  <div class="metric-label">Median equity</div>
+                  <div class="metric-value" id="metricMedian">-</div>
+                </div>
+                <div class="metric-tile metric-tile-blue">
+                  <div class="metric-label">Average quality</div>
+                  <div class="metric-value" id="metricQuality">-</div>
+                </div>
+                <div class="metric-tile metric-tile-amber">
+                  <div class="metric-label">Top pnl</div>
+                  <div class="metric-value" id="metricLeader">-</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel sidebar-card">
+              <div class="sidebar-card-head">
+                <div class="sidebar-section-title">Profit profile</div>
+                <p class="sidebar-section-copy">Group wallets by realized performance in the selected window.</p>
+              </div>
+              <div class="sidebar-section" id="profitFilterList"></div>
+            </section>
+
+            <section class="panel sidebar-card">
+              <div class="sidebar-card-head">
+                <div class="sidebar-section-title">Wallet size</div>
+                <p class="sidebar-section-copy">Quickly jump between small accounts, whales, and apex balances.</p>
+              </div>
+              <div class="sidebar-section" id="sizeFilterList"></div>
+            </section>
+          </aside>
+
+          <section class="panel leaderboard-panel">
+            <div class="leaderboard-hero">
+              <div class="leaderboard-hero-copy">
+                <div class="leaderboard-hero-eyebrow">Leaderboard explorer</div>
+                <h2 class="leaderboard-hero-title">Scan the board with the same glassy dashboard feel as the wallet tracker.</h2>
+                <p class="leaderboard-hero-subtitle">
+                  Search by wallet or tier, switch performance windows, and keep the best addresses in focus before
+                  opening the embedded tracker.
+                </p>
+                <div class="leaderboard-hero-tags">
+                  <span class="leaderboard-hero-tag">Searchable</span>
+                  <span class="leaderboard-hero-tag">Sortable</span>
+                  <span class="leaderboard-hero-tag">Opens in overlay</span>
+                </div>
+              </div>
+
+              <div class="leaderboard-hero-note">
+                <div class="leaderboard-hero-note-label">Workflow</div>
+                <div class="leaderboard-hero-note-title">Filter, compare, inspect</div>
+                <div class="leaderboard-hero-note-copy">
+                  Once a wallet stands out, opening its row keeps you in the same shell while loading the full
+                  positions, fills, and performance view inside the overlay.
+                </div>
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <label class="sr-only" for="searchInput">Search wallets</label>
+                <input
+                  id="searchInput"
+                  class="search-input"
+                  type="search"
+                  placeholder="Search wallet address or tier"
+                  autocomplete="off"
+                />
+
+                <label class="sr-only" for="windowSelect">Performance window</label>
+                <select id="windowSelect" class="control" title="Performance window">
+                  <option value="day">Day</option>
+                  <option value="week">Week</option>
+                  <option value="month">Month</option>
+                  <option value="allTime" selected>All time</option>
+                </select>
+              </div>
+
+              <div class="toolbar-right">
+                <label class="sr-only" for="limitSelect">Row limit</label>
+                <select id="limitSelect" class="control" title="Rows to show">
+                  <option value="50">Top 50</option>
+                  <option value="100" selected>Top 100</option>
+                  <option value="250">Top 250</option>
+                  <option value="100000">All</option>
+                </select>
+                <button class="refresh-btn" type="button" id="refreshBtn">Refresh</button>
+              </div>
+            </div>
+
+            <div class="summary-grid">
+              <div class="summary-card summary-card-green">
+                <div class="summary-label">Wallets loaded</div>
+                <div class="summary-value" id="summaryLoaded">-</div>
+                <div class="summary-subvalue" id="summaryLoadedSub">Awaiting leaderboard data</div>
+              </div>
+              <div class="summary-card summary-card-cyan">
+                <div class="summary-label">Positive pnl share</div>
+                <div class="summary-value" id="summaryPositive">-</div>
+                <div class="summary-subvalue">Across the current filtered view</div>
+              </div>
+              <div class="summary-card summary-card-blue">
+                <div class="summary-label">Whale concentration</div>
+                <div class="summary-value" id="summaryWhales">-</div>
+                <div class="summary-subvalue">Wallets above $1M account value</div>
+              </div>
+              <div class="summary-card summary-card-amber">
+                <div class="summary-label">Top wallet</div>
+                <div class="summary-value" id="summaryTopWallet">-</div>
+                <div class="summary-subvalue" id="summaryTopWalletSub">Best pnl in view</div>
+              </div>
+            </div>
+
+            <div class="active-filters-bar">
+              <div class="active-filters-label">Active filters</div>
+              <div class="active-filters" id="activeFilters"></div>
+            </div>
+
+            <div class="table-wrap loading" id="tableWrap">
+              <div class="loading-overlay" id="loadingOverlay">Loading leaderboard</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sortable" data-key="rank">Rank<span class="sort-indicator" id="sort-rank"></span></th>
+                    <th>Wallet</th>
+                    <th class="sortable" data-key="accountValue">Account value<span class="sort-indicator" id="sort-accountValue"></span></th>
+                    <th class="sortable" data-key="pnl">PnL<span class="sort-indicator" id="sort-pnl"></span></th>
+                    <th class="sortable" data-key="roi">ROI<span class="sort-indicator" id="sort-roi"></span></th>
+                    <th class="sortable hide-mobile" data-key="volume">Volume<span class="sort-indicator" id="sort-volume"></span></th>
+                    <th class="sortable" data-key="walletScore">Quality<span class="sort-indicator" id="sort-walletScore"></span></th>
+                    <th class="sortable hide-tablet" data-key="trendScore">Trend<span class="sort-indicator" id="sort-trendScore"></span></th>
+                    <th class="sortable hide-tablet" data-key="consistencyScore">Consistency<span class="sort-indicator" id="sort-consistencyScore"></span></th>
+                    <th class="sortable hide-mobile" data-key="activityScore">Activity<span class="sort-indicator" id="sort-activityScore"></span></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody">
+                  <tr>
+                    <td colspan="10" class="table-empty">Loading leaderboard...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="footer-note">
+              Wallet rows open <code>tracker.html</code> with the wallet pinned, then the full tracker loads inside the
+              wallet overlay. Ranking data continues to use the current Hypermonitor leaderboard feed.
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="wallet-modal-backdrop" id="walletModalBackdrop" aria-hidden="true">
+    <section class="panel wallet-modal" role="dialog" aria-modal="true" aria-labelledby="walletModalTitle">
+      <div class="wallet-modal-head">
+        <div class="wallet-modal-headline">
+          <strong id="walletModalTitle">Wallet tracker</strong>
+          <span id="walletModalSubtitle"></span>
+        </div>
+        <div class="wallet-modal-actions">
+          <a class="header-btn" id="openStandaloneWallet" href="track.html" target="_blank" rel="noopener">
+            Open standalone
+          </a>
+          <button class="ghost-btn" type="button" id="copyWalletLinkBtn">Copy link</button>
+          <button class="icon-btn" type="button" id="closeWalletModalBtn" aria-label="Close wallet tracker">&times;</button>
+        </div>
+      </div>
+      <iframe id="walletTrackerFrame" title="Hypermonitor wallet tracker"></iframe>
+    </section>
+  </div>
+
+  <script>
+    const HYPERLIQUID_INFO_URL = "https://api.hyperliquid.xyz/info";
+    const LEADERBOARD_URL =
+      window.HYPERMONITOR_LEADERBOARD_API_URL ||
+      (() => {
+        try {
+          return localStorage.getItem("hypermonitor-leaderboard-api-url") || "";
+        } catch (err) {
+          return "";
+        }
+      })() ||
+      "https://hypermonitor-private-leaderboard.hypermonitor.workers.dev/api/leaderboard";
+
+    const PROFIT_FILTERS = [
+      {
+        id: "all",
+        label: "All wallets",
+        description: "Every ranked address in the current window.",
+        test: () => true
+      },
+      {
+        id: "extreme",
+        label: "Extremely profitable",
+        description: "PnL above $1M.",
+        test: (row) => Number.isFinite(row.pnl) && row.pnl >= 1000000
+      },
+      {
+        id: "very",
+        label: "Very profitable",
+        description: "PnL from $100K to $1M.",
+        test: (row) => Number.isFinite(row.pnl) && row.pnl >= 100000 && row.pnl < 1000000
+      },
+      {
+        id: "positive",
+        label: "Profitable",
+        description: "PnL from $0 to $100K.",
+        test: (row) => Number.isFinite(row.pnl) && row.pnl >= 0 && row.pnl < 100000
+      },
+      {
+        id: "negative",
+        label: "Unprofitable",
+        description: "PnL below $0 but above -$100K.",
+        test: (row) => Number.isFinite(row.pnl) && row.pnl < 0 && row.pnl >= -100000
+      },
+      {
+        id: "rekt",
+        label: "Rekt",
+        description: "PnL below -$100K.",
+        test: (row) => Number.isFinite(row.pnl) && row.pnl < -100000
+      }
+    ];
+
+    const SIZE_FILTERS = [
+      {
+        id: "all",
+        label: "All sizes",
+        description: "Every wallet size tier.",
+        test: () => true
+      },
+      {
+        id: "apex",
+        label: "Apex",
+        description: "Account value above $5M.",
+        test: (row) => Number.isFinite(row.accountValue) && row.accountValue >= 5000000
+      },
+      {
+        id: "whale",
+        label: "Whale",
+        description: "Account value from $1M to $5M.",
+        test: (row) => Number.isFinite(row.accountValue) && row.accountValue >= 1000000 && row.accountValue < 5000000
+      },
+      {
+        id: "large",
+        label: "Large",
+        description: "Account value from $100K to $1M.",
+        test: (row) => Number.isFinite(row.accountValue) && row.accountValue >= 100000 && row.accountValue < 1000000
+      },
+      {
+        id: "medium",
+        label: "Medium",
+        description: "Account value from $10K to $100K.",
+        test: (row) => Number.isFinite(row.accountValue) && row.accountValue >= 10000 && row.accountValue < 100000
+      },
+      {
+        id: "small",
+        label: "Small",
+        description: "Account value below $10K.",
+        test: (row) => Number.isFinite(row.accountValue) && row.accountValue < 10000
+      }
+    ];
+
+    const state = {
+      view: "trade",
+      coin: "BTC",
+      wallet: "",
+      rawRows: [],
+      normalizedRows: [],
+      displayRows: [],
+      sortKey: "rank",
+      sortDir: "asc",
+      search: "",
+      limit: 100,
+      windowKey: "allTime",
+      profitFilter: "all",
+      sizeFilter: "all",
+      headerSuggestions: [],
+      headerSuggestionIndex: -1
+    };
+
+    let headerCoinOptions = [];
+    let headerCoinOptionsPromise = null;
+
+    const menuButtons = Array.from(document.querySelectorAll(".nav-link"));
+    const viewPanels = {
+      trade: document.getElementById("tradeView"),
+      explore: document.getElementById("exploreView")
+    };
+
+    const tradeFrame = document.getElementById("tradeFrame");
+    const openTradeTabLink = document.getElementById("openTradeTabLink");
+    const marketChipGroup = document.getElementById("marketChipGroup");
+    const tradeWalletInline = document.getElementById("tradeWalletInline");
+    const tradeWalletText = document.getElementById("tradeWalletText");
+    const selectedWalletPill = document.getElementById("selectedWalletPill");
+    const selectedWalletText = document.getElementById("selectedWalletText");
+    const viewWalletBtn = document.getElementById("viewWalletBtn");
+    const walletJumpForm = document.getElementById("walletJumpForm");
+    const walletJumpInput = document.getElementById("walletJumpInput");
+    const headerSearchForm = document.getElementById("headerSearchForm");
+    const headerSearchInput = document.getElementById("headerSearchInput");
+    const headerSearchSuggestions = document.getElementById("headerSearchSuggestions");
+
+    const profitFilterList = document.getElementById("profitFilterList");
+    const sizeFilterList = document.getElementById("sizeFilterList");
+    const searchInput = document.getElementById("searchInput");
+    const windowSelect = document.getElementById("windowSelect");
+    const limitSelect = document.getElementById("limitSelect");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const tbody = document.getElementById("tbody");
+    const tableWrap = document.getElementById("tableWrap");
+    const activeFilters = document.getElementById("activeFilters");
+
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const metricVisible = document.getElementById("metricVisible");
+    const metricMedian = document.getElementById("metricMedian");
+    const metricQuality = document.getElementById("metricQuality");
+    const metricLeader = document.getElementById("metricLeader");
+    const summaryLoaded = document.getElementById("summaryLoaded");
+    const summaryLoadedSub = document.getElementById("summaryLoadedSub");
+    const summaryPositive = document.getElementById("summaryPositive");
+    const summaryWhales = document.getElementById("summaryWhales");
+    const summaryTopWallet = document.getElementById("summaryTopWallet");
+    const summaryTopWalletSub = document.getElementById("summaryTopWalletSub");
+
+    const walletModalBackdrop = document.getElementById("walletModalBackdrop");
+    const walletTrackerFrame = document.getElementById("walletTrackerFrame");
+    const walletModalSubtitle = document.getElementById("walletModalSubtitle");
+    const closeWalletModalBtn = document.getElementById("closeWalletModalBtn");
+    const openStandaloneWallet = document.getElementById("openStandaloneWallet");
+    const copyWalletLinkBtn = document.getElementById("copyWalletLinkBtn");
+
+    function parseView() {
+      const params = new URLSearchParams(window.location.search);
+      const value = (params.get("view") || "trade").toLowerCase();
+      return value === "explore" ? "explore" : "trade";
+    }
+
+    function parseCoin() {
+      const params = new URLSearchParams(window.location.search);
+      return (params.get("coin") || params.get("asset") || "BTC").toUpperCase();
+    }
+
+    function parseWallet() {
+      const params = new URLSearchParams(window.location.search);
+      return (params.get("wallet") || "").trim();
+    }
+
+    function splitDexCoin(name) {
+      const value = String(name || "").trim();
+      const idx = value.indexOf(":");
+      if (idx > 0 && idx < value.length - 1) {
+        return { dex: value.slice(0, idx), base: value.slice(idx + 1) };
+      }
+      return { dex: "", base: value };
+    }
+
+    function buildCoinKey(name, dex = "") {
+      const value = String(name || "").trim();
+      if (!value) return "";
+      const parsed = splitDexCoin(value);
+      const base = String(parsed.base || value).trim().toUpperCase();
+      const prefix = String(parsed.dex || dex || "").trim().toLowerCase();
+      return prefix ? `${prefix}:${base}` : base;
+    }
+
+    function getCoinBaseName(name) {
+      const { base } = splitDexCoin(name);
+      return String(base || name || "").trim().toUpperCase();
+    }
+
+    function getCoinDexName(name) {
+      const { dex } = splitDexCoin(name);
+      return String(dex || "").trim().toLowerCase();
+    }
+
+    function getCoinLabel(name) {
+      const key = buildCoinKey(name);
+      const base = getCoinBaseName(key);
+      const dex = getCoinDexName(key);
+      return dex ? `${dex}:${base}` : base;
+    }
+
+    function isWalletAddress(value) {
+      return /^0x[a-fA-F0-9]{40}$/.test(String(value || "").trim());
+    }
+
+    function normalizeCoinQuery(value) {
+      const normalized = String(value || "")
+        .trim()
+        .replace(/^\$/, "")
+        .replace(/\/USD$/i, "")
+        .replace(/\s+/g, "");
+      return buildCoinKey(normalized);
+    }
+
+    function isCoinQuery(value) {
+      return /^(?:[A-Z0-9]+|[A-Z0-9]+:[A-Z0-9]+)$/.test(String(value || "").trim());
+    }
+
+    function setStatus(kind, message) {
+      if (statusDot) {
+        statusDot.classList.remove("ok", "err");
+        if (kind === "ok") statusDot.classList.add("ok");
+        if (kind === "err") statusDot.classList.add("err");
+      }
+      if (statusText) statusText.textContent = message || "";
+    }
+
+    function setLoadingState(isLoading) {
+      tableWrap.classList.toggle("loading", isLoading);
+      if (isLoading) {
+        renderLoadingRows();
+      }
+    }
+
+    function renderLoadingRows(count = 12) {
+      const rows = Array.from({ length: count }, () => (
+        "<tr>" +
+          "<td><span class='rank-badge'>-</span></td>" +
+          "<td><div class='wallet-link'><strong>Loading...</strong><span class='wallet-meta'>Updating leaderboard</span></div></td>" +
+          "<td class='money'>-</td>" +
+          "<td class='money'>-</td>" +
+          "<td class='money'>-</td>" +
+          "<td class='money hide-mobile'>-</td>" +
+          "<td><div class='score-cell'><div class='score-cell-top'><span class='score-value'>-</span></div><div class='score-bar'><span style='width:0%'></span></div></div></td>" +
+          "<td class='hide-tablet'>-</td>" +
+          "<td class='hide-tablet'>-</td>" +
+          "<td class='hide-mobile'>-</td>" +
+        "</tr>"
+      )).join("");
+      tbody.innerHTML = rows;
+    }
+
+    function moneyFormat(value, decimals = 2) {
+      if (!Number.isFinite(value)) return "-";
+      const abs = Math.abs(value);
+      const digits = abs >= 1000 ? decimals : Math.min(decimals, 2);
+      return (value < 0 ? "-" : "") + "$" + abs.toLocaleString(undefined, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      });
+    }
+
+    function compactMoney(value) {
+      if (!Number.isFinite(value)) return "-";
+      const abs = Math.abs(value);
+      const sign = value < 0 ? "-" : "";
+      if (abs >= 1000000000) return sign + "$" + (abs / 1000000000).toFixed(2) + "B";
+      if (abs >= 1000000) return sign + "$" + (abs / 1000000).toFixed(2) + "M";
+      if (abs >= 1000) return sign + "$" + (abs / 1000).toFixed(1) + "K";
+      return sign + "$" + abs.toFixed(0);
+    }
+
+    function percentFormat(value) {
+      if (!Number.isFinite(value)) return "-";
+      return (value >= 0 ? "+" : "") + (value * 100).toLocaleString(undefined, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 2
+      }) + "%";
+    }
+
+    function shortAddress(address) {
+      if (!address) return "-";
+      if (address.length <= 14) return address;
+      return address.slice(0, 6) + "..." + address.slice(-4);
+    }
+
+    function scorePercent(value) {
+      if (!Number.isFinite(value)) return NaN;
+      return Math.max(0, Math.min(100, value * 100));
+    }
+
+    function average(values) {
+      const valid = values.filter((value) => Number.isFinite(value));
+      if (!valid.length) return NaN;
+      return valid.reduce((sum, value) => sum + value, 0) / valid.length;
+    }
+
+    function median(values) {
+      const valid = values.filter((value) => Number.isFinite(value)).sort((a, b) => a - b);
+      if (!valid.length) return NaN;
+      const mid = Math.floor(valid.length / 2);
+      if (valid.length % 2) return valid[mid];
+      return (valid[mid - 1] + valid[mid]) / 2;
+    }
+
+    function findFilterMeta(list, id) {
+      return list.find((item) => item.id === id) || list[0];
+    }
+
+    function sizeTierLabel(row) {
+      if (SIZE_FILTERS[1].test(row)) return "Apex";
+      if (SIZE_FILTERS[2].test(row)) return "Whale";
+      if (SIZE_FILTERS[3].test(row)) return "Large";
+      if (SIZE_FILTERS[4].test(row)) return "Medium";
+      return "Small";
+    }
+
+    function qualityLabel(value) {
+      const pct = scorePercent(value);
+      if (!Number.isFinite(pct)) return "Unscored";
+      if (pct >= 85) return "Elite";
+      if (pct >= 70) return "Strong";
+      if (pct >= 50) return "Watch";
+      return "Speculative";
+    }
+
+    function pnlChipClass(value) {
+      if (!Number.isFinite(value)) return "";
+      return value >= 0 ? "good" : "bad";
+    }
+
+    function getNumericSortValue(row, key) {
+      const value = row[key];
+      return Number.isFinite(Number(value)) ? Number(value) : NaN;
+    }
+
+    function updateUrl(push = false) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", state.view);
+      url.searchParams.set("coin", state.coin);
+      if (state.wallet) url.searchParams.set("wallet", state.wallet);
+      else url.searchParams.delete("wallet");
+      if (push) history.pushState({}, "", url.toString());
+      else history.replaceState({}, "", url.toString());
+    }
+
+    function buildWalletShellHref(wallet) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", state.view);
+      url.searchParams.set("coin", state.coin);
+      url.searchParams.set("wallet", wallet);
+      return url.toString();
+    }
+
+    function buildWalletTrackerHref(wallet) {
+      return "track.html?wallet=" + encodeURIComponent(wallet);
+    }
+
+    async function fetchHyperliquidInfo(payload) {
+      const response = await fetch(HYPERLIQUID_INFO_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error("Hyperliquid info request failed");
+      }
+      return response.json();
+    }
+
+    async function ensureHeaderCoinOptions() {
+      if (headerCoinOptionsPromise) return headerCoinOptionsPromise;
+
+      headerCoinOptionsPromise = (async () => {
+        let dexNames = [""];
+        try {
+          const dexData = await fetchHyperliquidInfo({ type: "perpDexs" });
+          const names = (Array.isArray(dexData) ? dexData : [])
+            .map((entry) => entry && entry.name)
+            .filter((value) => typeof value === "string" && value.length > 0);
+          dexNames = ["", ...names.filter((value, index, list) => list.indexOf(value) === index)];
+        } catch (error) {
+          dexNames = [""];
+        }
+
+        const marketMap = new Map();
+        const results = await Promise.allSettled(
+          dexNames.map((dex) => fetchHyperliquidInfo(dex ? { type: "metaAndAssetCtxs", dex } : { type: "metaAndAssetCtxs" }))
+        );
+
+        results.forEach((result, resultIndex) => {
+          if (result.status !== "fulfilled") return;
+          const data = result.value;
+          const dex = dexNames[resultIndex] || "";
+          const meta = Array.isArray(data) ? data[0] : data && data.meta;
+          const assetCtxs = Array.isArray(data) ? data[1] : data && data.assetCtxs;
+          const universe = Array.isArray(meta && meta.universe) ? meta.universe : [];
+          const ctxs = Array.isArray(assetCtxs) ? assetCtxs : [];
+          const length = Math.max(universe.length, ctxs.length);
+
+          for (let index = 0; index < length; index += 1) {
+            const entry = universe[index] || {};
+            const ctx = ctxs[index] || {};
+            const rawName = String(ctx.coin ?? ctx.symbol ?? ctx.asset ?? entry.name ?? "").trim();
+            const key = buildCoinKey(rawName, dex);
+            const markPx = Number(ctx.markPx ?? ctx.mark ?? ctx.midPx ?? ctx.mid ?? ctx.px);
+            if (!key || entry.isDelisted || !Number.isFinite(markPx) || markPx <= 0) continue;
+
+            if (!marketMap.has(key)) {
+              const dexName = getCoinDexName(key);
+              marketMap.set(key, {
+                type: "coin",
+                value: key,
+                key,
+                name: getCoinBaseName(key),
+                label: getCoinLabel(key),
+                meta: dexName ? `HIP-3 market • ${dexName}` : "Hyperliquid market",
+                volume: Number(ctx.dayNtlVlm ?? 0)
+              });
+            }
+          }
+        });
+
+        headerCoinOptions = Array.from(marketMap.values()).sort((left, right) => {
+          const volumeDiff = (Number(right.volume) || 0) - (Number(left.volume) || 0);
+          if (volumeDiff !== 0) return volumeDiff;
+          return left.label.localeCompare(right.label);
+        });
+
+        return headerCoinOptions;
+      })().catch((error) => {
+        console.error("Failed to load header coin suggestions", error);
+        headerCoinOptions = [];
+        return headerCoinOptions;
+      });
+
+      return headerCoinOptionsPromise;
+    }
+
+    function openCoinInShell(nextCoin, options = {}) {
+      const normalizedCoin = normalizeCoinQuery(nextCoin) || "BTC";
+      setView("trade", { fromPopState: true });
+      setCoin(normalizedCoin, { fromPopState: true });
+      if (state.wallet) {
+        closeWalletOverlay({ fromPopState: true });
+      }
+      if (!options.fromPopState) {
+        updateUrl(options.pushHistory === true);
+      }
+    }
+
+    function setView(nextView, options = {}) {
+      const view = nextView === "explore" ? "explore" : "trade";
+      state.view = view;
+
+      menuButtons.forEach((button) => {
+        const isActive = button.dataset.viewTarget === view;
+        button.classList.toggle("is-active", isActive);
+        if (isActive) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+
+      Object.entries(viewPanels).forEach(([key, panel]) => {
+        panel.classList.toggle("is-active", key === view);
+      });
+
+      if (!options.fromPopState) {
+        updateUrl(options.pushHistory === true);
+      }
+    }
+
+    function setCoin(nextCoin, options = {}) {
+      state.coin = (nextCoin || "BTC").toUpperCase();
+      updateTradeFrame();
+
+      const chips = Array.from(document.querySelectorAll(".market-chip"));
+      chips.forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.coin === state.coin);
+      });
+
+      if (!options.fromPopState) {
+        updateUrl(options.pushHistory === true);
+      }
+    }
+
+    function updateTradeFrame() {
+      const src = "asset.html?coin=" + encodeURIComponent(state.coin);
+      if (tradeFrame.getAttribute("src") !== src) {
+        tradeFrame.setAttribute("src", src);
+      }
+      if (openTradeTabLink) openTradeTabLink.href = src;
+    }
+
+    function syncWalletUi() {
+      const hasWallet = Boolean(state.wallet);
+      if (selectedWalletPill) selectedWalletPill.hidden = !hasWallet;
+      if (tradeWalletInline) tradeWalletInline.hidden = !hasWallet;
+      if (viewWalletBtn) viewWalletBtn.hidden = !hasWallet;
+
+      if (hasWallet) {
+        if (selectedWalletText) selectedWalletText.textContent = shortAddress(state.wallet);
+        if (tradeWalletText) tradeWalletText.textContent = shortAddress(state.wallet);
+      } else {
+        if (selectedWalletText) selectedWalletText.textContent = "";
+        if (tradeWalletText) tradeWalletText.textContent = "";
+      }
+    }
+
+    function openWalletOverlay(wallet, options = {}) {
+      const targetWallet = (wallet || "").trim();
+      if (!targetWallet) return;
+
+      state.wallet = targetWallet;
+      syncWalletUi();
+
+      const trackerHref = buildWalletTrackerHref(targetWallet);
+      walletModalSubtitle.textContent = targetWallet;
+      openStandaloneWallet.href = trackerHref;
+      walletTrackerFrame.src = trackerHref;
+      walletModalBackdrop.classList.add("is-open");
+      walletModalBackdrop.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+
+      if (!options.fromPopState) {
+        updateUrl(options.pushHistory === true);
+      }
+
+      highlightSelectedWallet();
+    }
+
+    function closeWalletOverlay(options = {}) {
+      state.wallet = "";
+      syncWalletUi();
+      walletTrackerFrame.src = "";
+      walletModalBackdrop.classList.remove("is-open");
+      walletModalBackdrop.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+
+      if (!options.fromPopState) {
+        updateUrl(options.pushHistory === true);
+      }
+
+      highlightSelectedWallet();
+    }
+
+    function highlightSelectedWallet() {
+      const rows = tbody.querySelectorAll("tr[data-wallet]");
+      rows.forEach((row) => {
+        row.classList.toggle("is-selected", row.dataset.wallet === state.wallet);
+      });
+    }
+
+    function perfForWindow(row, windowKey) {
+      const performances = row && row.windowPerformances;
+      if (!Array.isArray(performances)) return null;
+      for (const entry of performances) {
+        if (Array.isArray(entry) && entry[0] === windowKey) return entry[1] || null;
+      }
+      return null;
+    }
+
+    function normalizeLeaderboardRows(rows) {
+      return (rows || []).map((row, index) => {
+        const performance = perfForWindow(row, state.windowKey) || {};
+        const address =
+          row.ethAddress ||
+          row.address ||
+          row.user ||
+          row.wallet ||
+          "";
+
+        const normalized = {
+          rank: Number(row.rank ?? row.csvRank ?? index + 1),
+          address,
+          accountValue: Number(row.accountValue ?? row.account_value ?? NaN),
+          pnl: Number(performance.pnl ?? performance.pnlUsd ?? performance.pnl_usd ?? NaN),
+          roi: Number(performance.roi ?? performance.return ?? NaN),
+          volume: Number(performance.vlm ?? performance.vol ?? performance.tradeVolume ?? NaN),
+          walletScore: Number(row.wallet_score ?? row.walletScore ?? NaN),
+          trendScore: Number(row.full_slope_score ?? row.trendScore ?? NaN),
+          consistencyScore: Number(row.full_R_sq_score ?? row.consistencyScore ?? NaN),
+          activityScore: Number(row.activity_score ?? row.activityScore ?? NaN)
+        };
+
+        return normalized;
+      });
+    }
+
+    function computeFilterCounts(rows, filters) {
+      const counts = {};
+      filters.forEach((filterMeta) => {
+        counts[filterMeta.id] = rows.filter((row) => filterMeta.test(row)).length;
+      });
+      return counts;
+    }
+
+    function renderSidebarFilters() {
+      const profitCounts = computeFilterCounts(state.normalizedRows, PROFIT_FILTERS);
+      const sizeCounts = computeFilterCounts(state.normalizedRows, SIZE_FILTERS);
+
+      profitFilterList.innerHTML = PROFIT_FILTERS.map((filterMeta) => (
+        "<button class='sidebar-filter" + (state.profitFilter === filterMeta.id ? " is-active" : "") + "' type='button' data-profit-filter='" + filterMeta.id + "'>" +
+          "<span class='sidebar-filter-top'><span>" + escapeHtml(filterMeta.label) + "</span><span>" + profitCounts[filterMeta.id] + "</span></span>" +
+          "<span class='sidebar-filter-meta'>" + escapeHtml(filterMeta.description) + "</span>" +
+        "</button>"
+      )).join("");
+
+      sizeFilterList.innerHTML = SIZE_FILTERS.map((filterMeta) => (
+        "<button class='sidebar-filter" + (state.sizeFilter === filterMeta.id ? " is-active" : "") + "' type='button' data-size-filter='" + filterMeta.id + "'>" +
+          "<span class='sidebar-filter-top'><span>" + escapeHtml(filterMeta.label) + "</span><span>" + sizeCounts[filterMeta.id] + "</span></span>" +
+          "<span class='sidebar-filter-meta'>" + escapeHtml(filterMeta.description) + "</span>" +
+        "</button>"
+      )).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function applyFiltersAndSort() {
+      const searchTerm = state.search.trim().toLowerCase();
+      const profitMeta = findFilterMeta(PROFIT_FILTERS, state.profitFilter);
+      const sizeMeta = findFilterMeta(SIZE_FILTERS, state.sizeFilter);
+
+      let rows = state.normalizedRows.filter((row) => {
+        if (!profitMeta.test(row) || !sizeMeta.test(row)) return false;
+
+        if (!searchTerm) return true;
+
+        const haystack = [
+          row.address,
+          sizeTierLabel(row),
+          qualityLabel(row.walletScore),
+          percentFormat(row.roi),
+          compactMoney(row.accountValue)
+        ].join(" ").toLowerCase();
+
+        return haystack.includes(searchTerm);
+      });
+
+      rows.sort((left, right) => {
+        const leftValue = getNumericSortValue(left, state.sortKey);
+        const rightValue = getNumericSortValue(right, state.sortKey);
+        const leftValid = Number.isFinite(leftValue);
+        const rightValid = Number.isFinite(rightValue);
+
+        if (!leftValid && !rightValid) return 0;
+        if (!leftValid) return 1;
+        if (!rightValid) return -1;
+
+        return state.sortDir === "asc" ? leftValue - rightValue : rightValue - leftValue;
+      });
+
+      const limit = Number(state.limit) || 100;
+      state.displayRows = rows.slice(0, limit);
+      renderSummaryCards(rows);
+      renderActiveFilters(rows.length);
+      renderTable(state.displayRows);
+      renderSortIndicators();
+      renderSidebarFilters();
+    }
+
+    function renderSummaryCards(filteredRows) {
+      const loadedCount = state.normalizedRows.length;
+      const visibleCount = filteredRows.length;
+      const positiveCount = filteredRows.filter((row) => Number.isFinite(row.pnl) && row.pnl >= 0).length;
+      const whaleCount = filteredRows.filter((row) => SIZE_FILTERS[2].test(row) || SIZE_FILTERS[1].test(row)).length;
+      const topRow = filteredRows
+        .filter((row) => Number.isFinite(row.pnl))
+        .sort((a, b) => b.pnl - a.pnl)[0];
+      const avgQuality = average(filteredRows.map((row) => scorePercent(row.walletScore)));
+      const medianEquity = median(filteredRows.map((row) => row.accountValue));
+
+      summaryLoaded.textContent = loadedCount.toLocaleString();
+      summaryLoadedSub.textContent = visibleCount.toLocaleString() + " visible after filters";
+      summaryPositive.textContent = visibleCount ? Math.round((positiveCount / visibleCount) * 100) + "%" : "-";
+      summaryWhales.textContent = whaleCount.toLocaleString();
+      summaryTopWallet.textContent = topRow ? shortAddress(topRow.address) : "-";
+      summaryTopWalletSub.textContent = topRow ? compactMoney(topRow.pnl) + " pnl" : "No wallet in view";
+
+      metricVisible.textContent = visibleCount.toLocaleString();
+      metricMedian.textContent = Number.isFinite(medianEquity) ? compactMoney(medianEquity) : "-";
+      metricQuality.textContent = Number.isFinite(avgQuality) ? avgQuality.toFixed(1) : "-";
+      metricLeader.textContent = topRow ? compactMoney(topRow.pnl) : "-";
+    }
+
+    function renderActiveFilters(filteredCount) {
+      const chips = [];
+      if (state.windowKey !== "allTime") {
+        chips.push("<span class='filter-chip'>Window: " + escapeHtml(windowSelect.options[windowSelect.selectedIndex].text) + "</span>");
+      }
+      if (state.search) {
+        chips.push("<span class='filter-chip'>Search: " + escapeHtml(state.search) + "</span>");
+      }
+      if (state.profitFilter !== "all") {
+        chips.push("<span class='filter-chip'>Profit: " + escapeHtml(findFilterMeta(PROFIT_FILTERS, state.profitFilter).label) + "</span>");
+      }
+      if (state.sizeFilter !== "all") {
+        chips.push("<span class='filter-chip'>Size: " + escapeHtml(findFilterMeta(SIZE_FILTERS, state.sizeFilter).label) + "</span>");
+      }
+      chips.push("<span class='filter-chip'>Showing: " + filteredCount.toLocaleString() + " wallet" + (filteredCount === 1 ? "" : "s") + "</span>");
+      activeFilters.innerHTML = chips.join("");
+    }
+
+    function renderSortIndicators() {
+      document.querySelectorAll(".sort-indicator").forEach((element) => {
+        element.textContent = "";
+      });
+      const active = document.getElementById("sort-" + state.sortKey);
+      if (active) active.textContent = state.sortDir === "asc" ? "up" : "down";
+    }
+
+    function renderTable(rows) {
+      if (!rows.length) {
+        tbody.innerHTML = "<tr><td colspan='10' class='table-empty'>No wallets matched the current filters.</td></tr>";
+        return;
+      }
+
+      tbody.innerHTML = rows.map((row) => {
+        const pnlClass = Number.isFinite(row.pnl) ? (row.pnl >= 0 ? "positive" : "negative") : "neutral";
+        const roiClass = Number.isFinite(row.roi) ? (row.roi >= 0 ? "positive" : "negative") : "neutral";
+        const qualityPct = scorePercent(row.walletScore);
+        const trendPct = scorePercent(row.trendScore);
+        const consistencyPct = scorePercent(row.consistencyScore);
+        const activityPct = scorePercent(row.activityScore);
+        const href = buildWalletShellHref(row.address);
+        const selectedClass = row.address === state.wallet ? " is-selected" : "";
+
+        return (
+          "<tr class='" + selectedClass.trim() + "' data-wallet='" + escapeHtml(row.address) + "'>" +
+            "<td><span class='rank-badge'>" + row.rank + "</span></td>" +
+            "<td>" +
+              "<a class='wallet-link' href='" + escapeHtml(href) + "' data-wallet-link='" + escapeHtml(row.address) + "'>" +
+                "<strong>" + escapeHtml(shortAddress(row.address)) + "</strong>" +
+                "<span class='wallet-meta'>" +
+                  "<span class='mini-chip'>" + escapeHtml(sizeTierLabel(row)) + "</span>" +
+                  "<span class='mini-chip " + pnlChipClass(row.pnl) + "'>" + escapeHtml(qualityLabel(row.walletScore)) + "</span>" +
+                "</span>" +
+              "</a>" +
+            "</td>" +
+            "<td class='money'>" + moneyFormat(row.accountValue) + "</td>" +
+            "<td class='money " + pnlClass + "'>" + moneyFormat(row.pnl) + "</td>" +
+            "<td class='money " + roiClass + "'>" + percentFormat(row.roi) + "</td>" +
+            "<td class='money hide-mobile'>" + compactMoney(row.volume) + "</td>" +
+            "<td>" + renderScoreCell(qualityPct) + "</td>" +
+            "<td class='hide-tablet'>" + renderScoreCell(trendPct) + "</td>" +
+            "<td class='hide-tablet'>" + renderScoreCell(consistencyPct) + "</td>" +
+            "<td class='hide-mobile'>" + renderScoreCell(activityPct) + "</td>" +
+          "</tr>"
+        );
+      }).join("");
+
+      highlightSelectedWallet();
+    }
+
+    function renderScoreCell(percent) {
+      const safePercent = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0;
+      const label = Number.isFinite(percent) ? safePercent.toFixed(1) : "-";
+      return (
+        "<div class='score-cell'>" +
+          "<div class='score-cell-top'><span class='score-value'>" + label + "</span></div>" +
+          "<div class='score-bar'><span style='width:" + safePercent + "%'></span></div>" +
+        "</div>"
+      );
+    }
+
+    async function loadLeaderboard() {
+      setStatus("", "Loading leaderboard");
+      setLoadingState(true);
+
+      try {
+        const response = await fetch(LEADERBOARD_URL, { cache: "no-store" });
+        const rawText = await response.text();
+
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status + " " + response.statusText + " - " + rawText.slice(0, 120));
+        }
+
+        let json;
+        try {
+          json = JSON.parse(rawText);
+        } catch (error) {
+          throw new Error("Non-JSON leaderboard response");
+        }
+
+        let rows = null;
+        if (Array.isArray(json)) rows = json;
+        else if (json && typeof json === "object") {
+          if (Array.isArray(json.data)) rows = json.data;
+          else if (Array.isArray(json.leaderboard)) rows = json.leaderboard;
+          else if (Array.isArray(json.leaderboardRows)) rows = json.leaderboardRows;
+          else if (Array.isArray(json.result)) rows = json.result;
+          else if (Array.isArray(json.payload)) rows = json.payload;
+          else if (json.error || json.message) throw new Error(String(json.error || json.message));
+        }
+
+        if (!rows) {
+          throw new Error("Unexpected leaderboard response shape");
+        }
+
+        state.rawRows = rows;
+        state.normalizedRows = normalizeLeaderboardRows(rows);
+        setStatus("ok", "Loaded " + state.normalizedRows.length.toLocaleString() + " wallets");
+        setLoadingState(false);
+        applyFiltersAndSort();
+        updateHeaderSuggestions();
+      } catch (error) {
+        console.error("Failed to load leaderboard", error);
+        setStatus("err", "Leaderboard failed to load");
+        setLoadingState(false);
+        tbody.innerHTML =
+          "<tr><td colspan='10' class='table-empty'>Failed to load the leaderboard. " +
+          escapeHtml(String(error && error.message ? error.message : error)) +
+          "</td></tr>";
+      }
+    }
+
+    function handleTableClick(event) {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const link = target.closest("[data-wallet-link]");
+      if (!link) return;
+
+      event.preventDefault();
+      const wallet = link.getAttribute("data-wallet-link");
+      if (!wallet) return;
+      openWalletOverlay(wallet, { pushHistory: true });
+    }
+
+    function syncFromUrl() {
+      const nextView = parseView();
+      const nextCoin = parseCoin();
+      const nextWallet = parseWallet();
+
+      setView(nextView, { fromPopState: true });
+      setCoin(nextCoin, { fromPopState: true });
+
+      if (nextWallet) openWalletOverlay(nextWallet, { fromPopState: true });
+      else closeWalletOverlay({ fromPopState: true });
+    }
+
+    function copyCurrentLink() {
+      const link = buildWalletShellHref(state.wallet);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(() => {
+          setStatus("ok", "Copied tracker link");
+        }).catch(() => {
+          setStatus("err", "Unable to copy link");
+        });
+        return;
+      }
+
+      try {
+        const temp = document.createElement("input");
+        temp.value = link;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        setStatus("ok", "Copied tracker link");
+      } catch (error) {
+        setStatus("err", "Unable to copy link");
+      }
+    }
+
+    function closeHeaderSuggestions() {
+      state.headerSuggestions = [];
+      state.headerSuggestionIndex = -1;
+      if (headerSearchSuggestions) headerSearchSuggestions.hidden = true;
+      if (headerSearchInput) headerSearchInput.setAttribute("aria-expanded", "false");
+    }
+
+    function renderHeaderSuggestions() {
+      if (!headerSearchSuggestions) return;
+      const suggestions = state.headerSuggestions || [];
+
+      if (!suggestions.length) {
+        headerSearchSuggestions.innerHTML = "";
+        headerSearchSuggestions.hidden = true;
+        if (headerSearchInput) headerSearchInput.setAttribute("aria-expanded", "false");
+        return;
+      }
+
+      headerSearchSuggestions.innerHTML = suggestions.map((item, index) => (
+        "<button class='header-search-suggestion" + (index === state.headerSuggestionIndex ? " is-active" : "") + "' type='button' data-suggestion-index='" + index + "'>" +
+          "<span class='header-search-suggestion-copy'>" +
+            "<span class='header-search-suggestion-label'>" + escapeHtml(item.label) + "</span>" +
+            "<span class='header-search-suggestion-meta'>" + escapeHtml(item.meta) + "</span>" +
+          "</span>" +
+          "<span class='header-search-suggestion-type'>" + escapeHtml(item.type) + "</span>" +
+        "</button>"
+      )).join("");
+
+      headerSearchSuggestions.hidden = false;
+      if (headerSearchInput) headerSearchInput.setAttribute("aria-expanded", "true");
+    }
+
+    function scoreWalletSuggestion(address, query) {
+      const target = String(address || "").toLowerCase();
+      if (!target) return Number.POSITIVE_INFINITY;
+      if (target === query) return 0;
+      if (target.startsWith(query)) return 1;
+      const idx = target.indexOf(query);
+      return idx === -1 ? Number.POSITIVE_INFINITY : idx + 2;
+    }
+
+    function scoreCoinSuggestion(item, query) {
+      const normalized = String(query || "").toUpperCase();
+      const candidates = [
+        String(item.label || "").toUpperCase(),
+        String(item.name || "").toUpperCase(),
+        String(item.key || "").toUpperCase()
+      ];
+      if (candidates.some((candidate) => candidate === normalized)) return 0;
+      if (candidates.some((candidate) => candidate.startsWith(normalized))) return 1;
+      const indexes = candidates
+        .map((candidate) => candidate.indexOf(normalized))
+        .filter((value) => value >= 0);
+      return indexes.length ? Math.min(...indexes) + 2 : Number.POSITIVE_INFINITY;
+    }
+
+    function buildWalletSuggestions(query) {
+      const normalizedQuery = String(query || "").trim().toLowerCase();
+      if (!normalizedQuery) return [];
+      const seen = new Set();
+      return state.normalizedRows
+        .filter((row) => row.address && row.address.toLowerCase().includes(normalizedQuery))
+        .sort((left, right) => {
+          const scoreDiff = scoreWalletSuggestion(left.address, normalizedQuery) - scoreWalletSuggestion(right.address, normalizedQuery);
+          if (scoreDiff !== 0) return scoreDiff;
+          return Number(left.rank || 0) - Number(right.rank || 0);
+        })
+        .filter((row) => {
+          if (seen.has(row.address)) return false;
+          seen.add(row.address);
+          return true;
+        })
+        .slice(0, 5)
+        .map((row) => ({
+          type: "wallet",
+          value: row.address,
+          label: shortAddress(row.address),
+          meta: `${row.address} • ${sizeTierLabel(row)}`
+        }));
+    }
+
+    function buildCoinSuggestions(query) {
+      const normalizedQuery = normalizeCoinQuery(query);
+      if (!normalizedQuery) return [];
+      return headerCoinOptions
+        .filter((item) => (
+          String(item.label || "").toUpperCase().includes(normalizedQuery) ||
+          String(item.name || "").toUpperCase().includes(normalizedQuery) ||
+          String(item.key || "").toUpperCase().includes(normalizedQuery)
+        ))
+        .sort((left, right) => {
+          const scoreDiff = scoreCoinSuggestion(left, normalizedQuery) - scoreCoinSuggestion(right, normalizedQuery);
+          if (scoreDiff !== 0) return scoreDiff;
+          const volumeDiff = (Number(right.volume) || 0) - (Number(left.volume) || 0);
+          if (volumeDiff !== 0) return volumeDiff;
+          return left.label.localeCompare(right.label);
+        })
+        .slice(0, 5)
+        .map((item) => ({
+          type: "coin",
+          value: item.value,
+          label: item.label,
+          meta: item.meta
+        }));
+    }
+
+    function updateHeaderSuggestions() {
+      if (!headerSearchInput) return;
+      const rawQuery = headerSearchInput.value.trim();
+      if (!rawQuery) {
+        closeHeaderSuggestions();
+        return;
+      }
+
+      const walletSuggestions = buildWalletSuggestions(rawQuery);
+      const coinSuggestions = buildCoinSuggestions(rawQuery);
+      const preferWallets = rawQuery.toLowerCase().startsWith("0x");
+      const combined = (preferWallets ? walletSuggestions.concat(coinSuggestions) : coinSuggestions.concat(walletSuggestions))
+        .filter((item, index, list) => list.findIndex((candidate) => candidate.type === item.type && candidate.value === item.value) === index)
+        .slice(0, 8);
+
+      state.headerSuggestions = combined;
+      state.headerSuggestionIndex = -1;
+      renderHeaderSuggestions();
+    }
+
+    function applyHeaderSuggestion(index) {
+      const item = state.headerSuggestions[index];
+      if (!item) return;
+      closeHeaderSuggestions();
+      if (headerSearchInput) {
+        headerSearchInput.setCustomValidity("");
+        headerSearchInput.value = item.type === "coin" ? item.label : item.value;
+      }
+      if (item.type === "wallet") {
+        openWalletOverlay(item.value, { pushHistory: true });
+        return;
+      }
+      openCoinInShell(item.value, { pushHistory: true });
+    }
+
+    function submitHeaderSearch(rawValue) {
+      const value = String(rawValue || "").trim();
+      if (!value) return;
+      closeHeaderSuggestions();
+
+      if (isWalletAddress(value)) {
+        if (headerSearchInput) headerSearchInput.value = value;
+        openWalletOverlay(value, { pushHistory: true });
+        return;
+      }
+
+      const coin = normalizeCoinQuery(value);
+      const exactCoinMatch = headerCoinOptions.find((item) => (
+        String(item.key || "").toUpperCase() === coin ||
+        String(item.label || "").toUpperCase() === coin ||
+        String(item.name || "").toUpperCase() === coin
+      ));
+
+      if (exactCoinMatch) {
+        if (headerSearchInput) {
+          headerSearchInput.setCustomValidity("");
+          headerSearchInput.value = exactCoinMatch.label;
+        }
+        openCoinInShell(exactCoinMatch.value, { pushHistory: true });
+        return;
+      }
+
+      if (!isCoinQuery(coin)) {
+        if (headerSearchInput) {
+          headerSearchInput.setCustomValidity("Enter a full wallet address or coin symbol.");
+          headerSearchInput.reportValidity();
+        }
+        return;
+      }
+
+      if (headerSearchInput) {
+        headerSearchInput.setCustomValidity("Choose a suggested coin or enter the full symbol.");
+        headerSearchInput.reportValidity();
+      }
+    }
+
+    menuButtons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        setView(button.dataset.viewTarget);
+      });
+    });
+
+    if (marketChipGroup) {
+      marketChipGroup.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const button = target.closest("[data-coin]");
+        if (!button) return;
+        setCoin(button.getAttribute("data-coin"));
+      });
+    }
+
+    if (walletJumpForm && walletJumpInput) {
+      walletJumpForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const wallet = walletJumpInput.value.trim();
+        if (!wallet) return;
+        openWalletOverlay(wallet, { pushHistory: true });
+        walletJumpInput.value = wallet;
+      });
+    }
+
+    if (headerSearchInput) {
+      headerSearchInput.addEventListener("input", () => {
+        headerSearchInput.setCustomValidity("");
+        updateHeaderSuggestions();
+      });
+
+      headerSearchInput.addEventListener("focus", () => {
+        ensureHeaderCoinOptions().then(() => {
+          updateHeaderSuggestions();
+        });
+      });
+
+      headerSearchInput.addEventListener("keydown", (event) => {
+        if (!state.headerSuggestions.length) {
+          if (event.key === "Escape") closeHeaderSuggestions();
+          return;
+        }
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          state.headerSuggestionIndex =
+            state.headerSuggestionIndex < state.headerSuggestions.length - 1
+              ? state.headerSuggestionIndex + 1
+              : 0;
+          renderHeaderSuggestions();
+          return;
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          state.headerSuggestionIndex =
+            state.headerSuggestionIndex > 0
+              ? state.headerSuggestionIndex - 1
+              : state.headerSuggestions.length - 1;
+          renderHeaderSuggestions();
+          return;
+        }
+
+        if (event.key === "Enter" && state.headerSuggestionIndex >= 0) {
+          event.preventDefault();
+          applyHeaderSuggestion(state.headerSuggestionIndex);
+          return;
+        }
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeHeaderSuggestions();
+        }
+      });
+    }
+
+    if (headerSearchForm) {
+      headerSearchForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submitHeaderSearch(headerSearchInput ? headerSearchInput.value : "");
+      });
+    }
+
+    if (headerSearchSuggestions) {
+      headerSearchSuggestions.addEventListener("mousedown", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.closest("[data-suggestion-index]")) event.preventDefault();
+      });
+
+      headerSearchSuggestions.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const button = target.closest("[data-suggestion-index]");
+        if (!button) return;
+        const index = Number(button.getAttribute("data-suggestion-index"));
+        if (!Number.isFinite(index)) return;
+        applyHeaderSuggestion(index);
+      });
+    }
+
+    if (viewWalletBtn) {
+      viewWalletBtn.addEventListener("click", () => {
+        if (!state.wallet) return;
+        openWalletOverlay(state.wallet, { pushHistory: false });
+      });
+    }
+
+    searchInput.addEventListener("input", () => {
+      state.search = searchInput.value;
+      applyFiltersAndSort();
+    });
+
+    windowSelect.addEventListener("change", () => {
+      state.windowKey = windowSelect.value;
+      state.normalizedRows = normalizeLeaderboardRows(state.rawRows);
+      applyFiltersAndSort();
+    });
+
+    limitSelect.addEventListener("change", () => {
+      state.limit = Number(limitSelect.value) || 100;
+      applyFiltersAndSort();
+    });
+
+    refreshBtn.addEventListener("click", () => {
+      loadLeaderboard();
+    });
+
+    profitFilterList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const button = target.closest("[data-profit-filter]");
+      if (!button) return;
+      state.profitFilter = button.getAttribute("data-profit-filter") || "all";
+      applyFiltersAndSort();
+    });
+
+    sizeFilterList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const button = target.closest("[data-size-filter]");
+      if (!button) return;
+      state.sizeFilter = button.getAttribute("data-size-filter") || "all";
+      applyFiltersAndSort();
+    });
+
+    document.querySelectorAll("th.sortable").forEach((header) => {
+      header.addEventListener("click", () => {
+        const key = header.getAttribute("data-key");
+        if (!key) return;
+        if (state.sortKey === key) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+        else {
+          state.sortKey = key;
+          state.sortDir = "asc";
+        }
+        applyFiltersAndSort();
+      });
+    });
+
+    tbody.addEventListener("click", handleTableClick);
+
+    walletModalBackdrop.addEventListener("click", (event) => {
+      if (event.target === walletModalBackdrop) {
+        closeWalletOverlay({ pushHistory: true });
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (headerSearchForm && !headerSearchForm.contains(target)) {
+        closeHeaderSuggestions();
+      }
+    });
+
+    closeWalletModalBtn.addEventListener("click", () => {
+      closeWalletOverlay({ pushHistory: true });
+    });
+
+    copyWalletLinkBtn.addEventListener("click", () => {
+      if (!state.wallet) return;
+      copyCurrentLink();
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && walletModalBackdrop.classList.contains("is-open")) {
+        closeWalletOverlay({ pushHistory: true });
+      }
+    });
+
+    window.addEventListener("popstate", () => {
+      syncFromUrl();
+    });
+
+    state.view = parseView();
+    state.coin = parseCoin();
+    state.wallet = parseWallet();
+    state.windowKey = windowSelect.value;
+    state.limit = Number(limitSelect.value) || 100;
+
+    setView(state.view, { fromPopState: true });
+    setCoin(state.coin, { fromPopState: true });
+    syncWalletUi();
+
+    ensureHeaderCoinOptions().then(() => {
+      updateHeaderSuggestions();
+    });
+
+    if (state.wallet) {
+      openWalletOverlay(state.wallet, { fromPopState: true });
+    }
+
+    loadLeaderboard();
+  </script>
+</body>
+</html>
