@@ -10,14 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0a;
-            --surface: #0a0a0a;
-            --surface2: #111318;
-            --border: #1e2329;
+            --bg: #181613;
+            --surface: #181613;
+            --surface2: #211d19;
+            --border: #2d2924;
             --text: #e6edf3;
             --muted: #7d8590;
-            --up: #2EBD85;
-            --down: #F6465D;
+            --up: #59A47F;
+            --down: #AD3542;
             --header-h: 58px;
             --toolbar-h: 38px;
         }
@@ -53,7 +53,7 @@
         #header {
             height: var(--header-h);
             min-height: var(--header-h);
-            background: #0a0a0a;
+            background: var(--bg);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
@@ -350,12 +350,12 @@
 
         #ws-dot.live {
             background: var(--up);
-            box-shadow: 0 0 6px rgba(46, 189, 133, 0.7);
+            box-shadow: 0 0 6px rgba(89, 164, 127, 0.7);
         }
 
         #ws-dot.err {
             background: var(--down);
-            box-shadow: 0 0 6px rgba(246, 70, 93, 0.7);
+            box-shadow: 0 0 6px rgba(173, 53, 66, 0.7);
         }
 
         /* ── Main ── */
@@ -452,7 +452,7 @@
             justify-content: center;
             flex-direction: column;
             gap: 10px;
-            background: #060709;
+            background: var(--bg);
             text-align: center;
             pointer-events: none;
         }
@@ -539,6 +539,23 @@
 
         #legend-ohlc span.v {
             color: var(--text);
+        }
+
+        .chart-corner-logo {
+            position: absolute;
+            left: 12px;
+            bottom: 12px;
+            z-index: 4;
+            width: 22px;
+            height: 22px;
+            padding: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            background: rgba(24, 22, 19, 0.82);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+            pointer-events: none;
+            user-select: none;
+            object-fit: contain;
         }
 
         /* ── Right panel ── */
@@ -686,7 +703,7 @@
         #ob-asks-inner {
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: flex-end;
             height: 100%;
             overflow: hidden;
         }
@@ -772,7 +789,7 @@
             padding: 6px 12px;
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
-            background: #060709;
+            background: var(--bg);
             flex-shrink: 0;
             font-size: 11px;
         }
@@ -1003,9 +1020,9 @@
         <header id="header">
             <div id="coin-picker-wrap">
                 <div id="coin-btn" onclick="toggleDropdown()">
-                    <img id="coin-logo" src="images/coins/BTC.svg" data-coin="BTC" data-fallback-tried="0" onerror="handleCoinImgError(this)">
+                    <img id="coin-logo" src="" data-coin="" data-fallback-tried="0" onerror="handleCoinImgError(this)" alt="" style="display:none;">
                     <span class="coin-btn-meta">
-                        <span id="coin-label">BTC</span>
+                        <span id="coin-label">–</span>
                         <span id="coin-badge" class="coin-btn-badge" style="display:none;"></span>
                     </span>
                     <span id="coin-perc" style="font-size: 13px; font-weight: 500; margin-left: 2px;"></span>
@@ -1055,7 +1072,7 @@
                         <div id="chart-wrap" class="chart-loading-wrap is-loading" style="flex:1; min-height:0; position:relative;">
                             <div id="chart-canvas"></div>
                             <div id="chart-legend">
-                                <span id="legend-name">BTC/USD • 15m</span>
+                                <span id="legend-name">–/USD • 15m</span>
                                 <div id="legend-ohlc">
                                     <span>O <span class="v" id="leg-o">–</span></span>
                                     <span>H <span class="v" id="leg-h">–</span></span>
@@ -1064,6 +1081,7 @@
                                     <span class="v" id="leg-pct" style="margin-left: 2px;"></span>
                                 </div>
                             </div>
+                            <img class="chart-corner-logo" src="images/logo.png" alt="Hypermonitor logo" aria-hidden="true">
                             <div class="chart-loading-overlay" id="chart-loading-1" aria-hidden="true">
                                 <img src="images/pulse.gif" alt="Hypermonitor loading logo">
                                 <span>Loading...</span>
@@ -1101,6 +1119,7 @@
                                     <span class="v" id="leg-pct-2" style="margin-left: 2px;"></span>
                                 </div>
                             </div>
+                            <img class="chart-corner-logo" src="images/logo.png" alt="Hypermonitor logo" aria-hidden="true">
                             <div class="chart-loading-overlay" id="chart-loading-2" aria-hidden="true">
                                 <img src="images/pulse.gif" alt="Hypermonitor loading logo">
                                 <span>Loading...</span>
@@ -1186,6 +1205,105 @@
 
 
     
+    <script>
+        (function seedInitialCoinUi() {
+            const params = new URLSearchParams(location.search);
+            const raw = String(params.get('coin') || params.get('asset') || 'BTC').trim();
+            const idx = raw.indexOf(':');
+            const dex = idx > 0 ? raw.slice(0, idx).trim().toLowerCase() : '';
+            const base = String(idx > 0 ? raw.slice(idx + 1) : raw).trim().toUpperCase() || 'BTC';
+            const marketKey = dex ? `${dex}:${base}` : base;
+            const displayLabel = base;
+            const fullLabel = dex ? `${dex}:${base}` : base;
+
+            const specialLogos = {
+                USA500: 'images/coins/USA500.png',
+                COPPER: 'images/coins/COPPER.png',
+                GOLD: 'images/coins/GOLD.svg',
+                SILVER: 'images/coins/SILVER.svg',
+                CRCL: 'images/coins/CRCL.svg',
+                OIL: 'images/coins/OIL.svg',
+                USOIL: 'images/coins/USOIL.svg'
+            };
+            const domainLogos = {
+                NVDA: 'https://logo.clearbit.com/nvidia.com',
+                MSTR: 'https://logo.clearbit.com/microstrategy.com',
+                TSLA: 'https://logo.clearbit.com/tesla.com',
+                AAPL: 'https://logo.clearbit.com/apple.com',
+                AMZN: 'https://logo.clearbit.com/amazon.com',
+                GOOGL: 'https://logo.clearbit.com/google.com',
+                MSFT: 'https://logo.clearbit.com/microsoft.com',
+                META: 'https://logo.clearbit.com/meta.com',
+                SPY: 'https://logo.clearbit.com/ssga.com',
+                QQQ: 'https://logo.clearbit.com/invesco.com',
+                CRCL: 'https://logo.clearbit.com/circle.com'
+            };
+            const logoCandidates = [
+                `https://app.hyperliquid.xyz/coins/${encodeURIComponent(marketKey)}.svg`,
+                `https://app.hyperliquid.xyz/coins/${encodeURIComponent(marketKey)}.png`,
+                specialLogos[base],
+                domainLogos[base],
+                `images/coins/${encodeURIComponent(base)}.svg`,
+                `images/coins/${encodeURIComponent(base)}.png`,
+                `https://financialmodelingprep.com/image-stock/${encodeURIComponent(base)}.png`,
+                `https://eodhd.com/img/logos/US/${encodeURIComponent(base)}.png`
+            ].filter(Boolean);
+
+            window.handleCoinImgError = window.handleCoinImgError || function(el) {
+                if (!el) return;
+                let candidates = [];
+                try {
+                    candidates = JSON.parse(el.dataset.logoCandidates || '[]');
+                } catch (_) {
+                    candidates = [];
+                }
+                const nextIdx = Number(el.dataset.logoIndex || '0') + 1;
+                if (nextIdx >= candidates.length) {
+                    el.style.display = 'none';
+                    return;
+                }
+                el.dataset.logoIndex = String(nextIdx);
+                el.src = candidates[nextIdx];
+            };
+
+            const setText = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            };
+
+            const badgeEl = document.getElementById('coin-badge');
+            if (badgeEl) {
+                if (dex) {
+                    badgeEl.textContent = dex;
+                    badgeEl.style.display = 'inline-flex';
+                } else {
+                    badgeEl.textContent = '';
+                    badgeEl.style.display = 'none';
+                }
+            }
+
+            const logoEl = document.getElementById('coin-logo');
+            if (logoEl) {
+                logoEl.dataset.coin = marketKey;
+                logoEl.dataset.logoCandidates = JSON.stringify(logoCandidates);
+                logoEl.dataset.logoIndex = '0';
+                logoEl.alt = displayLabel;
+                if (logoCandidates[0]) {
+                    logoEl.src = logoCandidates[0];
+                    logoEl.style.display = 'block';
+                    logoEl.style.visibility = 'visible';
+                }
+            }
+
+            setText('coin-label', displayLabel);
+            setText('legend-name', `${fullLabel}/USD • 15m`);
+
+            const coinBtn = document.getElementById('coin-btn');
+            if (coinBtn) coinBtn.title = fullLabel;
+
+            document.title = `${fullLabel} — Asset Terminal`;
+        })();
+    </script>
     <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
     <script>
         // ── Config ──────────────────────────────────────────────────
@@ -1282,6 +1400,8 @@
         const walletModalWallet = $('wallet-modal-wallet');
         const walletModalLink = $('wallet-modal-link');
         const walletModalClose = $('wallet-modal-close');
+        const orderBookRows = { ask: [], bid: [] };
+        let latestBookSnapshot = { bids: [], asks: [] };
         
         // Legends
         const legName = $('legend-name'), legO = $('leg-o'), legH = $('leg-h'), legL = $('leg-l'), legC = $('leg-c'), legPct = $('leg-pct');
@@ -1344,18 +1464,68 @@
             return v.toFixed(2);
         }
 
+        function createOrderBookRow(side) {
+            const row = document.createElement('div');
+            row.className = 'ob-row';
+            row.setAttribute('aria-hidden', 'true');
+
+            const bar = document.createElement('div');
+            bar.className = `bar ${side === 'ask' ? 'ask-bar' : 'bid-bar'}`;
+
+            const c1 = document.createElement('span');
+            c1.className = `c1 ${side === 'ask' ? 'ask' : 'bid'}`;
+
+            const c2 = document.createElement('span');
+            c2.className = 'c2';
+
+            const c3 = document.createElement('span');
+            c3.className = 'c3';
+
+            row.append(bar, c1, c2, c3);
+            return { row, bar, c1, c2, c3 };
+        }
+
+        function ensureOrderBookRows() {
+            if (orderBookRows.ask.length || orderBookRows.bid.length) return;
+            if (!obAsks || !obBids) return;
+
+            for (let index = 0; index < ROWS; index += 1) {
+                const askRow = createOrderBookRow('ask');
+                const bidRow = createOrderBookRow('bid');
+                orderBookRows.ask.push(askRow);
+                orderBookRows.bid.push(bidRow);
+                obAsks.appendChild(askRow.row);
+                obBids.appendChild(bidRow.row);
+            }
+        }
+
+        function updateOrderBookRow(rowRef, level, maxT, decimals) {
+            const hasLevel = Boolean(
+                level &&
+                Number.isFinite(level.px) &&
+                Number.isFinite(level.sz) &&
+                Number.isFinite(level.cum)
+            );
+            rowRef.row.style.visibility = hasLevel ? 'visible' : 'hidden';
+            rowRef.row.setAttribute('aria-hidden', hasLevel ? 'false' : 'true');
+            rowRef.bar.style.width = hasLevel && maxT > 0 ? `${(level.cum / maxT * 100).toFixed(1)}%` : '0%';
+            rowRef.c1.textContent = hasLevel ? fmt(level.px, decimals) : '';
+            rowRef.c2.textContent = hasLevel ? fmtK(level.sz) : '';
+            rowRef.c3.textContent = hasLevel ? fmtK(level.cum) : '';
+        }
+
         // ── Chart 1 Setup ──────────────────────────────────────────
         const chartWrap = $('chart-wrap');
         const chart = LightweightCharts.createChart($('chart-canvas'), {
-            layout: { background: { color: '#060709' }, textColor: '#7d8590', attributionLogo: false },
-            grid: { vertLines: { color: '#111318' }, horzLines: { color: '#111318' } },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#58a6ff44', labelBackgroundColor: '#1e2329' }, horzLine: { color: '#58a6ff44', labelBackgroundColor: '#1e2329' } },
-            rightPriceScale: { borderColor: '#1e2329' },
-            timeScale: { borderColor: '#1e2329', timeVisible: true, secondsVisible: false },
+            layout: { background: { color: '#181613' }, textColor: '#7d8590', attributionLogo: false },
+            grid: { vertLines: { color: '#211d19' }, horzLines: { color: '#211d19' } },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#58a6ff44', labelBackgroundColor: '#2d2924' }, horzLine: { color: '#58a6ff44', labelBackgroundColor: '#2d2924' } },
+            rightPriceScale: { borderColor: '#2d2924' },
+            timeScale: { borderColor: '#2d2924', timeVisible: true, secondsVisible: false },
         });
 
-        const candles = chart.addCandlestickSeries({ upColor: '#2EBD85', wickUpColor: '#2EBD85', downColor: '#F6465D', wickDownColor: '#F6465D', borderVisible: false });
-        const volSeries = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: 'vol', color: '#2EBD8540' });
+        const candles = chart.addCandlestickSeries({ upColor: '#59A47F', wickUpColor: '#59A47F', downColor: '#AD3542', wickDownColor: '#AD3542', borderVisible: false });
+        const volSeries = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: 'vol', color: '#59A47F55' });
         chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
 
         new ResizeObserver(() => { chart.applyOptions({ width: chartWrap.clientWidth, height: chartWrap.clientHeight }); }).observe(chartWrap);
@@ -1374,15 +1544,15 @@
         // ── Chart 2 Setup ──────────────────────────────────────────
         const chartWrap2 = $('chart-wrap-2');
         const chart2 = LightweightCharts.createChart($('chart-canvas-2'), {
-            layout: { background: { color: '#060709' }, textColor: '#7d8590', attributionLogo: false },
-            grid: { vertLines: { color: '#111318' }, horzLines: { color: '#111318' } },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#58a6ff44', labelBackgroundColor: '#1e2329' }, horzLine: { color: '#58a6ff44', labelBackgroundColor: '#1e2329' } },
-            rightPriceScale: { borderColor: '#1e2329' },
-            timeScale: { borderColor: '#1e2329', timeVisible: true, secondsVisible: false },
+            layout: { background: { color: '#181613' }, textColor: '#7d8590', attributionLogo: false },
+            grid: { vertLines: { color: '#211d19' }, horzLines: { color: '#211d19' } },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#58a6ff44', labelBackgroundColor: '#2d2924' }, horzLine: { color: '#58a6ff44', labelBackgroundColor: '#2d2924' } },
+            rightPriceScale: { borderColor: '#2d2924' },
+            timeScale: { borderColor: '#2d2924', timeVisible: true, secondsVisible: false },
         });
 
-        const candles2 = chart2.addCandlestickSeries({ upColor: '#2EBD85', wickUpColor: '#2EBD85', downColor: '#F6465D', wickDownColor: '#F6465D', borderVisible: false });
-        const volSeries2 = chart2.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: 'vol', color: '#2EBD8540' });
+        const candles2 = chart2.addCandlestickSeries({ upColor: '#59A47F', wickUpColor: '#59A47F', downColor: '#AD3542', wickDownColor: '#AD3542', borderVisible: false });
+        const volSeries2 = chart2.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: 'vol', color: '#59A47F55' });
         chart2.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
 
         new ResizeObserver(() => { chart2.applyOptions({ width: chartWrap2.clientWidth, height: chartWrap2.clientHeight }); }).observe(chartWrap2);
@@ -1412,9 +1582,37 @@
                 const o = Number(c.o), h = Number(c.h), l = Number(c.l), cl = Number(c.c), v = Number(c.v);
                 if (!Number.isFinite(t)) continue;
                 cv.push({ time: t, open: o, high: h, low: l, close: cl });
-                vl.push({ time: t, value: v, color: cl >= o ? '#2EBD8540' : '#F6465D40' });
+                vl.push({ time: t, value: v, color: cl >= o ? '#59A47F55' : '#AD354255' });
             }
             return { cv, vl };
+        }
+
+        function getDefaultVisibleBars(tf) {
+            const barsByTf = {
+                '1m': 90,
+                '5m': 84,
+                '15m': 64,
+                '1h': 72,
+                '4h': 60,
+                '1d': 48
+            };
+            return barsByTf[tf] || 64;
+        }
+
+        function applyDefaultZoom(chartInstance, candleCount, tf) {
+            if (!chartInstance || !Number.isFinite(candleCount) || candleCount <= 0) return;
+            const visibleBars = Math.max(24, Math.round(getDefaultVisibleBars(tf) * 1.5));
+            const rightPad = Math.max(3, Math.round(visibleBars * 0.06));
+            if (candleCount <= visibleBars) {
+                chartInstance.timeScale().fitContent();
+                return;
+            }
+            requestAnimationFrame(() => {
+                chartInstance.timeScale().setVisibleLogicalRange({
+                    from: Math.max(0, candleCount - visibleBars),
+                    to: candleCount - 1 + rightPad
+                });
+            });
         }
 
         async function fetchCandles() {
@@ -1428,7 +1626,7 @@
                 const cvArr = [...candleMap.values()].sort((a,b)=>a.time-b.time);
                 oldestTs = cvArr.length ? cvArr[0].time : null;
                 candles.setData(cvArr); volSeries.setData([...volMap.values()].sort((a,b)=>a.time-b.time));
-                chart.timeScale().fitContent();
+                applyDefaultZoom(chart, cvArr.length, S.tf);
                 if (cvArr.length) {
                     const last = cvArr[cvArr.length - 1], d = pxDec(last.close);
                     legO.textContent = fmt(last.open, d); legH.textContent = fmt(last.high, d); legL.textContent = fmt(last.low, d);
@@ -1455,7 +1653,7 @@
                 const cvArr = [...candleMap2.values()].sort((a,b)=>a.time-b.time);
                 oldestTs2 = cvArr.length ? cvArr[0].time : null;
                 candles2.setData(cvArr); volSeries2.setData([...volMap2.values()].sort((a,b)=>a.time-b.time));
-                chart2.timeScale().fitContent();
+                applyDefaultZoom(chart2, cvArr.length, S.tf);
                 if (cvArr.length) {
                     const last = cvArr[cvArr.length - 1], d = pxDec(last.close);
                     legO2.textContent = fmt(last.open, d); legH2.textContent = fmt(last.high, d); legL2.textContent = fmt(last.low, d);
@@ -1613,7 +1811,13 @@
             if (!S.aggTick || !ticks.includes(S.aggTick)) S.aggTick = ticks[0];
             $('ob-agg-btns').innerHTML = ticks.map(t => `<button class="agg-btn${S.aggTick === t ? ' active' : ''}" onclick="setAgg(${t})">${fmtTick(t)}</button>`).join('');
         }
-        function setAgg(tick) { S.aggTick = tick; document.querySelectorAll('.agg-btn').forEach(b => b.classList.toggle('active', parseFloat(b.textContent) === tick || b.textContent === fmtTick(tick))); }
+        function setAgg(tick) {
+            S.aggTick = tick;
+            document.querySelectorAll('.agg-btn').forEach(b => b.classList.toggle('active', parseFloat(b.textContent) === tick || b.textContent === fmtTick(tick)));
+            if (latestBookSnapshot.bids.length && latestBookSnapshot.asks.length) {
+                renderBook(latestBookSnapshot.bids, latestBookSnapshot.asks);
+            }
+        }
 
         // ── Orderbook fetch (REST) ─────────────────────────────────
         async function fetchBook() {
@@ -1638,6 +1842,17 @@
         }
 
         function renderBook(bids, asks) {
+            const nextBids = Array.isArray(bids) ? bids : [];
+            const nextAsks = Array.isArray(asks) ? asks : [];
+            if (nextBids.length && nextAsks.length) {
+                latestBookSnapshot = { bids: nextBids, asks: nextAsks };
+            } else if (latestBookSnapshot.bids.length && latestBookSnapshot.asks.length) {
+                bids = latestBookSnapshot.bids;
+                asks = latestBookSnapshot.asks;
+            } else {
+                return;
+            }
+
             const d = pxDec(S.markPx || 1000), tick = S.aggTick || 0;
             const aggAsks = aggregateLevels(asks, tick, 'ask').slice(0, ROWS), aggBids = aggregateLevels(bids, tick, 'bid').slice(0, ROWS);
             let maxT = 0, aLvl = [], bLvl = [], cum = 0;
@@ -1646,8 +1861,10 @@
             for (const b of aggBids) { cum += b.px * b.sz; bLvl.push({ px: b.px, sz: b.px * b.sz, cum }); }
             maxT = Math.max(maxT, cum);
 
-            obAsks.innerHTML = [...aLvl].reverse().map(lv => `<div class="ob-row"><div class="bar ask-bar" style="width:${maxT > 0 ? (lv.cum/maxT*100).toFixed(1) : 0}%"></div><span class="c1 ask">${fmt(lv.px, d)}</span><span class="c2">${fmtK(lv.sz)}</span><span class="c3">${fmtK(lv.cum)}</span></div>`).join('');
-            obBids.innerHTML = bLvl.map(lv => `<div class="ob-row"><div class="bar bid-bar" style="width:${maxT > 0 ? (lv.cum/maxT*100).toFixed(1) : 0}%"></div><span class="c1 bid">${fmt(lv.px, d)}</span><span class="c2">${fmtK(lv.sz)}</span><span class="c3">${fmtK(lv.cum)}</span></div>`).join('');
+            ensureOrderBookRows();
+            const displayAsks = [...aLvl].reverse();
+            orderBookRows.ask.forEach((rowRef, index) => updateOrderBookRow(rowRef, displayAsks[index], maxT, d));
+            orderBookRows.bid.forEach((rowRef, index) => updateOrderBookRow(rowRef, bLvl[index], maxT, d));
 
             if (aggAsks.length && aggBids.length) {
                 const bestAsk = Number(aggAsks[0].px), bestBid = Number(aggBids[0].px);
@@ -1835,12 +2052,12 @@
                             if (coinStr === S.coin) {
                                 candles.update(bar);
                                 if (candleMap.has(bar.time)) { const old = candleMap.get(bar.time); old.open = bar.open; old.high = bar.high; old.low = bar.low; old.close = bar.close; }
-                                volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#2EBD8540' : '#F6465D40' });
+                                volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#59A47F55' : '#AD354255' });
                             }
                             if (S.chart2Active && coinStr === S.coin2) {
                                 candles2.update(bar);
                                 if (candleMap2.has(bar.time)) { const old = candleMap2.get(bar.time); old.open = bar.open; old.high = bar.high; old.low = bar.low; old.close = bar.close; }
-                                volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#2EBD8540' : '#F6465D40' });
+                                volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#59A47F55' : '#AD354255' });
                             }
                         }
                     }
@@ -2204,7 +2421,6 @@
             await fetchCandles();
             await fetchBook();
             connectWs();
-            setInterval(() => { if (!document.hidden) fetchBook(); }, 1000);
         }
 
         init();

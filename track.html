@@ -34,20 +34,20 @@
     :root {
       font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color-scheme: dark;
-      --bg: #0b0b0f;
-      --bg-soft: #111319;
-      --panel: rgba(8, 11, 18, 0.68);
-      --panel-strong: rgba(10, 10, 12, 0.88);
+      --bg: #181613;
+      --bg-soft: #211d19;
+      --panel: rgba(24, 22, 19, 0.76);
+      --panel-strong: rgba(24, 22, 19, 0.92);
       --panel-muted: rgba(255, 255, 255, 0.03);
-      --card-bg: rgba(10, 10, 12, 0.88);
-      --accent: #26d97f;
-      --accent-soft: rgba(38, 217, 127, 0.18);
-      --danger: #f25f5c;
+      --card-bg: rgba(24, 22, 19, 0.92);
+      --accent: #59A47F;
+      --accent-soft: rgba(89, 164, 127, 0.18);
+      --danger: #AD3542;
       --border: rgba(255,255,255,0.08);
       --border-strong: rgba(255, 255, 255, 0.18);
       --muted: rgba(245,245,255,0.62);
       --text-main: #f5f5ff;
-      --glass: rgba(10, 10, 12, 0.88);
+      --glass: rgba(24, 22, 19, 0.92);
       --glass-border: rgba(255, 255, 255, 0.08);
       --accent-blue: #0070f3;
       --accent-cyan: #00b4d8;
@@ -70,7 +70,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: #0a0a0a;
+      background: var(--bg);
       background-attachment: fixed;
       color: var(--text-main);
     }
@@ -88,6 +88,16 @@
     body.embed-popup #app {
       width: calc(100vw - 12px);
       padding-top: 0;
+    }
+
+    body.embed-popup .dashboard-shell {
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    body.embed-popup .dashboard-main {
+      gap: 0.8rem;
     }
 
     @media (max-width: 720px) {
@@ -1193,12 +1203,12 @@
 
     .status-dot.connected {
       background: var(--accent);
-      box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+      box-shadow: 0 0 6px rgba(89, 164, 127, 0.7);
     }
 
     .status-dot.error {
       background: var(--danger);
-      box-shadow: 0 0 6px rgba(248, 113, 113, 0.7);
+      box-shadow: 0 0 6px rgba(173, 53, 66, 0.7);
     }
 
     .status-spinner {
@@ -1693,11 +1703,11 @@
     }
 
     .overview-direction-value .tone-long {
-      color: #4ade80;
+      color: var(--accent);
     }
 
     .overview-direction-value .tone-short {
-      color: #f87171;
+      color: var(--danger);
     }
 
     .overview-metric-list {
@@ -1743,11 +1753,11 @@
     }
 
     .overview-metric-value.overview-negative {
-      color: #fb7185;
+      color: var(--danger);
     }
 
     .overview-metric-value.overview-positive {
-      color: #4ade80;
+      color: var(--accent);
     }
 
     @media (max-width: 720px) {
@@ -1874,11 +1884,11 @@
 
     .position-row.expanded .chevron {
       transform: rotate(-135deg);
-      border-color: #18bf98;
+      border-color: var(--accent);
     }
 
-    .upnl-pos { color: #4ade80; }
-    .upnl-neg { color: #fb7185; }
+    .upnl-pos { color: var(--accent); }
+    .upnl-neg { color: var(--danger); }
 
     .position-breakdown {
       margin-top: 0.25rem;
@@ -1932,7 +1942,7 @@
     }
 
     thead {
-      background: #17181f;
+      background: #221f1b;
       position: sticky;
       top: 0;
       z-index: 1;
@@ -1945,7 +1955,7 @@
       white-space: nowrap;
     }
 
-    tbody tr:nth-child(even) { background: #14141c; }
+    tbody tr:nth-child(even) { background: #1d1a17; }
     tbody tr.loading-row { background: transparent; }
 
     .pill {
@@ -1975,17 +1985,17 @@
     }
 
     .pill-buy {
-      color: #4ade80;
-      border-color: rgba(22, 163, 74, 0.8);
-      background: rgba(22, 163, 74, 0.18);
-      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.2);
+      color: var(--accent);
+      border-color: rgba(89, 164, 127, 0.8);
+      background: rgba(89, 164, 127, 0.18);
+      box-shadow: 0 0 0 1px rgba(89, 164, 127, 0.2);
     }
 
     .pill-sell {
-      color: #f97373;
-      border-color: rgba(248, 113, 113, 0.6);
-      background: rgba(220, 38, 38, 0.18);
-      box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+      color: var(--danger);
+      border-color: rgba(173, 53, 66, 0.6);
+      background: rgba(173, 53, 66, 0.18);
+      box-shadow: 0 0 0 1px rgba(173, 53, 66, 0.2);
     }
 
     .pill-new {
@@ -2001,9 +2011,9 @@
     }
 
     .pill-fill {
-      color: #22c55e;
-      border-color: rgba(22, 163, 74, 0.6);
-      background: rgba(21, 128, 61, 0.16);
+      color: var(--accent);
+      border-color: rgba(89, 164, 127, 0.6);
+      background: rgba(89, 164, 127, 0.16);
     }
 
     .muted { color: var(--muted); }
@@ -2349,14 +2359,14 @@
 
     tbody tr.flash { animation: flashRow 1s ease-out; }
     @keyframes flashRow {
-      from { background: rgba(34, 197, 94, 0.22); }
-      to { background: #14141c; }
+      from { background: rgba(89, 164, 127, 0.22); }
+      to { background: #1d1a17; }
     }
 
     tbody tr.flash-cancel { animation: flashCancel 1s ease-out; }
     @keyframes flashCancel {
       from { background: rgba(244, 114, 182, 0.22); }
-      to { background: #14141c; }
+      to { background: #1d1a17; }
     }
 
     p { margin: 1.5rem 0; }
@@ -2940,9 +2950,9 @@
       text-transform: uppercase;
     }
 
-    .pnl-heatmap-legend .neg { color: #f87171; }
+    .pnl-heatmap-legend .neg { color: var(--danger); }
     .pnl-heatmap-legend .neutral { color: #94a3b8; }
-    .pnl-heatmap-legend .pos { color: #4ade80; }
+    .pnl-heatmap-legend .pos { color: var(--accent); }
 
     .transfers-wrap {
       width: 100%;
@@ -3467,8 +3477,8 @@
     body.light .notional-sub { color: #0f172a; opacity: 0.7; }
     body.light .upnl-pos { color: #16a34a; }
     body.light .upnl-neg { color: #dc2626; }
-    .favorites-metrics .upnl-pos { color: #22c55e; }
-    .favorites-metrics .upnl-neg { color: #f43f5e; }
+    .favorites-metrics .upnl-pos { color: var(--accent); }
+    .favorites-metrics .upnl-neg { color: var(--danger); }
 
 
     .linkedin-badge {
@@ -3657,14 +3667,14 @@
       width: 7px;
       height: 7px;
       border-radius: 999px;
-      background: #ef4444;
+      background: var(--danger);
       display: inline-block;
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+      box-shadow: 0 0 0 2px rgba(173, 53, 66, 0.25);
       position: relative;
     }
 
     body.light .live-dot {
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+      box-shadow: 0 0 0 2px rgba(173, 53, 66, 0.2);
     }
 
     .live-dot::after {
@@ -3672,7 +3682,7 @@
       position: absolute;
       inset: -5px;
       border-radius: 999px;
-      background: rgba(239, 68, 68, 0.35);
+      background: rgba(173, 53, 66, 0.35);
       opacity: 0.6;
       display: none;
     }
@@ -3770,7 +3780,7 @@
     .orders-filter-select {
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: #17181f;
+      background: #221f1b;
       color: var(--text-main);
       font-size: 0.75rem;
       padding: 0.2rem 0.6rem;
@@ -4891,7 +4901,7 @@
       width: 100%;
       border-radius: 12px;
       border: 1px solid var(--border);
-      background: #0b0b0f;
+      background: var(--bg);
       overflow: hidden;
     }
 
@@ -4996,8 +5006,8 @@
       color: #475569;
     }
 
-    .funding-pos { color: #4ade80; }
-    .funding-neg { color: #fb7185; }
+    .funding-pos { color: var(--accent); }
+    .funding-neg { color: var(--danger); }
 
     .price-footer.rolling .price-list {
       flex-wrap: nowrap;
@@ -5474,7 +5484,7 @@
     </div>
   </div>
 
-  <section class="card">
+    <section class="card" id="performanceSection">
     <div class="section-title performance-title">
       <h2>Performance</h2>
       <div class="performance-toolbar is-hidden" id="performanceToolbar">
@@ -6075,6 +6085,9 @@
   import * as hl from "https://esm.sh/jsr/@nktkas/hyperliquid";
 
   const DEFAULT_WALLET = "0x0b1ace05eb9ef1c3a1951b763700ecad24f27741";
+  const pageParams = new URLSearchParams(window.location.search);
+  const isEmbedPopup = pageParams.get("embed") === "popup";
+  const initialEmbedSection = normalizeEmbedSection(pageParams.get("section"));
 
   const MAX_FILL_ROWS = 100;
   const USER_FILLS_HISTORY_CAP = 2000;
@@ -6100,6 +6113,10 @@
   const marginSummaryEl = document.getElementById("marginSummary");
   const snapshotErrorEl = document.getElementById("snapshotError");
   const accountOverviewCardEl = document.querySelector(".account-overview-card");
+  const dashboardSidebarEl = document.querySelector(".dashboard-sidebar");
+  const dashboardMainEl = document.querySelector(".dashboard-main");
+  const positionsSectionEl = document.querySelector(".positions-card");
+  const performanceSectionEl = document.getElementById("performanceSection");
 
   const positionsBodyEl = document.getElementById("positionsBody");
   const positionsChartBtn = document.getElementById("positionsChartBtn");
@@ -8090,7 +8107,7 @@
 
   function applyPnlTooltipStyling(chart) {
     if (!chart?.options?.plugins?.tooltip) return;
-    const resolve = (v) => (v >= 0 ? getCssVar("--accent", "#22c55e") : getCssVar("--danger", "#ef4444"));
+    const resolve = (v) => (v >= 0 ? getCssVar("--accent", "#59A47F") : getCssVar("--danger", "#AD3542"));
     chart.options.plugins.tooltip.enabled = false;
     chart.options.plugins.tooltip.external = (context) => {
       const { chart, tooltip } = context;
@@ -8122,7 +8139,7 @@
     if (!chart?.options?.plugins?.tooltip) return;
     const resolve = (v) => {
       if (v === 0) return getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
-      return v >= 0 ? getCssVar("--danger", "#ef4444") : getCssVar("--accent", "#22c55e");
+      return v >= 0 ? getCssVar("--danger", "#AD3542") : getCssVar("--accent", "#59A47F");
     };
     chart.options.plugins.tooltip.enabled = false;
     chart.options.plugins.tooltip.external = (context) => {
@@ -8180,9 +8197,9 @@
         if (isDrawdown) {
           valueEl.style.color =
             v < 0
-              ? getCssVar("--danger", "#ef4444")
-              : v > 0
-                ? getCssVar("--accent", "#22c55e")
+              ? getCssVar("--danger", "#AD3542")
+                : v > 0
+                ? getCssVar("--accent", "#59A47F")
                 : getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
         } else {
           valueEl.style.color = getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
@@ -8219,7 +8236,7 @@
       `;
 
       const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
-      if (valueEl) valueEl.style.color = getCssVar("--accent", "#26d97f");
+      if (valueEl) valueEl.style.color = getCssVar("--accent", "#59A47F");
       positionChartTooltip(tooltipEl, chart, tooltip);
       tooltipEl.style.opacity = "1";
     };
@@ -8271,12 +8288,12 @@
   function buildEquityModeDatasets(baseDatasets, mode = "line") {
     if (mode !== "drawdown") return baseDatasets;
     return (Array.isArray(baseDatasets) ? baseDatasets : []).map((ds) => {
-      const color = "#fb7185";
+      const color = "#AD3542";
       return {
         ...ds,
         data: buildDrawdownSeries(ds?.data || [], ds?.flowData || [], ds?.pnlData || []),
         borderColor: color,
-        backgroundColor: "rgba(251, 113, 133, 0.22)",
+        backgroundColor: "rgba(173, 53, 66, 0.22)",
         fill: { target: "origin" },
       };
     });
@@ -9112,12 +9129,12 @@
     if (!ctx) return null;
 
     const pnlValue = parseSignedMoney(data.upnl);
-    const accent = pnlValue !== null && pnlValue < 0 ? "#fb7185" : "#4ade80";
-    const logoAccent = pnlValue !== null && pnlValue < 0 ? "#fb7185" : "#97fde5";
+    const accent = pnlValue !== null && pnlValue < 0 ? "#AD3542" : "#59A47F";
+    const logoAccent = accent;
 
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#0b0b0f");
-    gradient.addColorStop(1, "#0e141c");
+    gradient.addColorStop(0, "#181613");
+    gradient.addColorStop(1, "#211d19");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -9245,7 +9262,7 @@
       const pillHeight = 40;
       const pillX = 90;
       const pillY = 308;
-      const pillColor = data.direction.startsWith("SHORT") ? "#fb7185" : "#4ade80";
+      const pillColor = data.direction.startsWith("SHORT") ? "#AD3542" : "#59A47F";
       ctx.fillStyle = pillColor + "33";
       drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 20);
       ctx.fill();
@@ -9349,12 +9366,12 @@
     const ordersPerDayText = stripWholeDecimals(getMetricText(metricOrdersTradesPerDayEl));
 
     const pnlValue = parseSignedMoney(totalPnlText);
-    const accent = pnlValue !== null && pnlValue < 0 ? "#fb7185" : "#4ade80";
-    const accentSoft = pnlValue !== null && pnlValue < 0 ? "rgba(251, 113, 133, 0.18)" : "rgba(74, 222, 128, 0.18)";
+    const accent = pnlValue !== null && pnlValue < 0 ? "#AD3542" : "#59A47F";
+    const accentSoft = pnlValue !== null && pnlValue < 0 ? "rgba(173, 53, 66, 0.18)" : "rgba(89, 164, 127, 0.18)";
 
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#0b0b0f");
-    gradient.addColorStop(1, "#0e141c");
+    gradient.addColorStop(0, "#181613");
+    gradient.addColorStop(1, "#211d19");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -9453,7 +9470,7 @@
     ctx.fillStyle = accent;
     ctx.fillText(pillText, pillX + 12, pillY + 6);
     const returnValue = Number(String(returnText).replace(/[^0-9.+-]/g, ""));
-    const returnAccent = Number.isFinite(returnValue) ? (returnValue < 0 ? "#fb7185" : "#4ade80") : "#ffffff";
+    const returnAccent = Number.isFinite(returnValue) ? (returnValue < 0 ? "#AD3542" : "#59A47F") : "#ffffff";
 
     ctx.fillStyle = returnAccent;
     ctx.font = "700 98px Outfit, sans-serif";
@@ -12687,7 +12704,7 @@
         const szi = Number(p.szi ?? 0);
 
         const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
-        const dirColor = szi >= 0 ? "#4ade80" : "#fb7185";
+        const dirColor = szi >= 0 ? "#59A47F" : "#AD3542";
         const entryPx = Number(p.entryPx ?? 0);
 
         const markFromContext = getMarkPriceForCoin(coin);
@@ -15447,7 +15464,7 @@
       HYPE: "#0b5c2f",
       LINK: "#2a5ada",
     };
-    const palette = ["#38bdf8", "#26d97f", "#a78bfa", "#f472b6", "#facc15", "#fb7185", "#22d3ee", "#f59e0b"];
+    const palette = ["#38bdf8", "#59A47F", "#a78bfa", "#f472b6", "#facc15", "#AD3542", "#22d3ee", "#f59e0b"];
     const colors = rawSeries.map((item, i) => {
       const coin = (item.coin || "").toUpperCase();
       if (coin && coinColors[coin]) return coinColors[coin];
@@ -15577,8 +15594,8 @@
     const safeAlpha = Math.max(0, Math.min(1, Number(alpha)));
     const n = Number(value);
     if (!Number.isFinite(n)) return `rgba(148, 163, 184, ${safeAlpha})`;
-    if (n > 0) return `rgba(38, 217, 127, ${safeAlpha})`;
-    if (n < 0) return `rgba(242, 95, 92, ${safeAlpha})`;
+    if (n > 0) return `rgba(89, 164, 127, ${safeAlpha})`;
+    if (n < 0) return `rgba(173, 53, 66, ${safeAlpha})`;
     return `rgba(196, 202, 215, ${safeAlpha})`;
   }
 
@@ -18562,6 +18579,11 @@
 
     resetState();
     resetPortfolioSection();
+    if (!shouldPreloadPerformanceSection()) {
+      portfolioLoadSettled = true;
+      historicalFillsLoadSettled = true;
+      setPortfolioLoadingState(false, "");
+    }
 
     trackBtnEl.disabled = true;
     try {
@@ -18579,19 +18601,30 @@
         recomputeAndRenderMarginSummary();
       })();
 
-      await Promise.all([
+      const loadTasks = [
         snapshotTask,
-        loadPortfolio(walletList),
         startStreams(walletList),
-        ensureHistoricalDataLoaded(),
-      ]);
+      ];
+
+      if (shouldPreloadPerformanceSection()) {
+        loadTasks.push(loadPortfolio(walletList));
+        if (isEmbedPopup) {
+          loadTasks.push(loadHistoricalFills(walletList));
+        }
+      }
+
+      if (shouldPreloadStandaloneHistory()) {
+        loadTasks.push(ensureHistoricalDataLoaded());
+      }
+
+      await Promise.all(loadTasks);
       await initFooterStream();
       recomputeTimelineControls();
 
-      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
+      if (shouldPreloadStandaloneHistory() && historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && ordersHistoryPanelEl && !ordersHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalOrders(walletList);
       }
-      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
+      if (shouldPreloadStandaloneHistory() && historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
         await loadHistoricalFills(walletList);
       }
       await accountOverviewReadyTask;
@@ -18600,6 +18633,8 @@
       trackBtnEl.disabled = false;
     }
   }
+
+  if (isEmbedPopup) setEmbedPopupSection(initialEmbedSection);
 
   (async function boot() {
     initTheme();
@@ -19304,6 +19339,55 @@
     modeTabButtons.forEach((b) => b.classList.toggle("active", b.dataset.tab === "history"));
     updateTabSwitchIndicator(modeTabsEl);
     updateTabSwitchIndicator(modeTabsHistoryEl);
+  }
+
+  function normalizeEmbedSection(value) {
+    return value === "positions" || value === "performance" || value === "orders" || value === "overview" ? value : "overview";
+  }
+
+  function shouldPreloadPerformanceSection() {
+    return !isEmbedPopup || initialEmbedSection === "performance";
+  }
+
+  function shouldPreloadStandaloneHistory() {
+    return !isEmbedPopup;
+  }
+
+  function resizeVisiblePopupCharts() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        Object.values(portfolioCharts).forEach((chart) => {
+          if (!chart) return;
+          if (typeof chart.resize === "function") chart.resize();
+          if (typeof chart.update === "function") chart.update("none");
+        });
+      });
+    });
+  }
+
+  function setEmbedPopupSection(section) {
+    if (!isEmbedPopup) return;
+    const nextSection = normalizeEmbedSection(section);
+    document.body.dataset.popupSection = nextSection;
+    if (dashboardSidebarEl) dashboardSidebarEl.classList.toggle("hidden", nextSection !== "overview");
+    if (dashboardMainEl) dashboardMainEl.classList.toggle("hidden", nextSection === "overview");
+    if (positionsSectionEl) positionsSectionEl.classList.toggle("hidden", nextSection !== "positions");
+    if (performanceSectionEl) performanceSectionEl.classList.toggle("hidden", nextSection !== "performance");
+
+    if (nextSection === "orders") {
+      const showHistory = Array.from(modeTabButtons).some(
+        (button) => button.dataset.tab === "history" && button.classList.contains("active")
+      );
+      if (showHistory) setHistoryMode(true, lastHistoryFocus);
+      else setHistoryMode(false);
+    } else {
+      if (liveLayoutEl) liveLayoutEl.classList.add("hidden");
+      if (historyLayoutEl) historyLayoutEl.classList.add("hidden");
+    }
+
+    if (nextSection === "performance") {
+      resizeVisiblePopupCharts();
+    }
   }
 
   if (metricsToggleEl && metricsCardEl) {

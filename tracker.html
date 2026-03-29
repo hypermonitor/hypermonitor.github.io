@@ -19,10 +19,10 @@
     :root {
       color-scheme: dark;
       font-family: "Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --bg: #0b0b0f;
-      --bg-soft: #111319;
-      --panel: rgba(8, 11, 18, 0.68);
-      --panel-strong: rgba(10, 10, 12, 0.88);
+      --bg: #181613;
+      --bg-soft: #211d19;
+      --panel: rgba(24, 22, 19, 0.76);
+      --panel-strong: rgba(24, 22, 19, 0.92);
       --panel-muted: rgba(255, 255, 255, 0.03);
       --border: rgba(255, 255, 255, 0.08);
       --border-strong: rgba(255, 255, 255, 0.18);
@@ -32,13 +32,13 @@
       --muted-strong: rgba(245, 245, 255, 0.82);
       --accent: #ffffff;
       --accent-soft: rgba(255, 255, 255, 0.08);
-      --accent-green: #26d97f;
-      --accent-green-soft: rgba(38, 217, 127, 0.16);
+      --accent-green: #59A47F;
+      --accent-green-soft: rgba(89, 164, 127, 0.16);
       --accent-cyan: #00b4d8;
       --accent-blue: #0070f3;
       --accent-amber: #f3c969;
-      --danger: #f25f5c;
-      --danger-soft: rgba(242, 95, 92, 0.16);
+      --danger: #AD3542;
+      --danger-soft: rgba(173, 53, 66, 0.16);
       --glass-border: rgba(255, 255, 255, 0.08);
       --neutral-blue: rgba(124, 176, 255, 0.95);
       --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
@@ -61,7 +61,7 @@
     body {
       margin: 0;
       color: var(--text);
-      background: #0a0a0a;
+      background: var(--bg);
       background-attachment: fixed;
     }
 
@@ -103,7 +103,7 @@
       padding: 5px 0 7px;
       margin-bottom: 4px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      background: #0a0a0a;
+      background: var(--bg);
       box-shadow: none;
       backdrop-filter: none;
     }
@@ -338,7 +338,7 @@
     .primary-btn {
       border-color: #fff;
       background: #fff;
-      color: #0a0a0a;
+      color: var(--bg);
     }
 
     .primary-btn:hover {
@@ -477,7 +477,7 @@
       min-height: 0;
       border: none;
       display: block;
-      background: #060709;
+      background: var(--bg);
     }
 
     .trade-view-stack {
@@ -493,8 +493,8 @@
       flex-direction: column;
       min-height: 0;
       overflow: hidden;
-      background: #0a0a0a;
-      border-color: #1e2329;
+      background: var(--bg);
+      border-color: #2d2924;
       box-shadow: none;
       backdrop-filter: none;
     }
@@ -579,7 +579,7 @@
 
     .sidebar-hero-card {
       background:
-        radial-gradient(circle at top right, rgba(38, 217, 127, 0.18), transparent 38%),
+        radial-gradient(circle at top right, rgba(89, 164, 127, 0.18), transparent 38%),
         radial-gradient(circle at bottom left, rgba(0, 112, 243, 0.16), transparent 42%),
         linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.16)),
         rgba(8, 11, 18, 0.8);
@@ -650,9 +650,9 @@
     }
 
     .metric-tile-green {
-      border-color: rgba(38, 217, 127, 0.18);
+      border-color: rgba(89, 164, 127, 0.18);
       background:
-        radial-gradient(circle at top right, rgba(38, 217, 127, 0.16), transparent 42%),
+        radial-gradient(circle at top right, rgba(89, 164, 127, 0.16), transparent 42%),
         linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
         rgba(255, 255, 255, 0.03);
     }
@@ -721,12 +721,12 @@
     }
 
     .sidebar-filter.is-active {
-      border-color: rgba(38, 217, 127, 0.26);
+      border-color: rgba(89, 164, 127, 0.26);
       background:
-        radial-gradient(circle at top right, rgba(38, 217, 127, 0.16), transparent 40%),
+        radial-gradient(circle at top right, rgba(89, 164, 127, 0.16), transparent 40%),
         linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
         rgba(255, 255, 255, 0.04);
-      box-shadow: inset 0 0 0 1px rgba(38, 217, 127, 0.06);
+      box-shadow: inset 0 0 0 1px rgba(89, 164, 127, 0.06);
     }
 
     .sidebar-filter-top {
@@ -760,8 +760,8 @@
 
     .leaderboard-panel {
       overflow: hidden;
-      background: #0a0a0a;
-      border-color: #1e2329;
+      background: var(--bg);
+      border-color: #2d2924;
       box-shadow: none;
       backdrop-filter: none;
     }
@@ -769,8 +769,8 @@
     .market-heatmap-panel {
       overflow: hidden;
       background:
-        radial-gradient(circle at top right, rgba(38, 217, 127, 0.06), transparent 24%),
-        radial-gradient(circle at top left, rgba(242, 95, 92, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(89, 164, 127, 0.06), transparent 24%),
+        radial-gradient(circle at top left, rgba(173, 53, 66, 0.08), transparent 28%),
         var(--panel);
     }
 
@@ -1109,7 +1109,7 @@
       min-height: 520px;
       border: none;
       display: block;
-      background: #060709;
+      background: var(--bg);
     }
 
     .leaderboard-hero {
@@ -1264,9 +1264,9 @@
     }
 
     .summary-card-green {
-      border-color: rgba(38, 217, 127, 0.18);
+      border-color: rgba(89, 164, 127, 0.18);
       background:
-        radial-gradient(circle at top right, rgba(38, 217, 127, 0.15), transparent 40%),
+        radial-gradient(circle at top right, rgba(89, 164, 127, 0.15), transparent 40%),
         linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
         rgba(255, 255, 255, 0.02);
     }
@@ -1321,7 +1321,7 @@
       gap: 4px;
       padding: 10px 14px 0;
       border-bottom: 1px solid var(--border);
-      background: #0a0a0a;
+      background: var(--bg);
     }
 
     .active-filters-bar.is-hidden {
@@ -1356,13 +1356,13 @@
       position: relative;
       overflow: auto;
       max-height: min(72vh, 1080px);
-      padding: 0 14px 14px;
+      padding: 0 0 14px;
       background: transparent;
     }
 
     .table-wrap.loading {
       min-height: 520px;
-      background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.06), transparent 42%);
+      background: var(--bg);
     }
 
     .loading-overlay {
@@ -1374,10 +1374,7 @@
       flex-direction: column;
       gap: 10px;
       pointer-events: none;
-      color: var(--muted);
-      font-size: 0.88rem;
-      letter-spacing: 0.02em;
-      background: linear-gradient(180deg, rgba(10, 12, 18, 0.4), rgba(10, 12, 18, 0.16));
+      background: var(--bg);
     }
 
     .table-wrap.loading .loading-overlay {
@@ -1403,7 +1400,7 @@
       position: sticky;
       top: 0;
       z-index: 5;
-      background: #17181f;
+      background: #221f1b;
       backdrop-filter: none;
     }
 
@@ -1482,6 +1479,11 @@
       user-select: none;
     }
 
+    th.sortable[data-sort-dir="asc"]::after,
+    th.sortable[data-sort-dir="desc"]::after {
+      content: "";
+    }
+
     th.sortable:hover {
       color: var(--muted-strong);
     }
@@ -1491,7 +1493,7 @@
     }
 
     tbody tr:nth-child(even) {
-      background: #14141c;
+      background: #1d1a17;
     }
 
     tbody tr[data-wallet] {
@@ -1507,32 +1509,53 @@
     }
 
     .rank-badge {
+      position: relative;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      min-width: 30px;
-      padding: 0.18rem 0.38rem;
-      border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
+      justify-content: flex-start;
+      min-width: 2.4rem;
+      padding-left: 0.72rem;
+      color: var(--muted-strong);
       font-weight: 600;
       font-variant-numeric: tabular-nums;
-      font-size: 0.72rem;
+      font-size: 0.76rem;
+      letter-spacing: 0.02em;
+    }
+
+    .rank-badge::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-50%);
     }
 
     tbody tr:nth-child(1) .rank-badge {
-      border-color: rgba(38, 217, 127, 0.28);
-      background: rgba(38, 217, 127, 0.12);
+      color: var(--accent-green);
     }
 
     tbody tr:nth-child(2) .rank-badge {
-      border-color: rgba(0, 180, 216, 0.28);
-      background: rgba(0, 180, 216, 0.12);
+      color: rgba(0, 180, 216, 0.96);
     }
 
     tbody tr:nth-child(3) .rank-badge {
-      border-color: rgba(243, 201, 105, 0.28);
-      background: rgba(243, 201, 105, 0.1);
+      color: rgba(243, 201, 105, 0.96);
+    }
+
+    tbody tr:nth-child(1) .rank-badge::before {
+      background: var(--accent-green);
+    }
+
+    tbody tr:nth-child(2) .rank-badge::before {
+      background: rgba(0, 180, 216, 0.96);
+    }
+
+    tbody tr:nth-child(3) .rank-badge::before {
+      background: rgba(243, 201, 105, 0.96);
     }
 
     .wallet-link {
@@ -1575,9 +1598,9 @@
     }
 
     .mini-chip.bad {
-      border-color: rgba(242, 95, 92, 0.28);
-      background: rgba(242, 95, 92, 0.08);
-      color: #ffdada;
+      border-color: rgba(173, 53, 66, 0.28);
+      background: rgba(173, 53, 66, 0.08);
+      color: #f3cbd0;
     }
 
     .money,
@@ -1598,38 +1621,15 @@
     }
 
     .score-cell {
-      display: grid;
-      gap: 4px;
-      min-width: 0;
-    }
-
-    .score-cell-top {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      min-width: 0;
     }
 
     .score-value {
       font-size: 0.76rem;
       line-height: 1;
-    }
-
-    .score-bar {
-      position: relative;
-      width: 100%;
-      height: 5px;
-      border-radius: 6px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .score-bar > span {
-      position: absolute;
-      inset: 0 auto 0 0;
-      border-radius: inherit;
-      background: var(--score-fill, linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(150, 150, 150, 0.92)));
-      box-shadow: 0 0 16px var(--score-glow, transparent);
+      font-variant-numeric: tabular-nums;
     }
 
     .score-value {
@@ -1692,7 +1692,7 @@
       padding: 0.12rem;
       border-radius: 999px;
       border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      background: rgba(24, 22, 19, 0.45);
       position: static;
       z-index: 2;
     }
@@ -1884,7 +1884,7 @@
       height: 26px;
       padding: 0;
       border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      background: rgba(24, 22, 19, 0.45);
       color: #e2e8f0;
       border-radius: 999px;
       font-size: 0.82rem;
@@ -1895,7 +1895,7 @@
 
     .price-add-toggle-btn:hover {
       border-color: rgba(255,255,255,0.22);
-      background: rgba(18, 18, 24, 0.6);
+      background: rgba(33, 29, 25, 0.6);
       color: #f8fafc;
     }
 
@@ -1903,7 +1903,7 @@
       padding: 0.3rem 0.5rem;
       border-radius: 8px;
       border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.35);
+      background: rgba(24, 22, 19, 0.35);
       color: #e2e8f0;
       font-size: 0.72rem;
       outline: none;
@@ -1918,7 +1918,7 @@
 
     .price-add-btn {
       border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
+      background: rgba(24, 22, 19, 0.45);
       color: #e2e8f0;
       padding: 0.25rem 0.6rem;
       border-radius: 999px;
@@ -1931,7 +1931,7 @@
 
     .price-add-btn:hover {
       border-color: rgba(255,255,255,0.22);
-      background: rgba(18, 18, 24, 0.6);
+      background: rgba(33, 29, 25, 0.6);
       color: #f8fafc;
     }
 
@@ -2056,7 +2056,7 @@
       width: min(1460px, calc(100vw - 36px));
       height: min(92vh, 1020px);
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
       overflow: hidden;
       background: #101014;
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -2099,6 +2099,47 @@
       gap: 8px;
     }
 
+    .wallet-modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .wallet-modal-tab-list {
+      display: flex;
+      width: 100%;
+    }
+
+    .wallet-modal-tab {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 9px 0;
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0;
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+
+    .wallet-modal-tab:hover {
+      color: var(--text);
+    }
+
+    .wallet-modal-tab.is-active {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+
+    .wallet-modal-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
     .icon-btn {
       width: 40px;
       height: 40px;
@@ -2125,11 +2166,14 @@
       height: 100%;
       border: none;
       display: block;
-      background: #0b0b0f;
+      background: var(--bg);
     }
 
     .sort-indicator {
-      margin-left: 6px;
+      margin-left: 0.25rem;
+      font-size: 0.5rem;
+      letter-spacing: 0.02em;
+      opacity: 0.9;
       color: var(--muted-strong);
     }
 
@@ -2298,7 +2342,6 @@
       .toolbar,
       .summary-grid,
       .active-filters-bar,
-      .table-wrap,
       .footer-note {
         padding-left: 14px;
         padding-right: 14px;
@@ -2335,6 +2378,32 @@
         align-items: flex-end;
       }
 
+      .wallet-modal-tab {
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+
+      .wallet-modal-tabs {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        touch-action: pan-x;
+      }
+
+      .wallet-modal-tab-list {
+        width: max-content;
+        min-width: 100%;
+      }
+
+      .wallet-modal-tab {
+        flex: 0 0 auto;
+        min-width: max-content;
+        padding-left: 14px;
+        padding-right: 14px;
+        scroll-snap-align: center;
+      }
+
       .price-footer-inner {
         width: calc(100vw - 8px);
       }
@@ -2368,11 +2437,6 @@
         <img src="images/logo.png" alt="Hypermonitor logo" />
         <h1 class="brand-name"><span class="hyper">Hyper</span><em>monitor</em></h1>
       </a>
-
-      <nav class="top-nav" aria-label="Tracker sections">
-        <a class="nav-link is-active" href="?view=trade" data-view-target="trade">Trade</a>
-        <a class="nav-link" href="?view=explore" data-view-target="explore">Explore</a>
-      </nav>
 
       <form class="header-search-form" id="headerSearchForm" autocomplete="off">
         <label class="sr-only" for="headerSearchInput">Search wallet address or coin</label>
@@ -2414,145 +2478,26 @@
             </div>
 
             <div class="table-wrap loading" id="tradeTableWrap">
-              <div class="loading-overlay">
-                <img src="images/pulse.gif" alt="Hypermonitor loading logo" />
-                <span>Loading leaderboard...</span>
-              </div>
+              <div class="loading-overlay"></div>
               <table>
                 <thead>
                   <tr>
-                    <th>Rank</th>
-                    <th>Wallet</th>
-                    <th>Account value</th>
-                    <th>PnL</th>
-                    <th>ROI</th>
-                    <th class="hide-mobile">Volume</th>
-                    <th>Quality</th>
-                    <th class="hide-tablet">Trend</th>
-                    <th class="hide-tablet">Consistency</th>
-                    <th class="hide-mobile">Activity</th>
+                    <th class="sortable" data-key="rank">Rank<span class="sort-indicator"></span></th>
+                    <th class="sortable" data-key="address">Wallet<span class="sort-indicator"></span></th>
+                    <th class="sortable" data-key="accountValue">Account value<span class="sort-indicator"></span></th>
+                    <th class="sortable" data-key="pnl">PnL<span class="sort-indicator"></span></th>
+                    <th class="sortable" data-key="roi">ROI<span class="sort-indicator"></span></th>
+                    <th class="sortable hide-mobile" data-key="volume">Volume<span class="sort-indicator"></span></th>
+                    <th class="sortable" data-key="walletScore">Quality<span class="sort-indicator"></span></th>
+                    <th class="sortable hide-tablet" data-key="trendScore">Trend<span class="sort-indicator"></span></th>
+                    <th class="sortable hide-tablet" data-key="consistencyScore">Consistency<span class="sort-indicator"></span></th>
+                    <th class="sortable hide-mobile" data-key="activityScore">Activity<span class="sort-indicator"></span></th>
                   </tr>
                 </thead>
-                <tbody id="tradeTbody">
-                  <tr>
-                    <td colspan="10" class="table-empty">Loading leaderboard...</td>
-                  </tr>
-                </tbody>
+                <tbody id="tradeTbody"></tbody>
               </table>
             </div>
           </section>
-        </div>
-      </section>
-
-      <section class="view" id="exploreView" aria-labelledby="exploreTitle">
-        <h1 class="sr-only" id="exploreTitle">Explore</h1>
-
-        <div class="explore-layout">
-          <aside class="sidebar">
-            <section class="panel sidebar-card">
-              <div class="sidebar-card-head">
-                <div class="sidebar-section-title">Profit profile</div>
-                <p class="sidebar-section-copy">Group wallets by realized performance in the selected window.</p>
-              </div>
-              <div class="sidebar-section" id="profitFilterList"></div>
-            </section>
-
-            <section class="panel sidebar-card">
-              <div class="sidebar-card-head">
-                <div class="sidebar-section-title">Wallet size</div>
-                <p class="sidebar-section-copy">Quickly jump between small accounts, whales, and apex balances.</p>
-              </div>
-              <div class="sidebar-section" id="sizeFilterList"></div>
-            </section>
-          </aside>
-
-          <div class="explore-main">
-            <section class="panel market-heatmap-panel">
-              <div class="market-heatmap-head">
-                <div class="market-heatmap-copy">
-                  <div class="explore-market-eyebrow">Market breadth</div>
-                  <h2 class="explore-market-title">Hyperliquid heatmap</h2>
-                  <p class="explore-market-subtitle">Size by 24h volume, color by 24h move. Click any tile to open that market in the trade shell.</p>
-                </div>
-                <div class="market-heatmap-meta">
-                  <div class="market-heatmap-summary" id="marketHeatmapSummary"></div>
-                  <div class="market-heatmap-legend">
-                    <div class="market-heatmap-legend-scale" aria-hidden="true"></div>
-                    <div class="market-heatmap-legend-labels">
-                      <span>Losers</span>
-                      <span>Flat</span>
-                      <span>Gainers</span>
-                    </div>
-                  </div>
-                  <div class="market-heatmap-status" id="marketHeatmapStatus">Loading live market breadth…</div>
-                </div>
-              </div>
-              <div class="market-heatmap-wrap">
-                <div class="market-heatmap-board is-loading" id="marketHeatmapBoard">
-                  <div class="market-heatmap-tiles" id="marketHeatmapTiles"></div>
-                  <div class="market-heatmap-overlay" id="marketHeatmapOverlay">
-                    <img src="images/pulse.png" alt="Hypermonitor loading logo" />
-                    <span>Loading market heatmap...</span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section class="panel leaderboard-panel">
-              <div class="active-filters-bar is-hidden">
-                <div class="active-filters" id="activeFilters"></div>
-              </div>
-
-              <div class="table-wrap loading" id="tableWrap">
-                <div class="loading-overlay" id="loadingOverlay">
-                  <img src="images/pulse.gif" alt="Hypermonitor loading logo" />
-                  <span>Loading leaderboard...</span>
-                </div>
-                <table>
-                  <thead>
-                    <tr>
-                      <th class="sortable" data-key="rank">Rank<span class="sort-indicator" id="sort-rank"></span></th>
-                      <th>Wallet</th>
-                      <th class="sortable" data-key="accountValue">Account value<span class="sort-indicator" id="sort-accountValue"></span></th>
-                      <th class="sortable" data-key="pnl">PnL<span class="sort-indicator" id="sort-pnl"></span></th>
-                      <th class="sortable" data-key="roi">ROI<span class="sort-indicator" id="sort-roi"></span></th>
-                      <th class="sortable hide-mobile" data-key="volume">Volume<span class="sort-indicator" id="sort-volume"></span></th>
-                      <th class="sortable" data-key="walletScore">Quality<span class="sort-indicator" id="sort-walletScore"></span></th>
-                      <th class="sortable hide-tablet" data-key="trendScore">Trend<span class="sort-indicator" id="sort-trendScore"></span></th>
-                      <th class="sortable hide-tablet" data-key="consistencyScore">Consistency<span class="sort-indicator" id="sort-consistencyScore"></span></th>
-                      <th class="sortable hide-mobile" data-key="activityScore">Activity<span class="sort-indicator" id="sort-activityScore"></span></th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbody">
-                    <tr>
-                      <td colspan="10" class="table-empty">Loading leaderboard...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="footer-note">
-                Wallet rows now open the standalone <code>track.html</code> page directly. Ranking data continues to use
-                the current Hypermonitor leaderboard feed.
-              </div>
-            </section>
-
-            <section class="panel explore-market-panel">
-              <div class="explore-market-head">
-                <div class="explore-market-copy">
-                  <div class="explore-market-eyebrow">Market context</div>
-                  <h2 class="explore-market-title">Live trade terminal</h2>
-                  <p class="explore-market-subtitle">A shorter terminal view under the leaderboard for quick market context.</p>
-                </div>
-              </div>
-              <iframe
-                class="explore-market-frame"
-                id="exploreTradeFrame"
-                title="Hypermonitor market context"
-                loading="lazy"
-              ></iframe>
-            </section>
-          </div>
         </div>
       </section>
     </main>
@@ -2638,6 +2583,14 @@
           </a>
           <button class="ghost-btn" type="button" id="copyWalletLinkBtn">Copy link</button>
           <button class="icon-btn" type="button" id="closeWalletModalBtn" aria-label="Close wallet tracker">&times;</button>
+        </div>
+      </div>
+      <div class="wallet-modal-tabs" aria-label="Wallet sections">
+        <div class="wallet-modal-tab-list" role="tablist" aria-label="Wallet section tabs">
+          <button class="wallet-modal-tab is-active" type="button" data-wallet-section="overview" aria-selected="true">Account Overview</button>
+          <button class="wallet-modal-tab" type="button" data-wallet-section="positions" aria-selected="false">Positions</button>
+          <button class="wallet-modal-tab" type="button" data-wallet-section="performance" aria-selected="false">Performance</button>
+          <button class="wallet-modal-tab" type="button" data-wallet-section="orders" aria-selected="false">Orders</button>
         </div>
       </div>
       <iframe id="walletTrackerFrame" title="Hypermonitor wallet tracker"></iframe>
@@ -2730,9 +2683,9 @@
     ];
 
     const state = {
-      view: "trade",
       coin: "BTC",
       wallet: "",
+      walletModalSection: "overview",
       rawRows: [],
       normalizedRows: [],
       displayRows: [],
@@ -2753,15 +2706,7 @@
     let marketHeatmapPromise = null;
     let marketHeatmapRefreshTimer = null;
 
-    const menuButtons = Array.from(document.querySelectorAll(".nav-link"));
-    const viewPanels = {
-      trade: document.getElementById("tradeView"),
-      explore: document.getElementById("exploreView")
-    };
-
     const tradeFrame = document.getElementById("tradeFrame");
-    const exploreTradeFrame = document.getElementById("exploreTradeFrame");
-    const openTradeTabLink = document.getElementById("openTradeTabLink");
     const marketChipGroup = document.getElementById("marketChipGroup");
     const tradeWalletInline = document.getElementById("tradeWalletInline");
     const tradeWalletText = document.getElementById("tradeWalletText");
@@ -2815,6 +2760,7 @@
     const walletModalBackdrop = document.getElementById("walletModalBackdrop");
     const walletTrackerFrame = document.getElementById("walletTrackerFrame");
     const walletModalSubtitle = document.getElementById("walletModalSubtitle");
+    const walletModalTabButtons = Array.from(document.querySelectorAll("[data-wallet-section]"));
     const closeWalletModalBtn = document.getElementById("closeWalletModalBtn");
     const openStandaloneWallet = document.getElementById("openStandaloneWallet");
     const copyWalletLinkBtn = document.getElementById("copyWalletLinkBtn");
@@ -2889,6 +2835,7 @@
     let footerUsdJpyPromise = null;
     let footerAddCompactOpen = false;
     let priceContextCoin = null;
+    let lastFooterDragEndedAt = 0;
     let footerQuotesByCoin = new Map();
     const coinNameCache = new Map();
     const coinColorCache = new Map();
@@ -2910,12 +2857,6 @@
     let manualMidTimer = null;
     let lastManualMidRefreshRequestMs = 0;
     let footerDexNames = null;
-
-    function parseView() {
-      const params = new URLSearchParams(window.location.search);
-      const value = (params.get("view") || "trade").toLowerCase();
-      return value === "explore" ? "explore" : "trade";
-    }
 
     function parseCoin() {
       const params = new URLSearchParams(window.location.search);
@@ -3120,23 +3061,9 @@
       }
     }
 
-    function renderLoadingRows(count = 12) {
-      const rows = Array.from({ length: count }, () => (
-        "<tr>" +
-          "<td><span class='rank-badge'>-</span></td>" +
-          "<td><div class='wallet-link'><strong>Loading...</strong><span class='wallet-meta'>Updating leaderboard</span></div></td>" +
-          "<td class='money'>-</td>" +
-          "<td class='money'>-</td>" +
-          "<td class='money'>-</td>" +
-          "<td class='money hide-mobile'>-</td>" +
-          "<td><div class='score-cell'><div class='score-cell-top'><span class='score-value'>-</span></div><div class='score-bar'><span style='width:0%'></span></div></div></td>" +
-          "<td class='hide-tablet'>-</td>" +
-          "<td class='hide-tablet'>-</td>" +
-          "<td class='hide-mobile'>-</td>" +
-        "</tr>"
-      )).join("");
+    function renderLoadingRows() {
       leaderboardBodies.forEach((body) => {
-        body.innerHTML = rows;
+        body.innerHTML = "";
       });
     }
 
@@ -3214,27 +3141,21 @@
       return "rgb(" + red + ", " + green + ", " + blue + ")";
     }
 
-    function rgbaFromRgb(rgb, alpha) {
-      const match = String(rgb || "").match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i);
-      if (!match) return rgb;
-      return "rgba(" + match[1] + ", " + match[2] + ", " + match[3] + ", " + alpha + ")";
-    }
-
     function getSignedToneColor(value, maxAbs = 100) {
       const n = Number(value);
       if (!Number.isFinite(n)) return "rgb(226, 232, 240)";
       const weight = Math.min(1, Math.abs(n) / Math.max(1, maxAbs));
       if (n >= 0) {
         return rgbString(
-          mixChannel(214, 74, weight),
-          mixChannel(219, 222, weight),
-          mixChannel(231, 128, weight)
+          mixChannel(214, 89, weight),
+          mixChannel(219, 164, weight),
+          mixChannel(231, 127, weight)
         );
       }
       return rgbString(
-        mixChannel(214, 251, weight),
-        mixChannel(219, 113, weight),
-        mixChannel(231, 133, weight)
+        mixChannel(214, 173, weight),
+        mixChannel(219, 53, weight),
+        mixChannel(231, 66, weight)
       );
     }
 
@@ -3244,22 +3165,17 @@
       if (safePercent >= 50) {
         const weight = (safePercent - 50) / 50;
         return rgbString(
-          mixChannel(214, 74, weight),
-          mixChannel(219, 222, weight),
-          mixChannel(231, 128, weight)
+          mixChannel(214, 89, weight),
+          mixChannel(219, 164, weight),
+          mixChannel(231, 127, weight)
         );
       }
       const weight = safePercent / 50;
       return rgbString(
-        mixChannel(251, 214, weight),
-        mixChannel(113, 219, weight),
-        mixChannel(133, 231, weight)
+        mixChannel(173, 214, weight),
+        mixChannel(53, 219, weight),
+        mixChannel(66, 231, weight)
       );
-    }
-
-    function getScoreFillStyle(percent) {
-      const color = getScoreToneColor(percent);
-      return "linear-gradient(90deg, " + rgbaFromRgb(color, 0.94) + ", " + rgbaFromRgb(color, 0.62) + ")";
     }
 
     function setMarketHeatmapState(isLoading, message = "", isEmpty = false) {
@@ -3574,14 +3490,21 @@
       }, 180000);
     }
 
-    function getNumericSortValue(row, key) {
+    function getLeaderboardSortValue(row, key) {
+      if (key === "address") {
+        return String(row?.address || "").toLowerCase();
+      }
       const value = row[key];
       return Number.isFinite(Number(value)) ? Number(value) : NaN;
     }
 
+    function getLeaderboardSortDefaultDir(key) {
+      return key === "rank" || key === "address" ? "asc" : "desc";
+    }
+
     function updateUrl(push = false) {
       const url = new URL(window.location.href);
-      url.searchParams.set("view", state.view);
+      url.searchParams.delete("view");
       url.searchParams.set("coin", state.coin);
       if (state.wallet) url.searchParams.set("wallet", state.wallet);
       else url.searchParams.delete("wallet");
@@ -3591,7 +3514,7 @@
 
     function buildWalletShellHref(wallet) {
       const url = new URL(window.location.href);
-      url.searchParams.set("view", state.view);
+      url.searchParams.delete("view");
       url.searchParams.set("coin", state.coin);
       url.searchParams.set("wallet", wallet);
       return url.toString();
@@ -3601,8 +3524,12 @@
       return "track.html?wallet=" + encodeURIComponent(wallet);
     }
 
-    function buildWalletPopupHref(wallet) {
-      return buildWalletTrackerHref(wallet) + "&embed=popup";
+    function normalizeWalletModalSection(value) {
+      return value === "positions" || value === "performance" || value === "orders" || value === "overview" ? value : "overview";
+    }
+
+    function buildWalletPopupHref(wallet, section = state.walletModalSection) {
+      return buildWalletTrackerHref(wallet) + "&embed=popup&section=" + encodeURIComponent(normalizeWalletModalSection(section));
     }
 
     async function fetchHyperliquidInfo(payload) {
@@ -5626,31 +5553,10 @@
 
     function openCoinInShell(nextCoin, options = {}) {
       const normalizedCoin = normalizeCoinQuery(nextCoin) || "BTC";
-      setView("trade", { fromPopState: true });
       setCoin(normalizedCoin, { fromPopState: true });
       if (state.wallet) {
         closeWalletOverlay({ fromPopState: true });
       }
-      if (!options.fromPopState) {
-        updateUrl(options.pushHistory === true);
-      }
-    }
-
-    function setView(nextView, options = {}) {
-      const view = nextView === "explore" ? "explore" : "trade";
-      state.view = view;
-
-      menuButtons.forEach((button) => {
-        const isActive = button.dataset.viewTarget === view;
-        button.classList.toggle("is-active", isActive);
-        if (isActive) button.setAttribute("aria-current", "page");
-        else button.removeAttribute("aria-current");
-      });
-
-      Object.entries(viewPanels).forEach(([key, panel]) => {
-        panel.classList.toggle("is-active", key === view);
-      });
-
       if (!options.fromPopState) {
         updateUrl(options.pushHistory === true);
       }
@@ -5675,10 +5581,6 @@
       if (tradeFrame.getAttribute("src") !== src) {
         tradeFrame.setAttribute("src", src);
       }
-      if (exploreTradeFrame && exploreTradeFrame.getAttribute("src") !== src) {
-        exploreTradeFrame.setAttribute("src", src);
-      }
-      if (openTradeTabLink) openTradeTabLink.href = src;
     }
 
     function syncWalletUi() {
@@ -5696,15 +5598,40 @@
       }
     }
 
+    function syncWalletModalTabs() {
+      walletModalTabButtons.forEach((button) => {
+        const isActive = button.dataset.walletSection === state.walletModalSection;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-selected", isActive ? "true" : "false");
+        if (isActive && window.matchMedia("(max-width: 720px)").matches) {
+          requestAnimationFrame(() => {
+            button.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+          });
+        }
+      });
+    }
+
+    function setWalletModalSection(nextSection, options = {}) {
+      const normalizedSection = normalizeWalletModalSection(nextSection);
+      const sectionChanged = normalizedSection !== state.walletModalSection;
+      state.walletModalSection = normalizedSection;
+      syncWalletModalTabs();
+      if (options.syncFrame !== false && walletTrackerFrame && state.wallet && (sectionChanged || options.forceReload === true)) {
+        walletTrackerFrame.src = buildWalletPopupHref(state.wallet, state.walletModalSection);
+      }
+    }
+
     function openWalletOverlay(wallet, options = {}) {
       const targetWallet = (wallet || "").trim();
       if (!targetWallet) return;
 
       state.wallet = targetWallet;
+      state.walletModalSection = normalizeWalletModalSection(options.section || "overview");
       syncWalletUi();
+      syncWalletModalTabs();
 
       const trackerHref = buildWalletTrackerHref(targetWallet);
-      const popupHref = buildWalletPopupHref(targetWallet);
+      const popupHref = buildWalletPopupHref(targetWallet, state.walletModalSection);
       walletModalSubtitle.textContent = targetWallet;
       openStandaloneWallet.href = trackerHref;
       walletTrackerFrame.src = popupHref;
@@ -5721,7 +5648,9 @@
 
     function closeWalletOverlay(options = {}) {
       state.wallet = "";
+      state.walletModalSection = "overview";
       syncWalletUi();
+      syncWalletModalTabs();
       walletTrackerFrame.src = "";
       walletModalBackdrop.classList.remove("is-open");
       walletModalBackdrop.setAttribute("aria-hidden", "true");
@@ -5788,6 +5717,8 @@
     }
 
     function renderSidebarFilters() {
+      if (!profitFilterList || !sizeFilterList) return;
+
       const profitCounts = computeFilterCounts(state.normalizedRows, PROFIT_FILTERS);
       const sizeCounts = computeFilterCounts(state.normalizedRows, SIZE_FILTERS);
 
@@ -5837,16 +5768,23 @@
       });
 
       rows.sort((left, right) => {
-        const leftValue = getNumericSortValue(left, state.sortKey);
-        const rightValue = getNumericSortValue(right, state.sortKey);
-        const leftValid = Number.isFinite(leftValue);
-        const rightValid = Number.isFinite(rightValue);
+        const leftValue = getLeaderboardSortValue(left, state.sortKey);
+        const rightValue = getLeaderboardSortValue(right, state.sortKey);
 
-        if (!leftValid && !rightValid) return 0;
-        if (!leftValid) return 1;
-        if (!rightValid) return -1;
+        const leftIsNumber = typeof leftValue === "number" && Number.isFinite(leftValue);
+        const rightIsNumber = typeof rightValue === "number" && Number.isFinite(rightValue);
 
-        return state.sortDir === "asc" ? leftValue - rightValue : rightValue - leftValue;
+        if (leftIsNumber || rightIsNumber) {
+          if (!leftIsNumber && !rightIsNumber) return 0;
+          if (!leftIsNumber) return 1;
+          if (!rightIsNumber) return -1;
+          return state.sortDir === "asc" ? leftValue - rightValue : rightValue - leftValue;
+        }
+
+        const leftText = String(leftValue || "");
+        const rightText = String(rightValue || "");
+        const compare = leftText.localeCompare(rightText, undefined, { numeric: true, sensitivity: "base" });
+        return state.sortDir === "asc" ? compare : -compare;
       });
 
       const limit = Number(state.limit) || 100;
@@ -5877,11 +5815,18 @@
     }
 
     function renderSortIndicators() {
-      document.querySelectorAll(".sort-indicator").forEach((element) => {
-        element.textContent = "";
+      document.querySelectorAll("th.sortable").forEach((header) => {
+        const key = header.getAttribute("data-key");
+        const indicator = header.querySelector(".sort-indicator");
+        if (!indicator) return;
+        if (key === state.sortKey) {
+          header.setAttribute("data-sort-dir", state.sortDir);
+          indicator.textContent = state.sortDir === "asc" ? " ↑" : " ↓";
+        } else {
+          header.removeAttribute("data-sort-dir");
+          indicator.textContent = "";
+        }
       });
-      const active = document.getElementById("sort-" + state.sortKey);
-      if (active) active.textContent = state.sortDir === "asc" ? "up" : "down";
     }
 
     function renderTable(rows) {
@@ -5939,11 +5884,9 @@
       const safePercent = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0;
       const label = Number.isFinite(percent) ? safePercent.toFixed(1) : "-";
       const toneColor = getScoreToneColor(safePercent);
-      const fillStyle = getScoreFillStyle(safePercent);
       return (
         "<div class='score-cell'>" +
-          "<div class='score-cell-top'><span class='score-value' style='--score-color:" + escapeHtml(toneColor) + ";'>" + label + "</span></div>" +
-          "<div class='score-bar'><span style='width:" + safePercent + "%; --score-fill:" + escapeHtml(fillStyle) + "; --score-glow:" + escapeHtml(rgbaFromRgb(toneColor, 0.22)) + ";'></span></div>" +
+          "<span class='score-value' style='--score-color:" + escapeHtml(toneColor) + ";'>" + label + "</span>" +
         "</div>"
       );
     }
@@ -6022,11 +5965,9 @@
     }
 
     function syncFromUrl() {
-      const nextView = parseView();
       const nextCoin = parseCoin();
       const nextWallet = parseWallet();
 
-      setView(nextView, { fromPopState: true });
       setCoin(nextCoin, { fromPopState: true });
 
       if (nextWallet) openWalletOverlay(nextWallet, { fromPopState: true });
@@ -6239,13 +6180,6 @@
       }
     }
 
-    menuButtons.forEach((button) => {
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        setView(button.dataset.viewTarget);
-      });
-    });
-
     if (marketChipGroup) {
       marketChipGroup.addEventListener("click", (event) => {
         const target = event.target;
@@ -6349,23 +6283,27 @@
       });
     }
 
-    profitFilterList.addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) return;
-      const button = target.closest("[data-profit-filter]");
-      if (!button) return;
-      state.profitFilter = button.getAttribute("data-profit-filter") || "all";
-      applyFiltersAndSort();
-    });
+    if (profitFilterList) {
+      profitFilterList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const button = target.closest("[data-profit-filter]");
+        if (!button) return;
+        state.profitFilter = button.getAttribute("data-profit-filter") || "all";
+        applyFiltersAndSort();
+      });
+    }
 
-    sizeFilterList.addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) return;
-      const button = target.closest("[data-size-filter]");
-      if (!button) return;
-      state.sizeFilter = button.getAttribute("data-size-filter") || "all";
-      applyFiltersAndSort();
-    });
+    if (sizeFilterList) {
+      sizeFilterList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const button = target.closest("[data-size-filter]");
+        if (!button) return;
+        state.sizeFilter = button.getAttribute("data-size-filter") || "all";
+        applyFiltersAndSort();
+      });
+    }
 
     document.querySelectorAll("th.sortable").forEach((header) => {
       header.addEventListener("click", () => {
@@ -6374,13 +6312,13 @@
         if (state.sortKey === key) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
         else {
           state.sortKey = key;
-          state.sortDir = "asc";
+          state.sortDir = getLeaderboardSortDefaultDir(key);
         }
         applyFiltersAndSort();
       });
     });
 
-    tbody.addEventListener("click", handleTableClick);
+    if (tbody) tbody.addEventListener("click", handleTableClick);
     if (tradeTbody) tradeTbody.addEventListener("click", handleTableClick);
 
     if (marketHeatmapTiles) {
@@ -6399,6 +6337,13 @@
       if (event.target === walletModalBackdrop) {
         closeWalletOverlay({ pushHistory: true });
       }
+    });
+
+    walletModalTabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!state.wallet) return;
+        setWalletModalSection(button.dataset.walletSection || "overview");
+      });
     });
 
     document.addEventListener("click", (event) => {
@@ -6515,6 +6460,7 @@
         draggingCoin = null;
         draggingEl = null;
         lastDragOrder = null;
+        lastFooterDragEndedAt = Date.now();
       });
 
       priceListEl.addEventListener("dragover", (event) => {
@@ -6539,6 +6485,31 @@
     }
 
     if (priceFooterWrapEl) {
+      priceFooterWrapEl.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (
+          target.closest(".price-currency-switch") ||
+          target.closest(".price-controls") ||
+          target.closest(".price-input") ||
+          target.closest(".price-add-btn") ||
+          target.closest("#priceContextMenu")
+        ) {
+          return;
+        }
+
+        const item = target.closest(".price-item");
+        if (!item) return;
+        if (Date.now() - lastFooterDragEndedAt < 250) return;
+
+        const coin = item.dataset.coin;
+        if (!coin) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        openCoinInShell(coin);
+      });
+
       priceFooterWrapEl.addEventListener("contextmenu", (event) => {
         if (
           event.target.closest(".price-currency-switch") ||
@@ -6630,11 +6601,9 @@
 
     window.addEventListener("scroll", hidePriceContextMenu, true);
 
-    state.view = parseView();
     state.coin = parseCoin();
     state.wallet = parseWallet();
 
-    setView(state.view, { fromPopState: true });
     setCoin(state.coin, { fromPopState: true });
     syncWalletUi();
 
@@ -6642,12 +6611,9 @@
     ensureHeaderCoinOptions().then(() => {
       updateHeaderSuggestions();
     });
-    loadMarketHeatmap();
-    ensureMarketHeatmapRefresh();
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
         refreshFooterBar();
-        loadMarketHeatmap(true);
       }
     });
 
@@ -6655,6 +6621,7 @@
       openWalletOverlay(state.wallet, { fromPopState: true });
     }
 
+    updateUrl(false);
     loadLeaderboard();
   </script>
 </body>

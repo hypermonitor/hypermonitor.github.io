@@ -112,6 +112,28 @@
       overflow-x: hidden;
     }
 
+    body.home-page {
+      min-height: 100svh;
+    }
+
+    body.home-page.scroll-lock {
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    body.home-page #app {
+      min-height: 100svh;
+    }
+
+    body.home-page.scroll-lock #app {
+      height: 100svh;
+      overflow: hidden;
+    }
+
+    body.home-page .hero {
+      min-height: 100svh;
+    }
+
 
 
 
@@ -960,7 +982,7 @@
   </style>
 </head>
 
-<body>
+<body class="home-page">
   <div id="app">
 
     <!-- HEADER / NAV -->
@@ -976,11 +998,8 @@
       </button>
 
       <nav id="primary-nav" aria-label="Primary">
-        <!-- TODO: point these to your real pages -->
-        <a class="nav-link" href="#how">How it works</a>
+        <a class="nav-link" href="/team.html">How it works</a>
         <a class="nav-link" href="/leaderboard.html">Leaderboard</a>
-        <a class="nav-link" href="/team.html">Team</a>
-        <!-- TODO: set href to your tracker page -->
         <a class="nav-cta" href="https://www.hypermonitor.org/track">Open Tracker</a>
       </nav>
     </header>
@@ -1021,7 +1040,7 @@
           </div> -->
           <div class="stats-line">
             <span class="stat-item"><strong class="count-up" data-count="159" data-suffix="K">159K</strong> Tracked</span>
-            <span class="stat-item"><strong class="count-up" data-count="28" data-suffix="K">1.6K</strong> Ranked</span>
+            <span class="stat-item"><strong class="count-up" data-count="28" data-suffix="K">28K</strong> Ranked</span>
           </div>
         </div>
       </div>
@@ -1030,7 +1049,7 @@
     <style>
       .hero {
         position: relative;
-        min-height: 80vh;
+        min-height: 100svh;
         display: flex;
         align-items: center;
         overflow: hidden;
@@ -1296,322 +1315,6 @@
       }
     </style>
 
-    <!-- HOW IT WORKS / FEATURES -->
-    <section id="how" class="panel-section panel-dark section-gap" aria-label="How it works">
-      <div style="max-width: var(--page-width); margin: 0 auto; padding: 0 1rem;">
-        <h2 style="font-size: 1.8rem; margin-bottom: 2rem; font-weight: 600;">How it works</h2>
-
-        <div class="feature-cards">
-          <!-- Card 1: Discover -->
-          <div class="feature-card is-active">
-            <div class="feature-card-content">
-              <h3>Discover</h3>
-              <p>Identify wallets using objective filters and metrics. Find well-performing traders on
-                Hyperliquid.</p>
-            </div>
-            <div class="feature-card-image">
-              <div class="image-glow">
-                <img src="images/discover.gif" alt="Discover wallets" draggable="false" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 2: Evaluate -->
-          <div class="feature-card">
-            <div class="feature-card-content">
-              <h3>Evaluate</h3>
-              <p>See clean performance charts, risk stats, and trading behavior patterns.</p>
-            </div>
-            <div class="feature-card-image">
-              <div class="image-glow">
-                <img src="images/evaluate.gif" alt="Evaluate performance" draggable="false" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 3: Track -->
-          <div class="feature-card">
-            <div class="feature-card-content">
-              <h3>Track in real time</h3>
-              <p>Live positions, open orders, fills, and portfolio history.</p>
-            </div>
-            <div class="feature-card-image">
-              <div class="image-glow">
-                <img src="images/track.gif" alt="Track in real time" draggable="false" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <style>
-      .feature-cards {
-        display: flex;
-        gap: 1.25rem;
-      }
-
-      .feature-card {
-        flex: 1;
-        background: #1a1a1a;
-        border: none;
-        border-radius: 16px;
-        padding: 1.75rem;
-        display: flex;
-        flex-direction: column;
-        transition: flex 0.75s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.35s ease;
-        min-height: 450px;
-        height: 450px;
-      }
-
-      .feature-card.is-active {
-        flex: 1.6;
-      }
-
-      .feature-card-content {
-        margin-bottom: 1.5rem;
-      }
-
-      .feature-card h3 {
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin: 0 0 0.85rem;
-        color: #fff;
-      }
-
-      .feature-card p {
-        font-size: 0.95rem;
-        color: #888;
-        line-height: 1.6;
-        margin: 0;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .feature-card:hover p,
-      .feature-card:focus-within p {
-        -webkit-line-clamp: unset;
-        overflow: visible;
-      }
-
-      .feature-card-image {
-        flex: 1;
-        display: flex;
-        align-items: flex-end;
-      }
-
-      .image-glow {
-        position: relative;
-        width: 100%;
-        height: 240px;
-        /* Fixed height for consistency */
-        border-radius: 12px;
-        overflow: hidden;
-        filter: grayscale(100%) opacity(0.5);
-        transition: filter 0.4s ease, box-shadow 0.4s ease;
-      }
-
-      .feature-card.is-active .image-glow {
-        filter: grayscale(0%) opacity(1);
-        box-shadow: none;
-      }
-
-      .feature-card:first-child.is-active .image-glow {
-        box-shadow: none;
-      }
-
-      .image-glow::before {
-        content: "";
-        position: absolute;
-        inset: -50%;
-        background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        pointer-events: none;
-      }
-
-      .feature-card.is-active .image-glow::before {
-        opacity: 0;
-      }
-
-      .image-glow img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        /* Ensure image covers the area */
-        object-position: top center;
-        /* Focus on top part of image */
-        display: block;
-        border-radius: 12px;
-        user-select: none;
-        -webkit-user-drag: none;
-      }
-
-      @media (max-width: 900px) {
-        .feature-cards {
-          flex-direction: column;
-        }
-
-        .feature-card {
-          min-height: auto;
-          height: auto;
-        }
-
-        .feature-card.is-active {
-          flex: 1;
-        }
-      }
-    </style>
-
-
-    <!-- LEADERBOARD PREVIEW -->
-    <section id="leaderboard" class="bleed-panel panel-section section-gap" style="background-color: transparent;"
-      aria-label="Leaderboard preview">
-      <div class="bleed-inner">
-        <h2 class="section-title">
-          <span class="left">Leaderboard</span>
-        </h2>
-
-        <div class="muted" style="margin-bottom:.65rem; line-height:1.6;">
-          Live snapshot of your curated wallet leaderboard. Click a row to open the tracker for that wallet.
-        </div>
-
-        <div class="leaderboard-table-wrap loading" id="leaderboardPreviewWrap"
-          style="max-height: 720px; overflow: hidden; border-radius: .75rem; border: 1px solid var(--border);">
-          <div class="loading-overlay">Loading…</div>
-          <table>
-            <thead>
-              <tr>
-                <th class="sortable" data-key="rank">#</th>
-                <th>Trader</th>
-                <th class="sortable" data-key="accountValue">Account Value</th>
-                <th class="sortable" data-key="pnl">PnL</th>
-                <th class="sortable" data-key="roi">ROI</th>
-                <th class="sortable" data-key="volume">Volume</th>
-                <th class="sortable" data-key="walletScore">Quality</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboardPreviewBody">
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-              <tr><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td><td class="mono">&nbsp;</td></tr>
-            </tbody>
-            <tfoot>
-              <tr class="leaderboard-footer-row">
-                <td colspan="7">
-                  <a class="leaderboard-footer-link" href="/leaderboard.html">Open full leaderboard →</a>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section id="faq" class="bleed-panel panel-section section-gap" style="background-color: transparent;"
-      aria-label="FAQ">
-      <div class="bleed-inner">
-        <div class="grid stack">
-          <div class="card info-card how-panel">
-            <h2 class="section-title"><span class="left">FAQ</span></h2>
-
-            <div class="feature-list">
-              <div class="feature feature-tile">
-                <div>
-                  <h4>Is this financial advice?</h4>
-                  <p>No. Hypermonitor provides analytics and monitoring tools.</p>
-                </div>
-              </div>
-
-              <div class="feature feature-tile">
-                <div>
-                  <h4>Do I need to sign in?</h4>
-                  <p>
-                    You can track public wallets without signing in.
-                  </p>
-                </div>
-              </div>
-
-              <div class="feature feature-tile">
-                <div>
-                  <h4>How are wallets ranked?</h4>
-                  <p>
-                    We collected and designed some powerful metrics, ranking each wallet.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card contact-card" id="contact">
-            <h2 class="section-title"><span class="left">Get in touch</span></h2>
-            <p class="muted" style="margin:0; font-size:.86rem; line-height:1.55;">
-              Want early access to leaderboard filters, or vaults? Contact us.
-            </p>
-
-            <form class="contact-form" id="contactForm" action="https://formspree.io/f/xvzzpakk" method="POST">
-              <div>
-                <label for="contactName">Name</label>
-                <input id="contactName" name="name" type="text" autocomplete="name" required />
-              </div>
-              <div>
-                <label for="contactEmail">Email</label>
-                <input id="contactEmail" name="email" type="email" autocomplete="email" required />
-              </div>
-              <div>
-                <label for="contactMessage">Message</label>
-                <textarea id="contactMessage" name="message" required></textarea>
-              </div>
-              <div class="contact-actions">
-                <button class="btn btn-primary" type="submit">Submit</button>
-                <span class="contact-status" id="contactStatus" aria-live="polite"></span>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="panel-section panel-dark">
-      <div style="margin-top:0.35rem;">
-        <!-- TODO -->
-        <strong>Disclaimer:</strong> This website is for informational purposes only and does not constitute investment
-        advice.
-      </div>
-      <div style="margin-top:.35rem;">
-        © <span id="year"></span> Hypermonitor ·
-        <!-- TODO -->
-        <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> ·
-        <a href="mailto:info@hypermonitor.org">Email</a> ·
-        <a class="x-logo" href="https://x.com/HypermonitorX" target="_blank" rel="noopener noreferrer" aria-label="X">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M18.9 3H21l-6.5 7.4L22 21h-6.2l-4.9-6.2L5.4 21H3.2l6.9-7.9L2 3h6.3l4.4 5.6L18.9 3zm-2.2 16.2h1.9L7.4 4.7H5.4l11.3 14.5z" />
-          </svg>
-        </a>
-        ·
-        <a class="li-logo" href="https://www.linkedin.com/company/hypermonitor" target="_blank"
-          rel="noopener noreferrer" aria-label="LinkedIn">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm7 0h3.8v1.71h.05A4.16 4.16 0 0 1 18 9c3.34 0 4 2.2 4 5.06V21h-4v-5.33c0-1.27-.02-2.9-1.77-2.9-1.78 0-2.05 1.38-2.05 2.8V21h-4V9Z" />
-          </svg>
-        </a>
-      </div>
-    </footer>
-
   </div>
 
   <script>
@@ -1646,7 +1349,10 @@
     });
 
     // Footer year
-    document.getElementById("year").textContent = new Date().getFullYear();
+    const yearElement = document.getElementById("year");
+    if (yearElement) {
+      yearElement.textContent = new Date().getFullYear();
+    }
 
     // Count-up animation for preview numbers
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1692,6 +1398,18 @@
       }, { threshold: 0.6 });
 
       counters.forEach(el => io.observe(el));
+    }
+
+    let scrollLockFrame = 0;
+    function syncHomeScrollLock() {
+      if (!document.body.classList.contains("home-page")) return;
+      document.body.classList.remove("scroll-lock");
+      if (scrollLockFrame) cancelAnimationFrame(scrollLockFrame);
+      scrollLockFrame = requestAnimationFrame(() => {
+        const lockByHeight = window.innerHeight >= 1080;
+        const fitsViewport = document.documentElement.scrollHeight <= window.innerHeight + 1;
+        document.body.classList.toggle("scroll-lock", lockByHeight || fitsViewport);
+      });
     }
 
     // Contact form success popup
@@ -2011,6 +1729,7 @@
       initFeatureCardInteraction();
       initLeaderboardPreview();
       initHeroRotator();
+      syncHomeScrollLock();
     };
 
     function initHeroRotator() {
@@ -2036,6 +1755,12 @@
       document.addEventListener("DOMContentLoaded", initCore, { once: true });
     } else {
       initCore();
+    }
+
+    window.addEventListener("resize", syncHomeScrollLock);
+    window.addEventListener("load", syncHomeScrollLock, { once: true });
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(syncHomeScrollLock).catch(() => {});
     }
 
     runAfterLoad(() => {
