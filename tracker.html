@@ -19,27 +19,27 @@
     :root {
       color-scheme: dark;
       font-family: "Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --bg: #181613;
-      --bg-soft: #211d19;
-      --panel: rgba(24, 22, 19, 0.76);
-      --panel-strong: rgba(24, 22, 19, 0.92);
-      --panel-muted: rgba(255, 255, 255, 0.03);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(255, 255, 255, 0.18);
-      --text: #f5f5ff;
-      --text-main: #f5f5ff;
-      --muted: rgba(245, 245, 255, 0.62);
-      --muted-strong: rgba(245, 245, 255, 0.82);
-      --accent: #ffffff;
-      --accent-soft: rgba(255, 255, 255, 0.08);
-      --accent-green: #59A47F;
-      --accent-green-soft: rgba(89, 164, 127, 0.16);
-      --accent-cyan: #00b4d8;
-      --accent-blue: #0070f3;
-      --accent-amber: #f3c969;
-      --danger: #AD3542;
-      --danger-soft: rgba(173, 53, 66, 0.16);
-      --glass-border: rgba(255, 255, 255, 0.08);
+      --bg: #0d1014;
+      --bg-soft: #12161c;
+      --panel: rgba(15, 18, 23, 0.92);
+      --panel-strong: rgba(15, 18, 23, 0.98);
+      --panel-muted: rgba(255, 255, 255, 0.02);
+      --border: #20252d;
+      --border-strong: #2b313a;
+      --text: #e3e8ee;
+      --text-main: #e3e8ee;
+      --muted: #7c848f;
+      --muted-strong: #aeb6c0;
+      --accent: #d3d8df;
+      --accent-soft: rgba(211, 216, 223, 0.1);
+      --accent-green: #0ECB81;
+      --accent-green-soft: rgba(14, 203, 129, 0.16);
+      --accent-cyan: #7f8ea1;
+      --accent-blue: #74849a;
+      --accent-amber: #d3d8df;
+      --danger: #F6465D;
+      --danger-soft: rgba(246, 70, 93, 0.16);
+      --glass-border: #20252d;
       --neutral-blue: rgba(124, 176, 255, 0.95);
       --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
       --radius-xl: 16px;
@@ -55,13 +55,15 @@
 
     html,
     body {
+      height: 100%;
       min-height: 100%;
+      overflow: hidden;
     }
 
     body {
       margin: 0;
       color: var(--text);
-      background: var(--bg);
+      background: linear-gradient(180deg, #0d1014 0%, #0a0c10 100%);
       background-attachment: fixed;
     }
 
@@ -86,8 +88,12 @@
 
     #app {
       width: min(1840px, calc(100vw - 24px));
+      height: 100dvh;
       margin: 0 auto;
-      padding: 10px 0 88px;
+      padding: 10px 0 56px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      overflow: hidden;
     }
 
     .shell-header {
@@ -179,9 +185,10 @@
 
     .header-search-icon {
       flex: 0 0 auto;
-      padding: 0 0 0 12px;
+      padding: 0 0 0 13px;
       color: var(--muted);
-      font-size: 0.94rem;
+      font-size: 1.14rem;
+      font-weight: 600;
       line-height: 1;
       user-select: none;
     }
@@ -352,11 +359,16 @@
     }
 
     .view.is-active {
-      display: block;
+      display: flex;
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 0;
     }
 
     main {
       min-height: 0;
+      overflow: hidden;
+      display: flex;
     }
 
     .section-intro {
@@ -484,8 +496,9 @@
       display: grid;
       grid-template-rows: minmax(0, 3fr) minmax(0, 2fr);
       gap: 16px;
-      height: calc(100vh - var(--header-height) - 114px);
-      min-height: 780px;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
     }
 
     .trade-leaderboard-panel {
@@ -494,7 +507,7 @@
       min-height: 0;
       overflow: hidden;
       background: var(--bg);
-      border-color: #2d2924;
+      border-color: #20252d;
       box-shadow: none;
       backdrop-filter: none;
     }
@@ -507,7 +520,6 @@
       flex: 1 1 auto;
       min-height: 0;
       max-height: none;
-      padding-bottom: 14px;
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 10%);
     }
 
@@ -579,7 +591,7 @@
 
     .sidebar-hero-card {
       background:
-        radial-gradient(circle at top right, rgba(89, 164, 127, 0.18), transparent 38%),
+        radial-gradient(circle at top right, rgba(14, 203, 129, 0.18), transparent 38%),
         radial-gradient(circle at bottom left, rgba(0, 112, 243, 0.16), transparent 42%),
         linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.16)),
         rgba(8, 11, 18, 0.8);
@@ -626,7 +638,7 @@
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.12);
       background: rgba(255, 255, 255, 0.05);
-      color: rgba(245, 245, 255, 0.88);
+      color: var(--text-main);
       font-size: 0.72rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -650,9 +662,9 @@
     }
 
     .metric-tile-green {
-      border-color: rgba(89, 164, 127, 0.18);
+      border-color: rgba(14, 203, 129, 0.18);
       background:
-        radial-gradient(circle at top right, rgba(89, 164, 127, 0.16), transparent 42%),
+        radial-gradient(circle at top right, rgba(14, 203, 129, 0.16), transparent 42%),
         linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
         rgba(255, 255, 255, 0.03);
     }
@@ -721,12 +733,12 @@
     }
 
     .sidebar-filter.is-active {
-      border-color: rgba(89, 164, 127, 0.26);
+      border-color: rgba(14, 203, 129, 0.26);
       background:
-        radial-gradient(circle at top right, rgba(89, 164, 127, 0.16), transparent 40%),
+        radial-gradient(circle at top right, rgba(14, 203, 129, 0.16), transparent 40%),
         linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
         rgba(255, 255, 255, 0.04);
-      box-shadow: inset 0 0 0 1px rgba(89, 164, 127, 0.06);
+      box-shadow: inset 0 0 0 1px rgba(14, 203, 129, 0.06);
     }
 
     .sidebar-filter-top {
@@ -747,7 +759,7 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.05);
-      color: rgba(245, 245, 255, 0.88);
+      color: var(--text-main);
       font-size: 0.72rem;
       font-variant-numeric: tabular-nums;
     }
@@ -761,7 +773,7 @@
     .leaderboard-panel {
       overflow: hidden;
       background: var(--bg);
-      border-color: #2d2924;
+      border-color: #20252d;
       box-shadow: none;
       backdrop-filter: none;
     }
@@ -769,8 +781,8 @@
     .market-heatmap-panel {
       overflow: hidden;
       background:
-        radial-gradient(circle at top right, rgba(89, 164, 127, 0.06), transparent 24%),
-        radial-gradient(circle at top left, rgba(173, 53, 66, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(14, 203, 129, 0.06), transparent 24%),
+        radial-gradient(circle at top left, rgba(246, 70, 93, 0.08), transparent 28%),
         var(--panel);
     }
 
@@ -1264,9 +1276,9 @@
     }
 
     .summary-card-green {
-      border-color: rgba(89, 164, 127, 0.18);
+      border-color: rgba(14, 203, 129, 0.18);
       background:
-        radial-gradient(circle at top right, rgba(89, 164, 127, 0.15), transparent 40%),
+        radial-gradient(circle at top right, rgba(14, 203, 129, 0.15), transparent 40%),
         linear-gradient(180deg, rgba(15, 23, 42, 0.22), rgba(2, 6, 23, 0.12)),
         rgba(255, 255, 255, 0.02);
     }
@@ -1356,7 +1368,7 @@
       position: relative;
       overflow: auto;
       max-height: min(72vh, 1080px);
-      padding: 0 0 14px;
+      padding: 0;
       background: transparent;
     }
 
@@ -1400,7 +1412,7 @@
       position: sticky;
       top: 0;
       z-index: 5;
-      background: #221f1b;
+      background: #12161c;
       backdrop-filter: none;
     }
 
@@ -1493,7 +1505,7 @@
     }
 
     tbody tr:nth-child(even) {
-      background: #1d1a17;
+      background: #0d1014;
     }
 
     tbody tr[data-wallet] {
@@ -1514,24 +1526,12 @@
       align-items: center;
       justify-content: flex-start;
       min-width: 2.4rem;
-      padding-left: 0.72rem;
+      padding-left: 0.28rem;
       color: var(--muted-strong);
       font-weight: 600;
       font-variant-numeric: tabular-nums;
       font-size: 0.76rem;
       letter-spacing: 0.02em;
-    }
-
-    .rank-badge::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 50%;
-      width: 5px;
-      height: 5px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.16);
-      transform: translateY(-50%);
     }
 
     tbody tr:nth-child(1) .rank-badge {
@@ -1544,18 +1544,6 @@
 
     tbody tr:nth-child(3) .rank-badge {
       color: rgba(243, 201, 105, 0.96);
-    }
-
-    tbody tr:nth-child(1) .rank-badge::before {
-      background: var(--accent-green);
-    }
-
-    tbody tr:nth-child(2) .rank-badge::before {
-      background: rgba(0, 180, 216, 0.96);
-    }
-
-    tbody tr:nth-child(3) .rank-badge::before {
-      background: rgba(243, 201, 105, 0.96);
     }
 
     .wallet-link {
@@ -1598,8 +1586,8 @@
     }
 
     .mini-chip.bad {
-      border-color: rgba(173, 53, 66, 0.28);
-      background: rgba(173, 53, 66, 0.08);
+      border-color: rgba(246, 70, 93, 0.28);
+      background: rgba(246, 70, 93, 0.08);
       color: #f3cbd0;
     }
 
@@ -1692,7 +1680,7 @@
       padding: 0.12rem;
       border-radius: 999px;
       border: 1px solid var(--glass-border);
-      background: rgba(24, 22, 19, 0.45);
+      background: rgba(15, 18, 23, 0.82);
       position: static;
       z-index: 2;
     }
@@ -1884,8 +1872,8 @@
       height: 26px;
       padding: 0;
       border: 1px solid var(--glass-border);
-      background: rgba(24, 22, 19, 0.45);
-      color: #e2e8f0;
+      background: rgba(15, 18, 23, 0.82);
+      color: var(--text-main);
       border-radius: 999px;
       font-size: 0.82rem;
       line-height: 1;
@@ -1895,16 +1883,16 @@
 
     .price-add-toggle-btn:hover {
       border-color: rgba(255,255,255,0.22);
-      background: rgba(33, 29, 25, 0.6);
-      color: #f8fafc;
+      background: rgba(43, 49, 57, 0.92);
+      color: var(--text-main);
     }
 
     .price-input {
       padding: 0.3rem 0.5rem;
       border-radius: 8px;
       border: 1px solid var(--glass-border);
-      background: rgba(24, 22, 19, 0.35);
-      color: #e2e8f0;
+      background: rgba(15, 18, 23, 0.72);
+      color: var(--text-main);
       font-size: 0.72rem;
       outline: none;
       width: 90px;
@@ -1918,8 +1906,8 @@
 
     .price-add-btn {
       border: 1px solid var(--glass-border);
-      background: rgba(24, 22, 19, 0.45);
-      color: #e2e8f0;
+      background: rgba(15, 18, 23, 0.82);
+      color: var(--text-main);
       padding: 0.25rem 0.6rem;
       border-radius: 999px;
       font-size: 0.7rem;
@@ -2293,11 +2281,11 @@
       }
 
       .trade-frame-panel {
-        min-height: 52vh;
+        min-height: 0;
       }
 
       .trade-leaderboard-panel {
-        min-height: 34vh;
+        min-height: 0;
       }
 
       .explore-market-frame {
@@ -2328,7 +2316,7 @@
       }
 
       .trade-view-stack {
-        height: auto;
+        height: 100%;
         min-height: 0;
       }
 
@@ -2503,7 +2491,7 @@
     </main>
   </div>
 
-  <div class="price-footer pending" aria-label="Live prices">
+  <div class="price-footer" aria-label="Live prices">
     <div class="price-footer-inner" id="priceFooter">
       <div class="price-brand-wrap">
         <div class="price-currency-switch" id="priceCurrencySwitch" role="group" aria-label="Footer price currency">
@@ -3096,6 +3084,12 @@
     }
 
     function shortAddress(address) {
+      if (!address) return "-";
+      if (address.length <= 14) return address;
+      return address.slice(0, 6) + "..." + address.slice(-4);
+    }
+
+    function shortLeaderboardAddress(address) {
       if (!address) return "-";
       if (address.length <= 14) return address;
       return address.slice(0, 6) + "..." + address.slice(-4);
@@ -5471,6 +5465,7 @@
       updateFooterChangeMenu();
       syncFooterAddControls();
       renderFooterPrices();
+      revealFooter(true);
       await bootstrapFooterCatalog();
       renderFooterPrices();
       await initFooterStream();
@@ -5854,7 +5849,7 @@
             "<td><span class='rank-badge'>" + row.rank + "</span></td>" +
             "<td>" +
               "<a class='wallet-link' href='" + escapeHtml(href) + "' data-wallet-link='" + escapeHtml(row.address) + "'>" +
-                "<strong>" + escapeHtml(shortAddress(row.address)) + "</strong>" +
+                "<strong>" + escapeHtml(shortLeaderboardAddress(row.address)) + "</strong>" +
                 "<span class='wallet-meta'>" +
                   "<span class='mini-chip'>" + escapeHtml(sizeTierLabel(row)) + "</span>" +
                   "<span class='mini-chip " + pnlChipClass(row.pnl) + "'>" + escapeHtml(qualityLabel(row.walletScore)) + "</span>" +

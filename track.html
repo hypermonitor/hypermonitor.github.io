@@ -34,23 +34,23 @@
     :root {
       font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color-scheme: dark;
-      --bg: #181613;
-      --bg-soft: #211d19;
-      --panel: rgba(24, 22, 19, 0.76);
-      --panel-strong: rgba(24, 22, 19, 0.92);
-      --panel-muted: rgba(255, 255, 255, 0.03);
-      --card-bg: rgba(24, 22, 19, 0.92);
-      --accent: #59A47F;
-      --accent-soft: rgba(89, 164, 127, 0.18);
-      --danger: #AD3542;
-      --border: rgba(255,255,255,0.08);
-      --border-strong: rgba(255, 255, 255, 0.18);
-      --muted: rgba(245,245,255,0.62);
-      --text-main: #f5f5ff;
-      --glass: rgba(24, 22, 19, 0.92);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --accent-blue: #0070f3;
-      --accent-cyan: #00b4d8;
+      --bg: #0d1014;
+      --bg-soft: #12161c;
+      --panel: rgba(15, 18, 23, 0.92);
+      --panel-strong: rgba(15, 18, 23, 0.98);
+      --panel-muted: rgba(255, 255, 255, 0.02);
+      --card-bg: rgba(15, 18, 23, 0.98);
+      --accent: #0ECB81;
+      --accent-soft: rgba(14, 203, 129, 0.18);
+      --danger: #F6465D;
+      --border: #20252d;
+      --border-strong: #2b313a;
+      --muted: #7c848f;
+      --text-main: #e3e8ee;
+      --glass: rgba(15, 18, 23, 0.98);
+      --glass-border: #20252d;
+      --accent-blue: #74849a;
+      --accent-cyan: #7f8ea1;
       --equity-accent: #22d3ee;
       --activity-accent: #3b82f6;
       --activity-bar-bg: rgba(59, 130, 246, 0.72);
@@ -70,7 +70,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: var(--bg);
+      background: linear-gradient(180deg, #0d1014 0%, #0a0c10 100%);
       background-attachment: fixed;
       color: var(--text-main);
     }
@@ -1203,12 +1203,12 @@
 
     .status-dot.connected {
       background: var(--accent);
-      box-shadow: 0 0 6px rgba(89, 164, 127, 0.7);
+      box-shadow: 0 0 6px rgba(14, 203, 129, 0.7);
     }
 
     .status-dot.error {
       background: var(--danger);
-      box-shadow: 0 0 6px rgba(173, 53, 66, 0.7);
+      box-shadow: 0 0 6px rgba(246, 70, 93, 0.7);
     }
 
     .status-spinner {
@@ -1942,7 +1942,7 @@
     }
 
     thead {
-      background: #221f1b;
+      background: #12161c;
       position: sticky;
       top: 0;
       z-index: 1;
@@ -1955,7 +1955,7 @@
       white-space: nowrap;
     }
 
-    tbody tr:nth-child(even) { background: #1d1a17; }
+    tbody tr:nth-child(even) { background: #0d1014; }
     tbody tr.loading-row { background: transparent; }
 
     .pill {
@@ -1986,16 +1986,16 @@
 
     .pill-buy {
       color: var(--accent);
-      border-color: rgba(89, 164, 127, 0.8);
-      background: rgba(89, 164, 127, 0.18);
-      box-shadow: 0 0 0 1px rgba(89, 164, 127, 0.2);
+      border-color: rgba(14, 203, 129, 0.8);
+      background: rgba(14, 203, 129, 0.18);
+      box-shadow: 0 0 0 1px rgba(14, 203, 129, 0.2);
     }
 
     .pill-sell {
       color: var(--danger);
-      border-color: rgba(173, 53, 66, 0.6);
-      background: rgba(173, 53, 66, 0.18);
-      box-shadow: 0 0 0 1px rgba(173, 53, 66, 0.2);
+      border-color: rgba(246, 70, 93, 0.6);
+      background: rgba(246, 70, 93, 0.18);
+      box-shadow: 0 0 0 1px rgba(246, 70, 93, 0.2);
     }
 
     .pill-new {
@@ -2012,8 +2012,8 @@
 
     .pill-fill {
       color: var(--accent);
-      border-color: rgba(89, 164, 127, 0.6);
-      background: rgba(89, 164, 127, 0.16);
+      border-color: rgba(14, 203, 129, 0.6);
+      background: rgba(14, 203, 129, 0.16);
     }
 
     .muted { color: var(--muted); }
@@ -2359,14 +2359,14 @@
 
     tbody tr.flash { animation: flashRow 1s ease-out; }
     @keyframes flashRow {
-      from { background: rgba(89, 164, 127, 0.22); }
-      to { background: #1d1a17; }
+      from { background: rgba(14, 203, 129, 0.22); }
+      to { background: #0d1014; }
     }
 
     tbody tr.flash-cancel { animation: flashCancel 1s ease-out; }
     @keyframes flashCancel {
       from { background: rgba(244, 114, 182, 0.22); }
-      to { background: #1d1a17; }
+      to { background: #0d1014; }
     }
 
     p { margin: 1.5rem 0; }
@@ -2755,7 +2755,7 @@
       letter-spacing: 0.04em;
       font-size: clamp(0.56rem, 1vw, 0.78rem);
       text-transform: uppercase;
-      color: rgba(245, 245, 255, 0.16);
+      color: rgba(234, 236, 239, 0.14);
       white-space: nowrap;
       pointer-events: none;
       z-index: 0;
@@ -3669,12 +3669,12 @@
       border-radius: 999px;
       background: var(--danger);
       display: inline-block;
-      box-shadow: 0 0 0 2px rgba(173, 53, 66, 0.25);
+      box-shadow: 0 0 0 2px rgba(246, 70, 93, 0.25);
       position: relative;
     }
 
     body.light .live-dot {
-      box-shadow: 0 0 0 2px rgba(173, 53, 66, 0.2);
+      box-shadow: 0 0 0 2px rgba(246, 70, 93, 0.2);
     }
 
     .live-dot::after {
@@ -3682,7 +3682,7 @@
       position: absolute;
       inset: -5px;
       border-radius: 999px;
-      background: rgba(173, 53, 66, 0.35);
+      background: rgba(246, 70, 93, 0.35);
       opacity: 0.6;
       display: none;
     }
@@ -3780,7 +3780,7 @@
     .orders-filter-select {
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: #221f1b;
+      background: #12161c;
       color: var(--text-main);
       font-size: 0.75rem;
       padding: 0.2rem 0.6rem;
@@ -8107,7 +8107,7 @@
 
   function applyPnlTooltipStyling(chart) {
     if (!chart?.options?.plugins?.tooltip) return;
-    const resolve = (v) => (v >= 0 ? getCssVar("--accent", "#59A47F") : getCssVar("--danger", "#AD3542"));
+    const resolve = (v) => (v >= 0 ? getCssVar("--accent", "#0ECB81") : getCssVar("--danger", "#F6465D"));
     chart.options.plugins.tooltip.enabled = false;
     chart.options.plugins.tooltip.external = (context) => {
       const { chart, tooltip } = context;
@@ -8139,7 +8139,7 @@
     if (!chart?.options?.plugins?.tooltip) return;
     const resolve = (v) => {
       if (v === 0) return getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
-      return v >= 0 ? getCssVar("--danger", "#AD3542") : getCssVar("--accent", "#59A47F");
+      return v >= 0 ? getCssVar("--danger", "#F6465D") : getCssVar("--accent", "#0ECB81");
     };
     chart.options.plugins.tooltip.enabled = false;
     chart.options.plugins.tooltip.external = (context) => {
@@ -8197,9 +8197,9 @@
         if (isDrawdown) {
           valueEl.style.color =
             v < 0
-              ? getCssVar("--danger", "#AD3542")
+              ? getCssVar("--danger", "#F6465D")
                 : v > 0
-                ? getCssVar("--accent", "#59A47F")
+                ? getCssVar("--accent", "#0ECB81")
                 : getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
         } else {
           valueEl.style.color = getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
@@ -8236,7 +8236,7 @@
       `;
 
       const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
-      if (valueEl) valueEl.style.color = getCssVar("--accent", "#59A47F");
+      if (valueEl) valueEl.style.color = getCssVar("--accent", "#0ECB81");
       positionChartTooltip(tooltipEl, chart, tooltip);
       tooltipEl.style.opacity = "1";
     };
@@ -8288,12 +8288,12 @@
   function buildEquityModeDatasets(baseDatasets, mode = "line") {
     if (mode !== "drawdown") return baseDatasets;
     return (Array.isArray(baseDatasets) ? baseDatasets : []).map((ds) => {
-      const color = "#AD3542";
+      const color = "#F6465D";
       return {
         ...ds,
         data: buildDrawdownSeries(ds?.data || [], ds?.flowData || [], ds?.pnlData || []),
         borderColor: color,
-        backgroundColor: "rgba(173, 53, 66, 0.22)",
+        backgroundColor: "rgba(246, 70, 93, 0.22)",
         fill: { target: "origin" },
       };
     });
@@ -9129,12 +9129,12 @@
     if (!ctx) return null;
 
     const pnlValue = parseSignedMoney(data.upnl);
-    const accent = pnlValue !== null && pnlValue < 0 ? "#AD3542" : "#59A47F";
+    const accent = pnlValue !== null && pnlValue < 0 ? "#F6465D" : "#0ECB81";
     const logoAccent = accent;
 
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#181613");
-    gradient.addColorStop(1, "#211d19");
+    gradient.addColorStop(0, "#0d1014");
+    gradient.addColorStop(1, "#12161c");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -9262,7 +9262,7 @@
       const pillHeight = 40;
       const pillX = 90;
       const pillY = 308;
-      const pillColor = data.direction.startsWith("SHORT") ? "#AD3542" : "#59A47F";
+      const pillColor = data.direction.startsWith("SHORT") ? "#F6465D" : "#0ECB81";
       ctx.fillStyle = pillColor + "33";
       drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 20);
       ctx.fill();
@@ -9366,12 +9366,12 @@
     const ordersPerDayText = stripWholeDecimals(getMetricText(metricOrdersTradesPerDayEl));
 
     const pnlValue = parseSignedMoney(totalPnlText);
-    const accent = pnlValue !== null && pnlValue < 0 ? "#AD3542" : "#59A47F";
-    const accentSoft = pnlValue !== null && pnlValue < 0 ? "rgba(173, 53, 66, 0.18)" : "rgba(89, 164, 127, 0.18)";
+    const accent = pnlValue !== null && pnlValue < 0 ? "#F6465D" : "#0ECB81";
+    const accentSoft = pnlValue !== null && pnlValue < 0 ? "rgba(246, 70, 93, 0.18)" : "rgba(14, 203, 129, 0.18)";
 
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#181613");
-    gradient.addColorStop(1, "#211d19");
+    gradient.addColorStop(0, "#0d1014");
+    gradient.addColorStop(1, "#12161c");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -9470,7 +9470,7 @@
     ctx.fillStyle = accent;
     ctx.fillText(pillText, pillX + 12, pillY + 6);
     const returnValue = Number(String(returnText).replace(/[^0-9.+-]/g, ""));
-    const returnAccent = Number.isFinite(returnValue) ? (returnValue < 0 ? "#AD3542" : "#59A47F") : "#ffffff";
+    const returnAccent = Number.isFinite(returnValue) ? (returnValue < 0 ? "#F6465D" : "#0ECB81") : "#ffffff";
 
     ctx.fillStyle = returnAccent;
     ctx.font = "700 98px Outfit, sans-serif";
@@ -12704,7 +12704,7 @@
         const szi = Number(p.szi ?? 0);
 
         const dir = szi > 0 ? "LONG" : szi < 0 ? "SHORT" : "FLAT";
-        const dirColor = szi >= 0 ? "#59A47F" : "#AD3542";
+        const dirColor = szi >= 0 ? "#0ECB81" : "#F6465D";
         const entryPx = Number(p.entryPx ?? 0);
 
         const markFromContext = getMarkPriceForCoin(coin);
@@ -15464,7 +15464,7 @@
       HYPE: "#0b5c2f",
       LINK: "#2a5ada",
     };
-    const palette = ["#38bdf8", "#59A47F", "#a78bfa", "#f472b6", "#facc15", "#AD3542", "#22d3ee", "#f59e0b"];
+    const palette = ["#8e9caf", "#0ECB81", "#8b91a8", "#b38aa2", "#d3d8df", "#F6465D", "#7f8ea1", "#9098a3"];
     const colors = rawSeries.map((item, i) => {
       const coin = (item.coin || "").toUpperCase();
       if (coin && coinColors[coin]) return coinColors[coin];
@@ -15594,8 +15594,8 @@
     const safeAlpha = Math.max(0, Math.min(1, Number(alpha)));
     const n = Number(value);
     if (!Number.isFinite(n)) return `rgba(148, 163, 184, ${safeAlpha})`;
-    if (n > 0) return `rgba(89, 164, 127, ${safeAlpha})`;
-    if (n < 0) return `rgba(173, 53, 66, ${safeAlpha})`;
+    if (n > 0) return `rgba(14, 203, 129, ${safeAlpha})`;
+    if (n < 0) return `rgba(246, 70, 93, ${safeAlpha})`;
     return `rgba(196, 202, 215, ${safeAlpha})`;
   }
 

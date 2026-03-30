@@ -10,14 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #181613;
-            --surface: #181613;
-            --surface2: #211d19;
-            --border: #2d2924;
-            --text: #e6edf3;
-            --muted: #7d8590;
-            --up: #59A47F;
-            --down: #AD3542;
+            --bg: #0d1014;
+            --surface: #12161c;
+            --surface2: #0f1318;
+            --border: #20252d;
+            --text: #e3e8ee;
+            --muted: #7c848f;
+            --up: #0ECB81;
+            --down: #F6465D;
             --header-h: 58px;
             --toolbar-h: 38px;
         }
@@ -116,7 +116,7 @@
         }
 
         #coin-btn:hover {
-            border-color: #58a6ff;
+            border-color: #d3d8df;
         }
 
         #coin-btn .caret {
@@ -350,12 +350,12 @@
 
         #ws-dot.live {
             background: var(--up);
-            box-shadow: 0 0 6px rgba(89, 164, 127, 0.7);
+            box-shadow: 0 0 6px rgba(14, 203, 129, 0.7);
         }
 
         #ws-dot.err {
             background: var(--down);
-            box-shadow: 0 0 6px rgba(173, 53, 66, 0.7);
+            box-shadow: 0 0 6px rgba(246, 70, 93, 0.7);
         }
 
         /* ── Main ── */
@@ -438,6 +438,45 @@
             min-height: 0;
         }
 
+        .chart-watermark {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.18s ease;
+            z-index: 2;
+        }
+
+        .chart-watermark img {
+            width: min(36%, 145px);
+            max-width: 145px;
+            height: auto;
+            object-fit: contain;
+            opacity: 0.08;
+        }
+
+        .chart-watermark span {
+            position: relative;
+            top: -16px;
+            font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            font-size: clamp(0.56rem, 1vw, 0.78rem);
+            line-height: 1;
+            text-transform: uppercase;
+            color: rgba(234, 236, 239, 0.14);
+            white-space: nowrap;
+        }
+
+        .chart-loading-wrap.is-loading .chart-watermark {
+            opacity: 0;
+        }
+
         .chart-loading-wrap.is-loading > :not(.chart-loading-overlay) {
             opacity: 0;
             pointer-events: none;
@@ -474,11 +513,21 @@
             font-size: 0.85rem;
             font-weight: 500;
             letter-spacing: 0.01em;
+            margin-top: -10px;
         }
 
         #chart-canvas {
             width: 100%;
             height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        #chart-canvas-2 {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         #chart-wrap a[href*="tradingview"],
@@ -532,30 +581,24 @@
         #legend-ohlc {
             font-size: 11px;
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px 14px;
             font-variant-numeric: tabular-nums;
+            color: var(--muted);
+        }
+
+        #legend-ohlc .legend-item {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        #legend-ohlc .legend-key {
             color: var(--muted);
         }
 
         #legend-ohlc span.v {
             color: var(--text);
-        }
-
-        .chart-corner-logo {
-            position: absolute;
-            left: 12px;
-            bottom: 12px;
-            z-index: 4;
-            width: 22px;
-            height: 22px;
-            padding: 2px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
-            background: rgba(24, 22, 19, 0.82);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
-            pointer-events: none;
-            user-select: none;
-            object-fit: contain;
         }
 
         /* ── Right panel ── */
@@ -615,52 +658,160 @@
             display: flex;
         }
 
-        /* Orderbook aggregation selector */
+        #tab-ob {
+            position: relative;
+        }
+
+        /* Orderbook controls */
         #ob-agg-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 10px;
+            padding: 6px 10px;
             border-bottom: 1px solid var(--border);
             background: var(--surface);
             flex-shrink: 0;
+            gap: 10px;
+        }
+
+        #ob-view-btns {
+            display: inline-flex;
+            align-items: center;
             gap: 6px;
         }
 
-        #ob-agg-bar .agg-label {
-            font-size: 10px;
+        .ob-view-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
             color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        #ob-agg-btns {
-            display: flex;
-            gap: 2px;
-        }
-
-        .agg-btn {
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--muted);
-            background: none;
-            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            transition: background 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+            opacity: 0.82;
+        }
+
+        .ob-view-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .ob-view-btn.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.055);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .ob-view-btn:focus-visible,
+        .ob-agg-trigger:focus-visible,
+        .ob-agg-option:focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 1px rgba(234, 236, 239, 0.12);
+        }
+
+        .ob-view-svg {
+            width: 20px;
+            height: 14px;
+            display: block;
+        }
+
+        .ob-view-svg .up-fill {
+            fill: #0ECB81;
+        }
+
+        .ob-view-svg .down-fill {
+            fill: #F6465D;
+        }
+
+        .ob-view-svg .dim {
+            fill: rgba(132, 142, 156, 0.32);
+        }
+
+        .ob-agg-select {
+            position: relative;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .ob-agg-trigger {
+            height: 28px;
+            min-width: 70px;
+            padding: 0 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
             font-family: inherit;
             font-variant-numeric: tabular-nums;
-            transition: all 0.12s;
+            transition: border-color 0.12s ease, background 0.12s ease;
         }
 
-        .agg-btn:hover {
+        .ob-agg-trigger:hover {
+            border-color: var(--border-strong);
+        }
+
+        .ob-agg-caret {
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .ob-agg-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 86px;
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 24;
+        }
+
+        .ob-agg-menu.open {
+            display: flex;
+        }
+
+        .ob-agg-option {
+            width: 100%;
+            padding: 6px 8px;
+            border-radius: 7px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            font-variant-numeric: tabular-nums;
+            text-align: left;
+            transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+        }
+
+        .ob-agg-option:hover {
             color: var(--text);
+            background: var(--surface2);
             border-color: var(--border);
         }
 
-        .agg-btn.active {
+        .ob-agg-option.active {
             color: var(--text);
-            background: var(--surface2);
+            background: rgba(255, 255, 255, 0.045);
             border-color: var(--border);
         }
 
@@ -694,10 +845,43 @@
 
         #ob-asks-wrap,
         #ob-bids-wrap {
+            flex: 1 1 0;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             min-height: 0;
+        }
+
+        #tab-ob[data-ob-view="both"] #ob-asks-wrap {
+            order: 1;
+        }
+
+        #tab-ob[data-ob-view="both"] #ob-spread {
+            order: 2;
+        }
+
+        #tab-ob[data-ob-view="both"] #ob-bids-wrap {
+            order: 3;
+        }
+
+        #tab-ob[data-ob-view="bids"] #ob-spread,
+        #tab-ob[data-ob-view="asks"] #ob-spread {
+            order: 1;
+            border-top: 0;
+        }
+
+        #tab-ob[data-ob-view="bids"] #ob-asks-wrap,
+        #tab-ob[data-ob-view="asks"] #ob-bids-wrap {
+            display: none;
+        }
+
+        #tab-ob[data-ob-view="bids"] #ob-bids-wrap,
+        #tab-ob[data-ob-view="asks"] #ob-asks-wrap {
+            order: 2;
+        }
+
+        #tab-ob[data-ob-view="asks"] #ob-asks-inner {
+            justify-content: flex-start;
         }
 
         #ob-asks-inner {
@@ -720,11 +904,14 @@
             align-items: center;
             padding: 0 12px;
             position: relative;
-            cursor: pointer;
             font-size: 11.5px;
             font-variant-numeric: tabular-nums;
             line-height: 1.85;
             transition: background 0.08s;
+        }
+
+        .ob-row.is-interactive {
+            cursor: pointer;
         }
 
         .ob-row:nth-child(odd) {
@@ -733,6 +920,12 @@
 
         .ob-row:hover {
             background: var(--surface2) !important;
+        }
+
+        .ob-row.is-interactive:focus-visible {
+            outline: none;
+            background: rgba(255, 255, 255, 0.02) !important;
+            box-shadow: inset 0 0 0 1px rgba(234, 236, 239, 0.12);
         }
 
         .ob-row .bar {
@@ -782,6 +975,83 @@
             color: var(--up);
         }
 
+        .ob-row.is-skeleton {
+            cursor: default;
+            pointer-events: none;
+            background: transparent !important;
+        }
+
+        .ob-row.is-skeleton .bar {
+            display: none;
+        }
+
+        .ob-row.is-skeleton .c1,
+        .ob-row.is-skeleton .c2,
+        .ob-row.is-skeleton .c3 {
+            display: flex;
+            align-items: center;
+            color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ob-row.is-skeleton .c2,
+        .ob-row.is-skeleton .c3 {
+            justify-content: flex-end;
+        }
+
+        .ob-row.is-skeleton .c1::before,
+        .ob-row.is-skeleton .c2::before,
+        .ob-row.is-skeleton .c3::before {
+            content: "";
+            display: block;
+            height: 18px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.03));
+            background-size: 200% 100%;
+            animation: ob-skeleton-shimmer 1.35s ease-in-out infinite;
+        }
+
+        .ob-row.is-skeleton .c1::before {
+            width: var(--ob-skel-c1, 78%);
+        }
+
+        .ob-row.is-skeleton .c2::before {
+            width: var(--ob-skel-c2, 64%);
+            margin-left: auto;
+        }
+
+        .ob-row.is-skeleton .c3::before {
+            width: var(--ob-skel-c3, 72%);
+            margin-left: auto;
+        }
+
+        .ob-row.ask-row.is-skeleton .c1::before {
+            background: linear-gradient(90deg, rgba(246, 70, 93, 0.12), rgba(246, 70, 93, 0.19), rgba(246, 70, 93, 0.12));
+            background-size: 200% 100%;
+        }
+
+        .ob-row.bid-row.is-skeleton .c1::before {
+            background: linear-gradient(90deg, rgba(14, 203, 129, 0.12), rgba(14, 203, 129, 0.19), rgba(14, 203, 129, 0.12));
+            background-size: 200% 100%;
+        }
+
+        @keyframes ob-skeleton-shimmer {
+            0% {
+                background-position: 200% 0;
+                opacity: 0.64;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                background-position: -200% 0;
+                opacity: 0.64;
+            }
+        }
+
         #ob-spread {
             display: flex;
             align-items: center;
@@ -801,11 +1071,237 @@
             letter-spacing: -0.3px;
         }
 
+        #ob-mid-arrow {
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
         #ob-spread-info {
             color: var(--muted);
             font-size: 10px;
             text-align: right;
             line-height: 1.6;
+        }
+
+        #ob-spread.is-loading #ob-mid,
+        #ob-spread.is-loading #ob-spread-info {
+            color: transparent !important;
+            position: relative;
+        }
+
+        #ob-spread.is-loading #ob-mid::before,
+        #ob-spread.is-loading #ob-spread-info::before {
+            content: "";
+            display: block;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.03));
+            background-size: 200% 100%;
+            animation: ob-skeleton-shimmer 1.35s ease-in-out infinite;
+        }
+
+        #ob-spread.is-loading #ob-mid::before {
+            width: 78px;
+            height: 18px;
+        }
+
+        #ob-spread.is-loading #ob-spread-info::before {
+            width: 118px;
+            height: 12px;
+            margin-left: auto;
+        }
+
+        #ob-detail-sheet {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        #tab-ob.show-detail #ob-detail-sheet {
+            display: flex;
+        }
+
+        #ob-detail-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 12px 11px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0;
+        }
+
+        #ob-detail-back {
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            padding: 0;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        #ob-detail-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        #ob-detail-ccy {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        #ob-detail-stats {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .ob-detail-stat {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ob-detail-stat .k {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .ob-detail-stat .v {
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .ob-detail-stat .v.ask {
+            color: var(--down);
+        }
+
+        .ob-detail-stat .v.bid {
+            color: var(--up);
+        }
+
+        #ob-detail-table {
+            min-height: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #ob-detail-hdr {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px 9px;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        #ob-detail-hdr .c1,
+        .ob-detail-row .c1 {
+            flex: 0 0 82px;
+        }
+
+        #ob-detail-hdr .c2,
+        .ob-detail-row .c2 {
+            flex: 1 1 auto;
+            text-align: right;
+        }
+
+        #ob-detail-hdr .c3,
+        .ob-detail-row .c3 {
+            flex: 0 0 74px;
+            text-align: right;
+        }
+
+        #ob-detail-list {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+        }
+
+        .ob-detail-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            height: 38px;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+            overflow: hidden;
+        }
+
+        .ob-detail-row:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .ob-detail-row .bar {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: var(--ob-detail-fill, 0%);
+            opacity: 0.14;
+            pointer-events: none;
+        }
+
+        .ob-detail-row.ask .bar {
+            background: var(--down);
+        }
+
+        .ob-detail-row.bid .bar {
+            background: var(--up);
+        }
+
+        .ob-detail-row .c1,
+        .ob-detail-row .c2,
+        .ob-detail-row .c3 {
+            position: relative;
+            z-index: 1;
+        }
+
+        .ob-detail-row.ask .c1 {
+            color: var(--down);
+        }
+
+        .ob-detail-row.bid .c1 {
+            color: var(--up);
+        }
+
+        .ob-detail-row .c2,
+        .ob-detail-row .c3 {
+            color: var(--text);
+        }
+
+        #ob-detail-empty {
+            display: none;
+            padding: 20px 12px;
+            color: var(--muted);
+            font-size: 11px;
+            text-align: center;
+        }
+
+        #ob-detail-sheet.is-empty #ob-detail-empty {
+            display: block;
         }
 
         /* Trades */
@@ -935,7 +1431,7 @@
             min-height: 44px;
             padding: 0 12px 0 14px;
             border-bottom: 1px solid var(--border);
-            background: #0c0f13;
+            background: #0f1217;
         }
 
         .wallet-modal-title {
@@ -1069,19 +1565,23 @@
                 <div id="charts-container" style="display:flex; flex:1; min-height:0; background:var(--border); gap:1px;">
                     <!-- Primary Chart -->
                     <div id="chart-container-1" style="flex:1; background:var(--bg); display:flex; flex-direction:column; position:relative; min-width:0;">
-                        <div id="chart-wrap" class="chart-loading-wrap is-loading" style="flex:1; min-height:0; position:relative;">
+                        <div id="chart-wrap" class="chart-loading-wrap logo-watermark is-loading" style="flex:1; min-height:0; position:relative;">
                             <div id="chart-canvas"></div>
+                            <div class="chart-watermark" aria-hidden="true">
+                                <img src="images/logo.png" alt="">
+                                <span>HYPERMONITOR</span>
+                            </div>
                             <div id="chart-legend">
                                 <span id="legend-name">–/USD • 15m</span>
                                 <div id="legend-ohlc">
-                                    <span>O <span class="v" id="leg-o">–</span></span>
-                                    <span>H <span class="v" id="leg-h">–</span></span>
-                                    <span>L <span class="v" id="leg-l">–</span></span>
-                                    <span>C <span class="v" id="leg-c">–</span></span>
-                                    <span class="v" id="leg-pct" style="margin-left: 2px;"></span>
+                                    <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">High</span><span class="v" id="leg-h">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">Low</span><span class="v" id="leg-l">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">Close</span><span class="v" id="leg-c">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">Change</span><span class="v" id="leg-pct">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">Range</span><span class="v" id="leg-range">–</span></span>
                                 </div>
                             </div>
-                            <img class="chart-corner-logo" src="images/logo.png" alt="Hypermonitor logo" aria-hidden="true">
                             <div class="chart-loading-overlay" id="chart-loading-1" aria-hidden="true">
                                 <img src="images/pulse.gif" alt="Hypermonitor loading logo">
                                 <span>Loading...</span>
@@ -1099,8 +1599,12 @@
                             <div id="coin-list-2" style="max-height:300px; overflow-y:auto; padding:4px;"></div>
                         </div>
 
-                        <div id="chart-wrap-2" class="chart-loading-wrap" style="flex:1; display:flex; flex-direction:column; position:relative; min-height:0;">
+                        <div id="chart-wrap-2" class="chart-loading-wrap logo-watermark" style="flex:1; display:flex; flex-direction:column; position:relative; min-height:0;">
                             <div id="chart-canvas-2" style="flex:1;"></div>
+                            <div class="chart-watermark" aria-hidden="true">
+                                <img src="images/logo.png" alt="">
+                                <span>HYPERMONITOR</span>
+                            </div>
                             <div id="chart-legend" style="pointer-events:none; z-index:5;"> <!-- inherit styles -->
                                 <div id="coin-toggle-2" class="mini-coin-select" onclick="toggleDropdown2()">
                                     <img id="coin-logo-2" class="mini-coin-logo" src="images/coins/ETH.svg" data-coin="ETH" data-fallback-tried="0" onerror="handleCoinImgError(this)" alt="ETH">
@@ -1112,14 +1616,14 @@
                                 </div>
                                 <span id="legend-name-2" style="display:none;">ETH/USD • 15m</span>
                                 <div id="legend-ohlc">
-                                    <span>O <span class="v" id="leg-o-2">–</span></span>
-                                    <span>H <span class="v" id="leg-h-2">–</span></span>
-                                    <span>L <span class="v" id="leg-l-2">–</span></span>
-                                    <span>C <span class="v" id="leg-c-2">–</span></span>
-                                    <span class="v" id="leg-pct-2" style="margin-left: 2px;"></span>
+                                    <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o-2">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">High</span><span class="v" id="leg-h-2">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">Low</span><span class="v" id="leg-l-2">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">Close</span><span class="v" id="leg-c-2">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">Change</span><span class="v" id="leg-pct-2">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">Range</span><span class="v" id="leg-range-2">–</span></span>
                                 </div>
                             </div>
-                            <img class="chart-corner-logo" src="images/logo.png" alt="Hypermonitor logo" aria-hidden="true">
                             <div class="chart-loading-overlay" id="chart-loading-2" aria-hidden="true">
                                 <img src="images/pulse.gif" alt="Hypermonitor loading logo">
                                 <span>Loading...</span>
@@ -1141,15 +1645,46 @@
 
                 <div class="panel-content">
                     <!-- Orderbook tab -->
-                    <div class="tab-panel active" id="tab-ob">
-                        <!-- Aggregation selector -->
+                    <div class="tab-panel active" id="tab-ob" data-ob-view="both">
                         <div id="ob-agg-bar">
-                            <span class="agg-label">Aggregation</span>
-                            <div id="ob-agg-btns"></div>
+                            <div id="ob-view-btns" role="tablist" aria-label="Order book side filter">
+                                <button class="ob-view-btn active" type="button" data-ob-view="both" aria-label="Show asks and bids" title="Show asks and bids">
+                                    <svg class="ob-view-svg" viewBox="0 0 18 14" aria-hidden="true">
+                                        <rect x="1" y="1" width="5" height="5" rx="0.8" class="down-fill"></rect>
+                                        <rect x="1" y="8" width="5" height="5" rx="0.8" class="up-fill"></rect>
+                                        <rect x="10" y="1" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                        <rect x="10" y="5.8" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                        <rect x="10" y="10.6" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                    </svg>
+                                </button>
+                                <button class="ob-view-btn" type="button" data-ob-view="bids" aria-label="Show bids only" title="Show bids only">
+                                    <svg class="ob-view-svg" viewBox="0 0 18 14" aria-hidden="true">
+                                        <rect x="1" y="1" width="5" height="12" rx="0.8" class="up-fill"></rect>
+                                        <rect x="10" y="1" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                        <rect x="10" y="5.8" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                        <rect x="10" y="10.6" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                    </svg>
+                                </button>
+                                <button class="ob-view-btn" type="button" data-ob-view="asks" aria-label="Show asks only" title="Show asks only">
+                                    <svg class="ob-view-svg" viewBox="0 0 18 14" aria-hidden="true">
+                                        <rect x="1" y="1" width="5" height="12" rx="0.8" class="down-fill"></rect>
+                                        <rect x="10" y="1" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                        <rect x="10" y="5.8" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                        <rect x="10" y="10.6" width="6" height="2.4" rx="0.8" class="dim"></rect>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="ob-agg-select">
+                                <button id="ob-agg-trigger" class="ob-agg-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+                                    <span id="ob-agg-value">0.01</span>
+                                    <span class="ob-agg-caret">▼</span>
+                                </button>
+                                <div id="ob-agg-menu" class="ob-agg-menu" role="menu" aria-hidden="true"></div>
+                            </div>
                         </div>
                         <div class="ob-hdr">
-                            <span class="c1">Price</span>
-                            <span class="c2">Size</span>
+                            <span class="c1" id="ob-price-label">Price (USDT)</span>
+                            <span class="c2" id="ob-size-label">Amount (BTC)</span>
                             <span class="c3">Total</span>
                         </div>
                         <div id="ob-asks-wrap">
@@ -1159,7 +1694,7 @@
                             <div style="display:flex;align-items:baseline;gap:6px">
                                 <span id="ob-mid" class="val"
                                     style="font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.3px">–</span>
-                                <span style="font-size:10px;color:var(--muted)">mid</span>
+                                <span id="ob-mid-arrow" class="val" aria-hidden="true"></span>
                             </div>
                             <div id="ob-spread-info"
                                 style="color:var(--muted);font-size:10px;text-align:right;line-height:1.6">Spread –
@@ -1167,6 +1702,40 @@
                         </div>
                         <div id="ob-bids-wrap">
                             <div id="ob-bids-inner"></div>
+                        </div>
+                        <div id="ob-detail-sheet" aria-hidden="true">
+                            <div id="ob-detail-head">
+                                <button id="ob-detail-back" type="button" aria-label="Back to order book">‹</button>
+                                <div id="ob-detail-title">Orders</div>
+                                <div id="ob-detail-ccy">USD</div>
+                            </div>
+                            <div id="ob-detail-stats">
+                                <div class="ob-detail-stat">
+                                    <span class="k">Price Range</span>
+                                    <span class="v" id="ob-detail-range">–</span>
+                                </div>
+                                <div class="ob-detail-stat">
+                                    <span class="k">Total Orders</span>
+                                    <span class="v" id="ob-detail-orders">–</span>
+                                </div>
+                                <div class="ob-detail-stat">
+                                    <span class="k" id="ob-detail-size-key">Total Size</span>
+                                    <span class="v" id="ob-detail-size">–</span>
+                                </div>
+                                <div class="ob-detail-stat">
+                                    <span class="k">Total Value</span>
+                                    <span class="v" id="ob-detail-value">–</span>
+                                </div>
+                            </div>
+                            <div id="ob-detail-table">
+                                <div id="ob-detail-hdr">
+                                    <span class="c1">Price</span>
+                                    <span class="c2" id="ob-detail-col-size">Size</span>
+                                    <span class="c3" id="ob-detail-col-meta">Orders</span>
+                                </div>
+                                <div id="ob-detail-list"></div>
+                                <div id="ob-detail-empty">No underlying levels available for this range.</div>
+                            </div>
                         </div>
                     </div>
 
@@ -1334,7 +1903,9 @@
             ['CRCL', 'https://logo.clearbit.com/circle.com']
         ]);
         const TF_MS = { '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3 };
-        const ROWS = 14;
+        const OB_ROWS_BOTH = 14;
+        const OB_ROWS_SINGLE = 28;
+        const ORDERBOOK_ROW_CAP = OB_ROWS_SINGLE;
         const MAX_TRADES = 80;
         let perpDexNames = null;
 
@@ -1381,6 +1952,7 @@
         // ── State ──────────────────────────────────────────────────
         const S = {
             coin: parseCoin(), tf: '15m', markPx: 0, aggTick: 0,
+            obView: 'both', aggTicks: [],
             markets: [], tradeBuf: [], ws: null,
             
             // Dual chart
@@ -1393,7 +1965,25 @@
         const sMark = $('s-mark'), sChg = $('s-chg');
         const sVol = $('s-vol'), sOi = $('s-oi'), sFund = $('s-fund');
         const obAsks = $('ob-asks-inner'), obBids = $('ob-bids-inner');
+        const obSpread = $('ob-spread');
         const obMid = $('ob-mid'), obSprdInfo = $('ob-spread-info');
+        const obMidArrow = $('ob-mid-arrow');
+        const obTab = $('tab-ob');
+        const obAggTrigger = $('ob-agg-trigger');
+        const obAggValue = $('ob-agg-value');
+        const obAggMenu = $('ob-agg-menu');
+        const obPriceLabel = $('ob-price-label');
+        const obSizeLabel = $('ob-size-label');
+        const obDetailSheet = $('ob-detail-sheet');
+        const obDetailBack = $('ob-detail-back');
+        const obDetailRange = $('ob-detail-range');
+        const obDetailOrders = $('ob-detail-orders');
+        const obDetailSizeKey = $('ob-detail-size-key');
+        const obDetailSize = $('ob-detail-size');
+        const obDetailValue = $('ob-detail-value');
+        const obDetailColSize = $('ob-detail-col-size');
+        const obDetailColMeta = $('ob-detail-col-meta');
+        const obDetailList = $('ob-detail-list');
         const tradesList = $('trades-list');
         const walletModalBackdrop = $('wallet-modal-backdrop');
         const walletModalFrame = $('wallet-modal-frame');
@@ -1402,10 +1992,11 @@
         const walletModalClose = $('wallet-modal-close');
         const orderBookRows = { ask: [], bid: [] };
         let latestBookSnapshot = { bids: [], asks: [] };
+        let activeBookDetail = null;
         
         // Legends
-        const legName = $('legend-name'), legO = $('leg-o'), legH = $('leg-h'), legL = $('leg-l'), legC = $('leg-c'), legPct = $('leg-pct');
-        const legName2 = $('legend-name-2'), legO2 = $('leg-o-2'), legH2 = $('leg-h-2'), legL2 = $('leg-l-2'), legC2 = $('leg-c-2'), legPct2 = $('leg-pct-2');
+        const legName = $('legend-name'), legO = $('leg-o'), legH = $('leg-h'), legL = $('leg-l'), legC = $('leg-c'), legPct = $('leg-pct'), legRange = $('leg-range');
+        const legName2 = $('legend-name-2'), legO2 = $('leg-o-2'), legH2 = $('leg-h-2'), legL2 = $('leg-l-2'), legC2 = $('leg-c-2'), legPct2 = $('leg-pct-2'), legRange2 = $('leg-range-2');
 
         // Layouts
         const rightPanel = $('right-panel');
@@ -1414,6 +2005,60 @@
         const addChartBtn = $('add-chart-btn');
         const chartLoadingWrap1 = $('chart-wrap');
         const chartLoadingWrap2 = $('chart-wrap-2');
+
+        function getOrderBookView() {
+            return S.obView === 'bids' || S.obView === 'asks' ? S.obView : 'both';
+        }
+
+        function isOrderBookSideVisible(side) {
+            const view = getOrderBookView();
+            return view === 'both' || (view === 'bids' && side === 'bid') || (view === 'asks' && side === 'ask');
+        }
+
+        function getOrderBookRowCount() {
+            return getOrderBookView() === 'both' ? OB_ROWS_BOTH : OB_ROWS_SINGLE;
+        }
+
+        function closeObAggMenu() {
+            if (!obAggMenu || !obAggTrigger) return;
+            obAggMenu.classList.remove('open');
+            obAggMenu.setAttribute('aria-hidden', 'true');
+            obAggTrigger.setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleObAggMenu(forceOpen) {
+            if (!obAggMenu || !obAggTrigger) return;
+            const next = typeof forceOpen === 'boolean' ? forceOpen : !obAggMenu.classList.contains('open');
+            obAggMenu.classList.toggle('open', next);
+            obAggMenu.setAttribute('aria-hidden', next ? 'false' : 'true');
+            obAggTrigger.setAttribute('aria-expanded', next ? 'true' : 'false');
+        }
+
+        function syncOrderBookViewUi() {
+            if (obTab) obTab.dataset.obView = getOrderBookView();
+            document.querySelectorAll('.ob-view-btn[data-ob-view]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.obView === getOrderBookView());
+            });
+        }
+
+        function setOrderBookView(view) {
+            S.obView = view === 'bids' || view === 'asks' ? view : 'both';
+            closeOrderBookDetail();
+            syncOrderBookViewUi();
+            if (latestBookSnapshot.bids.length && latestBookSnapshot.asks.length) {
+                renderBook(latestBookSnapshot.bids, latestBookSnapshot.asks);
+            } else {
+                setOrderBookLoading(true);
+            }
+        }
+
+        function updateOrderBookLabels() {
+            if (obPriceLabel) obPriceLabel.textContent = 'Price (USDT)';
+            if (obSizeLabel) {
+                const base = getCoinDisplayName(S.coin) || 'BTC';
+                obSizeLabel.textContent = `Amount (${base})`;
+            }
+        }
 
         function setChartLoading(targetNum, isLoading, message = 'Loading...') {
             const wrap = targetNum === 2 ? chartLoadingWrap2 : chartLoadingWrap1;
@@ -1464,10 +2109,170 @@
             return v.toFixed(2);
         }
 
+        function formatPercentCompact(value) {
+            if (!Number.isFinite(value)) return '–';
+            return Math.abs(value).toFixed(2) + '%';
+        }
+
+        function updateLegendMetrics(bar, legendRefs) {
+            if (!bar || !legendRefs) return;
+            const d = pxDec(bar.close);
+            const movePct = Number.isFinite(bar.open) && bar.open !== 0 ? ((bar.close - bar.open) / bar.open * 100) : NaN;
+            const rangePct = Number.isFinite(bar.low) && bar.low !== 0 ? ((bar.high - bar.low) / bar.low * 100) : NaN;
+            const directionClass = Number.isFinite(movePct) && movePct < 0 ? 'var(--down)' : 'var(--up)';
+
+            legendRefs.open.textContent = fmt(bar.open, d);
+            legendRefs.high.textContent = fmt(bar.high, d);
+            legendRefs.low.textContent = fmt(bar.low, d);
+            legendRefs.close.textContent = fmt(bar.close, d);
+            legendRefs.change.textContent = formatPercentCompact(movePct);
+            legendRefs.range.textContent = formatPercentCompact(rangePct);
+            legendRefs.open.style.color = directionClass;
+            legendRefs.high.style.color = directionClass;
+            legendRefs.low.style.color = directionClass;
+            legendRefs.close.style.color = directionClass;
+            legendRefs.change.style.color = directionClass;
+            legendRefs.range.style.color = directionClass;
+        }
+
+        function fmtOrderCount(value) {
+            if (!Number.isFinite(value)) return '–';
+            return Math.round(value).toLocaleString('en-US');
+        }
+
+        function formatBookAddress(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '—';
+            return raw.length <= 12 ? raw : `${raw.slice(0, 6)}...${raw.slice(-4)}`;
+        }
+
+        function normalizeBookLevel(level) {
+            if (!level) return null;
+            const px = Number(Array.isArray(level) ? level[0] : level.px);
+            const sz = Number(Array.isArray(level) ? level[1] : level.sz);
+            let orders = Number(Array.isArray(level) ? level[2] : (level.n ?? level.orders ?? level.count));
+            const address = Array.isArray(level) ? '' : String(level.address ?? level.user ?? level.addr ?? '').trim();
+            if (!Number.isFinite(px) || !Number.isFinite(sz)) return null;
+            if (!Number.isFinite(orders) || orders <= 0) orders = 1;
+            return { px, sz, orders, address };
+        }
+
+        function getBucketPrice(px, tick, side) {
+            if (!tick || tick <= 0) return Number(px);
+            return side === 'ask' ? Math.ceil(px / tick) * tick : Math.floor(px / tick) * tick;
+        }
+
+        function getBucketKey(px, tick, side) {
+            return getBucketPrice(px, tick, side).toFixed(10);
+        }
+
+        function formatBucketRange(level, decimals) {
+            if (!level || !Number.isFinite(level.rangeLow) || !Number.isFinite(level.rangeHigh)) return '–';
+            const low = Math.min(level.rangeLow, level.rangeHigh);
+            const high = Math.max(level.rangeLow, level.rangeHigh);
+            if (Math.abs(high - low) < 1e-10) return `$${fmt(high, decimals)}`;
+            return `$${fmt(low, decimals)} - $${fmt(high, decimals)}`;
+        }
+
+        function closeOrderBookDetail(clearState = true) {
+            if (clearState) activeBookDetail = null;
+            if (obTab) obTab.classList.remove('show-detail');
+            if (obDetailSheet) {
+                obDetailSheet.classList.remove('is-empty');
+                obDetailSheet.setAttribute('aria-hidden', 'true');
+            }
+            if (obDetailList) obDetailList.replaceChildren();
+        }
+
+        function renderOrderBookDetail() {
+            if (!activeBookDetail || !obDetailSheet || !obTab) return;
+            const source = activeBookDetail.side === 'ask' ? latestBookSnapshot.asks : latestBookSnapshot.bids;
+            const aggregated = aggregateLevels(source, activeBookDetail.tick, activeBookDetail.side);
+            const bucket = aggregated.find(level => getBucketKey(level.px, activeBookDetail.tick, activeBookDetail.side) === activeBookDetail.bucketKey);
+            if (!bucket) {
+                closeOrderBookDetail();
+                return;
+            }
+
+            const decimals = pxDec(S.markPx || bucket.px);
+            const sideClass = activeBookDetail.side === 'ask' ? 'ask' : 'bid';
+            const coinLabel = getSelectedCoinLabel(S.coin);
+            const rawLevels = [...(bucket.rawLevels || [])].sort((a, b) => b.px - a.px);
+            const hasAddresses = rawLevels.some(row => row.address);
+            const totalValue = rawLevels.reduce((sum, row) => sum + (row.px * row.sz), 0);
+            const maxRowValue = rawLevels.reduce((max, row) => Math.max(max, row.px * row.sz), 0);
+
+            obDetailRange.textContent = formatBucketRange(bucket, decimals);
+            obDetailRange.className = `v ${sideClass}`;
+            obDetailOrders.textContent = fmtOrderCount(bucket.orders);
+            obDetailOrders.className = 'v';
+            obDetailSizeKey.textContent = 'Total Size';
+            obDetailSize.textContent = `${fmtK(bucket.sz)} ${coinLabel}`;
+            obDetailSize.className = 'v';
+            obDetailValue.textContent = `$${fmtK(totalValue)}`;
+            obDetailValue.className = 'v';
+            obDetailColSize.textContent = `Size (${coinLabel})`;
+            if (obDetailColMeta) obDetailColMeta.textContent = hasAddresses ? 'Address' : 'Orders';
+
+            const fragment = document.createDocumentFragment();
+            rawLevels.forEach((rowLevel) => {
+                const row = document.createElement('div');
+                row.className = `ob-detail-row ${sideClass}`;
+                row.style.setProperty('--ob-detail-fill', maxRowValue > 0 ? `${(rowLevel.px * rowLevel.sz / maxRowValue * 100).toFixed(1)}%` : '0%');
+
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+
+                const c1 = document.createElement('span');
+                c1.className = 'c1';
+                c1.textContent = `$${fmt(rowLevel.px, decimals)}`;
+
+                const c2 = document.createElement('span');
+                c2.className = 'c2';
+                c2.textContent = fmtK(rowLevel.sz);
+
+                const c3 = document.createElement('span');
+                c3.className = 'c3';
+                c3.textContent = hasAddresses ? formatBookAddress(rowLevel.address) : fmtOrderCount(rowLevel.orders);
+
+                row.append(bar, c1, c2, c3);
+                fragment.appendChild(row);
+            });
+
+            obDetailSheet.classList.toggle('is-empty', rawLevels.length === 0);
+            obDetailList.replaceChildren(fragment);
+            obTab.classList.add('show-detail');
+            obDetailSheet.setAttribute('aria-hidden', 'false');
+        }
+
+        function openOrderBookDetail(side, level) {
+            if (!side || !level || !Number.isFinite(level.px)) return;
+            activeBookDetail = {
+                side,
+                tick: S.aggTick || 0,
+                bucketKey: getBucketKey(level.px, S.aggTick || 0, side)
+            };
+            renderOrderBookDetail();
+        }
+
         function createOrderBookRow(side) {
             const row = document.createElement('div');
-            row.className = 'ob-row';
+            row.className = `ob-row ${side}-row`;
             row.setAttribute('aria-hidden', 'true');
+            row.tabIndex = -1;
+            row.dataset.side = side;
+
+            row.addEventListener('click', () => {
+                if (!row._bookLevel) return;
+                openOrderBookDetail(side, row._bookLevel);
+            });
+
+            row.addEventListener('keydown', event => {
+                if ((event.key === 'Enter' || event.key === ' ') && row._bookLevel) {
+                    event.preventDefault();
+                    openOrderBookDetail(side, row._bookLevel);
+                }
+            });
 
             const bar = document.createElement('div');
             bar.className = `bar ${side === 'ask' ? 'ask-bar' : 'bid-bar'}`;
@@ -1489,7 +2294,7 @@
             if (orderBookRows.ask.length || orderBookRows.bid.length) return;
             if (!obAsks || !obBids) return;
 
-            for (let index = 0; index < ROWS; index += 1) {
+            for (let index = 0; index < ORDERBOOK_ROW_CAP; index += 1) {
                 const askRow = createOrderBookRow('ask');
                 const bidRow = createOrderBookRow('bid');
                 orderBookRows.ask.push(askRow);
@@ -1499,13 +2304,27 @@
             }
         }
 
-        function updateOrderBookRow(rowRef, level, maxT, decimals) {
+        function updateOrderBookRow(rowRef, level, maxT, decimals, shouldDisplay = true) {
+            rowRef.row.classList.remove('is-skeleton');
+            rowRef.row.style.display = shouldDisplay ? 'flex' : 'none';
+            if (!shouldDisplay) {
+                rowRef.row.style.visibility = 'hidden';
+                rowRef.row.setAttribute('aria-hidden', 'true');
+                rowRef.bar.style.width = '0%';
+                rowRef.c1.textContent = '';
+                rowRef.c2.textContent = '';
+                rowRef.c3.textContent = '';
+                return;
+            }
             const hasLevel = Boolean(
                 level &&
                 Number.isFinite(level.px) &&
                 Number.isFinite(level.sz) &&
                 Number.isFinite(level.cum)
             );
+            rowRef.row._bookLevel = hasLevel ? level : null;
+            rowRef.row.classList.toggle('is-interactive', hasLevel);
+            rowRef.row.tabIndex = hasLevel ? 0 : -1;
             rowRef.row.style.visibility = hasLevel ? 'visible' : 'hidden';
             rowRef.row.setAttribute('aria-hidden', hasLevel ? 'false' : 'true');
             rowRef.bar.style.width = hasLevel && maxT > 0 ? `${(level.cum / maxT * 100).toFixed(1)}%` : '0%';
@@ -1514,18 +2333,87 @@
             rowRef.c3.textContent = hasLevel ? fmtK(level.cum) : '';
         }
 
+        function setOrderBookLoading(isLoading) {
+            ensureOrderBookRows();
+            const loading = Boolean(isLoading);
+            const tintWidth = 82;
+            const c2Widths = [60, 54, 66, 58, 62, 56, 64];
+            const c3Widths = [72, 80, 68, 84, 74, 82, 70];
+            const rowCount = getOrderBookRowCount();
+
+            if (obSpread) obSpread.classList.toggle('is-loading', loading);
+
+            ['ask', 'bid'].forEach(side => {
+                orderBookRows[side].forEach((rowRef, index) => {
+                    const shouldDisplay = isOrderBookSideVisible(side) && index < rowCount;
+                    rowRef.row.style.display = shouldDisplay ? 'flex' : 'none';
+                    if (!shouldDisplay) {
+                        rowRef.row.classList.remove('is-skeleton');
+                        rowRef.row.classList.remove('is-interactive');
+                        rowRef.row._bookLevel = null;
+                        rowRef.row.tabIndex = -1;
+                        rowRef.row.style.visibility = 'hidden';
+                        rowRef.row.setAttribute('aria-hidden', 'true');
+                        rowRef.bar.style.width = '0%';
+                        rowRef.c1.textContent = '';
+                        rowRef.c2.textContent = '';
+                        rowRef.c3.textContent = '';
+                        return;
+                    }
+                    rowRef.row.classList.toggle('is-skeleton', loading);
+                    if (!loading) return;
+                    const patternIndex = index % c2Widths.length;
+                    rowRef.row.style.visibility = 'visible';
+                    rowRef.row.setAttribute('aria-hidden', 'true');
+                    rowRef.row.style.setProperty('--ob-skel-c1', `${tintWidth}%`);
+                    rowRef.row.style.setProperty('--ob-skel-c2', `${c2Widths[patternIndex]}%`);
+                    rowRef.row.style.setProperty('--ob-skel-c3', `${c3Widths[patternIndex]}%`);
+                    rowRef.row.classList.remove('is-interactive');
+                    rowRef.row._bookLevel = null;
+                    rowRef.row.tabIndex = -1;
+                    rowRef.bar.style.width = '0%';
+                    rowRef.c1.textContent = ' ';
+                    rowRef.c2.textContent = ' ';
+                    rowRef.c3.textContent = ' ';
+                });
+            });
+        }
+
+        function resetOrderBookState() {
+            latestBookSnapshot = { bids: [], asks: [] };
+            closeOrderBookDetail();
+            S.aggTick = 0;
+            closeObAggMenu();
+            if (obMid) {
+                obMid.textContent = '–';
+                obMid.className = 'val';
+            }
+            if (obMidArrow) {
+                obMidArrow.textContent = '';
+                obMidArrow.className = 'val';
+            }
+            if (obSprdInfo) obSprdInfo.textContent = 'Spread –';
+            setOrderBookLoading(true);
+        }
+
         // ── Chart 1 Setup ──────────────────────────────────────────
         const chartWrap = $('chart-wrap');
         const chart = LightweightCharts.createChart($('chart-canvas'), {
-            layout: { background: { color: '#181613' }, textColor: '#7d8590', attributionLogo: false },
-            grid: { vertLines: { color: '#211d19' }, horzLines: { color: '#211d19' } },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#58a6ff44', labelBackgroundColor: '#2d2924' }, horzLine: { color: '#58a6ff44', labelBackgroundColor: '#2d2924' } },
-            rightPriceScale: { borderColor: '#2d2924' },
-            timeScale: { borderColor: '#2d2924', timeVisible: true, secondsVisible: false },
+            layout: { background: { color: '#0d1014' }, textColor: '#7c848f', attributionLogo: false },
+            grid: { vertLines: { color: '#20252d' }, horzLines: { color: '#20252d' } },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#d3d8df24', labelBackgroundColor: '#12161c' }, horzLine: { color: '#d3d8df24', labelBackgroundColor: '#12161c' } },
+            rightPriceScale: { borderColor: '#20252d' },
+            timeScale: { borderColor: '#20252d', timeVisible: true, secondsVisible: false },
         });
 
-        const candles = chart.addCandlestickSeries({ upColor: '#59A47F', wickUpColor: '#59A47F', downColor: '#AD3542', wickDownColor: '#AD3542', borderVisible: false });
-        const volSeries = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: 'vol', color: '#59A47F55' });
+        const candles = chart.addCandlestickSeries({ upColor: '#0ECB81', wickUpColor: '#0ECB81', downColor: '#F6465D', wickDownColor: '#F6465D', borderVisible: false });
+        const volSeries = chart.addHistogramSeries({
+            priceFormat: { type: 'volume' },
+            priceScaleId: 'vol',
+            color: '#0ECB8155',
+            lastValueVisible: false,
+            priceLineVisible: false
+        });
         chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
 
         new ResizeObserver(() => { chart.applyOptions({ width: chartWrap.clientWidth, height: chartWrap.clientHeight }); }).observe(chartWrap);
@@ -1533,26 +2421,35 @@
         chart.subscribeCrosshairMove(param => {
             const bar = param?.seriesData?.get(candles);
             if (bar) {
-                const d = pxDec(bar.close);
-                legO.textContent = fmt(bar.open, d); legH.textContent = fmt(bar.high, d); legL.textContent = fmt(bar.low, d);
-                legC.textContent = fmt(bar.close, d); legC.style.color = bar.close >= bar.open ? 'var(--up)' : 'var(--down)';
-                const pct = ((bar.close - bar.open) / bar.open * 100).toFixed(2);
-                legPct.textContent = `${pct >= 0 ? '+' : ''}${pct}%`; legPct.style.color = pct >= 0 ? 'var(--up)' : 'var(--down)';
+                updateLegendMetrics(bar, {
+                    open: legO,
+                    high: legH,
+                    low: legL,
+                    close: legC,
+                    change: legPct,
+                    range: legRange
+                });
             }
         });
 
         // ── Chart 2 Setup ──────────────────────────────────────────
         const chartWrap2 = $('chart-wrap-2');
         const chart2 = LightweightCharts.createChart($('chart-canvas-2'), {
-            layout: { background: { color: '#181613' }, textColor: '#7d8590', attributionLogo: false },
-            grid: { vertLines: { color: '#211d19' }, horzLines: { color: '#211d19' } },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#58a6ff44', labelBackgroundColor: '#2d2924' }, horzLine: { color: '#58a6ff44', labelBackgroundColor: '#2d2924' } },
-            rightPriceScale: { borderColor: '#2d2924' },
-            timeScale: { borderColor: '#2d2924', timeVisible: true, secondsVisible: false },
+            layout: { background: { color: '#0d1014' }, textColor: '#7c848f', attributionLogo: false },
+            grid: { vertLines: { color: '#20252d' }, horzLines: { color: '#20252d' } },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#d3d8df24', labelBackgroundColor: '#12161c' }, horzLine: { color: '#d3d8df24', labelBackgroundColor: '#12161c' } },
+            rightPriceScale: { borderColor: '#20252d' },
+            timeScale: { borderColor: '#20252d', timeVisible: true, secondsVisible: false },
         });
 
-        const candles2 = chart2.addCandlestickSeries({ upColor: '#59A47F', wickUpColor: '#59A47F', downColor: '#AD3542', wickDownColor: '#AD3542', borderVisible: false });
-        const volSeries2 = chart2.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: 'vol', color: '#59A47F55' });
+        const candles2 = chart2.addCandlestickSeries({ upColor: '#0ECB81', wickUpColor: '#0ECB81', downColor: '#F6465D', wickDownColor: '#F6465D', borderVisible: false });
+        const volSeries2 = chart2.addHistogramSeries({
+            priceFormat: { type: 'volume' },
+            priceScaleId: 'vol',
+            color: '#0ECB8155',
+            lastValueVisible: false,
+            priceLineVisible: false
+        });
         chart2.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
 
         new ResizeObserver(() => { chart2.applyOptions({ width: chartWrap2.clientWidth, height: chartWrap2.clientHeight }); }).observe(chartWrap2);
@@ -1560,11 +2457,14 @@
         chart2.subscribeCrosshairMove(param => {
             const bar = param?.seriesData?.get(candles2);
             if (bar) {
-                const d = pxDec(bar.close);
-                legO2.textContent = fmt(bar.open, d); legH2.textContent = fmt(bar.high, d); legL2.textContent = fmt(bar.low, d);
-                legC2.textContent = fmt(bar.close, d); legC2.style.color = bar.close >= bar.open ? 'var(--up)' : 'var(--down)';
-                const pct = ((bar.close - bar.open) / bar.open * 100).toFixed(2);
-                legPct2.textContent = `${pct >= 0 ? '+' : ''}${pct}%`; legPct2.style.color = pct >= 0 ? 'var(--up)' : 'var(--down)';
+                updateLegendMetrics(bar, {
+                    open: legO2,
+                    high: legH2,
+                    low: legL2,
+                    close: legC2,
+                    change: legPct2,
+                    range: legRange2
+                });
             }
         });
 
@@ -1582,7 +2482,7 @@
                 const o = Number(c.o), h = Number(c.h), l = Number(c.l), cl = Number(c.c), v = Number(c.v);
                 if (!Number.isFinite(t)) continue;
                 cv.push({ time: t, open: o, high: h, low: l, close: cl });
-                vl.push({ time: t, value: v, color: cl >= o ? '#59A47F55' : '#AD354255' });
+                vl.push({ time: t, value: v, color: cl >= o ? '#0ECB8155' : '#F6465D55' });
             }
             return { cv, vl };
         }
@@ -1628,9 +2528,15 @@
                 candles.setData(cvArr); volSeries.setData([...volMap.values()].sort((a,b)=>a.time-b.time));
                 applyDefaultZoom(chart, cvArr.length, S.tf);
                 if (cvArr.length) {
-                    const last = cvArr[cvArr.length - 1], d = pxDec(last.close);
-                    legO.textContent = fmt(last.open, d); legH.textContent = fmt(last.high, d); legL.textContent = fmt(last.low, d);
-                    legC.textContent = fmt(last.close, d); legC.style.color = last.close >= last.open ? 'var(--up)' : 'var(--down)';
+                    const last = cvArr[cvArr.length - 1];
+                    updateLegendMetrics(last, {
+                        open: legO,
+                        high: legH,
+                        low: legL,
+                        close: legC,
+                        change: legPct,
+                        range: legRange
+                    });
                 }
             } catch(e) {} finally {
                 setChartLoading(1, false);
@@ -1655,9 +2561,15 @@
                 candles2.setData(cvArr); volSeries2.setData([...volMap2.values()].sort((a,b)=>a.time-b.time));
                 applyDefaultZoom(chart2, cvArr.length, S.tf);
                 if (cvArr.length) {
-                    const last = cvArr[cvArr.length - 1], d = pxDec(last.close);
-                    legO2.textContent = fmt(last.open, d); legH2.textContent = fmt(last.high, d); legL2.textContent = fmt(last.low, d);
-                    legC2.textContent = fmt(last.close, d); legC2.style.color = last.close >= last.open ? 'var(--up)' : 'var(--down)';
+                    const last = cvArr[cvArr.length - 1];
+                    updateLegendMetrics(last, {
+                        open: legO2,
+                        high: legH2,
+                        low: legL2,
+                        close: legC2,
+                        change: legPct2,
+                        range: legRange2
+                    });
                 }
             } catch(e) {} finally {
                 setChartLoading(2, false);
@@ -1808,12 +2720,25 @@
         function fmtTick(t) { if (t >= 1) return t % 1 === 0 ? t.toString() : t.toFixed(1); const s = t.toString(); return s.includes('e') ? t.toPrecision(1) : s; }
         function buildAggBar(price) {
             const ticks = smartTicks(price);
+            S.aggTicks = ticks;
             if (!S.aggTick || !ticks.includes(S.aggTick)) S.aggTick = ticks[0];
-            $('ob-agg-btns').innerHTML = ticks.map(t => `<button class="agg-btn${S.aggTick === t ? ' active' : ''}" onclick="setAgg(${t})">${fmtTick(t)}</button>`).join('');
+            if (obAggValue) obAggValue.textContent = fmtTick(S.aggTick);
+            if (obAggMenu) {
+                obAggMenu.innerHTML = ticks.map(t => `
+                    <button class="ob-agg-option${S.aggTick === t ? ' active' : ''}" type="button" data-agg-tick="${t}" role="menuitem">
+                        ${fmtTick(t)}
+                    </button>
+                `).join('');
+            }
         }
         function setAgg(tick) {
             S.aggTick = tick;
-            document.querySelectorAll('.agg-btn').forEach(b => b.classList.toggle('active', parseFloat(b.textContent) === tick || b.textContent === fmtTick(tick)));
+            closeOrderBookDetail();
+            if (obAggValue) obAggValue.textContent = fmtTick(tick);
+            document.querySelectorAll('.ob-agg-option[data-agg-tick]').forEach(btn => {
+                btn.classList.toggle('active', Number(btn.dataset.aggTick) === tick);
+            });
+            closeObAggMenu();
             if (latestBookSnapshot.bids.length && latestBookSnapshot.asks.length) {
                 renderBook(latestBookSnapshot.bids, latestBookSnapshot.asks);
             }
@@ -1830,15 +2755,35 @@
 
         // ── Orderbook renderer ─────────────────────────────────────
         function aggregateLevels(levels, tick, side) {
-            if (!tick || tick <= 0) return levels.map(l => ({ px: Number(l.px), sz: Number(l.sz) }));
             const map = new Map();
-            for (const l of levels) {
-                const px = Number(l.px), sz = Number(l.sz);
-                const bucket = side === 'ask' ? Math.ceil(px / tick) * tick : Math.floor(px / tick) * tick;
+            for (const rawLevel of Array.isArray(levels) ? levels : []) {
+                const level = normalizeBookLevel(rawLevel);
+                if (!level) continue;
+                const bucket = getBucketPrice(level.px, tick, side);
                 const key = bucket.toFixed(10);
-                map.set(key, (map.get(key) || 0) + sz);
+                if (!map.has(key)) {
+                    map.set(key, {
+                        px: bucket,
+                        sz: 0,
+                        orders: 0,
+                        rangeLow: level.px,
+                        rangeHigh: level.px,
+                        rawLevels: []
+                    });
+                }
+                const entry = map.get(key);
+                entry.sz += level.sz;
+                entry.orders += level.orders;
+                entry.rangeLow = Math.min(entry.rangeLow, level.px);
+                entry.rangeHigh = Math.max(entry.rangeHigh, level.px);
+                entry.rawLevels.push(level);
             }
-            return [...map.entries()].map(([k, sz]) => ({ px: parseFloat(k), sz })).sort((a, b) => side === 'ask' ? a.px - b.px : b.px - a.px);
+            return [...map.values()]
+                .map(entry => ({
+                    ...entry,
+                    rawLevels: [...entry.rawLevels].sort((a, b) => side === 'ask' ? a.px - b.px : b.px - a.px)
+                }))
+                .sort((a, b) => side === 'ask' ? a.px - b.px : b.px - a.px);
         }
 
         function renderBook(bids, asks) {
@@ -1853,24 +2798,47 @@
                 return;
             }
 
+            setOrderBookLoading(false);
+
             const d = pxDec(S.markPx || 1000), tick = S.aggTick || 0;
-            const aggAsks = aggregateLevels(asks, tick, 'ask').slice(0, ROWS), aggBids = aggregateLevels(bids, tick, 'bid').slice(0, ROWS);
-            let maxT = 0, aLvl = [], bLvl = [], cum = 0;
-            for (const a of aggAsks) { cum += a.px * a.sz; aLvl.push({ px: a.px, sz: a.px * a.sz, cum }); }
-            maxT = Math.max(maxT, cum); cum = 0;
-            for (const b of aggBids) { cum += b.px * b.sz; bLvl.push({ px: b.px, sz: b.px * b.sz, cum }); }
-            maxT = Math.max(maxT, cum);
+            const rowCount = getOrderBookRowCount();
+            const aggAsks = aggregateLevels(asks, tick, 'ask').slice(0, rowCount);
+            const aggBids = aggregateLevels(bids, tick, 'bid').slice(0, rowCount);
+            const view = getOrderBookView();
+            let aLvl = [], bLvl = [], cum = 0;
+            for (const a of aggAsks) {
+                cum += a.px * a.sz;
+                aLvl.push({ ...a, cum });
+            }
+            const askMax = cum;
+            cum = 0;
+            for (const b of aggBids) {
+                cum += b.px * b.sz;
+                bLvl.push({ ...b, cum });
+            }
+            const bidMax = cum;
+            const maxT = view === 'asks' ? askMax : view === 'bids' ? bidMax : Math.max(askMax, bidMax);
 
             ensureOrderBookRows();
-            const displayAsks = [...aLvl].reverse();
-            orderBookRows.ask.forEach((rowRef, index) => updateOrderBookRow(rowRef, displayAsks[index], maxT, d));
-            orderBookRows.bid.forEach((rowRef, index) => updateOrderBookRow(rowRef, bLvl[index], maxT, d));
+            const displayAsks = view === 'both' ? [...aLvl].reverse() : aLvl;
+            orderBookRows.ask.forEach((rowRef, index) => updateOrderBookRow(rowRef, displayAsks[index], maxT, d, isOrderBookSideVisible('ask') && index < rowCount));
+            orderBookRows.bid.forEach((rowRef, index) => updateOrderBookRow(rowRef, bLvl[index], maxT, d, isOrderBookSideVisible('bid') && index < rowCount));
 
             if (aggAsks.length && aggBids.length) {
                 const bestAsk = Number(aggAsks[0].px), bestBid = Number(aggBids[0].px);
                 const mid = (bestAsk + bestBid) / 2, spread = bestAsk - bestBid, pct = (spread / mid * 100).toFixed(3);
-                obMid.textContent = fmt(mid, d); obMid.className = 'val ' + (mid >= S.markPx ? 'up' : 'dn');
+                const isUp = mid >= S.markPx;
+                obMid.textContent = fmt(mid, d);
+                obMid.className = 'val ' + (isUp ? 'up' : 'dn');
+                if (obMidArrow) {
+                    obMidArrow.textContent = isUp ? '↑' : '↓';
+                    obMidArrow.className = 'val ' + (isUp ? 'up' : 'dn');
+                }
                 obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
+            }
+
+            if (activeBookDetail) {
+                renderOrderBookDetail();
             }
         }
 
@@ -1884,7 +2852,63 @@
         function formatWalletShort(wallet) {
             const value = String(wallet || '').trim();
             if (!value) return '—';
-            return value.length <= 8 ? value : `${value.slice(0, 8)}…`;
+            return value.length <= 9 ? value : `${value.slice(0, 6)}...`;
+        }
+
+        function getLatestCandleBar(map) {
+            if (!(map instanceof Map) || !map.size) return null;
+            let latest = null;
+            map.forEach((bar) => {
+                if (!bar || !Number.isFinite(bar.time)) return;
+                if (!latest || bar.time > latest.time) latest = bar;
+            });
+            return latest;
+        }
+
+        function applyTradeToPrimaryCandle(trade) {
+            if (!trade || !Number.isFinite(trade.px) || !Number.isFinite(trade.time)) return;
+            const tfMs = TF_MS[S.tf] || 900e3;
+            if (!tfMs || !candleMap.size) return;
+
+            const tradeTimeMs = Number(trade.time);
+            const bucketSec = Math.floor(Math.floor(tradeTimeMs / tfMs) * tfMs / 1000);
+            const latestBar = getLatestCandleBar(candleMap);
+            if (!latestBar || !Number.isFinite(bucketSec)) return;
+            if (bucketSec < latestBar.time) return;
+
+            const nextClose = Number(trade.px);
+            let nextBar;
+
+            if (bucketSec === latestBar.time) {
+                nextBar = {
+                    time: latestBar.time,
+                    open: Number(latestBar.open),
+                    high: Math.max(Number(latestBar.high), nextClose),
+                    low: Math.min(Number(latestBar.low), nextClose),
+                    close: nextClose
+                };
+            } else {
+                const prevClose = Number(latestBar.close);
+                nextBar = {
+                    time: bucketSec,
+                    open: prevClose,
+                    high: Math.max(prevClose, nextClose),
+                    low: Math.min(prevClose, nextClose),
+                    close: nextClose
+                };
+            }
+
+            candleMap.set(nextBar.time, nextBar);
+            candles.update(nextBar);
+
+            const existingVol = volMap.get(nextBar.time);
+            const nextVol = {
+                time: nextBar.time,
+                value: Number(existingVol?.value) || 0,
+                color: nextBar.close >= nextBar.open ? '#0ECB8155' : '#F6465D55'
+            };
+            volMap.set(nextBar.time, nextVol);
+            volSeries.update(nextVol);
         }
 
         function buildWalletTrackerHref(wallet) {
@@ -1998,6 +3022,10 @@
             }
             if (!nextTrades.length) return;
 
+            [...nextTrades]
+                .sort((a, b) => Number(a.time || 0) - Number(b.time || 0))
+                .forEach(applyTradeToPrimaryCandle);
+
             nextTrades.sort(compareTrades);
             const currentTopTime = S.tradeBuf[0]?.time ?? -Infinity;
             const canPrepend = !S.tradeBuf.length || nextTrades.every(trade => trade.time >= currentTopTime);
@@ -2052,12 +3080,12 @@
                             if (coinStr === S.coin) {
                                 candles.update(bar);
                                 if (candleMap.has(bar.time)) { const old = candleMap.get(bar.time); old.open = bar.open; old.high = bar.high; old.low = bar.low; old.close = bar.close; }
-                                volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#59A47F55' : '#AD354255' });
+                                volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
                             }
                             if (S.chart2Active && coinStr === S.coin2) {
                                 candles2.update(bar);
                                 if (candleMap2.has(bar.time)) { const old = candleMap2.get(bar.time); old.open = bar.open; old.high = bar.high; old.low = bar.low; old.close = bar.close; }
-                                volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#59A47F55' : '#AD354255' });
+                                volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
                             }
                         }
                     }
@@ -2193,6 +3221,7 @@
             setCoinBadge(badgeEl, marketKey);
             setCoinLogo(logo, marketKey);
             if (toggle) toggle.title = getSelectedCoinLabel(marketKey);
+            if (targetNum === 1) updateOrderBookLabels();
         }
 
         function resolveCoinSelection(value) {
@@ -2339,9 +3368,35 @@
         $('coin-list').addEventListener('keydown', handleCoinListKeydown);
         $('coin-list-2').addEventListener('keydown', handleCoinListKeydown);
 
+        document.querySelectorAll('.ob-view-btn[data-ob-view]').forEach(btn => {
+            btn.addEventListener('click', () => setOrderBookView(btn.dataset.obView || 'both'));
+        });
+
+        if (obAggTrigger) {
+            obAggTrigger.addEventListener('click', event => {
+                event.stopPropagation();
+                toggleObAggMenu();
+            });
+        }
+
+        if (obAggMenu) {
+            obAggMenu.addEventListener('click', event => {
+                const target = event.target;
+                if (!(target instanceof HTMLElement)) return;
+                const button = target.closest('.ob-agg-option[data-agg-tick]');
+                if (!button) return;
+                setAgg(Number(button.dataset.aggTick));
+            });
+        }
+
+        if (obDetailBack) {
+            obDetailBack.addEventListener('click', () => closeOrderBookDetail());
+        }
+
         document.addEventListener('click', e => {
             if (!$('coin-picker-wrap').contains(e.target)) $('coin-dropdown').classList.remove('open');
             if (!$('chart-container-2').contains(e.target)) $('coin-dropdown-2').style.display = 'none';
+            if (!obAggTrigger?.contains(e.target) && !obAggMenu?.contains(e.target)) closeObAggMenu();
         });
 
         tradesList.addEventListener('click', event => {
@@ -2363,6 +3418,12 @@
         }
 
         document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && obTab?.classList.contains('show-detail')) {
+                closeOrderBookDetail();
+            }
+            if (event.key === 'Escape' && obAggMenu?.classList.contains('open')) {
+                closeObAggMenu();
+            }
             if (event.key === 'Escape' && walletModalBackdrop?.classList.contains('open')) {
                 closeWalletModal();
             }
@@ -2388,12 +3449,16 @@
         document.querySelectorAll('.ptab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const id = tab.dataset.tab;
+                closeOrderBookDetail();
                 document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
                 tab.classList.add('active');
                 $('tab-' + id).classList.add('active');
             });
         });
+
+        syncOrderBookViewUi();
+        updateOrderBookLabels();
 
         // ── Funding countdown ──────────────────────────────────────
         setInterval(() => {
@@ -2408,6 +3473,7 @@
 
         // ── Boot ───────────────────────────────────────────────────
         async function reinit() {
+            resetOrderBookState();
             applyStats();
             await fetchCandles();
             await fetchBook();
@@ -2415,6 +3481,7 @@
         }
 
         async function init() {
+            resetOrderBookState();
             await fetchMeta();
             buildCoinList();
             applyStats();
