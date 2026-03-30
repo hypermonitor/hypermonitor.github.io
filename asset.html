@@ -8,6 +8,22 @@
     <meta name="description" content="Real-time crypto asset terminal with live charts and orderbook.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        const bootParams = new URLSearchParams(location.search);
+        const bootPane = String(bootParams.get('pane') || '').trim();
+        if (window.matchMedia('(max-width: 720px)').matches) {
+            document.documentElement.classList.add('mobile-layout');
+            if (bootParams.get('compact') !== '1') {
+                document.documentElement.classList.add('mobile-ob-collapsed');
+            }
+        }
+        if (bootParams.get('compact') === '1') {
+            document.documentElement.classList.add('compact');
+            if (bootPane.startsWith('extra-')) {
+                document.documentElement.classList.add('compact-extra');
+            }
+        }
+    </script>
     <style>
         :root {
             --bg: #0d1014;
@@ -40,6 +56,15 @@
             overflow: hidden;
         }
 
+        html.compact {
+            --header-h: 0px;
+            --toolbar-h: 34px;
+        }
+
+        html.compact-extra {
+            --toolbar-h: 0px;
+        }
+
         /* ── Layout ── */
         #layout {
             display: flex;
@@ -61,6 +86,10 @@
             gap: 20px;
             flex-shrink: 0;
             overflow: hidden;
+        }
+
+        html.compact #header {
+            display: none;
         }
 
         /* Coin picker */
@@ -317,7 +346,6 @@
         .hstat .lbl {
             font-size: 10px;
             color: var(--muted);
-            text-transform: uppercase;
             letter-spacing: 0.03em;
         }
 
@@ -364,6 +392,7 @@
             flex: 1;
             min-height: 0;
             overflow: hidden;
+            position: relative;
         }
 
         /* ── Chart ── */
@@ -373,6 +402,66 @@
             flex: 1;
             min-width: 0;
             overflow: hidden;
+        }
+
+        #charts-container {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            background: var(--border);
+            gap: 1px;
+            position: relative;
+        }
+
+        .asset-splitter {
+            position: absolute;
+            z-index: 8;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .asset-splitter::before {
+            content: "";
+            position: absolute;
+            background: transparent;
+            opacity: 0;
+            transition: background 140ms ease, opacity 140ms ease;
+        }
+
+        .asset-splitter:hover::before,
+        .asset-splitter.is-dragging::before {
+            opacity: 1;
+            background: rgba(227, 232, 238, 0.16);
+        }
+
+        #chart-splitter {
+            top: 0;
+            bottom: 0;
+            left: var(--chart-splitter-left, 50%);
+            width: 12px;
+            transform: translateX(-50%);
+            cursor: col-resize;
+        }
+
+        #chart-splitter::before,
+        #ob-main-splitter::before {
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            transform: translateX(-50%);
+        }
+
+        #ob-main-splitter {
+            top: 0;
+            bottom: 0;
+            left: var(--ob-main-splitter-left, 50%);
+            width: 12px;
+            transform: translateX(-50%);
+            cursor: col-resize;
         }
 
         #chart-toolbar {
@@ -385,6 +474,14 @@
             padding: 0 12px;
             gap: 2px;
             flex-shrink: 0;
+        }
+
+        html.compact #chart-toolbar {
+            padding: 0 10px;
+        }
+
+        html.compact-extra #chart-toolbar {
+            display: none;
         }
 
         .tf-btn {
@@ -408,6 +505,61 @@
         .tf-btn.active {
             color: var(--bg);
             background: var(--text);
+        }
+
+        .toolbar-icon-btn {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: color 0.15s ease;
+            flex: 0 0 auto;
+        }
+
+        .toolbar-icon-btn:hover {
+            color: var(--text);
+        }
+
+        .toolbar-icon-btn:focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 1px rgba(234, 236, 239, 0.14);
+        }
+
+        .toolbar-icon-btn svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+
+        .ob-open-svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .ob-open-svg .dim {
+            fill: rgba(132, 142, 156, 0.56);
+        }
+
+        .chart-toggle-btn {
+            align-self: center;
+        }
+
+        .ob-close-btn {
+            align-self: center;
+            margin-right: 6px;
+        }
+
+        .toolbar-icon-stroke {
+            width: 16px;
+            height: 16px;
+            display: block;
         }
 
         .tb-sep {
@@ -516,6 +668,147 @@
             margin-top: -10px;
         }
 
+        html.mobile-layout,
+        html.mobile-layout body {
+            height: auto;
+            min-height: 100%;
+            overflow: auto;
+        }
+
+        html.mobile-layout #layout {
+            height: auto;
+            min-height: 100svh;
+            overflow: visible;
+        }
+
+        html.mobile-layout #header {
+            height: auto;
+            min-height: 0;
+            padding: 10px 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        html.mobile-layout #coin-picker-wrap {
+            max-width: 100%;
+        }
+
+        html.mobile-layout #coin-btn {
+            max-width: 100%;
+            font-size: 14px;
+        }
+
+        html.mobile-layout #header-stats {
+            width: 100%;
+            gap: 14px;
+            padding-bottom: 2px;
+        }
+
+        html.mobile-layout .hstat .lbl {
+            font-size: 9px;
+        }
+
+        html.mobile-layout .hstat .val {
+            font-size: 12px;
+        }
+
+        html.mobile-layout #main {
+            display: block;
+            flex: none;
+            overflow: visible;
+        }
+
+        html.mobile-layout #chart-side {
+            overflow: visible;
+        }
+
+        html.mobile-layout #chart-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 9;
+            padding: 0 8px;
+            gap: 0;
+            background: rgba(13, 16, 20, 0.94);
+            backdrop-filter: blur(12px);
+        }
+
+        html.mobile-layout .tf-btn {
+            padding: 3px 6px;
+            font-size: 11px;
+        }
+
+        html.mobile-layout .toolbar-icon-btn {
+            width: 28px;
+            height: 28px;
+        }
+
+        html.mobile-layout #charts-container {
+            flex-direction: column;
+            flex: none;
+            overflow: visible;
+            background: transparent;
+            gap: 10px;
+        }
+
+        html.mobile-layout #chart-container-1,
+        html.mobile-layout #chart-container-2 {
+            flex: none !important;
+            height: clamp(340px, 58svh, 540px);
+            min-height: clamp(340px, 58svh, 540px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        html.mobile-layout #chart-container-2 {
+            height: clamp(300px, 48svh, 460px);
+            min-height: clamp(300px, 48svh, 460px);
+        }
+
+        html.mobile-layout #chart-wrap,
+        html.mobile-layout #chart-wrap-2 {
+            min-height: 0;
+        }
+
+        html.mobile-layout #chart-legend {
+            top: 8px;
+            left: 10px;
+            right: 10px;
+        }
+
+        html.mobile-layout #legend-name {
+            font-size: 12px;
+        }
+
+        html.mobile-layout #legend-ohlc {
+            font-size: 10px;
+            gap: 6px 10px;
+        }
+
+        html.mobile-layout #chart-splitter,
+        html.mobile-layout #ob-main-splitter {
+            display: none !important;
+        }
+
+        html.mobile-layout #right-panel {
+            width: 100% !important;
+            min-width: 0 !important;
+            min-height: 520px;
+            margin-top: 10px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        html.mobile-ob-collapsed #right-panel {
+            display: none;
+        }
+
+        html.mobile-ob-collapsed #ob-open-btn {
+            display: inline-flex !important;
+        }
+
         #chart-canvas {
             width: 100%;
             height: 100%;
@@ -610,6 +903,15 @@
             border-left: 1px solid var(--border);
             overflow: hidden;
             background: var(--surface);
+        }
+
+        html.compact #right-panel,
+        html.compact #ob-open-btn,
+        html.compact #add-chart-btn,
+        html.compact #chart-container-2,
+        html.compact #coin-dropdown,
+        html.compact #coin-dropdown-2 {
+            display: none !important;
         }
 
         .panel-tabs {
@@ -864,6 +1166,10 @@
             order: 3;
         }
 
+        #tab-ob[data-ob-view="both"] #ob-ratio {
+            order: 4;
+        }
+
         #tab-ob[data-ob-view="bids"] #ob-spread,
         #tab-ob[data-ob-view="asks"] #ob-spread {
             order: 1;
@@ -878,6 +1184,11 @@
         #tab-ob[data-ob-view="bids"] #ob-bids-wrap,
         #tab-ob[data-ob-view="asks"] #ob-asks-wrap {
             order: 2;
+        }
+
+        #tab-ob[data-ob-view="bids"] #ob-ratio,
+        #tab-ob[data-ob-view="asks"] #ob-ratio {
+            order: 3;
         }
 
         #tab-ob[data-ob-view="asks"] #ob-asks-inner {
@@ -1109,6 +1420,75 @@
             width: 118px;
             height: 12px;
             margin-left: auto;
+        }
+
+        #ob-ratio {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px 10px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0;
+            font-size: 11px;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        #ob-ratio.is-loading {
+            opacity: 0.72;
+        }
+
+        .ob-ratio-side {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 58px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+        }
+
+        .ob-ratio-side.bid {
+            justify-content: flex-start;
+            color: var(--up);
+        }
+
+        .ob-ratio-side.ask {
+            justify-content: flex-end;
+            color: var(--down);
+            text-align: right;
+        }
+
+        .ob-ratio-side .lbl {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .ob-ratio-bar {
+            flex: 1 1 auto;
+            min-width: 0;
+            height: 6px;
+            display: flex;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.055);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        }
+
+        .ob-ratio-fill {
+            height: 100%;
+        }
+
+        .ob-ratio-fill.bid {
+            background: var(--up);
+        }
+
+        .ob-ratio-fill.ask {
+            background: var(--down);
         }
 
         #ob-detail-sheet {
@@ -1540,9 +1920,6 @@
                 <div class="hstat"><span class="lbl">24h Volume</span><span class="val" id="s-vol">–</span></div>
                 <div class="hstat"><span class="lbl">Open Interest</span><span class="val" id="s-oi">–</span></div>
                 <div class="hstat"><span class="lbl">Funding / Countdown</span><span class="val" id="s-fund">–</span></div>
-                <div style="flex:1"></div>
-                <!-- Show Book Button (Hidden while book is open) -->
-                <button id="ob-open-btn" onclick="toggleOb()" style="display:none; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:600; font-size:12px;">Show Book</button>
             </div>
         </header>
 
@@ -1559,10 +1936,21 @@
                     <button class="tf-btn" data-tf="4h">4H</button>
                     <button class="tf-btn" data-tf="1d">1D</button>
                     <div style="flex:1"></div>
-                    <button class="tf-btn" id="add-chart-btn" onclick="toggleChart2()" style="border-color:var(--border); color:var(--text); padding: 4px 12px;">+ Add Chart</button>
+                    <button id="add-chart-btn" class="toolbar-icon-btn chart-toggle-btn" type="button" onclick="toggleChart2()" title="Add chart" aria-label="Add chart">
+                        <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                            <path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                        </svg>
+                    </button>
+                    <button id="ob-open-btn" class="toolbar-icon-btn" type="button" onclick="toggleOb()" title="Show order book" aria-label="Show order book" style="display:none;">
+                        <svg class="ob-open-svg" viewBox="0 0 18 18" aria-hidden="true">
+                            <rect x="1" y="4" width="4" height="10" rx="1" class="dim"></rect>
+                            <rect x="7" y="4" width="4" height="10" rx="1" class="dim"></rect>
+                            <rect x="13" y="4" width="4" height="10" rx="1" class="dim"></rect>
+                        </svg>
+                    </button>
                 </div>
 
-                <div id="charts-container" style="display:flex; flex:1; min-height:0; background:var(--border); gap:1px;">
+                <div id="charts-container">
                     <!-- Primary Chart -->
                     <div id="chart-container-1" style="flex:1; background:var(--bg); display:flex; flex-direction:column; position:relative; min-width:0;">
                         <div id="chart-wrap" class="chart-loading-wrap logo-watermark is-loading" style="flex:1; min-height:0; position:relative;">
@@ -1630,9 +2018,12 @@
                             </div>
                         </div>
                     </div>
+                    <div id="chart-splitter" class="asset-splitter" role="separator" aria-orientation="vertical" aria-label="Resize charts" hidden></div>
                 </div>
 
             </div>
+
+            <div id="ob-main-splitter" class="asset-splitter" role="separator" aria-orientation="vertical" aria-label="Resize order book" hidden></div>
 
             <!-- RIGHT PANEL (Orderbook) -->
             <div id="right-panel">
@@ -1640,7 +2031,11 @@
                     <div class="ptab active" data-tab="ob">Order Book</div>
                     <div class="ptab" data-tab="trades">Trades</div>
                     <div style="flex:1"></div>
-                    <div style="cursor:pointer; color:var(--muted); padding:0 12px; font-size:14px; display:flex; align-items:center;" onclick="toggleOb()" title="Hide Orderbook">✕</div>
+                    <button class="toolbar-icon-btn chart-toggle-btn ob-close-btn" type="button" onclick="toggleOb()" title="Hide order book" aria-label="Hide order book">
+                        <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                            <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                        </svg>
+                    </button>
                 </div>
 
                 <div class="panel-content">
@@ -1683,7 +2078,7 @@
                             </div>
                         </div>
                         <div class="ob-hdr">
-                            <span class="c1" id="ob-price-label">Price (USDT)</span>
+                            <span class="c1" id="ob-price-label">Price (USD)</span>
                             <span class="c2" id="ob-size-label">Amount (BTC)</span>
                             <span class="c3">Total</span>
                         </div>
@@ -1702,6 +2097,20 @@
                         </div>
                         <div id="ob-bids-wrap">
                             <div id="ob-bids-inner"></div>
+                        </div>
+                        <div id="ob-ratio" class="is-loading" aria-label="Order book buy sell ratio">
+                            <div class="ob-ratio-side bid">
+                                <span class="lbl">B</span>
+                                <span id="ob-ratio-bid">–</span>
+                            </div>
+                            <div class="ob-ratio-bar" aria-hidden="true">
+                                <div class="ob-ratio-fill bid" id="ob-ratio-fill-bid" style="width:50%"></div>
+                                <div class="ob-ratio-fill ask" id="ob-ratio-fill-ask" style="width:50%"></div>
+                            </div>
+                            <div class="ob-ratio-side ask">
+                                <span id="ob-ratio-ask">–</span>
+                                <span class="lbl">S</span>
+                            </div>
                         </div>
                         <div id="ob-detail-sheet" aria-hidden="true">
                             <div id="ob-detail-head">
@@ -1880,6 +2289,10 @@
         const WS = 'wss://api.hyperliquid.xyz/ws';
         const COIN_ICON_BASE = 'https://app.hyperliquid.xyz/coins/';
         const NON_CRYPTO_PREFIXES = ['xyz', 'flx', 'hyna', 'km', 'vntl', 'cash'];
+        const PAGE_PARAMS = new URLSearchParams(location.search);
+        const IS_COMPACT = PAGE_PARAMS.get('compact') === '1';
+        const EMBED_PANE = String(PAGE_PARAMS.get('pane') || '').trim();
+        const MOBILE_ASSET_QUERY = window.matchMedia('(max-width: 720px)');
         const SPECIAL_LOGOS = new Map([
             ['USA500', 'images/coins/USA500.png'],
             ['COPPER', 'images/coins/COPPER.png'],
@@ -1908,6 +2321,10 @@
         const ORDERBOOK_ROW_CAP = OB_ROWS_SINGLE;
         const MAX_TRADES = 80;
         let perpDexNames = null;
+        let mobileOrderBookAutoApplied = false;
+        let orderBookVisibilityTouched = false;
+        const TOOLBAR_PLUS_ICON = '<svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+        const TOOLBAR_MINUS_ICON = '<svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
 
         function splitDexCoin(name) {
             const s = String(name || '').trim();
@@ -1945,8 +2362,7 @@
         }
 
         function parseCoin() {
-            const p = new URLSearchParams(location.search);
-            return buildMarketKey(p.get('coin') || p.get('asset') || 'BTC');
+            return buildMarketKey(PAGE_PARAMS.get('coin') || PAGE_PARAMS.get('asset') || 'BTC');
         }
 
         // ── State ──────────────────────────────────────────────────
@@ -1957,7 +2373,10 @@
             
             // Dual chart
             chart2Active: false,
-            coin2: 'ETH'
+            coin2: 'ETH',
+            parentExtraCharts: 0,
+            chartSplitRatio: 0.5,
+            trackerBookWidth: 310
         };
 
         // ── DOM refs ───────────────────────────────────────────────
@@ -1984,6 +2403,11 @@
         const obDetailColSize = $('ob-detail-col-size');
         const obDetailColMeta = $('ob-detail-col-meta');
         const obDetailList = $('ob-detail-list');
+        const obRatio = $('ob-ratio');
+        const obRatioBid = $('ob-ratio-bid');
+        const obRatioAsk = $('ob-ratio-ask');
+        const obRatioFillBid = $('ob-ratio-fill-bid');
+        const obRatioFillAsk = $('ob-ratio-fill-ask');
         const tradesList = $('trades-list');
         const walletModalBackdrop = $('wallet-modal-backdrop');
         const walletModalFrame = $('wallet-modal-frame');
@@ -2000,11 +2424,241 @@
 
         // Layouts
         const rightPanel = $('right-panel');
+        const mainLayout = $('main');
+        const chartSide = $('chart-side');
+        const chartsContainer = $('charts-container');
+        const chartCont1 = $('chart-container-1');
         const obOpenBtn = $('ob-open-btn');
         const chartCont2 = $('chart-container-2');
         const addChartBtn = $('add-chart-btn');
         const chartLoadingWrap1 = $('chart-wrap');
         const chartLoadingWrap2 = $('chart-wrap-2');
+        const chartSplitter = $('chart-splitter');
+        const obMainSplitter = $('ob-main-splitter');
+        const topSplitDrag = { kind: '', pointerId: null };
+
+        function notifyParentChartState() {
+            if (IS_COMPACT || window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:asset-chart-state',
+                    chart2Active: Boolean(S.chart2Active),
+                    pane: EMBED_PANE || 'primary'
+                }, '*');
+            } catch (_) {}
+        }
+
+        function notifyParentTimeframe() {
+            if (IS_COMPACT || window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:timeframe-change',
+                    tf: S.tf
+                }, '*');
+            } catch (_) {}
+        }
+
+        function notifyParentBookWidth(bookWidth) {
+            if (IS_COMPACT || window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:book-width-change',
+                    bookWidth
+                }, '*');
+            } catch (_) {}
+        }
+
+        function syncChartToggleButton(isRemove) {
+            if (!addChartBtn) return;
+            const remove = Boolean(isRemove);
+            addChartBtn.innerHTML = remove ? TOOLBAR_MINUS_ICON : TOOLBAR_PLUS_ICON;
+            addChartBtn.title = remove ? 'Remove chart' : 'Add chart';
+            addChartBtn.setAttribute('aria-label', remove ? 'Remove chart' : 'Add chart');
+        }
+
+        function isMobileAssetLayout() {
+            return MOBILE_ASSET_QUERY.matches;
+        }
+
+        function syncResponsiveAssetLayout() {
+            const mobile = isMobileAssetLayout();
+            document.documentElement.classList.toggle('mobile-layout', mobile);
+
+            if (mobile) {
+                if (chartCont1) chartCont1.style.flex = '';
+                if (chartCont2) chartCont2.style.flex = '';
+            }
+
+            if (IS_COMPACT || !rightPanel) {
+                syncTopSplitters();
+                return;
+            }
+
+            if (mobile) {
+                rightPanel.style.removeProperty('width');
+                rightPanel.style.removeProperty('min-width');
+                if (!mobileOrderBookAutoApplied && !orderBookVisibilityTouched) {
+                    document.documentElement.classList.add('mobile-ob-collapsed');
+                    rightPanel.style.display = 'none';
+                    if (obOpenBtn) obOpenBtn.style.display = 'inline-flex';
+                    mobileOrderBookAutoApplied = true;
+                }
+            } else {
+                document.documentElement.classList.remove('mobile-ob-collapsed');
+                if (!orderBookVisibilityTouched) {
+                    rightPanel.style.display = 'flex';
+                    if (obOpenBtn) obOpenBtn.style.display = 'none';
+                }
+                mobileOrderBookAutoApplied = false;
+            }
+
+            syncTopSplitters();
+        }
+
+        function isOrderBookVisible() {
+            return Boolean(rightPanel) && getComputedStyle(rightPanel).display !== 'none';
+        }
+
+        function syncTopSplitters() {
+            if (isMobileAssetLayout()) {
+                if (chartCont1) chartCont1.style.flex = '';
+                if (chartCont2) chartCont2.style.flex = '';
+                if (chartSplitter) chartSplitter.hidden = true;
+                if (obMainSplitter) obMainSplitter.hidden = true;
+                return;
+            }
+
+            if (chartSplitter && chartsContainer) {
+                if (S.chart2Active && getComputedStyle(chartCont2).display !== 'none') {
+                    const rect = chartsContainer.getBoundingClientRect();
+                    const usableWidth = Math.max(0, rect.width - 1);
+                    const ratio = Math.min(0.72, Math.max(0.28, Number(S.chartSplitRatio) || 0.5));
+                    const leftPx = Math.round(usableWidth * ratio);
+                    chartCont1.style.flex = `0 0 calc(${(ratio * 100).toFixed(4)}% - 0.5px)`;
+                    chartCont2.style.flex = `0 0 calc(${((1 - ratio) * 100).toFixed(4)}% - 0.5px)`;
+                    chartsContainer.style.setProperty('--chart-splitter-left', `${leftPx}px`);
+                    chartSplitter.hidden = false;
+                } else {
+                    chartCont1.style.flex = '1 1 0';
+                    chartCont2.style.flex = '1 1 0';
+                    chartSplitter.hidden = true;
+                }
+            }
+
+            if (obMainSplitter && mainLayout && rightPanel) {
+                if (isOrderBookVisible()) {
+                    const rect = mainLayout.getBoundingClientRect();
+                    const bookWidth = rightPanel.getBoundingClientRect().width;
+                    const leftPx = Math.round(rect.width - bookWidth);
+                    mainLayout.style.setProperty('--ob-main-splitter-left', `${leftPx}px`);
+                    obMainSplitter.hidden = false;
+                } else {
+                    obMainSplitter.hidden = true;
+                }
+            }
+        }
+
+        async function applyTimeframe(nextTf, options = {}) {
+            const tf = String(nextTf || '').trim();
+            if (!TF_MS[tf]) return;
+            if (tf === S.tf && options.force !== true) return;
+            S.tf = tf;
+            document.querySelectorAll('.tf-btn[data-tf]').forEach(button => {
+                button.classList.toggle('active', button.dataset.tf === S.tf);
+            });
+            legName.textContent = `${getSelectedCoinLabel(S.coin)}/USD • ${S.tf}`;
+            if (S.chart2Active) {
+                const coinLabel = getSelectedCoinLabel(S.coin2);
+                const legendName2 = $('legend-name-2');
+                if (legendName2) legendName2.textContent = `${coinLabel}/USD • ${S.tf}`;
+            }
+            if (options.notifyParent) {
+                notifyParentTimeframe();
+            }
+            await fetchCandles();
+            await fetchCandles2();
+            connectWs();
+        }
+
+        function applyTrackerLayout(bookWidth) {
+            if (IS_COMPACT || !rightPanel) return;
+            if (isMobileAssetLayout()) {
+                rightPanel.style.removeProperty('width');
+                rightPanel.style.removeProperty('min-width');
+                S.trackerBookWidth = 310;
+                syncTopSplitters();
+                return;
+            }
+            const nextWidth = Number(bookWidth);
+            if (!Number.isFinite(nextWidth) || nextWidth <= 0) {
+                rightPanel.style.removeProperty('width');
+                rightPanel.style.removeProperty('min-width');
+                S.trackerBookWidth = 310;
+                syncTopSplitters();
+                return;
+            }
+            const clampedWidth = Math.max(220, Math.round(nextWidth));
+            rightPanel.style.width = `${clampedWidth}px`;
+            rightPanel.style.minWidth = `${clampedWidth}px`;
+            S.trackerBookWidth = clampedWidth;
+            syncTopSplitters();
+        }
+
+        function stopTopSplitDrag() {
+            if (!topSplitDrag.kind) return;
+            topSplitDrag.kind = '';
+            topSplitDrag.pointerId = null;
+            if (chartSplitter) chartSplitter.classList.remove('is-dragging');
+            if (obMainSplitter) obMainSplitter.classList.remove('is-dragging');
+            document.body.style.removeProperty('cursor');
+            document.body.style.removeProperty('user-select');
+        }
+
+        function updateTopSplitDrag(event) {
+            if (!topSplitDrag.kind) return;
+
+            if (topSplitDrag.kind === 'chart' && chartsContainer && S.chart2Active && getComputedStyle(chartCont2).display !== 'none') {
+                const rect = chartsContainer.getBoundingClientRect();
+                const usableWidth = Math.max(0, rect.width - 1);
+                const minWidth = Math.max(220, Math.round(usableWidth * 0.22));
+                const leftPx = Math.min(usableWidth - minWidth, Math.max(minWidth, Math.round(event.clientX - rect.left)));
+                S.chartSplitRatio = usableWidth > 0 ? leftPx / usableWidth : 0.5;
+                syncTopSplitters();
+                return;
+            }
+
+            if (topSplitDrag.kind === 'book' && mainLayout && rightPanel && isOrderBookVisible()) {
+                const rect = mainLayout.getBoundingClientRect();
+                const minChartWidth = 320;
+                const minBookWidth = 220;
+                const dividerX = Math.min(rect.width - minBookWidth, Math.max(minChartWidth, Math.round(event.clientX - rect.left)));
+                const nextWidth = rect.width - dividerX;
+                applyTrackerLayout(nextWidth);
+                notifyParentBookWidth(nextWidth);
+            }
+        }
+
+        function startTopSplitDrag(kind, event) {
+            if (isMobileAssetLayout()) return;
+            event.preventDefault();
+            topSplitDrag.kind = kind;
+            topSplitDrag.pointerId = event.pointerId;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            if (kind === 'chart' && chartSplitter) chartSplitter.classList.add('is-dragging');
+            if (kind === 'book' && obMainSplitter) obMainSplitter.classList.add('is-dragging');
+            updateTopSplitDrag(event);
+        }
+
+        function applyCompactMode() {
+            if (!IS_COMPACT) return;
+            S.chart2Active = false;
+            if (chartCont2) chartCont2.style.display = 'none';
+            syncChartToggleButton(false);
+            if (rightPanel) rightPanel.style.display = 'none';
+            if (obOpenBtn) obOpenBtn.style.display = 'none';
+            syncTopSplitters();
+        }
 
         function getOrderBookView() {
             return S.obView === 'bids' || S.obView === 'asks' ? S.obView : 'both';
@@ -2053,11 +2707,28 @@
         }
 
         function updateOrderBookLabels() {
-            if (obPriceLabel) obPriceLabel.textContent = 'Price (USDT)';
+            if (obPriceLabel) obPriceLabel.textContent = 'Price (USD)';
             if (obSizeLabel) {
                 const base = getCoinDisplayName(S.coin) || 'BTC';
                 obSizeLabel.textContent = `Amount (${base})`;
             }
+        }
+
+        function updateOrderBookRatio(bidTotal, askTotal, options = {}) {
+            if (!obRatio || !obRatioBid || !obRatioAsk || !obRatioFillBid || !obRatioFillAsk) return;
+            const loading = Boolean(options.loading);
+            obRatio.classList.toggle('is-loading', loading);
+
+            const safeBid = Number.isFinite(bidTotal) && bidTotal >= 0 ? bidTotal : NaN;
+            const safeAsk = Number.isFinite(askTotal) && askTotal >= 0 ? askTotal : NaN;
+            const total = safeBid + safeAsk;
+            const bidPct = Number.isFinite(total) && total > 0 ? (safeBid / total) * 100 : 50;
+            const askPct = Number.isFinite(total) && total > 0 ? (safeAsk / total) * 100 : 50;
+
+            obRatioBid.textContent = loading ? '–' : `${bidPct.toFixed(2)}%`;
+            obRatioAsk.textContent = loading ? '–' : `${askPct.toFixed(2)}%`;
+            obRatioFillBid.style.width = `${bidPct.toFixed(2)}%`;
+            obRatioFillAsk.style.width = `${askPct.toFixed(2)}%`;
         }
 
         function setChartLoading(targetNum, isLoading, message = 'Loading...') {
@@ -2071,27 +2742,80 @@
         }
 
         function toggleOb() {
+            if (IS_COMPACT) return;
+            orderBookVisibilityTouched = true;
             if (rightPanel.style.display === 'none') {
+                if (isMobileAssetLayout()) document.documentElement.classList.remove('mobile-ob-collapsed');
                 rightPanel.style.display = 'flex';
                 obOpenBtn.style.display = 'none';
             } else {
+                if (isMobileAssetLayout()) document.documentElement.classList.add('mobile-ob-collapsed');
                 rightPanel.style.display = 'none';
-                obOpenBtn.style.display = 'inline-block';
+                obOpenBtn.style.display = 'inline-flex';
             }
+            syncTopSplitters();
         }
 
         function toggleChart2() {
+            if (IS_COMPACT) return;
+            if (S.chart2Active && Number.isFinite(S.parentExtraCharts) && S.parentExtraCharts > 0) {
+                try {
+                    window.parent.postMessage({ type: 'hypermonitor:remove-extra-chart' }, '*');
+                } catch (_) {}
+                return;
+            }
             S.chart2Active = !S.chart2Active;
             if (S.chart2Active) {
                 chartCont2.style.display = 'flex';
-                addChartBtn.textContent = '- Remove Chart';
+                syncChartToggleButton(true);
                 syncSelectedCoinUi(2);
                 fetchCandles2();
             } else {
                 chartCont2.style.display = 'none';
-                addChartBtn.textContent = '+ Add Chart';
+                syncChartToggleButton(false);
             }
+            syncTopSplitters();
+            notifyParentChartState();
             connectWs();
+        }
+
+        window.addEventListener('message', event => {
+            const data = event.data;
+            if (!data || typeof data !== 'object') return;
+            if (data.type === 'hypermonitor:set-timeframe') {
+                applyTimeframe(data.tf, { force: data.force === true });
+                return;
+            }
+            if (IS_COMPACT) return;
+            if (data.type === 'hypermonitor:extra-chart-count') {
+                const next = Number(data.extraCount);
+                S.parentExtraCharts = Number.isFinite(next) && next > 0 ? Math.floor(next) : 0;
+                return;
+            }
+            if (data.type === 'hypermonitor:tracker-layout') {
+                applyTrackerLayout(data.bookWidth);
+            }
+        });
+
+        if (chartSplitter) {
+            chartSplitter.addEventListener('pointerdown', event => {
+                startTopSplitDrag('chart', event);
+            });
+        }
+
+        if (obMainSplitter) {
+            obMainSplitter.addEventListener('pointerdown', event => {
+                startTopSplitDrag('book', event);
+            });
+        }
+
+        window.addEventListener('pointermove', updateTopSplitDrag);
+        window.addEventListener('pointerup', stopTopSplitDrag);
+        window.addEventListener('pointercancel', stopTopSplitDrag);
+        if (typeof MOBILE_ASSET_QUERY.addEventListener === 'function') {
+            MOBILE_ASSET_QUERY.addEventListener('change', syncResponsiveAssetLayout);
+        } else if (typeof MOBILE_ASSET_QUERY.addListener === 'function') {
+            MOBILE_ASSET_QUERY.addListener(syncResponsiveAssetLayout);
         }
 
         // ── Formatting ─────────────────────────────────────────────
@@ -2342,6 +3066,7 @@
             const rowCount = getOrderBookRowCount();
 
             if (obSpread) obSpread.classList.toggle('is-loading', loading);
+            updateOrderBookRatio(NaN, NaN, { loading });
 
             ['ask', 'bid'].forEach(side => {
                 orderBookRows[side].forEach((rowRef, index) => {
@@ -2393,6 +3118,7 @@
                 obMidArrow.className = 'val';
             }
             if (obSprdInfo) obSprdInfo.textContent = 'Spread –';
+            updateOrderBookRatio(NaN, NaN, { loading: true });
             setOrderBookLoading(true);
         }
 
@@ -2417,6 +3143,8 @@
         chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
 
         new ResizeObserver(() => { chart.applyOptions({ width: chartWrap.clientWidth, height: chartWrap.clientHeight }); }).observe(chartWrap);
+        if (chartsContainer) new ResizeObserver(() => { syncTopSplitters(); }).observe(chartsContainer);
+        if (mainLayout) new ResizeObserver(() => { syncTopSplitters(); }).observe(mainLayout);
 
         chart.subscribeCrosshairMove(param => {
             const bar = param?.seriesData?.get(candles);
@@ -2837,6 +3565,8 @@
                 obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
             }
 
+            updateOrderBookRatio(bidMax, askMax);
+
             if (activeBookDetail) {
                 renderOrderBookDetail();
             }
@@ -3053,12 +3783,16 @@
             if (S.ws) { try { S.ws.close(); } catch (_) { } }
             S.ws = new WebSocket(WS);
             S.ws.onopen = () => {
-                const subs = [
-                    { type: 'l2Book', coin: S.coin }, 
-                    { type: 'trades', coin: S.coin }, 
-                    { type: 'candle', coin: S.coin, interval: S.tf }
-                ];
-                if (S.chart2Active && S.coin !== S.coin2) {
+                const subs = IS_COMPACT
+                    ? [
+                        { type: 'candle', coin: S.coin, interval: S.tf }
+                    ]
+                    : [
+                        { type: 'l2Book', coin: S.coin },
+                        { type: 'trades', coin: S.coin },
+                        { type: 'candle', coin: S.coin, interval: S.tf }
+                    ];
+                if (!IS_COMPACT && S.chart2Active && S.coin !== S.coin2) {
                     subs.push({ type: 'candle', coin: S.coin2, interval: S.tf });
                 }
                 subs.forEach(sub => S.ws.send(JSON.stringify({ method: 'subscribe', subscription: sub })));
@@ -3434,14 +4168,7 @@
             if (btn.id === 'add-chart-btn') return;
             btn.addEventListener('click', async () => {
                 const tf = btn.dataset.tf;
-                if (tf === S.tf) return;
-                S.tf = tf;
-                document.querySelectorAll('.tf-btn:not(#add-chart-btn)').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                legName.textContent = `${getSelectedCoinLabel(S.coin)}/USD • ${S.tf}`;
-                await fetchCandles();
-                await fetchCandles2();
-                connectWs();
+                await applyTimeframe(tf, { notifyParent: true });
             });
         });
 
@@ -3473,21 +4200,29 @@
 
         // ── Boot ───────────────────────────────────────────────────
         async function reinit() {
-            resetOrderBookState();
+            applyCompactMode();
+            syncResponsiveAssetLayout();
+            if (!IS_COMPACT) resetOrderBookState();
             applyStats();
             await fetchCandles();
-            await fetchBook();
+            if (!IS_COMPACT) await fetchBook();
             connectWs();
+            notifyParentChartState();
+            syncTopSplitters();
         }
 
         async function init() {
-            resetOrderBookState();
+            applyCompactMode();
+            syncResponsiveAssetLayout();
+            if (!IS_COMPACT) resetOrderBookState();
             await fetchMeta();
             buildCoinList();
             applyStats();
             await fetchCandles();
-            await fetchBook();
+            if (!IS_COMPACT) await fetchBook();
             connectWs();
+            notifyParentChartState();
+            syncTopSplitters();
         }
 
         init();

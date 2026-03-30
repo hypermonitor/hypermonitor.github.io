@@ -47,6 +47,8 @@
       --radius-md: 8px;
       --radius-sm: 6px;
       --header-height: 50px;
+      --shell-v-gap: 2px;
+      --footer-reserve: 34px;
     }
 
     * {
@@ -87,10 +89,10 @@
     }
 
     #app {
-      width: min(1840px, calc(100vw - 24px));
+      width: min(1920px, calc(100vw - 8px));
       height: 100dvh;
       margin: 0 auto;
-      padding: 10px 0 56px;
+      padding: 6px 0 var(--footer-reserve);
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
       overflow: hidden;
@@ -104,10 +106,10 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: flex-start;
-      gap: 20px;
+      gap: 16px;
       min-height: var(--header-height);
-      padding: 5px 0 7px;
-      margin-bottom: 4px;
+      padding: 3px 0 5px;
+      margin-bottom: var(--shell-v-gap);
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       background: var(--bg);
       box-shadow: none;
@@ -185,12 +187,19 @@
 
     .header-search-icon {
       flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 0 0 0 13px;
       color: var(--muted);
-      font-size: 1.14rem;
-      font-weight: 600;
       line-height: 1;
       user-select: none;
+    }
+
+    .header-search-icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
     }
 
     .header-search-input {
@@ -476,6 +485,7 @@
       flex-direction: column;
       min-height: 0;
       overflow: hidden;
+      position: relative;
     }
 
     .trade-frame-panel .panel-head,
@@ -493,12 +503,69 @@
     }
 
     .trade-view-stack {
+      --trade-bottom-gap: 0px;
+      --trade-book-width: 310px;
       display: grid;
-      grid-template-rows: minmax(0, 3fr) minmax(0, 2fr);
-      gap: 16px;
+      grid-template-rows: minmax(0, 3.85fr) minmax(0, 1.45fr);
+      gap: var(--shell-v-gap);
       width: 100%;
       height: 100%;
       min-height: 0;
+      position: relative;
+    }
+
+    .trade-view-stack[data-layout="multi"] {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1.78fr) minmax(0, 0.9fr);
+      column-gap: 0;
+      row-gap: 0;
+    }
+
+    .trade-view-stack[data-layout="multi"][data-extra-count="1"] {
+      grid-template-rows: minmax(0, 1.21fr) minmax(0, 1fr);
+      grid-template-columns:
+        minmax(0, calc((100% - var(--trade-book-width)) / 2))
+        minmax(0, calc((100% + var(--trade-book-width)) / 2));
+    }
+
+    .trade-view-stack[data-layout="multi"][data-extra-count="2"] {
+      column-gap: 0;
+      grid-template-columns:
+        minmax(0, calc((100% - var(--trade-book-width)) / 2))
+        minmax(0, calc((100% + var(--trade-book-width)) / 2));
+    }
+
+    .trade-view-stack[data-layout="multi"] .top-frame-panel {
+      grid-column: 1 / span 2;
+      grid-row: 1;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .trade-view-stack[data-layout="multi"] .trade-leaderboard-panel {
+      grid-column: 2;
+      grid-row: 2;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    .trade-view-stack[data-layout="multi"] .extra-chart-panel[data-pane="1"] {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .trade-view-stack[data-layout="multi"] .extra-chart-panel[data-pane="2"] {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .trade-view-stack[data-layout="multi"] .extra-chart-panel {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
     }
 
     .trade-leaderboard-panel {
@@ -510,6 +577,126 @@
       border-color: #20252d;
       box-shadow: none;
       backdrop-filter: none;
+    }
+
+    .trade-leaderboard-panel[hidden] {
+      display: none !important;
+    }
+
+    .multi-chart-add-btn,
+    .multi-chart-remove-btn {
+      position: absolute;
+      top: var(--pane-btn-top, 12px);
+      right: var(--pane-btn-right, 12px);
+      z-index: 3;
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 21px;
+      font-weight: 400;
+      line-height: 1;
+      transition: color 160ms ease;
+    }
+
+    .top-frame-panel {
+      --pane-btn-top: 63px;
+      --pane-btn-right: calc(var(--trade-book-width) + 42px);
+    }
+
+    .extra-chart-panel {
+      --pane-btn-top: 3px;
+      --pane-btn-right: 10px;
+    }
+
+    .extra-chart-panel .multi-chart-remove-btn {
+      display: none !important;
+    }
+
+    .multi-chart-add-btn:hover,
+    .multi-chart-remove-btn:hover {
+      color: var(--text);
+      background: transparent;
+    }
+
+    .multi-chart-add-btn[hidden],
+    .multi-chart-remove-btn[hidden] {
+      display: none;
+    }
+
+    .extra-chart-panel {
+      display: none;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .extra-chart-panel.is-active {
+      display: flex;
+    }
+
+    .trade-splitter {
+      position: absolute;
+      z-index: 4;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      opacity: 1;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .trade-splitter::before {
+      content: "";
+      position: absolute;
+      background: transparent;
+      transition: background 140ms ease, opacity 140ms ease;
+      opacity: 0;
+    }
+
+    .trade-splitter:hover::before,
+    .trade-splitter.is-dragging::before {
+      opacity: 1;
+      background: rgba(227, 232, 238, 0.16);
+    }
+
+    .trade-row-splitter {
+      left: 0;
+      right: 0;
+      top: var(--trade-row-splitter-top, 50%);
+      height: 12px;
+      transform: translateY(-50%);
+      cursor: row-resize;
+    }
+
+    .trade-row-splitter::before {
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 2px;
+      transform: translateY(-50%);
+    }
+
+    .trade-column-splitter {
+      top: var(--trade-column-splitter-top, 50%);
+      bottom: 0;
+      left: var(--trade-column-splitter-left, 50%);
+      width: 12px;
+      transform: translateX(-50%);
+      cursor: col-resize;
+    }
+
+    .trade-column-splitter::before {
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
     }
 
     .trade-leaderboard-panel .active-filters-bar {
@@ -2081,10 +2268,9 @@
 
     .wallet-modal-actions {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: flex-end;
-      gap: 8px;
+      gap: 6px;
     }
 
     .wallet-modal-tabs {
@@ -2128,25 +2314,43 @@
       display: none;
     }
 
+    .wallet-modal-action-btn,
     .icon-btn {
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 0;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text);
-      font-size: 1.35rem;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 21px;
       line-height: 1;
-      transition: background 160ms ease, border-color 160ms ease;
+      transition: color 160ms ease;
     }
 
+    .wallet-modal-action-btn {
+      text-decoration: none;
+      flex: 0 0 auto;
+    }
+
+    .wallet-modal-action-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    .wallet-modal-action-btn:focus-visible,
+    .icon-btn:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(234, 236, 239, 0.14);
+    }
+
+    .wallet-modal-action-btn:hover,
     .icon-btn:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: var(--border-strong);
+      color: var(--text);
     }
 
     .wallet-modal iframe {
@@ -2170,6 +2374,10 @@
     }
 
     .hide-mobile {
+      display: table-cell;
+    }
+
+    .hide-phone {
       display: table-cell;
     }
 
@@ -2416,6 +2624,178 @@
         display: none;
       }
     }
+
+    @media (max-width: 720px) {
+      html,
+      body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+      }
+
+      body:not(.modal-open) {
+        overflow-y: auto;
+      }
+
+      #app {
+        width: 100%;
+        min-height: 100dvh;
+        height: auto;
+        padding: 8px 8px calc(72px + env(safe-area-inset-bottom, 0px));
+        display: block;
+        overflow: visible;
+      }
+
+      .shell-header {
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        margin-bottom: 10px;
+        padding: 8px 0 10px;
+        background: rgba(13, 16, 20, 0.94);
+        backdrop-filter: blur(14px);
+      }
+
+      .brand img {
+        width: 30px;
+        height: 30px;
+      }
+
+      .brand-name {
+        font-size: 0.88rem;
+      }
+
+      .header-search-form {
+        order: 2;
+        flex: 1 0 100%;
+        min-width: 0;
+      }
+
+      .header-search-shell {
+        min-height: 42px;
+      }
+
+      main,
+      .view.is-active {
+        display: block;
+        overflow: visible;
+        min-height: 0;
+      }
+
+      .trade-view-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+      }
+
+      .trade-view-stack[data-layout="multi"] {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .top-frame-panel,
+      .extra-chart-panel,
+      .trade-leaderboard-panel {
+        width: 100%;
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .trade-view-stack[data-layout="multi"] .top-frame-panel,
+      .trade-view-stack[data-layout="multi"] .extra-chart-panel,
+      .trade-view-stack[data-layout="multi"] .trade-leaderboard-panel {
+        border-radius: 14px;
+      }
+
+      .top-frame-panel {
+        min-height: clamp(440px, 78svh, 820px);
+        height: clamp(440px, 78svh, 820px);
+      }
+
+      .extra-chart-panel,
+      .extra-chart-panel.is-active {
+        min-height: clamp(300px, 52svh, 520px);
+        height: clamp(300px, 52svh, 520px);
+      }
+
+      .trade-frame {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+      }
+
+      .trade-splitter {
+        display: none !important;
+      }
+
+      .top-frame-panel .multi-chart-add-btn,
+      .extra-chart-panel .multi-chart-add-btn,
+      .multi-chart-remove-btn {
+        top: 10px;
+        right: 10px;
+      }
+
+      .trade-leaderboard-panel {
+        min-height: 0;
+        overflow: visible;
+      }
+
+      .trade-leaderboard-panel .table-wrap {
+        overflow: visible;
+        max-height: none;
+        min-height: 0;
+      }
+
+      .trade-leaderboard-panel .table-wrap.loading {
+        min-height: 260px;
+      }
+
+      .trade-leaderboard-panel table {
+        min-width: 0;
+      }
+
+      .trade-leaderboard-panel th,
+      .trade-leaderboard-panel td {
+        padding-top: 11px;
+        padding-bottom: 11px;
+      }
+
+      .hide-phone {
+        display: none !important;
+      }
+
+      .wallet-link strong {
+        font-size: 0.82rem;
+      }
+
+      .wallet-meta {
+        gap: 4px;
+      }
+
+      .mini-chip {
+        font-size: 0.5rem;
+        padding: 3px 5px;
+      }
+
+      .price-footer {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      .price-footer-inner {
+        width: 100%;
+        padding: 0.3rem 0.55rem;
+        gap: 0.45rem;
+      }
+
+      .price-ticker {
+        -webkit-mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
+      }
+    }
   </style>
 </head>
 <body>
@@ -2429,7 +2809,11 @@
       <form class="header-search-form" id="headerSearchForm" autocomplete="off">
         <label class="sr-only" for="headerSearchInput">Search wallet address or coin</label>
         <div class="header-search-shell">
-          <span class="header-search-icon" aria-hidden="true">&#8981;</span>
+          <span class="header-search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
           <input
             id="headerSearchInput"
             class="header-search-input"
@@ -2451,7 +2835,8 @@
         <h1 class="sr-only" id="tradeTitle">Trade</h1>
 
         <div class="trade-view-stack">
-          <section class="panel trade-frame-panel">
+          <section class="panel trade-frame-panel top-frame-panel">
+            <button class="multi-chart-add-btn" id="tradeAddChartBtn" type="button" aria-label="Add chart" title="Add chart" hidden>+</button>
             <iframe
               class="trade-frame"
               id="tradeFrame"
@@ -2460,7 +2845,27 @@
             ></iframe>
           </section>
 
-          <section class="panel trade-leaderboard-panel">
+          <section class="panel trade-frame-panel extra-chart-panel" id="extraChartPanel1" data-pane="1">
+            <button class="multi-chart-remove-btn" id="extraChartRemoveBtn1" type="button" aria-label="Remove chart" title="Remove chart">−</button>
+            <iframe
+              class="trade-frame"
+              id="extraTradeFrame1"
+              title="Hypermonitor additional chart"
+              loading="eager"
+            ></iframe>
+          </section>
+
+          <section class="panel trade-frame-panel extra-chart-panel" id="extraChartPanel2" data-pane="2">
+            <button class="multi-chart-remove-btn" id="extraChartRemoveBtn2" type="button" aria-label="Remove chart" title="Remove chart">−</button>
+            <iframe
+              class="trade-frame"
+              id="extraTradeFrame2"
+              title="Hypermonitor additional chart"
+              loading="eager"
+            ></iframe>
+          </section>
+
+          <section class="panel trade-leaderboard-panel" id="tradeLeaderboardPanel">
             <div class="active-filters-bar is-hidden">
               <div class="active-filters" id="tradeActiveFilters"></div>
             </div>
@@ -2472,11 +2877,11 @@
                   <tr>
                     <th class="sortable" data-key="rank">Rank<span class="sort-indicator"></span></th>
                     <th class="sortable" data-key="address">Wallet<span class="sort-indicator"></span></th>
-                    <th class="sortable" data-key="accountValue">Account value<span class="sort-indicator"></span></th>
+                    <th class="sortable hide-phone" data-key="accountValue">Account value<span class="sort-indicator"></span></th>
                     <th class="sortable" data-key="pnl">PnL<span class="sort-indicator"></span></th>
                     <th class="sortable" data-key="roi">ROI<span class="sort-indicator"></span></th>
                     <th class="sortable hide-mobile" data-key="volume">Volume<span class="sort-indicator"></span></th>
-                    <th class="sortable" data-key="walletScore">Quality<span class="sort-indicator"></span></th>
+                    <th class="sortable hide-phone" data-key="walletScore">Quality<span class="sort-indicator"></span></th>
                     <th class="sortable hide-tablet" data-key="trendScore">Trend<span class="sort-indicator"></span></th>
                     <th class="sortable hide-tablet" data-key="consistencyScore">Consistency<span class="sort-indicator"></span></th>
                     <th class="sortable hide-mobile" data-key="activityScore">Activity<span class="sort-indicator"></span></th>
@@ -2486,6 +2891,9 @@
               </table>
             </div>
           </section>
+
+          <div class="trade-splitter trade-row-splitter" id="tradeRowSplitter" role="separator" aria-orientation="horizontal" aria-label="Resize rows"></div>
+          <div class="trade-splitter trade-column-splitter" id="tradeColumnSplitter" role="separator" aria-orientation="vertical" aria-label="Resize columns" hidden></div>
         </div>
       </section>
     </main>
@@ -2566,11 +2974,19 @@
           <span id="walletModalSubtitle"></span>
         </div>
         <div class="wallet-modal-actions">
-          <a class="header-btn" id="openStandaloneWallet" href="track.html" target="_blank" rel="noopener">
-            Open standalone
+          <a class="wallet-modal-action-btn" id="openStandaloneWallet" href="track.html" target="_blank" rel="noopener" aria-label="Open standalone" title="Open standalone">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 10L21 3M21 3H16.5M21 3V7.5M10 14L3 21M3 21H7.5M3 21L3 16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
           </a>
-          <button class="ghost-btn" type="button" id="copyWalletLinkBtn">Copy link</button>
-          <button class="icon-btn" type="button" id="closeWalletModalBtn" aria-label="Close wallet tracker">&times;</button>
+          <button class="wallet-modal-action-btn" type="button" id="copyWalletLinkBtn" aria-label="Copy link" title="Copy link">
+            <svg viewBox="0 0 32 32" aria-hidden="true">
+              <path d="M11.9474,19a4.9476,4.9476,0,0,1-3.4991-8.4465l5.1053-5.1043a4.9482,4.9482,0,0,1,6.9981,6.9976l-.5523.5526-1.4158-1.4129.5577-.5579a2.95,2.95,0,0,0-.0039-4.1653,3.02,3.02,0,0,0-4.17,0l-5.1047,5.104a2.9474,2.9474,0,0,0,0,4.1692,3.02,3.02,0,0,0,4.17,0l1.4143,1.4145A4.9176,4.9176,0,0,1,11.9474,19Z" fill="currentColor"></path>
+              <path d="M19.9474,17a4.9476,4.9476,0,0,1-3.4991-8.4465l.5526-.5526,1.4143,1.4146-.5526.5523a2.9476,2.9476,0,0,0,0,4.1689,3.02,3.02,0,0,0,4.17,0c.26-.26,4.7293-4.7293,5.1053-5.1045a2.951,2.951,0,0,0,0-4.1687,3.02,3.02,0,0,0-4.17,0L21.5536,3.449a4.9483,4.9483,0,0,1,6.9981,6.9978c-.3765.376-4.844,4.8428-5.1038,5.1035A4.9193,4.9193,0,0,1,19.9474,17Z" fill="currentColor"></path>
+              <path d="M24,30H4a2.0021,2.0021,0,0,1-2-2V8A2.0021,2.0021,0,0,1,4,6H8V8H4V28H24V18h2V28A2.0021,2.0021,0,0,1,24,30Z" fill="currentColor"></path>
+            </svg>
+          </button>
+          <button class="icon-btn" type="button" id="closeWalletModalBtn" aria-label="Close wallet tracker" title="Close wallet tracker">&times;</button>
         </div>
       </div>
       <div class="wallet-modal-tabs" aria-label="Wallet sections">
@@ -2672,8 +3088,14 @@
 
     const state = {
       coin: "BTC",
+      tradeTimeframe: "15m",
       wallet: "",
       walletModalSection: "overview",
+      topChartCount: 1,
+      extraCharts: [],
+      tradeBookWidth: 310,
+      tradeSingleRowRatio: null,
+      tradeMultiRowRatio: null,
       rawRows: [],
       normalizedRows: [],
       displayRows: [],
@@ -2693,8 +3115,39 @@
     let headerCoinOptionsPromise = null;
     let marketHeatmapPromise = null;
     let marketHeatmapRefreshTimer = null;
+    const DEFAULT_TRADE_BOOK_WIDTH = 310;
+    const MIN_TRADE_BOOK_WIDTH = 220;
+    const MIN_TRADE_COLUMN_WIDTH = 280;
+    const MIN_TRADE_TOP_HEIGHT_SINGLE = 280;
+    const MIN_TRADE_BOTTOM_HEIGHT_SINGLE = 180;
+    const MIN_TRADE_TOP_HEIGHT_MULTI = 220;
+    const MIN_TRADE_BOTTOM_HEIGHT_MULTI = 180;
+    const DEFAULT_TRADE_SINGLE_ROW_RATIO = 3.85 / (3.85 + 1.45);
+    const DEFAULT_TRADE_MULTI_ROW_RATIO_THREE = 1.21 / (1.21 + 1);
+    const DEFAULT_TRADE_MULTI_ROW_RATIO_FOUR = 1.78 / (1.78 + 0.9);
 
     const tradeFrame = document.getElementById("tradeFrame");
+    const tradeViewStack = document.querySelector(".trade-view-stack");
+    const tradeAddChartBtn = document.getElementById("tradeAddChartBtn");
+    const tradeLeaderboardPanel = document.getElementById("tradeLeaderboardPanel");
+    const tradeRowSplitter = document.getElementById("tradeRowSplitter");
+    const tradeColumnSplitter = document.getElementById("tradeColumnSplitter");
+    const extraChartPanels = [
+      document.getElementById("extraChartPanel1"),
+      document.getElementById("extraChartPanel2")
+    ];
+    const extraTradeFrames = [
+      document.getElementById("extraTradeFrame1"),
+      document.getElementById("extraTradeFrame2")
+    ];
+    const extraChartRemoveButtons = [
+      document.getElementById("extraChartRemoveBtn1"),
+      document.getElementById("extraChartRemoveBtn2")
+    ];
+    const tradeSplitDrag = {
+      kind: "",
+      pointerId: null
+    };
     const marketChipGroup = document.getElementById("marketChipGroup");
     const tradeWalletInline = document.getElementById("tradeWalletInline");
     const tradeWalletText = document.getElementById("tradeWalletText");
@@ -5560,6 +6013,7 @@
     function setCoin(nextCoin, options = {}) {
       state.coin = (nextCoin || "BTC").toUpperCase();
       updateTradeFrame();
+      updateExtraTradeFrames();
 
       const chips = Array.from(document.querySelectorAll(".market-chip"));
       chips.forEach((button) => {
@@ -5569,6 +6023,275 @@
       if (!options.fromPopState) {
         updateUrl(options.pushHistory === true);
       }
+    }
+
+    function buildCompactAssetHref(coin, paneId) {
+      return "asset.html?coin=" + encodeURIComponent(coin) + "&compact=1&pane=" + encodeURIComponent(paneId);
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function getDefaultTradeRowRatio(extraCount) {
+      if (extraCount >= 2) return DEFAULT_TRADE_MULTI_ROW_RATIO_FOUR;
+      if (extraCount === 1) return DEFAULT_TRADE_MULTI_ROW_RATIO_THREE;
+      return DEFAULT_TRADE_SINGLE_ROW_RATIO;
+    }
+
+    function getTradeRowRatio(extraCount) {
+      if (extraCount > 0) return state.tradeMultiRowRatio ?? getDefaultTradeRowRatio(extraCount);
+      return state.tradeSingleRowRatio ?? getDefaultTradeRowRatio(extraCount);
+    }
+
+    function setTradeRowRatio(extraCount, ratio) {
+      const nextRatio = Number.isFinite(ratio) ? ratio : getDefaultTradeRowRatio(extraCount);
+      if (extraCount > 0) state.tradeMultiRowRatio = nextRatio;
+      else state.tradeSingleRowRatio = nextRatio;
+    }
+
+    function getTradeMaxBookWidth(stackWidth) {
+      const safeWidth = Number.isFinite(stackWidth) ? stackWidth : tradeViewStack?.getBoundingClientRect().width || 0;
+      return Math.max(MIN_TRADE_BOOK_WIDTH, Math.round(safeWidth - MIN_TRADE_COLUMN_WIDTH * 2));
+    }
+
+    function clampTradeBookWidth(bookWidth, stackWidth) {
+      const safeWidth = Number.isFinite(stackWidth) ? stackWidth : tradeViewStack?.getBoundingClientRect().width || 0;
+      return clamp(Math.round(bookWidth || DEFAULT_TRADE_BOOK_WIDTH), MIN_TRADE_BOOK_WIDTH, getTradeMaxBookWidth(safeWidth));
+    }
+
+    function syncTradeSplitters(layout) {
+      if (!tradeViewStack || !tradeRowSplitter || !tradeColumnSplitter) return;
+      if (!layout || !Number.isFinite(layout.topPx)) {
+        tradeRowSplitter.hidden = true;
+        tradeColumnSplitter.hidden = true;
+        return;
+      }
+
+      const rowTop = layout.topPx + ((layout.rowGap || 0) / 2);
+      tradeViewStack.style.setProperty("--trade-row-splitter-top", rowTop + "px");
+      tradeRowSplitter.hidden = false;
+
+      if (layout.multi && Number.isFinite(layout.leftPx)) {
+        tradeViewStack.style.setProperty("--trade-column-splitter-left", layout.leftPx + "px");
+        tradeViewStack.style.setProperty("--trade-column-splitter-top", layout.topPx + "px");
+        tradeColumnSplitter.hidden = false;
+      } else {
+        tradeColumnSplitter.hidden = true;
+      }
+    }
+
+    function syncTradeFrameLayout() {
+      if (!tradeFrame || !tradeFrame.contentWindow) return;
+      try {
+        tradeFrame.contentWindow.postMessage({
+          type: "hypermonitor:tracker-layout",
+          bookWidth: state.tradeBookWidth
+        }, "*");
+      } catch (_) {
+        // Ignore iframe timing issues during load.
+      }
+    }
+
+    function applyTradeViewInlineLayout(extraCount) {
+      if (!tradeViewStack) return;
+
+      tradeViewStack.style.removeProperty("grid-template-columns");
+      tradeViewStack.style.removeProperty("grid-template-rows");
+
+      const bounds = tradeViewStack.getBoundingClientRect();
+      const width = Math.round(bounds.width);
+      const height = Math.round(bounds.height);
+
+      if (!width || !height) {
+        syncTradeSplitters(null);
+        syncTradeFrameLayout();
+        return;
+      }
+
+      tradeViewStack.style.setProperty("--trade-book-width", state.tradeBookWidth + "px");
+
+      const computed = getComputedStyle(tradeViewStack);
+      const rowGap = parseFloat(computed.rowGap) || 0;
+      const multiLayout = extraCount > 0;
+
+      if (multiLayout) {
+        const bookWidth = clampTradeBookWidth(state.tradeBookWidth, width);
+        if (bookWidth !== state.tradeBookWidth) state.tradeBookWidth = bookWidth;
+        tradeViewStack.style.setProperty("--trade-book-width", bookWidth + "px");
+
+        const ratio = getTradeRowRatio(extraCount);
+        const topMax = Math.max(MIN_TRADE_TOP_HEIGHT_MULTI, height - MIN_TRADE_BOTTOM_HEIGHT_MULTI);
+        const topPx = clamp(Math.round(height * ratio), MIN_TRADE_TOP_HEIGHT_MULTI, topMax);
+        const leftPx = Math.round((width - bookWidth) / 2);
+
+        tradeViewStack.style.gridTemplateRows = "minmax(0, " + topPx + "px) minmax(0, 1fr)";
+        tradeViewStack.style.gridTemplateColumns = "minmax(0, " + leftPx + "px) minmax(0, 1fr)";
+
+        syncTradeSplitters({ multi: true, topPx, leftPx, rowGap: 0 });
+        syncTradeFrameLayout();
+        return;
+      }
+
+      const ratio = getTradeRowRatio(0);
+      const usableHeight = Math.max(0, height - rowGap);
+      const topMax = Math.max(MIN_TRADE_TOP_HEIGHT_SINGLE, usableHeight - MIN_TRADE_BOTTOM_HEIGHT_SINGLE);
+      const topPx = clamp(Math.round(usableHeight * ratio), MIN_TRADE_TOP_HEIGHT_SINGLE, topMax);
+      tradeViewStack.style.gridTemplateRows = "minmax(0, " + topPx + "px) minmax(0, 1fr)";
+      syncTradeSplitters({ multi: false, topPx, rowGap });
+      syncTradeFrameLayout();
+    }
+
+    function updateExtraTradeFrames() {
+      extraTradeFrames.forEach((frame, index) => {
+        if (!frame) return;
+        const coin = state.extraCharts[index];
+        if (!coin) return;
+        const src = buildCompactAssetHref(coin, "extra-" + (index + 1));
+        if (frame.getAttribute("src") !== src) {
+          frame.setAttribute("src", src);
+        }
+      });
+    }
+
+    function syncTradeFrameExtraCount() {
+      if (!tradeFrame || !tradeFrame.contentWindow) return;
+      try {
+        tradeFrame.contentWindow.postMessage({
+          type: "hypermonitor:extra-chart-count",
+          extraCount: state.extraCharts.length
+        }, "*");
+      } catch (_) {
+        // Ignore iframe timing issues during load.
+      }
+    }
+
+    function syncTradeTimeframe() {
+      const tf = String(state.tradeTimeframe || "15m");
+      const payload = {
+        type: "hypermonitor:set-timeframe",
+        tf,
+        force: true
+      };
+
+      if (tradeFrame?.contentWindow) {
+        try {
+          tradeFrame.contentWindow.postMessage(payload, "*");
+        } catch (_) {
+          // Ignore iframe timing issues during load.
+        }
+      }
+
+      extraTradeFrames.forEach((frame, index) => {
+        if (!frame || index >= state.extraCharts.length || !frame.contentWindow) return;
+        try {
+          frame.contentWindow.postMessage(payload, "*");
+        } catch (_) {
+          // Ignore iframe timing issues during load.
+        }
+      });
+    }
+
+    function syncTradeLayout() {
+      const extraCount = state.extraCharts.length;
+      const totalCharts = state.topChartCount + extraCount;
+      const multiLayout = extraCount > 0;
+
+      if (tradeViewStack) {
+        tradeViewStack.dataset.layout = multiLayout ? "multi" : "default";
+        tradeViewStack.dataset.extraCount = String(extraCount);
+        applyTradeViewInlineLayout(extraCount);
+      }
+
+      extraChartPanels.forEach((panel, index) => {
+        if (!panel) return;
+        const active = index < extraCount;
+        panel.classList.toggle("is-active", active);
+      });
+
+      if (tradeLeaderboardPanel) {
+        tradeLeaderboardPanel.hidden = extraCount >= 2;
+      }
+
+      if (tradeAddChartBtn) {
+        tradeAddChartBtn.hidden = !(state.topChartCount >= 2 && totalCharts < 4);
+      }
+
+      updateExtraTradeFrames();
+      syncTradeFrameExtraCount();
+      syncTradeFrameLayout();
+      syncTradeTimeframe();
+    }
+
+    function addExtraChart() {
+      if (state.topChartCount < 2) return;
+      if (state.extraCharts.length >= 2) return;
+      state.extraCharts.push(state.coin);
+      syncTradeLayout();
+    }
+
+    function removeExtraChart(index) {
+      if (!Number.isInteger(index) || index < 0 || index >= state.extraCharts.length) return;
+      state.extraCharts.splice(index, 1);
+      syncTradeLayout();
+    }
+
+    function removeLastExtraChart() {
+      if (!state.extraCharts.length) return;
+      removeExtraChart(state.extraCharts.length - 1);
+    }
+
+    function stopTradeSplitDrag() {
+      if (!tradeSplitDrag.kind) return;
+      tradeSplitDrag.kind = "";
+      tradeSplitDrag.pointerId = null;
+      if (tradeRowSplitter) tradeRowSplitter.classList.remove("is-dragging");
+      if (tradeColumnSplitter) tradeColumnSplitter.classList.remove("is-dragging");
+      document.body.style.removeProperty("cursor");
+      document.body.style.removeProperty("user-select");
+    }
+
+    function updateTradeSplitDrag(event) {
+      if (!tradeSplitDrag.kind || !tradeViewStack) return;
+      const bounds = tradeViewStack.getBoundingClientRect();
+      const width = Math.round(bounds.width);
+      const height = Math.round(bounds.height);
+      if (!width || !height) return;
+
+      if (tradeSplitDrag.kind === "column" && state.extraCharts.length > 0) {
+        const targetLeft = clamp(Math.round(event.clientX - bounds.left), MIN_TRADE_COLUMN_WIDTH, width - MIN_TRADE_COLUMN_WIDTH);
+        state.tradeBookWidth = clampTradeBookWidth(width - targetLeft * 2, width);
+        syncTradeLayout();
+        return;
+      }
+
+      if (tradeSplitDrag.kind === "row") {
+        const extraCount = state.extraCharts.length;
+        const rowGap = extraCount > 0 ? 0 : (parseFloat(getComputedStyle(tradeViewStack).rowGap) || 0);
+        const usableHeight = Math.max(0, height - rowGap);
+        const minTop = extraCount > 0 ? MIN_TRADE_TOP_HEIGHT_MULTI : MIN_TRADE_TOP_HEIGHT_SINGLE;
+        const minBottom = extraCount > 0 ? MIN_TRADE_BOTTOM_HEIGHT_MULTI : MIN_TRADE_BOTTOM_HEIGHT_SINGLE;
+        const targetTop = clamp(
+          Math.round(event.clientY - bounds.top - rowGap / 2),
+          minTop,
+          Math.max(minTop, usableHeight - minBottom)
+        );
+        const nextRatio = usableHeight > 0 ? targetTop / usableHeight : getDefaultTradeRowRatio(extraCount);
+        setTradeRowRatio(extraCount, nextRatio);
+        syncTradeLayout();
+      }
+    }
+
+    function startTradeSplitDrag(kind, event) {
+      if (!tradeViewStack) return;
+      event.preventDefault();
+      tradeSplitDrag.kind = kind;
+      tradeSplitDrag.pointerId = event.pointerId;
+      document.body.style.cursor = kind === "column" ? "col-resize" : "row-resize";
+      document.body.style.userSelect = "none";
+      if (kind === "column" && tradeColumnSplitter) tradeColumnSplitter.classList.add("is-dragging");
+      if (kind === "row" && tradeRowSplitter) tradeRowSplitter.classList.add("is-dragging");
+      updateTradeSplitDrag(event);
     }
 
     function updateTradeFrame() {
@@ -5856,11 +6579,11 @@
                 "</span>" +
               "</a>" +
             "</td>" +
-            "<td class='money'>" + moneyFormat(row.accountValue) + "</td>" +
+            "<td class='money hide-phone'>" + moneyFormat(row.accountValue) + "</td>" +
             "<td class='money " + pnlClass + "'" + (pnlTone ? " style='color:" + escapeHtml(pnlTone) + "'" : "") + ">" + moneyFormat(row.pnl) + "</td>" +
             "<td class='money " + roiClass + "'" + (roiTone ? " style='color:" + escapeHtml(roiTone) + "'" : "") + ">" + percentFormat(row.roi) + "</td>" +
             "<td class='money hide-mobile'>" + compactMoney(row.volume) + "</td>" +
-            "<td>" + renderScoreCell(qualityPct) + "</td>" +
+            "<td class='hide-phone'>" + renderScoreCell(qualityPct) + "</td>" +
             "<td class='hide-tablet'>" + renderScoreCell(trendPct) + "</td>" +
             "<td class='hide-tablet'>" + renderScoreCell(consistencyPct) + "</td>" +
             "<td class='hide-mobile'>" + renderScoreCell(activityPct) + "</td>" +
@@ -6592,14 +7315,85 @@
       updatePriceTickerRolling();
       if (!isCompactFooterAddMode()) footerAddCompactOpen = false;
       syncFooterAddControls();
+      syncTradeLayout();
     });
 
     window.addEventListener("scroll", hidePriceContextMenu, true);
+
+    if (tradeAddChartBtn) {
+      tradeAddChartBtn.addEventListener("click", () => {
+        addExtraChart();
+      });
+    }
+
+    if (tradeRowSplitter) {
+      tradeRowSplitter.addEventListener("pointerdown", (event) => {
+        startTradeSplitDrag("row", event);
+      });
+    }
+
+    if (tradeColumnSplitter) {
+      tradeColumnSplitter.addEventListener("pointerdown", (event) => {
+        startTradeSplitDrag("column", event);
+      });
+    }
+
+    window.addEventListener("pointermove", updateTradeSplitDrag);
+    window.addEventListener("pointerup", stopTradeSplitDrag);
+    window.addEventListener("pointercancel", stopTradeSplitDrag);
+
+    if (tradeFrame) {
+      tradeFrame.addEventListener("load", () => {
+        syncTradeFrameExtraCount();
+        syncTradeFrameLayout();
+        syncTradeTimeframe();
+      });
+    }
+
+    extraTradeFrames.forEach((frame) => {
+      if (!frame) return;
+      frame.addEventListener("load", () => {
+        syncTradeTimeframe();
+      });
+    });
+
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+      if (event.source !== tradeFrame.contentWindow) return;
+      if (data.type === "hypermonitor:remove-extra-chart") {
+        removeLastExtraChart();
+        return;
+      }
+      if (data.type === "hypermonitor:book-width-change") {
+        const width = Number(data.bookWidth);
+        if (Number.isFinite(width) && width > 0) {
+          state.tradeBookWidth = width;
+          syncTradeLayout();
+        }
+        return;
+      }
+      if (data.type === "hypermonitor:timeframe-change") {
+        const tf = String(data.tf || "").trim();
+        if (tf) {
+          state.tradeTimeframe = tf;
+          syncTradeTimeframe();
+        }
+        return;
+      }
+      if (data.type !== "hypermonitor:asset-chart-state") return;
+      state.topChartCount = data.chart2Active ? 2 : 1;
+      if (state.topChartCount < 2 && state.extraCharts.length) {
+        state.extraCharts = [];
+      }
+      syncTradeLayout();
+    });
 
     state.coin = parseCoin();
     state.wallet = parseWallet();
 
     setCoin(state.coin, { fromPopState: true });
+    syncTradeLayout();
     syncWalletUi();
 
     initFooterBar();
