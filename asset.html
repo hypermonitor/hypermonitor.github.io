@@ -544,7 +544,14 @@
         }
 
         .ob-open-svg .dim {
-            fill: rgba(132, 142, 156, 0.56);
+            fill: currentColor;
+            opacity: 0.56;
+            transition: opacity 0.15s ease;
+        }
+
+        .toolbar-icon-btn:hover .ob-open-svg .dim,
+        .toolbar-icon-btn:focus-visible .ob-open-svg .dim {
+            opacity: 1;
         }
 
         .chart-toggle-btn {
@@ -1943,9 +1950,9 @@
                     </button>
                     <button id="ob-open-btn" class="toolbar-icon-btn" type="button" onclick="toggleOb()" title="Show order book" aria-label="Show order book" style="display:none;">
                         <svg class="ob-open-svg" viewBox="0 0 18 18" aria-hidden="true">
-                            <rect x="1" y="4" width="4" height="10" rx="1" class="dim"></rect>
-                            <rect x="7" y="4" width="4" height="10" rx="1" class="dim"></rect>
-                            <rect x="13" y="4" width="4" height="10" rx="1" class="dim"></rect>
+                            <rect x="2" y="3" width="14" height="2.5" rx="1" class="dim"></rect>
+                            <rect x="2" y="7.75" width="14" height="2.5" rx="1" class="dim"></rect>
+                            <rect x="2" y="12.5" width="14" height="2.5" rx="1" class="dim"></rect>
                         </svg>
                     </button>
                 </div>
@@ -2443,6 +2450,9 @@
                 window.parent.postMessage({
                     type: 'hypermonitor:asset-chart-state',
                     chart2Active: Boolean(S.chart2Active),
+                    chartSplitRatio: Number(S.chartSplitRatio) || 0.5,
+                    orderBookVisible: isOrderBookVisible(),
+                    bookWidth: rightPanel ? Math.round(rightPanel.getBoundingClientRect().width) : 0,
                     pane: EMBED_PANE || 'primary'
                 }, '*');
             } catch (_) {}
@@ -2513,6 +2523,7 @@
             }
 
             syncTopSplitters();
+            notifyParentChartState();
         }
 
         function isOrderBookVisible() {
@@ -2537,7 +2548,7 @@
                     chartCont1.style.flex = `0 0 calc(${(ratio * 100).toFixed(4)}% - 0.5px)`;
                     chartCont2.style.flex = `0 0 calc(${((1 - ratio) * 100).toFixed(4)}% - 0.5px)`;
                     chartsContainer.style.setProperty('--chart-splitter-left', `${leftPx}px`);
-                    chartSplitter.hidden = false;
+                    chartSplitter.hidden = Number.isFinite(S.parentExtraCharts) && S.parentExtraCharts > 0;
                 } else {
                     chartCont1.style.flex = '1 1 0';
                     chartCont2.style.flex = '1 1 0';
@@ -2624,6 +2635,7 @@
                 const leftPx = Math.min(usableWidth - minWidth, Math.max(minWidth, Math.round(event.clientX - rect.left)));
                 S.chartSplitRatio = usableWidth > 0 ? leftPx / usableWidth : 0.5;
                 syncTopSplitters();
+                notifyParentChartState();
                 return;
             }
 
@@ -2754,6 +2766,7 @@
                 obOpenBtn.style.display = 'inline-flex';
             }
             syncTopSplitters();
+            notifyParentChartState();
         }
 
         function toggleChart2() {
@@ -2793,6 +2806,10 @@
                 return;
             }
             if (data.type === 'hypermonitor:tracker-layout') {
+                const nextRatio = Number(data.chartSplitRatio);
+                if (Number.isFinite(nextRatio) && nextRatio > 0) {
+                    S.chartSplitRatio = nextRatio;
+                }
                 applyTrackerLayout(data.bookWidth);
             }
         });

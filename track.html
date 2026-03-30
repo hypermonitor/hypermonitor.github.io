@@ -12283,8 +12283,16 @@
       return;
     }
 
-    const selectedEquity = populatedItems.reduce((sum, item) => {
-      const value = Number(item?.summary?.accountValue ?? 0);
+    const perpTotal = currentWallets.reduce((sum, wallet) => {
+      const value = getOverviewMarketAccountValue(wallet, "perp");
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    const spotTotal = currentWallets.reduce((sum, wallet) => {
+      const value = getOverviewMarketAccountValue(wallet, "spot");
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    const selectedEquity = currentWallets.reduce((sum, wallet) => {
+      const value = getOverviewMarketAccountValue(wallet, currentMarketType);
       return sum + (Number.isFinite(value) ? value : 0);
     }, 0);
     const marginUsedTotal = populatedItems.reduce((sum, item) => {
@@ -12306,16 +12314,6 @@
     const positionCount = Number(positionMetrics.positionCount ?? 0);
     const assetCount = Number(positionMetrics.assetCount ?? 0);
 
-    const perpTotal = currentWallets.reduce((sum, wallet) => {
-      const value = getOverviewMarketAccountValue(wallet, "perp");
-      return sum + (Number.isFinite(value) ? value : 0);
-    }, 0);
-    const spotTotal = currentWallets.reduce((sum, wallet) => {
-      const value = getOverviewMarketAccountValue(wallet, "spot");
-      return sum + (Number.isFinite(value) ? value : 0);
-    }, 0);
-    const fullPortfolioValue = Math.max(0, perpTotal) + Math.max(0, spotTotal);
-
     let mixPrimaryLabel = "Perps";
     let mixSecondaryLabel = "Spot";
     let mixPrimaryValue = perpTotal;
@@ -12325,15 +12323,15 @@
 
     if (currentMarketType === "perp") {
       mixPrimaryLabel = "Perps";
-      mixSecondaryLabel = "Other";
+      mixSecondaryLabel = "Spot";
       mixPrimaryValue = perpTotal;
-      mixSecondaryValue = Math.max(0, fullPortfolioValue - perpTotal);
+      mixSecondaryValue = spotTotal;
       mixSecondaryColor = "#94a3b8";
     } else if (currentMarketType === "spot") {
       mixPrimaryLabel = "Spot";
-      mixSecondaryLabel = "Other";
+      mixSecondaryLabel = "Perps";
       mixPrimaryValue = spotTotal;
-      mixSecondaryValue = Math.max(0, fullPortfolioValue - spotTotal);
+      mixSecondaryValue = perpTotal;
       mixPrimaryColor = "#2bb8a8";
       mixSecondaryColor = "#94a3b8";
     }

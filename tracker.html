@@ -538,6 +538,7 @@
     .trade-view-stack[data-layout="multi"] .top-frame-panel {
       grid-column: 1 / span 2;
       grid-row: 1;
+      border-bottom-width: 0;
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
       box-shadow: none;
@@ -547,6 +548,7 @@
     .trade-view-stack[data-layout="multi"] .trade-leaderboard-panel {
       grid-column: 2;
       grid-row: 2;
+      border-top-width: 0;
       border-top-left-radius: 0;
       border-top-right-radius: 0;
     }
@@ -554,11 +556,19 @@
     .trade-view-stack[data-layout="multi"] .extra-chart-panel[data-pane="1"] {
       grid-column: 1;
       grid-row: 2;
+      border-top-width: 0;
+      border-right-width: 0;
     }
 
     .trade-view-stack[data-layout="multi"] .extra-chart-panel[data-pane="2"] {
       grid-column: 2;
       grid-row: 2;
+      border-top-width: 0;
+      border-left-width: 0;
+    }
+
+    .trade-view-stack[data-layout="multi"][data-extra-count="1"] .trade-leaderboard-panel {
+      border-left-width: 0;
     }
 
     .trade-view-stack[data-layout="multi"] .extra-chart-panel {
@@ -599,15 +609,19 @@
       border-radius: 4px;
       background: transparent;
       color: var(--muted);
-      font-size: 21px;
-      font-weight: 400;
-      line-height: 1;
       transition: color 160ms ease;
     }
 
+    .multi-chart-add-btn svg,
+    .multi-chart-remove-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
     .top-frame-panel {
-      --pane-btn-top: 63px;
-      --pane-btn-right: calc(var(--trade-book-width) + 42px);
+      --pane-btn-top: 61.5px;
+      --pane-btn-right: var(--top-frame-btn-right, calc(var(--trade-book-width) + 44px));
     }
 
     .extra-chart-panel {
@@ -678,7 +692,7 @@
       left: 0;
       right: 0;
       top: 50%;
-      height: 2px;
+      height: 1px;
       transform: translateY(-50%);
     }
 
@@ -695,7 +709,7 @@
       top: 0;
       bottom: 0;
       left: 50%;
-      width: 2px;
+      width: 1px;
       transform: translateX(-50%);
     }
 
@@ -1606,7 +1620,7 @@
     th,
     td {
       padding: 0.3rem 0.32rem;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 0;
       text-align: left;
       font-size: clamp(0.76rem, 0.62vw, 0.92rem);
       white-space: nowrap;
@@ -2631,6 +2645,7 @@
         height: auto;
         min-height: 100%;
         overflow-x: hidden;
+        overflow-y: auto;
       }
 
       body:not(.modal-open) {
@@ -2712,14 +2727,14 @@
       }
 
       .top-frame-panel {
-        min-height: clamp(440px, 78svh, 820px);
-        height: clamp(440px, 78svh, 820px);
+        min-height: clamp(420px, 64svh, 580px);
+        height: clamp(420px, 64svh, 580px);
       }
 
       .extra-chart-panel,
       .extra-chart-panel.is-active {
-        min-height: clamp(300px, 52svh, 520px);
-        height: clamp(300px, 52svh, 520px);
+        min-height: clamp(280px, 44svh, 400px);
+        height: clamp(280px, 44svh, 400px);
       }
 
       .trade-frame {
@@ -2836,7 +2851,11 @@
 
         <div class="trade-view-stack">
           <section class="panel trade-frame-panel top-frame-panel">
-            <button class="multi-chart-add-btn" id="tradeAddChartBtn" type="button" aria-label="Add chart" title="Add chart" hidden>+</button>
+            <button class="multi-chart-add-btn" id="tradeAddChartBtn" type="button" aria-label="Add chart" title="Add chart" hidden>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+              </svg>
+            </button>
             <iframe
               class="trade-frame"
               id="tradeFrame"
@@ -3092,8 +3111,10 @@
       wallet: "",
       walletModalSection: "overview",
       topChartCount: 1,
+      topOrderBookVisible: true,
       extraCharts: [],
       tradeBookWidth: 310,
+      tradeChartSplitRatio: 0.5,
       tradeSingleRowRatio: null,
       tradeMultiRowRatio: null,
       rawRows: [],
@@ -5412,6 +5433,18 @@
           } else {
             priceListEl.appendChild(item);
           }
+
+          const nextIconMarkup = footerCoinIconHtml(coin, coin).trim();
+          if (!nextIconMarkup) return;
+          const currentIconEl = item.querySelector(".coinIcon, .coinFallback");
+          const template = document.createElement("template");
+          template.innerHTML = nextIconMarkup;
+          const nextIconEl = template.content.firstElementChild;
+          if (nextIconEl && currentIconEl && currentIconEl.outerHTML !== nextIconEl.outerHTML) {
+            currentIconEl.replaceWith(nextIconEl);
+          } else if (nextIconEl && !currentIconEl) {
+            item.insertAdjacentElement("afterbegin", nextIconEl);
+          }
         });
 
         desired.forEach((coin) => {
@@ -6060,6 +6093,23 @@
       return clamp(Math.round(bookWidth || DEFAULT_TRADE_BOOK_WIDTH), MIN_TRADE_BOOK_WIDTH, getTradeMaxBookWidth(safeWidth));
     }
 
+    function getTradeChartSplitRatio() {
+      const ratio = Number(state.tradeChartSplitRatio);
+      return Number.isFinite(ratio) ? clamp(ratio, 0.28, 0.72) : 0.5;
+    }
+
+    function getTradeVisibleBookWidth() {
+      return state.topOrderBookVisible ? state.tradeBookWidth : 0;
+    }
+
+    function getTradeSharedLeftPx(stackWidth) {
+      const width = Number.isFinite(stackWidth) ? stackWidth : tradeViewStack?.getBoundingClientRect().width || 0;
+      const visibleBookWidth = getTradeVisibleBookWidth();
+      const usableChartWidth = Math.max(MIN_TRADE_COLUMN_WIDTH * 2, width - visibleBookWidth);
+      const targetLeft = Math.round(usableChartWidth * getTradeChartSplitRatio());
+      return clamp(targetLeft, MIN_TRADE_COLUMN_WIDTH, Math.max(MIN_TRADE_COLUMN_WIDTH, width - MIN_TRADE_COLUMN_WIDTH));
+    }
+
     function syncTradeSplitters(layout) {
       if (!tradeViewStack || !tradeRowSplitter || !tradeColumnSplitter) return;
       if (!layout || !Number.isFinite(layout.topPx)) {
@@ -6071,10 +6121,9 @@
       const rowTop = layout.topPx + ((layout.rowGap || 0) / 2);
       tradeViewStack.style.setProperty("--trade-row-splitter-top", rowTop + "px");
       tradeRowSplitter.hidden = false;
-
       if (layout.multi && Number.isFinite(layout.leftPx)) {
         tradeViewStack.style.setProperty("--trade-column-splitter-left", layout.leftPx + "px");
-        tradeViewStack.style.setProperty("--trade-column-splitter-top", layout.topPx + "px");
+        tradeViewStack.style.setProperty("--trade-column-splitter-top", "0px");
         tradeColumnSplitter.hidden = false;
       } else {
         tradeColumnSplitter.hidden = true;
@@ -6086,7 +6135,8 @@
       try {
         tradeFrame.contentWindow.postMessage({
           type: "hypermonitor:tracker-layout",
-          bookWidth: state.tradeBookWidth
+          bookWidth: state.tradeBookWidth,
+          chartSplitRatio: getTradeChartSplitRatio()
         }, "*");
       } catch (_) {
         // Ignore iframe timing issues during load.
@@ -6110,6 +6160,10 @@
       }
 
       tradeViewStack.style.setProperty("--trade-book-width", state.tradeBookWidth + "px");
+      tradeViewStack.style.setProperty(
+        "--top-frame-btn-right",
+        (state.topOrderBookVisible ? (state.tradeBookWidth + 44) : 76) + "px"
+      );
 
       const computed = getComputedStyle(tradeViewStack);
       const rowGap = parseFloat(computed.rowGap) || 0;
@@ -6123,7 +6177,7 @@
         const ratio = getTradeRowRatio(extraCount);
         const topMax = Math.max(MIN_TRADE_TOP_HEIGHT_MULTI, height - MIN_TRADE_BOTTOM_HEIGHT_MULTI);
         const topPx = clamp(Math.round(height * ratio), MIN_TRADE_TOP_HEIGHT_MULTI, topMax);
-        const leftPx = Math.round((width - bookWidth) / 2);
+        const leftPx = clamp(getTradeSharedLeftPx(width), MIN_TRADE_COLUMN_WIDTH, Math.max(MIN_TRADE_COLUMN_WIDTH, width - MIN_TRADE_COLUMN_WIDTH));
 
         tradeViewStack.style.gridTemplateRows = "minmax(0, " + topPx + "px) minmax(0, 1fr)";
         tradeViewStack.style.gridTemplateColumns = "minmax(0, " + leftPx + "px) minmax(0, 1fr)";
@@ -6259,8 +6313,16 @@
       if (!width || !height) return;
 
       if (tradeSplitDrag.kind === "column" && state.extraCharts.length > 0) {
-        const targetLeft = clamp(Math.round(event.clientX - bounds.left), MIN_TRADE_COLUMN_WIDTH, width - MIN_TRADE_COLUMN_WIDTH);
-        state.tradeBookWidth = clampTradeBookWidth(width - targetLeft * 2, width);
+        const visibleBookWidth = getTradeVisibleBookWidth();
+        const usableChartWidth = Math.max(MIN_TRADE_COLUMN_WIDTH * 2, width - visibleBookWidth);
+        const targetLeft = clamp(
+          Math.round(event.clientX - bounds.left),
+          MIN_TRADE_COLUMN_WIDTH,
+          Math.max(MIN_TRADE_COLUMN_WIDTH, usableChartWidth - MIN_TRADE_COLUMN_WIDTH)
+        );
+        state.tradeChartSplitRatio = usableChartWidth > 0
+          ? clamp(targetLeft / usableChartWidth, 0.28, 0.72)
+          : 0.5;
         syncTradeLayout();
         return;
       }
@@ -6573,10 +6635,6 @@
             "<td>" +
               "<a class='wallet-link' href='" + escapeHtml(href) + "' data-wallet-link='" + escapeHtml(row.address) + "'>" +
                 "<strong>" + escapeHtml(shortLeaderboardAddress(row.address)) + "</strong>" +
-                "<span class='wallet-meta'>" +
-                  "<span class='mini-chip'>" + escapeHtml(sizeTierLabel(row)) + "</span>" +
-                  "<span class='mini-chip " + pnlChipClass(row.pnl) + "'>" + escapeHtml(qualityLabel(row.walletScore)) + "</span>" +
-                "</span>" +
               "</a>" +
             "</td>" +
             "<td class='money hide-phone'>" + moneyFormat(row.accountValue) + "</td>" +
@@ -7383,6 +7441,17 @@
       }
       if (data.type !== "hypermonitor:asset-chart-state") return;
       state.topChartCount = data.chart2Active ? 2 : 1;
+      if (typeof data.orderBookVisible === "boolean") {
+        state.topOrderBookVisible = data.orderBookVisible;
+      }
+      const splitRatio = Number(data.chartSplitRatio);
+      if (Number.isFinite(splitRatio) && splitRatio > 0) {
+        state.tradeChartSplitRatio = clamp(splitRatio, 0.28, 0.72);
+      }
+      const reportedBookWidth = Number(data.bookWidth);
+      if (state.topOrderBookVisible && Number.isFinite(reportedBookWidth) && reportedBookWidth > 0) {
+        state.tradeBookWidth = clampTradeBookWidth(reportedBookWidth);
+      }
       if (state.topChartCount < 2 && state.extraCharts.length) {
         state.extraCharts = [];
       }
