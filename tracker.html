@@ -713,6 +713,16 @@
       transform: translateX(-50%);
     }
 
+    .trade-view-stack[data-layout="multi"] .trade-column-splitter::before {
+      opacity: 1;
+      background: var(--border);
+    }
+
+    .trade-view-stack[data-layout="multi"] .trade-row-splitter::before {
+      opacity: 1;
+      background: var(--border);
+    }
+
     .trade-leaderboard-panel .active-filters-bar {
       padding-bottom: 12px;
     }
@@ -3105,6 +3115,8 @@
       }
     ];
 
+    const DEFAULT_EXTRA_CHART_COINS = ["SOL", "HYPE"];
+
     const state = {
       coin: "BTC",
       tradeTimeframe: "15m",
@@ -3167,7 +3179,11 @@
     ];
     const tradeSplitDrag = {
       kind: "",
-      pointerId: null
+      pointerId: null,
+      handle: null,
+      rafId: 0,
+      lastClientX: 0,
+      lastClientY: 0
     };
     const marketChipGroup = document.getElementById("marketChipGroup");
     const tradeWalletInline = document.getElementById("tradeWalletInline");
@@ -6225,7 +6241,7 @@
       const payload = {
         type: "hypermonitor:set-timeframe",
         tf,
-        force: true
+        force: false
       };
 
       if (tradeFrame?.contentWindow) {
@@ -6274,13 +6290,13 @@
       updateExtraTradeFrames();
       syncTradeFrameExtraCount();
       syncTradeFrameLayout();
-      syncTradeTimeframe();
     }
 
     function addExtraChart() {
       if (state.topChartCount < 2) return;
       if (state.extraCharts.length >= 2) return;
-      state.extraCharts.push(state.coin);
+      const nextDefaultCoin = DEFAULT_EXTRA_CHART_COINS[state.extraCharts.length] || state.coin;
+      state.extraCharts.push(nextDefaultCoin);
       syncTradeLayout();
     }
 
@@ -6295,17 +6311,8 @@
       removeExtraChart(state.extraCharts.length - 1);
     }
 
-    function stopTradeSplitDrag() {
-      if (!tradeSplitDrag.kind) return;
-      tradeSplitDrag.kind = "";
-      tradeSplitDrag.pointerId = null;
-      if (tradeRowSplitter) tradeRowSplitter.classList.remove("is-dragging");
-      if (tradeColumnSplitter) tradeColumnSplitter.classList.remove("is-dragging");
-      document.body.style.removeProperty("cursor");
-      document.body.style.removeProperty("user-select");
-    }
-
-    function updateTradeSplitDrag(event) {
+    function processTradeSplitDrag() {
+      tradeSplitDrag.rafId = 0;
       if (!tradeSplitDrag.kind || !tradeViewStack) return;
       const bounds = tradeViewStack.getBoundingClientRect();
       const width = Math.round(bounds.width);
@@ -6316,14 +6323,14 @@
         const visibleBookWidth = getTradeVisibleBookWidth();
         const usableChartWidth = Math.max(MIN_TRADE_COLUMN_WIDTH * 2, width - visibleBookWidth);
         const targetLeft = clamp(
-          Math.round(event.clientX - bounds.left),
+          Math.round(tradeSplitDrag.lastClientX - bounds.left),
           MIN_TRADE_COLUMN_WIDTH,
           Math.max(MIN_TRADE_COLUMN_WIDTH, usableChartWidth - MIN_TRADE_COLUMN_WIDTH)
         );
         state.tradeChartSplitRatio = usableChartWidth > 0
           ? clamp(targetLeft / usableChartWidth, 0.28, 0.72)
           : 0.5;
-        syncTradeLayout();
+        applyTradeViewInlineLayout(state.extraCharts.length);
         return;
       }
 
@@ -6334,14 +6341,48 @@
         const minTop = extraCount > 0 ? MIN_TRADE_TOP_HEIGHT_MULTI : MIN_TRADE_TOP_HEIGHT_SINGLE;
         const minBottom = extraCount > 0 ? MIN_TRADE_BOTTOM_HEIGHT_MULTI : MIN_TRADE_BOTTOM_HEIGHT_SINGLE;
         const targetTop = clamp(
-          Math.round(event.clientY - bounds.top - rowGap / 2),
+          Math.round(tradeSplitDrag.lastClientY - bounds.top - rowGap / 2),
           minTop,
           Math.max(minTop, usableHeight - minBottom)
         );
         const nextRatio = usableHeight > 0 ? targetTop / usableHeight : getDefaultTradeRowRatio(extraCount);
         setTradeRowRatio(extraCount, nextRatio);
-        syncTradeLayout();
+        applyTradeViewInlineLayout(extraCount);
       }
+    }
+
+    function queueTradeSplitDragFrame() {
+      if (tradeSplitDrag.rafId) return;
+      tradeSplitDrag.rafId = window.requestAnimationFrame(processTradeSplitDrag);
+    }
+
+    function stopTradeSplitDrag() {
+      if (!tradeSplitDrag.kind) return;
+      if (tradeSplitDrag.rafId) {
+        window.cancelAnimationFrame(tradeSplitDrag.rafId);
+        tradeSplitDrag.rafId = 0;
+      }
+      if (tradeSplitDrag.handle && tradeSplitDrag.pointerId !== null && typeof tradeSplitDrag.handle.releasePointerCapture === "function") {
+        try {
+          tradeSplitDrag.handle.releasePointerCapture(tradeSplitDrag.pointerId);
+        } catch (_) {
+          // Ignore capture release issues.
+        }
+      }
+      tradeSplitDrag.kind = "";
+      tradeSplitDrag.pointerId = null;
+      tradeSplitDrag.handle = null;
+      if (tradeRowSplitter) tradeRowSplitter.classList.remove("is-dragging");
+      if (tradeColumnSplitter) tradeColumnSplitter.classList.remove("is-dragging");
+      document.body.style.removeProperty("cursor");
+      document.body.style.removeProperty("user-select");
+    }
+
+    function updateTradeSplitDrag(event) {
+      if (!tradeSplitDrag.kind || !tradeViewStack) return;
+      tradeSplitDrag.lastClientX = Number(event.clientX || 0);
+      tradeSplitDrag.lastClientY = Number(event.clientY || 0);
+      queueTradeSplitDragFrame();
     }
 
     function startTradeSplitDrag(kind, event) {
@@ -6349,11 +6390,21 @@
       event.preventDefault();
       tradeSplitDrag.kind = kind;
       tradeSplitDrag.pointerId = event.pointerId;
+      tradeSplitDrag.handle = event.currentTarget instanceof Element ? event.currentTarget : null;
+      tradeSplitDrag.lastClientX = Number(event.clientX || 0);
+      tradeSplitDrag.lastClientY = Number(event.clientY || 0);
       document.body.style.cursor = kind === "column" ? "col-resize" : "row-resize";
       document.body.style.userSelect = "none";
+      if (tradeSplitDrag.handle && typeof tradeSplitDrag.handle.setPointerCapture === "function") {
+        try {
+          tradeSplitDrag.handle.setPointerCapture(event.pointerId);
+        } catch (_) {
+          // Ignore capture issues.
+        }
+      }
       if (kind === "column" && tradeColumnSplitter) tradeColumnSplitter.classList.add("is-dragging");
       if (kind === "row" && tradeRowSplitter) tradeRowSplitter.classList.add("is-dragging");
-      updateTradeSplitDrag(event);
+      queueTradeSplitDragFrame();
     }
 
     function updateTradeFrame() {
@@ -7418,7 +7469,20 @@
     window.addEventListener("message", (event) => {
       const data = event.data;
       if (!data || typeof data !== "object") return;
-      if (event.source !== tradeFrame.contentWindow) return;
+      const isPrimaryFrame = event.source === tradeFrame?.contentWindow;
+      const extraFrameIndex = extraTradeFrames.findIndex((frame) => frame?.contentWindow === event.source);
+      if (!isPrimaryFrame && extraFrameIndex === -1) return;
+      if (data.type === "hypermonitor:coin-change") {
+        const coin = String(data.coin || "").trim();
+        if (!coin) return;
+        if (isPrimaryFrame) {
+          state.coin = coin;
+        } else if (extraFrameIndex >= 0 && extraFrameIndex < state.extraCharts.length) {
+          state.extraCharts[extraFrameIndex] = coin;
+        }
+        return;
+      }
+      if (!isPrimaryFrame) return;
       if (data.type === "hypermonitor:remove-extra-chart") {
         removeLastExtraChart();
         return;

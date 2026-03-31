@@ -92,6 +92,20 @@
             display: none;
         }
 
+        html.compact.compact-extra #header {
+            display: block;
+            height: 0;
+            min-height: 0;
+            padding: 0;
+            border: 0;
+            overflow: visible;
+        }
+
+        html.compact.compact-extra #coin-btn,
+        html.compact.compact-extra #header-stats {
+            display: none;
+        }
+
         /* Coin picker */
         #coin-picker-wrap {
             position: relative;
@@ -176,6 +190,18 @@
             cursor: pointer;
             margin-bottom: 4px;
             max-width: max-content;
+        }
+
+        #coin-toggle-extra {
+            display: none;
+        }
+
+        html.compact-extra #coin-toggle-extra {
+            display: inline-flex;
+        }
+
+        html.compact-extra #legend-name {
+            display: none;
         }
 
         .mini-coin-logo {
@@ -916,8 +942,11 @@
         html.compact #ob-open-btn,
         html.compact #add-chart-btn,
         html.compact #chart-container-2,
-        html.compact #coin-dropdown,
         html.compact #coin-dropdown-2 {
+            display: none !important;
+        }
+
+        html.compact:not(.compact-extra) #coin-dropdown {
             display: none !important;
         }
 
@@ -1903,7 +1932,7 @@
         <header id="header">
             <div id="coin-picker-wrap">
                 <div id="coin-btn" onclick="toggleDropdown()">
-                    <img id="coin-logo" src="" data-coin="" data-fallback-tried="0" onerror="handleCoinImgError(this)" alt="" style="display:none;">
+                    <img id="coin-logo" src="" data-coin="" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="" style="display:none;">
                     <span class="coin-btn-meta">
                         <span id="coin-label">–</span>
                         <span id="coin-badge" class="coin-btn-badge" style="display:none;"></span>
@@ -1967,6 +1996,14 @@
                                 <span>HYPERMONITOR</span>
                             </div>
                             <div id="chart-legend">
+                                <div id="coin-toggle-extra" class="mini-coin-select" onclick="toggleDropdown()">
+                                    <img id="coin-logo-extra" class="mini-coin-logo" src="" data-coin="" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="">
+                                    <span class="mini-coin-meta">
+                                        <span id="coin-label-extra" class="mini-coin-label">–</span>
+                                        <span id="coin-badge-extra" class="mini-coin-badge" style="display:none;"></span>
+                                    </span>
+                                    <span style="font-size:10px; color:var(--muted);">▼</span>
+                                </div>
                                 <span id="legend-name">–/USD • 15m</span>
                                 <div id="legend-ohlc">
                                     <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o">–</span></span>
@@ -2002,7 +2039,7 @@
                             </div>
                             <div id="chart-legend" style="pointer-events:none; z-index:5;"> <!-- inherit styles -->
                                 <div id="coin-toggle-2" class="mini-coin-select" onclick="toggleDropdown2()">
-                                    <img id="coin-logo-2" class="mini-coin-logo" src="images/coins/ETH.svg" data-coin="ETH" data-fallback-tried="0" onerror="handleCoinImgError(this)" alt="ETH">
+                                    <img id="coin-logo-2" class="mini-coin-logo" src="images/coins/ETH.svg" data-coin="ETH" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="ETH">
                                     <span class="mini-coin-meta">
                                         <span id="coin-label-2" class="mini-coin-label">ETH</span>
                                         <span id="coin-badge-2" class="mini-coin-badge" style="display:none;"></span>
@@ -2296,11 +2333,25 @@
         const WS = 'wss://api.hyperliquid.xyz/ws';
         const COIN_ICON_BASE = 'https://app.hyperliquid.xyz/coins/';
         const NON_CRYPTO_PREFIXES = ['xyz', 'flx', 'hyna', 'km', 'vntl', 'cash'];
+        const COIN_LOGO_URL_CACHE_KEY = 'hypermonitor-logo-url-cache';
         const PAGE_PARAMS = new URLSearchParams(location.search);
         const IS_COMPACT = PAGE_PARAMS.get('compact') === '1';
         const EMBED_PANE = String(PAGE_PARAMS.get('pane') || '').trim();
         const MOBILE_ASSET_QUERY = window.matchMedia('(max-width: 720px)');
+        const FOOTER_SPECIAL_LOGOS = new Map([
+            ['HYPE', 'https://hyperfoundation.org/landing/blob_green.gif'],
+            ['DOGE', 'https://s2.coinmarketcap.com/static/img/coins/64x64/74.gif'],
+            ['DOT', 'https://s2.coinmarketcap.com/static/img/coins/64x64/6636.gif'],
+            ['LINK', 'https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif'],
+            ['RENDER', 'https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif'],
+            ['XRP', 'https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif'],
+            ['GOLD', 'https://s3-symbol-logo.tradingview.com/metal/gold--600.png'],
+            ['SILVER', 'https://s3-symbol-logo.tradingview.com/metal/silver--600.png'],
+            ['USA500', 'https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png']
+        ]);
+        const FOOTER_CIRCLE_LOGOS = new Set(['DOGE', 'DOT', 'RENDER', 'XRP']);
         const SPECIAL_LOGOS = new Map([
+            ['ETH', 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Ethereum_Logo.png'],
             ['USA500', 'images/coins/USA500.png'],
             ['COPPER', 'images/coins/COPPER.png'],
             ['GOLD', 'images/coins/GOLD.svg'],
@@ -2322,6 +2373,8 @@
             ['QQQ', 'https://logo.clearbit.com/invesco.com'],
             ['CRCL', 'https://logo.clearbit.com/circle.com']
         ]);
+        const coinResolvedLogoCache = new Map();
+        const coinLogoCandidateCache = new Map();
         const TF_MS = { '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3 };
         const OB_ROWS_BOTH = 14;
         const OB_ROWS_SINGLE = 28;
@@ -2366,6 +2419,58 @@
             const base = getCoinDisplayName(normalized);
             const dex = getCoinDexLabel(normalized);
             return dex ? `${dex}:${base}` : base;
+        }
+
+        function normalizeLogoKey(name) {
+            const normalized = buildMarketKey(name);
+            const { dex, base } = splitDexCoin(normalized);
+            let normalizedBase = String(base || '').trim().toUpperCase();
+            if (normalizedBase.startsWith('U') && normalizedBase.length > 1) {
+                const unwrapped = normalizedBase.slice(1);
+                if (SPECIAL_LOGOS.has(unwrapped) || FOOTER_SPECIAL_LOGOS.has(unwrapped)) {
+                    normalizedBase = unwrapped;
+                }
+            }
+            return dex ? `${String(dex || '').trim().toLowerCase()}:${normalizedBase}` : normalizedBase;
+        }
+
+        function loadResolvedCoinLogoCache() {
+            try {
+                const raw = localStorage.getItem(COIN_LOGO_URL_CACHE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return;
+                Object.entries(parsed).forEach(([key, value]) => {
+                    if (!key || !value) return;
+                    coinResolvedLogoCache.set(String(key), String(value));
+                });
+            } catch (_) {}
+        }
+
+        function saveResolvedCoinLogoCache() {
+            try {
+                const obj = {};
+                coinResolvedLogoCache.forEach((value, key) => {
+                    obj[key] = value;
+                });
+                localStorage.setItem(COIN_LOGO_URL_CACHE_KEY, JSON.stringify(obj));
+            } catch (_) {}
+        }
+
+        function rememberResolvedCoinLogo(name, url) {
+            const key = normalizeLogoKey(name);
+            const safeUrl = String(url || '').trim();
+            if (!key || !safeUrl) return;
+            if (coinResolvedLogoCache.get(key) === safeUrl) return;
+            coinResolvedLogoCache.set(key, safeUrl);
+            saveResolvedCoinLogoCache();
+            coinLogoCandidateCache.delete(key);
+        }
+
+        function getResolvedCoinLogo(name) {
+            const key = normalizeLogoKey(name);
+            if (!key) return '';
+            return coinResolvedLogoCache.get(key) || '';
         }
 
         function parseCoin() {
@@ -2464,6 +2569,17 @@
                 window.parent.postMessage({
                     type: 'hypermonitor:timeframe-change',
                     tf: S.tf
+                }, '*');
+            } catch (_) {}
+        }
+
+        function notifyParentCoinChange() {
+            if (window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:coin-change',
+                    coin: S.coin,
+                    pane: EMBED_PANE || 'primary'
                 }, '*');
             } catch (_) {}
         }
@@ -3262,7 +3378,8 @@
 
         async function fetchCandles() {
             const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
-            setChartLoading(1, true);
+            const showLoading = candleMap.size === 0;
+            if (showLoading) setChartLoading(1, true);
             try {
                 const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin, interval: S.tf, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
@@ -3295,7 +3412,8 @@
             syncSelectedCoinUi(2);
             
             const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
-            setChartLoading(2, true);
+            const showLoading = candleMap2.size === 0;
+            if (showLoading) setChartLoading(2, true);
             try {
                 const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin2, interval: S.tf, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
@@ -3857,6 +3975,9 @@
 
         function coinLogoCandidates(name) {
             const normalized = buildMarketKey(name);
+            const cacheKey = normalizeLogoKey(normalized);
+            if (coinLogoCandidateCache.has(cacheKey)) return coinLogoCandidateCache.get(cacheKey).slice();
+
             const { dex, base } = splitDexCoin(normalized);
             const baseName = String(base || normalized).trim().toUpperCase();
             const exact = dex ? `${dex.toLowerCase()}:${baseName}` : baseName;
@@ -3864,6 +3985,14 @@
             const push = url => {
                 if (url && !urls.includes(url)) urls.push(url);
             };
+            const resolvedUrl = getResolvedCoinLogo(exact);
+            push(resolvedUrl);
+            push(FOOTER_SPECIAL_LOGOS.get(exact));
+            push(FOOTER_SPECIAL_LOGOS.get(baseName));
+            push(SPECIAL_LOGOS.get(exact));
+            push(SPECIAL_LOGOS.get(baseName));
+            push(DOMAIN_LOGOS.get(exact));
+            push(DOMAIN_LOGOS.get(baseName));
 
             const hyperliquidLogoKeys = [];
             if (exact.includes(':')) hyperliquidLogoKeys.push(exact);
@@ -3878,14 +4007,11 @@
                 push(`${COIN_ICON_BASE}${encodeURIComponent(key)}.png`);
             });
 
-            push(SPECIAL_LOGOS.get(exact));
-            push(SPECIAL_LOGOS.get(baseName));
-            push(DOMAIN_LOGOS.get(exact));
-            push(DOMAIN_LOGOS.get(baseName));
             push(coinLogoPath(baseName, 'svg'));
             push(coinLogoPath(baseName, 'png'));
             push(`https://financialmodelingprep.com/image-stock/${encodeURIComponent(baseName)}.png`);
             push(`https://eodhd.com/img/logos/US/${encodeURIComponent(baseName)}.png`);
+            coinLogoCandidateCache.set(cacheKey, urls.slice());
             return urls;
         }
 
@@ -3895,6 +4021,7 @@
             el.dataset.coin = buildMarketKey(name);
             el.dataset.logoCandidates = JSON.stringify(candidates);
             el.dataset.logoIndex = '0';
+            el.style.borderRadius = FOOTER_CIRCLE_LOGOS.has(getCoinDisplayName(name)) ? '50%' : '';
             if (!candidates.length) {
                 el.style.display = 'none';
                 return;
@@ -3902,6 +4029,13 @@
             el.src = candidates[0];
             el.style.display = 'block';
             el.style.visibility = 'visible';
+        }
+
+        function handleCoinImgLoad(el) {
+            if (!el) return;
+            const coin = el.dataset.coin;
+            const resolved = el.currentSrc || el.src || '';
+            if (coin && resolved) rememberResolvedCoinLogo(coin, resolved);
         }
 
         function handleCoinImgError(el) {
@@ -3972,7 +4106,17 @@
             setCoinBadge(badgeEl, marketKey);
             setCoinLogo(logo, marketKey);
             if (toggle) toggle.title = getSelectedCoinLabel(marketKey);
-            if (targetNum === 1) updateOrderBookLabels();
+            if (targetNum === 1) {
+                const compactLogo = $('coin-logo-extra');
+                const compactLabel = $('coin-label-extra');
+                const compactBadge = $('coin-badge-extra');
+                const compactToggle = $('coin-toggle-extra');
+                if (compactLabel) compactLabel.textContent = label;
+                setCoinBadge(compactBadge, marketKey);
+                setCoinLogo(compactLogo, marketKey);
+                if (compactToggle) compactToggle.title = getSelectedCoinLabel(marketKey);
+                updateOrderBookLabels();
+            }
         }
 
         function resolveCoinSelection(value) {
@@ -4022,10 +4166,12 @@
         function renderCoinList(list, targetNum) {
             $(`coin-list${targetNum===2?'-2':''}`).innerHTML = list.map(c => {
                 const logoCandidates = JSON.stringify(coinLogoCandidates(c.key)).replace(/'/g, '&#39;');
+                const initialLogo = getResolvedCoinLogo(c.key) || coinLogoCandidates(c.key)[0] || coinLogoPath(c.key);
+                const extraStyle = FOOTER_CIRCLE_LOGOS.has(getCoinDisplayName(c.key)) ? ' style="border-radius:50%;"' : '';
                 return `
                 <div class="coin-option" data-coin-key="${c.key}" data-target-num="${targetNum}" tabindex="0" title="${c.key}">
                     <span class="coin-option-main">
-                        <img class="coin-option-logo" src="${coinLogoCandidates(c.key)[0] || coinLogoPath(c.key)}" data-coin="${c.key}" data-logo-candidates='${logoCandidates}' data-logo-index="0" onerror="handleCoinImgError(this)" alt="${c.name}">
+                        <img class="coin-option-logo" src="${initialLogo}" data-coin="${c.key}" data-logo-candidates='${logoCandidates}' data-logo-index="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="${c.name}" loading="lazy" decoding="async"${extraStyle}>
                         <span class="coin-option-text">
                             <span class="coin-option-name">${c.name}</span>
                             ${c.dex ? `<span class="coin-option-badge">${c.dex}</span>` : ''}
@@ -4047,7 +4193,8 @@
         }
 
         function toggleDropdown() {
-            const dd = $('coin-dropdown'), btn = $('coin-btn');
+            const dd = $('coin-dropdown');
+            const btn = document.documentElement.classList.contains('compact-extra') ? $('coin-toggle-extra') : $('coin-btn');
             if (dd.classList.contains('open')) { dd.classList.remove('open'); return; }
             dd.classList.add('open');
             positionDropdown(dd, btn);
@@ -4076,6 +4223,7 @@
                 $('coin-dropdown').classList.remove('open');
                 syncPrimaryCoinUrl();
                 syncSelectedCoinUi(1);
+                notifyParentCoinChange();
                 reinit();
             } else {
                 S.coin2 = selected;
@@ -4145,7 +4293,11 @@
         }
 
         document.addEventListener('click', e => {
-            if (!$('coin-picker-wrap').contains(e.target)) $('coin-dropdown').classList.remove('open');
+            const compactToggle = $('coin-toggle-extra');
+            if (
+                !$('coin-picker-wrap').contains(e.target) &&
+                !compactToggle?.contains(e.target)
+            ) $('coin-dropdown').classList.remove('open');
             if (!$('chart-container-2').contains(e.target)) $('coin-dropdown-2').style.display = 'none';
             if (!obAggTrigger?.contains(e.target) && !obAggMenu?.contains(e.target)) closeObAggMenu();
         });
@@ -4232,6 +4384,7 @@
             applyCompactMode();
             syncResponsiveAssetLayout();
             if (!IS_COMPACT) resetOrderBookState();
+            loadResolvedCoinLogoCache();
             await fetchMeta();
             buildCoinList();
             applyStats();
