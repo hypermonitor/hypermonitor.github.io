@@ -11,6 +11,11 @@
     <script>
         const bootParams = new URLSearchParams(location.search);
         const bootPane = String(bootParams.get('pane') || '').trim();
+        try {
+            if (localStorage.getItem('hypermonitor-theme') === 'light') {
+                document.documentElement.classList.add('light');
+            }
+        } catch (_) {}
         if (window.matchMedia('(max-width: 720px)').matches) {
             document.documentElement.classList.add('mobile-layout');
             if (bootParams.get('compact') !== '1') {
@@ -34,8 +39,26 @@
             --muted: #7c848f;
             --up: #0ECB81;
             --down: #F6465D;
+            --chart-crosshair-line: rgba(211, 216, 223, 0.14);
+            --chart-crosshair-label-bg: #18202a;
+            --chart-border: #20252d;
             --header-h: 58px;
             --toolbar-h: 38px;
+        }
+
+        html.light {
+            color-scheme: light;
+            --bg: #fbfcfe;
+            --surface: #ffffff;
+            --surface2: #f5f7fb;
+            --border: #dbe3ee;
+            --text: #0f172a;
+            --muted: #64748b;
+            --up: #16a34a;
+            --down: #dc2626;
+            --chart-crosshair-line: rgba(71, 85, 105, 0.18);
+            --chart-crosshair-label-bg: #edf2f7;
+            --chart-border: #dbe3ee;
         }
 
         *,
@@ -54,6 +77,11 @@
             font-family: 'Inter', system-ui, sans-serif;
             font-size: 13px;
             overflow: hidden;
+        }
+
+        html.light body {
+            background:
+                linear-gradient(180deg, #fafaf9 0%, #f4f4f3 44%, #efefee 100%);
         }
 
         html.compact {
@@ -162,6 +190,10 @@
             border-color: #d3d8df;
         }
 
+        html.light #coin-btn:hover {
+            border-color: #94a3b8;
+        }
+
         #coin-btn .caret {
             font-size: 10px;
             color: var(--muted);
@@ -178,6 +210,12 @@
             padding: 1px;
         }
 
+        html.light #coin-logo,
+        html.light .mini-coin-logo,
+        html.light .coin-option-logo {
+            background: #ffffff;
+        }
+
         .mini-coin-select {
             pointer-events: auto;
             display: inline-flex;
@@ -190,6 +228,11 @@
             cursor: pointer;
             margin-bottom: 4px;
             max-width: max-content;
+        }
+
+        html.light .mini-coin-select {
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
         }
 
         #coin-toggle-extra {
@@ -1045,6 +1088,21 @@
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
 
+        html.light .ob-view-btn {
+            color: #64748b;
+            opacity: 0.92;
+        }
+
+        html.light .ob-view-btn:hover {
+            background: rgba(15, 23, 42, 0.06);
+        }
+
+        html.light .ob-view-btn.active {
+            color: #0f172a;
+            background: #e5e7eb;
+            box-shadow: inset 0 0 0 1px #cbd5e1;
+        }
+
         .ob-view-btn:focus-visible,
         .ob-agg-trigger:focus-visible,
         .ob-agg-option:focus-visible {
@@ -1850,6 +1908,10 @@
             background: #0f1217;
         }
 
+        html.light .wallet-modal-bar {
+            background: #f8fafc;
+        }
+
         .wallet-modal-title {
             display: flex;
             align-items: center;
@@ -1906,6 +1968,10 @@
             flex: 1;
             border: 0;
             background: #080a0d;
+        }
+
+        html.light .wallet-modal-frame {
+            background: #ffffff;
         }
 
         /* scrollbar */
@@ -2343,6 +2409,7 @@
             ['DOGE', 'https://s2.coinmarketcap.com/static/img/coins/64x64/74.gif'],
             ['DOT', 'https://s2.coinmarketcap.com/static/img/coins/64x64/6636.gif'],
             ['LINK', 'https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif'],
+            ['hyna:LINK', 'https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif'],
             ['RENDER', 'https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif'],
             ['XRP', 'https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif'],
             ['GOLD', 'https://s3-symbol-logo.tradingview.com/metal/gold--600.png'],
@@ -2490,6 +2557,51 @@
             chartSplitRatio: 0.5,
             trackerBookWidth: 310
         };
+
+        function normalizeTheme(value) {
+            return value === 'light' ? 'light' : 'dark';
+        }
+
+        function getCssVar(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        function getChartThemeOptions() {
+            const background = getCssVar('--bg') || '#0d1014';
+            const textColor = getCssVar('--muted') || '#7c848f';
+            const borderColor = getCssVar('--chart-border') || getCssVar('--border') || '#20252d';
+            const crosshairLineColor = getCssVar('--chart-crosshair-line') || 'rgba(211, 216, 223, 0.14)';
+            const crosshairLabelBg = getCssVar('--chart-crosshair-label-bg') || '#18202a';
+            return {
+                layout: { background: { color: background }, textColor, attributionLogo: false },
+                grid: { vertLines: { color: borderColor }, horzLines: { color: borderColor } },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: { color: crosshairLineColor, labelBackgroundColor: crosshairLabelBg },
+                    horzLine: { color: crosshairLineColor, labelBackgroundColor: crosshairLabelBg }
+                },
+                rightPriceScale: { borderColor },
+                timeScale: { borderColor, timeVisible: true, secondsVisible: false }
+            };
+        }
+
+        function applyAssetTheme(theme, options = {}) {
+            const nextTheme = normalizeTheme(theme);
+            const isLight = nextTheme === 'light';
+            document.documentElement.classList.toggle('light', isLight);
+            document.body?.classList.toggle('light', isLight);
+            if (options.persist !== false) {
+                try {
+                    localStorage.setItem('hypermonitor-theme', nextTheme);
+                } catch (_) {}
+            }
+            if (typeof chart !== 'undefined' && chart) {
+                chart.applyOptions(getChartThemeOptions());
+            }
+            if (typeof chart2 !== 'undefined' && chart2) {
+                chart2.applyOptions(getChartThemeOptions());
+            }
+        }
 
         // ── DOM refs ───────────────────────────────────────────────
         const $ = id => document.getElementById(id);
@@ -2911,8 +3023,22 @@
         window.addEventListener('message', event => {
             const data = event.data;
             if (!data || typeof data !== 'object') return;
+            if (data.type === 'hypermonitor:set-theme') {
+                applyAssetTheme(String(data.theme || 'dark'), { persist: true });
+                return;
+            }
             if (data.type === 'hypermonitor:set-timeframe') {
                 applyTimeframe(data.tf, { force: data.force === true });
+                return;
+            }
+            if (data.type === 'hypermonitor:set-primary-coin') {
+                const coin = String(data.coin || '').trim();
+                if (coin) {
+                    setPrimaryCoinSelection(coin, {
+                        notifyParent: false,
+                        closeDropdown: false
+                    });
+                }
                 return;
             }
             if (IS_COMPACT) return;
@@ -3257,13 +3383,7 @@
 
         // ── Chart 1 Setup ──────────────────────────────────────────
         const chartWrap = $('chart-wrap');
-        const chart = LightweightCharts.createChart($('chart-canvas'), {
-            layout: { background: { color: '#0d1014' }, textColor: '#7c848f', attributionLogo: false },
-            grid: { vertLines: { color: '#20252d' }, horzLines: { color: '#20252d' } },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#d3d8df24', labelBackgroundColor: '#12161c' }, horzLine: { color: '#d3d8df24', labelBackgroundColor: '#12161c' } },
-            rightPriceScale: { borderColor: '#20252d' },
-            timeScale: { borderColor: '#20252d', timeVisible: true, secondsVisible: false },
-        });
+        const chart = LightweightCharts.createChart($('chart-canvas'), getChartThemeOptions());
 
         const candles = chart.addCandlestickSeries({ upColor: '#0ECB81', wickUpColor: '#0ECB81', downColor: '#F6465D', wickDownColor: '#F6465D', borderVisible: false });
         const volSeries = chart.addHistogramSeries({
@@ -3295,13 +3415,7 @@
 
         // ── Chart 2 Setup ──────────────────────────────────────────
         const chartWrap2 = $('chart-wrap-2');
-        const chart2 = LightweightCharts.createChart($('chart-canvas-2'), {
-            layout: { background: { color: '#0d1014' }, textColor: '#7c848f', attributionLogo: false },
-            grid: { vertLines: { color: '#20252d' }, horzLines: { color: '#20252d' } },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#d3d8df24', labelBackgroundColor: '#12161c' }, horzLine: { color: '#d3d8df24', labelBackgroundColor: '#12161c' } },
-            rightPriceScale: { borderColor: '#20252d' },
-            timeScale: { borderColor: '#20252d', timeVisible: true, secondsVisible: false },
-        });
+        const chart2 = LightweightCharts.createChart($('chart-canvas-2'), getChartThemeOptions());
 
         const candles2 = chart2.addCandlestickSeries({ upColor: '#0ECB81', wickUpColor: '#0ECB81', downColor: '#F6465D', wickDownColor: '#F6465D', borderVisible: false });
         const volSeries2 = chart2.addHistogramSeries({
@@ -3985,14 +4099,14 @@
             const push = url => {
                 if (url && !urls.includes(url)) urls.push(url);
             };
-            const resolvedUrl = getResolvedCoinLogo(exact);
-            push(resolvedUrl);
             push(FOOTER_SPECIAL_LOGOS.get(exact));
             push(FOOTER_SPECIAL_LOGOS.get(baseName));
             push(SPECIAL_LOGOS.get(exact));
             push(SPECIAL_LOGOS.get(baseName));
             push(DOMAIN_LOGOS.get(exact));
             push(DOMAIN_LOGOS.get(baseName));
+            push(getResolvedCoinLogo(exact));
+            push(getResolvedCoinLogo(baseName));
 
             const hyperliquidLogoKeys = [];
             if (exact.includes(':')) hyperliquidLogoKeys.push(exact);
@@ -4165,8 +4279,9 @@
 
         function renderCoinList(list, targetNum) {
             $(`coin-list${targetNum===2?'-2':''}`).innerHTML = list.map(c => {
-                const logoCandidates = JSON.stringify(coinLogoCandidates(c.key)).replace(/'/g, '&#39;');
-                const initialLogo = getResolvedCoinLogo(c.key) || coinLogoCandidates(c.key)[0] || coinLogoPath(c.key);
+                const candidates = coinLogoCandidates(c.key);
+                const logoCandidates = JSON.stringify(candidates).replace(/'/g, '&#39;');
+                const initialLogo = candidates[0] || coinLogoPath(c.key);
                 const extraStyle = FOOTER_CIRCLE_LOGOS.has(getCoinDisplayName(c.key)) ? ' style="border-radius:50%;"' : '';
                 return `
                 <div class="coin-option" data-coin-key="${c.key}" data-target-num="${targetNum}" tabindex="0" title="${c.key}">
@@ -4213,18 +4328,34 @@
             $('coin-search-2').focus();
         }
 
+        async function setPrimaryCoinSelection(name, options = {}) {
+            const selected = resolveCoinSelection(name);
+            if (!selected || !availableCoinNames.has(selected)) return false;
+            const dropdown = $('coin-dropdown');
+            if (selected === S.coin && options.force !== true) {
+                if (options.closeDropdown !== false) dropdown?.classList.remove('open');
+                return false;
+            }
+            S.coin = selected;
+            resetTrades();
+            if (options.closeDropdown !== false) dropdown?.classList.remove('open');
+            syncPrimaryCoinUrl();
+            syncSelectedCoinUi(1);
+            if (options.notifyParent !== false) {
+                notifyParentCoinChange();
+            }
+            await reinit();
+            return true;
+        }
+
         function selectCoin(name, targetNum) {
             const selected = resolveCoinSelection(name);
             if (!selected || !availableCoinNames.has(selected)) return;
             if (targetNum === 1) {
-                if (selected === S.coin) { $('coin-dropdown').classList.remove('open'); return; }
-                S.coin = selected;
-                resetTrades();
-                $('coin-dropdown').classList.remove('open');
-                syncPrimaryCoinUrl();
-                syncSelectedCoinUi(1);
-                notifyParentCoinChange();
-                reinit();
+                setPrimaryCoinSelection(selected, {
+                    notifyParent: true,
+                    closeDropdown: true
+                });
             } else {
                 S.coin2 = selected;
                 $('coin-dropdown-2').style.display = 'none';
@@ -4321,6 +4452,20 @@
         }
 
         document.addEventListener('keydown', event => {
+            if (
+                (event.metaKey || event.ctrlKey) &&
+                !event.shiftKey &&
+                !event.altKey &&
+                String(event.key || '').toLowerCase() === 'k'
+            ) {
+                if (window.parent && window.parent !== window) {
+                    event.preventDefault();
+                    try {
+                        window.parent.postMessage({ type: 'hypermonitor:focus-search' }, '*');
+                    } catch (_) {}
+                    return;
+                }
+            }
             if (event.key === 'Escape' && obTab?.classList.contains('show-detail')) {
                 closeOrderBookDetail();
             }

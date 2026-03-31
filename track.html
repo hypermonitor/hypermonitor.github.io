@@ -3166,12 +3166,9 @@
     }
 
     body.light {
-      background-color: #fbfcfe;
+      background-color: #f4f4f3;
       background-image:
-        radial-gradient(circle at 14% 16%, rgba(56, 189, 248, 0.08), transparent 28%),
-        radial-gradient(circle at 84% 12%, rgba(59, 130, 246, 0.07), transparent 32%),
-        radial-gradient(circle at 58% 74%, rgba(45, 212, 191, 0.05), transparent 30%),
-        linear-gradient(145deg, #feffff 0%, #fbfcfe 40%, #f8fbfe 72%, #fcfefd 100%);
+        linear-gradient(180deg, #fafaf9 0%, #f4f4f3 44%, #efefee 100%);
       color: #0f172a;
       color-scheme: light;
     }
@@ -18512,9 +18509,13 @@
     if (theme === "light") {
       bodyEl.classList.add("light");
       themeToggleBtn.textContent = "☼";
+      themeToggleBtn.setAttribute("aria-label", "Light mode");
+      themeToggleBtn.setAttribute("title", "Light mode");
     } else {
       bodyEl.classList.remove("light");
-      themeToggleBtn.textContent = "◐";
+      themeToggleBtn.textContent = "☾";
+      themeToggleBtn.setAttribute("aria-label", "Dark mode");
+      themeToggleBtn.setAttribute("title", "Dark mode");
     }
     try { localStorage.setItem("hypermonitor-theme", theme); } catch (e) {}
     updateSpinnerForTheme(theme);
@@ -19568,6 +19569,22 @@
     hideMetricTooltip();
   });
 
+  document.addEventListener("keydown", (event) => {
+    if (
+      (event.metaKey || event.ctrlKey) &&
+      !event.shiftKey &&
+      !event.altKey &&
+      String(event.key || "").toLowerCase() === "k" &&
+      window.parent &&
+      window.parent !== window
+    ) {
+      event.preventDefault();
+      try {
+        window.parent.postMessage({ type: "hypermonitor:focus-search" }, "*");
+      } catch (_) {}
+    }
+  });
+
   window.addEventListener("scroll", () => {
     if (activeMetricTooltip) hideMetricTooltip();
   });
@@ -19575,6 +19592,13 @@
   themeToggleBtn.addEventListener("click", () => {
     const isLight = document.body.classList.contains("light");
     applyTheme(isLight ? "dark" : "light");
+  });
+
+  window.addEventListener("message", (event) => {
+    const data = event.data;
+    if (!data || typeof data !== "object") return;
+    if (data.type !== "hypermonitor:set-theme") return;
+    applyTheme(String(data.theme || "dark"));
   });
 
   if (exportExcelBtn) {
