@@ -11,12 +11,13 @@
     <script>
         const bootParams = new URLSearchParams(location.search);
         const bootPane = String(bootParams.get('pane') || '').trim();
+        const bootCompactExtra = bootParams.get('compact') === '1' && bootPane.startsWith('extra-');
         try {
             if (localStorage.getItem('hypermonitor-theme') === 'light') {
                 document.documentElement.classList.add('light');
             }
         } catch (_) {}
-        if (window.matchMedia('(max-width: 720px)').matches) {
+        if (window.matchMedia('(max-width: 720px)').matches && !bootCompactExtra) {
             document.documentElement.classList.add('mobile-layout');
             if (bootParams.get('compact') !== '1') {
                 document.documentElement.classList.add('mobile-ob-collapsed');
@@ -857,6 +858,171 @@
             min-height: 0;
         }
 
+        .chart-drawing-toolbar {
+            position: absolute;
+            left: 8px;
+            top: 56px;
+            z-index: 7;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 8px 6px;
+            border-radius: 14px;
+            border: 1px solid rgba(72, 84, 101, 0.36);
+            background: rgba(12, 16, 22, 0.88);
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(10px);
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), background 0.14s ease, border-color 0.14s ease;
+        }
+
+        html.light .chart-drawing-toolbar {
+            border-color: rgba(148, 163, 184, 0.28);
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .chart-drawing-btn {
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.14s ease, color 0.14s ease, transform 0.14s ease;
+        }
+
+        .chart-drawing-btn:hover,
+        .chart-drawing-btn:focus-visible {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            outline: none;
+        }
+
+        .chart-drawing-btn.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        html.light .chart-drawing-btn:hover,
+        html.light .chart-drawing-btn:focus-visible {
+            background: rgba(148, 163, 184, 0.12);
+        }
+
+        html.light .chart-drawing-btn.active {
+            background: rgba(99, 102, 241, 0.12);
+            box-shadow: inset 0 0 0 1px rgba(129, 140, 248, 0.22);
+        }
+
+        .chart-drawing-btn svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        .chart-drawing-toolbar.is-hidden {
+            opacity: 0;
+            transform: translateX(-16px);
+            pointer-events: none;
+        }
+
+        .chart-drawing-toolbar-restore {
+            position: absolute;
+            left: 8px;
+            top: 92px;
+            z-index: 7;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-10px);
+            transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .chart-drawing-toolbar-restore.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        .chart-drawing-divider {
+            width: calc(100% - 8px);
+            height: 1px;
+            margin: 2px auto;
+            background: rgba(148, 163, 184, 0.22);
+        }
+
+        .chart-drawing-stage {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .chart-drawing-stage.is-active {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        .chart-drawing-layer {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        .chart-drawing-shape {
+            fill: none;
+            stroke-width: 1.6;
+            vector-effect: non-scaling-stroke;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .chart-drawing-shape.trend {
+            stroke: #7dd3fc;
+        }
+
+        .chart-drawing-shape.rect {
+            stroke: rgba(226, 232, 240, 0.84);
+            fill: rgba(148, 163, 184, 0.08);
+        }
+
+        .chart-drawing-shape.fib-box {
+            stroke: rgba(167, 139, 250, 0.38);
+            fill: rgba(124, 92, 255, 0.08);
+        }
+
+        .chart-drawing-shape.fib-line {
+            stroke: rgba(167, 139, 250, 0.82);
+        }
+
+        .chart-drawing-label {
+            fill: rgba(226, 232, 240, 0.74);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            dominant-baseline: central;
+        }
+
+        html.light .chart-drawing-shape.rect {
+            stroke: rgba(71, 85, 105, 0.82);
+            fill: rgba(148, 163, 184, 0.08);
+        }
+
+        html.light .chart-drawing-shape.fib-box {
+            stroke: rgba(124, 92, 255, 0.34);
+            fill: rgba(124, 92, 255, 0.07);
+        }
+
+        html.light .chart-drawing-label {
+            fill: rgba(55, 65, 81, 0.72);
+        }
+
         .chart-main-canvas,
         .chart-lower-canvas {
             width: 100%;
@@ -869,10 +1035,23 @@
             min-height: 104px;
             border-top: 1px solid var(--border);
             background: var(--bg);
+            overflow: hidden;
+            opacity: 1;
+            transform: translateY(0);
+            transition: flex-basis 0.34s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease, transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease;
         }
 
         .chart-lower-pane.is-hidden {
             display: none;
+        }
+
+        .chart-lower-pane.is-collapsed {
+            flex-basis: 0 !important;
+            min-height: 0;
+            border-top-color: transparent;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
         }
 
         .chart-lower-pane.is-rsi {
@@ -928,13 +1107,16 @@
         .chart-rsi-band {
             position: absolute;
             left: 0;
-            right: 0;
+            right: auto;
             top: 0;
+            width: 0;
             height: 0;
-            background: rgba(124, 92, 255, 0.18);
+            z-index: 2;
+            background: rgba(124, 92, 255, 0.07);
+            box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.03);
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.12s ease;
+            transition: opacity 0.14s ease;
         }
 
         .chart-rsi-band.is-visible {
@@ -942,7 +1124,8 @@
         }
 
         html.light .chart-rsi-band {
-            background: rgba(124, 92, 255, 0.14);
+            background: rgba(124, 92, 255, 0.055);
+            box-shadow: inset 0 0 0 1px rgba(124, 92, 255, 0.025);
         }
 
         .chart-shared-crosshair {
@@ -995,6 +1178,12 @@
             gap: 10px;
             z-index: 6;
             pointer-events: none;
+            transition: opacity 0.14s ease, transform 0.18s ease;
+        }
+
+        .chart-lower-pane.is-collapsed .lower-pane-overlay {
+            opacity: 0;
+            transform: translateY(-8px);
         }
 
         .lower-pane-meta {
@@ -1040,6 +1229,25 @@
             height: 24px;
             flex: 0 0 24px;
             pointer-events: auto;
+            margin-top: -2px;
+            margin-right: -2px;
+        }
+
+        .lower-pane-restore {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            z-index: 6;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+            transition: opacity 0.22s ease, transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .lower-pane-restore.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
         }
 
         .lower-pane-splitter {
@@ -1213,6 +1421,15 @@
         html.mobile-layout .toolbar-icon-btn {
             width: 28px;
             height: 28px;
+        }
+
+        #chart-drawing-toolbar-2,
+        html.mobile-layout .chart-drawing-toolbar,
+        html.mobile-layout .chart-drawing-stage,
+        html.mobile-layout .chart-drawing-toolbar-restore,
+        .compact-extra .chart-drawing-toolbar,
+        .compact-extra .chart-drawing-toolbar-restore {
+            display: none !important;
         }
 
         html.mobile-layout #charts-container {
@@ -2561,6 +2778,36 @@
                         <div id="chart-wrap" class="chart-loading-wrap logo-watermark is-loading" style="flex:1; min-height:0; position:relative;">
                             <div class="chart-main-pane" id="chart-main-pane">
                                 <div id="chart-canvas" class="chart-main-canvas"></div>
+                                <div id="chart-drawing-stage" class="chart-drawing-stage" aria-hidden="true">
+                                    <svg id="chart-drawing-layer" class="chart-drawing-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+                                </div>
+                                <div id="chart-drawing-toolbar" class="chart-drawing-toolbar" aria-label="Drawing tools">
+                                    <button class="chart-drawing-btn active" type="button" data-draw-tool="cursor" data-draw-target="1" title="Cursor" aria-label="Cursor">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3.25L12.75 9.2L8.85 9.95L10.95 14.75L9.05 15.55L6.95 10.75L4 13.9V3.25Z" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"></path></svg>
+                                    </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="trend" data-draw-target="1" title="Trend line" aria-label="Trend line">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 13.5L13.75 4.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="3" cy="13.5" r="1.5" fill="currentColor"></circle><circle cx="13.75" cy="4.25" r="1.5" fill="currentColor"></circle></svg>
+                                    </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="rect" data-draw-target="1" title="Rectangle" aria-label="Rectangle">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3.25" y="4" width="11.5" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect></svg>
+                                    </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="fib" data-draw-target="1" title="Fibonacci retracement" aria-label="Fibonacci retracement">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 4.5H15M3 7.5H12.5M3 10.5H14M3 13.5H10.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                                    </button>
+                                    <div class="chart-drawing-divider"></div>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="clear" data-draw-target="1" title="Clear drawings" aria-label="Clear drawings">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 5.5H14M6 5.5V13.25M9 5.5V13.25M12 5.5V13.25M6.5 3.5H11.5L12.25 5.5H5.75L6.5 3.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </button>
+                                    <div class="chart-drawing-divider"></div>
+                                    <button id="chart-drawing-hide-btn" class="chart-drawing-btn" type="button" title="Hide drawing toolbar" aria-label="Hide drawing toolbar">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M10.75 4.25L6.25 9L10.75 13.75" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </button>
+                                </div>
+                                <button id="chart-drawing-toolbar-restore" class="toolbar-icon-btn chart-drawing-toolbar-restore" type="button" aria-label="Show drawing toolbar" title="Show drawing toolbar">
+                                    <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                                        <path d="M5.25 3.5L9.75 8L5.25 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </button>
                                 <div id="chart-extrema-layer" class="chart-extrema-layer" aria-hidden="true">
                                     <div id="chart-max-label" class="chart-extrema-label high"><span id="chart-max-text">–</span></div>
                                     <div id="chart-min-label" class="chart-extrema-label low"><span id="chart-min-text">–</span></div>
@@ -2605,15 +2852,20 @@
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow"><span class="lower-pane-key">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-rsi"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi">–</span></span>
                                     </div>
-                                    <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="applyChartPrefs({ ...getChartPrefsPayload(), lowerStudy: 'none' })">
+                                    <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="setLowerPaneCollapsed(true)">
                                         <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
-                                            <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                                            <path d="M3.5 5.75L8 10.25L12.5 5.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
                                         </svg>
                                     </button>
                                 </div>
                                 <div id="chart-rsi-band" class="chart-rsi-band" aria-hidden="true"></div>
                                 <div id="chart-lower-canvas" class="chart-lower-canvas"></div>
                             </div>
+                            <button id="lower-pane-restore" class="toolbar-icon-btn lower-pane-restore" type="button" aria-label="Show lower pane" title="Show lower pane" onclick="setLowerPaneCollapsed(false)">
+                                <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                                    <path d="M3.5 10.25L8 5.75L12.5 10.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                            </button>
                             <div id="chart-shared-crosshair" class="chart-shared-crosshair" aria-hidden="true">
                                 <div id="chart-shared-crosshair-line" class="chart-shared-crosshair-line"></div>
                                 <div id="chart-shared-crosshair-time" class="chart-shared-crosshair-time"></div>
@@ -2638,6 +2890,27 @@
                         <div id="chart-wrap-2" class="chart-loading-wrap logo-watermark" style="flex:1; display:flex; flex-direction:column; position:relative; min-height:0;">
                             <div class="chart-main-pane" id="chart-main-pane-2">
                                 <div id="chart-canvas-2" class="chart-main-canvas"></div>
+                                <div id="chart-drawing-stage-2" class="chart-drawing-stage" aria-hidden="true">
+                                    <svg id="chart-drawing-layer-2" class="chart-drawing-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+                                </div>
+                                <div id="chart-drawing-toolbar-2" class="chart-drawing-toolbar" aria-label="Drawing tools">
+                                    <button class="chart-drawing-btn active" type="button" data-draw-tool="cursor" data-draw-target="2" title="Cursor" aria-label="Cursor">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3.25L12.75 9.2L8.85 9.95L10.95 14.75L9.05 15.55L6.95 10.75L4 13.9V3.25Z" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"></path></svg>
+                                    </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="trend" data-draw-target="2" title="Trend line" aria-label="Trend line">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 13.5L13.75 4.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="3" cy="13.5" r="1.5" fill="currentColor"></circle><circle cx="13.75" cy="4.25" r="1.5" fill="currentColor"></circle></svg>
+                                    </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="rect" data-draw-target="2" title="Rectangle" aria-label="Rectangle">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3.25" y="4" width="11.5" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect></svg>
+                                    </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="fib" data-draw-target="2" title="Fibonacci retracement" aria-label="Fibonacci retracement">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 4.5H15M3 7.5H12.5M3 10.5H14M3 13.5H10.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                                    </button>
+                                    <div class="chart-drawing-divider"></div>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="clear" data-draw-target="2" title="Clear drawings" aria-label="Clear drawings">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 5.5H14M6 5.5V13.25M9 5.5V13.25M12 5.5V13.25M6.5 3.5H11.5L12.25 5.5H5.75L6.5 3.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </button>
+                                </div>
                                 <div id="chart-extrema-layer-2" class="chart-extrema-layer" aria-hidden="true">
                                     <div id="chart-max-label-2" class="chart-extrema-label high"><span id="chart-max-text-2">–</span></div>
                                     <div id="chart-min-label-2" class="chart-extrema-label low"><span id="chart-min-text-2">–</span></div>
@@ -2682,15 +2955,20 @@
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow-2"><span class="lower-pane-key">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow-2">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-rsi-2"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi-2">–</span></span>
                                     </div>
-                                    <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="applyChartPrefs({ ...getChartPrefsPayload(), lowerStudy: 'none' })">
+                                    <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="setLowerPaneCollapsed(true)">
                                         <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
-                                            <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                                            <path d="M3.5 5.75L8 10.25L12.5 5.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
                                         </svg>
                                     </button>
                                 </div>
                                 <div id="chart-rsi-band-2" class="chart-rsi-band" aria-hidden="true"></div>
                                 <div id="chart-lower-canvas-2" class="chart-lower-canvas"></div>
                             </div>
+                            <button id="lower-pane-restore-2" class="toolbar-icon-btn lower-pane-restore" type="button" aria-label="Show lower pane" title="Show lower pane" onclick="setLowerPaneCollapsed(false)">
+                                <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                                    <path d="M3.5 10.25L8 5.75L12.5 10.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                            </button>
                             <div id="chart-shared-crosshair-2" class="chart-shared-crosshair" aria-hidden="true">
                                 <div id="chart-shared-crosshair-line-2" class="chart-shared-crosshair-line"></div>
                                 <div id="chart-shared-crosshair-time-2" class="chart-shared-crosshair-time"></div>
@@ -2974,8 +3252,8 @@
         const NON_CRYPTO_PREFIXES = ['xyz', 'flx', 'hyna', 'km', 'vntl', 'cash'];
         const COIN_LOGO_URL_CACHE_KEY = 'hypermonitor-logo-url-cache';
         const CHART_PREFS_STORAGE_KEY = 'hypermonitor-chart-prefs';
-        const VOLUME_UP_COLOR = 'rgba(14, 203, 129, 0.88)';
-        const VOLUME_DOWN_COLOR = 'rgba(246, 70, 93, 0.88)';
+        const VOLUME_UP_COLOR = 'rgba(14, 203, 129, 0.68)';
+        const VOLUME_DOWN_COLOR = 'rgba(246, 70, 93, 0.68)';
         const VOLUME_MA_FAST = 7;
         const VOLUME_MA_SLOW = 14;
         const VOLUME_MA_FAST_COLOR = '#6fe3ff';
@@ -3209,6 +3487,9 @@
             rsiUpper: initialChartPrefs.rsiUpper,
             maPeriods: initialChartPrefs.maPeriods.slice(),
             lowerPaneHeight: initialChartPrefs.lowerPaneHeight,
+            lowerPaneCollapsed: false,
+            sharedDrawingTool: 'cursor',
+            drawingToolbarHidden: false,
             // Dual chart
             chart2Active: false,
             coin2: 'ETH',
@@ -3225,10 +3506,24 @@
             return Number.isFinite(ts) ? new Date(ts * 1000) : null;
         }
 
+        function normalizeTickMarkType(tickMarkType) {
+            if (typeof tickMarkType === 'number') {
+                switch (tickMarkType) {
+                    case 0: return 'year';
+                    case 1: return 'month';
+                    case 2: return 'dayofmonth';
+                    case 3: return 'time';
+                    case 4: return 'timewithseconds';
+                    default: return '';
+                }
+            }
+            return String(tickMarkType || '').toLowerCase();
+        }
+
         function formatAxisTimeLabel(time, tickMarkType) {
             const date = toLocalDateFromTime(time);
             if (!date || Number.isNaN(date.getTime())) return '';
-            const type = String(tickMarkType || '').toLowerCase();
+            const type = normalizeTickMarkType(tickMarkType);
             if (type.includes('year')) {
                 return date.toLocaleDateString('en-US', { year: 'numeric' });
             }
@@ -3238,10 +3533,13 @@
             if (type.includes('dayofmonth') || type.includes('day') || type.includes('date')) {
                 return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
             }
-            if (type.includes('time') || type.includes('hour') || type.includes('minute')) {
+            if (type.includes('timewithseconds')) {
+                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            }
+            if (type.includes('time') || type.includes('hour') || type.includes('minute') || !type) {
                 return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
             }
-            return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         }
 
         function normalizeTheme(value) {
@@ -3366,10 +3664,20 @@
         const chartLoadingWrap2 = $('chart-wrap-2');
         const chartMainPane1 = $('chart-main-pane');
         const chartMainPane2 = $('chart-main-pane-2');
+        const chartDrawingStage1 = $('chart-drawing-stage');
+        const chartDrawingStage2 = $('chart-drawing-stage-2');
+        const chartDrawingLayer1 = $('chart-drawing-layer');
+        const chartDrawingLayer2 = $('chart-drawing-layer-2');
+        const chartDrawingToolbar1 = $('chart-drawing-toolbar');
+        const chartDrawingToolbar2 = $('chart-drawing-toolbar-2');
+        const chartDrawingHideBtn = $('chart-drawing-hide-btn');
+        const chartDrawingToolbarRestore = $('chart-drawing-toolbar-restore');
         const chartLowerPane1 = $('chart-lower-pane');
         const chartLowerPane2 = $('chart-lower-pane-2');
         const chartLowerSplitter1 = $('lower-pane-splitter');
         const chartLowerSplitter2 = $('lower-pane-splitter-2');
+        const lowerPaneRestore1 = $('lower-pane-restore');
+        const lowerPaneRestore2 = $('lower-pane-restore-2');
         const chartRsiBand1 = $('chart-rsi-band');
         const chartRsiBand2 = $('chart-rsi-band-2');
         const chartExtremaLayer1 = $('chart-extrema-layer');
@@ -3402,6 +3710,11 @@
         const lowerPaneItemVolMaSlow2 = $('lower-pane-item-vol-ma-slow-2');
         const lowerPaneItemRsi1 = $('lower-pane-item-rsi');
         const lowerPaneItemRsi2 = $('lower-pane-item-rsi-2');
+        const drawingState = {
+            1: { tool: 'cursor', drawings: [], draft: null, nextId: 1, pointerId: null },
+            2: { tool: 'cursor', drawings: [], draft: null, nextId: 1, pointerId: null }
+        };
+        const drawingFrameState = { 1: 0, 2: 0 };
         const chartMaxLabel1 = $('chart-max-label');
         const chartMaxLabel2 = $('chart-max-label-2');
         const chartMinLabel1 = $('chart-min-label');
@@ -3468,9 +3781,19 @@
             } catch (_) {}
         }
 
+        function notifyParentRemoveExtraChart() {
+            if (IS_COMPACT || window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:remove-extra-chart'
+                }, '*');
+            } catch (_) {}
+        }
+
         function syncChartToggleButtons() {
             const canAddSecondChart = !IS_COMPACT && !S.chart2Active;
-            const canRemoveSecondChart = !IS_COMPACT && S.chart2Active && (!Number.isFinite(S.parentExtraCharts) || S.parentExtraCharts <= 0);
+            const hasExtraCharts = Number.isFinite(S.parentExtraCharts) && S.parentExtraCharts > 0;
+            const canRemoveSecondChart = !IS_COMPACT && (hasExtraCharts || S.chart2Active);
             if (addChartBtn) addChartBtn.disabled = !canAddSecondChart;
             if (removeChartBtn) removeChartBtn.disabled = !canRemoveSecondChart;
         }
@@ -3484,8 +3807,8 @@
 
         function getLowerPaneRefs(target) {
             return target === 2
-                ? { wrap: chartWrap2, pane: chartLowerPane2, splitter: chartLowerSplitter2, band: chartRsiBand2 }
-                : { wrap: chartWrap, pane: chartLowerPane1, splitter: chartLowerSplitter1, band: chartRsiBand1 };
+                ? { wrap: chartWrap2, pane: chartLowerPane2, splitter: chartLowerSplitter2, band: chartRsiBand2, restore: lowerPaneRestore2 }
+                : { wrap: chartWrap, pane: chartLowerPane1, splitter: chartLowerSplitter1, band: chartRsiBand1, restore: lowerPaneRestore1 };
         }
 
         function clampLowerPaneHeight(nextHeight) {
@@ -3500,8 +3823,63 @@
             return S.lowerStudy === 'volume' || S.lowerStudy === 'rsi';
         }
 
+        function isLowerPaneVisible() {
+            return hasLowerPane() && !S.lowerPaneCollapsed;
+        }
+
+        let lowerPaneResizeTimers = [];
+        let activeRsiBandInteractionTarget = 0;
+        let rsiBandInteractionRaf = 0;
+
+        function scheduleLowerPaneResize() {
+            lowerPaneResizeTimers.forEach(timer => clearTimeout(timer));
+            lowerPaneResizeTimers = [];
+            [0, 70, 150, 230].forEach(delay => {
+                lowerPaneResizeTimers.push(setTimeout(() => {
+                    resizeChartBundle(1, chartSeries1, chartMainPane1, chartLowerPane1);
+                    resizeChartBundle(2, chartSeries2, chartMainPane2, chartLowerPane2);
+                }, delay));
+            });
+        }
+
+        function hasInteractiveRsiBand(target) {
+            return S.lowerStudy === 'rsi' && !S.lowerPaneCollapsed && Boolean(getLowerPaneRefs(target)?.pane);
+        }
+
+        function runActiveRsiBandInteraction() {
+            if (!activeRsiBandInteractionTarget || !hasInteractiveRsiBand(activeRsiBandInteractionTarget)) {
+                activeRsiBandInteractionTarget = 0;
+                rsiBandInteractionRaf = 0;
+                return;
+            }
+            scheduleRsiBandUpdate(activeRsiBandInteractionTarget);
+            rsiBandInteractionRaf = requestAnimationFrame(runActiveRsiBandInteraction);
+        }
+
+        function beginRsiBandInteraction(target) {
+            if (!hasInteractiveRsiBand(target)) return;
+            activeRsiBandInteractionTarget = target === 2 ? 2 : 1;
+            scheduleRsiBandUpdate(activeRsiBandInteractionTarget);
+            if (!rsiBandInteractionRaf) {
+                rsiBandInteractionRaf = requestAnimationFrame(runActiveRsiBandInteraction);
+            }
+        }
+
+        function endRsiBandInteraction(target) {
+            if (!activeRsiBandInteractionTarget) return;
+            if (target != null && activeRsiBandInteractionTarget !== (target === 2 ? 2 : 1)) return;
+            const activeTarget = activeRsiBandInteractionTarget;
+            activeRsiBandInteractionTarget = 0;
+            if (rsiBandInteractionRaf) {
+                cancelAnimationFrame(rsiBandInteractionRaf);
+                rsiBandInteractionRaf = 0;
+            }
+            scheduleRsiBandUpdate(activeTarget);
+        }
+
         function syncLowerPaneLayout() {
-            const visible = hasLowerPane();
+            const available = hasLowerPane();
+            const visible = isLowerPaneVisible();
             const height = clampLowerPaneHeight(S.lowerPaneHeight || DEFAULT_CHART_PREFS.lowerPaneHeight);
             S.lowerPaneHeight = height;
             [chartWrap, chartWrap2].forEach((wrap) => {
@@ -3509,12 +3887,31 @@
             });
             [1, 2].forEach((target) => {
                 const refs = getLowerPaneRefs(target);
-                refs.pane?.classList.toggle('is-hidden', !visible);
+                refs.pane?.classList.toggle('is-hidden', !available);
+                refs.pane?.classList.toggle('is-collapsed', available && !visible);
                 refs.splitter && (refs.splitter.hidden = !visible || isMobileAssetLayout());
+                refs.restore?.classList.toggle('is-visible', available && !visible);
             });
         }
 
+        function setLowerPaneCollapsed(collapsed) {
+            const next = Boolean(collapsed);
+            if (!hasLowerPane()) {
+                S.lowerPaneCollapsed = false;
+                syncLowerPaneLayout();
+                scheduleLowerPaneResize();
+                return;
+            }
+            if (S.lowerPaneCollapsed === next) return;
+            S.lowerPaneCollapsed = next;
+            syncLowerPaneLayout();
+            syncChartStudyVisibility(1);
+            syncChartStudyVisibility(2);
+            scheduleLowerPaneResize();
+        }
+
         function isMobileAssetLayout() {
+            if (IS_COMPACT && EMBED_PANE.startsWith('extra-')) return false;
             return MOBILE_ASSET_QUERY.matches;
         }
 
@@ -3840,8 +4237,14 @@
         }
 
         function handleRemoveChart() {
-            if (IS_COMPACT || !S.chart2Active) return;
-            if (Number.isFinite(S.parentExtraCharts) && S.parentExtraCharts > 0) return;
+            if (IS_COMPACT) return;
+            if (Number.isFinite(S.parentExtraCharts) && S.parentExtraCharts > 0) {
+                S.parentExtraCharts = Math.max(0, Math.floor(S.parentExtraCharts) - 1);
+                syncChartToggleButtons();
+                notifyParentRemoveExtraChart();
+                return;
+            }
+            if (!S.chart2Active) return;
             toggleChart2(false);
         }
 
@@ -3854,6 +4257,15 @@
             }
             if (data.type === 'hypermonitor:set-timeframe') {
                 applyTimeframe(data.tf, { force: data.force === true });
+                return;
+            }
+            if (data.type === 'hypermonitor:set-drawing-tool') {
+                applySharedDrawingTool(String(data.tool || 'cursor'), { notifyParent: false });
+                return;
+            }
+            if (data.type === 'hypermonitor:clear-drawings') {
+                clearDrawings(1);
+                clearDrawings(2);
                 return;
             }
             if (data.type === 'hypermonitor:set-primary-coin') {
@@ -4499,6 +4911,7 @@
             });
             scheduleVisibleExtremaUpdate(target);
             scheduleRsiBandUpdate(target);
+            scheduleDrawingRender(target);
         }
 
         new ResizeObserver(() => { resizeChartBundle(1, chartSeries1, chartMainPane1, chartLowerPane1); }).observe(chartWrap);
@@ -4620,6 +5033,7 @@
             requestAnimationFrame(() => {
                 paneSyncState[target] = false;
                 scheduleVisibleExtremaUpdate(target);
+                scheduleDrawingRender(target);
             });
         }
 
@@ -4628,11 +5042,13 @@
                 if (range && range.from < 10) loadOlderCandles(target);
                 syncPaneRange(target, mainChartInstance, lowerChartInstance, range);
                 scheduleVisibleExtremaUpdate(target);
+                scheduleDrawingRender(target);
             });
             lowerChartInstance.timeScale().subscribeVisibleLogicalRangeChange(range => {
                 if (range && range.from < 10) loadOlderCandles(target);
                 syncPaneRange(target, lowerChartInstance, mainChartInstance, range);
                 scheduleVisibleExtremaUpdate(target);
+                scheduleDrawingRender(target);
             });
         }
 
@@ -4760,6 +5176,283 @@
                 : { wrap: chartSharedCrosshair1, line: chartSharedCrosshairLine1, time: chartSharedCrosshairTime1, pane: chartLowerPane1 };
         }
 
+        function getDrawingRefs(target) {
+            return target === 2
+                ? { stage: chartDrawingStage2, layer: chartDrawingLayer2, pane: chartMainPane2, toolbar: chartDrawingToolbar2 }
+                : { stage: chartDrawingStage1, layer: chartDrawingLayer1, pane: chartMainPane1, toolbar: chartDrawingToolbar1 };
+        }
+
+        function getDrawingStore(target) {
+            return drawingState[target === 2 ? 2 : 1];
+        }
+
+        function normalizeChartTime(time) {
+            if (typeof time === 'object' && time && 'year' in time && 'month' in time && 'day' in time) {
+                return Math.floor(Date.UTC(Number(time.year), Number(time.month) - 1, Number(time.day), 0, 0, 0, 0) / 1000);
+            }
+            const ts = Number(time);
+            return Number.isFinite(ts) ? ts : NaN;
+        }
+
+        function createSvgNode(name, attrs = {}) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', name);
+            Object.entries(attrs).forEach(([key, value]) => {
+                if (value == null) return;
+                el.setAttribute(key, String(value));
+            });
+            return el;
+        }
+
+        function clearDrawings(target) {
+            const store = getDrawingStore(target);
+            store.drawings = [];
+            store.draft = null;
+            scheduleDrawingRender(target);
+        }
+
+        function syncDrawingToolbarUi() {
+            const activeTool = S.sharedDrawingTool || 'cursor';
+            [chartDrawingToolbar1, chartDrawingToolbar2].forEach(toolbar => {
+                if (!toolbar) return;
+                toolbar.querySelectorAll('.chart-drawing-btn[data-draw-tool]').forEach(button => {
+                    button.classList.toggle('active', button.dataset.drawTool === activeTool);
+                });
+                toolbar.classList.toggle('is-hidden', Boolean(S.drawingToolbarHidden));
+            });
+            if (chartDrawingToolbarRestore) {
+                chartDrawingToolbarRestore.classList.toggle('is-visible', Boolean(S.drawingToolbarHidden));
+            }
+            [1, 2].forEach(target => {
+                const refs = getDrawingRefs(target);
+                const store = getDrawingStore(target);
+                refs.stage?.classList.toggle('is-active', store.tool !== 'cursor');
+            });
+        }
+
+        function notifyParentDrawingTool(tool) {
+            if (window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:drawing-tool-change',
+                    tool: String(tool || 'cursor')
+                }, '*');
+            } catch (_) {}
+        }
+
+        function notifyParentClearDrawings() {
+            if (window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:clear-drawings'
+                }, '*');
+            } catch (_) {}
+        }
+
+        function applySharedDrawingTool(tool, options = {}) {
+            const nextTool = String(tool || 'cursor');
+            if (nextTool === 'clear') {
+                clearDrawings(1);
+                clearDrawings(2);
+                if (options.notifyParent !== false) notifyParentClearDrawings();
+                return;
+            }
+            S.sharedDrawingTool = nextTool;
+            [1, 2].forEach(target => {
+                const store = getDrawingStore(target);
+                store.tool = nextTool;
+                store.draft = null;
+                store.pointerId = null;
+                scheduleDrawingRender(target);
+            });
+            syncDrawingToolbarUi();
+            if (options.notifyParent !== false) notifyParentDrawingTool(nextTool);
+        }
+
+        function setDrawingToolbarHidden(hidden) {
+            S.drawingToolbarHidden = Boolean(hidden);
+            syncDrawingToolbarUi();
+        }
+
+        function drawingPointFromClient(target, clientX, clientY) {
+            const refs = getDrawingRefs(target);
+            const bundle = getSeriesBundle(target);
+            const activeSeries = getActivePriceSeries(target);
+            const rect = refs.pane?.getBoundingClientRect();
+            if (!rect || !bundle?.chart || !activeSeries) return null;
+            const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+            const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+            const time = normalizeChartTime(bundle.chart.timeScale().coordinateToTime(x));
+            const price = Number(activeSeries.coordinateToPrice?.(y));
+            if (!Number.isFinite(time) || !Number.isFinite(price)) return null;
+            return { time, price };
+        }
+
+        function drawingPointToCoords(target, point) {
+            const bundle = getSeriesBundle(target);
+            const activeSeries = getActivePriceSeries(target);
+            if (!bundle?.chart || !activeSeries || !point) return null;
+            const x = Number(bundle.chart.timeScale().timeToCoordinate(point.time));
+            const y = Number(activeSeries.priceToCoordinate?.(point.price));
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+            return { x, y };
+        }
+
+        function scheduleDrawingRender(target) {
+            if (drawingFrameState[target]) cancelAnimationFrame(drawingFrameState[target]);
+            drawingFrameState[target] = requestAnimationFrame(() => {
+                drawingFrameState[target] = 0;
+                renderDrawings(target);
+            });
+        }
+
+        function renderTrendDrawing(layer, start, end, isDraft) {
+            layer.appendChild(createSvgNode('line', {
+                x1: start.x,
+                y1: start.y,
+                x2: end.x,
+                y2: end.y,
+                class: `chart-drawing-shape trend${isDraft ? ' is-draft' : ''}`,
+                'stroke-opacity': isDraft ? '0.72' : '1'
+            }));
+        }
+
+        function renderRectDrawing(layer, start, end, isDraft) {
+            const x = Math.min(start.x, end.x);
+            const y = Math.min(start.y, end.y);
+            const width = Math.max(1, Math.abs(end.x - start.x));
+            const height = Math.max(1, Math.abs(end.y - start.y));
+            layer.appendChild(createSvgNode('rect', {
+                x, y, width, height,
+                rx: 2,
+                class: 'chart-drawing-shape rect',
+                'stroke-opacity': isDraft ? '0.72' : '1',
+                'fill-opacity': isDraft ? '0.05' : '0.08'
+            }));
+        }
+
+        function renderFibDrawing(layer, start, end, stageWidth, isDraft) {
+            const left = Math.min(start.x, end.x);
+            const right = Math.max(start.x, end.x);
+            const top = Math.min(start.y, end.y);
+            const bottom = Math.max(start.y, end.y);
+            const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+            layer.appendChild(createSvgNode('rect', {
+                x: left,
+                y: top,
+                width: Math.max(1, right - left),
+                height: Math.max(1, bottom - top),
+                rx: 2,
+                class: 'chart-drawing-shape fib-box',
+                'stroke-opacity': isDraft ? '0.65' : '1',
+                'fill-opacity': isDraft ? '0.04' : '0.08'
+            }));
+            levels.forEach(level => {
+                const y = top + ((bottom - top) * level);
+                layer.appendChild(createSvgNode('line', {
+                    x1: left,
+                    y1: y,
+                    x2: right,
+                    y2: y,
+                    class: 'chart-drawing-shape fib-line',
+                    'stroke-opacity': isDraft ? '0.62' : '0.92'
+                }));
+                const labelX = Math.min(stageWidth - 22, right + 6);
+                const text = createSvgNode('text', {
+                    x: labelX,
+                    y,
+                    class: 'chart-drawing-label',
+                    'text-anchor': 'start'
+                });
+                text.textContent = level === 0 || level === 1 ? String(level) : level.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+                layer.appendChild(text);
+            });
+        }
+
+        function renderDrawings(target) {
+            const refs = getDrawingRefs(target);
+            const store = getDrawingStore(target);
+            const layer = refs?.layer;
+            const stage = refs?.stage;
+            if (!layer || !stage) return;
+            const rect = stage.getBoundingClientRect();
+            const width = Math.max(1, Math.round(rect.width || 1));
+            const height = Math.max(1, Math.round(rect.height || 1));
+            layer.setAttribute('viewBox', `0 0 ${width} ${height}`);
+            layer.replaceChildren();
+
+            const items = store.drawings.slice();
+            if (store.draft) items.push({ ...store.draft, isDraft: true });
+
+            items.forEach(item => {
+                const start = drawingPointToCoords(target, item.start);
+                const end = drawingPointToCoords(target, item.end);
+                if (!start || !end) return;
+                if (item.type === 'trend') {
+                    renderTrendDrawing(layer, start, end, Boolean(item.isDraft));
+                    return;
+                }
+                if (item.type === 'rect') {
+                    renderRectDrawing(layer, start, end, Boolean(item.isDraft));
+                    return;
+                }
+                if (item.type === 'fib') {
+                    renderFibDrawing(layer, start, end, width, Boolean(item.isDraft));
+                }
+            });
+        }
+
+        function startDrawingGesture(target, event) {
+            const store = getDrawingStore(target);
+            const refs = getDrawingRefs(target);
+            if (store.tool === 'cursor' || !refs?.stage) return;
+            const point = drawingPointFromClient(target, event.clientX, event.clientY);
+            if (!point) return;
+            event.preventDefault();
+            event.stopPropagation();
+            store.pointerId = event.pointerId;
+            store.draft = { type: store.tool, start: point, end: point };
+            refs.stage.setPointerCapture?.(event.pointerId);
+            scheduleDrawingRender(target);
+        }
+
+        function moveDrawingGesture(target, event) {
+            const store = getDrawingStore(target);
+            if (!store.draft || store.pointerId !== event.pointerId) return;
+            const point = drawingPointFromClient(target, event.clientX, event.clientY);
+            if (!point) return;
+            store.draft.end = point;
+            scheduleDrawingRender(target);
+        }
+
+        function finishDrawingGesture(target, event) {
+            const store = getDrawingStore(target);
+            const refs = getDrawingRefs(target);
+            if (store.pointerId !== event.pointerId) return;
+            const point = drawingPointFromClient(target, event.clientX, event.clientY);
+            if (point && store.draft) {
+                store.draft.end = point;
+            }
+            if (store.draft) {
+                const start = drawingPointToCoords(target, store.draft.start);
+                const end = drawingPointToCoords(target, store.draft.end);
+                const distance = start && end ? Math.hypot(end.x - start.x, end.y - start.y) : 0;
+                if (distance >= 8) {
+                    store.drawings.push({
+                        id: `${target}-${store.nextId++}`,
+                        type: store.draft.type,
+                        start: store.draft.start,
+                        end: store.draft.end
+                    });
+                }
+            }
+            store.draft = null;
+            store.pointerId = null;
+            if (refs?.stage?.hasPointerCapture?.(event.pointerId)) {
+                refs.stage.releasePointerCapture(event.pointerId);
+            }
+            scheduleDrawingRender(target);
+        }
+
         function formatCrosshairTimeLabel(time) {
             const ts = Number(time);
             if (!Number.isFinite(ts)) return '';
@@ -4884,26 +5577,32 @@
         function updateRsiBand(target) {
             const bundle = getSeriesBundle(target);
             const bandEl = getRsiBandEl(target);
-            if (!bundle?.rsi || !bandEl || S.lowerStudy !== 'rsi') {
+            if (!bundle?.rsi || !bandEl || S.lowerStudy !== 'rsi' || S.lowerPaneCollapsed) {
                 if (bandEl) {
                     bandEl.classList.remove('is-visible');
                     bandEl.style.top = '0px';
                     bandEl.style.height = '0px';
+                    bandEl.style.width = '0px';
                 }
                 return;
             }
             const paneHeight = bundle.lowerPane?.clientHeight || 0;
+            const timeScaleHeight = Number(bundle.lowerChart?.timeScale?.().height?.()) || 0;
+            const plotHeight = Math.max(0, paneHeight - timeScaleHeight);
+            const plotWidth = Math.max(0, Number(bundle.lowerChart?.timeScale?.().width?.()) || (bundle.lowerPane?.clientWidth || 0));
             const upperY = bundle.rsi.priceToCoordinate?.(S.rsiUpper);
             const lowerY = bundle.rsi.priceToCoordinate?.(S.rsiLower);
-            if (!paneHeight || !Number.isFinite(upperY) || !Number.isFinite(lowerY)) {
+            if (!plotHeight || !plotWidth || !Number.isFinite(upperY) || !Number.isFinite(lowerY)) {
                 bandEl.classList.remove('is-visible');
                 bandEl.style.top = '0px';
                 bandEl.style.height = '0px';
+                bandEl.style.width = '0px';
                 return;
             }
             const top = Math.max(0, Math.min(upperY, lowerY));
-            const bottom = Math.min(paneHeight, Math.max(upperY, lowerY));
+            const bottom = Math.min(plotHeight, Math.max(upperY, lowerY));
             const height = Math.max(0, bottom - top);
+            bandEl.style.width = `${Math.round(plotWidth)}px`;
             bandEl.style.top = `${Math.round(top)}px`;
             bandEl.style.height = `${Math.round(height)}px`;
             bandEl.classList.toggle('is-visible', height > 1);
@@ -4985,7 +5684,7 @@
             const showCandles = S.priceMode === 'candles';
             const showVolume = S.lowerStudy === 'volume';
             const showRsi = S.lowerStudy === 'rsi';
-            const showLowerPane = showVolume || showRsi;
+            const showLowerPane = (showVolume || showRsi) && !S.lowerPaneCollapsed;
             syncLowerPaneLayout();
             bundle.candles.applyOptions({ visible: showCandles, lastValueVisible: showCandles, priceLineVisible: showCandles });
             bundle.line.applyOptions({ visible: !showCandles, lastValueVisible: !showCandles, priceLineVisible: !showCandles });
@@ -4993,19 +5692,19 @@
                 series.applyOptions({ visible: Boolean(S.showMAs) });
             });
             bundle.volume.applyOptions({
-                visible: showVolume,
+                visible: showVolume && showLowerPane,
                 lastValueVisible: false,
                 priceLineVisible: false
             });
-            bundle.volumeMaFast.applyOptions({ visible: showVolume });
-            bundle.volumeMaSlow.applyOptions({ visible: showVolume });
+            bundle.volumeMaFast.applyOptions({ visible: showVolume && showLowerPane });
+            bundle.volumeMaSlow.applyOptions({ visible: showVolume && showLowerPane });
             bundle.rsi.applyOptions({
-                visible: showRsi,
-                lastValueVisible: showRsi,
+                visible: showRsi && showLowerPane,
+                lastValueVisible: showRsi && showLowerPane,
                 priceLineVisible: false
             });
-            bundle.rsiFloor.applyOptions({ visible: showRsi });
-            bundle.rsiCeil.applyOptions({ visible: showRsi });
+            bundle.rsiFloor.applyOptions({ visible: showRsi && showLowerPane });
+            bundle.rsiCeil.applyOptions({ visible: showRsi && showLowerPane });
             bundle.chart.applyOptions(getChartThemeOptions({ showTimeScale: !showLowerPane }));
             bundle.lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: showLowerPane }));
             bundle.lowerPane?.classList.toggle('is-rsi', showRsi);
@@ -5018,6 +5717,7 @@
             );
             scheduleVisibleExtremaUpdate(target);
             scheduleRsiBandUpdate(target);
+            scheduleDrawingRender(target);
             syncLowerPaneLegend(target);
         }
 
@@ -5131,6 +5831,7 @@
 
         function applyChartPrefs(nextPrefs, options = {}) {
             const prefs = normalizeChartPrefs(nextPrefs);
+            const prevLowerStudy = S.lowerStudy;
             S.priceMode = prefs.priceMode;
             S.lowerStudy = prefs.lowerStudy;
             S.showMAs = prefs.showMAs;
@@ -5138,12 +5839,18 @@
             S.rsiLower = prefs.rsiLower;
             S.rsiUpper = prefs.rsiUpper;
             S.lowerPaneHeight = prefs.lowerPaneHeight;
+            if (S.lowerStudy === 'none') {
+                S.lowerPaneCollapsed = false;
+            } else if (prevLowerStudy !== S.lowerStudy) {
+                S.lowerPaneCollapsed = false;
+            }
             syncChartPrefsUi();
             syncLowerPaneLayout();
             syncChartStudyVisibility(1);
             syncChartStudyVisibility(2);
             syncStudyLegend(1);
             syncStudyLegend(2);
+            scheduleLowerPaneResize();
             if (options.persist !== false) saveChartPrefs(getChartPrefsPayload());
         }
 
@@ -5214,6 +5921,7 @@
                     });
                     syncStudyLegend(1, last.time);
                 }
+                scheduleDrawingRender(1);
             } catch(e) {} finally {
                 setChartLoading(1, false);
             }
@@ -5250,6 +5958,7 @@
                     });
                     syncStudyLegend(2, last.time);
                 }
+                scheduleDrawingRender(2);
             } catch(e) {} finally {
                 setChartLoading(2, false);
             }
@@ -5278,6 +5987,7 @@
                     if (targetChart === 1) oldestTs = cvArr[0].time; else oldestTs2 = cvArr[0].time;
                     seriesC.setData(cvArr); seriesV.setData([...mapVL.values()].sort((a,b)=>a.time-b.time));
                     syncDerivedSeries(targetChart);
+                    scheduleDrawingRender(targetChart);
                 }
             } catch(e) {}
             if (targetChart === 1) isLoadingHistory = false; else isLoadingHistory2 = false;
@@ -6087,6 +6797,7 @@
                 return false;
             }
             S.coin = selected;
+            clearDrawings(1);
             resetTrades();
             if (options.closeDropdown !== false) dropdown?.classList.remove('open');
             syncPrimaryCoinUrl();
@@ -6108,6 +6819,7 @@
                 });
             } else {
                 S.coin2 = selected;
+                clearDrawings(2);
                 $('coin-dropdown-2').style.display = 'none';
                 syncSelectedCoinUi(2);
                 fetchCandles2();
@@ -6147,6 +6859,66 @@
         $('coin-list-2').addEventListener('click', handleCoinListActivation);
         $('coin-list').addEventListener('keydown', handleCoinListKeydown);
         $('coin-list-2').addEventListener('keydown', handleCoinListKeydown);
+
+        document.querySelectorAll('.chart-drawing-btn[data-draw-tool]').forEach(button => {
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                applySharedDrawingTool(button.dataset.drawTool || 'cursor');
+            });
+        });
+
+        [[1, chartDrawingStage1], [2, chartDrawingStage2]].forEach(([target, stage]) => {
+            if (!stage) return;
+            stage.addEventListener('pointerdown', event => startDrawingGesture(target, event));
+            stage.addEventListener('pointermove', event => moveDrawingGesture(target, event));
+            stage.addEventListener('pointerup', event => finishDrawingGesture(target, event));
+            stage.addEventListener('pointercancel', event => finishDrawingGesture(target, event));
+        });
+
+        [[1, chartLowerPane1], [2, chartLowerPane2]].forEach(([target, pane]) => {
+            if (!pane) return;
+            pane.addEventListener('pointerdown', () => beginRsiBandInteraction(target), { passive: true, capture: true });
+            pane.addEventListener('wheel', () => {
+                if (!hasInteractiveRsiBand(target)) return;
+                scheduleRsiBandUpdate(target);
+                requestAnimationFrame(() => scheduleRsiBandUpdate(target));
+            }, { passive: true, capture: true });
+        });
+
+        window.addEventListener('pointerup', () => endRsiBandInteraction());
+        window.addEventListener('pointercancel', () => endRsiBandInteraction());
+        window.addEventListener('blur', () => endRsiBandInteraction());
+
+        document.addEventListener('keydown', event => {
+            if (event.key !== 'Escape') return;
+            [1, 2].forEach(target => {
+                const store = getDrawingStore(target);
+                if (!store.draft) return;
+                store.draft = null;
+                store.pointerId = null;
+                scheduleDrawingRender(target);
+            });
+        });
+
+        if (chartDrawingHideBtn) {
+            chartDrawingHideBtn.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                setDrawingToolbarHidden(true);
+            });
+        }
+
+        if (chartDrawingToolbarRestore) {
+            chartDrawingToolbarRestore.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                setDrawingToolbarHidden(false);
+            });
+        }
+
+        applySharedDrawingTool('cursor', { notifyParent: false });
+        setDrawingToolbarHidden(false);
 
         if (chartSettingsBtn) {
             chartSettingsBtn.addEventListener('click', event => {

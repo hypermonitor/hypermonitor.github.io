@@ -700,15 +700,13 @@
     .trade-view-stack[data-layout="multi"] .extra-chart-panel[data-pane="1"] {
       grid-column: 1;
       grid-row: 2;
-      border-top-width: 0;
-      border-right-width: 0;
+      border-width: 0;
     }
 
     .trade-view-stack[data-layout="multi"] .extra-chart-panel[data-pane="2"] {
       grid-column: 2;
       grid-row: 2;
-      border-top-width: 0;
-      border-left-width: 0;
+      border-width: 0;
     }
 
     .trade-view-stack[data-layout="multi"][data-extra-count="1"] .trade-leaderboard-panel {
@@ -716,6 +714,8 @@
     }
 
     .trade-view-stack[data-layout="multi"] .extra-chart-panel {
+      border-width: 0;
+      border-radius: 0;
       border-top-left-radius: 0;
       border-top-right-radius: 0;
       box-shadow: none;
@@ -3416,6 +3416,7 @@
       topOrderBookVisible: true,
       extraCharts: [],
       tradeBookWidth: 310,
+      tradeDrawingTool: "cursor",
       tradeChartSplitRatio: 0.5,
       tradeSingleRowRatio: null,
       tradeMultiRowRatio: null,
@@ -6659,6 +6660,43 @@
       });
     }
 
+    function syncTradeDrawingTool() {
+      const payload = {
+        type: "hypermonitor:set-drawing-tool",
+        tool: String(state.tradeDrawingTool || "cursor")
+      };
+
+      if (tradeFrame?.contentWindow) {
+        try {
+          tradeFrame.contentWindow.postMessage(payload, "*");
+        } catch (_) {}
+      }
+
+      extraTradeFrames.forEach((frame, index) => {
+        if (!frame || index >= state.extraCharts.length || !frame.contentWindow) return;
+        try {
+          frame.contentWindow.postMessage(payload, "*");
+        } catch (_) {}
+      });
+    }
+
+    function syncTradeClearDrawings() {
+      const payload = { type: "hypermonitor:clear-drawings" };
+
+      if (tradeFrame?.contentWindow) {
+        try {
+          tradeFrame.contentWindow.postMessage(payload, "*");
+        } catch (_) {}
+      }
+
+      extraTradeFrames.forEach((frame, index) => {
+        if (!frame || index >= state.extraCharts.length || !frame.contentWindow) return;
+        try {
+          frame.contentWindow.postMessage(payload, "*");
+        } catch (_) {}
+      });
+    }
+
     function syncTradeLayout() {
       const extraCount = state.extraCharts.length;
       const totalCharts = state.topChartCount + extraCount;
@@ -7913,6 +7951,7 @@
         syncTradeFrameExtraCount();
         syncTradeFrameLayout();
         syncTradeTimeframe();
+        syncTradeDrawingTool();
       });
     }
 
@@ -7921,6 +7960,7 @@
       frame.addEventListener("load", () => {
         postThemeToFrame(frame);
         syncTradeTimeframe();
+        syncTradeDrawingTool();
       });
     });
 
@@ -7982,6 +8022,15 @@
           state.tradeTimeframe = tf;
           syncTradeTimeframe();
         }
+        return;
+      }
+      if (data.type === "hypermonitor:drawing-tool-change") {
+        state.tradeDrawingTool = String(data.tool || "cursor");
+        syncTradeDrawingTool();
+        return;
+      }
+      if (data.type === "hypermonitor:clear-drawings") {
+        syncTradeClearDrawings();
         return;
       }
       if (data.type !== "hypermonitor:asset-chart-state") return;
