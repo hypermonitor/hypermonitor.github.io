@@ -931,7 +931,7 @@
             right: 0;
             top: 0;
             height: 0;
-            background: rgba(139, 92, 246, 0.12);
+            background: rgba(124, 92, 255, 0.18);
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.12s ease;
@@ -942,7 +942,104 @@
         }
 
         html.light .chart-rsi-band {
-            background: rgba(139, 92, 246, 0.1);
+            background: rgba(124, 92, 255, 0.14);
+        }
+
+        .chart-shared-crosshair {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .chart-shared-crosshair-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            border-left: 1px dashed rgba(211, 216, 223, 0.16);
+            opacity: 0;
+            transform: translateX(-0.5px);
+        }
+
+        .chart-shared-crosshair-time {
+            position: absolute;
+            bottom: 6px;
+            min-width: 0;
+            padding: 3px 8px;
+            border-radius: 7px;
+            background: var(--chart-crosshair-label-bg);
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateX(-50%);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+        }
+
+        html.light .chart-shared-crosshair-line {
+            border-left-color: rgba(71, 85, 105, 0.22);
+        }
+
+        .lower-pane-overlay {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            right: 8px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            z-index: 6;
+            pointer-events: none;
+        }
+
+        .lower-pane-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 12px;
+            min-width: 0;
+            font-size: 11px;
+            font-variant-numeric: tabular-nums;
+            color: var(--muted);
+        }
+
+        .lower-pane-item {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .lower-pane-key {
+            color: var(--muted);
+        }
+
+        .lower-pane-val {
+            color: var(--text);
+        }
+
+        .lower-pane-val.vol-ma-fast {
+            color: #6fe3ff;
+        }
+
+        .lower-pane-val.vol-ma-slow {
+            color: #ff5f97;
+        }
+
+        .lower-pane-val.rsi {
+            color: #8b5cf6;
+        }
+
+        .lower-pane-close {
+            width: 24px;
+            height: 24px;
+            flex: 0 0 24px;
+            pointer-events: auto;
         }
 
         .lower-pane-splitter {
@@ -2372,6 +2469,7 @@
                     <button class="tf-btn" data-tf="1h">1H</button>
                     <button class="tf-btn" data-tf="4h">4H</button>
                     <button class="tf-btn" data-tf="1d">1D</button>
+                    <button class="tf-btn" data-tf="1w">1W</button>
                     <div class="chart-settings" id="chartSettings">
                         <button id="chart-settings-btn" class="toolbar-icon-btn" type="button" aria-label="Chart options" title="Chart options">
                             <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
@@ -2499,8 +2597,26 @@
                             </div>
                             <div id="lower-pane-splitter" class="asset-splitter lower-pane-splitter" role="separator" aria-orientation="horizontal" aria-label="Resize lower pane" hidden></div>
                             <div id="chart-lower-pane" class="chart-lower-pane">
+                                <div class="lower-pane-overlay" id="lower-pane-overlay">
+                                    <div class="lower-pane-meta">
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-base"><span class="lower-pane-key" id="lower-pane-key-vol-base">Vol(BTC)</span><span class="lower-pane-val" id="lower-pane-val-vol-base">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-usd"><span class="lower-pane-key">Vol(USD)</span><span class="lower-pane-val" id="lower-pane-val-vol-usd">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast"><span class="lower-pane-key">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow"><span class="lower-pane-key">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-rsi"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi">–</span></span>
+                                    </div>
+                                    <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="applyChartPrefs({ ...getChartPrefsPayload(), lowerStudy: 'none' })">
+                                        <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                                            <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div id="chart-rsi-band" class="chart-rsi-band" aria-hidden="true"></div>
                                 <div id="chart-lower-canvas" class="chart-lower-canvas"></div>
+                            </div>
+                            <div id="chart-shared-crosshair" class="chart-shared-crosshair" aria-hidden="true">
+                                <div id="chart-shared-crosshair-line" class="chart-shared-crosshair-line"></div>
+                                <div id="chart-shared-crosshair-time" class="chart-shared-crosshair-time"></div>
                             </div>
                             <div class="chart-loading-overlay" id="chart-loading-1" aria-hidden="true">
                                 <img src="images/pulse.gif" alt="Hypermonitor loading logo">
@@ -2558,8 +2674,26 @@
                             </div>
                             <div id="lower-pane-splitter-2" class="asset-splitter lower-pane-splitter" role="separator" aria-orientation="horizontal" aria-label="Resize lower pane" hidden></div>
                             <div id="chart-lower-pane-2" class="chart-lower-pane">
+                                <div class="lower-pane-overlay" id="lower-pane-overlay-2">
+                                    <div class="lower-pane-meta">
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-base-2"><span class="lower-pane-key" id="lower-pane-key-vol-base-2">Vol(ETH)</span><span class="lower-pane-val" id="lower-pane-val-vol-base-2">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-usd-2"><span class="lower-pane-key">Vol(USD)</span><span class="lower-pane-val" id="lower-pane-val-vol-usd-2">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast-2"><span class="lower-pane-key">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast-2">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow-2"><span class="lower-pane-key">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow-2">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-rsi-2"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi-2">–</span></span>
+                                    </div>
+                                    <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="applyChartPrefs({ ...getChartPrefsPayload(), lowerStudy: 'none' })">
+                                        <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                                            <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div id="chart-rsi-band-2" class="chart-rsi-band" aria-hidden="true"></div>
                                 <div id="chart-lower-canvas-2" class="chart-lower-canvas"></div>
+                            </div>
+                            <div id="chart-shared-crosshair-2" class="chart-shared-crosshair" aria-hidden="true">
+                                <div id="chart-shared-crosshair-line-2" class="chart-shared-crosshair-line"></div>
+                                <div id="chart-shared-crosshair-time-2" class="chart-shared-crosshair-time"></div>
                             </div>
                             <div class="chart-loading-overlay" id="chart-loading-2" aria-hidden="true">
                                 <img src="images/pulse.gif" alt="Hypermonitor loading logo">
@@ -2840,6 +2974,12 @@
         const NON_CRYPTO_PREFIXES = ['xyz', 'flx', 'hyna', 'km', 'vntl', 'cash'];
         const COIN_LOGO_URL_CACHE_KEY = 'hypermonitor-logo-url-cache';
         const CHART_PREFS_STORAGE_KEY = 'hypermonitor-chart-prefs';
+        const VOLUME_UP_COLOR = 'rgba(14, 203, 129, 0.88)';
+        const VOLUME_DOWN_COLOR = 'rgba(246, 70, 93, 0.88)';
+        const VOLUME_MA_FAST = 7;
+        const VOLUME_MA_SLOW = 14;
+        const VOLUME_MA_FAST_COLOR = '#6fe3ff';
+        const VOLUME_MA_SLOW_COLOR = '#ff5f97';
         const DEFAULT_CHART_PREFS = Object.freeze({
             priceMode: 'candles',
             lowerStudy: 'volume',
@@ -2898,7 +3038,7 @@
         ]);
         const coinResolvedLogoCache = new Map();
         const coinLogoCandidateCache = new Map();
-        const TF_MS = { '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3 };
+        const TF_MS = { '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3, '1w': 604800e3 };
         const OB_ROWS_BOTH = 14;
         const OB_ROWS_SINGLE = 28;
         const ORDERBOOK_ROW_CAP = OB_ROWS_SINGLE;
@@ -3077,6 +3217,33 @@
             trackerBookWidth: 310
         };
 
+        function toLocalDateFromTime(time) {
+            if (typeof time === 'object' && time && 'year' in time && 'month' in time && 'day' in time) {
+                return new Date(Number(time.year), Number(time.month) - 1, Number(time.day), 0, 0, 0, 0);
+            }
+            const ts = Number(time);
+            return Number.isFinite(ts) ? new Date(ts * 1000) : null;
+        }
+
+        function formatAxisTimeLabel(time, tickMarkType) {
+            const date = toLocalDateFromTime(time);
+            if (!date || Number.isNaN(date.getTime())) return '';
+            const type = String(tickMarkType || '').toLowerCase();
+            if (type.includes('year')) {
+                return date.toLocaleDateString('en-US', { year: 'numeric' });
+            }
+            if (type.includes('month')) {
+                return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+            }
+            if (type.includes('dayofmonth') || type.includes('day') || type.includes('date')) {
+                return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+            }
+            if (type.includes('time') || type.includes('hour') || type.includes('minute')) {
+                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            }
+            return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+        }
+
         function normalizeTheme(value) {
             return value === 'light' ? 'light' : 'dark';
         }
@@ -3094,14 +3261,23 @@
             const showTimeScale = options.showTimeScale !== false;
             return {
                 layout: { background: { color: background }, textColor, attributionLogo: false },
+                localization: {
+                    timeFormatter: (time) => formatAxisTimeLabel(time, 'time'),
+                },
                 grid: { vertLines: { color: borderColor }, horzLines: { color: borderColor } },
                 crosshair: {
                     mode: LightweightCharts.CrosshairMode.Normal,
                     vertLine: { color: crosshairLineColor, labelBackgroundColor: crosshairLabelBg },
                     horzLine: { color: crosshairLineColor, labelBackgroundColor: crosshairLabelBg }
                 },
-                rightPriceScale: { borderColor },
-                timeScale: { borderColor, visible: showTimeScale, timeVisible: true, secondsVisible: false }
+                rightPriceScale: { borderColor, minimumWidth: 78, entireTextOnly: true },
+                timeScale: {
+                    borderColor,
+                    visible: showTimeScale,
+                    timeVisible: true,
+                    secondsVisible: false,
+                    tickMarkFormatter: (time, tickMarkType) => formatAxisTimeLabel(time, tickMarkType)
+                }
             };
         }
 
@@ -3198,6 +3374,34 @@
         const chartRsiBand2 = $('chart-rsi-band-2');
         const chartExtremaLayer1 = $('chart-extrema-layer');
         const chartExtremaLayer2 = $('chart-extrema-layer-2');
+        const chartSharedCrosshair1 = $('chart-shared-crosshair');
+        const chartSharedCrosshair2 = $('chart-shared-crosshair-2');
+        const chartSharedCrosshairLine1 = $('chart-shared-crosshair-line');
+        const chartSharedCrosshairLine2 = $('chart-shared-crosshair-line-2');
+        const chartSharedCrosshairTime1 = $('chart-shared-crosshair-time');
+        const chartSharedCrosshairTime2 = $('chart-shared-crosshair-time-2');
+        const lowerPaneKeyVolBase1 = $('lower-pane-key-vol-base');
+        const lowerPaneKeyVolBase2 = $('lower-pane-key-vol-base-2');
+        const lowerPaneValVolBase1 = $('lower-pane-val-vol-base');
+        const lowerPaneValVolBase2 = $('lower-pane-val-vol-base-2');
+        const lowerPaneValVolUsd1 = $('lower-pane-val-vol-usd');
+        const lowerPaneValVolUsd2 = $('lower-pane-val-vol-usd-2');
+        const lowerPaneValVolMaFast1 = $('lower-pane-val-vol-ma-fast');
+        const lowerPaneValVolMaFast2 = $('lower-pane-val-vol-ma-fast-2');
+        const lowerPaneValVolMaSlow1 = $('lower-pane-val-vol-ma-slow');
+        const lowerPaneValVolMaSlow2 = $('lower-pane-val-vol-ma-slow-2');
+        const lowerPaneValRsi1 = $('lower-pane-val-rsi');
+        const lowerPaneValRsi2 = $('lower-pane-val-rsi-2');
+        const lowerPaneItemVolBase1 = $('lower-pane-item-vol-base');
+        const lowerPaneItemVolBase2 = $('lower-pane-item-vol-base-2');
+        const lowerPaneItemVolUsd1 = $('lower-pane-item-vol-usd');
+        const lowerPaneItemVolUsd2 = $('lower-pane-item-vol-usd-2');
+        const lowerPaneItemVolMaFast1 = $('lower-pane-item-vol-ma-fast');
+        const lowerPaneItemVolMaFast2 = $('lower-pane-item-vol-ma-fast-2');
+        const lowerPaneItemVolMaSlow1 = $('lower-pane-item-vol-ma-slow');
+        const lowerPaneItemVolMaSlow2 = $('lower-pane-item-vol-ma-slow-2');
+        const lowerPaneItemRsi1 = $('lower-pane-item-rsi');
+        const lowerPaneItemRsi2 = $('lower-pane-item-rsi-2');
         const chartMaxLabel1 = $('chart-max-label');
         const chartMaxLabel2 = $('chart-max-label-2');
         const chartMinLabel1 = $('chart-min-label');
@@ -3817,6 +4021,25 @@
             return values;
         }
 
+        function computeValueSmaData(seriesData, period) {
+            const data = Array.isArray(seriesData) ? seriesData : [];
+            const values = [];
+            if (!Number.isFinite(period) || period <= 0) return values;
+            let sum = 0;
+            const queue = [];
+            data.forEach(point => {
+                const value = Number(point?.value);
+                if (!Number.isFinite(value)) return;
+                queue.push(value);
+                sum += value;
+                if (queue.length > period) sum -= queue.shift();
+                if (queue.length === period) {
+                    values.push({ time: point.time, value: sum / period });
+                }
+            });
+            return values;
+        }
+
         function computeRsiData(candlesData, period = RSI_PERIOD) {
             const data = Array.isArray(candlesData) ? candlesData : [];
             if (data.length <= period) return [];
@@ -3851,11 +4074,34 @@
         function findStudyValue(seriesData, time) {
             const data = Array.isArray(seriesData) ? seriesData : [];
             if (!data.length) return null;
-            if (!Number.isFinite(Number(time))) return Number(data[data.length - 1].value);
+            const targetTime = time == null ? NaN : Number(time);
+            if (!Number.isFinite(targetTime)) return Number(data[data.length - 1].value);
             for (let i = data.length - 1; i >= 0; i -= 1) {
-                if (Number(data[i].time) === Number(time)) return Number(data[i].value);
+                const itemTime = Number(data[i].time);
+                if (itemTime === targetTime) return Number(data[i].value);
+                if (itemTime < targetTime) return Number(data[i].value);
             }
             return null;
+        }
+
+        function findVolumeValue(seriesData, time) {
+            const data = Array.isArray(seriesData) ? seriesData : [];
+            if (!data.length) return null;
+            const targetTime = time == null ? NaN : Number(time);
+            if (!Number.isFinite(targetTime)) {
+                for (let i = data.length - 1; i >= 0; i -= 1) {
+                    const value = Number(data[i]?.value);
+                    if (Number.isFinite(value) && value > 0) return value;
+                }
+                return Number(data[data.length - 1].value);
+            }
+            for (let i = data.length - 1; i >= 0; i -= 1) {
+                const itemTime = Number(data[i].time);
+                const value = Number(data[i].value);
+                if (itemTime === targetTime) return value;
+                if (itemTime < targetTime) return value;
+            }
+            return Number(data[data.length - 1].value);
         }
 
         function fmtOrderCount(value) {
@@ -4163,9 +4409,25 @@
             });
             const volumeSeries = lowerChartInstance.addHistogramSeries({
                 priceFormat: { type: 'volume' },
-                color: '#0ECB8155',
+                color: VOLUME_UP_COLOR,
                 lastValueVisible: false,
                 priceLineVisible: false
+            });
+            const volumeMaFastSeries = lowerChartInstance.addLineSeries({
+                color: VOLUME_MA_FAST_COLOR,
+                lineWidth: 1.5,
+                crosshairMarkerVisible: false,
+                lastValueVisible: false,
+                priceLineVisible: false,
+                visible: false
+            });
+            const volumeMaSlowSeries = lowerChartInstance.addLineSeries({
+                color: VOLUME_MA_SLOW_COLOR,
+                lineWidth: 1.5,
+                crosshairMarkerVisible: false,
+                lastValueVisible: false,
+                priceLineVisible: false,
+                visible: false
             });
             const rsiSeries = lowerChartInstance.addLineSeries({
                 color: '#8b5cf6',
@@ -4200,6 +4462,8 @@
                 candles: candleSeries,
                 line: lineSeries,
                 volume: volumeSeries,
+                volumeMaFast: volumeMaFastSeries,
+                volumeMaSlow: volumeMaSlowSeries,
                 ma7: ma7Series,
                 ma25: ma25Series,
                 ma99: ma99Series,
@@ -4258,6 +4522,31 @@
                 });
                 syncStudyLegend(1, bar.time);
             }
+            if (Number.isFinite(hoverTime)) updateSharedCrosshair(1, hoverTime);
+            else hideSharedCrosshair(1);
+        });
+
+        lowerChart.subscribeCrosshairMove(param => {
+            const data = getSortedCandleData(1);
+            const hoverTime = Number(param?.time);
+            if (Number.isFinite(hoverTime)) {
+                syncStudyLegend(1, hoverTime);
+                updateSharedCrosshair(1, hoverTime);
+            } else {
+                const last = data[data.length - 1];
+                if (last) {
+                    updateLegendMetrics(last, {
+                        open: legO,
+                        high: legH,
+                        low: legL,
+                        close: legC,
+                        change: legPct,
+                        range: legRange
+                    });
+                }
+                syncStudyLegend(1);
+                hideSharedCrosshair(1);
+            }
         });
 
         // ── Chart 2 Setup ──────────────────────────────────────────
@@ -4292,6 +4581,31 @@
                     range: legRange2
                 });
                 syncStudyLegend(2, bar.time);
+            }
+            if (Number.isFinite(hoverTime)) updateSharedCrosshair(2, hoverTime);
+            else hideSharedCrosshair(2);
+        });
+
+        lowerChart2.subscribeCrosshairMove(param => {
+            const data = getSortedCandleData(2);
+            const hoverTime = Number(param?.time);
+            if (Number.isFinite(hoverTime)) {
+                syncStudyLegend(2, hoverTime);
+                updateSharedCrosshair(2, hoverTime);
+            } else {
+                const last = data[data.length - 1];
+                if (last) {
+                    updateLegendMetrics(last, {
+                        open: legO2,
+                        high: legH2,
+                        low: legL2,
+                        close: legC2,
+                        change: legPct2,
+                        range: legRange2
+                    });
+                }
+                syncStudyLegend(2);
+                hideSharedCrosshair(2);
             }
         });
 
@@ -4328,11 +4642,11 @@
         // ── Candle data (deduplicated maps) ────────────────────────
         let candleMap = new Map(), volMap = new Map();
         let oldestTs = null, isLoadingHistory = false;
-        let studyCache1 = { ma7: [], ma25: [], ma99: [], rsi: [] };
+        let studyCache1 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
 
         let candleMap2 = new Map(), volMap2 = new Map();
         let oldestTs2 = null, isLoadingHistory2 = false;
-        let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [] };
+        let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
 
         function getSeriesBundle(target) {
             return target === 2 ? chartSeries2 : chartSeries1;
@@ -4352,6 +4666,36 @@
                 };
         }
 
+        function getLowerPaneLegendRefs(target) {
+            return target === 2
+                ? {
+                    keyVolBase: lowerPaneKeyVolBase2,
+                    volBase: lowerPaneValVolBase2,
+                    volUsd: lowerPaneValVolUsd2,
+                    volMaFast: lowerPaneValVolMaFast2,
+                    volMaSlow: lowerPaneValVolMaSlow2,
+                    rsi: lowerPaneValRsi2,
+                    itemVolBase: lowerPaneItemVolBase2,
+                    itemVolUsd: lowerPaneItemVolUsd2,
+                    itemVolMaFast: lowerPaneItemVolMaFast2,
+                    itemVolMaSlow: lowerPaneItemVolMaSlow2,
+                    itemRsi: lowerPaneItemRsi2
+                }
+                : {
+                    keyVolBase: lowerPaneKeyVolBase1,
+                    volBase: lowerPaneValVolBase1,
+                    volUsd: lowerPaneValVolUsd1,
+                    volMaFast: lowerPaneValVolMaFast1,
+                    volMaSlow: lowerPaneValVolMaSlow1,
+                    rsi: lowerPaneValRsi1,
+                    itemVolBase: lowerPaneItemVolBase1,
+                    itemVolUsd: lowerPaneItemVolUsd1,
+                    itemVolMaFast: lowerPaneItemVolMaFast1,
+                    itemVolMaSlow: lowerPaneItemVolMaSlow1,
+                    itemRsi: lowerPaneItemRsi1
+                };
+        }
+
         function getCandleStore(target) {
             return target === 2
                 ? { candleMap: candleMap2, volMap: volMap2, studies: studyCache2 }
@@ -4364,6 +4708,18 @@
 
         function getSortedVolumeData(target) {
             return [...getCandleStore(target).volMap.values()].sort((a, b) => a.time - b.time);
+        }
+
+        function findCandleBarAtOrBefore(target, time) {
+            const data = getSortedCandleData(target);
+            if (!data.length) return null;
+            const targetTime = time == null ? NaN : Number(time);
+            if (!Number.isFinite(targetTime)) return data[data.length - 1] || null;
+            for (let index = data.length - 1; index >= 0; index -= 1) {
+                const bar = data[index];
+                if (Number(bar?.time) <= targetTime) return bar || null;
+            }
+            return data[0] || null;
         }
 
         const extremaFrameState = { 1: 0, 2: 0 };
@@ -4396,6 +4752,52 @@
 
         function getRsiBandEl(target) {
             return target === 2 ? chartRsiBand2 : chartRsiBand1;
+        }
+
+        function getSharedCrosshairRefs(target) {
+            return target === 2
+                ? { wrap: chartSharedCrosshair2, line: chartSharedCrosshairLine2, time: chartSharedCrosshairTime2, pane: chartLowerPane2 }
+                : { wrap: chartSharedCrosshair1, line: chartSharedCrosshairLine1, time: chartSharedCrosshairTime1, pane: chartLowerPane1 };
+        }
+
+        function formatCrosshairTimeLabel(time) {
+            const ts = Number(time);
+            if (!Number.isFinite(ts)) return '';
+            const date = new Date(ts * 1000);
+            const now = new Date();
+            const sameYear = date.getFullYear() === now.getFullYear();
+            return date.toLocaleString('en-US', sameYear
+                ? { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }
+                : { year: '2-digit', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+
+        function hideSharedCrosshair(target) {
+            const refs = getSharedCrosshairRefs(target);
+            if (!refs?.line || !refs.time) return;
+            refs.line.style.opacity = '0';
+            refs.time.style.opacity = '0';
+            refs.time.textContent = '';
+        }
+
+        function updateSharedCrosshair(target, time) {
+            const refs = getSharedCrosshairRefs(target);
+            const bundle = getSeriesBundle(target);
+            if (!refs?.line || !refs.time || !bundle?.chart) return;
+            const ts = Number(time);
+            const x = bundle.chart.timeScale().timeToCoordinate(ts);
+            const wrapWidth = refs.wrap?.clientWidth || 0;
+            const timeText = formatCrosshairTimeLabel(ts);
+            if (!Number.isFinite(x) || !wrapWidth || !timeText) {
+                hideSharedCrosshair(target);
+                return;
+            }
+            refs.line.style.left = `${Math.round(x)}px`;
+            refs.line.style.opacity = '1';
+            refs.time.textContent = timeText;
+            const labelWidth = Math.max(84, Math.round(refs.time.getBoundingClientRect().width || refs.time.offsetWidth || 84));
+            const clampedLeft = Math.max(labelWidth / 2 + 6, Math.min(x, wrapWidth - labelWidth / 2 - 6));
+            refs.time.style.left = `${Math.round(clampedLeft)}px`;
+            refs.time.style.opacity = '1';
         }
 
         function hideExtremaLabels(target) {
@@ -4462,10 +4864,10 @@
             let hasMax = false;
             let hasMin = false;
             if (Number.isFinite(maxX) && Number.isFinite(maxY)) {
-                hasMax = positionExtremaLabel(refs.maxLabel, refs.maxText, fmt(maxBar.value, pxDec(maxBar.value)), maxX, maxY, paneWidth, paneHeight, -14);
+                hasMax = positionExtremaLabel(refs.maxLabel, refs.maxText, fmt(maxBar.value, pxDec(maxBar.value)), maxX, maxY, paneWidth, paneHeight, 0);
             }
             if (Number.isFinite(minX) && Number.isFinite(minY)) {
-                hasMin = positionExtremaLabel(refs.minLabel, refs.minText, fmt(minBar.value, pxDec(minBar.value)), minX, minY, paneWidth, paneHeight, 14);
+                hasMin = positionExtremaLabel(refs.minLabel, refs.minText, fmt(minBar.value, pxDec(minBar.value)), minX, minY, paneWidth, paneHeight, 0);
             }
             if (!hasMax && refs.maxLabel) refs.maxLabel.classList.remove('is-visible');
             if (!hasMin && refs.minLabel) refs.minLabel.classList.remove('is-visible');
@@ -4547,6 +4949,37 @@
             });
         }
 
+        function syncLowerPaneLegend(target, time) {
+            const refs = getLowerPaneLegendRefs(target);
+            const store = getCandleStore(target);
+            if (!refs) return;
+            const effectiveTime = time == null ? null : (Number.isFinite(Number(time)) ? Number(time) : null);
+            const selectedKey = target === 2 ? S.coin2 : S.coin;
+            const baseLabel = getSelectedCoinName(selectedKey) || getCoinDisplayName(selectedKey);
+            if (refs.keyVolBase) refs.keyVolBase.textContent = `Vol(${baseLabel})`;
+            const volumeData = getSortedVolumeData(target);
+            const volumeValue = findVolumeValue(volumeData, effectiveTime);
+            const priceBar = findCandleBarAtOrBefore(target, effectiveTime);
+            const volumeUsdValue = Number.isFinite(volumeValue) && Number.isFinite(Number(priceBar?.close))
+                ? volumeValue * Number(priceBar.close)
+                : null;
+            const volMaFastValue = findStudyValue(store.studies?.volMaFast, effectiveTime);
+            const volMaSlowValue = findStudyValue(store.studies?.volMaSlow, effectiveTime);
+            const rsiValue = findStudyValue(store.studies?.rsi, effectiveTime);
+            const showVolume = S.lowerStudy === 'volume';
+            const showRsi = S.lowerStudy === 'rsi';
+            if (refs.itemVolBase) refs.itemVolBase.style.display = showVolume ? '' : 'none';
+            if (refs.itemVolUsd) refs.itemVolUsd.style.display = showVolume ? '' : 'none';
+            if (refs.itemVolMaFast) refs.itemVolMaFast.style.display = showVolume ? '' : 'none';
+            if (refs.itemVolMaSlow) refs.itemVolMaSlow.style.display = showVolume ? '' : 'none';
+            if (refs.itemRsi) refs.itemRsi.style.display = showRsi ? '' : 'none';
+            if (refs.volBase) refs.volBase.textContent = Number.isFinite(volumeValue) ? fmtK(volumeValue) : '–';
+            if (refs.volUsd) refs.volUsd.textContent = Number.isFinite(volumeUsdValue) ? fmtK(volumeUsdValue) : '–';
+            if (refs.volMaFast) refs.volMaFast.textContent = Number.isFinite(volMaFastValue) ? fmtK(volMaFastValue) : '–';
+            if (refs.volMaSlow) refs.volMaSlow.textContent = Number.isFinite(volMaSlowValue) ? fmtK(volMaSlowValue) : '–';
+            if (refs.rsi) refs.rsi.textContent = Number.isFinite(rsiValue) ? rsiValue.toFixed(2) : '–';
+        }
+
         function syncChartStudyVisibility(target) {
             const bundle = getSeriesBundle(target);
             const showCandles = S.priceMode === 'candles';
@@ -4564,6 +4997,8 @@
                 lastValueVisible: false,
                 priceLineVisible: false
             });
+            bundle.volumeMaFast.applyOptions({ visible: showVolume });
+            bundle.volumeMaSlow.applyOptions({ visible: showVolume });
             bundle.rsi.applyOptions({
                 visible: showRsi,
                 lastValueVisible: showRsi,
@@ -4583,6 +5018,7 @@
             );
             scheduleVisibleExtremaUpdate(target);
             scheduleRsiBandUpdate(target);
+            syncLowerPaneLegend(target);
         }
 
         function syncStudyLegend(target, time) {
@@ -4590,19 +5026,16 @@
             const store = getCandleStore(target);
             const studyCache = store.studies;
             if (!refs) return;
+            const effectiveTime = time == null ? null : (Number.isFinite(Number(time)) ? Number(time) : null);
             const [maFast, maMid, maSlow] = S.maPeriods;
             const lowerValue = S.lowerStudy === 'rsi'
-                ? findStudyValue(studyCache.rsi, time)
-                : (() => {
-                    const data = getSortedVolumeData(target);
-                    const found = data.find(entry => Number(entry.time) === Number(time));
-                    return Number(found?.value ?? data[data.length - 1]?.value);
-                })();
+                ? findStudyValue(studyCache.rsi, effectiveTime)
+                : findVolumeValue(getSortedVolumeData(target), effectiveTime);
             if (refs.maKey7) refs.maKey7.textContent = `MA(${maFast})`;
             if (refs.maKey25) refs.maKey25.textContent = `MA(${maMid})`;
             if (refs.maKey99) refs.maKey99.textContent = `MA(${maSlow})`;
             const lowerItem = refs.lowerLabel?.closest('.legend-item');
-            if (lowerItem) lowerItem.style.display = hasLowerPane() ? '' : 'none';
+            if (lowerItem) lowerItem.style.display = 'none';
             refs.lowerLabel.textContent = S.lowerStudy === 'rsi' ? `RSI(${RSI_PERIOD})` : 'Volume';
             refs.lowerValue.textContent = S.lowerStudy === 'none'
                 ? '–'
@@ -4614,9 +5047,10 @@
                 if (!el) return;
                 const item = el.closest('.legend-item');
                 if (item) item.style.display = S.showMAs ? '' : 'none';
-                const value = findStudyValue(data, time);
+                const value = findStudyValue(data, effectiveTime);
                 el.textContent = Number.isFinite(value) ? fmt(value, pxDec(value)) : '–';
             });
+            syncLowerPaneLegend(target, effectiveTime);
         }
 
         function syncDerivedSeries(target) {
@@ -4629,7 +5063,9 @@
                 ma7: computeSmaData(candleData, maFast),
                 ma25: computeSmaData(candleData, maMid),
                 ma99: computeSmaData(candleData, maSlow),
-                rsi: computeRsiData(candleData, RSI_PERIOD)
+                rsi: computeRsiData(candleData, RSI_PERIOD),
+                volMaFast: computeValueSmaData(getSortedVolumeData(target), VOLUME_MA_FAST),
+                volMaSlow: computeValueSmaData(getSortedVolumeData(target), VOLUME_MA_SLOW)
             };
             if (target === 2) studyCache2 = store.studies;
             else studyCache1 = store.studies;
@@ -4638,6 +5074,8 @@
             bundle.ma25.setData(store.studies.ma25);
             bundle.ma99.setData(store.studies.ma99);
             bundle.rsi.setData(store.studies.rsi);
+            bundle.volumeMaFast.setData(store.studies.volMaFast);
+            bundle.volumeMaSlow.setData(store.studies.volMaSlow);
             bundle.rsiFloor.setData(candleData.map(bar => ({ time: bar.time, value: 0 })));
             bundle.rsiCeil.setData(candleData.map(bar => ({ time: bar.time, value: 100 })));
             syncChartStudyVisibility(target);
@@ -4716,7 +5154,7 @@
                 const o = Number(c.o), h = Number(c.h), l = Number(c.l), cl = Number(c.c), v = Number(c.v);
                 if (!Number.isFinite(t)) continue;
                 cv.push({ time: t, open: o, high: h, low: l, close: cl });
-                vl.push({ time: t, value: v, color: cl >= o ? '#0ECB8155' : '#F6465D55' });
+                vl.push({ time: t, value: v, color: cl >= o ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
             }
             return { cv, vl };
         }
@@ -4728,7 +5166,8 @@
                 '15m': 64,
                 '1h': 72,
                 '4h': 60,
-                '1d': 48
+                '1d': 48,
+                '1w': 40
             };
             return barsByTf[tf] || 64;
         }
@@ -5148,7 +5587,7 @@
             const nextVol = {
                 time: nextBar.time,
                 value: Number(existingVol?.value) || 0,
-                color: nextBar.close >= nextBar.open ? '#0ECB8155' : '#F6465D55'
+                color: nextBar.close >= nextBar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR
             };
             volMap.set(nextBar.time, nextVol);
             volSeries.update(nextVol);
@@ -5339,8 +5778,8 @@
                                 lineSeries.update({ time: bar.time, value: bar.close });
                                 if (candleMap.has(bar.time)) { const old = candleMap.get(bar.time); old.open = bar.open; old.high = bar.high; old.low = bar.low; old.close = bar.close; }
                                 else { candleMap.set(bar.time, bar); }
-                                volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
-                                volMap.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
+                                volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
+                                volMap.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
                                 syncDerivedSeries(1);
                                 updateLegendMetrics(bar, {
                                     open: legO,
@@ -5358,8 +5797,8 @@
                                 lineSeries2.update({ time: bar.time, value: bar.close });
                                 if (candleMap2.has(bar.time)) { const old = candleMap2.get(bar.time); old.open = bar.open; old.high = bar.high; old.low = bar.low; old.close = bar.close; }
                                 else { candleMap2.set(bar.time, bar); }
-                                volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
-                                volMap2.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
+                                volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
+                                volMap2.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
                                 syncDerivedSeries(2);
                                 updateLegendMetrics(bar, {
                                     open: legO2,
@@ -5540,6 +5979,7 @@
                 if (compactToggle) compactToggle.title = getSelectedCoinLabel(marketKey);
                 updateOrderBookLabels();
             }
+            syncLowerPaneLegend(targetNum);
         }
 
         function resolveCoinSelection(value) {
