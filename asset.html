@@ -562,18 +562,26 @@
             color: var(--muted);
             background: none;
             border: none;
-            transition: all 0.15s;
+            transition: color 0.15s ease;
             font-family: inherit;
         }
 
         .tf-btn:hover {
-            color: var(--text);
-            background: var(--surface2);
+            color: rgba(234, 236, 239, 0.78);
+            background: transparent;
         }
 
         .tf-btn.active {
-            color: var(--bg);
-            background: var(--text);
+            color: var(--text);
+            background: transparent;
+        }
+
+        html.light .tf-btn:hover {
+            color: rgba(15, 23, 42, 0.72);
+        }
+
+        html.light .tf-btn.active {
+            color: #0f172a;
         }
 
         .toolbar-icon-btn {
@@ -633,6 +641,13 @@
             align-self: center;
         }
 
+        .chart-toggle-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            margin-left: 2px;
+        }
+
         .ob-close-btn {
             align-self: center;
             margin-right: 6px;
@@ -673,7 +688,7 @@
         .chart-settings-menu {
             position: absolute;
             top: calc(100% + 8px);
-            right: 0;
+            left: 8px;
             width: 256px;
             padding: 10px;
             border-radius: 12px;
@@ -707,40 +722,48 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 4px;
-            border-radius: 10px;
+            padding: 0.12rem;
+            border-radius: 999px;
             border: 1px solid var(--border);
-            background: var(--surface2);
+            background: rgba(15, 18, 23, 0.82);
+        }
+
+        html.light .chart-settings-segment {
+            background: #ffffff;
+            border-color: #e5e7eb;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
         }
 
         .chart-settings-option {
             flex: 1 1 0;
             min-width: 0;
-            padding: 6px 8px;
+            padding: 0.18rem 0.5rem;
             border: 0;
-            border-radius: 8px;
+            border-radius: 999px;
             background: transparent;
             color: var(--muted);
             font: inherit;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 0.62rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
             cursor: pointer;
-            transition: background 0.12s ease, color 0.12s ease;
+            transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
         }
 
         .chart-settings-option:hover {
             color: var(--text);
-            background: rgba(255, 255, 255, 0.04);
+            background: transparent;
         }
 
         .chart-settings-option.active {
-            background: var(--text);
-            color: var(--bg);
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text);
         }
 
         html.light .chart-settings-option.active {
-            background: #0f172a;
-            color: #ffffff;
+            background: #f8fafc;
+            color: #0f172a;
+            box-shadow: inset 0 0 0 1px #cbd5e1;
         }
 
         .chart-settings-toggle {
@@ -822,8 +845,121 @@
         .chart-loading-wrap {
             flex: 1;
             position: relative;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
             min-height: 0;
+        }
+
+        .chart-main-pane {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        .chart-main-canvas,
+        .chart-lower-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-lower-pane {
+            position: relative;
+            flex: 0 0 var(--lower-pane-h, 122px);
+            min-height: 104px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .chart-lower-pane.is-hidden {
+            display: none;
+        }
+
+        .chart-lower-pane.is-rsi {
+            background: var(--bg);
+        }
+
+        html.light .chart-lower-pane.is-rsi {
+            background: var(--bg);
+        }
+
+        .chart-extrema-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .chart-extrema-label {
+            position: absolute;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(226, 232, 240, 0.9);
+            font-size: 11px;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.12s ease;
+        }
+
+        .chart-extrema-label::after {
+            content: "";
+            width: 24px;
+            height: 1px;
+            background: currentColor;
+            opacity: 0.72;
+        }
+
+        .chart-extrema-label.is-visible {
+            opacity: 1;
+        }
+
+        .chart-extrema-label.low {
+            transform: translateY(-50%);
+        }
+
+        html.light .chart-extrema-label {
+            color: rgba(55, 65, 81, 0.86);
+        }
+
+        .chart-rsi-band {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 0;
+            background: rgba(139, 92, 246, 0.12);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.12s ease;
+        }
+
+        .chart-rsi-band.is-visible {
+            opacity: 1;
+        }
+
+        html.light .chart-rsi-band {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .lower-pane-splitter {
+            left: 0;
+            right: 0;
+            top: calc(100% - var(--lower-pane-h, 122px));
+            height: 12px;
+            transform: translateY(-50%);
+            cursor: row-resize;
+        }
+
+        .lower-pane-splitter::before {
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 2px;
+            transform: translateY(-50%);
         }
 
         .chart-watermark {
@@ -1155,6 +1291,18 @@
 
         .legend-studies span.v {
             color: var(--text);
+        }
+
+        .legend-studies span.v[data-study="ma7"] {
+            color: #f0c419;
+        }
+
+        .legend-studies span.v[data-study="ma25"] {
+            color: #ff4da6;
+        }
+
+        .legend-studies span.v[data-study="ma99"] {
+            color: #7c5cff;
         }
 
         /* ── Right panel ── */
@@ -2244,8 +2392,28 @@
                             <div class="chart-settings-group">
                                 <div class="chart-settings-label">Lower Pane</div>
                                 <div class="chart-settings-segment" role="group" aria-label="Lower chart study">
+                                    <button class="chart-settings-option" type="button" data-lower-study="none">None</button>
                                     <button class="chart-settings-option" type="button" data-lower-study="volume">Volume</button>
                                     <button class="chart-settings-option" type="button" data-lower-study="rsi">RSI</button>
+                                </div>
+                            </div>
+                            <div class="chart-settings-group">
+                                <div class="chart-settings-label">Moving Average Periods</div>
+                                <div class="chart-settings-bounds">
+                                    <label class="chart-settings-field">
+                                        <span>Fast</span>
+                                        <input id="chart-ma-fast" type="number" min="1" max="999" step="1" inputmode="numeric" />
+                                    </label>
+                                    <label class="chart-settings-field">
+                                        <span>Mid</span>
+                                        <input id="chart-ma-mid" type="number" min="1" max="999" step="1" inputmode="numeric" />
+                                    </label>
+                                </div>
+                                <div class="chart-settings-bounds">
+                                    <label class="chart-settings-field">
+                                        <span>Slow</span>
+                                        <input id="chart-ma-slow" type="number" min="1" max="999" step="1" inputmode="numeric" />
+                                    </label>
                                 </div>
                             </div>
                             <div class="chart-settings-group">
@@ -2268,16 +2436,18 @@
                         </div>
                     </div>
                     <div style="flex:1"></div>
-                    <button id="add-chart-btn" class="toolbar-icon-btn chart-toggle-btn" type="button" onclick="handleAddChart()" title="Add chart" aria-label="Add chart">
-                        <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
-                            <path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-                        </svg>
-                    </button>
-                    <button id="remove-chart-btn" class="toolbar-icon-btn chart-toggle-btn" type="button" onclick="handleRemoveChart()" title="Remove chart" aria-label="Remove chart" disabled>
-                        <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
-                            <path d="M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-                        </svg>
-                    </button>
+                    <div class="chart-toggle-group">
+                        <button id="add-chart-btn" class="toolbar-icon-btn chart-toggle-btn" type="button" onclick="handleAddChart()" title="Add chart" aria-label="Add chart">
+                            <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                                <path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                            </svg>
+                        </button>
+                        <button id="remove-chart-btn" class="toolbar-icon-btn chart-toggle-btn" type="button" onclick="handleRemoveChart()" title="Remove chart" aria-label="Remove chart" disabled>
+                            <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                                <path d="M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <button id="ob-open-btn" class="toolbar-icon-btn" type="button" onclick="toggleOb()" title="Show order book" aria-label="Show order book" style="display:none;">
                         <svg class="ob-open-svg" viewBox="0 0 18 18" aria-hidden="true">
                             <rect x="2" y="3" width="14" height="2.5" rx="1" class="dim"></rect>
@@ -2291,35 +2461,46 @@
                     <!-- Primary Chart -->
                     <div id="chart-container-1" style="flex:1; background:var(--bg); display:flex; flex-direction:column; position:relative; min-width:0;">
                         <div id="chart-wrap" class="chart-loading-wrap logo-watermark is-loading" style="flex:1; min-height:0; position:relative;">
-                            <div id="chart-canvas"></div>
-                            <div class="chart-watermark" aria-hidden="true">
-                                <img src="images/logo.png" alt="">
-                                <span>HYPERMONITOR</span>
+                            <div class="chart-main-pane" id="chart-main-pane">
+                                <div id="chart-canvas" class="chart-main-canvas"></div>
+                                <div id="chart-extrema-layer" class="chart-extrema-layer" aria-hidden="true">
+                                    <div id="chart-max-label" class="chart-extrema-label high"><span id="chart-max-text">–</span></div>
+                                    <div id="chart-min-label" class="chart-extrema-label low"><span id="chart-min-text">–</span></div>
+                                </div>
+                                <div class="chart-watermark" aria-hidden="true">
+                                    <img src="images/logo.png" alt="">
+                                    <span>HYPERMONITOR</span>
+                                </div>
+                                <div id="chart-legend">
+                                    <div id="coin-toggle-extra" class="mini-coin-select" onclick="toggleDropdown()">
+                                        <img id="coin-logo-extra" class="mini-coin-logo" src="" data-coin="" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="">
+                                        <span class="mini-coin-meta">
+                                            <span id="coin-label-extra" class="mini-coin-label">–</span>
+                                            <span id="coin-badge-extra" class="mini-coin-badge" style="display:none;"></span>
+                                        </span>
+                                        <span style="font-size:10px; color:var(--muted);">▼</span>
+                                    </div>
+                                    <span id="legend-name">–/USD • 15m</span>
+                                    <div id="legend-ohlc">
+                                        <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">High</span><span class="v" id="leg-h">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">Low</span><span class="v" id="leg-l">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">Close</span><span class="v" id="leg-c">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">Change</span><span class="v" id="leg-pct">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">Range</span><span class="v" id="leg-range">–</span></span>
+                                    </div>
+                                    <div class="legend-studies">
+                                        <span class="legend-item"><span class="legend-key" id="leg-ma-key-7">MA(7)</span><span class="v" id="leg-ma-7" data-study="ma7">–</span></span>
+                                        <span class="legend-item"><span class="legend-key" id="leg-ma-key-25">MA(25)</span><span class="v" id="leg-ma-25" data-study="ma25">–</span></span>
+                                        <span class="legend-item"><span class="legend-key" id="leg-ma-key-99">MA(99)</span><span class="v" id="leg-ma-99" data-study="ma99">–</span></span>
+                                        <span class="legend-item"><span class="legend-key" id="leg-lower-label">Volume</span><span class="v" id="leg-lower-value">–</span></span>
+                                    </div>
+                                </div>
                             </div>
-                            <div id="chart-legend">
-                                <div id="coin-toggle-extra" class="mini-coin-select" onclick="toggleDropdown()">
-                                    <img id="coin-logo-extra" class="mini-coin-logo" src="" data-coin="" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="">
-                                    <span class="mini-coin-meta">
-                                        <span id="coin-label-extra" class="mini-coin-label">–</span>
-                                        <span id="coin-badge-extra" class="mini-coin-badge" style="display:none;"></span>
-                                    </span>
-                                    <span style="font-size:10px; color:var(--muted);">▼</span>
-                                </div>
-                                <span id="legend-name">–/USD • 15m</span>
-                                <div id="legend-ohlc">
-                                    <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">High</span><span class="v" id="leg-h">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">Low</span><span class="v" id="leg-l">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">Close</span><span class="v" id="leg-c">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">Change</span><span class="v" id="leg-pct">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">Range</span><span class="v" id="leg-range">–</span></span>
-                                </div>
-                                <div class="legend-studies">
-                                    <span class="legend-item"><span class="legend-key">MA(7)</span><span class="v" id="leg-ma-7">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">MA(25)</span><span class="v" id="leg-ma-25">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">MA(99)</span><span class="v" id="leg-ma-99">–</span></span>
-                                    <span class="legend-item"><span class="legend-key" id="leg-lower-label">Volume</span><span class="v" id="leg-lower-value">–</span></span>
-                                </div>
+                            <div id="lower-pane-splitter" class="asset-splitter lower-pane-splitter" role="separator" aria-orientation="horizontal" aria-label="Resize lower pane" hidden></div>
+                            <div id="chart-lower-pane" class="chart-lower-pane">
+                                <div id="chart-rsi-band" class="chart-rsi-band" aria-hidden="true"></div>
+                                <div id="chart-lower-canvas" class="chart-lower-canvas"></div>
                             </div>
                             <div class="chart-loading-overlay" id="chart-loading-1" aria-hidden="true">
                                 <img src="images/pulse.gif" alt="Hypermonitor loading logo">
@@ -2339,35 +2520,46 @@
                         </div>
 
                         <div id="chart-wrap-2" class="chart-loading-wrap logo-watermark" style="flex:1; display:flex; flex-direction:column; position:relative; min-height:0;">
-                            <div id="chart-canvas-2" style="flex:1;"></div>
-                            <div class="chart-watermark" aria-hidden="true">
-                                <img src="images/logo.png" alt="">
-                                <span>HYPERMONITOR</span>
+                            <div class="chart-main-pane" id="chart-main-pane-2">
+                                <div id="chart-canvas-2" class="chart-main-canvas"></div>
+                                <div id="chart-extrema-layer-2" class="chart-extrema-layer" aria-hidden="true">
+                                    <div id="chart-max-label-2" class="chart-extrema-label high"><span id="chart-max-text-2">–</span></div>
+                                    <div id="chart-min-label-2" class="chart-extrema-label low"><span id="chart-min-text-2">–</span></div>
+                                </div>
+                                <div class="chart-watermark" aria-hidden="true">
+                                    <img src="images/logo.png" alt="">
+                                    <span>HYPERMONITOR</span>
+                                </div>
+                                <div id="chart-legend" style="pointer-events:none; z-index:5;"> <!-- inherit styles -->
+                                    <div id="coin-toggle-2" class="mini-coin-select" onclick="toggleDropdown2()">
+                                        <img id="coin-logo-2" class="mini-coin-logo" src="images/coins/ETH.svg" data-coin="ETH" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="ETH">
+                                        <span class="mini-coin-meta">
+                                            <span id="coin-label-2" class="mini-coin-label">ETH</span>
+                                            <span id="coin-badge-2" class="mini-coin-badge" style="display:none;"></span>
+                                        </span>
+                                        <span style="font-size:10px; color:var(--muted);">▼</span>
+                                    </div>
+                                    <span id="legend-name-2" style="display:none;">ETH/USD • 15m</span>
+                                    <div id="legend-ohlc">
+                                        <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o-2">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">High</span><span class="v" id="leg-h-2">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">Low</span><span class="v" id="leg-l-2">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">Close</span><span class="v" id="leg-c-2">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">Change</span><span class="v" id="leg-pct-2">–</span></span>
+                                        <span class="legend-item"><span class="legend-key">Range</span><span class="v" id="leg-range-2">–</span></span>
+                                    </div>
+                                    <div class="legend-studies">
+                                        <span class="legend-item"><span class="legend-key" id="leg-ma-key-7-2">MA(7)</span><span class="v" id="leg-ma-7-2" data-study="ma7">–</span></span>
+                                        <span class="legend-item"><span class="legend-key" id="leg-ma-key-25-2">MA(25)</span><span class="v" id="leg-ma-25-2" data-study="ma25">–</span></span>
+                                        <span class="legend-item"><span class="legend-key" id="leg-ma-key-99-2">MA(99)</span><span class="v" id="leg-ma-99-2" data-study="ma99">–</span></span>
+                                        <span class="legend-item"><span class="legend-key" id="leg-lower-label-2">Volume</span><span class="v" id="leg-lower-value-2">–</span></span>
+                                    </div>
+                                </div>
                             </div>
-                            <div id="chart-legend" style="pointer-events:none; z-index:5;"> <!-- inherit styles -->
-                                <div id="coin-toggle-2" class="mini-coin-select" onclick="toggleDropdown2()">
-                                    <img id="coin-logo-2" class="mini-coin-logo" src="images/coins/ETH.svg" data-coin="ETH" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="ETH">
-                                    <span class="mini-coin-meta">
-                                        <span id="coin-label-2" class="mini-coin-label">ETH</span>
-                                        <span id="coin-badge-2" class="mini-coin-badge" style="display:none;"></span>
-                                    </span>
-                                    <span style="font-size:10px; color:var(--muted);">▼</span>
-                                </div>
-                                <span id="legend-name-2" style="display:none;">ETH/USD • 15m</span>
-                                <div id="legend-ohlc">
-                                    <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o-2">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">High</span><span class="v" id="leg-h-2">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">Low</span><span class="v" id="leg-l-2">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">Close</span><span class="v" id="leg-c-2">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">Change</span><span class="v" id="leg-pct-2">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">Range</span><span class="v" id="leg-range-2">–</span></span>
-                                </div>
-                                <div class="legend-studies">
-                                    <span class="legend-item"><span class="legend-key">MA(7)</span><span class="v" id="leg-ma-7-2">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">MA(25)</span><span class="v" id="leg-ma-25-2">–</span></span>
-                                    <span class="legend-item"><span class="legend-key">MA(99)</span><span class="v" id="leg-ma-99-2">–</span></span>
-                                    <span class="legend-item"><span class="legend-key" id="leg-lower-label-2">Volume</span><span class="v" id="leg-lower-value-2">–</span></span>
-                                </div>
+                            <div id="lower-pane-splitter-2" class="asset-splitter lower-pane-splitter" role="separator" aria-orientation="horizontal" aria-label="Resize lower pane" hidden></div>
+                            <div id="chart-lower-pane-2" class="chart-lower-pane">
+                                <div id="chart-rsi-band-2" class="chart-rsi-band" aria-hidden="true"></div>
+                                <div id="chart-lower-canvas-2" class="chart-lower-canvas"></div>
                             </div>
                             <div class="chart-loading-overlay" id="chart-loading-2" aria-hidden="true">
                                 <img src="images/pulse.gif" alt="Hypermonitor loading logo">
@@ -2636,7 +2828,7 @@
             const coinBtn = document.getElementById('coin-btn');
             if (coinBtn) coinBtn.title = fullLabel;
 
-            document.title = `${fullLabel} — Asset Terminal`;
+            document.title = `${fullLabel} | Hypermonitor`;
         })();
     </script>
     <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
@@ -2653,9 +2845,10 @@
             lowerStudy: 'volume',
             showMAs: true,
             rsiLower: 30,
-            rsiUpper: 70
+            rsiUpper: 70,
+            maPeriods: [7, 25, 99],
+            lowerPaneHeight: 122
         });
-        const MA_PERIODS = [7, 25, 99];
         const MA_COLORS = {
             7: '#f0c419',
             25: '#ff4da6',
@@ -2807,8 +3000,17 @@
             const next = { ...DEFAULT_CHART_PREFS };
             if (!raw || typeof raw !== 'object') return next;
             next.priceMode = raw.priceMode === 'line' ? 'line' : 'candles';
-            next.lowerStudy = raw.lowerStudy === 'rsi' ? 'rsi' : 'volume';
+            next.lowerStudy = raw.lowerStudy === 'rsi' ? 'rsi' : raw.lowerStudy === 'none' ? 'none' : 'volume';
             next.showMAs = raw.showMAs !== false;
+            const rawPeriods = Array.isArray(raw.maPeriods) ? raw.maPeriods : [raw.maFast, raw.maMid, raw.maSlow];
+            next.maPeriods = rawPeriods.slice(0, 3).map((value, index) => {
+                const fallback = DEFAULT_CHART_PREFS.maPeriods[index] || DEFAULT_CHART_PREFS.maPeriods[DEFAULT_CHART_PREFS.maPeriods.length - 1];
+                const num = Number(value);
+                return Number.isFinite(num) ? Math.min(999, Math.max(1, Math.round(num))) : fallback;
+            });
+            while (next.maPeriods.length < 3) {
+                next.maPeriods.push(DEFAULT_CHART_PREFS.maPeriods[next.maPeriods.length]);
+            }
             const lower = Number(raw.rsiLower);
             const upper = Number(raw.rsiUpper);
             next.rsiLower = Number.isFinite(lower) ? Math.min(98, Math.max(1, Math.round(lower))) : DEFAULT_CHART_PREFS.rsiLower;
@@ -2816,6 +3018,10 @@
             if (next.rsiUpper <= next.rsiLower) {
                 next.rsiUpper = Math.min(99, next.rsiLower + 1);
             }
+            const lowerPaneHeight = Number(raw.lowerPaneHeight);
+            next.lowerPaneHeight = Number.isFinite(lowerPaneHeight)
+                ? Math.min(280, Math.max(84, Math.round(lowerPaneHeight)))
+                : DEFAULT_CHART_PREFS.lowerPaneHeight;
             return next;
         }
 
@@ -2861,6 +3067,8 @@
             showMAs: initialChartPrefs.showMAs,
             rsiLower: initialChartPrefs.rsiLower,
             rsiUpper: initialChartPrefs.rsiUpper,
+            maPeriods: initialChartPrefs.maPeriods.slice(),
+            lowerPaneHeight: initialChartPrefs.lowerPaneHeight,
             // Dual chart
             chart2Active: false,
             coin2: 'ETH',
@@ -2877,12 +3085,13 @@
             return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         }
 
-        function getChartThemeOptions() {
+        function getChartThemeOptions(options = {}) {
             const background = getCssVar('--bg') || '#0d1014';
             const textColor = getCssVar('--muted') || '#7c848f';
             const borderColor = getCssVar('--chart-border') || getCssVar('--border') || '#20252d';
             const crosshairLineColor = getCssVar('--chart-crosshair-line') || 'rgba(211, 216, 223, 0.14)';
             const crosshairLabelBg = getCssVar('--chart-crosshair-label-bg') || '#18202a';
+            const showTimeScale = options.showTimeScale !== false;
             return {
                 layout: { background: { color: background }, textColor, attributionLogo: false },
                 grid: { vertLines: { color: borderColor }, horzLines: { color: borderColor } },
@@ -2892,7 +3101,7 @@
                     horzLine: { color: crosshairLineColor, labelBackgroundColor: crosshairLabelBg }
                 },
                 rightPriceScale: { borderColor },
-                timeScale: { borderColor, timeVisible: true, secondsVisible: false }
+                timeScale: { borderColor, visible: showTimeScale, timeVisible: true, secondsVisible: false }
             };
         }
 
@@ -2907,10 +3116,16 @@
                 } catch (_) {}
             }
             if (typeof chart !== 'undefined' && chart) {
-                chart.applyOptions(getChartThemeOptions());
+                chart.applyOptions(getChartThemeOptions({ showTimeScale: false }));
             }
             if (typeof chart2 !== 'undefined' && chart2) {
-                chart2.applyOptions(getChartThemeOptions());
+                chart2.applyOptions(getChartThemeOptions({ showTimeScale: false }));
+            }
+            if (typeof lowerChart !== 'undefined' && lowerChart) {
+                lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: true }));
+            }
+            if (typeof lowerChart2 !== 'undefined' && lowerChart2) {
+                lowerChart2.applyOptions(getChartThemeOptions({ showTimeScale: true }));
             }
         }
 
@@ -2958,6 +3173,8 @@
         const legName2 = $('legend-name-2'), legO2 = $('leg-o-2'), legH2 = $('leg-h-2'), legL2 = $('leg-l-2'), legC2 = $('leg-c-2'), legPct2 = $('leg-pct-2'), legRange2 = $('leg-range-2');
         const legMa7 = $('leg-ma-7'), legMa25 = $('leg-ma-25'), legMa99 = $('leg-ma-99'), legLowerLabel = $('leg-lower-label'), legLowerValue = $('leg-lower-value');
         const legMa72 = $('leg-ma-7-2'), legMa252 = $('leg-ma-25-2'), legMa992 = $('leg-ma-99-2'), legLowerLabel2 = $('leg-lower-label-2'), legLowerValue2 = $('leg-lower-value-2');
+        const legMaKey7 = $('leg-ma-key-7'), legMaKey25 = $('leg-ma-key-25'), legMaKey99 = $('leg-ma-key-99');
+        const legMaKey72 = $('leg-ma-key-7-2'), legMaKey252 = $('leg-ma-key-25-2'), legMaKey992 = $('leg-ma-key-99-2');
 
         // Layouts
         const rightPanel = $('right-panel');
@@ -2971,6 +3188,24 @@
         const removeChartBtn = $('remove-chart-btn');
         const chartLoadingWrap1 = $('chart-wrap');
         const chartLoadingWrap2 = $('chart-wrap-2');
+        const chartMainPane1 = $('chart-main-pane');
+        const chartMainPane2 = $('chart-main-pane-2');
+        const chartLowerPane1 = $('chart-lower-pane');
+        const chartLowerPane2 = $('chart-lower-pane-2');
+        const chartLowerSplitter1 = $('lower-pane-splitter');
+        const chartLowerSplitter2 = $('lower-pane-splitter-2');
+        const chartRsiBand1 = $('chart-rsi-band');
+        const chartRsiBand2 = $('chart-rsi-band-2');
+        const chartExtremaLayer1 = $('chart-extrema-layer');
+        const chartExtremaLayer2 = $('chart-extrema-layer-2');
+        const chartMaxLabel1 = $('chart-max-label');
+        const chartMaxLabel2 = $('chart-max-label-2');
+        const chartMinLabel1 = $('chart-min-label');
+        const chartMinLabel2 = $('chart-min-label-2');
+        const chartMaxText1 = $('chart-max-text');
+        const chartMaxText2 = $('chart-max-text-2');
+        const chartMinText1 = $('chart-min-text');
+        const chartMinText2 = $('chart-min-text-2');
         const chartSplitter = $('chart-splitter');
         const obMainSplitter = $('ob-main-splitter');
         const topSplitDrag = { kind: '', pointerId: null };
@@ -2978,6 +3213,9 @@
         const chartSettingsBtn = $('chart-settings-btn');
         const chartSettingsMenu = $('chart-settings-menu');
         const chartMaToggle = $('chart-ma-toggle');
+        const chartMaFastInput = $('chart-ma-fast');
+        const chartMaMidInput = $('chart-ma-mid');
+        const chartMaSlowInput = $('chart-ma-slow');
         const chartRsiLowerInput = $('chart-rsi-lower');
         const chartRsiUpperInput = $('chart-rsi-upper');
 
@@ -3033,6 +3271,45 @@
             if (removeChartBtn) removeChartBtn.disabled = !canRemoveSecondChart;
         }
 
+        function getVisibleChartWraps() {
+            const wraps = [];
+            if (chartWrap && chartCont1 && getComputedStyle(chartCont1).display !== 'none') wraps.push(chartWrap);
+            if (chartWrap2 && chartCont2 && getComputedStyle(chartCont2).display !== 'none') wraps.push(chartWrap2);
+            return wraps;
+        }
+
+        function getLowerPaneRefs(target) {
+            return target === 2
+                ? { wrap: chartWrap2, pane: chartLowerPane2, splitter: chartLowerSplitter2, band: chartRsiBand2 }
+                : { wrap: chartWrap, pane: chartLowerPane1, splitter: chartLowerSplitter1, band: chartRsiBand1 };
+        }
+
+        function clampLowerPaneHeight(nextHeight) {
+            const wraps = getVisibleChartWraps();
+            const maxFromWraps = wraps.length
+                ? Math.min(...wraps.map((wrap) => Math.max(120, Math.round((wrap.clientHeight || 0) * 0.42))))
+                : 280;
+            return Math.max(84, Math.min(maxFromWraps || 280, Math.round(nextHeight)));
+        }
+
+        function hasLowerPane() {
+            return S.lowerStudy === 'volume' || S.lowerStudy === 'rsi';
+        }
+
+        function syncLowerPaneLayout() {
+            const visible = hasLowerPane();
+            const height = clampLowerPaneHeight(S.lowerPaneHeight || DEFAULT_CHART_PREFS.lowerPaneHeight);
+            S.lowerPaneHeight = height;
+            [chartWrap, chartWrap2].forEach((wrap) => {
+                if (wrap) wrap.style.setProperty('--lower-pane-h', `${height}px`);
+            });
+            [1, 2].forEach((target) => {
+                const refs = getLowerPaneRefs(target);
+                refs.pane?.classList.toggle('is-hidden', !visible);
+                refs.splitter && (refs.splitter.hidden = !visible || isMobileAssetLayout());
+            });
+        }
+
         function isMobileAssetLayout() {
             return MOBILE_ASSET_QUERY.matches;
         }
@@ -3070,6 +3347,7 @@
             }
 
             syncTopSplitters();
+            syncLowerPaneLayout();
             notifyParentChartState();
         }
 
@@ -3083,6 +3361,8 @@
                 if (chartCont2) chartCont2.style.flex = '';
                 if (chartSplitter) chartSplitter.hidden = true;
                 if (obMainSplitter) obMainSplitter.hidden = true;
+                if (chartLowerSplitter1) chartLowerSplitter1.hidden = true;
+                if (chartLowerSplitter2) chartLowerSplitter2.hidden = true;
                 return;
             }
 
@@ -3164,6 +3444,8 @@
 
         function stopTopSplitDrag() {
             if (!topSplitDrag.kind) return;
+            if (topSplitDrag.kind === 'lower-1' && chartLowerSplitter1) chartLowerSplitter1.classList.remove('is-dragging');
+            if (topSplitDrag.kind === 'lower-2' && chartLowerSplitter2) chartLowerSplitter2.classList.remove('is-dragging');
             topSplitDrag.kind = '';
             topSplitDrag.pointerId = null;
             if (chartSplitter) chartSplitter.classList.remove('is-dragging');
@@ -3194,6 +3476,19 @@
                 const nextWidth = rect.width - dividerX;
                 applyTrackerLayout(nextWidth);
                 notifyParentBookWidth(nextWidth);
+                return;
+            }
+
+            if ((topSplitDrag.kind === 'lower-1' || topSplitDrag.kind === 'lower-2') && hasLowerPane()) {
+                const refs = topSplitDrag.kind === 'lower-2' ? getLowerPaneRefs(2) : getLowerPaneRefs(1);
+                const wrap = refs.wrap;
+                if (!wrap) return;
+                const rect = wrap.getBoundingClientRect();
+                const nextHeight = rect.bottom - event.clientY;
+                S.lowerPaneHeight = clampLowerPaneHeight(nextHeight);
+                syncLowerPaneLayout();
+                resizeChartBundle(1, chartSeries1, chartMainPane1, chartLowerPane1);
+                resizeChartBundle(2, chartSeries2, chartMainPane2, chartLowerPane2);
             }
         }
 
@@ -3202,10 +3497,12 @@
             event.preventDefault();
             topSplitDrag.kind = kind;
             topSplitDrag.pointerId = event.pointerId;
-            document.body.style.cursor = 'col-resize';
+            document.body.style.cursor = kind.startsWith('lower') ? 'row-resize' : 'col-resize';
             document.body.style.userSelect = 'none';
             if (kind === 'chart' && chartSplitter) chartSplitter.classList.add('is-dragging');
             if (kind === 'book' && obMainSplitter) obMainSplitter.classList.add('is-dragging');
+            if (kind === 'lower-1' && chartLowerSplitter1) chartLowerSplitter1.classList.add('is-dragging');
+            if (kind === 'lower-2' && chartLowerSplitter2) chartLowerSplitter2.classList.add('is-dragging');
             updateTopSplitDrag(event);
         }
 
@@ -3387,6 +3684,18 @@
             });
         }
 
+        if (chartLowerSplitter1) {
+            chartLowerSplitter1.addEventListener('pointerdown', event => {
+                startTopSplitDrag('lower-1', event);
+            });
+        }
+
+        if (chartLowerSplitter2) {
+            chartLowerSplitter2.addEventListener('pointerdown', event => {
+                startTopSplitDrag('lower-2', event);
+            });
+        }
+
         if (obMainSplitter) {
             obMainSplitter.addEventListener('pointerdown', event => {
                 startTopSplitDrag('book', event);
@@ -3415,6 +3724,45 @@
             if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
             if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
             return v.toFixed(2);
+        }
+
+        function formatTitlePrice(value) {
+            const price = Number(value);
+            if (!Number.isFinite(price) || price <= 0) return '';
+            const abs = Math.abs(price);
+            let decimals = 4;
+            if (abs >= 10000) decimals = 0;
+            else if (abs >= 1000) decimals = 1;
+            else if (abs >= 100) decimals = 2;
+            else if (abs >= 10) decimals = 3;
+            else if (abs >= 1) decimals = 4;
+            else decimals = 5;
+            return price.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        function syncAssetDocumentTitle(livePrice) {
+            const assetLabel = getSelectedCoinLabel(S.coin) || getCoinDisplayLabel(S.coin) || 'BTC';
+            const priceLabel = formatTitlePrice(livePrice);
+            document.title = priceLabel
+                ? `${priceLabel} | ${assetLabel} | Hypermonitor`
+                : `${assetLabel} | Hypermonitor`;
+        }
+
+        function notifyParentLivePrice(price) {
+            if (window.parent === window) return;
+            const nextPrice = Number(price);
+            if (!Number.isFinite(nextPrice) || nextPrice <= 0) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:live-price',
+                    coin: S.coin,
+                    price: nextPrice,
+                    pane: EMBED_PANE || 'primary'
+                }, '*');
+            } catch (_) {}
         }
 
         function formatPercentCompact(value) {
@@ -3775,8 +4123,10 @@
 
         // ── Chart 1 Setup ──────────────────────────────────────────
         const chartWrap = $('chart-wrap');
-        const chart = LightweightCharts.createChart($('chart-canvas'), getChartThemeOptions());
-        function createChartSeriesBundle(chartInstance) {
+        const chart = LightweightCharts.createChart($('chart-canvas'), getChartThemeOptions({ showTimeScale: false }));
+        const lowerChart = LightweightCharts.createChart($('chart-lower-canvas'), getChartThemeOptions({ showTimeScale: true }));
+
+        function createChartSeriesBundle(chartInstance, lowerChartInstance, lowerPaneEl) {
             const candleSeries = chartInstance.addCandlestickSeries({
                 upColor: '#0ECB81',
                 wickUpColor: '#0ECB81',
@@ -3786,16 +4136,9 @@
             });
             const lineSeries = chartInstance.addLineSeries({
                 color: '#8fb4ff',
-                lineWidth: 2,
+                lineWidth: 3,
                 crosshairMarkerVisible: false,
                 visible: false
-            });
-            const volumeSeries = chartInstance.addHistogramSeries({
-                priceFormat: { type: 'volume' },
-                priceScaleId: 'vol',
-                color: '#0ECB8155',
-                lastValueVisible: false,
-                priceLineVisible: false
             });
             const ma7Series = chartInstance.addLineSeries({
                 color: MA_COLORS[7],
@@ -3818,19 +4161,42 @@
                 lastValueVisible: false,
                 priceLineVisible: false
             });
-            const rsiSeries = chartInstance.addLineSeries({
-                priceScaleId: 'osc',
+            const volumeSeries = lowerChartInstance.addHistogramSeries({
+                priceFormat: { type: 'volume' },
+                color: '#0ECB8155',
+                lastValueVisible: false,
+                priceLineVisible: false
+            });
+            const rsiSeries = lowerChartInstance.addLineSeries({
                 color: '#8b5cf6',
                 lineWidth: 1.8,
+                crosshairMarkerVisible: false,
+                lastValueVisible: true,
+                priceLineVisible: false,
+                visible: false
+            });
+            const rsiFloorSeries = lowerChartInstance.addLineSeries({
+                color: 'rgba(0,0,0,0)',
+                lineWidth: 1,
                 crosshairMarkerVisible: false,
                 lastValueVisible: false,
                 priceLineVisible: false,
                 visible: false
             });
-            chartInstance.priceScale('right').applyOptions({ scaleMargins: { top: 0.08, bottom: 0.26 } });
-            chartInstance.priceScale('vol').applyOptions({ scaleMargins: { top: 0.78, bottom: 0.04 }, visible: true });
-            chartInstance.priceScale('osc').applyOptions({ scaleMargins: { top: 0.78, bottom: 0.04 }, visible: false });
+            const rsiCeilSeries = lowerChartInstance.addLineSeries({
+                color: 'rgba(0,0,0,0)',
+                lineWidth: 1,
+                crosshairMarkerVisible: false,
+                lastValueVisible: false,
+                priceLineVisible: false,
+                visible: false
+            });
+            chartInstance.priceScale('right').applyOptions({ scaleMargins: { top: 0.08, bottom: 0.04 } });
+            lowerChartInstance.priceScale('right').applyOptions({ scaleMargins: { top: 0.1, bottom: 0.12 } });
             return {
+                chart: chartInstance,
+                lowerChart: lowerChartInstance,
+                lowerPane: lowerPaneEl,
                 candles: candleSeries,
                 line: lineSeries,
                 volume: volumeSeries,
@@ -3838,12 +4204,15 @@
                 ma25: ma25Series,
                 ma99: ma99Series,
                 rsi: rsiSeries,
+                rsiFloor: rsiFloorSeries,
+                rsiCeil: rsiCeilSeries,
                 rsiUpperLine: null,
-                rsiLowerLine: null
+                rsiLowerLine: null,
+                rsiMidLine: null
             };
         }
 
-        const chartSeries1 = createChartSeriesBundle(chart);
+        const chartSeries1 = createChartSeriesBundle(chart, lowerChart, chartLowerPane1);
         const candles = chartSeries1.candles;
         const lineSeries = chartSeries1.line;
         const volSeries = chartSeries1.volume;
@@ -3852,7 +4221,23 @@
         const maSeries99 = chartSeries1.ma99;
         const rsiSeries = chartSeries1.rsi;
 
-        new ResizeObserver(() => { chart.applyOptions({ width: chartWrap.clientWidth, height: chartWrap.clientHeight }); }).observe(chartWrap);
+        function resizeChartBundle(target, bundle, mainPaneEl, lowerPaneEl) {
+            if (!bundle || !mainPaneEl || !lowerPaneEl) return;
+            const mainRect = mainPaneEl.getBoundingClientRect();
+            const lowerRect = lowerPaneEl.getBoundingClientRect();
+            bundle.chart.applyOptions({
+                width: Math.max(0, Math.round(mainRect.width)),
+                height: Math.max(0, Math.round(mainRect.height))
+            });
+            bundle.lowerChart.applyOptions({
+                width: Math.max(0, Math.round(lowerRect.width)),
+                height: Math.max(0, Math.round(lowerRect.height))
+            });
+            scheduleVisibleExtremaUpdate(target);
+            scheduleRsiBandUpdate(target);
+        }
+
+        new ResizeObserver(() => { resizeChartBundle(1, chartSeries1, chartMainPane1, chartLowerPane1); }).observe(chartWrap);
         if (chartsContainer) new ResizeObserver(() => { syncTopSplitters(); }).observe(chartsContainer);
         if (mainLayout) new ResizeObserver(() => { syncTopSplitters(); }).observe(mainLayout);
 
@@ -3877,9 +4262,10 @@
 
         // ── Chart 2 Setup ──────────────────────────────────────────
         const chartWrap2 = $('chart-wrap-2');
-        const chart2 = LightweightCharts.createChart($('chart-canvas-2'), getChartThemeOptions());
+        const chart2 = LightweightCharts.createChart($('chart-canvas-2'), getChartThemeOptions({ showTimeScale: false }));
+        const lowerChart2 = LightweightCharts.createChart($('chart-lower-canvas-2'), getChartThemeOptions({ showTimeScale: true }));
 
-        const chartSeries2 = createChartSeriesBundle(chart2);
+        const chartSeries2 = createChartSeriesBundle(chart2, lowerChart2, chartLowerPane2);
         const candles2 = chartSeries2.candles;
         const lineSeries2 = chartSeries2.line;
         const volSeries2 = chartSeries2.volume;
@@ -3888,7 +4274,7 @@
         const maSeries992 = chartSeries2.ma99;
         const rsiSeries2 = chartSeries2.rsi;
 
-        new ResizeObserver(() => { chart2.applyOptions({ width: chartWrap2.clientWidth, height: chartWrap2.clientHeight }); }).observe(chartWrap2);
+        new ResizeObserver(() => { resizeChartBundle(2, chartSeries2, chartMainPane2, chartLowerPane2); }).observe(chartWrap2);
 
         chart2.subscribeCrosshairMove(param => {
             const data = getSortedCandleData(2);
@@ -3909,6 +4295,36 @@
             }
         });
 
+        const paneSyncState = { 1: false, 2: false };
+
+        function syncPaneRange(target, sourceChart, destinationChart, range) {
+            if (!destinationChart || !range || paneSyncState[target]) return;
+            paneSyncState[target] = true;
+            try {
+                destinationChart.timeScale().setVisibleLogicalRange(range);
+            } catch (_) {}
+            requestAnimationFrame(() => {
+                paneSyncState[target] = false;
+                scheduleVisibleExtremaUpdate(target);
+            });
+        }
+
+        function wirePaneCharts(target, mainChartInstance, lowerChartInstance) {
+            mainChartInstance.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (range && range.from < 10) loadOlderCandles(target);
+                syncPaneRange(target, mainChartInstance, lowerChartInstance, range);
+                scheduleVisibleExtremaUpdate(target);
+            });
+            lowerChartInstance.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (range && range.from < 10) loadOlderCandles(target);
+                syncPaneRange(target, lowerChartInstance, mainChartInstance, range);
+                scheduleVisibleExtremaUpdate(target);
+            });
+        }
+
+        wirePaneCharts(1, chart, lowerChart);
+        wirePaneCharts(2, chart2, lowerChart2);
+
         // ── Candle data (deduplicated maps) ────────────────────────
         let candleMap = new Map(), volMap = new Map();
         let oldestTs = null, isLoadingHistory = false;
@@ -3926,11 +4342,13 @@
             return target === 2
                 ? {
                     open: legO2, high: legH2, low: legL2, close: legC2, change: legPct2, range: legRange2,
-                    ma7: legMa72, ma25: legMa252, ma99: legMa992, lowerLabel: legLowerLabel2, lowerValue: legLowerValue2
+                    ma7: legMa72, ma25: legMa252, ma99: legMa992, lowerLabel: legLowerLabel2, lowerValue: legLowerValue2,
+                    maKey7: legMaKey72, maKey25: legMaKey252, maKey99: legMaKey992
                 }
                 : {
                     open: legO, high: legH, low: legL, close: legC, change: legPct, range: legRange,
-                    ma7: legMa7, ma25: legMa25, ma99: legMa99, lowerLabel: legLowerLabel, lowerValue: legLowerValue
+                    ma7: legMa7, ma25: legMa25, ma99: legMa99, lowerLabel: legLowerLabel, lowerValue: legLowerValue,
+                    maKey7: legMaKey7, maKey25: legMaKey25, maKey99: legMaKey99
                 };
         }
 
@@ -3948,15 +4366,166 @@
             return [...getCandleStore(target).volMap.values()].sort((a, b) => a.time - b.time);
         }
 
+        const extremaFrameState = { 1: 0, 2: 0 };
+        const rsiBandFrameState = { 1: 0, 2: 0 };
+
+        function getExtremaRefs(target) {
+            return target === 2
+                ? {
+                    layer: chartExtremaLayer2,
+                    maxLabel: chartMaxLabel2,
+                    minLabel: chartMinLabel2,
+                    maxText: chartMaxText2,
+                    minText: chartMinText2,
+                    pane: chartMainPane2
+                }
+                : {
+                    layer: chartExtremaLayer1,
+                    maxLabel: chartMaxLabel1,
+                    minLabel: chartMinLabel1,
+                    maxText: chartMaxText1,
+                    minText: chartMinText1,
+                    pane: chartMainPane1
+                };
+        }
+
+        function getActivePriceSeries(target) {
+            const bundle = getSeriesBundle(target);
+            return S.priceMode === 'line' ? bundle.line : bundle.candles;
+        }
+
+        function getRsiBandEl(target) {
+            return target === 2 ? chartRsiBand2 : chartRsiBand1;
+        }
+
+        function hideExtremaLabels(target) {
+            const refs = getExtremaRefs(target);
+            if (!refs) return;
+            [refs.maxLabel, refs.minLabel].forEach(el => {
+                if (!el) return;
+                el.classList.remove('is-visible');
+                el.style.left = '-999px';
+                el.style.top = '-999px';
+            });
+        }
+
+        function positionExtremaLabel(labelEl, textEl, text, x, y, paneWidth, paneHeight, offsetY) {
+            if (!labelEl || !textEl || !Number.isFinite(x) || !Number.isFinite(y)) return false;
+            textEl.textContent = text;
+            labelEl.classList.add('is-visible');
+            const labelWidth = Math.max(48, Math.round(labelEl.getBoundingClientRect().width || labelEl.offsetWidth || 48));
+            const left = Math.max(14, Math.min(Math.round(x - labelWidth), Math.max(14, paneWidth - labelWidth - 14)));
+            const top = Math.max(14, Math.min(Math.round(y + offsetY), Math.max(14, paneHeight - 14)));
+            labelEl.style.left = `${left}px`;
+            labelEl.style.top = `${top}px`;
+            return true;
+        }
+
+        function updateVisibleExtrema(target) {
+            const bundle = getSeriesBundle(target);
+            const refs = getExtremaRefs(target);
+            const data = getSortedCandleData(target);
+            if (!bundle || !refs?.pane || !data.length) {
+                hideExtremaLabels(target);
+                return;
+            }
+            const visibleRange = bundle.chart.timeScale().getVisibleLogicalRange?.();
+            const from = Number.isFinite(visibleRange?.from) ? Math.max(0, Math.floor(visibleRange.from)) : 0;
+            const to = Number.isFinite(visibleRange?.to) ? Math.min(data.length - 1, Math.ceil(visibleRange.to)) : data.length - 1;
+            if (to < from) {
+                hideExtremaLabels(target);
+                return;
+            }
+            let maxBar = null;
+            let minBar = null;
+            for (let index = from; index <= to; index += 1) {
+                const bar = data[index];
+                if (!bar) continue;
+                const highValue = S.priceMode === 'line' ? Number(bar.close) : Number(bar.high);
+                const lowValue = S.priceMode === 'line' ? Number(bar.close) : Number(bar.low);
+                if (!Number.isFinite(highValue) || !Number.isFinite(lowValue)) continue;
+                if (!maxBar || highValue > maxBar.value) maxBar = { time: bar.time, value: highValue };
+                if (!minBar || lowValue < minBar.value) minBar = { time: bar.time, value: lowValue };
+            }
+            if (!maxBar || !minBar) {
+                hideExtremaLabels(target);
+                return;
+            }
+            const activeSeries = getActivePriceSeries(target);
+            const paneWidth = refs.pane.clientWidth || 0;
+            const paneHeight = refs.pane.clientHeight || 0;
+            const maxX = bundle.chart.timeScale().timeToCoordinate(maxBar.time);
+            const minX = bundle.chart.timeScale().timeToCoordinate(minBar.time);
+            const maxY = activeSeries?.priceToCoordinate?.(maxBar.value);
+            const minY = activeSeries?.priceToCoordinate?.(minBar.value);
+
+            let hasMax = false;
+            let hasMin = false;
+            if (Number.isFinite(maxX) && Number.isFinite(maxY)) {
+                hasMax = positionExtremaLabel(refs.maxLabel, refs.maxText, fmt(maxBar.value, pxDec(maxBar.value)), maxX, maxY, paneWidth, paneHeight, -14);
+            }
+            if (Number.isFinite(minX) && Number.isFinite(minY)) {
+                hasMin = positionExtremaLabel(refs.minLabel, refs.minText, fmt(minBar.value, pxDec(minBar.value)), minX, minY, paneWidth, paneHeight, 14);
+            }
+            if (!hasMax && refs.maxLabel) refs.maxLabel.classList.remove('is-visible');
+            if (!hasMin && refs.minLabel) refs.minLabel.classList.remove('is-visible');
+        }
+
+        function scheduleVisibleExtremaUpdate(target) {
+            if (extremaFrameState[target]) cancelAnimationFrame(extremaFrameState[target]);
+            extremaFrameState[target] = requestAnimationFrame(() => {
+                extremaFrameState[target] = 0;
+                updateVisibleExtrema(target);
+            });
+        }
+
+        function updateRsiBand(target) {
+            const bundle = getSeriesBundle(target);
+            const bandEl = getRsiBandEl(target);
+            if (!bundle?.rsi || !bandEl || S.lowerStudy !== 'rsi') {
+                if (bandEl) {
+                    bandEl.classList.remove('is-visible');
+                    bandEl.style.top = '0px';
+                    bandEl.style.height = '0px';
+                }
+                return;
+            }
+            const paneHeight = bundle.lowerPane?.clientHeight || 0;
+            const upperY = bundle.rsi.priceToCoordinate?.(S.rsiUpper);
+            const lowerY = bundle.rsi.priceToCoordinate?.(S.rsiLower);
+            if (!paneHeight || !Number.isFinite(upperY) || !Number.isFinite(lowerY)) {
+                bandEl.classList.remove('is-visible');
+                bandEl.style.top = '0px';
+                bandEl.style.height = '0px';
+                return;
+            }
+            const top = Math.max(0, Math.min(upperY, lowerY));
+            const bottom = Math.min(paneHeight, Math.max(upperY, lowerY));
+            const height = Math.max(0, bottom - top);
+            bandEl.style.top = `${Math.round(top)}px`;
+            bandEl.style.height = `${Math.round(height)}px`;
+            bandEl.classList.toggle('is-visible', height > 1);
+        }
+
+        function scheduleRsiBandUpdate(target) {
+            if (rsiBandFrameState[target]) cancelAnimationFrame(rsiBandFrameState[target]);
+            rsiBandFrameState[target] = requestAnimationFrame(() => {
+                rsiBandFrameState[target] = 0;
+                updateRsiBand(target);
+            });
+        }
+
         function syncRsiPriceLines(target) {
             const bundle = getSeriesBundle(target);
             if (!bundle?.rsi) return;
             if (bundle.rsiUpperLine) bundle.rsi.removePriceLine(bundle.rsiUpperLine);
             if (bundle.rsiLowerLine) bundle.rsi.removePriceLine(bundle.rsiLowerLine);
+            if (bundle.rsiMidLine) bundle.rsi.removePriceLine(bundle.rsiMidLine);
             bundle.rsiUpperLine = bundle.rsi.createPriceLine({
                 price: S.rsiUpper,
                 color: 'rgba(148, 163, 184, 0.65)',
                 lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
                 axisLabelVisible: false,
                 title: ''
             });
@@ -3964,6 +4533,15 @@
                 price: S.rsiLower,
                 color: 'rgba(148, 163, 184, 0.65)',
                 lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: false,
+                title: ''
+            });
+            bundle.rsiMidLine = bundle.rsi.createPriceLine({
+                price: 50,
+                color: 'rgba(148, 163, 184, 0.5)',
+                lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
                 axisLabelVisible: false,
                 title: ''
             });
@@ -3971,21 +4549,40 @@
 
         function syncChartStudyVisibility(target) {
             const bundle = getSeriesBundle(target);
-            const chartInstance = target === 2 ? chart2 : chart;
             const showCandles = S.priceMode === 'candles';
             const showVolume = S.lowerStudy === 'volume';
             const showRsi = S.lowerStudy === 'rsi';
+            const showLowerPane = showVolume || showRsi;
+            syncLowerPaneLayout();
             bundle.candles.applyOptions({ visible: showCandles, lastValueVisible: showCandles, priceLineVisible: showCandles });
             bundle.line.applyOptions({ visible: !showCandles, lastValueVisible: !showCandles, priceLineVisible: !showCandles });
             [bundle.ma7, bundle.ma25, bundle.ma99].forEach(series => {
                 series.applyOptions({ visible: Boolean(S.showMAs) });
             });
-            bundle.volume.applyOptions({ visible: showVolume });
-            bundle.rsi.applyOptions({ visible: showRsi });
-            chartInstance.priceScale('right').applyOptions({ scaleMargins: { top: 0.08, bottom: 0.26 } });
-            chartInstance.priceScale('vol').applyOptions({ scaleMargins: { top: 0.78, bottom: 0.04 }, visible: showVolume });
-            chartInstance.priceScale('osc').applyOptions({ scaleMargins: { top: 0.78, bottom: 0.04 }, visible: showRsi });
+            bundle.volume.applyOptions({
+                visible: showVolume,
+                lastValueVisible: false,
+                priceLineVisible: false
+            });
+            bundle.rsi.applyOptions({
+                visible: showRsi,
+                lastValueVisible: showRsi,
+                priceLineVisible: false
+            });
+            bundle.rsiFloor.applyOptions({ visible: showRsi });
+            bundle.rsiCeil.applyOptions({ visible: showRsi });
+            bundle.chart.applyOptions(getChartThemeOptions({ showTimeScale: !showLowerPane }));
+            bundle.lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: showLowerPane }));
+            bundle.lowerPane?.classList.toggle('is-rsi', showRsi);
             syncRsiPriceLines(target);
+            resizeChartBundle(
+                target,
+                bundle,
+                target === 2 ? chartMainPane2 : chartMainPane1,
+                target === 2 ? chartLowerPane2 : chartLowerPane1
+            );
+            scheduleVisibleExtremaUpdate(target);
+            scheduleRsiBandUpdate(target);
         }
 
         function syncStudyLegend(target, time) {
@@ -3993,6 +4590,7 @@
             const store = getCandleStore(target);
             const studyCache = store.studies;
             if (!refs) return;
+            const [maFast, maMid, maSlow] = S.maPeriods;
             const lowerValue = S.lowerStudy === 'rsi'
                 ? findStudyValue(studyCache.rsi, time)
                 : (() => {
@@ -4000,15 +4598,24 @@
                     const found = data.find(entry => Number(entry.time) === Number(time));
                     return Number(found?.value ?? data[data.length - 1]?.value);
                 })();
+            if (refs.maKey7) refs.maKey7.textContent = `MA(${maFast})`;
+            if (refs.maKey25) refs.maKey25.textContent = `MA(${maMid})`;
+            if (refs.maKey99) refs.maKey99.textContent = `MA(${maSlow})`;
+            const lowerItem = refs.lowerLabel?.closest('.legend-item');
+            if (lowerItem) lowerItem.style.display = hasLowerPane() ? '' : 'none';
             refs.lowerLabel.textContent = S.lowerStudy === 'rsi' ? `RSI(${RSI_PERIOD})` : 'Volume';
-            refs.lowerValue.textContent = S.lowerStudy === 'rsi'
-                ? (Number.isFinite(lowerValue) ? lowerValue.toFixed(2) : '–')
-                : (Number.isFinite(lowerValue) ? fmtK(lowerValue) : '–');
+            refs.lowerValue.textContent = S.lowerStudy === 'none'
+                ? '–'
+                : S.lowerStudy === 'rsi'
+                    ? (Number.isFinite(lowerValue) ? lowerValue.toFixed(2) : '–')
+                    : (Number.isFinite(lowerValue) ? fmtK(lowerValue) : '–');
+            refs.lowerValue.style.color = S.lowerStudy === 'rsi' ? '#8b5cf6' : 'var(--text)';
             [[refs.ma7, studyCache.ma7], [refs.ma25, studyCache.ma25], [refs.ma99, studyCache.ma99]].forEach(([el, data]) => {
                 if (!el) return;
                 const item = el.closest('.legend-item');
                 if (item) item.style.display = S.showMAs ? '' : 'none';
-                el.textContent = Number.isFinite(findStudyValue(data, time)) ? fmt(findStudyValue(data, time), pxDec(findStudyValue(data, time))) : '–';
+                const value = findStudyValue(data, time);
+                el.textContent = Number.isFinite(value) ? fmt(value, pxDec(value)) : '–';
             });
         }
 
@@ -4017,10 +4624,11 @@
             const store = getCandleStore(target);
             const candleData = getSortedCandleData(target);
             const lineData = buildLineData(candleData);
+            const [maFast, maMid, maSlow] = S.maPeriods;
             store.studies = {
-                ma7: computeSmaData(candleData, MA_PERIODS[0]),
-                ma25: computeSmaData(candleData, MA_PERIODS[1]),
-                ma99: computeSmaData(candleData, MA_PERIODS[2]),
+                ma7: computeSmaData(candleData, maFast),
+                ma25: computeSmaData(candleData, maMid),
+                ma99: computeSmaData(candleData, maSlow),
                 rsi: computeRsiData(candleData, RSI_PERIOD)
             };
             if (target === 2) studyCache2 = store.studies;
@@ -4030,8 +4638,12 @@
             bundle.ma25.setData(store.studies.ma25);
             bundle.ma99.setData(store.studies.ma99);
             bundle.rsi.setData(store.studies.rsi);
+            bundle.rsiFloor.setData(candleData.map(bar => ({ time: bar.time, value: 0 })));
+            bundle.rsiCeil.setData(candleData.map(bar => ({ time: bar.time, value: 100 })));
             syncChartStudyVisibility(target);
             syncStudyLegend(target);
+            scheduleVisibleExtremaUpdate(target);
+            scheduleRsiBandUpdate(target);
         }
 
         function syncChartPrefsUi() {
@@ -4045,6 +4657,9 @@
                 chartMaToggle.classList.toggle('is-active', Boolean(S.showMAs));
                 chartMaToggle.setAttribute('aria-pressed', S.showMAs ? 'true' : 'false');
             }
+            if (chartMaFastInput) chartMaFastInput.value = String(S.maPeriods[0]);
+            if (chartMaMidInput) chartMaMidInput.value = String(S.maPeriods[1]);
+            if (chartMaSlowInput) chartMaSlowInput.value = String(S.maPeriods[2]);
             if (chartRsiLowerInput) chartRsiLowerInput.value = String(S.rsiLower);
             if (chartRsiUpperInput) chartRsiUpperInput.value = String(S.rsiUpper);
         }
@@ -4054,8 +4669,10 @@
                 priceMode: S.priceMode,
                 lowerStudy: S.lowerStudy,
                 showMAs: S.showMAs,
+                maPeriods: S.maPeriods.slice(),
                 rsiLower: S.rsiLower,
-                rsiUpper: S.rsiUpper
+                rsiUpper: S.rsiUpper,
+                lowerPaneHeight: S.lowerPaneHeight
             });
         }
 
@@ -4079,9 +4696,12 @@
             S.priceMode = prefs.priceMode;
             S.lowerStudy = prefs.lowerStudy;
             S.showMAs = prefs.showMAs;
+            S.maPeriods = prefs.maPeriods.slice();
             S.rsiLower = prefs.rsiLower;
             S.rsiUpper = prefs.rsiUpper;
+            S.lowerPaneHeight = prefs.lowerPaneHeight;
             syncChartPrefsUi();
+            syncLowerPaneLayout();
             syncChartStudyVisibility(1);
             syncChartStudyVisibility(2);
             syncStudyLegend(1);
@@ -4224,9 +4844,6 @@
             if (targetChart === 1) isLoadingHistory = false; else isLoadingHistory2 = false;
         }
 
-        chart.timeScale().subscribeVisibleLogicalRangeChange(range => { if (range && range.from < 10) loadOlderCandles(1); });
-        chart2.timeScale().subscribeVisibleLogicalRangeChange(range => { if (range && range.from < 10) loadOlderCandles(2); });
-
         // ── API calls ─────────────────────────────────────────────
         async function getPerpDexNames() {
             if (perpDexNames) return perpDexNames;
@@ -4330,7 +4947,7 @@
             sFund.textContent = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
             sFund.className = 'val ' + (fund >= 0 ? 'up' : 'dn');
             sFund.dataset.base = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
-            document.title = `${market.label} — Asset Terminal`;
+            syncAssetDocumentTitle(mark);
             legName.textContent = `${market.label}/USD • ${S.tf}`;
             syncSelectedCoinUi(1);
             buildAggBar(mark);
@@ -4456,6 +5073,8 @@
                     obMidArrow.className = 'val ' + (isUp ? 'up' : 'dn');
                 }
                 obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
+                syncAssetDocumentTitle(bestBid);
+                notifyParentLivePrice(bestBid);
             }
 
             updateOrderBookRatio(bidMax, askMax);
@@ -4542,6 +5161,7 @@
                 range: legRange
             });
             syncStudyLegend(1, nextBar.time);
+            scheduleVisibleExtremaUpdate(1);
         }
 
         function buildWalletTrackerHref(wallet) {
@@ -4731,6 +5351,7 @@
                                     range: legRange
                                 });
                                 syncStudyLegend(1, bar.time);
+                                scheduleVisibleExtremaUpdate(1);
                             }
                             if (S.chart2Active && coinStr === S.coin2) {
                                 candles2.update(bar);
@@ -4749,6 +5370,7 @@
                                     range: legRange2
                                 });
                                 syncStudyLegend(2, bar.time);
+                                scheduleVisibleExtremaUpdate(2);
                             }
                         }
                     }
@@ -5110,6 +5732,22 @@
                 applyChartPrefs({ ...getChartPrefsPayload(), showMAs: !S.showMAs });
             });
         }
+
+        function applyMaPeriodsFromInputs() {
+            applyChartPrefs({
+                ...getChartPrefsPayload(),
+                maPeriods: [
+                    Number(chartMaFastInput?.value),
+                    Number(chartMaMidInput?.value),
+                    Number(chartMaSlowInput?.value)
+                ]
+            });
+        }
+
+        [chartMaFastInput, chartMaMidInput, chartMaSlowInput].forEach((input) => {
+            if (!input) return;
+            input.addEventListener('change', applyMaPeriodsFromInputs);
+        });
 
         if (chartRsiLowerInput) {
             chartRsiLowerInput.addEventListener('change', () => {

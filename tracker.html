@@ -7945,9 +7945,22 @@
         if (!coin) return;
         if (isPrimaryFrame) {
           state.coin = coin;
+          syncTrackerDocumentTitle();
         } else if (extraFrameIndex >= 0 && extraFrameIndex < state.extraCharts.length) {
           state.extraCharts[extraFrameIndex] = coin;
         }
+        return;
+      }
+      if (data.type === "hypermonitor:live-price") {
+        if (!isPrimaryFrame) return;
+        const rawCoin = String(data.coin || state.coin || "").trim();
+        const price = Number(data.price);
+        if (!rawCoin || !Number.isFinite(price) || price <= 0) return;
+        const coinKey = normalizeFooterCoinValue(rawCoin);
+        const base = getFooterBase(coinKey);
+        liveMids.set(coinKey, price);
+        if (base) liveMids.set(base, price);
+        syncTrackerDocumentTitle();
         return;
       }
       if (!isPrimaryFrame) return;
