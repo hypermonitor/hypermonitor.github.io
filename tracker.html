@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hypermonitor - Tracker Terminal</title>
+  <title>BTC | Hypermonitor</title>
   <meta
     name="description"
     content="Hypermonitor trade terminal and explore leaderboard in one view."
@@ -132,7 +132,7 @@
     }
 
     #app {
-      width: min(1920px, calc(100vw - 8px));
+      width: min(1920px, 100vw);
       height: 100dvh;
       margin: 0 auto;
       padding: 6px 0 var(--footer-reserve);
@@ -146,12 +146,10 @@
       top: 0;
       z-index: 40;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
+      gap: 8px;
       min-height: var(--header-height);
-      padding: 3px 0 5px;
+      padding: 0 8px 0 10px;
       margin-bottom: var(--shell-v-gap);
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       background: var(--bg);
@@ -221,6 +219,14 @@
       min-width: 280px;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+      height: auto;
+    }
+
     .header-theme-btn {
       width: 30px;
       height: 30px;
@@ -234,6 +240,7 @@
       color: var(--muted);
       transition: color 160ms ease;
       flex: 0 0 auto;
+      margin: 0;
     }
 
     .header-theme-btn svg {
@@ -1878,11 +1885,11 @@
     }
 
     body.light thead {
-      background: #f3f4f6;
+      background: #e7eaee;
     }
 
     body.light th {
-      color: #6b7280;
+      color: #5f6b78;
     }
 
     body.light tbody tr {
@@ -2050,20 +2057,23 @@
     }
 
     .price-footer-inner {
-      width: min(1920px, calc(100vw - 8px));
+      width: min(1920px, 100vw);
       margin: 0 auto;
-      display: flex;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: center;
       gap: 0.6rem;
-      flex-wrap: nowrap;
       position: relative;
-      padding: 0.15rem 0;
+      height: 34px;
+      min-height: 34px;
+      overflow: hidden;
+      padding: 0 8px;
     }
 
     .price-brand-wrap {
       display: inline-flex;
       align-items: center;
-      flex: 0 0 auto;
+      height: 100%;
     }
 
     .price-currency-switch {
@@ -2117,9 +2127,11 @@
     }
 
     .price-ticker {
-      flex: 1 1 auto;
       overflow: hidden;
       min-width: 0;
+      display: flex;
+      align-items: center;
+      height: 100%;
       -webkit-mask-image: linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
       mask-image: linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%);
     }
@@ -2278,9 +2290,9 @@
     .price-controls {
       display: inline-flex;
       align-items: center;
+      justify-content: flex-end;
       gap: 0.4rem;
-      margin-left: auto;
-      flex: 0 0 auto;
+      height: 100%;
     }
 
     .price-add-toggle-btn {
@@ -2378,6 +2390,10 @@
 
     .price-controls.compact-open .price-add-toggle-btn {
       display: none;
+    }
+
+    .price-controls.compact-open {
+      gap: 0.35rem;
     }
 
     .price-context-menu {
@@ -2873,10 +2889,6 @@
       }
 
       .price-footer-inner {
-        width: calc(100vw - 8px);
-      }
-
-      .price-footer-inner {
         padding-left: 0;
         padding-right: 0;
         gap: 0.45rem;
@@ -2920,6 +2932,8 @@
       }
 
       .shell-header {
+        display: flex;
+        flex-wrap: wrap;
         position: sticky;
         top: 0;
         z-index: 60;
@@ -2946,6 +2960,12 @@
         order: 2;
         flex: 1 0 100%;
         min-width: 0;
+      }
+
+      .header-actions {
+        order: 1;
+        margin-left: auto;
+        justify-content: flex-end;
       }
 
       .header-search-shell {
@@ -3093,7 +3113,7 @@
       </a>
 
       <form class="header-search-form" id="headerSearchForm" autocomplete="off">
-        <label class="sr-only" for="headerSearchInput">Search wallet address or coin</label>
+        <label class="sr-only" for="headerSearchInput">Find wallet or asset</label>
         <div class="header-search-shell">
           <span class="header-search-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -3104,7 +3124,7 @@
             id="headerSearchInput"
             class="header-search-input"
             type="search"
-            placeholder="Wallet address or coin"
+            placeholder="Find wallet or asset"
             spellcheck="false"
             autocapitalize="off"
             autocomplete="off"
@@ -3116,7 +3136,9 @@
         </div>
         <div class="header-search-suggestions" id="headerSearchSuggestions" hidden></div>
       </form>
-      <button class="header-theme-btn" id="headerThemeBtn" type="button" aria-label="Switch theme" title="Switch theme"></button>
+      <div class="header-actions">
+        <button class="header-theme-btn" id="headerThemeBtn" type="button" aria-label="Switch theme" title="Switch theme"></button>
+      </div>
     </header>
 
     <main>
@@ -3204,17 +3226,17 @@
         <div class="price-track" id="priceTrack">
           <div class="price-list" id="priceList">
             <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
-            <span class="price-item" data-coin="BTC"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/BTC.svg" alt="BTC" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="ETH"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/ETH.svg" alt="ETH" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="SOL"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/SOL.svg" alt="SOL" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="HYPE"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/HYPE.svg" alt="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="LINK"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/LINK.svg" alt="LINK" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="BTC"><img class="coinIcon" src="images/coins/BTC.svg" alt="BTC" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="ETH"><img class="coinIcon" src="images/coins/ETH.svg" alt="ETH" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="SOL"><img class="coinIcon" src="images/coins/SOL.svg" alt="SOL" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="HYPE"><img class="coinIcon" src="images/coins/HYPE.svg" alt="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="LINK"><img class="coinIcon" src="images/coins/LINK.svg" alt="LINK" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
-            <span class="price-item" data-coin="xyz:GOLD"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/xyz:GOLD.svg" alt="GOLD" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/xyz:SILVER.svg" alt="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="cash:USA500"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/cash:USA500.svg" alt="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:NVDA"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/xyz:NVDA.svg" alt="NVDA" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:MSTR"><img class="coinIcon" src="https://app.hyperliquid.xyz/coins/xyz:MSTR.svg" alt="MSTR" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:GOLD"><img class="coinIcon" src="images/coins/GOLD.svg" alt="GOLD" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon" src="images/coins/SILVER.svg" alt="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="cash:USA500"><img class="coinIcon" src="images/coins/USA500.png" alt="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:NVDA"><img class="coinIcon" src="images/coins/NVDA.svg" alt="NVDA" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:MSTR"><img class="coinIcon" src="images/coins/MSTR.svg" alt="MSTR" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
           </div>
           <div class="price-list clone" id="priceListClone" aria-hidden="true"></div>
           <div class="price-list clone" id="priceListClone2" aria-hidden="true"></div>
@@ -4697,6 +4719,32 @@
         return `${meta.symbol}${formatted}`;
       }
 
+    function formatTitlePrice(value) {
+        const price = Number(value);
+        if (!Number.isFinite(price) || price <= 0) return "";
+        const abs = Math.abs(price);
+        let decimals = 4;
+        if (abs >= 10000) decimals = 0;
+        else if (abs >= 1000) decimals = 1;
+        else if (abs >= 100) decimals = 2;
+        else if (abs >= 10) decimals = 3;
+        else if (abs >= 1) decimals = 4;
+        else decimals = 5;
+        return price.toLocaleString("en-US", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: decimals
+        });
+      }
+
+    function syncTrackerDocumentTitle() {
+        const assetLabel = getFooterBase(state.coin || "BTC") || "BTC";
+        const livePrice = getLivePriceForCoin(state.coin);
+        const priceLabel = formatTitlePrice(livePrice);
+        document.title = priceLabel
+          ? `${priceLabel} | ${assetLabel} | Hypermonitor`
+          : `${assetLabel} | Hypermonitor`;
+      }
+
   
     function isSameOriginAsset(url) {
         if (!url) return false;
@@ -4756,6 +4804,8 @@
           const pngOnly = new Set(["USA500", "COPPER"]);
           const localExt = pngOnly.has(upper) ? "png" : "svg";
           const dexLower = String(dex || "").toLowerCase();
+          candidates.push(`images/coins/${encodeURIComponent(safe)}.${localExt}`);
+          if (upper !== safe) candidates.push(`images/coins/${encodeURIComponent(upper)}.${localExt}`);
           candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(symbol)}.svg`);
           if (upper !== symbol) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}.svg`);
           if (!pngOnly.has(upper) && !symbol.includes("/") && !NON_CRYPTO_PREFIXES.includes(dexLower)) {
@@ -4763,8 +4813,6 @@
             candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(symbol)}_spot.svg`);
             if (upper !== symbol) candidates.push(`${COIN_ICON_BASE}${encodeURIComponent(upper)}_spot.svg`);
           }
-          candidates.push(`images/coins/${encodeURIComponent(safe)}.${localExt}`);
-          if (upper !== safe) candidates.push(`images/coins/${encodeURIComponent(upper)}.${localExt}`);
           if (NON_CRYPTO_PREFIXES.includes(dexLower)) {
             // Generic HIP-3 ticker logo fallbacks (e.g. xyz:NVDA, xyz:MSTR, cash:SPY).
             candidates.push(`https://financialmodelingprep.com/image-stock/${encodeURIComponent(upper)}.png`);
@@ -5936,6 +5984,7 @@
           if (!footerReady && priceFooterWrapEl && allFooterPricesReady) {
             revealFooter(true);
           }
+          syncTrackerDocumentTitle();
         });
 
         desired.forEach(async (coin) => {
@@ -6408,6 +6457,7 @@
 
     function setCoin(nextCoin, options = {}) {
       state.coin = (nextCoin || "BTC").toUpperCase();
+      syncTrackerDocumentTitle();
       updateTradeFrame();
       updateExtraTradeFrames();
 
@@ -7294,7 +7344,7 @@
         })
         .slice(0, 5)
         .map((item) => ({
-          type: "coin",
+          type: "asset",
           value: item.value,
           label: item.label,
           meta: item.meta
@@ -7327,7 +7377,7 @@
       closeHeaderSuggestions();
       if (headerSearchInput) {
         headerSearchInput.setCustomValidity("");
-        headerSearchInput.value = item.type === "coin" ? item.label : item.value;
+        headerSearchInput.value = item.type === "asset" ? item.label : item.value;
       }
       if (item.type === "wallet") {
         openWalletOverlay(item.value, { pushHistory: true });
@@ -7374,14 +7424,14 @@
 
       if (!isCoinQuery(coin)) {
         if (headerSearchInput) {
-          headerSearchInput.setCustomValidity("Enter a full wallet address or coin symbol.");
+          headerSearchInput.setCustomValidity("Enter a full wallet address or asset symbol.");
           headerSearchInput.reportValidity();
         }
         return;
       }
 
       if (headerSearchInput) {
-        headerSearchInput.setCustomValidity("Choose a suggested coin or enter the full symbol.");
+        headerSearchInput.setCustomValidity("Choose a suggested asset or enter the full symbol.");
         headerSearchInput.reportValidity();
       }
     }

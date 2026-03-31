@@ -607,6 +607,12 @@
             display: block;
         }
 
+        .toolbar-icon-btn:disabled {
+            opacity: 0.34;
+            cursor: default;
+            pointer-events: none;
+        }
+
         .ob-open-svg {
             width: 18px;
             height: 18px;
@@ -659,6 +665,160 @@
             background: var(--surface2);
         }
 
+        .chart-settings {
+            position: relative;
+            flex: 0 0 auto;
+        }
+
+        .chart-settings-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 256px;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 32;
+        }
+
+        .chart-settings-menu.open {
+            display: flex;
+        }
+
+        .chart-settings-group {
+            display: grid;
+            gap: 6px;
+        }
+
+        .chart-settings-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .chart-settings-segment {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+        }
+
+        .chart-settings-option {
+            flex: 1 1 0;
+            min-width: 0;
+            padding: 6px 8px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--muted);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.12s ease, color 0.12s ease;
+        }
+
+        .chart-settings-option:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .chart-settings-option.active {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        html.light .chart-settings-option.active {
+            background: #0f172a;
+            color: #ffffff;
+        }
+
+        .chart-settings-toggle {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface2);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            transition: border-color 0.12s ease, background 0.12s ease;
+        }
+
+        .chart-settings-toggle:hover {
+            border-color: var(--border-strong);
+        }
+
+        .chart-settings-toggle::after {
+            content: "";
+            width: 30px;
+            height: 18px;
+            border-radius: 999px;
+            background: rgba(132, 142, 156, 0.28);
+            box-shadow: inset 0 0 0 1px rgba(132, 142, 156, 0.18);
+            transition: background 0.12s ease;
+        }
+
+        .chart-settings-toggle.is-active::after {
+            background: rgba(14, 203, 129, 0.28);
+            box-shadow: inset 12px 0 0 var(--up);
+        }
+
+        .chart-settings-bounds {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .chart-settings-field {
+            display: grid;
+            gap: 4px;
+        }
+
+        .chart-settings-field span {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .chart-settings-field input {
+            width: 100%;
+            min-width: 0;
+            padding: 7px 9px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--surface2);
+            color: var(--text);
+            font: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .chart-settings-field input:focus {
+            border-color: var(--border-strong);
+        }
+
+        .chart-settings-hint {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
         .chart-loading-wrap {
             flex: 1;
             position: relative;
@@ -690,7 +850,7 @@
 
         .chart-watermark span {
             position: relative;
-            top: -16px;
+            top: -20px;
             font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             font-weight: 600;
             letter-spacing: 0.04em;
@@ -699,6 +859,10 @@
             text-transform: uppercase;
             color: rgba(234, 236, 239, 0.14);
             white-space: nowrap;
+        }
+
+        html.light .chart-watermark span {
+            color: rgba(55, 65, 81, 0.24);
         }
 
         .chart-loading-wrap.is-loading .chart-watermark {
@@ -967,6 +1131,29 @@
         }
 
         #legend-ohlc span.v {
+            color: var(--text);
+        }
+
+        .legend-studies {
+            font-size: 11px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            font-variant-numeric: tabular-nums;
+            color: var(--muted);
+        }
+
+        .legend-studies .legend-item {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .legend-studies .legend-key {
+            color: var(--muted);
+        }
+
+        .legend-studies span.v {
             color: var(--text);
         }
 
@@ -2037,10 +2224,58 @@
                     <button class="tf-btn" data-tf="1h">1H</button>
                     <button class="tf-btn" data-tf="4h">4H</button>
                     <button class="tf-btn" data-tf="1d">1D</button>
+                    <div class="chart-settings" id="chartSettings">
+                        <button id="chart-settings-btn" class="toolbar-icon-btn" type="button" aria-label="Chart options" title="Chart options">
+                            <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                                <path d="M3 4.25H13M5.5 8H13M8.5 11.75H13M3 11.75H5M3 8H7.5M3 4.25H4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                                <circle cx="5.1" cy="4.25" r="1.35" fill="currentColor"></circle>
+                                <circle cx="8.1" cy="8" r="1.35" fill="currentColor"></circle>
+                                <circle cx="6.6" cy="11.75" r="1.35" fill="currentColor"></circle>
+                            </svg>
+                        </button>
+                        <div id="chart-settings-menu" class="chart-settings-menu" aria-hidden="true">
+                            <div class="chart-settings-group">
+                                <div class="chart-settings-label">Price</div>
+                                <div class="chart-settings-segment" role="group" aria-label="Price chart style">
+                                    <button class="chart-settings-option" type="button" data-price-mode="candles">Candles</button>
+                                    <button class="chart-settings-option" type="button" data-price-mode="line">Line</button>
+                                </div>
+                            </div>
+                            <div class="chart-settings-group">
+                                <div class="chart-settings-label">Lower Pane</div>
+                                <div class="chart-settings-segment" role="group" aria-label="Lower chart study">
+                                    <button class="chart-settings-option" type="button" data-lower-study="volume">Volume</button>
+                                    <button class="chart-settings-option" type="button" data-lower-study="rsi">RSI</button>
+                                </div>
+                            </div>
+                            <div class="chart-settings-group">
+                                <button id="chart-ma-toggle" class="chart-settings-toggle" type="button" aria-pressed="false">Moving averages</button>
+                            </div>
+                            <div class="chart-settings-group">
+                                <div class="chart-settings-label">RSI Bounds</div>
+                                <div class="chart-settings-bounds">
+                                    <label class="chart-settings-field">
+                                        <span>Lower</span>
+                                        <input id="chart-rsi-lower" type="number" min="1" max="99" step="1" inputmode="numeric" />
+                                    </label>
+                                    <label class="chart-settings-field">
+                                        <span>Upper</span>
+                                        <input id="chart-rsi-upper" type="number" min="1" max="99" step="1" inputmode="numeric" />
+                                    </label>
+                                </div>
+                                <div class="chart-settings-hint">RSI replaces the lower volume pane and shows configurable upper and lower guide levels.</div>
+                            </div>
+                        </div>
+                    </div>
                     <div style="flex:1"></div>
-                    <button id="add-chart-btn" class="toolbar-icon-btn chart-toggle-btn" type="button" onclick="toggleChart2()" title="Add chart" aria-label="Add chart">
+                    <button id="add-chart-btn" class="toolbar-icon-btn chart-toggle-btn" type="button" onclick="handleAddChart()" title="Add chart" aria-label="Add chart">
                         <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
                             <path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                        </svg>
+                    </button>
+                    <button id="remove-chart-btn" class="toolbar-icon-btn chart-toggle-btn" type="button" onclick="handleRemoveChart()" title="Remove chart" aria-label="Remove chart" disabled>
+                        <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
+                            <path d="M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
                         </svg>
                     </button>
                     <button id="ob-open-btn" class="toolbar-icon-btn" type="button" onclick="toggleOb()" title="Show order book" aria-label="Show order book" style="display:none;">
@@ -2078,6 +2313,12 @@
                                     <span class="legend-item"><span class="legend-key">Close</span><span class="v" id="leg-c">–</span></span>
                                     <span class="legend-item"><span class="legend-key">Change</span><span class="v" id="leg-pct">–</span></span>
                                     <span class="legend-item"><span class="legend-key">Range</span><span class="v" id="leg-range">–</span></span>
+                                </div>
+                                <div class="legend-studies">
+                                    <span class="legend-item"><span class="legend-key">MA(7)</span><span class="v" id="leg-ma-7">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">MA(25)</span><span class="v" id="leg-ma-25">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">MA(99)</span><span class="v" id="leg-ma-99">–</span></span>
+                                    <span class="legend-item"><span class="legend-key" id="leg-lower-label">Volume</span><span class="v" id="leg-lower-value">–</span></span>
                                 </div>
                             </div>
                             <div class="chart-loading-overlay" id="chart-loading-1" aria-hidden="true">
@@ -2120,6 +2361,12 @@
                                     <span class="legend-item"><span class="legend-key">Close</span><span class="v" id="leg-c-2">–</span></span>
                                     <span class="legend-item"><span class="legend-key">Change</span><span class="v" id="leg-pct-2">–</span></span>
                                     <span class="legend-item"><span class="legend-key">Range</span><span class="v" id="leg-range-2">–</span></span>
+                                </div>
+                                <div class="legend-studies">
+                                    <span class="legend-item"><span class="legend-key">MA(7)</span><span class="v" id="leg-ma-7-2">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">MA(25)</span><span class="v" id="leg-ma-25-2">–</span></span>
+                                    <span class="legend-item"><span class="legend-key">MA(99)</span><span class="v" id="leg-ma-99-2">–</span></span>
+                                    <span class="legend-item"><span class="legend-key" id="leg-lower-label-2">Volume</span><span class="v" id="leg-lower-value-2">–</span></span>
                                 </div>
                             </div>
                             <div class="chart-loading-overlay" id="chart-loading-2" aria-hidden="true">
@@ -2327,12 +2574,12 @@
                 CRCL: 'https://logo.clearbit.com/circle.com'
             };
             const logoCandidates = [
-                `https://app.hyperliquid.xyz/coins/${encodeURIComponent(marketKey)}.svg`,
-                `https://app.hyperliquid.xyz/coins/${encodeURIComponent(marketKey)}.png`,
                 specialLogos[base],
                 domainLogos[base],
                 `images/coins/${encodeURIComponent(base)}.svg`,
                 `images/coins/${encodeURIComponent(base)}.png`,
+                `https://app.hyperliquid.xyz/coins/${encodeURIComponent(marketKey)}.svg`,
+                `https://app.hyperliquid.xyz/coins/${encodeURIComponent(marketKey)}.png`,
                 `https://financialmodelingprep.com/image-stock/${encodeURIComponent(base)}.png`,
                 `https://eodhd.com/img/logos/US/${encodeURIComponent(base)}.png`
             ].filter(Boolean);
@@ -2400,6 +2647,22 @@
         const COIN_ICON_BASE = 'https://app.hyperliquid.xyz/coins/';
         const NON_CRYPTO_PREFIXES = ['xyz', 'flx', 'hyna', 'km', 'vntl', 'cash'];
         const COIN_LOGO_URL_CACHE_KEY = 'hypermonitor-logo-url-cache';
+        const CHART_PREFS_STORAGE_KEY = 'hypermonitor-chart-prefs';
+        const DEFAULT_CHART_PREFS = Object.freeze({
+            priceMode: 'candles',
+            lowerStudy: 'volume',
+            showMAs: true,
+            rsiLower: 30,
+            rsiUpper: 70
+        });
+        const MA_PERIODS = [7, 25, 99];
+        const MA_COLORS = {
+            7: '#f0c419',
+            25: '#ff4da6',
+            99: '#7c5cff'
+        };
+        const RSI_PERIOD = 14;
+        const LOGO_PREFETCH_LIMIT = 900;
         const PAGE_PARAMS = new URLSearchParams(location.search);
         const IS_COMPACT = PAGE_PARAMS.get('compact') === '1';
         const EMBED_PANE = String(PAGE_PARAMS.get('pane') || '').trim();
@@ -2540,16 +2803,64 @@
             return coinResolvedLogoCache.get(key) || '';
         }
 
+        function normalizeChartPrefs(raw) {
+            const next = { ...DEFAULT_CHART_PREFS };
+            if (!raw || typeof raw !== 'object') return next;
+            next.priceMode = raw.priceMode === 'line' ? 'line' : 'candles';
+            next.lowerStudy = raw.lowerStudy === 'rsi' ? 'rsi' : 'volume';
+            next.showMAs = raw.showMAs !== false;
+            const lower = Number(raw.rsiLower);
+            const upper = Number(raw.rsiUpper);
+            next.rsiLower = Number.isFinite(lower) ? Math.min(98, Math.max(1, Math.round(lower))) : DEFAULT_CHART_PREFS.rsiLower;
+            next.rsiUpper = Number.isFinite(upper) ? Math.min(99, Math.max(2, Math.round(upper))) : DEFAULT_CHART_PREFS.rsiUpper;
+            if (next.rsiUpper <= next.rsiLower) {
+                next.rsiUpper = Math.min(99, next.rsiLower + 1);
+            }
+            return next;
+        }
+
+        function loadChartPrefs() {
+            try {
+                return normalizeChartPrefs(JSON.parse(localStorage.getItem(CHART_PREFS_STORAGE_KEY) || 'null'));
+            } catch (_) {
+                return { ...DEFAULT_CHART_PREFS };
+            }
+        }
+
+        function saveChartPrefs(prefs) {
+            try {
+                localStorage.setItem(CHART_PREFS_STORAGE_KEY, JSON.stringify(normalizeChartPrefs(prefs)));
+            } catch (_) {}
+        }
+
+        const prefetchedLogoUrls = new Set();
+
+        function preloadLogoUrl(url) {
+            const safeUrl = String(url || '').trim();
+            if (!safeUrl || prefetchedLogoUrls.has(safeUrl)) return;
+            prefetchedLogoUrls.add(safeUrl);
+            const img = new Image();
+            img.decoding = 'async';
+            img.loading = 'eager';
+            img.referrerPolicy = 'no-referrer';
+            img.src = safeUrl;
+        }
+
         function parseCoin() {
             return buildMarketKey(PAGE_PARAMS.get('coin') || PAGE_PARAMS.get('asset') || 'BTC');
         }
 
         // ── State ──────────────────────────────────────────────────
+        const initialChartPrefs = loadChartPrefs();
         const S = {
             coin: parseCoin(), tf: '15m', markPx: 0, aggTick: 0,
             obView: 'both', aggTicks: [],
             markets: [], tradeBuf: [], ws: null,
-            
+            priceMode: initialChartPrefs.priceMode,
+            lowerStudy: initialChartPrefs.lowerStudy,
+            showMAs: initialChartPrefs.showMAs,
+            rsiLower: initialChartPrefs.rsiLower,
+            rsiUpper: initialChartPrefs.rsiUpper,
             // Dual chart
             chart2Active: false,
             coin2: 'ETH',
@@ -2645,6 +2956,8 @@
         // Legends
         const legName = $('legend-name'), legO = $('leg-o'), legH = $('leg-h'), legL = $('leg-l'), legC = $('leg-c'), legPct = $('leg-pct'), legRange = $('leg-range');
         const legName2 = $('legend-name-2'), legO2 = $('leg-o-2'), legH2 = $('leg-h-2'), legL2 = $('leg-l-2'), legC2 = $('leg-c-2'), legPct2 = $('leg-pct-2'), legRange2 = $('leg-range-2');
+        const legMa7 = $('leg-ma-7'), legMa25 = $('leg-ma-25'), legMa99 = $('leg-ma-99'), legLowerLabel = $('leg-lower-label'), legLowerValue = $('leg-lower-value');
+        const legMa72 = $('leg-ma-7-2'), legMa252 = $('leg-ma-25-2'), legMa992 = $('leg-ma-99-2'), legLowerLabel2 = $('leg-lower-label-2'), legLowerValue2 = $('leg-lower-value-2');
 
         // Layouts
         const rightPanel = $('right-panel');
@@ -2655,11 +2968,18 @@
         const obOpenBtn = $('ob-open-btn');
         const chartCont2 = $('chart-container-2');
         const addChartBtn = $('add-chart-btn');
+        const removeChartBtn = $('remove-chart-btn');
         const chartLoadingWrap1 = $('chart-wrap');
         const chartLoadingWrap2 = $('chart-wrap-2');
         const chartSplitter = $('chart-splitter');
         const obMainSplitter = $('ob-main-splitter');
         const topSplitDrag = { kind: '', pointerId: null };
+        const chartSettingsRoot = $('chartSettings');
+        const chartSettingsBtn = $('chart-settings-btn');
+        const chartSettingsMenu = $('chart-settings-menu');
+        const chartMaToggle = $('chart-ma-toggle');
+        const chartRsiLowerInput = $('chart-rsi-lower');
+        const chartRsiUpperInput = $('chart-rsi-upper');
 
         function notifyParentChartState() {
             if (IS_COMPACT || window.parent === window) return;
@@ -2706,12 +3026,11 @@
             } catch (_) {}
         }
 
-        function syncChartToggleButton(isRemove) {
-            if (!addChartBtn) return;
-            const remove = Boolean(isRemove);
-            addChartBtn.innerHTML = remove ? TOOLBAR_MINUS_ICON : TOOLBAR_PLUS_ICON;
-            addChartBtn.title = remove ? 'Remove chart' : 'Add chart';
-            addChartBtn.setAttribute('aria-label', remove ? 'Remove chart' : 'Add chart');
+        function syncChartToggleButtons() {
+            const canAddSecondChart = !IS_COMPACT && !S.chart2Active;
+            const canRemoveSecondChart = !IS_COMPACT && S.chart2Active && (!Number.isFinite(S.parentExtraCharts) || S.parentExtraCharts <= 0);
+            if (addChartBtn) addChartBtn.disabled = !canAddSecondChart;
+            if (removeChartBtn) removeChartBtn.disabled = !canRemoveSecondChart;
         }
 
         function isMobileAssetLayout() {
@@ -2894,7 +3213,7 @@
             if (!IS_COMPACT) return;
             S.chart2Active = false;
             if (chartCont2) chartCont2.style.display = 'none';
-            syncChartToggleButton(false);
+            syncChartToggleButtons();
             if (rightPanel) rightPanel.style.display = 'none';
             if (obOpenBtn) obOpenBtn.style.display = 'none';
             syncTopSplitters();
@@ -2997,27 +3316,32 @@
             notifyParentChartState();
         }
 
-        function toggleChart2() {
+        function toggleChart2(forceActive) {
             if (IS_COMPACT) return;
-            if (S.chart2Active && Number.isFinite(S.parentExtraCharts) && S.parentExtraCharts > 0) {
-                try {
-                    window.parent.postMessage({ type: 'hypermonitor:remove-extra-chart' }, '*');
-                } catch (_) {}
-                return;
-            }
-            S.chart2Active = !S.chart2Active;
+            const nextActive = typeof forceActive === 'boolean' ? forceActive : !S.chart2Active;
+            S.chart2Active = Boolean(nextActive);
             if (S.chart2Active) {
                 chartCont2.style.display = 'flex';
-                syncChartToggleButton(true);
                 syncSelectedCoinUi(2);
                 fetchCandles2();
             } else {
                 chartCont2.style.display = 'none';
-                syncChartToggleButton(false);
             }
+            syncChartToggleButtons();
             syncTopSplitters();
             notifyParentChartState();
             connectWs();
+        }
+
+        function handleAddChart() {
+            if (IS_COMPACT || S.chart2Active) return;
+            toggleChart2(true);
+        }
+
+        function handleRemoveChart() {
+            if (IS_COMPACT || !S.chart2Active) return;
+            if (Number.isFinite(S.parentExtraCharts) && S.parentExtraCharts > 0) return;
+            toggleChart2(false);
         }
 
         window.addEventListener('message', event => {
@@ -3045,6 +3369,7 @@
             if (data.type === 'hypermonitor:extra-chart-count') {
                 const next = Number(data.extraCount);
                 S.parentExtraCharts = Number.isFinite(next) && next > 0 ? Math.floor(next) : 0;
+                syncChartToggleButtons();
                 return;
             }
             if (data.type === 'hypermonitor:tracker-layout') {
@@ -3116,6 +3441,73 @@
             legendRefs.close.style.color = directionClass;
             legendRefs.change.style.color = directionClass;
             legendRefs.range.style.color = directionClass;
+        }
+
+        function buildLineData(candlesData) {
+            return (Array.isArray(candlesData) ? candlesData : []).map(bar => ({
+                time: bar.time,
+                value: Number(bar.close)
+            }));
+        }
+
+        function computeSmaData(candlesData, period) {
+            const data = Array.isArray(candlesData) ? candlesData : [];
+            const values = [];
+            if (!Number.isFinite(period) || period <= 0) return values;
+            let sum = 0;
+            const queue = [];
+            data.forEach(bar => {
+                const close = Number(bar.close);
+                if (!Number.isFinite(close)) return;
+                queue.push(close);
+                sum += close;
+                if (queue.length > period) sum -= queue.shift();
+                if (queue.length === period) {
+                    values.push({ time: bar.time, value: sum / period });
+                }
+            });
+            return values;
+        }
+
+        function computeRsiData(candlesData, period = RSI_PERIOD) {
+            const data = Array.isArray(candlesData) ? candlesData : [];
+            if (data.length <= period) return [];
+            let avgGain = 0;
+            let avgLoss = 0;
+            for (let i = 1; i <= period; i += 1) {
+                const diff = Number(data[i].close) - Number(data[i - 1].close);
+                if (diff >= 0) avgGain += diff;
+                else avgLoss -= diff;
+            }
+            avgGain /= period;
+            avgLoss /= period;
+            const values = [];
+            const calcRsi = () => {
+                if (avgLoss === 0) return 100;
+                if (avgGain === 0) return 0;
+                const rs = avgGain / avgLoss;
+                return 100 - 100 / (1 + rs);
+            };
+            values.push({ time: data[period].time, value: calcRsi() });
+            for (let i = period + 1; i < data.length; i += 1) {
+                const diff = Number(data[i].close) - Number(data[i - 1].close);
+                const gain = diff > 0 ? diff : 0;
+                const loss = diff < 0 ? -diff : 0;
+                avgGain = ((avgGain * (period - 1)) + gain) / period;
+                avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+                values.push({ time: data[i].time, value: calcRsi() });
+            }
+            return values;
+        }
+
+        function findStudyValue(seriesData, time) {
+            const data = Array.isArray(seriesData) ? seriesData : [];
+            if (!data.length) return null;
+            if (!Number.isFinite(Number(time))) return Number(data[data.length - 1].value);
+            for (let i = data.length - 1; i >= 0; i -= 1) {
+                if (Number(data[i].time) === Number(time)) return Number(data[i].value);
+            }
+            return null;
         }
 
         function fmtOrderCount(value) {
@@ -3384,23 +3776,92 @@
         // ── Chart 1 Setup ──────────────────────────────────────────
         const chartWrap = $('chart-wrap');
         const chart = LightweightCharts.createChart($('chart-canvas'), getChartThemeOptions());
+        function createChartSeriesBundle(chartInstance) {
+            const candleSeries = chartInstance.addCandlestickSeries({
+                upColor: '#0ECB81',
+                wickUpColor: '#0ECB81',
+                downColor: '#F6465D',
+                wickDownColor: '#F6465D',
+                borderVisible: false
+            });
+            const lineSeries = chartInstance.addLineSeries({
+                color: '#8fb4ff',
+                lineWidth: 2,
+                crosshairMarkerVisible: false,
+                visible: false
+            });
+            const volumeSeries = chartInstance.addHistogramSeries({
+                priceFormat: { type: 'volume' },
+                priceScaleId: 'vol',
+                color: '#0ECB8155',
+                lastValueVisible: false,
+                priceLineVisible: false
+            });
+            const ma7Series = chartInstance.addLineSeries({
+                color: MA_COLORS[7],
+                lineWidth: 1.4,
+                crosshairMarkerVisible: false,
+                lastValueVisible: false,
+                priceLineVisible: false
+            });
+            const ma25Series = chartInstance.addLineSeries({
+                color: MA_COLORS[25],
+                lineWidth: 1.4,
+                crosshairMarkerVisible: false,
+                lastValueVisible: false,
+                priceLineVisible: false
+            });
+            const ma99Series = chartInstance.addLineSeries({
+                color: MA_COLORS[99],
+                lineWidth: 1.4,
+                crosshairMarkerVisible: false,
+                lastValueVisible: false,
+                priceLineVisible: false
+            });
+            const rsiSeries = chartInstance.addLineSeries({
+                priceScaleId: 'osc',
+                color: '#8b5cf6',
+                lineWidth: 1.8,
+                crosshairMarkerVisible: false,
+                lastValueVisible: false,
+                priceLineVisible: false,
+                visible: false
+            });
+            chartInstance.priceScale('right').applyOptions({ scaleMargins: { top: 0.08, bottom: 0.26 } });
+            chartInstance.priceScale('vol').applyOptions({ scaleMargins: { top: 0.78, bottom: 0.04 }, visible: true });
+            chartInstance.priceScale('osc').applyOptions({ scaleMargins: { top: 0.78, bottom: 0.04 }, visible: false });
+            return {
+                candles: candleSeries,
+                line: lineSeries,
+                volume: volumeSeries,
+                ma7: ma7Series,
+                ma25: ma25Series,
+                ma99: ma99Series,
+                rsi: rsiSeries,
+                rsiUpperLine: null,
+                rsiLowerLine: null
+            };
+        }
 
-        const candles = chart.addCandlestickSeries({ upColor: '#0ECB81', wickUpColor: '#0ECB81', downColor: '#F6465D', wickDownColor: '#F6465D', borderVisible: false });
-        const volSeries = chart.addHistogramSeries({
-            priceFormat: { type: 'volume' },
-            priceScaleId: 'vol',
-            color: '#0ECB8155',
-            lastValueVisible: false,
-            priceLineVisible: false
-        });
-        chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+        const chartSeries1 = createChartSeriesBundle(chart);
+        const candles = chartSeries1.candles;
+        const lineSeries = chartSeries1.line;
+        const volSeries = chartSeries1.volume;
+        const maSeries7 = chartSeries1.ma7;
+        const maSeries25 = chartSeries1.ma25;
+        const maSeries99 = chartSeries1.ma99;
+        const rsiSeries = chartSeries1.rsi;
 
         new ResizeObserver(() => { chart.applyOptions({ width: chartWrap.clientWidth, height: chartWrap.clientHeight }); }).observe(chartWrap);
         if (chartsContainer) new ResizeObserver(() => { syncTopSplitters(); }).observe(chartsContainer);
         if (mainLayout) new ResizeObserver(() => { syncTopSplitters(); }).observe(mainLayout);
 
         chart.subscribeCrosshairMove(param => {
-            const bar = param?.seriesData?.get(candles);
+            const data = getSortedCandleData(1);
+            const hoverTime = Number(param?.time);
+            const bar = Number.isFinite(hoverTime)
+                ? data.find(entry => Number(entry.time) === hoverTime)
+                : data[data.length - 1] || param?.seriesData?.get(candles);
             if (bar) {
                 updateLegendMetrics(bar, {
                     open: legO,
@@ -3410,6 +3871,7 @@
                     change: legPct,
                     range: legRange
                 });
+                syncStudyLegend(1, bar.time);
             }
         });
 
@@ -3417,20 +3879,23 @@
         const chartWrap2 = $('chart-wrap-2');
         const chart2 = LightweightCharts.createChart($('chart-canvas-2'), getChartThemeOptions());
 
-        const candles2 = chart2.addCandlestickSeries({ upColor: '#0ECB81', wickUpColor: '#0ECB81', downColor: '#F6465D', wickDownColor: '#F6465D', borderVisible: false });
-        const volSeries2 = chart2.addHistogramSeries({
-            priceFormat: { type: 'volume' },
-            priceScaleId: 'vol',
-            color: '#0ECB8155',
-            lastValueVisible: false,
-            priceLineVisible: false
-        });
-        chart2.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+        const chartSeries2 = createChartSeriesBundle(chart2);
+        const candles2 = chartSeries2.candles;
+        const lineSeries2 = chartSeries2.line;
+        const volSeries2 = chartSeries2.volume;
+        const maSeries72 = chartSeries2.ma7;
+        const maSeries252 = chartSeries2.ma25;
+        const maSeries992 = chartSeries2.ma99;
+        const rsiSeries2 = chartSeries2.rsi;
 
         new ResizeObserver(() => { chart2.applyOptions({ width: chartWrap2.clientWidth, height: chartWrap2.clientHeight }); }).observe(chartWrap2);
 
         chart2.subscribeCrosshairMove(param => {
-            const bar = param?.seriesData?.get(candles2);
+            const data = getSortedCandleData(2);
+            const hoverTime = Number(param?.time);
+            const bar = Number.isFinite(hoverTime)
+                ? data.find(entry => Number(entry.time) === hoverTime)
+                : data[data.length - 1] || param?.seriesData?.get(candles2);
             if (bar) {
                 updateLegendMetrics(bar, {
                     open: legO2,
@@ -3440,15 +3905,189 @@
                     change: legPct2,
                     range: legRange2
                 });
+                syncStudyLegend(2, bar.time);
             }
         });
 
         // ── Candle data (deduplicated maps) ────────────────────────
         let candleMap = new Map(), volMap = new Map();
         let oldestTs = null, isLoadingHistory = false;
+        let studyCache1 = { ma7: [], ma25: [], ma99: [], rsi: [] };
 
         let candleMap2 = new Map(), volMap2 = new Map();
         let oldestTs2 = null, isLoadingHistory2 = false;
+        let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [] };
+
+        function getSeriesBundle(target) {
+            return target === 2 ? chartSeries2 : chartSeries1;
+        }
+
+        function getLegendRefs(target) {
+            return target === 2
+                ? {
+                    open: legO2, high: legH2, low: legL2, close: legC2, change: legPct2, range: legRange2,
+                    ma7: legMa72, ma25: legMa252, ma99: legMa992, lowerLabel: legLowerLabel2, lowerValue: legLowerValue2
+                }
+                : {
+                    open: legO, high: legH, low: legL, close: legC, change: legPct, range: legRange,
+                    ma7: legMa7, ma25: legMa25, ma99: legMa99, lowerLabel: legLowerLabel, lowerValue: legLowerValue
+                };
+        }
+
+        function getCandleStore(target) {
+            return target === 2
+                ? { candleMap: candleMap2, volMap: volMap2, studies: studyCache2 }
+                : { candleMap, volMap, studies: studyCache1 };
+        }
+
+        function getSortedCandleData(target) {
+            return [...getCandleStore(target).candleMap.values()].sort((a, b) => a.time - b.time);
+        }
+
+        function getSortedVolumeData(target) {
+            return [...getCandleStore(target).volMap.values()].sort((a, b) => a.time - b.time);
+        }
+
+        function syncRsiPriceLines(target) {
+            const bundle = getSeriesBundle(target);
+            if (!bundle?.rsi) return;
+            if (bundle.rsiUpperLine) bundle.rsi.removePriceLine(bundle.rsiUpperLine);
+            if (bundle.rsiLowerLine) bundle.rsi.removePriceLine(bundle.rsiLowerLine);
+            bundle.rsiUpperLine = bundle.rsi.createPriceLine({
+                price: S.rsiUpper,
+                color: 'rgba(148, 163, 184, 0.65)',
+                lineWidth: 1,
+                axisLabelVisible: false,
+                title: ''
+            });
+            bundle.rsiLowerLine = bundle.rsi.createPriceLine({
+                price: S.rsiLower,
+                color: 'rgba(148, 163, 184, 0.65)',
+                lineWidth: 1,
+                axisLabelVisible: false,
+                title: ''
+            });
+        }
+
+        function syncChartStudyVisibility(target) {
+            const bundle = getSeriesBundle(target);
+            const chartInstance = target === 2 ? chart2 : chart;
+            const showCandles = S.priceMode === 'candles';
+            const showVolume = S.lowerStudy === 'volume';
+            const showRsi = S.lowerStudy === 'rsi';
+            bundle.candles.applyOptions({ visible: showCandles, lastValueVisible: showCandles, priceLineVisible: showCandles });
+            bundle.line.applyOptions({ visible: !showCandles, lastValueVisible: !showCandles, priceLineVisible: !showCandles });
+            [bundle.ma7, bundle.ma25, bundle.ma99].forEach(series => {
+                series.applyOptions({ visible: Boolean(S.showMAs) });
+            });
+            bundle.volume.applyOptions({ visible: showVolume });
+            bundle.rsi.applyOptions({ visible: showRsi });
+            chartInstance.priceScale('right').applyOptions({ scaleMargins: { top: 0.08, bottom: 0.26 } });
+            chartInstance.priceScale('vol').applyOptions({ scaleMargins: { top: 0.78, bottom: 0.04 }, visible: showVolume });
+            chartInstance.priceScale('osc').applyOptions({ scaleMargins: { top: 0.78, bottom: 0.04 }, visible: showRsi });
+            syncRsiPriceLines(target);
+        }
+
+        function syncStudyLegend(target, time) {
+            const refs = getLegendRefs(target);
+            const store = getCandleStore(target);
+            const studyCache = store.studies;
+            if (!refs) return;
+            const lowerValue = S.lowerStudy === 'rsi'
+                ? findStudyValue(studyCache.rsi, time)
+                : (() => {
+                    const data = getSortedVolumeData(target);
+                    const found = data.find(entry => Number(entry.time) === Number(time));
+                    return Number(found?.value ?? data[data.length - 1]?.value);
+                })();
+            refs.lowerLabel.textContent = S.lowerStudy === 'rsi' ? `RSI(${RSI_PERIOD})` : 'Volume';
+            refs.lowerValue.textContent = S.lowerStudy === 'rsi'
+                ? (Number.isFinite(lowerValue) ? lowerValue.toFixed(2) : '–')
+                : (Number.isFinite(lowerValue) ? fmtK(lowerValue) : '–');
+            [[refs.ma7, studyCache.ma7], [refs.ma25, studyCache.ma25], [refs.ma99, studyCache.ma99]].forEach(([el, data]) => {
+                if (!el) return;
+                const item = el.closest('.legend-item');
+                if (item) item.style.display = S.showMAs ? '' : 'none';
+                el.textContent = Number.isFinite(findStudyValue(data, time)) ? fmt(findStudyValue(data, time), pxDec(findStudyValue(data, time))) : '–';
+            });
+        }
+
+        function syncDerivedSeries(target) {
+            const bundle = getSeriesBundle(target);
+            const store = getCandleStore(target);
+            const candleData = getSortedCandleData(target);
+            const lineData = buildLineData(candleData);
+            store.studies = {
+                ma7: computeSmaData(candleData, MA_PERIODS[0]),
+                ma25: computeSmaData(candleData, MA_PERIODS[1]),
+                ma99: computeSmaData(candleData, MA_PERIODS[2]),
+                rsi: computeRsiData(candleData, RSI_PERIOD)
+            };
+            if (target === 2) studyCache2 = store.studies;
+            else studyCache1 = store.studies;
+            bundle.line.setData(lineData);
+            bundle.ma7.setData(store.studies.ma7);
+            bundle.ma25.setData(store.studies.ma25);
+            bundle.ma99.setData(store.studies.ma99);
+            bundle.rsi.setData(store.studies.rsi);
+            syncChartStudyVisibility(target);
+            syncStudyLegend(target);
+        }
+
+        function syncChartPrefsUi() {
+            document.querySelectorAll('[data-price-mode]').forEach(button => {
+                button.classList.toggle('active', button.dataset.priceMode === S.priceMode);
+            });
+            document.querySelectorAll('[data-lower-study]').forEach(button => {
+                button.classList.toggle('active', button.dataset.lowerStudy === S.lowerStudy);
+            });
+            if (chartMaToggle) {
+                chartMaToggle.classList.toggle('is-active', Boolean(S.showMAs));
+                chartMaToggle.setAttribute('aria-pressed', S.showMAs ? 'true' : 'false');
+            }
+            if (chartRsiLowerInput) chartRsiLowerInput.value = String(S.rsiLower);
+            if (chartRsiUpperInput) chartRsiUpperInput.value = String(S.rsiUpper);
+        }
+
+        function getChartPrefsPayload() {
+            return normalizeChartPrefs({
+                priceMode: S.priceMode,
+                lowerStudy: S.lowerStudy,
+                showMAs: S.showMAs,
+                rsiLower: S.rsiLower,
+                rsiUpper: S.rsiUpper
+            });
+        }
+
+        function closeChartSettingsMenu() {
+            if (!chartSettingsMenu || !chartSettingsBtn) return;
+            chartSettingsMenu.classList.remove('open');
+            chartSettingsMenu.setAttribute('aria-hidden', 'true');
+            chartSettingsBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleChartSettingsMenu(forceOpen) {
+            if (!chartSettingsMenu || !chartSettingsBtn) return;
+            const next = typeof forceOpen === 'boolean' ? forceOpen : !chartSettingsMenu.classList.contains('open');
+            chartSettingsMenu.classList.toggle('open', next);
+            chartSettingsMenu.setAttribute('aria-hidden', next ? 'false' : 'true');
+            chartSettingsBtn.setAttribute('aria-expanded', next ? 'true' : 'false');
+        }
+
+        function applyChartPrefs(nextPrefs, options = {}) {
+            const prefs = normalizeChartPrefs(nextPrefs);
+            S.priceMode = prefs.priceMode;
+            S.lowerStudy = prefs.lowerStudy;
+            S.showMAs = prefs.showMAs;
+            S.rsiLower = prefs.rsiLower;
+            S.rsiUpper = prefs.rsiUpper;
+            syncChartPrefsUi();
+            syncChartStudyVisibility(1);
+            syncChartStudyVisibility(2);
+            syncStudyLegend(1);
+            syncStudyLegend(2);
+            if (options.persist !== false) saveChartPrefs(getChartPrefsPayload());
+        }
 
         function parseRawCandles(data) {
             const cv = [], vl = [];
@@ -3502,6 +4141,7 @@
                 const cvArr = [...candleMap.values()].sort((a,b)=>a.time-b.time);
                 oldestTs = cvArr.length ? cvArr[0].time : null;
                 candles.setData(cvArr); volSeries.setData([...volMap.values()].sort((a,b)=>a.time-b.time));
+                syncDerivedSeries(1);
                 applyDefaultZoom(chart, cvArr.length, S.tf);
                 if (cvArr.length) {
                     const last = cvArr[cvArr.length - 1];
@@ -3513,6 +4153,7 @@
                         change: legPct,
                         range: legRange
                     });
+                    syncStudyLegend(1, last.time);
                 }
             } catch(e) {} finally {
                 setChartLoading(1, false);
@@ -3536,6 +4177,7 @@
                 const cvArr = [...candleMap2.values()].sort((a,b)=>a.time-b.time);
                 oldestTs2 = cvArr.length ? cvArr[0].time : null;
                 candles2.setData(cvArr); volSeries2.setData([...volMap2.values()].sort((a,b)=>a.time-b.time));
+                syncDerivedSeries(2);
                 applyDefaultZoom(chart2, cvArr.length, S.tf);
                 if (cvArr.length) {
                     const last = cvArr[cvArr.length - 1];
@@ -3547,6 +4189,7 @@
                         change: legPct2,
                         range: legRange2
                     });
+                    syncStudyLegend(2, last.time);
                 }
             } catch(e) {} finally {
                 setChartLoading(2, false);
@@ -3575,6 +4218,7 @@
                     const cvArr = [...mapCV.values()].sort((a,b)=>a.time-b.time);
                     if (targetChart === 1) oldestTs = cvArr[0].time; else oldestTs2 = cvArr[0].time;
                     seriesC.setData(cvArr); seriesV.setData([...mapVL.values()].sort((a,b)=>a.time-b.time));
+                    syncDerivedSeries(targetChart);
                 }
             } catch(e) {}
             if (targetChart === 1) isLoadingHistory = false; else isLoadingHistory2 = false;
@@ -3879,6 +4523,7 @@
 
             candleMap.set(nextBar.time, nextBar);
             candles.update(nextBar);
+            lineSeries.update({ time: nextBar.time, value: nextBar.close });
 
             const existingVol = volMap.get(nextBar.time);
             const nextVol = {
@@ -3888,6 +4533,15 @@
             };
             volMap.set(nextBar.time, nextVol);
             volSeries.update(nextVol);
+            updateLegendMetrics(nextBar, {
+                open: legO,
+                high: legH,
+                low: legL,
+                close: legC,
+                change: legPct,
+                range: legRange
+            });
+            syncStudyLegend(1, nextBar.time);
         }
 
         function buildWalletTrackerHref(wallet) {
@@ -4062,13 +4716,39 @@
                             const bar = { time: Math.floor(c.t / 1000), open: +c.o, high: +c.h, low: +c.l, close: +c.c };
                             if (coinStr === S.coin) {
                                 candles.update(bar);
+                                lineSeries.update({ time: bar.time, value: bar.close });
                                 if (candleMap.has(bar.time)) { const old = candleMap.get(bar.time); old.open = bar.open; old.high = bar.high; old.low = bar.low; old.close = bar.close; }
+                                else { candleMap.set(bar.time, bar); }
                                 volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
+                                volMap.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
+                                syncDerivedSeries(1);
+                                updateLegendMetrics(bar, {
+                                    open: legO,
+                                    high: legH,
+                                    low: legL,
+                                    close: legC,
+                                    change: legPct,
+                                    range: legRange
+                                });
+                                syncStudyLegend(1, bar.time);
                             }
                             if (S.chart2Active && coinStr === S.coin2) {
                                 candles2.update(bar);
+                                lineSeries2.update({ time: bar.time, value: bar.close });
                                 if (candleMap2.has(bar.time)) { const old = candleMap2.get(bar.time); old.open = bar.open; old.high = bar.high; old.low = bar.low; old.close = bar.close; }
+                                else { candleMap2.set(bar.time, bar); }
                                 volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
+                                volMap2.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? '#0ECB8155' : '#F6465D55' });
+                                syncDerivedSeries(2);
+                                updateLegendMetrics(bar, {
+                                    open: legO2,
+                                    high: legH2,
+                                    low: legL2,
+                                    close: legC2,
+                                    change: legPct2,
+                                    range: legRange2
+                                });
+                                syncStudyLegend(2, bar.time);
                             }
                         }
                     }
@@ -4116,13 +4796,12 @@
             });
             if (!hyperliquidLogoKeys.includes(baseName)) hyperliquidLogoKeys.push(baseName);
 
+            push(coinLogoPath(baseName, 'svg'));
+            push(coinLogoPath(baseName, 'png'));
             hyperliquidLogoKeys.forEach(key => {
                 push(`${COIN_ICON_BASE}${encodeURIComponent(key)}.svg`);
                 push(`${COIN_ICON_BASE}${encodeURIComponent(key)}.png`);
             });
-
-            push(coinLogoPath(baseName, 'svg'));
-            push(coinLogoPath(baseName, 'png'));
             push(`https://financialmodelingprep.com/image-stock/${encodeURIComponent(baseName)}.png`);
             push(`https://eodhd.com/img/logos/US/${encodeURIComponent(baseName)}.png`);
             coinLogoCandidateCache.set(cacheKey, urls.slice());
@@ -4172,6 +4851,14 @@
             }
             el.dataset.logoIndex = String(nextIdx);
             el.src = candidates[nextIdx];
+        }
+
+        function preloadCoinLogoSnapshot(list) {
+            const items = Array.isArray(list) ? list.slice(0, LOGO_PREFETCH_LIMIT) : [];
+            items.forEach(item => {
+                const candidate = coinLogoCandidates(item?.key || item)[0];
+                preloadLogoUrl(candidate);
+            });
         }
 
         function isTradableCoin(market) {
@@ -4275,6 +4962,7 @@
             renderCoinList(allCoins, 2);
             syncSelectedCoinUi(1);
             syncSelectedCoinUi(2);
+            preloadCoinLogoSnapshot([S.coin, S.coin2, ...allCoins]);
         }
 
         function renderCoinList(list, targetNum) {
@@ -4398,6 +5086,43 @@
         $('coin-list').addEventListener('keydown', handleCoinListKeydown);
         $('coin-list-2').addEventListener('keydown', handleCoinListKeydown);
 
+        if (chartSettingsBtn) {
+            chartSettingsBtn.addEventListener('click', event => {
+                event.stopPropagation();
+                toggleChartSettingsMenu();
+            });
+        }
+
+        document.querySelectorAll('[data-price-mode]').forEach(button => {
+            button.addEventListener('click', () => {
+                applyChartPrefs({ ...getChartPrefsPayload(), priceMode: button.dataset.priceMode });
+            });
+        });
+
+        document.querySelectorAll('[data-lower-study]').forEach(button => {
+            button.addEventListener('click', () => {
+                applyChartPrefs({ ...getChartPrefsPayload(), lowerStudy: button.dataset.lowerStudy });
+            });
+        });
+
+        if (chartMaToggle) {
+            chartMaToggle.addEventListener('click', () => {
+                applyChartPrefs({ ...getChartPrefsPayload(), showMAs: !S.showMAs });
+            });
+        }
+
+        if (chartRsiLowerInput) {
+            chartRsiLowerInput.addEventListener('change', () => {
+                applyChartPrefs({ ...getChartPrefsPayload(), rsiLower: Number(chartRsiLowerInput.value) });
+            });
+        }
+
+        if (chartRsiUpperInput) {
+            chartRsiUpperInput.addEventListener('change', () => {
+                applyChartPrefs({ ...getChartPrefsPayload(), rsiUpper: Number(chartRsiUpperInput.value) });
+            });
+        }
+
         document.querySelectorAll('.ob-view-btn[data-ob-view]').forEach(btn => {
             btn.addEventListener('click', () => setOrderBookView(btn.dataset.obView || 'both'));
         });
@@ -4431,6 +5156,7 @@
             ) $('coin-dropdown').classList.remove('open');
             if (!$('chart-container-2').contains(e.target)) $('coin-dropdown-2').style.display = 'none';
             if (!obAggTrigger?.contains(e.target) && !obAggMenu?.contains(e.target)) closeObAggMenu();
+            if (!chartSettingsRoot?.contains(e.target)) closeChartSettingsMenu();
         });
 
         tradesList.addEventListener('click', event => {
@@ -4472,6 +5198,9 @@
             if (event.key === 'Escape' && obAggMenu?.classList.contains('open')) {
                 closeObAggMenu();
             }
+            if (event.key === 'Escape' && chartSettingsMenu?.classList.contains('open')) {
+                closeChartSettingsMenu();
+            }
             if (event.key === 'Escape' && walletModalBackdrop?.classList.contains('open')) {
                 closeWalletModal();
             }
@@ -4484,6 +5213,11 @@
                 const tf = btn.dataset.tf;
                 await applyTimeframe(tf, { notifyParent: true });
             });
+        });
+
+        window.addEventListener('storage', event => {
+            if (event.key !== CHART_PREFS_STORAGE_KEY) return;
+            applyChartPrefs(loadChartPrefs(), { persist: false });
         });
 
         // ── Panel tabs ─────────────────────────────────────────────
@@ -4528,8 +5262,10 @@
         async function init() {
             applyCompactMode();
             syncResponsiveAssetLayout();
+            syncChartToggleButtons();
             if (!IS_COMPACT) resetOrderBookState();
             loadResolvedCoinLogoCache();
+            applyChartPrefs(loadChartPrefs(), { persist: false });
             await fetchMeta();
             buildCoinList();
             applyStats();
