@@ -3816,9 +3816,9 @@
             ['hyna:LINK', 'https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif'],
             ['RENDER', 'https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif'],
             ['XRP', 'https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif'],
-            ['GOLD', 'https://s3-symbol-logo.tradingview.com/metal/gold--600.png'],
-            ['SILVER', 'https://s3-symbol-logo.tradingview.com/metal/silver--600.png'],
-            ['USA500', 'https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png']
+            ['GOLD', 'images/coins/GOLD.svg'],
+            ['SILVER', 'images/coins/SILVER.svg'],
+            ['USA500', 'images/coins/USA500.png']
         ]);
         const FOOTER_CIRCLE_LOGOS = new Set(['DOGE', 'DOT', 'RENDER', 'XRP']);
         const SPECIAL_LOGOS = new Map([
@@ -7363,15 +7363,6 @@
             }
         }
 
-        // ── Orderbook fetch (REST) ─────────────────────────────────
-        async function fetchBook() {
-            try {
-                const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'l2Book', coin: S.coin }) });
-                const data = await r.json();
-                renderBook(data?.levels?.[0] ?? data?.bids ?? [], data?.levels?.[1] ?? data?.asks ?? []);
-            } catch (e) { }
-        }
-
         // ── Orderbook renderer ─────────────────────────────────────
         function aggregateLevels(levels, tick, side) {
             const map = new Map();
@@ -8046,11 +8037,9 @@
             });
             availableCoinNames = new Set(allCoins.map(c => c.key));
             syncSelectedCoins();
-            renderCoinList(allCoins, 1);
-            renderCoinList(allCoins, 2);
             syncSelectedCoinUi(1);
             syncSelectedCoinUi(2);
-            preloadCoinLogoSnapshot([S.coin, S.coin2, ...allCoins]);
+            preloadCoinLogoSnapshot([S.coin, S.coin2]);
         }
 
         function renderCoinList(list, targetNum) {
@@ -8586,7 +8575,6 @@
             if (!IS_COMPACT) resetOrderBookState();
             applyStats();
             await fetchCandles();
-            if (!IS_COMPACT) await fetchBook();
             connectWs();
             notifyParentChartState();
             syncTopSplitters();
@@ -8603,7 +8591,6 @@
             buildCoinList();
             applyStats();
             await fetchCandles();
-            if (!IS_COMPACT) await fetchBook();
             connectWs();
             notifyParentChartState();
             syncTopSplitters();

@@ -6901,10 +6901,10 @@
   const SPECIAL_LOGOS = new Map([
     ["ETH", "https://upload.wikimedia.org/wikipedia/commons/f/fd/Ethereum_Logo.png"],
     ["USDT0", "https://app.hyperliquid.xyz/coins/USDT_spot.svg"],
-    ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
-    ["COPPER", "https://s3-symbol-logo.tradingview.com/metal/copper--600.png"],
-    ["GOLD", "https://s3-symbol-logo.tradingview.com/metal/gold--600.png"],
-    ["SILVER", "https://s3-symbol-logo.tradingview.com/metal/silver--600.png"],
+    ["USA500", "images/coins/USA500.png"],
+    ["COPPER", "images/coins/COPPER.png"],
+    ["GOLD", "images/coins/GOLD.svg"],
+    ["SILVER", "images/coins/SILVER.svg"],
   ]);
   const FOOTER_SPECIAL_LOGOS = new Map([
     ["HYPE", "https://hyperfoundation.org/landing/blob_green.gif"],
@@ -6913,7 +6913,7 @@
     ["LINK", "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif"],
     ["RENDER", "https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif"],
     ["XRP", "https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif"],
-    ["USA500", "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png"],
+    ["USA500", "images/coins/USA500.png"],
   ]);
   const FOOTER_CIRCLE_LOGOS = new Set(["DOGE", "DOT", "RENDER", "XRP"]);
   const FOOTER_PRICE_COLOR_OVERRIDES = new Map([
@@ -6939,6 +6939,7 @@
     ["QQQ", "https://logo.clearbit.com/invesco.com"],
   ]);
   const logoCache = new Map();
+  const verifiedLogoUrls = new Set();
   const expandedPositions = new Set();
   let currentPositionsSort = { key: "asset", dir: "asc" };
   let currentHistoricalOrdersSort = { key: "time", dir: "desc" };
@@ -7528,6 +7529,7 @@
     const wasOk = entry.state === "ok" && entry.okUrl === nextUrl;
     entry.state = "ok";
     entry.okUrl = nextUrl;
+    if (nextUrl) verifiedLogoUrls.add(nextUrl);
     if (!wasOk) {
       const hasFallbackForKey = Array.from(
         document.querySelectorAll("span.coinFallback[data-logo-key]")
@@ -11317,15 +11319,18 @@
     entry.idx = 0;
     entry.okUrl = okUrl;
     entry.urls = [okUrl];
+    if (okUrl) verifiedLogoUrls.add(okUrl);
   }
 
   function checkLogoUrl(url) {
+    if (verifiedLogoUrls.has(url)) return Promise.resolve(true);
     return new Promise((resolve) => {
       const img = new Image();
       let done = false;
       const finish = (ok) => {
         if (done) return;
         done = true;
+        if (ok) verifiedLogoUrls.add(url);
         resolve(ok);
       };
       const timer = setTimeout(() => finish(false), 3000);
@@ -11343,7 +11348,14 @@
   }
 
   async function findAvailableLogoUrl(rawName) {
+    const normalized = normalizeLogoKey(rawName);
+    const cached = logoCache.get(normalized);
+    if (cached?.state === "ok" && cached.okUrl) return cached.okUrl;
+    const specialLogo = getSpecialLogoUrl(rawName, rawName);
+    if (specialLogo && isSameOriginAsset(specialLogo)) return specialLogo;
     const candidates = getIconCandidates(rawName, rawName);
+    const verified = candidates.find((url) => verifiedLogoUrls.has(url));
+    if (verified) return verified;
     for (const url of candidates) {
       // eslint-disable-next-line no-await-in-loop
       const ok = await checkLogoUrl(url);
