@@ -715,6 +715,10 @@
             gap: 6px;
         }
 
+        .chart-settings-group[hidden] {
+            display: none !important;
+        }
+
         .chart-settings-label {
             font-size: 11px;
             font-weight: 600;
@@ -773,9 +777,9 @@
 
         .chart-settings-toggle {
             width: 100%;
-            padding: 9px 10px;
+            padding: 10px 12px;
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             background: var(--surface2);
             color: var(--text);
             display: inline-flex;
@@ -786,26 +790,90 @@
             font: inherit;
             font-size: 12px;
             font-weight: 600;
-            transition: border-color 0.12s ease, background 0.12s ease;
+            transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
         }
 
         .chart-settings-toggle:hover {
             border-color: var(--border-strong);
+            background: rgba(255, 255, 255, 0.04);
         }
 
-        .chart-settings-toggle::after {
-            content: "";
-            width: 30px;
-            height: 18px;
+        .chart-settings-toggle-label {
+            min-width: 0;
+            text-align: left;
+        }
+
+        .chart-settings-toggle-switch {
+            position: relative;
+            width: 34px;
+            height: 20px;
+            flex: 0 0 auto;
             border-radius: 999px;
-            background: rgba(132, 142, 156, 0.28);
+            background: rgba(132, 142, 156, 0.22);
             box-shadow: inset 0 0 0 1px rgba(132, 142, 156, 0.18);
-            transition: background 0.12s ease;
+            transition: background 0.14s ease, box-shadow 0.14s ease;
         }
 
-        .chart-settings-toggle.is-active::after {
-            background: rgba(14, 203, 129, 0.28);
-            box-shadow: inset 12px 0 0 var(--up);
+        .chart-settings-toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(226, 232, 240, 0.92);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.32);
+            transition: transform 0.16s ease, background 0.14s ease;
+        }
+
+        .chart-settings-toggle.is-active {
+            border-color: rgba(14, 203, 129, 0.28);
+            background: rgba(14, 203, 129, 0.08);
+        }
+
+        .chart-settings-toggle.is-active .chart-settings-toggle-switch {
+            background: rgba(14, 203, 129, 0.26);
+            box-shadow: inset 0 0 0 1px rgba(14, 203, 129, 0.18);
+        }
+
+        .chart-settings-toggle.is-active .chart-settings-toggle-knob {
+            transform: translateX(14px);
+            background: var(--up);
+        }
+
+        html.light .chart-settings-toggle {
+            background: #ffffff;
+            border-color: #d7dde5;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+        }
+
+        html.light .chart-settings-toggle:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        html.light .chart-settings-toggle-switch {
+            background: rgba(148, 163, 184, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+        }
+
+        html.light .chart-settings-toggle-knob {
+            background: #475569;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.16);
+        }
+
+        html.light .chart-settings-toggle.is-active {
+            background: rgba(14, 203, 129, 0.08);
+            border-color: rgba(14, 203, 129, 0.26);
+        }
+
+        html.light .chart-settings-toggle.is-active .chart-settings-toggle-switch {
+            background: rgba(14, 203, 129, 0.2);
+            box-shadow: inset 0 0 0 1px rgba(14, 203, 129, 0.16);
+        }
+
+        html.light .chart-settings-toggle.is-active .chart-settings-toggle-knob {
+            background: #0a7f57;
         }
 
         .chart-settings-bounds {
@@ -2267,11 +2335,11 @@
             min-width: 154px;
             padding: 8px 10px;
             border-radius: 10px;
-            background: rgba(245, 247, 250, 0.96);
-            color: #111827;
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.24);
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            pointer-events: none;
+            background: rgba(20, 24, 31, 0.98);
+            color: #f3f4f6;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            pointer-events: auto;
             opacity: 0;
             transform: translate3d(0, 4px, 0);
             transition: opacity 120ms ease, transform 120ms ease;
@@ -2297,12 +2365,12 @@
         }
 
         .ob-hover-key {
-            color: #4b5563;
+            color: #97a3b6;
             white-space: nowrap;
         }
 
         .ob-hover-value {
-            color: #111827;
+            color: #f9fafb;
             font-weight: 600;
             text-align: right;
             font-variant-numeric: tabular-nums;
@@ -2313,6 +2381,14 @@
             background: rgba(255, 255, 255, 0.98);
             border-color: rgba(148, 163, 184, 0.34);
             box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+        }
+
+        html.light .ob-hover-key {
+            color: #4b5563;
+        }
+
+        html.light .ob-hover-value {
+            color: #111827;
         }
 
         .ob-row.is-interactive:focus-visible {
@@ -3051,7 +3127,12 @@
                                 </div>
                             </div>
                             <div class="chart-settings-group">
-                                <button id="chart-ma-toggle" class="chart-settings-toggle" type="button" aria-pressed="false">Moving averages</button>
+                                <button id="chart-ma-toggle" class="chart-settings-toggle" type="button" aria-pressed="false">
+                                    <span class="chart-settings-toggle-label">Moving averages</span>
+                                    <span class="chart-settings-toggle-switch" aria-hidden="true">
+                                        <span class="chart-settings-toggle-knob"></span>
+                                    </span>
+                                </button>
                             </div>
                             <div class="chart-settings-group" id="chart-ma-periods-group" hidden>
                                 <div class="chart-settings-label">Moving Average Periods</div>
@@ -3067,6 +3148,19 @@
                                     <label class="chart-settings-field chart-settings-field--compact">
                                         <span>Slow</span>
                                         <input id="chart-ma-slow" type="number" min="1" max="999" step="1" inputmode="numeric" />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="chart-settings-group" id="chart-volume-ma-periods-group" hidden>
+                                <div class="chart-settings-label">Volume MA Periods</div>
+                                <div class="chart-settings-bounds">
+                                    <label class="chart-settings-field chart-settings-field--compact">
+                                        <span>Fast</span>
+                                        <input id="chart-volume-ma-fast" type="number" min="1" max="999" step="1" inputmode="numeric">
+                                    </label>
+                                    <label class="chart-settings-field chart-settings-field--compact">
+                                        <span>Slow</span>
+                                        <input id="chart-volume-ma-slow" type="number" min="1" max="999" step="1" inputmode="numeric">
                                     </label>
                                 </div>
                             </div>
@@ -3184,7 +3278,7 @@
                                         </span>
                                         <span style="font-size:10px; color:var(--muted);">▼</span>
                                     </div>
-                                    <span id="legend-name">–/USD • 15m</span>
+                                    <span id="legend-name">–/USD • 15m • Hypermonitor</span>
                                     <div id="legend-ohlc">
                                         <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o">–</span></span>
                                         <span class="legend-item"><span class="legend-key">High</span><span class="v" id="leg-h">–</span></span>
@@ -3207,8 +3301,8 @@
                                     <div class="lower-pane-meta">
                                         <span class="lower-pane-item" id="lower-pane-item-vol-base"><span class="lower-pane-key" id="lower-pane-key-vol-base">Vol(BTC)</span><span class="lower-pane-val" id="lower-pane-val-vol-base">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-vol-usd"><span class="lower-pane-key">Vol(USD)</span><span class="lower-pane-val" id="lower-pane-val-vol-usd">–</span></span>
-                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast"><span class="lower-pane-key">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast">–</span></span>
-                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow"><span class="lower-pane-key">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast"><span class="lower-pane-key" id="lower-pane-key-vol-ma-fast">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow"><span class="lower-pane-key" id="lower-pane-key-vol-ma-slow">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-rsi"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi">–</span></span>
                                     </div>
                                     <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="setLowerPaneCollapsed(true)">
@@ -3305,7 +3399,7 @@
                                         </span>
                                         <span style="font-size:10px; color:var(--muted);">▼</span>
                                     </div>
-                                    <span id="legend-name-2" style="display:none;">ETH/USD • 15m</span>
+                                    <span id="legend-name-2" style="display:none;">ETH/USD • 15m • Hypermonitor</span>
                                     <div id="legend-ohlc">
                                         <span class="legend-item"><span class="legend-key">Open</span><span class="v" id="leg-o-2">–</span></span>
                                         <span class="legend-item"><span class="legend-key">High</span><span class="v" id="leg-h-2">–</span></span>
@@ -3328,8 +3422,8 @@
                                     <div class="lower-pane-meta">
                                         <span class="lower-pane-item" id="lower-pane-item-vol-base-2"><span class="lower-pane-key" id="lower-pane-key-vol-base-2">Vol(ETH)</span><span class="lower-pane-val" id="lower-pane-val-vol-base-2">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-vol-usd-2"><span class="lower-pane-key">Vol(USD)</span><span class="lower-pane-val" id="lower-pane-val-vol-usd-2">–</span></span>
-                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast-2"><span class="lower-pane-key">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast-2">–</span></span>
-                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow-2"><span class="lower-pane-key">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow-2">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast-2"><span class="lower-pane-key" id="lower-pane-key-vol-ma-fast-2">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast-2">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow-2"><span class="lower-pane-key" id="lower-pane-key-vol-ma-slow-2">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow-2">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-rsi-2"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi-2">–</span></span>
                                     </div>
                                     <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="setLowerPaneCollapsed(true)">
@@ -3672,7 +3766,7 @@
             }
 
             setText('coin-label', displayLabel);
-            setText('legend-name', `${fullLabel}/USD • 15m`);
+            setText('legend-name', `${fullLabel}/USD • 15m • Hypermonitor`);
 
             const coinBtn = document.getElementById('coin-btn');
             if (coinBtn) coinBtn.title = fullLabel;
@@ -3691,8 +3785,6 @@
         const CHART_PREFS_STORAGE_KEY = 'hypermonitor-chart-prefs';
         const VOLUME_UP_COLOR = 'rgba(14, 203, 129, 0.68)';
         const VOLUME_DOWN_COLOR = 'rgba(246, 70, 93, 0.68)';
-        const VOLUME_MA_FAST = 7;
-        const VOLUME_MA_SLOW = 14;
         const VOLUME_MA_FAST_COLOR = '#6fe3ff';
         const VOLUME_MA_SLOW_COLOR = '#ff5f97';
         const DEFAULT_CHART_PREFS = Object.freeze({
@@ -3702,6 +3794,7 @@
             rsiLower: 30,
             rsiUpper: 70,
             maPeriods: [7, 25, 99],
+            volumeMaPeriods: [7, 14],
             lowerPaneHeight: 122
         });
         const MA_COLORS = {
@@ -3866,6 +3959,15 @@
             while (next.maPeriods.length < 3) {
                 next.maPeriods.push(DEFAULT_CHART_PREFS.maPeriods[next.maPeriods.length]);
             }
+            const rawVolumePeriods = Array.isArray(raw.volumeMaPeriods) ? raw.volumeMaPeriods : [raw.volumeMaFast, raw.volumeMaSlow];
+            next.volumeMaPeriods = rawVolumePeriods.slice(0, 2).map((value, index) => {
+                const fallback = DEFAULT_CHART_PREFS.volumeMaPeriods[index] || DEFAULT_CHART_PREFS.volumeMaPeriods[DEFAULT_CHART_PREFS.volumeMaPeriods.length - 1];
+                const num = Number(value);
+                return Number.isFinite(num) ? Math.min(999, Math.max(1, Math.round(num))) : fallback;
+            });
+            while (next.volumeMaPeriods.length < 2) {
+                next.volumeMaPeriods.push(DEFAULT_CHART_PREFS.volumeMaPeriods[next.volumeMaPeriods.length]);
+            }
             const lower = Number(raw.rsiLower);
             const upper = Number(raw.rsiUpper);
             next.rsiLower = Number.isFinite(lower) ? Math.min(98, Math.max(1, Math.round(lower))) : DEFAULT_CHART_PREFS.rsiLower;
@@ -3923,6 +4025,7 @@
             rsiLower: initialChartPrefs.rsiLower,
             rsiUpper: initialChartPrefs.rsiUpper,
             maPeriods: initialChartPrefs.maPeriods.slice(),
+            volumeMaPeriods: initialChartPrefs.volumeMaPeriods.slice(),
             lowerPaneHeight: initialChartPrefs.lowerPaneHeight,
             lowerPaneCollapsed: false,
             sharedDrawingTool: 'cursor',
@@ -4080,6 +4183,8 @@
         const orderBookRows = { ask: [], bid: [] };
         let latestBookSnapshot = { bids: [], asks: [] };
         let activeBookDetail = null;
+        let activeOrderBookHover = null;
+        let orderBookHoverHideTimer = 0;
         
         // Legends
         const legName = $('legend-name'), legO = $('leg-o'), legH = $('leg-h'), legL = $('leg-l'), legC = $('leg-c'), legPct = $('leg-pct'), legRange = $('leg-range');
@@ -4091,6 +4196,19 @@
 
         // Layouts
         const rightPanel = $('right-panel');
+
+        if (obHoverCard) {
+            obHoverCard.addEventListener('mouseenter', () => {
+                if (!activeOrderBookHover) return;
+                activeOrderBookHover.cardHovered = true;
+                clearOrderBookHoverHideTimer();
+            });
+            obHoverCard.addEventListener('mouseleave', () => {
+                if (!activeOrderBookHover) return;
+                activeOrderBookHover.cardHovered = false;
+                if (!activeOrderBookHover.rowHovered) hideOrderBookHoverCard();
+            });
+        }
         const mainLayout = $('main');
         const chartSide = $('chart-side');
         const chartsContainer = $('charts-container');
@@ -4139,6 +4257,10 @@
         const chartSharedCrosshairTime2 = $('chart-shared-crosshair-time-2');
         const lowerPaneKeyVolBase1 = $('lower-pane-key-vol-base');
         const lowerPaneKeyVolBase2 = $('lower-pane-key-vol-base-2');
+        const lowerPaneKeyVolMaFast1 = $('lower-pane-key-vol-ma-fast');
+        const lowerPaneKeyVolMaFast2 = $('lower-pane-key-vol-ma-fast-2');
+        const lowerPaneKeyVolMaSlow1 = $('lower-pane-key-vol-ma-slow');
+        const lowerPaneKeyVolMaSlow2 = $('lower-pane-key-vol-ma-slow-2');
         const lowerPaneValVolBase1 = $('lower-pane-val-vol-base');
         const lowerPaneValVolBase2 = $('lower-pane-val-vol-base-2');
         const lowerPaneValVolUsd1 = $('lower-pane-val-vol-usd');
@@ -4182,10 +4304,13 @@
         const chartSettingsMenu = $('chart-settings-menu');
         const chartMaToggle = $('chart-ma-toggle');
         const chartMaPeriodsGroup = $('chart-ma-periods-group');
+        const chartVolumeMaPeriodsGroup = $('chart-volume-ma-periods-group');
         const chartRsiBoundsGroup = $('chart-rsi-bounds-group');
         const chartMaFastInput = $('chart-ma-fast');
         const chartMaMidInput = $('chart-ma-mid');
         const chartMaSlowInput = $('chart-ma-slow');
+        const chartVolumeMaFastInput = $('chart-volume-ma-fast');
+        const chartVolumeMaSlowInput = $('chart-volume-ma-slow');
         const chartRsiLowerInput = $('chart-rsi-lower');
         const chartRsiUpperInput = $('chart-rsi-upper');
         const chartContextMenu = $('chart-context-menu');
@@ -4485,11 +4610,11 @@
             document.querySelectorAll('.tf-btn[data-tf]').forEach(button => {
                 button.classList.toggle('active', button.dataset.tf === S.tf);
             });
-            legName.textContent = `${getSelectedCoinLabel(S.coin)}/USD • ${S.tf}`;
+            legName.textContent = formatLegendName(getSelectedCoinLabel(S.coin), S.tf);
             if (S.chart2Active) {
                 const coinLabel = getSelectedCoinLabel(S.coin2);
                 const legendName2 = $('legend-name-2');
-                if (legendName2) legendName2.textContent = `${coinLabel}/USD • ${S.tf}`;
+                if (legendName2) legendName2.textContent = formatLegendName(coinLabel, S.tf);
             }
             if (options.notifyParent) {
                 notifyParentTimeframe();
@@ -5075,17 +5200,42 @@
             hideOrderBookHoverCard();
         }
 
-        function hideOrderBookHoverCard() {
+        function clearOrderBookHoverHideTimer() {
+            if (!orderBookHoverHideTimer) return;
+            clearTimeout(orderBookHoverHideTimer);
+            orderBookHoverHideTimer = 0;
+        }
+
+        function scheduleOrderBookHoverHide() {
+            clearOrderBookHoverHideTimer();
+            orderBookHoverHideTimer = window.setTimeout(() => {
+                if (activeOrderBookHover?.cardHovered || activeOrderBookHover?.rowHovered) return;
+                hideOrderBookHoverCard();
+            }, 60);
+        }
+
+        function hideOrderBookHoverCard(clearState = true) {
+            clearOrderBookHoverHideTimer();
             if (!obHoverCard) return;
             obHoverCard.classList.remove('is-visible');
             obHoverCard.setAttribute('aria-hidden', 'true');
+            if (clearState) activeOrderBookHover = null;
         }
 
-        function showOrderBookHoverCard(level, event) {
+        function showOrderBookHoverCard(level, event, options = {}) {
             if (!obHoverCard || !level || !Number.isFinite(level.px) || !Number.isFinite(level.sz)) {
                 hideOrderBookHoverCard();
                 return;
             }
+            clearOrderBookHoverHideTimer();
+            const nextHoverState = activeOrderBookHover ? { ...activeOrderBookHover } : {};
+            if (options.rowEl) nextHoverState.rowEl = options.rowEl;
+            if (options.side) nextHoverState.side = options.side;
+            if (options.rowHovered != null) nextHoverState.rowHovered = Boolean(options.rowHovered);
+            if (options.cardHovered != null) nextHoverState.cardHovered = Boolean(options.cardHovered);
+            if (Number.isFinite(event?.clientX)) nextHoverState.clientX = event.clientX;
+            if (Number.isFinite(event?.clientY)) nextHoverState.clientY = event.clientY;
+            activeOrderBookHover = nextHoverState;
             const coinLabel = getSelectedCoinLabel(S.coin);
             const totalSize = Number(level.cumSz || level.sz);
             const totalValue = Number(level.cum || (Number(level.px) * Number(level.sz)));
@@ -5099,10 +5249,16 @@
                 hideOrderBookHoverCard();
                 return;
             }
+            const anchorX = Number.isFinite(activeOrderBookHover?.clientX)
+                ? activeOrderBookHover.clientX
+                : (options.rowEl?.getBoundingClientRect().left || panelRect.left) + 24;
+            const anchorY = Number.isFinite(activeOrderBookHover?.clientY)
+                ? activeOrderBookHover.clientY
+                : ((options.rowEl?.getBoundingClientRect().top || panelRect.top) + (options.rowEl?.getBoundingClientRect().height || 28) / 2);
             const cardWidth = obHoverCard.offsetWidth || 164;
             const cardHeight = obHoverCard.offsetHeight || 74;
-            const left = Math.max(10, Math.min(event.clientX - panelRect.left + 14, panelRect.width - cardWidth - 10));
-            const top = Math.max(10, Math.min(event.clientY - panelRect.top - cardHeight / 2, panelRect.height - cardHeight - 10));
+            const left = Math.max(10, Math.min(anchorX - panelRect.left + 14, panelRect.width - cardWidth - 10));
+            const top = Math.max(10, Math.min(anchorY - panelRect.top - cardHeight / 2, panelRect.height - cardHeight - 10));
             obHoverCard.style.left = `${left}px`;
             obHoverCard.style.top = `${top}px`;
             obHoverCard.classList.add('is-visible');
@@ -5202,16 +5358,19 @@
 
             row.addEventListener('mouseenter', event => {
                 if (!row._bookLevel || activeBookDetail) return;
-                showOrderBookHoverCard(row._bookLevel, event);
+                showOrderBookHoverCard(row._bookLevel, event, { rowEl: row, side, rowHovered: true });
             });
 
             row.addEventListener('mousemove', event => {
                 if (!row._bookLevel || activeBookDetail) return;
-                showOrderBookHoverCard(row._bookLevel, event);
+                showOrderBookHoverCard(row._bookLevel, event, { rowEl: row, side, rowHovered: true });
             });
 
             row.addEventListener('mouseleave', () => {
-                hideOrderBookHoverCard();
+                if (activeOrderBookHover?.rowEl === row) {
+                    activeOrderBookHover.rowHovered = false;
+                    scheduleOrderBookHoverHide();
+                }
             });
 
             const bar = document.createElement('div');
@@ -5254,7 +5413,7 @@
                 rowRef.c1.textContent = '';
                 rowRef.c2.textContent = '';
                 rowRef.c3.textContent = '';
-                if (obHoverCard?.classList.contains('is-visible')) hideOrderBookHoverCard();
+                if (activeOrderBookHover?.rowEl === rowRef.row) hideOrderBookHoverCard();
                 return;
             }
             const hasLevel = Boolean(
@@ -5268,11 +5427,14 @@
             rowRef.row.tabIndex = hasLevel ? 0 : -1;
             rowRef.row.style.visibility = hasLevel ? 'visible' : 'hidden';
             rowRef.row.setAttribute('aria-hidden', hasLevel ? 'false' : 'true');
-            if (!hasLevel && obHoverCard?.classList.contains('is-visible')) hideOrderBookHoverCard();
+            if (!hasLevel && activeOrderBookHover?.rowEl === rowRef.row) hideOrderBookHoverCard();
             rowRef.bar.style.width = hasLevel && maxT > 0 ? `${(level.cum / maxT * 100).toFixed(1)}%` : '0%';
             rowRef.c1.textContent = hasLevel ? fmt(level.px, decimals) : '';
             rowRef.c2.textContent = hasLevel ? fmtK(level.sz) : '';
             rowRef.c3.textContent = hasLevel ? fmtK(level.cum) : '';
+            if (hasLevel && activeOrderBookHover?.rowEl === rowRef.row && !activeBookDetail) {
+                showOrderBookHoverCard(level, activeOrderBookHover, { rowEl: rowRef.row, side: rowRef.row.dataset.side, rowHovered: activeOrderBookHover.rowHovered, cardHovered: activeOrderBookHover.cardHovered });
+            }
         }
 
         function setOrderBookLoading(isLoading) {
@@ -5720,6 +5882,8 @@
             return target === 2
                 ? {
                     keyVolBase: lowerPaneKeyVolBase2,
+                    keyVolMaFast: lowerPaneKeyVolMaFast2,
+                    keyVolMaSlow: lowerPaneKeyVolMaSlow2,
                     volBase: lowerPaneValVolBase2,
                     volUsd: lowerPaneValVolUsd2,
                     volMaFast: lowerPaneValVolMaFast2,
@@ -5733,6 +5897,8 @@
                 }
                 : {
                     keyVolBase: lowerPaneKeyVolBase1,
+                    keyVolMaFast: lowerPaneKeyVolMaFast1,
+                    keyVolMaSlow: lowerPaneKeyVolMaSlow1,
                     volBase: lowerPaneValVolBase1,
                     volUsd: lowerPaneValVolUsd1,
                     volMaFast: lowerPaneValVolMaFast1,
@@ -6644,6 +6810,8 @@
             const selectedKey = target === 2 ? S.coin2 : S.coin;
             const baseLabel = getSelectedCoinName(selectedKey) || getCoinDisplayName(selectedKey);
             if (refs.keyVolBase) refs.keyVolBase.textContent = `Vol(${baseLabel})`;
+            if (refs.keyVolMaFast) refs.keyVolMaFast.textContent = `MA(${S.volumeMaPeriods[0]})`;
+            if (refs.keyVolMaSlow) refs.keyVolMaSlow.textContent = `MA(${S.volumeMaPeriods[1]})`;
             const volumeData = getSortedVolumeData(target);
             const volumeValue = findVolumeValue(volumeData, effectiveTime);
             const priceBar = findCandleBarAtOrBefore(target, effectiveTime);
@@ -6745,13 +6913,14 @@
             const candleData = getSortedCandleData(target);
             const lineData = buildLineData(candleData);
             const [maFast, maMid, maSlow] = S.maPeriods;
+            const [volMaFastPeriod, volMaSlowPeriod] = S.volumeMaPeriods;
             store.studies = {
                 ma7: computeSmaData(candleData, maFast),
                 ma25: computeSmaData(candleData, maMid),
                 ma99: computeSmaData(candleData, maSlow),
                 rsi: computeRsiData(candleData, RSI_PERIOD),
-                volMaFast: computeValueSmaData(getSortedVolumeData(target), VOLUME_MA_FAST),
-                volMaSlow: computeValueSmaData(getSortedVolumeData(target), VOLUME_MA_SLOW)
+                volMaFast: computeValueSmaData(getSortedVolumeData(target), volMaFastPeriod),
+                volMaSlow: computeValueSmaData(getSortedVolumeData(target), volMaSlowPeriod)
             };
             if (target === 2) studyCache2 = store.studies;
             else studyCache1 = store.studies;
@@ -6772,6 +6941,7 @@
         }
 
         function syncChartPrefsUi() {
+            const showVolumeMaPeriods = S.showMAs && S.lowerStudy === 'volume';
             document.querySelectorAll('[data-price-mode]').forEach(button => {
                 button.classList.toggle('active', button.dataset.priceMode === S.priceMode);
             });
@@ -6782,11 +6952,26 @@
                 chartMaToggle.classList.toggle('is-active', Boolean(S.showMAs));
                 chartMaToggle.setAttribute('aria-pressed', S.showMAs ? 'true' : 'false');
             }
-            if (chartMaPeriodsGroup) chartMaPeriodsGroup.hidden = !S.showMAs;
-            if (chartRsiBoundsGroup) chartRsiBoundsGroup.hidden = S.lowerStudy !== 'rsi';
+            if (chartMaPeriodsGroup) {
+                const hideMaPeriods = !S.showMAs;
+                chartMaPeriodsGroup.hidden = hideMaPeriods;
+                chartMaPeriodsGroup.setAttribute('aria-hidden', hideMaPeriods ? 'true' : 'false');
+            }
+            if (chartVolumeMaPeriodsGroup) {
+                const hideVolumeMaPeriods = !showVolumeMaPeriods;
+                chartVolumeMaPeriodsGroup.hidden = hideVolumeMaPeriods;
+                chartVolumeMaPeriodsGroup.setAttribute('aria-hidden', hideVolumeMaPeriods ? 'true' : 'false');
+            }
+            if (chartRsiBoundsGroup) {
+                const hideRsiBounds = S.lowerStudy !== 'rsi';
+                chartRsiBoundsGroup.hidden = hideRsiBounds;
+                chartRsiBoundsGroup.setAttribute('aria-hidden', hideRsiBounds ? 'true' : 'false');
+            }
             if (chartMaFastInput) chartMaFastInput.value = String(S.maPeriods[0]);
             if (chartMaMidInput) chartMaMidInput.value = String(S.maPeriods[1]);
             if (chartMaSlowInput) chartMaSlowInput.value = String(S.maPeriods[2]);
+            if (chartVolumeMaFastInput) chartVolumeMaFastInput.value = String(S.volumeMaPeriods[0]);
+            if (chartVolumeMaSlowInput) chartVolumeMaSlowInput.value = String(S.volumeMaPeriods[1]);
             if (chartRsiLowerInput) chartRsiLowerInput.value = String(S.rsiLower);
             if (chartRsiUpperInput) chartRsiUpperInput.value = String(S.rsiUpper);
         }
@@ -6830,6 +7015,7 @@
                 lowerStudy: S.lowerStudy,
                 showMAs: S.showMAs,
                 maPeriods: S.maPeriods.slice(),
+                volumeMaPeriods: S.volumeMaPeriods.slice(),
                 rsiLower: S.rsiLower,
                 rsiUpper: S.rsiUpper,
                 lowerPaneHeight: S.lowerPaneHeight
@@ -6856,12 +7042,14 @@
             const prevLowerStudy = S.lowerStudy;
             const prevShowMAs = S.showMAs;
             const prevMaPeriods = S.maPeriods.slice();
+            const prevVolumeMaPeriods = S.volumeMaPeriods.slice();
             const prevRsiLower = S.rsiLower;
             const prevRsiUpper = S.rsiUpper;
             S.priceMode = prefs.priceMode;
             S.lowerStudy = prefs.lowerStudy;
             S.showMAs = prefs.showMAs;
             S.maPeriods = prefs.maPeriods.slice();
+            S.volumeMaPeriods = prefs.volumeMaPeriods.slice();
             S.rsiLower = prefs.rsiLower;
             S.rsiUpper = prefs.rsiUpper;
             S.lowerPaneHeight = prefs.lowerPaneHeight;
@@ -6876,7 +7064,8 @@
             syncStudyLegend(2);
             scheduleLowerPaneResize();
             const maPeriodsChanged = prevMaPeriods.length !== S.maPeriods.length || prevMaPeriods.some((value, index) => value !== S.maPeriods[index]);
-            if (maPeriodsChanged) {
+            const volumeMaPeriodsChanged = prevVolumeMaPeriods.length !== S.volumeMaPeriods.length || prevVolumeMaPeriods.some((value, index) => value !== S.volumeMaPeriods[index]);
+            if (maPeriodsChanged || volumeMaPeriodsChanged) {
                 syncDerivedSeries(1);
                 syncDerivedSeries(2);
             } else if (prevLowerStudy !== S.lowerStudy || prevRsiLower !== S.rsiLower || prevRsiUpper !== S.rsiUpper || prevShowMAs !== S.showMAs) {
@@ -6970,7 +7159,7 @@
             const requestCoin = S.coin2;
             const requestTf = S.tf;
             const coinLabel = getSelectedCoinLabel(S.coin2);
-            $(`legend-name-2`).textContent = `${coinLabel}/USD • ${S.tf}`;
+            $(`legend-name-2`).textContent = formatLegendName(coinLabel, S.tf);
             syncSelectedCoinUi(2);
             
             const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
@@ -7140,7 +7329,7 @@
             sFund.className = 'val ' + (fund >= 0 ? 'up' : 'dn');
             sFund.dataset.base = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
             syncAssetDocumentTitle(mark);
-            legName.textContent = `${market.label}/USD • ${S.tf}`;
+            legName.textContent = formatLegendName(market.label, S.tf);
             syncSelectedCoinUi(1);
             buildAggBar(mark);
         }
@@ -7772,6 +7961,12 @@
             return market?.label || getCoinDisplayLabel(key);
         }
 
+        function formatLegendName(label, timeframe) {
+            const safeLabel = String(label || '–').trim() || '–';
+            const safeTimeframe = String(timeframe || '15m').trim() || '15m';
+            return `${safeLabel}/USD • ${safeTimeframe} • Hypermonitor`;
+        }
+
         function setCoinBadge(el, marketKey) {
             if (!el) return;
             const dex = getCoinDexLabel(marketKey);
@@ -8232,6 +8427,21 @@
         [chartMaFastInput, chartMaMidInput, chartMaSlowInput].forEach((input) => {
             if (!input) return;
             input.addEventListener('change', applyMaPeriodsFromInputs);
+        });
+
+        function applyVolumeMaPeriodsFromInputs() {
+            applyChartPrefs({
+                ...getChartPrefsPayload(),
+                volumeMaPeriods: [
+                    Number(chartVolumeMaFastInput?.value),
+                    Number(chartVolumeMaSlowInput?.value)
+                ]
+            });
+        }
+
+        [chartVolumeMaFastInput, chartVolumeMaSlowInput].forEach((input) => {
+            if (!input) return;
+            input.addEventListener('change', applyVolumeMaPeriodsFromInputs);
         });
 
         if (chartRsiLowerInput) {
