@@ -30,6 +30,10 @@
             }
         }
     </script>
+    <script>
+        window.handleCoinImgLoad = window.handleCoinImgLoad || function () {};
+        window.handleCoinImgError = window.handleCoinImgError || function () {};
+    </script>
     <style>
         :root {
             --bg: #0d1014;
@@ -845,17 +849,11 @@
         .chart-settings-field.chart-settings-field--compact input {
             padding: 6px 7px;
             border-radius: 8px;
-            text-align: center;
+            text-align: left;
         }
 
         .chart-settings-field input:focus {
             border-color: var(--border-strong);
-        }
-
-        .chart-settings-hint {
-            font-size: 11px;
-            color: var(--muted);
-            line-height: 1.45;
         }
 
         .chart-loading-wrap {
@@ -876,7 +874,7 @@
         .chart-drawing-toolbar {
             position: absolute;
             left: 8px;
-            top: 56px;
+            top: 68px;
             z-index: 7;
             display: flex;
             flex-direction: column;
@@ -950,7 +948,7 @@
         .chart-drawing-toolbar-restore {
             position: absolute;
             left: 8px;
-            top: 92px;
+            top: 104px;
             z-index: 7;
             opacity: 0;
             pointer-events: none;
@@ -978,9 +976,19 @@
             pointer-events: none;
         }
 
-        .chart-drawing-stage.is-active {
+        .chart-drawing-stage.is-drawing {
             pointer-events: auto;
             cursor: crosshair;
+        }
+
+        .chart-drawing-stage.is-selectable {
+            pointer-events: none;
+        }
+
+        .chart-drawing-stage.is-selectable .chart-drawing-shape-group,
+        .chart-drawing-stage.is-selectable .chart-drawing-shape-group * {
+            pointer-events: auto;
+            cursor: pointer;
         }
 
         .chart-drawing-layer {
@@ -988,6 +996,21 @@
             height: 100%;
             display: block;
             overflow: visible;
+            pointer-events: none;
+        }
+
+        .chart-drawing-shape-group {
+            pointer-events: none;
+        }
+
+        .chart-drawing-shape-group.is-selected .chart-drawing-shape {
+            stroke-width: 2.15;
+            filter: drop-shadow(0 0 6px rgba(15, 23, 42, 0.34));
+        }
+
+        .chart-drawing-shape-group.is-selected .chart-drawing-label {
+            font-weight: 600;
+            opacity: 1;
         }
 
         .chart-drawing-shape {
@@ -1000,6 +1023,14 @@
 
         .chart-drawing-shape.trend {
             stroke: #7dd3fc;
+        }
+
+        .chart-drawing-shape.arrow {
+            stroke: #60a5fa;
+        }
+
+        .chart-drawing-shape.hline {
+            stroke-dasharray: 5 4;
         }
 
         .chart-drawing-shape.rect {
@@ -1036,6 +1067,166 @@
 
         html.light .chart-drawing-label {
             fill: rgba(55, 65, 81, 0.72);
+        }
+
+        .chart-drawing-selection {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 8;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid rgba(72, 84, 101, 0.36);
+            background: rgba(12, 16, 22, 0.88);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-drawing-selection.is-visible {
+            display: inline-flex;
+        }
+
+        html.light .chart-drawing-selection {
+            border-color: rgba(148, 163, 184, 0.28);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .chart-drawing-color-chip {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            background: #4f8cff;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+        }
+
+        .chart-drawing-palette {
+            position: fixed;
+            z-index: 12;
+            display: none;
+            width: 188px;
+            padding: 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(72, 84, 101, 0.36);
+            background: rgba(12, 16, 22, 0.96);
+            box-shadow: 0 22px 40px rgba(0, 0, 0, 0.34);
+            backdrop-filter: blur(14px);
+        }
+
+        .chart-drawing-palette.is-open {
+            display: block;
+        }
+
+        html.light .chart-drawing-palette {
+            border-color: rgba(148, 163, 184, 0.28);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
+        }
+
+        .chart-drawing-palette-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .chart-drawing-color-option {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+            transition: transform 0.14s ease, box-shadow 0.14s ease;
+        }
+
+        .chart-drawing-color-option:hover,
+        .chart-drawing-color-option:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.38);
+            outline: none;
+        }
+
+        html.light .chart-drawing-color-option {
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+        }
+
+        .chart-context-menu {
+            position: fixed;
+            z-index: 13;
+            display: none;
+            min-width: 244px;
+            padding: 8px 0;
+            border-radius: 14px;
+            border: 1px solid rgba(72, 84, 101, 0.36);
+            background: rgba(18, 24, 34, 0.98);
+            box-shadow: 0 24px 44px rgba(0, 0, 0, 0.34);
+            backdrop-filter: blur(14px);
+        }
+
+        .chart-context-menu.is-open {
+            display: block;
+        }
+
+        html.light .chart-context-menu {
+            border-color: rgba(148, 163, 184, 0.26);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12);
+        }
+
+        .chart-context-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 14px;
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            font-size: 0.82rem;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .chart-context-item:hover,
+        .chart-context-item:focus-visible {
+            background: rgba(255, 255, 255, 0.06);
+            outline: none;
+        }
+
+        .chart-context-item.is-disabled {
+            opacity: 0.48;
+            cursor: default;
+        }
+
+        .chart-context-item.is-disabled:hover {
+            background: transparent;
+        }
+
+        .chart-context-item + .chart-context-item {
+            border-top: 1px solid rgba(148, 163, 184, 0.08);
+        }
+
+        .chart-context-item svg {
+            width: 14px;
+            height: 14px;
+            flex: 0 0 auto;
+            color: var(--muted);
+        }
+
+        .chart-context-item-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .chart-context-item-meta {
+            color: var(--muted);
+            font-size: 0.76rem;
         }
 
         .chart-main-canvas,
@@ -2746,7 +2937,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="chart-settings-group">
+                            <div class="chart-settings-group" id="chart-rsi-bounds-group" hidden>
                                 <div class="chart-settings-label">RSI Bounds</div>
                                 <div class="chart-settings-bounds">
                                     <label class="chart-settings-field">
@@ -2758,7 +2949,6 @@
                                         <input id="chart-rsi-upper" type="number" min="1" max="99" step="1" inputmode="numeric" />
                                     </label>
                                 </div>
-                                <div class="chart-settings-hint">RSI replaces the lower volume pane and shows configurable upper and lower guide levels.</div>
                             </div>
                         </div>
                     </div>
@@ -2800,11 +2990,20 @@
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="trend" data-draw-target="1" title="Trend line" aria-label="Trend line">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 13.5L13.75 4.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="3" cy="13.5" r="1.5" fill="currentColor"></circle><circle cx="13.75" cy="4.25" r="1.5" fill="currentColor"></circle></svg>
                                     </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="arrow" data-draw-target="1" title="Right arrow" aria-label="Right arrow">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9H13.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M10 5.6L14 9L10 12.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </button>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="rect" data-draw-target="1" title="Rectangle" aria-label="Rectangle">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3.25" y="4" width="11.5" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect></svg>
                                     </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="text" data-draw-target="1" title="Text" aria-label="Text">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4.5H14M9 4.5V13.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M6.4 13.5H11.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+                                    </button>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="fib" data-draw-target="1" title="Fibonacci retracement" aria-label="Fibonacci retracement">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 4.5H15M3 7.5H12.5M3 10.5H14M3 13.5H10.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                                    </button>
+                                    <button id="chart-drawing-color-btn" class="chart-drawing-btn" type="button" title="Drawing color" aria-label="Drawing color">
+                                        <span id="chart-drawing-color-chip" class="chart-drawing-color-chip"></span>
                                     </button>
                                     <div class="chart-drawing-divider"></div>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="clear" data-draw-target="1" title="Clear drawings" aria-label="Clear drawings">
@@ -2820,9 +3019,17 @@
                                         <path d="M5.25 3.5L9.75 8L5.25 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
                                     </svg>
                                 </button>
+                                <div id="chart-drawing-selection" class="chart-drawing-selection" aria-hidden="true">
+                                    <button id="chart-drawing-delete-btn" class="chart-drawing-btn" type="button" title="Delete selected drawing" aria-label="Delete selected drawing">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 5.5H14M6 5.5V13.25M9 5.5V13.25M12 5.5V13.25M6.5 3.5H11.5L12.25 5.5H5.75L6.5 3.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </button>
+                                </div>
                                 <div id="chart-extrema-layer" class="chart-extrema-layer" aria-hidden="true">
                                     <div id="chart-max-label" class="chart-extrema-label high"><span id="chart-max-text">–</span></div>
                                     <div id="chart-min-label" class="chart-extrema-label low"><span id="chart-min-text">–</span></div>
+                                </div>
+                                <div id="chart-drawing-palette" class="chart-drawing-palette" aria-hidden="true">
+                                    <div id="chart-drawing-palette-grid" class="chart-drawing-palette-grid"></div>
                                 </div>
                                 <div class="chart-watermark" aria-hidden="true">
                                     <img src="images/logo.png" alt="">
@@ -2912,8 +3119,14 @@
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="trend" data-draw-target="2" title="Trend line" aria-label="Trend line">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 13.5L13.75 4.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="3" cy="13.5" r="1.5" fill="currentColor"></circle><circle cx="13.75" cy="4.25" r="1.5" fill="currentColor"></circle></svg>
                                     </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="arrow" data-draw-target="2" title="Right arrow" aria-label="Right arrow">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9H13.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M10 5.6L14 9L10 12.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </button>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="rect" data-draw-target="2" title="Rectangle" aria-label="Rectangle">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3.25" y="4" width="11.5" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect></svg>
+                                    </button>
+                                    <button class="chart-drawing-btn" type="button" data-draw-tool="text" data-draw-target="2" title="Text" aria-label="Text">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4.5H14M9 4.5V13.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M6.4 13.5H11.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
                                     </button>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="fib" data-draw-target="2" title="Fibonacci retracement" aria-label="Fibonacci retracement">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 4.5H15M3 7.5H12.5M3 10.5H14M3 13.5H10.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
@@ -2926,6 +3139,11 @@
                                 <div id="chart-extrema-layer-2" class="chart-extrema-layer" aria-hidden="true">
                                     <div id="chart-max-label-2" class="chart-extrema-label high"><span id="chart-max-text-2">–</span></div>
                                     <div id="chart-min-label-2" class="chart-extrema-label low"><span id="chart-min-text-2">–</span></div>
+                                </div>
+                                <div id="chart-drawing-selection-2" class="chart-drawing-selection" aria-hidden="true">
+                                    <button id="chart-drawing-delete-btn-2" class="chart-drawing-btn" type="button" title="Delete selected drawing" aria-label="Delete selected drawing">
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 5.5H14M6 5.5V13.25M9 5.5V13.25M12 5.5V13.25M6.5 3.5H11.5L12.25 5.5H5.75L6.5 3.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </button>
                                 </div>
                                 <div class="chart-watermark" aria-hidden="true">
                                     <img src="images/logo.png" alt="">
@@ -3136,6 +3354,65 @@
 
         </div><!-- /main -->
     </div><!-- /layout -->
+
+    <div id="chart-context-menu" class="chart-context-menu" aria-hidden="true">
+        <button class="chart-context-item" type="button" data-chart-context-action="refresh">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 3.8A5.2 5.2 0 1 1 2.85 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M3.1 1.9v2.8h2.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>Refresh Chart</span>
+            </span>
+        </button>
+        <button class="chart-context-item is-disabled" type="button" data-chart-context-action="order" tabindex="-1">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8H13M8 3V13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                <span>Place New Order</span>
+            </span>
+            <span class="chart-context-item-meta">›</span>
+        </button>
+        <button class="chart-context-item" type="button" data-chart-context-action="copy-price">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.2" y="4.2" width="7.2" height="8" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.2"></rect><path d="M6 3h5.2a1 1 0 0 1 1 1v5.2" fill="none" stroke="currentColor" stroke-width="1.2"></path></svg>
+                <span id="chart-context-copy-price-label">Copy Price</span>
+            </span>
+        </button>
+        <button class="chart-context-item" type="button" data-chart-context-action="draw-hline">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8H13.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                <span id="chart-context-hline-label">Draw horizontal line</span>
+            </span>
+        </button>
+        <button class="chart-context-item" type="button" data-chart-context-action="settings">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.7 2.6h2.6l.5 1.6 1.5.7 1.5-.7 1.3 2.2-1.1 1.2.1 1.7 1.1 1.2-1.3 2.2-1.5-.7-1.5.7-.5 1.6H6.7l-.5-1.6-1.5-.7-1.5.7L1.9 10.6 3 9.4l-.1-1.7-1-1.2 1.3-2.2 1.5.7 1.5-.7.5-1.6Z" fill="none" stroke="currentColor" stroke-width="1"></path><circle cx="8" cy="8" r="1.8" fill="none" stroke="currentColor" stroke-width="1.2"></circle></svg>
+                <span>More Settings</span>
+            </span>
+            <span class="chart-context-item-meta">›</span>
+        </button>
+        <button class="chart-context-item" type="button" data-chart-context-action="remove-drawings">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 5.5H12M5.5 5.5V11.8M8 5.5V11.8M10.5 5.5V11.8M5.8 3.7h4.4l.7 1.8H5.1l.7-1.8Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>Remove Drawings</span>
+            </span>
+        </button>
+        <button class="chart-context-item" type="button" data-chart-context-action="remove-indicators">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 12.5L13.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M2.5 8h3M6.5 12h3M10.5 4h3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path></svg>
+                <span>Remove Indicators</span>
+            </span>
+        </button>
+        <button class="chart-context-item" type="button" data-chart-context-action="time-tools">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2V8l2.8 1.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="8" cy="8" r="5.3" fill="none" stroke="currentColor" stroke-width="1.2"></circle></svg>
+                <span>Time Tools</span>
+            </span>
+        </button>
+        <button class="chart-context-item" type="button" data-chart-context-action="chart-settings">
+            <span class="chart-context-item-label">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.2h10M3 8h10M3 11.8h10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                <span>Chart Settings</span>
+            </span>
+        </button>
+    </div>
 
     <div id="wallet-modal-backdrop" class="wallet-modal-backdrop" role="presentation">
         <div class="wallet-modal" role="dialog" aria-modal="true" aria-labelledby="wallet-modal-title">
@@ -3502,6 +3779,7 @@
             lowerPaneCollapsed: false,
             sharedDrawingTool: 'cursor',
             drawingToolbarHidden: false,
+            drawingColor: '#4f8cff',
             // Dual chart
             chart2Active: false,
             coin2: 'ETH',
@@ -3684,6 +3962,14 @@
         const chartDrawingToolbar2 = $('chart-drawing-toolbar-2');
         const chartDrawingHideBtn = $('chart-drawing-hide-btn');
         const chartDrawingToolbarRestore = $('chart-drawing-toolbar-restore');
+        const chartDrawingColorBtn = $('chart-drawing-color-btn');
+        const chartDrawingColorChip = $('chart-drawing-color-chip');
+        const chartDrawingPalette = $('chart-drawing-palette');
+        const chartDrawingPaletteGrid = $('chart-drawing-palette-grid');
+        const chartDrawingSelection1 = $('chart-drawing-selection');
+        const chartDrawingSelection2 = $('chart-drawing-selection-2');
+        const chartDrawingDeleteBtn1 = $('chart-drawing-delete-btn');
+        const chartDrawingDeleteBtn2 = $('chart-drawing-delete-btn-2');
         const chartLowerPane1 = $('chart-lower-pane');
         const chartLowerPane2 = $('chart-lower-pane-2');
         const chartLowerSplitter1 = $('lower-pane-splitter');
@@ -3723,8 +4009,8 @@
         const lowerPaneItemRsi1 = $('lower-pane-item-rsi');
         const lowerPaneItemRsi2 = $('lower-pane-item-rsi-2');
         const drawingState = {
-            1: { tool: 'cursor', drawings: [], draft: null, nextId: 1, pointerId: null },
-            2: { tool: 'cursor', drawings: [], draft: null, nextId: 1, pointerId: null }
+            1: { tool: 'cursor', drawings: [], draft: null, nextId: 1, pointerId: null, selectedId: null },
+            2: { tool: 'cursor', drawings: [], draft: null, nextId: 1, pointerId: null, selectedId: null }
         };
         const drawingFrameState = { 1: 0, 2: 0 };
         const chartMaxLabel1 = $('chart-max-label');
@@ -3743,11 +4029,35 @@
         const chartSettingsMenu = $('chart-settings-menu');
         const chartMaToggle = $('chart-ma-toggle');
         const chartMaPeriodsGroup = $('chart-ma-periods-group');
+        const chartRsiBoundsGroup = $('chart-rsi-bounds-group');
         const chartMaFastInput = $('chart-ma-fast');
         const chartMaMidInput = $('chart-ma-mid');
         const chartMaSlowInput = $('chart-ma-slow');
         const chartRsiLowerInput = $('chart-rsi-lower');
         const chartRsiUpperInput = $('chart-rsi-upper');
+        const chartContextMenu = $('chart-context-menu');
+        const chartContextCopyPriceLabel = $('chart-context-copy-price-label');
+        const chartContextHlineLabel = $('chart-context-hline-label');
+
+        const DRAWING_PALETTE_COLORS = [
+            '#111827', '#475569', '#94a3b8', '#ffffff', '#ef4444', '#f97316',
+            '#facc15', '#22c55e', '#14b8a6', '#38bdf8', '#4f8cff', '#8b5cf6',
+            '#d946ef', '#ec4899', '#f59e0b', '#84cc16', '#10b981', '#06b6d4'
+        ];
+        const FIBONACCI_LEVELS = [
+            { value: 0, color: 'rgba(148, 163, 184, 0.94)', fill: 'rgba(239, 68, 68, 0.10)' },
+            { value: 0.236, color: '#ef4444', fill: 'rgba(245, 158, 11, 0.10)' },
+            { value: 0.382, color: '#f59e0b', fill: 'rgba(34, 197, 94, 0.10)' },
+            { value: 0.5, color: '#22c55e', fill: 'rgba(20, 184, 166, 0.10)' },
+            { value: 0.618, color: '#14b8a6', fill: 'rgba(56, 189, 248, 0.10)' },
+            { value: 0.786, color: '#38bdf8', fill: 'rgba(148, 163, 184, 0.12)' },
+            { value: 1, color: 'rgba(148, 163, 184, 0.94)', fill: 'rgba(59, 130, 246, 0.12)' },
+            { value: 1.618, color: '#2563eb', fill: 'rgba(239, 68, 68, 0.10)' },
+            { value: 2.618, color: '#ef4444', fill: 'rgba(168, 85, 247, 0.11)' },
+            { value: 3.618, color: '#a855f7', fill: 'rgba(236, 72, 153, 0.10)' },
+            { value: 4.236, color: '#ec4899', fill: null }
+        ];
+        const chartContextState = { target: 1, price: NaN, time: NaN };
 
         function notifyParentChartState() {
             if (IS_COMPACT || window.parent === window) return;
@@ -5216,11 +5526,152 @@
             return el;
         }
 
+        function getDrawingSelectionRefs(target) {
+            return target === 2
+                ? { wrap: chartDrawingSelection2, deleteBtn: chartDrawingDeleteBtn2 }
+                : { wrap: chartDrawingSelection1, deleteBtn: chartDrawingDeleteBtn1 };
+        }
+
+        function getDrawingById(target, id) {
+            const store = getDrawingStore(target);
+            return store.drawings.find((item) => item.id === id) || null;
+        }
+
+        function getSelectedDrawingTarget() {
+            if (getDrawingById(1, getDrawingStore(1).selectedId)) return 1;
+            if (getDrawingById(2, getDrawingStore(2).selectedId)) return 2;
+            return null;
+        }
+
+        function getSelectedDrawing() {
+            const target = getSelectedDrawingTarget();
+            if (!target) return null;
+            return getDrawingById(target, getDrawingStore(target).selectedId);
+        }
+
+        function hexToRgba(color, alpha) {
+            const raw = String(color || '').trim().replace('#', '');
+            const normalized = raw.length === 3
+                ? raw.split('').map(ch => ch + ch).join('')
+                : raw;
+            if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return `rgba(79, 140, 255, ${alpha})`;
+            const int = Number.parseInt(normalized, 16);
+            const r = (int >> 16) & 255;
+            const g = (int >> 8) & 255;
+            const b = int & 255;
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function updateDrawingColorUi() {
+            if (chartDrawingColorChip) {
+                chartDrawingColorChip.style.background = S.drawingColor;
+            }
+        }
+
+        function syncDrawingSelectionUi(target) {
+            const refs = getDrawingSelectionRefs(target);
+            if (!refs?.wrap) return;
+            const hasSelection = Boolean(getDrawingById(target, getDrawingStore(target).selectedId));
+            refs.wrap.classList.toggle('is-visible', hasSelection);
+            refs.wrap.setAttribute('aria-hidden', hasSelection ? 'false' : 'true');
+        }
+
+        function syncAllDrawingSelectionUi() {
+            syncDrawingSelectionUi(1);
+            syncDrawingSelectionUi(2);
+        }
+
+        function closeDrawingPalette() {
+            if (!chartDrawingPalette) return;
+            chartDrawingPalette.classList.remove('is-open');
+            chartDrawingPalette.setAttribute('aria-hidden', 'true');
+            delete chartDrawingPalette.dataset.mode;
+        }
+
+        function positionFloatingPanel(panel, anchor) {
+            if (!panel || !anchor) return;
+            panel.style.visibility = 'hidden';
+            panel.classList.add('is-open');
+            const rect = anchor.getBoundingClientRect();
+            const width = panel.offsetWidth || 188;
+            const height = panel.offsetHeight || 180;
+            const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+            const top = Math.max(8, Math.min(rect.bottom + 8, window.innerHeight - height - 8));
+            panel.style.left = `${left}px`;
+            panel.style.top = `${top}px`;
+            panel.style.visibility = '';
+        }
+
+        function setDrawingColor(color, options = {}) {
+            const nextColor = String(color || '').trim() || '#4f8cff';
+            S.drawingColor = nextColor;
+            if (options.applyToSelection) {
+                const target = getSelectedDrawingTarget();
+                const selected = getSelectedDrawing();
+                if (target && selected) {
+                    selected.color = nextColor;
+                    scheduleDrawingRender(target);
+                }
+            }
+            updateDrawingColorUi();
+        }
+
+        function openDrawingPalette(anchor) {
+            if (!chartDrawingPalette || !anchor) return;
+            const selected = getSelectedDrawing();
+            chartDrawingPalette.dataset.mode = selected ? 'selection' : 'default';
+            positionFloatingPanel(chartDrawingPalette, anchor);
+            chartDrawingPalette.setAttribute('aria-hidden', 'false');
+        }
+
+        function clearDrawingSelection() {
+            let changed = false;
+            [1, 2].forEach((target) => {
+                const store = getDrawingStore(target);
+                if (!store.selectedId) return;
+                store.selectedId = null;
+                changed = true;
+                scheduleDrawingRender(target);
+            });
+            if (changed) {
+                closeDrawingPalette();
+                syncAllDrawingSelectionUi();
+            }
+        }
+
+        function setSelectedDrawing(target, id) {
+            [1, 2].forEach((paneTarget) => {
+                const store = getDrawingStore(paneTarget);
+                const nextId = paneTarget === target ? id : null;
+                if (store.selectedId === nextId) return;
+                store.selectedId = nextId;
+                scheduleDrawingRender(paneTarget);
+            });
+            syncAllDrawingSelectionUi();
+        }
+
+        function deleteSelectedDrawing(target) {
+            const store = getDrawingStore(target);
+            const selectedId = store.selectedId;
+            if (!selectedId) return false;
+            const next = store.drawings.filter((item) => item.id !== selectedId);
+            if (next.length === store.drawings.length) return false;
+            store.drawings = next;
+            store.selectedId = null;
+            closeDrawingPalette();
+            scheduleDrawingRender(target);
+            syncAllDrawingSelectionUi();
+            return true;
+        }
+
         function clearDrawings(target) {
             const store = getDrawingStore(target);
             store.drawings = [];
             store.draft = null;
+            store.selectedId = null;
+            closeDrawingPalette();
             scheduleDrawingRender(target);
+            syncAllDrawingSelectionUi();
         }
 
         function syncDrawingToolbarUi() {
@@ -5238,8 +5689,11 @@
             [1, 2].forEach(target => {
                 const refs = getDrawingRefs(target);
                 const store = getDrawingStore(target);
-                refs.stage?.classList.toggle('is-active', store.tool !== 'cursor');
+                refs.stage?.classList.toggle('is-drawing', store.tool !== 'cursor');
+                refs.stage?.classList.toggle('is-selectable', store.tool === 'cursor' && store.drawings.length > 0);
             });
+            updateDrawingColorUi();
+            syncAllDrawingSelectionUi();
         }
 
         function notifyParentDrawingTool(tool) {
@@ -5277,6 +5731,7 @@
                 store.pointerId = null;
                 scheduleDrawingRender(target);
             });
+            clearDrawingSelection();
             syncDrawingToolbarUi();
             if (options.notifyParent !== false) notifyParentDrawingTool(nextTool);
         }
@@ -5329,6 +5784,29 @@
             }));
         }
 
+        function renderArrowDrawing(layer, start, end, isDraft) {
+            const angle = Math.atan2(end.y - start.y, end.x - start.x);
+            const length = 7;
+            const wing = 4;
+            const leftX = end.x - Math.cos(angle) * length + Math.sin(angle) * wing;
+            const leftY = end.y - Math.sin(angle) * length - Math.cos(angle) * wing;
+            const rightX = end.x - Math.cos(angle) * length - Math.sin(angle) * wing;
+            const rightY = end.y - Math.sin(angle) * length + Math.cos(angle) * wing;
+            layer.appendChild(createSvgNode('line', {
+                x1: start.x,
+                y1: start.y,
+                x2: end.x,
+                y2: end.y,
+                class: `chart-drawing-shape arrow${isDraft ? ' is-draft' : ''}`,
+                'stroke-opacity': isDraft ? '0.72' : '1'
+            }));
+            layer.appendChild(createSvgNode('polyline', {
+                points: `${leftX},${leftY} ${end.x},${end.y} ${rightX},${rightY}`,
+                class: `chart-drawing-shape arrow${isDraft ? ' is-draft' : ''}`,
+                'stroke-opacity': isDraft ? '0.72' : '1'
+            }));
+        }
+
         function renderRectDrawing(layer, start, end, isDraft) {
             const x = Math.min(start.x, end.x);
             const y = Math.min(start.y, end.y);
@@ -5346,39 +5824,89 @@
         function renderFibDrawing(layer, start, end, stageWidth, isDraft) {
             const left = Math.min(start.x, end.x);
             const right = Math.max(start.x, end.x);
-            const top = Math.min(start.y, end.y);
-            const bottom = Math.max(start.y, end.y);
-            const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-            layer.appendChild(createSvgNode('rect', {
-                x: left,
-                y: top,
-                width: Math.max(1, right - left),
-                height: Math.max(1, bottom - top),
-                rx: 2,
-                class: 'chart-drawing-shape fib-box',
-                'stroke-opacity': isDraft ? '0.65' : '1',
-                'fill-opacity': isDraft ? '0.04' : '0.08'
+            const width = Math.max(1, right - left);
+            const verticalSpan = end.y - start.y;
+            if (Math.abs(verticalSpan) < 1) return;
+            const labelLeft = left >= 72;
+            const labelX = labelLeft ? Math.max(6, left - 6) : Math.min(stageWidth - 6, right + 6);
+            const labelAnchor = labelLeft ? 'end' : 'start';
+
+            for (let i = 0; i < FIBONACCI_LEVELS.length - 1; i += 1) {
+                const current = FIBONACCI_LEVELS[i];
+                const next = FIBONACCI_LEVELS[i + 1];
+                if (!next.fill) continue;
+                const y1 = start.y + (verticalSpan * current.value);
+                const y2 = start.y + (verticalSpan * next.value);
+                layer.appendChild(createSvgNode('rect', {
+                    x: left,
+                    y: Math.min(y1, y2),
+                    width,
+                    height: Math.max(1, Math.abs(y2 - y1)),
+                    class: 'chart-drawing-shape fib-box',
+                    fill: next.fill,
+                    stroke: 'none',
+                    'fill-opacity': isDraft ? '0.55' : '1'
+                }));
+            }
+
+            layer.appendChild(createSvgNode('line', {
+                x1: start.x,
+                y1: start.y,
+                x2: end.x,
+                y2: end.y,
+                class: 'chart-drawing-shape fib-line',
+                stroke: 'rgba(148, 163, 184, 0.74)',
+                'stroke-width': '1.2',
+                'stroke-dasharray': '6 5',
+                'stroke-opacity': isDraft ? '0.52' : '0.82'
             }));
-            levels.forEach(level => {
-                const y = top + ((bottom - top) * level);
+
+            FIBONACCI_LEVELS.forEach((level) => {
+                const y = start.y + (verticalSpan * level.value);
                 layer.appendChild(createSvgNode('line', {
                     x1: left,
                     y1: y,
                     x2: right,
                     y2: y,
                     class: 'chart-drawing-shape fib-line',
-                    'stroke-opacity': isDraft ? '0.62' : '0.92'
+                    stroke: level.color,
+                    'stroke-width': level.value === 0 || level.value === 1 ? '1.2' : '1',
+                    'stroke-opacity': isDraft ? '0.58' : '1'
                 }));
-                const labelX = Math.min(stageWidth - 22, right + 6);
                 const text = createSvgNode('text', {
                     x: labelX,
                     y,
                     class: 'chart-drawing-label',
-                    'text-anchor': 'start'
+                    fill: level.color,
+                    'text-anchor': labelAnchor
                 });
-                text.textContent = level === 0 || level === 1 ? String(level) : level.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+                text.textContent = level.value === 0 || level.value === 1
+                    ? String(level.value)
+                    : level.value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
                 layer.appendChild(text);
             });
+        }
+
+        function renderHorizontalLineDrawing(layer, y, width, isDraft) {
+            layer.appendChild(createSvgNode('line', {
+                x1: 0,
+                y1: y,
+                x2: width,
+                y2: y,
+                class: `chart-drawing-shape hline${isDraft ? ' is-draft' : ''}`,
+                'stroke-opacity': isDraft ? '0.72' : '1'
+            }));
+        }
+
+        function renderTextDrawing(layer, point, textValue) {
+            const textNode = createSvgNode('text', {
+                x: point.x,
+                y: point.y,
+                class: 'chart-drawing-label',
+                'text-anchor': 'start'
+            });
+            textNode.textContent = textValue;
+            layer.appendChild(textNode);
         }
 
         function renderDrawings(target) {
@@ -5397,20 +5925,49 @@
             if (store.draft) items.push({ ...store.draft, isDraft: true });
 
             items.forEach(item => {
+                const isDraft = Boolean(item.isDraft);
+                const isSelected = !isDraft && item.id && store.selectedId === item.id;
+                const group = createSvgNode('g', {
+                    class: `chart-drawing-shape-group${isSelected ? ' is-selected' : ''}`,
+                    'data-drawing-id': isDraft ? '' : item.id || ''
+                });
+                const color = String(item.color || S.drawingColor || '#4f8cff');
+                if (item.type === 'hline') {
+                    const y = Number(getActivePriceSeries(target)?.priceToCoordinate?.(item.price));
+                    if (!Number.isFinite(y)) return;
+                    renderHorizontalLineDrawing(group, y, width, isDraft);
+                    group.querySelectorAll('.chart-drawing-shape').forEach((shape) => {
+                        shape.setAttribute('stroke', color);
+                    });
+                    layer.appendChild(group);
+                    return;
+                }
                 const start = drawingPointToCoords(target, item.start);
                 const end = drawingPointToCoords(target, item.end);
-                if (!start || !end) return;
+                if (!start || (!end && item.type !== 'text')) return;
                 if (item.type === 'trend') {
-                    renderTrendDrawing(layer, start, end, Boolean(item.isDraft));
-                    return;
+                    renderTrendDrawing(group, start, end, isDraft);
+                } else if (item.type === 'arrow') {
+                    renderArrowDrawing(group, start, end, isDraft);
+                } else if (item.type === 'rect') {
+                    renderRectDrawing(group, start, end, isDraft);
+                } else if (item.type === 'fib') {
+                    renderFibDrawing(group, start, end, width, isDraft);
+                } else if (item.type === 'text') {
+                    renderTextDrawing(group, start, item.text || 'Text');
                 }
-                if (item.type === 'rect') {
-                    renderRectDrawing(layer, start, end, Boolean(item.isDraft));
-                    return;
-                }
-                if (item.type === 'fib') {
-                    renderFibDrawing(layer, start, end, width, Boolean(item.isDraft));
-                }
+                group.querySelectorAll('.chart-drawing-shape').forEach((shape) => {
+                    if (item.type === 'fib') return;
+                    shape.setAttribute('stroke', color);
+                    if (item.type === 'rect') {
+                        shape.setAttribute('fill', hexToRgba(color, isDraft ? 0.05 : 0.1));
+                    }
+                });
+                group.querySelectorAll('.chart-drawing-label').forEach((label) => {
+                    if (item.type === 'fib') return;
+                    label.setAttribute('fill', item.type === 'text' ? color : hexToRgba(color, 0.88));
+                });
+                layer.appendChild(group);
             });
         }
 
@@ -5422,8 +5979,24 @@
             if (!point) return;
             event.preventDefault();
             event.stopPropagation();
+            clearDrawingSelection();
+            if (store.tool === 'text') {
+                const textValue = window.prompt('Add text to chart', '');
+                if (textValue && String(textValue).trim()) {
+                    store.drawings.push({
+                        id: `${target}-${store.nextId++}`,
+                        type: 'text',
+                        start: point,
+                        end: point,
+                        text: String(textValue).trim(),
+                        color: S.drawingColor
+                    });
+                    scheduleDrawingRender(target);
+                }
+                return;
+            }
             store.pointerId = event.pointerId;
-            store.draft = { type: store.tool, start: point, end: point };
+            store.draft = { type: store.tool, start: point, end: point, color: S.drawingColor };
             refs.stage.setPointerCapture?.(event.pointerId);
             scheduleDrawingRender(target);
         }
@@ -5450,12 +6023,15 @@
                 const end = drawingPointToCoords(target, store.draft.end);
                 const distance = start && end ? Math.hypot(end.x - start.x, end.y - start.y) : 0;
                 if (distance >= 8) {
-                    store.drawings.push({
+                    const drawing = {
                         id: `${target}-${store.nextId++}`,
                         type: store.draft.type,
                         start: store.draft.start,
-                        end: store.draft.end
-                    });
+                        end: store.draft.end,
+                        color: store.draft.color || S.drawingColor
+                    };
+                    store.drawings.push(drawing);
+                    store.selectedId = drawing.id;
                 }
             }
             store.draft = null;
@@ -5464,6 +6040,74 @@
                 refs.stage.releasePointerCapture(event.pointerId);
             }
             scheduleDrawingRender(target);
+            syncAllDrawingSelectionUi();
+        }
+
+        function addHorizontalLineAt(target, price) {
+            const store = getDrawingStore(target);
+            if (!Number.isFinite(Number(price))) return;
+            clearDrawingSelection();
+            const drawing = {
+                id: `${target}-${store.nextId++}`,
+                type: 'hline',
+                price: Number(price),
+                color: S.drawingColor
+            };
+            store.drawings.push(drawing);
+            store.selectedId = drawing.id;
+            scheduleDrawingRender(target);
+            syncAllDrawingSelectionUi();
+        }
+
+        function refreshChartTarget(target) {
+            if (target === 2) {
+                fetchCandles2();
+                return;
+            }
+            fetchCandles();
+        }
+
+        function hideChartContextMenu() {
+            if (!chartContextMenu) return;
+            chartContextMenu.classList.remove('is-open');
+            chartContextMenu.setAttribute('aria-hidden', 'true');
+        }
+
+        function showChartContextMenu(target, clientX, clientY, point) {
+            if (!chartContextMenu || !point) return;
+            chartContextState.target = target;
+            chartContextState.price = Number(point.price);
+            chartContextState.time = Number(point.time);
+            if (chartContextCopyPriceLabel) {
+                chartContextCopyPriceLabel.textContent = `Copy Price ${fmt(point.price, pxDec(point.price))}`;
+            }
+            if (chartContextHlineLabel) {
+                chartContextHlineLabel.textContent = `Draw horizontal line on ${fmt(point.price, pxDec(point.price))}`;
+            }
+            chartContextMenu.classList.add('is-open');
+            chartContextMenu.setAttribute('aria-hidden', 'false');
+            chartContextMenu.style.visibility = 'hidden';
+            const width = chartContextMenu.offsetWidth || 244;
+            const height = chartContextMenu.offsetHeight || 320;
+            const left = Math.max(8, Math.min(clientX, window.innerWidth - width - 8));
+            const top = Math.max(8, Math.min(clientY, window.innerHeight - height - 8));
+            chartContextMenu.style.left = `${left}px`;
+            chartContextMenu.style.top = `${top}px`;
+            chartContextMenu.style.visibility = '';
+        }
+
+        function buildDrawingPaletteOptions() {
+            if (!chartDrawingPaletteGrid) return;
+            chartDrawingPaletteGrid.replaceChildren();
+            DRAWING_PALETTE_COLORS.forEach((color) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'chart-drawing-color-option';
+                button.dataset.color = color;
+                button.style.background = color;
+                button.setAttribute('aria-label', `Use drawing color ${color}`);
+                chartDrawingPaletteGrid.appendChild(button);
+            });
         }
 
         function formatCrosshairTimeLabel(time) {
@@ -5807,6 +6451,7 @@
                 chartMaToggle.setAttribute('aria-pressed', S.showMAs ? 'true' : 'false');
             }
             if (chartMaPeriodsGroup) chartMaPeriodsGroup.hidden = !S.showMAs;
+            if (chartRsiBoundsGroup) chartRsiBoundsGroup.hidden = S.lowerStudy !== 'rsi';
             if (chartMaFastInput) chartMaFastInput.value = String(S.maPeriods[0]);
             if (chartMaMidInput) chartMaMidInput.value = String(S.maPeriods[1]);
             if (chartMaSlowInput) chartMaSlowInput.value = String(S.maPeriods[2]);
@@ -6915,6 +7560,9 @@
         $('coin-list').addEventListener('keydown', handleCoinListKeydown);
         $('coin-list-2').addEventListener('keydown', handleCoinListKeydown);
 
+        buildDrawingPaletteOptions();
+        updateDrawingColorUi();
+
         document.querySelectorAll('.chart-drawing-btn[data-draw-tool]').forEach(button => {
             button.addEventListener('click', event => {
                 event.preventDefault();
@@ -6923,12 +7571,72 @@
             });
         });
 
+        if (chartDrawingColorBtn) {
+            chartDrawingColorBtn.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (chartDrawingPalette?.classList.contains('is-open')) {
+                    closeDrawingPalette();
+                    return;
+                }
+                openDrawingPalette(chartDrawingColorBtn);
+            });
+        }
+
+        if (chartDrawingPaletteGrid) {
+            chartDrawingPaletteGrid.addEventListener('click', event => {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+                const button = target.closest('.chart-drawing-color-option[data-color]');
+                if (!button) return;
+                const applyToSelection = chartDrawingPalette?.dataset.mode === 'selection' && Boolean(getSelectedDrawing());
+                setDrawingColor(button.dataset.color || '', { applyToSelection });
+                closeDrawingPalette();
+            });
+        }
+
         [[1, chartDrawingStage1], [2, chartDrawingStage2]].forEach(([target, stage]) => {
             if (!stage) return;
             stage.addEventListener('pointerdown', event => startDrawingGesture(target, event));
             stage.addEventListener('pointermove', event => moveDrawingGesture(target, event));
             stage.addEventListener('pointerup', event => finishDrawingGesture(target, event));
             stage.addEventListener('pointercancel', event => finishDrawingGesture(target, event));
+            stage.addEventListener('click', event => {
+                const eventTarget = event.target;
+                if (!(eventTarget instanceof Element)) return;
+                const drawingGroup = eventTarget.closest('[data-drawing-id]');
+                const drawingId = String(drawingGroup?.getAttribute('data-drawing-id') || '').trim();
+                if (!drawingId) return;
+                event.preventDefault();
+                event.stopPropagation();
+                applySharedDrawingTool('cursor', { notifyParent: false });
+                setSelectedDrawing(target, drawingId);
+                hideChartContextMenu();
+            });
+        });
+
+        [[1, chartMainPane1], [2, chartMainPane2]].forEach(([target, pane]) => {
+            if (!pane) return;
+            pane.addEventListener('pointerdown', event => {
+                const eventTarget = event.target;
+                if (!(eventTarget instanceof Element)) return;
+                if (eventTarget.closest('[data-drawing-id], .chart-drawing-toolbar, .chart-drawing-selection, .chart-drawing-palette, .chart-context-menu, .toolbar-icon-btn')) return;
+                if (getDrawingStore(target).tool === 'cursor') {
+                    clearDrawingSelection();
+                    closeDrawingPalette();
+                }
+                hideChartContextMenu();
+            });
+            pane.addEventListener('contextmenu', event => {
+                const eventTarget = event.target;
+                if (!(eventTarget instanceof Element)) return;
+                if (eventTarget.closest('.chart-drawing-toolbar, .chart-drawing-selection, .chart-drawing-palette')) return;
+                const point = drawingPointFromClient(target, event.clientX, event.clientY);
+                if (!point) return;
+                event.preventDefault();
+                event.stopPropagation();
+                showChartContextMenu(target, event.clientX, event.clientY, point);
+            });
         });
 
         [[1, chartLowerPane1], [2, chartLowerPane2]].forEach(([target, pane]) => {
@@ -6943,17 +7651,81 @@
 
         window.addEventListener('pointerup', () => endRsiBandInteraction());
         window.addEventListener('pointercancel', () => endRsiBandInteraction());
-        window.addEventListener('blur', () => endRsiBandInteraction());
+        window.addEventListener('blur', () => {
+            endRsiBandInteraction();
+            closeDrawingPalette();
+            hideChartContextMenu();
+        });
+        window.addEventListener('resize', () => {
+            closeDrawingPalette();
+            hideChartContextMenu();
+        });
+
+        [chartDrawingDeleteBtn1, chartDrawingDeleteBtn2].forEach((button, index) => {
+            if (!button) return;
+            const target = index === 0 ? 1 : 2;
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                deleteSelectedDrawing(target);
+            });
+        });
+
+        if (chartContextMenu) {
+            chartContextMenu.addEventListener('click', async event => {
+                const eventTarget = event.target;
+                if (!(eventTarget instanceof Element)) return;
+                const button = eventTarget.closest('[data-chart-context-action]');
+                if (!button || button.classList.contains('is-disabled')) return;
+                const action = button.dataset.chartContextAction || '';
+                const chartTarget = chartContextState.target === 2 ? 2 : 1;
+                if (action === 'refresh') {
+                    refreshChartTarget(chartTarget);
+                } else if (action === 'copy-price') {
+                    const priceText = fmt(chartContextState.price, pxDec(chartContextState.price));
+                    try { await navigator.clipboard.writeText(priceText); } catch (_) {}
+                } else if (action === 'draw-hline') {
+                    addHorizontalLineAt(chartTarget, chartContextState.price);
+                } else if (action === 'settings' || action === 'chart-settings') {
+                    toggleChartSettingsMenu(true);
+                } else if (action === 'remove-drawings') {
+                    clearDrawings(chartTarget);
+                } else if (action === 'remove-indicators') {
+                    applyChartPrefs({ ...getChartPrefsPayload(), showMAs: false });
+                    setLowerPaneCollapsed(true);
+                } else if (action === 'time-tools') {
+                    const firstTfBtn = document.querySelector('.tf-btn');
+                    firstTfBtn?.focus?.();
+                }
+                hideChartContextMenu();
+            });
+        }
 
         document.addEventListener('keydown', event => {
-            if (event.key !== 'Escape') return;
+            const key = String(event.key || '');
+            const targetEl = event.target;
+            const isEditable =
+                targetEl instanceof HTMLElement &&
+                (targetEl.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(targetEl.tagName));
+            if ((key === 'Backspace' || key === 'Delete') && !isEditable) {
+                const selectedTarget = getSelectedDrawingTarget();
+                if (selectedTarget && deleteSelectedDrawing(selectedTarget)) {
+                    event.preventDefault();
+                    return;
+                }
+            }
+            if (key !== 'Escape') return;
+            closeDrawingPalette();
+            hideChartContextMenu();
             [1, 2].forEach(target => {
                 const store = getDrawingStore(target);
-                if (!store.draft) return;
-                store.draft = null;
-                store.pointerId = null;
-                scheduleDrawingRender(target);
+                if (store.draft) {
+                    store.draft = null;
+                    store.pointerId = null;
+                    scheduleDrawingRender(target);
+                }
             });
+            clearDrawingSelection();
         });
 
         if (chartDrawingHideBtn) {
@@ -6971,6 +7743,17 @@
                 setDrawingToolbarHidden(false);
             });
         }
+
+        document.addEventListener('click', event => {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            if (!target.closest('.chart-drawing-palette') && !target.closest('#chart-drawing-color-btn')) {
+                closeDrawingPalette();
+            }
+            if (!target.closest('.chart-context-menu')) {
+                hideChartContextMenu();
+            }
+        });
 
         applySharedDrawingTool('cursor', { notifyParent: false });
         setDrawingToolbarHidden(false);

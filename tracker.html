@@ -245,8 +245,8 @@
     }
 
     .header-theme-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       display: block;
     }
 
@@ -257,11 +257,11 @@
     }
 
     .header-favorites-btn.is-active {
-      color: rgba(148, 163, 184, 0.76);
+      color: var(--muted);
     }
 
     body.light .header-favorites-btn.is-active {
-      color: #64748b;
+      color: var(--muted);
     }
 
     .header-search-shell {
@@ -659,42 +659,23 @@
     .wallet-shell-chrome {
       display: none;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 12px;
       min-height: 44px;
       border-bottom: 1px solid var(--border);
       background: var(--bg);
       flex: 0 0 auto;
+      padding-right: 8px;
     }
 
     .top-frame-panel.is-wallet-mode .wallet-shell-chrome {
-      display: flex;
-    }
-
-    .wallet-shell-tab-list {
-      display: flex;
-      align-items: center;
-      min-width: 0;
-      flex: 1 1 auto;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .wallet-shell-tab-list::-webkit-scrollbar {
       display: none;
-    }
-
-    .wallet-shell-tab-list .wallet-modal-tab {
-      flex: 0 0 auto;
-      min-width: auto;
-      padding: 10px 14px;
     }
 
     .wallet-shell-actions {
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      padding-right: 8px;
       flex: 0 0 auto;
     }
 
@@ -3280,11 +3261,6 @@
               </svg>
             </button>
             <div class="wallet-shell-chrome" id="walletShellChrome" hidden>
-              <div class="wallet-shell-tab-list" role="tablist" aria-label="Wallet section tabs">
-                <button class="wallet-modal-tab is-active" type="button" data-wallet-section="positions" aria-selected="true">Positions</button>
-                <button class="wallet-modal-tab" type="button" data-wallet-section="performance" aria-selected="false">Performance</button>
-                <button class="wallet-modal-tab" type="button" data-wallet-section="orders" aria-selected="false">Orders</button>
-              </div>
               <div class="wallet-shell-actions">
                 <button class="icon-btn" type="button" id="closeWalletShellBtn" aria-label="Close wallet tracker" title="Close wallet tracker">
                   <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -3371,13 +3347,13 @@
       <div class="price-ticker" id="priceTicker">
         <div class="price-track" id="priceTrack">
           <div class="price-list" id="priceList">
-            <span class="price-end-marker" aria-hidden="true"><img src="images/favicon.png" alt="" /><span>Hypermonitor</span><img src="images/favicon.png" alt="" /></span>
+            <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
             <span class="price-item" data-coin="BTC"><img class="coinIcon" src="images/coins/BTC.svg" alt="BTC" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="ETH"><img class="coinIcon" src="images/coins/ETH.svg" alt="ETH" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="SOL"><img class="coinIcon" src="images/coins/SOL.svg" alt="SOL" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="HYPE"><img class="coinIcon" src="images/coins/HYPE.svg" alt="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="LINK"><img class="coinIcon" src="images/coins/LINK.svg" alt="LINK" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-end-marker" aria-hidden="true"><img src="images/favicon.png" alt="" /><span>Hypermonitor</span><img src="images/favicon.png" alt="" /></span>
+            <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
             <span class="price-item" data-coin="xyz:GOLD"><img class="coinIcon" src="images/coins/GOLD.svg" alt="GOLD" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon" src="images/coins/SILVER.svg" alt="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="cash:USA500"><img class="coinIcon" src="images/coins/USA500.png" alt="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
@@ -6207,9 +6183,9 @@
             markerEl.className = "price-end-marker";
             markerEl.setAttribute("aria-hidden", "true");
             markerEl.innerHTML = `
-              <img src="images/favicon.png" alt="" />
+              <img src="images/pulse.gif" alt="" />
               <span>Hypermonitor</span>
-              <img src="images/favicon.png" alt="" />
+              <img src="images/pulse.gif" alt="" />
             `;
             return markerEl;
           };
@@ -8335,6 +8311,16 @@
         syncWalletUi();
         highlightSelectedWallet();
         updateUrl(false);
+        return;
+      }
+      if (data.type === "hypermonitor:wallet-section-change") {
+        if (!isPrimaryFrame) return;
+        state.walletModalSection = normalizeWalletModalSection(data.section);
+        return;
+      }
+      if (data.type === "hypermonitor:close-wallet-shell") {
+        if (!isPrimaryFrame) return;
+        closeWalletOverlay({ pushHistory: true });
         return;
       }
       if (data.type === "hypermonitor:coin-change") {

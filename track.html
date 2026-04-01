@@ -100,6 +100,8 @@
 
     body.embed-shell .dashboard-shell {
       margin-bottom: 0.8rem;
+      align-items: stretch;
+      min-height: calc(100vh - 12px);
     }
 
     body.embed-popup .dashboard-main {
@@ -108,6 +110,126 @@
 
     body.embed-shell .dashboard-main {
       gap: 0.8rem;
+      grid-template-rows: auto minmax(0, 1fr);
+      align-content: stretch;
+      min-height: 0;
+    }
+
+    .shell-main-topbar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      min-height: 30px;
+    }
+
+    body.embed-shell .shell-main-topbar {
+      display: flex;
+    }
+
+    .shell-section-switch {
+      display: none;
+      margin: 0;
+      flex: 1 1 auto;
+      min-width: 0;
+      align-self: stretch;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      background: transparent;
+    }
+
+    body.embed-shell .shell-section-switch {
+      display: flex;
+    }
+
+    .shell-section-switch .orders-tabs-indicator {
+      display: none !important;
+    }
+
+    .shell-section-switch .orders-tab-btn {
+      min-width: 0;
+      flex: 1 1 0;
+      padding: 0 0 10px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .shell-section-switch .orders-tab-btn:hover {
+      background: transparent;
+      color: var(--text-main);
+      border-color: transparent;
+    }
+
+    .shell-section-switch .orders-tab-btn.active {
+      background: transparent;
+      border-color: transparent;
+      border-bottom-color: var(--text-main);
+      color: var(--text-main);
+    }
+
+    .shell-close-btn {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      cursor: pointer;
+      transition: color 160ms ease;
+      flex: 0 0 auto;
+    }
+
+    .shell-close-btn:hover,
+    .shell-close-btn:focus-visible {
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .shell-close-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    body.embed-shell .dashboard-sidebar {
+      position: static;
+      align-self: stretch;
+      display: flex;
+      min-height: 0;
+    }
+
+    body.embed-shell .dashboard-sidebar .account-overview-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 100%;
+      max-height: none;
+      overflow: auto;
+    }
+
+    body.embed-shell .dashboard-main > .card {
+      min-height: 0;
+    }
+
+    body.embed-shell .dashboard-main > .card:not(.hidden) {
+      height: 100%;
+    }
+
+    body.embed-shell .positions-card,
+    body.embed-shell #performanceSection,
+    body.embed-shell #liveLayout,
+    body.embed-shell #historyLayout {
+      min-height: 0;
     }
 
     @media (max-width: 720px) {
@@ -3833,6 +3955,30 @@
       border-color: #cbd5f5;
     }
 
+    body.light .shell-section-switch {
+      border-bottom-color: #d7dbe0;
+      background: transparent;
+    }
+
+    body.light .shell-section-switch .orders-tab-btn {
+      background: transparent;
+      border-color: transparent;
+      color: #6b7280;
+    }
+
+    body.light .shell-section-switch .orders-tab-btn:hover {
+      background: transparent;
+      color: #111827;
+      border-color: transparent;
+    }
+
+    body.light .shell-section-switch .orders-tab-btn.active {
+      background: transparent;
+      border-color: transparent;
+      border-bottom-color: #111827;
+      color: #111827;
+    }
+
     .tab-panel.hidden { display: none; }
 
     .orders-filter-bar {
@@ -5452,6 +5598,18 @@
     </aside>
 
     <div class="dashboard-main">
+    <div class="shell-main-topbar">
+      <div class="shell-section-switch" id="shellSectionTabs" role="tablist" aria-label="Wallet section tabs">
+        <button class="orders-tab-btn shell-section-btn active" type="button" data-shell-section="positions" aria-selected="true">Positions</button>
+        <button class="orders-tab-btn shell-section-btn" type="button" data-shell-section="performance" aria-selected="false">Performance</button>
+        <button class="orders-tab-btn shell-section-btn" type="button" data-shell-section="orders" aria-selected="false">Orders</button>
+      </div>
+      <button class="shell-close-btn" id="shellCloseBtn" type="button" aria-label="Close wallet tracker" title="Close wallet tracker">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
     <section class="card positions-card">
       <div class="section-title">
         <h2>Positions</h2>
@@ -6200,6 +6358,9 @@
   const accountOverviewCardEl = document.querySelector(".account-overview-card");
   const dashboardSidebarEl = document.querySelector(".dashboard-sidebar");
   const dashboardMainEl = document.querySelector(".dashboard-main");
+  const shellSectionTabsEl = document.getElementById("shellSectionTabs");
+  const shellSectionButtons = shellSectionTabsEl ? Array.from(shellSectionTabsEl.querySelectorAll("[data-shell-section]")) : [];
+  const shellCloseBtn = document.getElementById("shellCloseBtn");
   const positionsSectionEl = document.querySelector(".positions-card");
   const performanceSectionEl = document.getElementById("performanceSection");
 
@@ -12483,12 +12644,6 @@
         meta: `${formatNumber(assetCount, 0)} assets currently open`,
         tone: "",
       },
-      {
-        label: "Tracked Wallets",
-        value: formatNumber(walletCount, 0),
-        meta: walletCount === 1 ? "Single wallet view" : "Combined wallet view",
-        tone: "",
-      },
     ];
 
     const metricHtml = stats
@@ -12584,7 +12739,6 @@
                 <div class="overview-section-title">Exposure Posture</div>
                 <div class="overview-section-subtitle">${xmlEscape(positionCount ? biasLabel : "Open a position to populate exposure posture.")}</div>
               </div>
-              <div class="overview-bias-pill">${exposureMultiple !== null ? xmlEscape(formatExposureMultiple(exposureMultiple, 2)) : "-"}</div>
             </div>
             <div class="overview-direction-head">
               <span>Long / Short Exposure</span>
@@ -19316,6 +19470,32 @@
     });
   }
 
+  shellSectionButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!isEmbedShell) return;
+      const nextSection = normalizeEmbedSection(button.dataset.shellSection || "positions");
+      setEmbedSection(nextSection);
+    });
+  });
+
+  if (shellSectionTabsEl) {
+    shellSectionTabsEl.addEventListener("wheel", handleShellSectionWheel, { passive: false });
+  }
+
+  if (shellCloseBtn) {
+    shellCloseBtn.addEventListener("click", () => {
+      if (window.parent && window.parent !== window) {
+        try {
+          window.parent.postMessage({ type: "hypermonitor:close-wallet-shell" }, "*");
+        } catch (_) {}
+      }
+    });
+  }
+
+  if (dashboardMainEl) {
+    dashboardMainEl.addEventListener("wheel", handleShellSectionWheel, { passive: false });
+  }
+
   document.addEventListener("click", (e) => {
     if (!priceContextMenuEl || !priceContextMenuEl.classList.contains("show")) return;
     if (e.target.closest("#priceContextMenu")) return;
@@ -19478,6 +19658,68 @@
     return value === "positions" || value === "performance" || value === "orders" || value === "overview" ? value : "overview";
   }
 
+  function getCurrentEmbedShellSection() {
+    return normalizeEmbedSection(document.body.dataset.popupSection || initialEmbedSection || "positions");
+  }
+
+  function syncShellSectionTabs(section) {
+    const normalizedSection = normalizeEmbedSection(section);
+    shellSectionButtons.forEach((button) => {
+      const isActive = button.dataset.shellSection === normalizedSection;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+    updateTabSwitchIndicator(shellSectionTabsEl);
+  }
+
+  function notifyParentShellSection(section) {
+    if (!isEmbedShell || window.parent === window) return;
+    try {
+      window.parent.postMessage({
+        type: "hypermonitor:wallet-section-change",
+        section: normalizeEmbedSection(section)
+      }, "*");
+    } catch (_) {}
+  }
+
+  function switchEmbedShellSectionBy(direction) {
+    if (!isEmbedShell || !Number.isFinite(direction) || !direction) return;
+    const order = ["positions", "performance", "orders"];
+    const current = getCurrentEmbedShellSection();
+    const currentIndex = Math.max(0, order.indexOf(current));
+    const nextIndex = Math.max(0, Math.min(order.length - 1, currentIndex + (direction > 0 ? 1 : -1)));
+    if (nextIndex === currentIndex) return;
+    setEmbedSection(order[nextIndex]);
+  }
+
+  let shellSectionWheelAccum = 0;
+  let shellSectionWheelResetTimer = 0;
+  let shellSectionLastSwitchAt = 0;
+
+  function handleShellSectionWheel(event) {
+    if (!isEmbedShell) return;
+    if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 14) return;
+    shellSectionWheelAccum += event.deltaX;
+    clearTimeout(shellSectionWheelResetTimer);
+    shellSectionWheelResetTimer = setTimeout(() => {
+      shellSectionWheelAccum = 0;
+    }, 140);
+    if (Math.abs(shellSectionWheelAccum) < 70) {
+      event.preventDefault();
+      return;
+    }
+    const now = Date.now();
+    if (now - shellSectionLastSwitchAt < 180) {
+      event.preventDefault();
+      return;
+    }
+    shellSectionLastSwitchAt = now;
+    const delta = shellSectionWheelAccum;
+    shellSectionWheelAccum = 0;
+    event.preventDefault();
+    switchEmbedShellSectionBy(delta > 0 ? 1 : -1);
+  }
+
   function shouldPreloadPerformanceSection() {
     return !isEmbedSectionMode || initialEmbedSection === "performance";
   }
@@ -19503,6 +19745,7 @@
     const normalizedSection = normalizeEmbedSection(section);
     const nextSection = isEmbedShell && normalizedSection === "overview" ? "positions" : normalizedSection;
     document.body.dataset.popupSection = nextSection;
+    syncShellSectionTabs(nextSection);
     if (isEmbedShell) {
       if (dashboardSidebarEl) dashboardSidebarEl.classList.remove("hidden");
       if (dashboardMainEl) dashboardMainEl.classList.remove("hidden");
@@ -19527,6 +19770,7 @@
     if (nextSection === "performance") {
       resizeVisiblePopupCharts();
     }
+    notifyParentShellSection(nextSection);
   }
 
   if (metricsToggleEl && metricsCardEl) {
