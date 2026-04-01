@@ -30,6 +30,7 @@
       font-family: "Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       --bg: #0d1014;
       --bg-soft: #12161c;
+      --surface2: #0f1318;
       --panel: rgba(15, 18, 23, 0.92);
       --panel-strong: rgba(15, 18, 23, 0.98);
       --panel-muted: rgba(255, 255, 255, 0.02);
@@ -89,6 +90,7 @@
       color-scheme: light;
       --bg: #fbfcfe;
       --bg-soft: #f1f5f9;
+      --surface2: #f5f7fb;
       --panel: rgba(255, 255, 255, 0.92);
       --panel-strong: rgba(255, 255, 255, 0.98);
       --panel-muted: rgba(15, 23, 42, 0.04);
@@ -1801,7 +1803,7 @@
       position: sticky;
       top: 0;
       z-index: 5;
-      background: #12161c;
+      background: var(--surface2);
       backdrop-filter: none;
     }
 
@@ -1984,7 +1986,7 @@
     }
 
     body.light thead {
-      background: #e7eaee;
+      background: var(--surface2);
     }
 
     body.light th {
@@ -2353,6 +2355,9 @@
       gap: 0.8rem;
       white-space: nowrap;
       --price-scroll-distance: 50%;
+      will-change: transform;
+      backface-visibility: hidden;
+      transform: translateZ(0);
     }
 
     .price-list {
@@ -2474,12 +2479,19 @@
       pointer-events: none;
     }
 
-    .price-end-marker img {
+    .price-end-marker::before,
+    .price-end-marker::after {
+      content: "";
       width: 18px;
       height: 18px;
       border-radius: 4px;
-      object-fit: contain;
       display: block;
+      flex: 0 0 18px;
+      background: center / contain no-repeat url("images/pulse.gif");
+    }
+
+    .price-end-marker img {
+      display: none;
     }
 
     .price-footer.hide-change .coin-change {
@@ -3458,18 +3470,18 @@
       <div class="price-ticker" id="priceTicker">
         <div class="price-track" id="priceTrack">
           <div class="price-list" id="priceList">
-            <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
-            <span class="price-item" data-coin="BTC"><img class="coinIcon" src="images/coins/BTC.svg" alt="BTC" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="ETH"><img class="coinIcon" src="images/coins/ETH.svg" alt="ETH" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="SOL"><img class="coinIcon" src="images/coins/SOL.svg" alt="SOL" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="HYPE"><img class="coinIcon" src="images/coins/HYPE.svg" alt="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="LINK"><img class="coinIcon" src="images/coins/LINK.svg" alt="LINK" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
-            <span class="price-item" data-coin="xyz:GOLD"><img class="coinIcon" src="images/coins/GOLD.svg" alt="GOLD" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon" src="images/coins/SILVER.svg" alt="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="cash:USA500"><img class="coinIcon" src="images/coins/USA500.png" alt="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:NVDA"><img class="coinIcon" src="images/coins/NVDA.svg" alt="NVDA" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:MSTR"><img class="coinIcon" src="images/coins/MSTR.svg" alt="MSTR" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-end-marker" aria-hidden="true">Hypermonitor</span>
+            <span class="price-item" data-coin="BTC"><img class="coinIcon coin-info-trigger" src="images/coins/BTC.svg" alt="BTC" data-logo-key="BTC" data-coin-key="BTC" data-coin-label="BTC" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('BTC', this)" onerror="window.__logoErr('BTC', this, 'B')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="ETH"><img class="coinIcon coin-info-trigger" src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Ethereum_Logo.png" alt="ETH" data-logo-key="ETH" data-coin-key="ETH" data-coin-label="ETH" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="SOL"><img class="coinIcon coin-info-trigger" src="images/coins/SOL.svg" alt="SOL" data-logo-key="SOL" data-coin-key="SOL" data-coin-label="SOL" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('SOL', this)" onerror="window.__logoErr('SOL', this, 'S')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="HYPE"><img class="coinIcon coin-info-trigger" src="https://hyperfoundation.org/landing/blob_green.gif" alt="HYPE" data-logo-key="HYPE" data-coin-key="HYPE" data-coin-label="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="LINK"><img class="coinIcon coin-info-trigger" src="https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif" alt="LINK" data-logo-key="LINK" data-coin-key="LINK" data-coin-label="LINK" loading="lazy" referrerpolicy="no-referrer" style="border-radius:50%;" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-end-marker" aria-hidden="true">Hypermonitor</span>
+            <span class="price-item" data-coin="xyz:GOLD"><img class="coinIcon coin-info-trigger" src="https://s3-symbol-logo.tradingview.com/metal/gold--600.png" alt="GOLD" data-logo-key="xyz:GOLD" data-coin-key="xyz:GOLD" data-coin-label="GOLD" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon coin-info-trigger" src="https://s3-symbol-logo.tradingview.com/metal/silver--600.png" alt="SILVER" data-logo-key="xyz:SILVER" data-coin-key="xyz:SILVER" data-coin-label="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="cash:USA500"><img class="coinIcon coin-info-trigger" src="https://s3-symbol-logo.tradingview.com/indices/s-and-p-500--600.png" alt="USA500" data-logo-key="cash:USA500" data-coin-key="cash:USA500" data-coin-label="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:NVDA"><img class="coinIcon coin-info-trigger" src="https://app.hyperliquid.xyz/coins/xyz%3ANVDA.svg" alt="NVDA" data-logo-key="xyz:NVDA" data-coin-key="xyz:NVDA" data-coin-label="NVDA" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('xyz:NVDA', this)" onerror="window.__logoErr('xyz:NVDA', this, 'N')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:MSTR"><img class="coinIcon coin-info-trigger" src="https://app.hyperliquid.xyz/coins/xyz%3AMSTR.svg" alt="MSTR" data-logo-key="xyz:MSTR" data-coin-key="xyz:MSTR" data-coin-label="MSTR" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('xyz:MSTR', this)" onerror="window.__logoErr('xyz:MSTR', this, 'M')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
           </div>
           <div class="price-list clone" id="priceListClone" aria-hidden="true"></div>
           <div class="price-list clone" id="priceListClone2" aria-hidden="true"></div>
@@ -3890,6 +3902,9 @@
     let manualMidTimer = null;
     let lastManualMidRefreshRequestMs = 0;
     let footerDexNames = null;
+    let footerTickerUpdateRaf = 0;
+    let footerTickerLastMeasureAt = 0;
+    let footerTickerMetricsSignature = "";
 
     function normalizeTheme(value) {
       return value === "light" ? "light" : "dark";
@@ -3905,6 +3920,22 @@
         frame.contentWindow.postMessage({
           type: "hypermonitor:set-theme",
           theme: getActiveTheme()
+        }, "*");
+      } catch (_) {
+        // Ignore iframe timing issues during load.
+      }
+    }
+
+    function postWalletSkillOverridesToFrame(frame, wallet = state.wallet) {
+      if (!frame?.contentWindow) return;
+      const overrides = getWalletSkillOverrides(wallet) || {};
+      try {
+        frame.contentWindow.postMessage({
+          type: "hypermonitor:set-wallet-skill-overrides",
+          skillQuality: overrides.skillQuality ?? null,
+          skillTrend: overrides.skillTrend ?? null,
+          skillConsistency: overrides.skillConsistency ?? null,
+          skillActivity: overrides.skillActivity ?? null,
         }, "*");
       } catch (_) {
         // Ignore iframe timing issues during load.
@@ -3938,7 +3969,7 @@
         } catch (_) {}
       }
       renderFooterPrices();
-      updatePriceTickerRolling();
+      schedulePriceTickerRollingUpdate(true);
       if (options.broadcast !== false) {
         broadcastTheme();
       }
@@ -4708,8 +4739,42 @@
       return "track.html?wallet=" + encodeURIComponent(wallet);
     }
 
+    function clampWalletSkillScore(value) {
+      const numeric = Number(value);
+      return Number.isFinite(numeric) ? Math.max(0, Math.min(100, numeric)) : null;
+    }
+
+    function getWalletSkillOverrides(wallet) {
+      const normalizedWallet = normalizeFavoriteWallet(wallet);
+      if (!normalizedWallet) return null;
+      const row = state.normalizedRows.find((entry) => normalizeFavoriteWallet(entry.address) === normalizedWallet);
+      if (!row) return null;
+      return {
+        skillQuality: clampWalletSkillScore(row.walletScore),
+        skillTrend: clampWalletSkillScore(row.trendScore),
+        skillConsistency: clampWalletSkillScore(row.consistencyScore),
+        skillActivity: clampWalletSkillScore(row.activityScore),
+      };
+    }
+
+    function applyWalletSkillOverrides(params, wallet) {
+      const overrides = getWalletSkillOverrides(wallet);
+      ["skillQuality", "skillTrend", "skillConsistency", "skillActivity"].forEach((key) => {
+        params.delete(key);
+      });
+      if (!overrides) return;
+      Object.entries(overrides).forEach(([key, value]) => {
+        if (Number.isFinite(value)) params.set(key, String(value));
+      });
+    }
+
     function buildWalletShellTrackerHref(wallet, section = state.walletModalSection) {
-      return buildWalletTrackerHref(wallet) + "&embed=shell&section=" + encodeURIComponent(normalizeWalletShellSection(section));
+      const params = new URLSearchParams();
+      params.set("wallet", wallet);
+      params.set("embed", "shell");
+      params.set("section", normalizeWalletShellSection(section));
+      applyWalletSkillOverrides(params, wallet);
+      return "track.html?" + params.toString();
     }
 
     function normalizeWalletModalSection(value) {
@@ -4721,7 +4786,12 @@
     }
 
     function buildWalletPopupHref(wallet, section = state.walletModalSection) {
-      return buildWalletTrackerHref(wallet) + "&embed=popup&section=" + encodeURIComponent(normalizeWalletModalSection(section));
+      const params = new URLSearchParams();
+      params.set("wallet", wallet);
+      params.set("embed", "popup");
+      params.set("section", normalizeWalletModalSection(section));
+      applyWalletSkillOverrides(params, wallet);
+      return "track.html?" + params.toString();
     }
 
     async function fetchHyperliquidInfo(payload) {
@@ -6167,6 +6237,14 @@
           if (!desired.includes(coin)) el.remove();
         });
 
+        const currentOrder = Array.from(priceListEl.children)
+          .filter((child) => child.classList?.contains("price-item"))
+          .map((child) => child.dataset.coin)
+          .filter(Boolean);
+        const orderNeedsSync =
+          currentOrder.length !== desired.length ||
+          currentOrder.some((coin, idx) => coin !== desired[idx]);
+
         desired.forEach((coin) => {
           let item = existing.get(coin);
           if (!item) {
@@ -6179,23 +6257,23 @@
               <span class="coin-price">--</span>
               <span class="coin-change"></span>
             `;
-            priceListEl.appendChild(item);
-          } else {
-            priceListEl.appendChild(item);
+            existing.set(coin, item);
           }
 
           const nextIconMarkup = footerCoinIconHtml(coin, coin).trim();
           if (!nextIconMarkup) return;
-          const currentIconEl = item.querySelector(".coinIcon, .coinFallback");
           const template = document.createElement("template");
           template.innerHTML = nextIconMarkup;
           const nextIconEl = template.content.firstElementChild;
-          if (nextIconEl && currentIconEl && currentIconEl.outerHTML !== nextIconEl.outerHTML) {
-            currentIconEl.replaceWith(nextIconEl);
-          } else if (nextIconEl && !currentIconEl) {
-            item.insertAdjacentElement("afterbegin", nextIconEl);
-          }
+          if (nextIconEl instanceof HTMLElement) syncFooterIcon(item, nextIconEl);
         });
+
+        if (orderNeedsSync) {
+          desired.forEach((coin) => {
+            const item = existing.get(coin);
+            if (item) priceListEl.appendChild(item);
+          });
+        }
 
         desired.forEach((coin) => {
           const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
@@ -6287,33 +6365,8 @@
           }
         });
 
-        priceListEl.querySelectorAll(".price-end-marker").forEach((el) => el.remove());
-        if (desired.length) {
-          const createFooterMarkerEl = () => {
-            const markerEl = document.createElement("span");
-            markerEl.className = "price-end-marker";
-            markerEl.setAttribute("aria-hidden", "true");
-            markerEl.innerHTML = `
-              <img src="images/pulse.gif" alt="" />
-              <span>Hypermonitor</span>
-              <img src="images/pulse.gif" alt="" />
-            `;
-            return markerEl;
-          };
-
-          priceListEl.insertBefore(createFooterMarkerEl(), priceListEl.firstChild);
-          desired.forEach((coin, idx) => {
-            if ((idx + 1) % footerSeparatorEvery !== 0) return;
-            if (idx === desired.length - 1) return;
-            const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
-            if (!item) return;
-            item.insertAdjacentElement("afterend", createFooterMarkerEl());
-          });
-        }
-
-        const footerStructureSignature = Array.from(priceListEl.children)
-          .map((child, index) => child.classList.contains("price-item") ? `item:${child.dataset.coin || ""}` : `marker:${index}`)
-          .join("|");
+        const footerStructureSignature = buildFooterStructureSignature(desired);
+        const structureChanged = syncFooterMarkers(desired, footerStructureSignature);
 
         priceListCloneEls.forEach((cloneEl) => {
           const shouldRebuild = cloneEl.dataset.structureSig !== footerStructureSignature;
@@ -6328,12 +6381,7 @@
               const cloneChild = cloneEl.children[index];
               if (!(sourceChild instanceof HTMLElement) || !(cloneChild instanceof HTMLElement)) return;
               const sourceIcon = sourceChild.querySelector(".coinIcon, .coinFallback");
-              const cloneIcon = cloneChild.querySelector(".coinIcon, .coinFallback");
-              if (sourceIcon && cloneIcon && sourceIcon.outerHTML !== cloneIcon.outerHTML) {
-                cloneIcon.replaceWith(sourceIcon.cloneNode(true));
-              } else if (sourceIcon && !cloneIcon) {
-                cloneChild.insertAdjacentElement("afterbegin", sourceIcon.cloneNode(true));
-              }
+              if (sourceIcon instanceof HTMLElement) syncFooterIcon(cloneChild, sourceIcon.cloneNode(true));
               const sourcePrice = sourceChild.querySelector(".coin-price");
               const clonePrice = cloneChild.querySelector(".coin-price");
               if (sourcePrice && clonePrice) {
@@ -6352,7 +6400,7 @@
         });
 
         requestAnimationFrame(() => {
-          updatePriceTickerRolling();
+          schedulePriceTickerRollingUpdate(structureChanged);
           if (!footerReady && priceFooterWrapEl && allFooterPricesReady) {
             revealFooter(true);
           }
@@ -6385,13 +6433,106 @@
         });
       }
 
-      function updatePriceTickerRolling() {
+      function createFooterMarkerEl() {
+        const markerEl = document.createElement("span");
+        markerEl.className = "price-end-marker";
+        markerEl.setAttribute("aria-hidden", "true");
+        markerEl.textContent = "Hypermonitor";
+        return markerEl;
+      }
+
+      function getFooterIconSignature(el) {
+        if (!(el instanceof HTMLElement)) return "";
+        if (el.classList.contains("coinFallback")) {
+          return [
+            "fallback",
+            el.dataset.logoKey || "",
+            el.dataset.coinKey || "",
+            el.textContent || "",
+          ].join("|");
+        }
+        if (el.classList.contains("coinIcon")) {
+          return [
+            "img",
+            el.dataset.logoKey || "",
+            el.getAttribute("src") || "",
+            el.getAttribute("style") || "",
+            el.getAttribute("alt") || "",
+          ].join("|");
+        }
+        return "";
+      }
+
+      function syncFooterIcon(containerEl, nextIconEl) {
+        if (!(containerEl instanceof HTMLElement) || !(nextIconEl instanceof HTMLElement)) return;
+        const currentIconEl = containerEl.querySelector(".coinIcon, .coinFallback");
+        if (!currentIconEl) {
+          containerEl.insertAdjacentElement("afterbegin", nextIconEl);
+          return;
+        }
+        if (getFooterIconSignature(currentIconEl) === getFooterIconSignature(nextIconEl)) return;
+        currentIconEl.replaceWith(nextIconEl);
+      }
+
+      function buildFooterStructureSignature(desired) {
+        if (!Array.isArray(desired) || !desired.length) return "";
+        const parts = ["marker"];
+        desired.forEach((coin, idx) => {
+          parts.push(`item:${coin}`);
+          if ((idx + 1) % footerSeparatorEvery === 0 && idx !== desired.length - 1) {
+            parts.push("marker");
+          }
+        });
+        return parts.join("|");
+      }
+
+      function syncFooterMarkers(desired, footerStructureSignature) {
+        if (!priceListEl) return false;
+        const previousSignature = priceListEl.dataset.structureSig || "";
+        if (previousSignature === footerStructureSignature) return false;
+        priceListEl.querySelectorAll(".price-end-marker").forEach((el) => el.remove());
+        if (desired.length) {
+          priceListEl.insertBefore(createFooterMarkerEl(), priceListEl.firstChild);
+          desired.forEach((coin, idx) => {
+            if ((idx + 1) % footerSeparatorEvery !== 0) return;
+            if (idx === desired.length - 1) return;
+            const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
+            if (!item) return;
+            item.insertAdjacentElement("afterend", createFooterMarkerEl());
+          });
+        }
+        priceListEl.dataset.structureSig = footerStructureSignature;
+        return true;
+      }
+
+      function schedulePriceTickerRollingUpdate(force = false) {
+        const now =
+          window.performance && typeof window.performance.now === "function"
+            ? window.performance.now()
+            : Date.now();
+        if (!force && footerTickerUpdateRaf) return;
+        if (!force && now - footerTickerLastMeasureAt < 140) return;
+        if (footerTickerUpdateRaf) cancelAnimationFrame(footerTickerUpdateRaf);
+        footerTickerUpdateRaf = requestAnimationFrame(() => {
+          footerTickerUpdateRaf = 0;
+          footerTickerLastMeasureAt =
+            window.performance && typeof window.performance.now === "function"
+              ? window.performance.now()
+              : Date.now();
+          updatePriceTickerRolling(force);
+        });
+      }
+
+      function updatePriceTickerRolling(force = false) {
         if (!priceFooterWrapEl || !priceListEl || !priceTickerEl || !priceTrackEl) return;
         const items = priceListEl.querySelectorAll(".price-item");
         if (!items.length) {
-          priceFooterWrapEl.classList.remove("rolling");
-          priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
-          priceTrackEl.style.animationDuration = "";
+          if (force || footerTickerMetricsSignature !== "empty") {
+            footerTickerMetricsSignature = "empty";
+            priceFooterWrapEl.classList.remove("rolling");
+            priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
+            priceTrackEl.style.animationDuration = "";
+          }
           return;
         }
         const tops = new Set(Array.from(items).map((el) => el.offsetTop));
@@ -6399,23 +6540,38 @@
         const isOverflow = priceListEl.scrollWidth > priceTickerEl.clientWidth + 4;
         const forceRoll = items.length >= 12;
         const shouldRoll = forceRoll || isWrapped || isOverflow;
-        priceFooterWrapEl.classList.toggle("rolling", shouldRoll);
         if (shouldRoll) {
           let scrollDistance = 0;
           const exactDistance = priceListCloneEl ? priceListCloneEl.offsetLeft - priceListEl.offsetLeft : 0;
+          let scrollDistanceValue = "50%";
           if (Number.isFinite(exactDistance) && exactDistance > 0) {
             scrollDistance = exactDistance;
-            priceTrackEl.style.setProperty("--price-scroll-distance", `${exactDistance}px`);
+            scrollDistanceValue = `${exactDistance}px`;
           } else {
             const trackStyle = getComputedStyle(priceTrackEl);
             const listGap = parseFloat(trackStyle.columnGap || trackStyle.gap || "0") || 0;
             scrollDistance = priceListEl.scrollWidth + listGap;
-            priceTrackEl.style.setProperty("--price-scroll-distance", `${scrollDistance}px`);
+            scrollDistanceValue = `${scrollDistance}px`;
           }
           const pxPerSecond = 52;
           const durationSeconds = Math.max(18, Math.min(42, scrollDistance / pxPerSecond));
+          const nextSignature = [
+            "rolling",
+            items.length,
+            Math.round(priceTickerEl.clientWidth),
+            Math.round(scrollDistance),
+            durationSeconds.toFixed(2),
+          ].join("|");
+          if (!force && footerTickerMetricsSignature === nextSignature) return;
+          footerTickerMetricsSignature = nextSignature;
+          priceFooterWrapEl.classList.add("rolling");
+          priceTrackEl.style.setProperty("--price-scroll-distance", scrollDistanceValue);
           priceTrackEl.style.animationDuration = `${durationSeconds.toFixed(2)}s`;
         } else {
+          const nextSignature = ["static", items.length, Math.round(priceTickerEl.clientWidth)].join("|");
+          if (!force && footerTickerMetricsSignature === nextSignature) return;
+          footerTickerMetricsSignature = nextSignature;
+          priceFooterWrapEl.classList.remove("rolling");
           priceTrackEl.style.setProperty("--price-scroll-distance", "50%");
           priceTrackEl.style.animationDuration = "";
         }
@@ -7775,6 +7931,7 @@
             setStatus("ok", "Showing cached leaderboard");
             setLoadingState(false);
             applyFiltersAndSort();
+            if (state.wallet && tradeFrameReady) postWalletSkillOverridesToFrame(tradeFrame, state.wallet);
             updateHeaderSuggestions();
             return;
           }
@@ -7791,6 +7948,7 @@
         setStatus("ok", "Loaded " + state.normalizedRows.length.toLocaleString() + " wallets");
         setLoadingState(false);
         applyFiltersAndSort();
+        if (state.wallet && tradeFrameReady) postWalletSkillOverridesToFrame(tradeFrame, state.wallet);
         updateHeaderSuggestions();
       } catch (error) {
         console.error("Failed to load leaderboard", error);
@@ -8507,7 +8665,7 @@
 
     window.addEventListener("resize", () => {
       hidePriceContextMenu();
-      updatePriceTickerRolling();
+      schedulePriceTickerRollingUpdate(true);
       if (!isCompactFooterAddMode()) footerAddCompactOpen = false;
       syncFooterAddControls();
       syncTradeLayout();
@@ -8541,6 +8699,7 @@
       tradeFrame.addEventListener("load", () => {
         tradeFrameReady = true;
         postThemeToFrame(tradeFrame);
+        if (state.wallet) postWalletSkillOverridesToFrame(tradeFrame, state.wallet);
         syncTradeFrameExtraCount();
         syncTradeFrameLayout();
         syncTradeTimeframe();
@@ -8584,6 +8743,7 @@
         const wallet = normalizeFavoriteWallet(data.wallet);
         if (!wallet) return;
         state.wallet = wallet;
+        postWalletSkillOverridesToFrame(tradeFrame, wallet);
         syncWalletUi();
         highlightSelectedWallet();
         updateUrl(false);
