@@ -417,6 +417,10 @@
             flex-shrink: 0;
         }
 
+        .hstat.has-hover-hint {
+            cursor: default;
+        }
+
         .hstat .lbl {
             font-size: 10px;
             color: var(--muted);
@@ -2330,7 +2334,8 @@
             background: var(--surface2) !important;
         }
 
-        #ob-hover-card {
+        #ob-hover-card,
+        #funding-hover-card {
             position: absolute;
             min-width: 154px;
             padding: 8px 10px;
@@ -2348,7 +2353,8 @@
             line-height: 1.45;
         }
 
-        #ob-hover-card.is-visible {
+        #ob-hover-card.is-visible,
+        #funding-hover-card.is-visible {
             opacity: 1;
             transform: translate3d(0, 0, 0);
         }
@@ -2377,7 +2383,8 @@
             white-space: nowrap;
         }
 
-        html.light #ob-hover-card {
+        html.light #ob-hover-card,
+        html.light #funding-hover-card {
             background: rgba(255, 255, 255, 0.98);
             border-color: rgba(148, 163, 184, 0.34);
             box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
@@ -3085,8 +3092,9 @@
                 <div class="hstat"><span class="lbl">24h Change</span><span class="val" id="s-chg">–</span></div>
                 <div class="hstat"><span class="lbl">24h Volume</span><span class="val" id="s-vol">–</span></div>
                 <div class="hstat"><span class="lbl">Open Interest</span><span class="val" id="s-oi">–</span></div>
-                <div class="hstat"><span class="lbl">Funding / Countdown</span><span class="val" id="s-fund">–</span></div>
+                <div class="hstat has-hover-hint" id="funding-stat"><span class="lbl">Funding / Countdown</span><span class="val" id="s-fund">–</span></div>
             </div>
+            <div id="funding-hover-card" aria-hidden="true"></div>
         </header>
 
         <!-- MAIN -->
@@ -3392,7 +3400,7 @@
                                 </div>
                                 <div id="chart-legend" style="pointer-events:none; z-index:5;"> <!-- inherit styles -->
                                     <div id="coin-toggle-2" class="mini-coin-select" onclick="toggleDropdown2()">
-                                        <img id="coin-logo-2" class="mini-coin-logo" src="images/coins/ETH.svg" data-coin="ETH" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="ETH">
+                                        <img id="coin-logo-2" class="mini-coin-logo" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E" data-coin="ETH" data-fallback-tried="0" onload="handleCoinImgLoad(this)" onerror="handleCoinImgError(this)" alt="ETH">
                                         <span class="mini-coin-meta">
                                             <span id="coin-label-2" class="mini-coin-label">ETH</span>
                                             <span id="coin-badge-2" class="mini-coin-badge" style="display:none;"></span>
@@ -3687,6 +3695,8 @@
             const fullLabel = dex ? `${dex}:${base}` : base;
 
             const specialLogos = {
+                BTC: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20shape-rendering%3D%22geometricPrecision%22%20text-rendering%3D%22geometricPrecision%22%20image-rendering%3D%22optimizeQuality%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20viewBox%3D%220%200%204091.27%204091.73%22%3E%3Cg%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill%3D%22%23F7931A%22%20d%3D%22M4030.06%202540.77C3756.82%203636.78%202646.74%204303.79%201550.6%204030.48%20454.92%203757.24-212.09%202647.09%2061.27%201551.17c273.12-1096.13%201383.2-1763.19%202479-1489.95C3636.33%20334.46%204303.3%201444.73%204030.03%202540.79l.02-.02z%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2947.77%201754.38c40.72-272.26-166.56-418.61-450-516.24l91.95-368.8-224.5-55.94-89.51%20359.09c-59.02-14.72-119.63-28.59-179.87-42.34L2186%20768.69l-224.36-55.94-92%20368.68c-48.84-11.12-96.81-22.11-143.35-33.69l.26-1.16-309.59-77.31-59.72%20239.78s166.56%2038.18%20163.05%2040.53c90.91%2022.69%20107.35%2082.87%20104.62%20130.57l-104.74%20420.15c6.26%201.59%2014.38%203.89%2023.34%207.49-7.49-1.86-15.46-3.89-23.73-5.87l-146.81%20588.57c-11.11%2027.62-39.31%2069.07-102.87%2053.33%202.25%203.26-163.17-40.72-163.17-40.72l-111.46%20256.98%20292.15%2072.83c54.35%2013.63%20107.61%2027.89%20160.06%2041.3l-92.9%20373.03%20224.24%2055.94%2092-369.07c61.26%2016.63%20120.71%2031.97%20178.91%2046.43l-91.69%20367.33%20224.51%2055.94%2092.89-372.33c382.82%2072.45%20670.67%2043.24%20791.83-303.02%2097.63-278.78-4.86-439.58-206.26-544.44%20146.69-33.83%20257.18-130.31%20286.64-329.61l-.07-.05zm-512.93%20719.26c-69.38%20278.78-538.76%20128.08-690.94%2090.29l123.28-494.2c152.17%2037.99%20640.17%20113.17%20567.67%20403.91zm69.43-723.3c-63.29%20253.58-453.96%20124.75-580.69%2093.16l111.77-448.21c126.73%2031.59%20534.85%2090.55%20468.94%20355.05h-.02z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E',
+                ETH: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E',
                 USA500: 'images/coins/USA500.png',
                 COPPER: 'images/coins/COPPER.png',
                 GOLD: 'images/coins/GOLD.svg',
@@ -3822,7 +3832,8 @@
         ]);
         const FOOTER_CIRCLE_LOGOS = new Set(['DOGE', 'DOT', 'RENDER', 'XRP']);
         const SPECIAL_LOGOS = new Map([
-            ['ETH', 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Ethereum_Logo.png'],
+            ['BTC', 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20shape-rendering%3D%22geometricPrecision%22%20text-rendering%3D%22geometricPrecision%22%20image-rendering%3D%22optimizeQuality%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20viewBox%3D%220%200%204091.27%204091.73%22%3E%3Cg%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill%3D%22%23F7931A%22%20d%3D%22M4030.06%202540.77C3756.82%203636.78%202646.74%204303.79%201550.6%204030.48%20454.92%203757.24-212.09%202647.09%2061.27%201551.17c273.12-1096.13%201383.2-1763.19%202479-1489.95C3636.33%20334.46%204303.3%201444.73%204030.03%202540.79l.02-.02z%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2947.77%201754.38c40.72-272.26-166.56-418.61-450-516.24l91.95-368.8-224.5-55.94-89.51%20359.09c-59.02-14.72-119.63-28.59-179.87-42.34L2186%20768.69l-224.36-55.94-92%20368.68c-48.84-11.12-96.81-22.11-143.35-33.69l.26-1.16-309.59-77.31-59.72%20239.78s166.56%2038.18%20163.05%2040.53c90.91%2022.69%20107.35%2082.87%20104.62%20130.57l-104.74%20420.15c6.26%201.59%2014.38%203.89%2023.34%207.49-7.49-1.86-15.46-3.89-23.73-5.87l-146.81%20588.57c-11.11%2027.62-39.31%2069.07-102.87%2053.33%202.25%203.26-163.17-40.72-163.17-40.72l-111.46%20256.98%20292.15%2072.83c54.35%2013.63%20107.61%2027.89%20160.06%2041.3l-92.9%20373.03%20224.24%2055.94%2092-369.07c61.26%2016.63%20120.71%2031.97%20178.91%2046.43l-91.69%20367.33%20224.51%2055.94%2092.89-372.33c382.82%2072.45%20670.67%2043.24%20791.83-303.02%2097.63-278.78-4.86-439.58-206.26-544.44%20146.69-33.83%20257.18-130.31%20286.64-329.61l-.07-.05zm-512.93%20719.26c-69.38%20278.78-538.76%20128.08-690.94%2090.29l123.28-494.2c152.17%2037.99%20640.17%20113.17%20567.67%20403.91zm69.43-723.3c-63.29%20253.58-453.96%20124.75-580.69%2093.16l111.77-448.21c126.73%2031.59%20534.85%2090.55%20468.94%20355.05h-.02z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E'],
+            ['ETH', 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E'],
             ['USA500', 'images/coins/USA500.png'],
             ['COPPER', 'images/coins/COPPER.png'],
             ['GOLD', 'images/coins/GOLD.svg'],
@@ -4148,6 +4159,8 @@
         const $ = id => document.getElementById(id);
         const sMark = $('s-mark'), sChg = $('s-chg');
         const sVol = $('s-vol'), sOi = $('s-oi'), sFund = $('s-fund');
+        const fundingStat = $('funding-stat');
+        const fundingHoverCard = $('funding-hover-card');
         const obAsks = $('ob-asks-inner'), obBids = $('ob-bids-inner');
         const obSpread = $('ob-spread');
         const obMid = $('ob-mid'), obSprdInfo = $('ob-spread-info');
@@ -4185,6 +4198,8 @@
         let activeBookDetail = null;
         let activeOrderBookHover = null;
         let orderBookHoverHideTimer = 0;
+        let fundingHoverHideTimer = 0;
+        let fundingHoverState = null;
         
         // Legends
         const legName = $('legend-name'), legO = $('leg-o'), legH = $('leg-h'), legL = $('leg-l'), legC = $('leg-c'), legPct = $('leg-pct'), legRange = $('leg-range');
@@ -4965,6 +4980,19 @@
                 .replace(/'/g, '&#39;');
         }
 
+        function formatSignedPctValue(value, decimals = 2) {
+            const n = Number(value);
+            if (!Number.isFinite(n)) return '–';
+            const abs = Math.abs(n).toFixed(decimals);
+            return `${n >= 0 ? '+' : '-'}${abs}%`;
+        }
+
+        function annualizeHourlyFundingRate(hourlyRate) {
+            const n = Number(hourlyRate);
+            if (!Number.isFinite(n)) return null;
+            return n * 24 * 365 * 100;
+        }
+
         function fmtBaseSize(v) {
             const n = Number(v);
             if (!Number.isFinite(n)) return '–';
@@ -5220,6 +5248,66 @@
             obHoverCard.classList.remove('is-visible');
             obHoverCard.setAttribute('aria-hidden', 'true');
             if (clearState) activeOrderBookHover = null;
+        }
+
+        function clearFundingHoverHideTimer() {
+            if (!fundingHoverHideTimer) return;
+            clearTimeout(fundingHoverHideTimer);
+            fundingHoverHideTimer = 0;
+        }
+
+        function scheduleFundingHoverHide() {
+            clearFundingHoverHideTimer();
+            fundingHoverHideTimer = window.setTimeout(() => {
+                if (fundingHoverState?.targetHovered || fundingHoverState?.cardHovered) return;
+                hideFundingHoverCard();
+            }, 60);
+        }
+
+        function hideFundingHoverCard(clearState = true) {
+            clearFundingHoverHideTimer();
+            if (!fundingHoverCard) return;
+            fundingHoverCard.classList.remove('is-visible');
+            fundingHoverCard.setAttribute('aria-hidden', 'true');
+            if (clearState) fundingHoverState = null;
+        }
+
+        function updateFundingHoverCardContent() {
+            if (!fundingHoverCard || !sFund) return false;
+            const hourlyRate = Number(sFund.dataset.fundingHourly);
+            const annualizedPct = annualizeHourlyFundingRate(hourlyRate);
+            const hourlyText = formatSignedPctValue(Number(hourlyRate) * 100, 4);
+            const annualizedText = formatSignedPctValue(annualizedPct, 2);
+            fundingHoverCard.innerHTML =
+                "<div class='ob-hover-row'><span class='ob-hover-key'>Hourly:</span><span class='ob-hover-value'>" + escapeHtml(hourlyText) + "</span></div>" +
+                "<div class='ob-hover-row'><span class='ob-hover-key'>Annualized:</span><span class='ob-hover-value'>" + escapeHtml(annualizedText) + "</span></div>";
+            return Number.isFinite(hourlyRate);
+        }
+
+        function showFundingHoverCard(options = {}) {
+            if (!fundingHoverCard || !fundingStat || !sFund) return;
+            const hasData = updateFundingHoverCardContent();
+            if (!hasData) {
+                hideFundingHoverCard();
+                return;
+            }
+            clearFundingHoverHideTimer();
+            const nextState = fundingHoverState ? { ...fundingHoverState } : {};
+            if (options.targetHovered != null) nextState.targetHovered = Boolean(options.targetHovered);
+            if (options.cardHovered != null) nextState.cardHovered = Boolean(options.cardHovered);
+            fundingHoverState = nextState;
+            const targetRect = fundingStat.getBoundingClientRect();
+            const cardWidth = fundingHoverCard.offsetWidth || 164;
+            const cardHeight = fundingHoverCard.offsetHeight || 58;
+            const left = Math.max(10, Math.min(targetRect.left + targetRect.width / 2 - cardWidth / 2, window.innerWidth - cardWidth - 10));
+            const fitsBelow = targetRect.bottom + 8 + cardHeight <= window.innerHeight - 10;
+            const top = fitsBelow
+                ? targetRect.bottom + 8
+                : Math.max(10, targetRect.top - cardHeight - 8);
+            fundingHoverCard.style.left = `${left}px`;
+            fundingHoverCard.style.top = `${top}px`;
+            fundingHoverCard.classList.add('is-visible');
+            fundingHoverCard.setAttribute('aria-hidden', 'false');
         }
 
         function showOrderBookHoverCard(level, event, options = {}) {
@@ -7328,6 +7416,9 @@
             sFund.textContent = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
             sFund.className = 'val ' + (fund >= 0 ? 'up' : 'dn');
             sFund.dataset.base = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
+            sFund.dataset.fundingHourly = Number.isFinite(Number(market.funding)) ? String(Number(market.funding)) : '';
+            sFund.dataset.fundingAnnualized = Number.isFinite(Number(market.funding)) ? String(annualizeHourlyFundingRate(Number(market.funding))) : '';
+            if (fundingHoverCard?.classList.contains('is-visible')) showFundingHoverCard();
             syncAssetDocumentTitle(mark);
             legName.textContent = formatLegendName(market.label, S.tf);
             syncSelectedCoinUi(1);
@@ -8556,6 +8647,31 @@
 
         syncOrderBookViewUi();
         updateOrderBookLabels();
+
+        if (fundingStat && fundingHoverCard) {
+            fundingStat.addEventListener('mouseenter', () => {
+                showFundingHoverCard({ targetHovered: true });
+            });
+            fundingStat.addEventListener('mouseleave', () => {
+                if (fundingHoverState) fundingHoverState.targetHovered = false;
+                scheduleFundingHoverHide();
+            });
+            fundingHoverCard.addEventListener('mouseenter', () => {
+                if (!fundingHoverState) fundingHoverState = {};
+                fundingHoverState.cardHovered = true;
+                showFundingHoverCard({ cardHovered: true });
+            });
+            fundingHoverCard.addEventListener('mouseleave', () => {
+                if (fundingHoverState) fundingHoverState.cardHovered = false;
+                scheduleFundingHoverHide();
+            });
+            window.addEventListener('scroll', () => {
+                if (fundingHoverCard.classList.contains('is-visible')) showFundingHoverCard();
+            }, true);
+            window.addEventListener('resize', () => {
+                if (fundingHoverCard.classList.contains('is-visible')) showFundingHoverCard();
+            });
+        }
 
         // ── Funding countdown ──────────────────────────────────────
         setInterval(() => {
