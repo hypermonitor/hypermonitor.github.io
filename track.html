@@ -75,7 +75,8 @@
       color: var(--text-main);
     }
 
-    body.embed-popup {
+    body.embed-popup,
+    body.embed-shell {
       overflow-x: hidden;
     }
 
@@ -85,7 +86,8 @@
       padding: 10px 0 32px;
     }
 
-    body.embed-popup #app {
+    body.embed-popup #app,
+    body.embed-shell #app {
       width: calc(100vw - 12px);
       padding-top: 0;
     }
@@ -96,7 +98,15 @@
       margin-bottom: 0.8rem;
     }
 
+    body.embed-shell .dashboard-shell {
+      margin-bottom: 0.8rem;
+    }
+
     body.embed-popup .dashboard-main {
+      gap: 0.8rem;
+    }
+
+    body.embed-shell .dashboard-main {
       gap: 0.8rem;
     }
 
@@ -119,6 +129,10 @@
     }
 
     body.embed-popup header {
+      display: none;
+    }
+
+    body.embed-shell header {
       display: none;
     }
 
@@ -159,6 +173,19 @@
       gap: .45rem;
       max-width: 680px;
       width: 100%;
+    }
+
+    body.embed-shell .wallet-controls {
+      max-width: none;
+      gap: 0;
+    }
+
+    body.embed-shell .brand,
+    body.embed-shell .tagline,
+    body.embed-shell .wallet-inputs-label,
+    body.embed-shell .wallet-inputs-row,
+    body.embed-shell .header-right {
+      display: none;
     }
 
     .wallet-line {
@@ -1491,6 +1518,61 @@
       font-size: 0.76rem;
       color: var(--muted);
       line-height: 1.35;
+    }
+
+    .overview-wallet-row {
+      margin-top: 0.42rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+    }
+
+    .overview-wallet {
+      margin-top: 0;
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.35;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: min(100%, 30rem);
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .overview-wallet-copy {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: color 0.16s ease, background 0.16s ease;
+    }
+
+    .overview-wallet-copy svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+    }
+
+    .overview-wallet-copy:hover,
+    .overview-wallet-copy:focus-visible {
+      color: var(--text-main);
+      background: rgba(148, 163, 184, 0.12);
+      outline: none;
+    }
+
+    .overview-wallet-copy.is-copied {
+      color: var(--text-main);
     }
 
     .overview-main-value {
@@ -3247,6 +3329,7 @@
     }
 
     body.light .overview-subtitle,
+    body.light .overview-wallet,
     body.light .overview-main-meta,
     body.light .overview-section-subtitle,
     body.light .overview-allocation-label,
@@ -5265,8 +5348,11 @@
 
   <body>
     <script>
-      if (new URLSearchParams(window.location.search).get("embed") === "popup") {
+      const embedMode = new URLSearchParams(window.location.search).get("embed");
+      if (embedMode === "popup") {
         document.body.classList.add("embed-popup");
+      } else if (embedMode === "shell") {
+        document.body.classList.add("embed-shell");
       }
     </script>
     <div class="mobile-loading-overlay" id="mobileLoadingOverlay" aria-hidden="true">
@@ -6084,6 +6170,8 @@
   const DEFAULT_WALLET = "0x0b1ace05eb9ef1c3a1951b763700ecad24f27741";
   const pageParams = new URLSearchParams(window.location.search);
   const isEmbedPopup = pageParams.get("embed") === "popup";
+  const isEmbedShell = pageParams.get("embed") === "shell";
+  const isEmbedSectionMode = isEmbedPopup || isEmbedShell;
   const initialEmbedSection = normalizeEmbedSection(pageParams.get("section"));
 
   const MAX_FILL_ROWS = 100;
@@ -6434,6 +6522,7 @@
   }
 
   function loadFavoriteWallets() {
+    favoriteWallets = [];
     try {
       const raw = localStorage.getItem(FAVORITES_KEY);
       if (!raw) return;
@@ -10268,7 +10357,7 @@
     const c = coin ?? "";
     const { label, iconKey, isSpot } = resolveSpotDisplay(c);
     const spotTagHtml = (forceSpot || isSpot) ? `<span class="dex-tag spot-tag">spot</span>` : "";
-    return `<span class="asset-cell">${coinIconHtml(iconKey, label)}<span>${label}</span>${spotTagHtml}${walletTagHtml(wallet)}</span>`;
+    return `<span class="asset-cell">${footerCoinIconHtml(iconKey, label)}<span>${label}</span>${spotTagHtml}${walletTagHtml(wallet)}</span>`;
   }
 
   function normalizeCoin(coin) {
@@ -12417,6 +12506,28 @@
       .join("");
 
     const allocationTrackStyle = `background:linear-gradient(90deg, ${mixPrimaryColor} 0 ${mixPrimaryShare * 100}%, ${mixSecondaryColor} ${mixPrimaryShare * 100}% 100%);`;
+    const overviewWallet = currentWallets[0] || primaryWallet || "";
+    const overviewWalletLabel = overviewWallet ? formatWalletLabel(overviewWallet) : "";
+    const overviewWalletMarkup = overviewWallet
+      ? `
+          <div class="overview-wallet-row">
+            <div class="overview-wallet" title="${xmlEscape(overviewWallet)}">Wallet ${xmlEscape(overviewWalletLabel)}</div>
+            <button
+              class="overview-wallet-copy"
+              type="button"
+              data-action="copy-overview-wallet"
+              data-wallet="${xmlEscape(overviewWallet)}"
+              aria-label="Copy wallet address"
+              title="Copy wallet address"
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M9 9.75A2.25 2.25 0 0 1 11.25 7.5h6a2.25 2.25 0 0 1 2.25 2.25v8.25A2.25 2.25 0 0 1 17.25 20.25h-6A2.25 2.25 0 0 1 9 18Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+                <path d="M6.75 16.5A2.25 2.25 0 0 1 4.5 14.25V6a2.25 2.25 0 0 1 2.25-2.25h6A2.25 2.25 0 0 1 15 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
+        `
+      : "";
 
     marginSummaryEl.innerHTML = `
       <div class="overview-dashboard">
@@ -12426,6 +12537,7 @@
               <div class="overview-eyebrow">${xmlEscape(marketLabel)}</div>
               <h3 class="overview-title">${xmlEscape(headline)}</h3>
               <div class="overview-subtitle">${xmlEscape(overviewSubtitle)}</div>
+              ${overviewWalletMarkup}
             </div>
           </div>
 
@@ -12911,7 +13023,7 @@
         <tr class="position-row${isExpanded ? " expanded" : ""}" data-coin="${coin}" data-wallet="${wallet}" data-market="${item.marketType || "perp"}">
           <td>
             <div class="asset-cell">
-              ${coinIconHtml(iconKeyForLogo, spotLabel)}
+              ${footerCoinIconHtml(iconKeyForLogo, spotLabel)}
               <span>${spotLabel}</span>
               ${spotTagHtml}
               ${walletTagHtml(wallet)}
@@ -18573,6 +18685,11 @@
     currentWallets = walletList;
     primaryWallet = walletList[0];
     updateFavoriteToggle();
+    if (isEmbedShell && window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({ type: "hypermonitor:wallet-change", wallet: primaryWallet }, "*");
+      } catch (_) {}
+    }
     setStartedAt();
     setStatus("connecting", "Connecting…");
 
@@ -18633,7 +18750,7 @@
     }
   }
 
-  if (isEmbedPopup) setEmbedPopupSection(initialEmbedSection);
+  if (isEmbedSectionMode) setEmbedSection(initialEmbedSection);
 
   (async function boot() {
     initTheme();
@@ -19180,6 +19297,23 @@
     accountOverviewCardEl.addEventListener("mouseleave", () => {
       accountOverviewCardEl.classList.remove("is-scrolling");
     });
+    accountOverviewCardEl.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-action='copy-overview-wallet']");
+      if (!btn) return;
+      const wallet = String(btn.dataset.wallet || "").trim();
+      if (!wallet) return;
+      e.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(wallet);
+        btn.classList.add("is-copied");
+        clearTimeout(btn._copiedTimer);
+        btn._copiedTimer = setTimeout(() => {
+          btn.classList.remove("is-copied");
+        }, 1100);
+      } catch (err) {
+        console.warn("Overview wallet copy failed", err);
+      }
+    });
   }
 
   document.addEventListener("click", (e) => {
@@ -19345,11 +19479,11 @@
   }
 
   function shouldPreloadPerformanceSection() {
-    return !isEmbedPopup || initialEmbedSection === "performance";
+    return !isEmbedSectionMode || initialEmbedSection === "performance";
   }
 
   function shouldPreloadStandaloneHistory() {
-    return !isEmbedPopup;
+    return !isEmbedSectionMode;
   }
 
   function resizeVisiblePopupCharts() {
@@ -19364,12 +19498,18 @@
     });
   }
 
-  function setEmbedPopupSection(section) {
-    if (!isEmbedPopup) return;
-    const nextSection = normalizeEmbedSection(section);
+  function setEmbedSection(section) {
+    if (!isEmbedSectionMode) return;
+    const normalizedSection = normalizeEmbedSection(section);
+    const nextSection = isEmbedShell && normalizedSection === "overview" ? "positions" : normalizedSection;
     document.body.dataset.popupSection = nextSection;
-    if (dashboardSidebarEl) dashboardSidebarEl.classList.toggle("hidden", nextSection !== "overview");
-    if (dashboardMainEl) dashboardMainEl.classList.toggle("hidden", nextSection === "overview");
+    if (isEmbedShell) {
+      if (dashboardSidebarEl) dashboardSidebarEl.classList.remove("hidden");
+      if (dashboardMainEl) dashboardMainEl.classList.remove("hidden");
+    } else {
+      if (dashboardSidebarEl) dashboardSidebarEl.classList.toggle("hidden", nextSection !== "overview");
+      if (dashboardMainEl) dashboardMainEl.classList.toggle("hidden", nextSection === "overview");
+    }
     if (positionsSectionEl) positionsSectionEl.classList.toggle("hidden", nextSection !== "positions");
     if (performanceSectionEl) performanceSectionEl.classList.toggle("hidden", nextSection !== "performance");
 
@@ -19597,8 +19737,28 @@
   window.addEventListener("message", (event) => {
     const data = event.data;
     if (!data || typeof data !== "object") return;
-    if (data.type !== "hypermonitor:set-theme") return;
-    applyTheme(String(data.theme || "dark"));
+    if (data.type === "hypermonitor:set-theme") {
+      applyTheme(String(data.theme || "dark"));
+      return;
+    }
+    if (data.type === "hypermonitor:open-favorites-panel") {
+      toggleFavoritesPanel(true);
+      return;
+    }
+    if (data.type === "hypermonitor:toggle-favorites-panel") {
+      toggleFavoritesPanel();
+      return;
+    }
+    if (data.type === "hypermonitor:set-wallet-section") {
+      setEmbedSection(String(data.section || "overview"));
+    }
+  });
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== FAVORITES_KEY) return;
+    loadFavoriteWallets();
+    updateFavoriteToggle();
+    renderFavoritesList();
   });
 
   if (exportExcelBtn) {

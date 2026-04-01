@@ -810,9 +810,18 @@
             gap: 8px;
         }
 
+        .chart-settings-bounds.chart-settings-bounds--triple {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+        }
+
         .chart-settings-field {
             display: grid;
             gap: 4px;
+        }
+
+        .chart-settings-field.chart-settings-field--compact {
+            gap: 3px;
         }
 
         .chart-settings-field span {
@@ -831,6 +840,12 @@
             font: inherit;
             font-size: 12px;
             outline: none;
+        }
+
+        .chart-settings-field.chart-settings-field--compact input {
+            padding: 6px 7px;
+            border-radius: 8px;
+            text-align: center;
         }
 
         .chart-settings-field input:focus {
@@ -2707,32 +2722,29 @@
                             <div class="chart-settings-group">
                                 <div class="chart-settings-label">Lower Pane</div>
                                 <div class="chart-settings-segment" role="group" aria-label="Lower chart study">
-                                    <button class="chart-settings-option" type="button" data-lower-study="none">None</button>
                                     <button class="chart-settings-option" type="button" data-lower-study="volume">Volume</button>
                                     <button class="chart-settings-option" type="button" data-lower-study="rsi">RSI</button>
                                 </div>
                             </div>
                             <div class="chart-settings-group">
+                                <button id="chart-ma-toggle" class="chart-settings-toggle" type="button" aria-pressed="false">Moving averages</button>
+                            </div>
+                            <div class="chart-settings-group" id="chart-ma-periods-group" hidden>
                                 <div class="chart-settings-label">Moving Average Periods</div>
-                                <div class="chart-settings-bounds">
-                                    <label class="chart-settings-field">
+                                <div class="chart-settings-bounds chart-settings-bounds--triple">
+                                    <label class="chart-settings-field chart-settings-field--compact">
                                         <span>Fast</span>
                                         <input id="chart-ma-fast" type="number" min="1" max="999" step="1" inputmode="numeric" />
                                     </label>
-                                    <label class="chart-settings-field">
+                                    <label class="chart-settings-field chart-settings-field--compact">
                                         <span>Mid</span>
                                         <input id="chart-ma-mid" type="number" min="1" max="999" step="1" inputmode="numeric" />
                                     </label>
-                                </div>
-                                <div class="chart-settings-bounds">
-                                    <label class="chart-settings-field">
+                                    <label class="chart-settings-field chart-settings-field--compact">
                                         <span>Slow</span>
                                         <input id="chart-ma-slow" type="number" min="1" max="999" step="1" inputmode="numeric" />
                                     </label>
                                 </div>
-                            </div>
-                            <div class="chart-settings-group">
-                                <button id="chart-ma-toggle" class="chart-settings-toggle" type="button" aria-pressed="false">Moving averages</button>
                             </div>
                             <div class="chart-settings-group">
                                 <div class="chart-settings-label">RSI Bounds</div>
@@ -3418,7 +3430,7 @@
             const next = { ...DEFAULT_CHART_PREFS };
             if (!raw || typeof raw !== 'object') return next;
             next.priceMode = raw.priceMode === 'line' ? 'line' : 'candles';
-            next.lowerStudy = raw.lowerStudy === 'rsi' ? 'rsi' : raw.lowerStudy === 'none' ? 'none' : 'volume';
+            next.lowerStudy = raw.lowerStudy === 'rsi' ? 'rsi' : 'volume';
             next.showMAs = raw.showMAs !== false;
             const rawPeriods = Array.isArray(raw.maPeriods) ? raw.maPeriods : [raw.maFast, raw.maMid, raw.maSlow];
             next.maPeriods = rawPeriods.slice(0, 3).map((value, index) => {
@@ -3730,6 +3742,7 @@
         const chartSettingsBtn = $('chart-settings-btn');
         const chartSettingsMenu = $('chart-settings-menu');
         const chartMaToggle = $('chart-ma-toggle');
+        const chartMaPeriodsGroup = $('chart-ma-periods-group');
         const chartMaFastInput = $('chart-ma-fast');
         const chartMaMidInput = $('chart-ma-mid');
         const chartMaSlowInput = $('chart-ma-slow');
@@ -5737,11 +5750,9 @@
             const lowerItem = refs.lowerLabel?.closest('.legend-item');
             if (lowerItem) lowerItem.style.display = 'none';
             refs.lowerLabel.textContent = S.lowerStudy === 'rsi' ? `RSI(${RSI_PERIOD})` : 'Volume';
-            refs.lowerValue.textContent = S.lowerStudy === 'none'
-                ? '–'
-                : S.lowerStudy === 'rsi'
-                    ? (Number.isFinite(lowerValue) ? lowerValue.toFixed(2) : '–')
-                    : (Number.isFinite(lowerValue) ? fmtK(lowerValue) : '–');
+            refs.lowerValue.textContent = S.lowerStudy === 'rsi'
+                ? (Number.isFinite(lowerValue) ? lowerValue.toFixed(2) : '–')
+                : (Number.isFinite(lowerValue) ? fmtK(lowerValue) : '–');
             refs.lowerValue.style.color = S.lowerStudy === 'rsi' ? '#8b5cf6' : 'var(--text)';
             [[refs.ma7, studyCache.ma7], [refs.ma25, studyCache.ma25], [refs.ma99, studyCache.ma99]].forEach(([el, data]) => {
                 if (!el) return;
@@ -5795,11 +5806,45 @@
                 chartMaToggle.classList.toggle('is-active', Boolean(S.showMAs));
                 chartMaToggle.setAttribute('aria-pressed', S.showMAs ? 'true' : 'false');
             }
+            if (chartMaPeriodsGroup) chartMaPeriodsGroup.hidden = !S.showMAs;
             if (chartMaFastInput) chartMaFastInput.value = String(S.maPeriods[0]);
             if (chartMaMidInput) chartMaMidInput.value = String(S.maPeriods[1]);
             if (chartMaSlowInput) chartMaSlowInput.value = String(S.maPeriods[2]);
             if (chartRsiLowerInput) chartRsiLowerInput.value = String(S.rsiLower);
             if (chartRsiUpperInput) chartRsiUpperInput.value = String(S.rsiUpper);
+        }
+
+        function refreshLowerStudyScale(target) {
+            const bundle = getSeriesBundle(target);
+            const store = getCandleStore(target);
+            if (!bundle?.lowerChart) return;
+            bundle.lowerChart.priceScale('right').applyOptions({
+                autoScale: true,
+                minimumWidth: 78,
+                entireTextOnly: true,
+                scaleMargins: { top: 0.1, bottom: 0.12 }
+            });
+
+            if (S.lowerStudy === 'volume') {
+                bundle.volume.setData(getSortedVolumeData(target));
+                bundle.volumeMaFast.setData(store.studies?.volMaFast || []);
+                bundle.volumeMaSlow.setData(store.studies?.volMaSlow || []);
+            } else if (S.lowerStudy === 'rsi') {
+                const candleData = getSortedCandleData(target);
+                bundle.rsi.setData(store.studies?.rsi || []);
+                bundle.rsiFloor.setData(candleData.map(bar => ({ time: bar.time, value: 0 })));
+                bundle.rsiCeil.setData(candleData.map(bar => ({ time: bar.time, value: 100 })));
+            }
+
+            requestAnimationFrame(() => {
+                const range = bundle.chart?.timeScale?.().getVisibleLogicalRange?.();
+                if (range) {
+                    try {
+                        bundle.lowerChart.timeScale().setVisibleLogicalRange(range);
+                    } catch (_) {}
+                }
+                scheduleRsiBandUpdate(target);
+            });
         }
 
         function getChartPrefsPayload() {
@@ -5832,6 +5877,10 @@
         function applyChartPrefs(nextPrefs, options = {}) {
             const prefs = normalizeChartPrefs(nextPrefs);
             const prevLowerStudy = S.lowerStudy;
+            const prevShowMAs = S.showMAs;
+            const prevMaPeriods = S.maPeriods.slice();
+            const prevRsiLower = S.rsiLower;
+            const prevRsiUpper = S.rsiUpper;
             S.priceMode = prefs.priceMode;
             S.lowerStudy = prefs.lowerStudy;
             S.showMAs = prefs.showMAs;
@@ -5839,9 +5888,7 @@
             S.rsiLower = prefs.rsiLower;
             S.rsiUpper = prefs.rsiUpper;
             S.lowerPaneHeight = prefs.lowerPaneHeight;
-            if (S.lowerStudy === 'none') {
-                S.lowerPaneCollapsed = false;
-            } else if (prevLowerStudy !== S.lowerStudy) {
+            if (prevLowerStudy !== S.lowerStudy) {
                 S.lowerPaneCollapsed = false;
             }
             syncChartPrefsUi();
@@ -5851,6 +5898,14 @@
             syncStudyLegend(1);
             syncStudyLegend(2);
             scheduleLowerPaneResize();
+            const maPeriodsChanged = prevMaPeriods.length !== S.maPeriods.length || prevMaPeriods.some((value, index) => value !== S.maPeriods[index]);
+            if (maPeriodsChanged) {
+                syncDerivedSeries(1);
+                syncDerivedSeries(2);
+            } else if (prevLowerStudy !== S.lowerStudy || prevRsiLower !== S.rsiLower || prevRsiUpper !== S.rsiUpper || prevShowMAs !== S.showMAs) {
+                refreshLowerStudyScale(1);
+                refreshLowerStudyScale(2);
+            }
             if (options.persist !== false) saveChartPrefs(getChartPrefsPayload());
         }
 

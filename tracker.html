@@ -223,6 +223,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
+      gap: 8px;
       flex: 0 0 auto;
       height: auto;
     }
@@ -253,6 +254,14 @@
     .header-theme-btn:focus-visible {
       color: var(--text);
       outline: none;
+    }
+
+    .header-favorites-btn.is-active {
+      color: rgba(148, 163, 184, 0.76);
+    }
+
+    body.light .header-favorites-btn.is-active {
+      color: #64748b;
     }
 
     .header-search-shell {
@@ -639,11 +648,54 @@
 
     .trade-frame {
       width: 100%;
-      height: 100%;
+      height: auto;
+      flex: 1 1 auto;
       min-height: 0;
       border: none;
       display: block;
       background: var(--bg);
+    }
+
+    .wallet-shell-chrome {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex: 0 0 auto;
+    }
+
+    .top-frame-panel.is-wallet-mode .wallet-shell-chrome {
+      display: flex;
+    }
+
+    .wallet-shell-tab-list {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .wallet-shell-tab-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .wallet-shell-tab-list .wallet-modal-tab {
+      flex: 0 0 auto;
+      min-width: auto;
+      padding: 10px 14px;
+    }
+
+    .wallet-shell-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      flex: 0 0 auto;
     }
 
     .trade-view-stack {
@@ -1795,52 +1847,57 @@
     .leaderboard-panel th:nth-child(1),
     .trade-leaderboard-panel th:nth-child(1),
     .leaderboard-panel td:nth-child(1),
-    .trade-leaderboard-panel td:nth-child(1) { width: 7%; }
+    .trade-leaderboard-panel td:nth-child(1) { width: 4%; }
 
     .leaderboard-panel th:nth-child(2),
     .trade-leaderboard-panel th:nth-child(2),
     .leaderboard-panel td:nth-child(2),
-    .trade-leaderboard-panel td:nth-child(2) { width: 17%; }
+    .trade-leaderboard-panel td:nth-child(2) { width: 4.6%; }
 
     .leaderboard-panel th:nth-child(3),
     .trade-leaderboard-panel th:nth-child(3),
     .leaderboard-panel td:nth-child(3),
-    .trade-leaderboard-panel td:nth-child(3) { width: 12%; }
+    .trade-leaderboard-panel td:nth-child(3) { width: 15%; }
 
     .leaderboard-panel th:nth-child(4),
     .trade-leaderboard-panel th:nth-child(4),
     .leaderboard-panel td:nth-child(4),
-    .trade-leaderboard-panel td:nth-child(4) { width: 11%; }
+    .trade-leaderboard-panel td:nth-child(4) { width: 12%; }
 
     .leaderboard-panel th:nth-child(5),
     .trade-leaderboard-panel th:nth-child(5),
     .leaderboard-panel td:nth-child(5),
-    .trade-leaderboard-panel td:nth-child(5) { width: 9%; }
+    .trade-leaderboard-panel td:nth-child(5) { width: 11%; }
 
     .leaderboard-panel th:nth-child(6),
     .trade-leaderboard-panel th:nth-child(6),
     .leaderboard-panel td:nth-child(6),
-    .trade-leaderboard-panel td:nth-child(6) { width: 10%; }
+    .trade-leaderboard-panel td:nth-child(6) { width: 8%; }
 
     .leaderboard-panel th:nth-child(7),
     .trade-leaderboard-panel th:nth-child(7),
     .leaderboard-panel td:nth-child(7),
-    .trade-leaderboard-panel td:nth-child(7) { width: 8.5%; }
+    .trade-leaderboard-panel td:nth-child(7) { width: 10%; }
 
     .leaderboard-panel th:nth-child(8),
     .trade-leaderboard-panel th:nth-child(8),
     .leaderboard-panel td:nth-child(8),
-    .trade-leaderboard-panel td:nth-child(8) { width: 8.5%; }
+    .trade-leaderboard-panel td:nth-child(8) { width: 8%; }
 
     .leaderboard-panel th:nth-child(9),
     .trade-leaderboard-panel th:nth-child(9),
     .leaderboard-panel td:nth-child(9),
-    .trade-leaderboard-panel td:nth-child(9) { width: 8.5%; }
+    .trade-leaderboard-panel td:nth-child(9) { width: 8%; }
 
     .leaderboard-panel th:nth-child(10),
     .trade-leaderboard-panel th:nth-child(10),
     .leaderboard-panel td:nth-child(10),
-    .trade-leaderboard-panel td:nth-child(10) { width: 8.5%; }
+    .trade-leaderboard-panel td:nth-child(10) { width: 8%; }
+
+    .leaderboard-panel th:nth-child(11),
+    .trade-leaderboard-panel th:nth-child(11),
+    .leaderboard-panel td:nth-child(11),
+    .trade-leaderboard-panel td:nth-child(11) { width: 9%; }
 
     th.sortable {
       cursor: pointer;
@@ -1854,6 +1911,54 @@
 
     th.sortable:hover {
       color: var(--muted-strong);
+    }
+
+    .favorites-col,
+    .favorite-wallet-cell {
+      text-align: center;
+      overflow: visible;
+    }
+
+    .favorites-col {
+      color: rgba(245, 200, 76, 0.72);
+    }
+
+    .favorites-col svg {
+      width: 13px;
+      height: 13px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .wallet-favorite-btn {
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgba(148, 163, 184, 0.64);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: color 160ms ease, transform 160ms ease;
+    }
+
+    .wallet-favorite-btn svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+    }
+
+    .wallet-favorite-btn:hover,
+    .wallet-favorite-btn:focus-visible {
+      color: #f5c84c;
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .wallet-favorite-btn.is-active {
+      color: #f5c84c;
     }
 
     tbody tr {
@@ -1906,6 +2011,20 @@
 
     body.light tbody tr.is-selected {
       background: rgba(15, 23, 42, 0.08);
+    }
+
+    body.light .favorites-col {
+      color: rgba(201, 143, 21, 0.74);
+    }
+
+    body.light .wallet-favorite-btn {
+      color: rgba(100, 116, 139, 0.68);
+    }
+
+    body.light .wallet-favorite-btn:hover,
+    body.light .wallet-favorite-btn:focus-visible,
+    body.light .wallet-favorite-btn.is-active {
+      color: #c98f15;
     }
 
     tbody tr[data-wallet] {
@@ -2630,6 +2749,13 @@
       display: block;
     }
 
+    .icon-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      flex: 0 0 auto;
+    }
+
     .wallet-modal-action-btn:focus-visible,
     .icon-btn:focus-visible {
       outline: none;
@@ -3137,6 +3263,7 @@
         <div class="header-search-suggestions" id="headerSearchSuggestions" hidden></div>
       </form>
       <div class="header-actions">
+        <button class="header-theme-btn header-favorites-btn" id="headerFavoritesBtn" type="button" aria-label="Favorite wallets" title="Favorite wallets"></button>
         <button class="header-theme-btn" id="headerThemeBtn" type="button" aria-label="Switch theme" title="Switch theme"></button>
       </div>
     </header>
@@ -3152,6 +3279,20 @@
                 <path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
               </svg>
             </button>
+            <div class="wallet-shell-chrome" id="walletShellChrome" hidden>
+              <div class="wallet-shell-tab-list" role="tablist" aria-label="Wallet section tabs">
+                <button class="wallet-modal-tab is-active" type="button" data-wallet-section="positions" aria-selected="true">Positions</button>
+                <button class="wallet-modal-tab" type="button" data-wallet-section="performance" aria-selected="false">Performance</button>
+                <button class="wallet-modal-tab" type="button" data-wallet-section="orders" aria-selected="false">Orders</button>
+              </div>
+              <div class="wallet-shell-actions">
+                <button class="icon-btn" type="button" id="closeWalletShellBtn" aria-label="Close wallet tracker" title="Close wallet tracker">
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
             <iframe
               class="trade-frame"
               id="tradeFrame"
@@ -3190,6 +3331,11 @@
               <table>
                 <thead>
                   <tr>
+                    <th class="favorites-col" aria-label="Favorites">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3.9 14.5 8.8l5.4.77-3.9 3.75.92 5.3L12 16l-4.92 2.61.93-5.3-3.9-3.75 5.4-.77L12 3.9Z" fill="currentColor"></path>
+                      </svg>
+                    </th>
                     <th class="sortable" data-key="rank">Rank<span class="sort-indicator"></span></th>
                     <th class="sortable" data-key="address">Wallet<span class="sort-indicator"></span></th>
                     <th class="sortable hide-phone" data-key="accountValue">Account value<span class="sort-indicator"></span></th>
@@ -3225,13 +3371,13 @@
       <div class="price-ticker" id="priceTicker">
         <div class="price-track" id="priceTrack">
           <div class="price-list" id="priceList">
-            <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
+            <span class="price-end-marker" aria-hidden="true"><img src="images/favicon.png" alt="" /><span>Hypermonitor</span><img src="images/favicon.png" alt="" /></span>
             <span class="price-item" data-coin="BTC"><img class="coinIcon" src="images/coins/BTC.svg" alt="BTC" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="ETH"><img class="coinIcon" src="images/coins/ETH.svg" alt="ETH" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="SOL"><img class="coinIcon" src="images/coins/SOL.svg" alt="SOL" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="HYPE"><img class="coinIcon" src="images/coins/HYPE.svg" alt="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="LINK"><img class="coinIcon" src="images/coins/LINK.svg" alt="LINK" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-end-marker" aria-hidden="true"><img src="images/pulse.gif" alt="" /><span>Hypermonitor</span><img src="images/pulse.gif" alt="" /></span>
+            <span class="price-end-marker" aria-hidden="true"><img src="images/favicon.png" alt="" /><span>Hypermonitor</span><img src="images/favicon.png" alt="" /></span>
             <span class="price-item" data-coin="xyz:GOLD"><img class="coinIcon" src="images/coins/GOLD.svg" alt="GOLD" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon" src="images/coins/SILVER.svg" alt="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="cash:USA500"><img class="coinIcon" src="images/coins/USA500.png" alt="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
@@ -3411,7 +3557,7 @@
       coin: "BTC",
       tradeTimeframe: "15m",
       wallet: "",
-      walletModalSection: "overview",
+      walletModalSection: "positions",
       topChartCount: 1,
       topOrderBookVisible: true,
       extraCharts: [],
@@ -3446,8 +3592,14 @@
         <path d="M20 14.2A7.9 7.9 0 0 1 9.8 4a8.8 8.8 0 1 0 10.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
       </svg>
     `;
+    const HEADER_ICON_STAR = `
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 3.8 14.57 8.95l5.62.81-4.07 3.93.97 5.57L12 16.46l-5.09 2.8.97-5.57-4.07-3.93 5.62-.81L12 3.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+      </svg>
+    `;
     const SEARCH_SHORTCUT_LABEL = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent) ? "⌘K" : "Ctrl K";
 
+    let favoriteWallets = [];
     let headerCoinOptions = [];
     let headerCoinOptionsPromise = null;
     let marketHeatmapPromise = null;
@@ -3464,8 +3616,11 @@
     const DEFAULT_TRADE_MULTI_ROW_RATIO_FOUR = 1.78 / (1.78 + 0.9);
 
     const tradeFrame = document.getElementById("tradeFrame");
+    const topFramePanel = document.querySelector(".top-frame-panel");
     const tradeViewStack = document.querySelector(".trade-view-stack");
     const tradeAddChartBtn = document.getElementById("tradeAddChartBtn");
+    const walletShellChrome = document.getElementById("walletShellChrome");
+    const closeWalletShellBtn = document.getElementById("closeWalletShellBtn");
     const tradeLeaderboardPanel = document.getElementById("tradeLeaderboardPanel");
     const tradeRowSplitter = document.getElementById("tradeRowSplitter");
     const tradeColumnSplitter = document.getElementById("tradeColumnSplitter");
@@ -3490,6 +3645,7 @@
       lastClientY: 0
     };
     let tradeFrameReady = false;
+    let pendingTradeFavoritesPanelOpen = false;
     const marketChipGroup = document.getElementById("marketChipGroup");
     const tradeWalletInline = document.getElementById("tradeWalletInline");
     const tradeWalletText = document.getElementById("tradeWalletText");
@@ -3502,6 +3658,7 @@
     const headerSearchInput = document.getElementById("headerSearchInput");
     const headerSearchShortcut = document.getElementById("headerSearchShortcut");
     const headerSearchSuggestions = document.getElementById("headerSearchSuggestions");
+    const headerFavoritesBtn = document.getElementById("headerFavoritesBtn");
     const headerThemeBtn = document.getElementById("headerThemeBtn");
 
     const profitFilterList = document.getElementById("profitFilterList");
@@ -3545,13 +3702,16 @@
     const walletModalBackdrop = document.getElementById("walletModalBackdrop");
     const walletTrackerFrame = document.getElementById("walletTrackerFrame");
     const walletModalSubtitle = document.getElementById("walletModalSubtitle");
-    const walletModalTabButtons = Array.from(document.querySelectorAll("[data-wallet-section]"));
+    const walletShellTabButtons = walletShellChrome ? Array.from(walletShellChrome.querySelectorAll("[data-wallet-section]")) : [];
+    const walletModalTabButtons = walletModalBackdrop ? Array.from(walletModalBackdrop.querySelectorAll("[data-wallet-section]")) : [];
+    const walletSectionTabButtons = [...walletShellTabButtons, ...walletModalTabButtons];
     const closeWalletModalBtn = document.getElementById("closeWalletModalBtn");
     const openStandaloneWallet = document.getElementById("openStandaloneWallet");
     const copyWalletLinkBtn = document.getElementById("copyWalletLinkBtn");
     const FOOTER_COINS_KEY = "hypermonitor-footer-coins";
     const FOOTER_PRICE_CURRENCY_KEY = "hypermonitor-footer-price-currency";
     const FOOTER_CHANGE_STORAGE_KEY = "hypermonitor-footer-change";
+    const FAVORITES_KEY = "hypermonitor-favorite-wallets";
     const THEME_STORAGE_KEY = "hypermonitor-theme";
     const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
     const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
@@ -3876,6 +4036,89 @@
 
     function isWalletAddress(value) {
       return /^0x[a-fA-F0-9]{40}$/.test(String(value || "").trim());
+    }
+
+    function normalizeFavoriteWallet(value) {
+      const wallet = String(value || "").trim();
+      return isWalletAddress(wallet) ? wallet : "";
+    }
+
+    function loadFavoriteWallets() {
+      favoriteWallets = [];
+      try {
+        const raw = localStorage.getItem(FAVORITES_KEY);
+        if (!raw) {
+          syncHeaderFavoritesButton();
+          return;
+        }
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          favoriteWallets = parsed.map(normalizeFavoriteWallet).filter(Boolean);
+        }
+      } catch (_) {}
+      syncHeaderFavoritesButton();
+    }
+
+    function saveFavoriteWallets() {
+      try {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favoriteWallets));
+      } catch (_) {}
+      syncHeaderFavoritesButton();
+    }
+
+    function isFavoriteWallet(wallet) {
+      const normalized = String(normalizeFavoriteWallet(wallet) || "").toLowerCase();
+      return normalized
+        ? favoriteWallets.some((value) => String(value || "").toLowerCase() === normalized)
+        : false;
+    }
+
+    function syncHeaderFavoritesButton() {
+      if (!headerFavoritesBtn) return;
+      headerFavoritesBtn.innerHTML = HEADER_ICON_STAR;
+      const hasFavorites = favoriteWallets.length > 0;
+      headerFavoritesBtn.classList.toggle("is-active", hasFavorites);
+      headerFavoritesBtn.setAttribute("aria-label", hasFavorites ? `Favorite wallets (${favoriteWallets.length})` : "Favorite wallets");
+      headerFavoritesBtn.setAttribute("title", hasFavorites ? `Favorite wallets (${favoriteWallets.length})` : "Favorite wallets");
+    }
+
+    function toggleFavoriteWallet(wallet) {
+      const normalized = normalizeFavoriteWallet(wallet);
+      if (!normalized) return false;
+      if (isFavoriteWallet(normalized)) {
+        favoriteWallets = favoriteWallets.filter((value) => String(value || "").toLowerCase() !== normalized.toLowerCase());
+      } else {
+        favoriteWallets = favoriteWallets.concat(normalized);
+      }
+      saveFavoriteWallets();
+      return true;
+    }
+
+    function requestTradeFavoritesPanel() {
+      const activeWallet = normalizeFavoriteWallet(state.wallet);
+      const fallbackWallet = favoriteWallets[0] || "";
+      const currentSrc = String(tradeFrame?.getAttribute("src") || "");
+      const trackerVisible = currentSrc.includes("track.html");
+
+      if (!trackerVisible) {
+        const targetWallet = activeWallet || fallbackWallet;
+        if (!targetWallet) return;
+        pendingTradeFavoritesPanelOpen = true;
+        openWalletOverlay(targetWallet, { pushHistory: false });
+        return;
+      }
+
+      if (!tradeFrameReady || !tradeFrame?.contentWindow) {
+        pendingTradeFavoritesPanelOpen = true;
+        return;
+      }
+
+      try {
+        tradeFrame.contentWindow.postMessage({ type: "hypermonitor:open-favorites-panel" }, "*");
+        pendingTradeFavoritesPanelOpen = false;
+      } catch (_) {
+        pendingTradeFavoritesPanelOpen = true;
+      }
     }
 
     function normalizeCoinQuery(value) {
@@ -4378,8 +4621,16 @@
       return "track.html?wallet=" + encodeURIComponent(wallet);
     }
 
+    function buildWalletShellTrackerHref(wallet, section = state.walletModalSection) {
+      return buildWalletTrackerHref(wallet) + "&embed=shell&section=" + encodeURIComponent(normalizeWalletShellSection(section));
+    }
+
     function normalizeWalletModalSection(value) {
-      return value === "positions" || value === "performance" || value === "orders" || value === "overview" ? value : "overview";
+      return value === "positions" || value === "performance" || value === "orders" || value === "overview" ? value : "positions";
+    }
+
+    function normalizeWalletShellSection(value) {
+      return value === "performance" || value === "orders" ? value : "positions";
     }
 
     function buildWalletPopupHref(wallet, section = state.walletModalSection) {
@@ -5956,9 +6207,9 @@
             markerEl.className = "price-end-marker";
             markerEl.setAttribute("aria-hidden", "true");
             markerEl.innerHTML = `
-              <img src="images/pulse.gif" alt="" />
+              <img src="images/favicon.png" alt="" />
               <span>Hypermonitor</span>
-              <img src="images/pulse.gif" alt="" />
+              <img src="images/favicon.png" alt="" />
             `;
             return markerEl;
           };
@@ -5973,11 +6224,44 @@
           });
         }
 
+        const footerStructureSignature = Array.from(priceListEl.children)
+          .map((child, index) => child.classList.contains("price-item") ? `item:${child.dataset.coin || ""}` : `marker:${index}`)
+          .join("|");
+
         priceListCloneEls.forEach((cloneEl) => {
-          cloneEl.innerHTML = priceListEl.innerHTML;
-          cloneEl.querySelectorAll(".price-item").forEach((item) => {
-            item.removeAttribute("draggable");
-          });
+          const shouldRebuild = cloneEl.dataset.structureSig !== footerStructureSignature;
+          if (shouldRebuild) {
+            cloneEl.innerHTML = priceListEl.innerHTML;
+            cloneEl.dataset.structureSig = footerStructureSignature;
+            cloneEl.querySelectorAll(".price-item").forEach((item) => {
+              item.removeAttribute("draggable");
+            });
+          } else {
+            Array.from(priceListEl.children).forEach((sourceChild, index) => {
+              const cloneChild = cloneEl.children[index];
+              if (!(sourceChild instanceof HTMLElement) || !(cloneChild instanceof HTMLElement)) return;
+              const sourceIcon = sourceChild.querySelector(".coinIcon, .coinFallback");
+              const cloneIcon = cloneChild.querySelector(".coinIcon, .coinFallback");
+              if (sourceIcon && cloneIcon && sourceIcon.outerHTML !== cloneIcon.outerHTML) {
+                cloneIcon.replaceWith(sourceIcon.cloneNode(true));
+              } else if (sourceIcon && !cloneIcon) {
+                cloneChild.insertAdjacentElement("afterbegin", sourceIcon.cloneNode(true));
+              }
+              const sourcePrice = sourceChild.querySelector(".coin-price");
+              const clonePrice = cloneChild.querySelector(".coin-price");
+              if (sourcePrice && clonePrice) {
+                clonePrice.textContent = sourcePrice.textContent;
+                clonePrice.className = sourcePrice.className;
+                clonePrice.style.color = sourcePrice.style.color;
+              }
+              const sourceChange = sourceChild.querySelector(".coin-change");
+              const cloneChange = cloneChild.querySelector(".coin-change");
+              if (sourceChange && cloneChange) {
+                cloneChange.textContent = sourceChange.textContent;
+                cloneChange.className = sourceChange.className;
+              }
+            });
+          }
         });
 
         requestAnimationFrame(() => {
@@ -6719,7 +7003,7 @@
       }
 
       if (tradeAddChartBtn) {
-        tradeAddChartBtn.hidden = !(state.topChartCount >= 2 && totalCharts < 4);
+        tradeAddChartBtn.hidden = Boolean(state.wallet) || !(state.topChartCount >= 2 && totalCharts < 4);
       }
 
       updateExtraTradeFrames();
@@ -6846,13 +7130,22 @@
       return "asset.html?coin=" + encodeURIComponent(coin);
     }
 
+    function buildTradeFrameHref() {
+      return state.wallet ? buildWalletShellTrackerHref(state.wallet) : buildPrimaryAssetHref(state.coin);
+    }
+
     function updateTradeFrame(options = {}) {
-      const src = buildPrimaryAssetHref(state.coin);
+      const src = buildTradeFrameHref();
+      const currentSrc = String(tradeFrame?.getAttribute("src") || "");
+      const nextIsAsset = !state.wallet;
+      const currentIsAsset = currentSrc.includes("asset.html");
       const canUpdateInPlace =
+        nextIsAsset &&
+        currentIsAsset &&
         options.useMessage !== false &&
         tradeFrameReady &&
         Boolean(tradeFrame?.contentWindow) &&
-        Boolean(tradeFrame?.getAttribute("src"));
+        Boolean(currentSrc);
 
       if (canUpdateInPlace) {
         try {
@@ -6877,6 +7170,8 @@
       if (selectedWalletPill) selectedWalletPill.hidden = !hasWallet;
       if (tradeWalletInline) tradeWalletInline.hidden = !hasWallet;
       if (viewWalletBtn) viewWalletBtn.hidden = !hasWallet;
+      if (walletShellChrome) walletShellChrome.hidden = !hasWallet;
+      if (topFramePanel) topFramePanel.classList.toggle("is-wallet-mode", hasWallet);
 
       if (hasWallet) {
         if (selectedWalletText) selectedWalletText.textContent = shortAddress(state.wallet);
@@ -6888,8 +7183,12 @@
     }
 
     function syncWalletModalTabs() {
-      walletModalTabButtons.forEach((button) => {
-        const isActive = button.dataset.walletSection === state.walletModalSection;
+      walletSectionTabButtons.forEach((button) => {
+        const targetSection =
+          walletShellChrome && walletShellChrome.contains(button)
+            ? normalizeWalletShellSection(state.walletModalSection)
+            : state.walletModalSection;
+        const isActive = button.dataset.walletSection === targetSection;
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-selected", isActive ? "true" : "false");
         if (isActive && window.matchMedia("(max-width: 720px)").matches) {
@@ -6905,8 +7204,13 @@
       const sectionChanged = normalizedSection !== state.walletModalSection;
       state.walletModalSection = normalizedSection;
       syncWalletModalTabs();
-      if (options.syncFrame !== false && walletTrackerFrame && state.wallet && (sectionChanged || options.forceReload === true)) {
-        walletTrackerFrame.src = buildWalletPopupHref(state.wallet, state.walletModalSection);
+      if (options.syncFrame !== false && state.wallet && (sectionChanged || options.forceReload === true)) {
+        if (walletModalBackdrop.classList.contains("is-open") && walletTrackerFrame) {
+          walletTrackerFrame.src = buildWalletPopupHref(state.wallet, state.walletModalSection);
+        }
+        if (!walletModalBackdrop.classList.contains("is-open")) {
+          updateTradeFrame({ useMessage: false });
+        }
       }
     }
 
@@ -6915,18 +7219,19 @@
       if (!targetWallet) return;
 
       state.wallet = targetWallet;
-      state.walletModalSection = normalizeWalletModalSection(options.section || "overview");
+      state.walletModalSection = normalizeWalletModalSection(options.section || "positions");
       syncWalletUi();
       syncWalletModalTabs();
 
       const trackerHref = buildWalletTrackerHref(targetWallet);
-      const popupHref = buildWalletPopupHref(targetWallet, state.walletModalSection);
       walletModalSubtitle.textContent = targetWallet;
       openStandaloneWallet.href = trackerHref;
-      walletTrackerFrame.src = popupHref;
-      walletModalBackdrop.classList.add("is-open");
-      walletModalBackdrop.setAttribute("aria-hidden", "false");
-      document.body.classList.add("modal-open");
+      walletTrackerFrame.src = "";
+      walletModalBackdrop.classList.remove("is-open");
+      walletModalBackdrop.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+      updateTradeFrame({ useMessage: false });
+      syncTradeLayout();
 
       if (!options.fromPopState) {
         updateUrl(options.pushHistory === true);
@@ -6936,14 +7241,17 @@
     }
 
     function closeWalletOverlay(options = {}) {
+      pendingTradeFavoritesPanelOpen = false;
       state.wallet = "";
-      state.walletModalSection = "overview";
+      state.walletModalSection = "positions";
       syncWalletUi();
       syncWalletModalTabs();
       walletTrackerFrame.src = "";
       walletModalBackdrop.classList.remove("is-open");
       walletModalBackdrop.setAttribute("aria-hidden", "true");
       document.body.classList.remove("modal-open");
+      updateTradeFrame({ useMessage: false });
+      syncTradeLayout();
 
       if (!options.fromPopState) {
         updateUrl(options.pushHistory === true);
@@ -7121,7 +7429,7 @@
     function renderTable(rows) {
       if (!rows.length) {
         leaderboardBodies.forEach((body) => {
-          body.innerHTML = "<tr><td colspan='10' class='table-empty'>No wallets matched the current filters.</td></tr>";
+          body.innerHTML = "<tr><td colspan='11' class='table-empty'>No wallets matched the current filters.</td></tr>";
         });
         return;
       }
@@ -7137,9 +7445,17 @@
         const pnlTone = Number.isFinite(row.roi) ? getSignedToneColor(row.roi * 100, 180) : "";
         const href = buildWalletTrackerHref(row.address);
         const selectedClass = row.address === state.wallet ? " is-selected" : "";
+        const favoriteClass = isFavoriteWallet(row.address) ? " is-active" : "";
 
         return (
           "<tr class='" + selectedClass.trim() + "' data-wallet='" + escapeHtml(row.address) + "'>" +
+            "<td class='favorite-wallet-cell'>" +
+              "<button class='wallet-favorite-btn" + favoriteClass + "' type='button' aria-label='Favorite wallet' title='Favorite wallet' data-wallet-star='" + escapeHtml(row.address) + "'>" +
+                "<svg viewBox='0 0 24 24' aria-hidden='true'>" +
+                  "<path d='M12 3.9 14.5 8.8l5.4.77-3.9 3.75.92 5.3L12 16l-4.92 2.61.93-5.3-3.9-3.75 5.4-.77L12 3.9Z' fill='currentColor'></path>" +
+                "</svg>" +
+              "</button>" +
+            "</td>" +
             "<td><span class='rank-badge'>" + row.rank + "</span></td>" +
             "<td>" +
               "<a class='wallet-link' href='" + escapeHtml(href) + "' data-wallet-link='" + escapeHtml(row.address) + "'>" +
@@ -7229,7 +7545,7 @@
         setStatus("err", "Leaderboard failed to load");
         setLoadingState(false);
         const markup =
-          "<tr><td colspan='10' class='table-empty'>Failed to load the leaderboard. " +
+          "<tr><td colspan='11' class='table-empty'>Failed to load the leaderboard. " +
           escapeHtml(String(error && error.message ? error.message : error)) +
           "</td></tr>";
         leaderboardBodies.forEach((body) => {
@@ -7240,7 +7556,18 @@
 
     function handleTableClick(event) {
       const target = event.target;
-      if (!(target instanceof HTMLElement)) return;
+      if (!(target instanceof Element)) return;
+      const favoriteBtn = target.closest("[data-wallet-star]");
+      if (favoriteBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        const wallet = favoriteBtn.getAttribute("data-wallet-star") || "";
+        if (!wallet) return;
+        if (toggleFavoriteWallet(wallet)) {
+          renderTable(state.displayRows);
+        }
+        return;
+      }
       const row = target.closest("tr[data-wallet]");
       if (!row) return;
       const wallet = row.getAttribute("data-wallet") || "";
@@ -7551,6 +7878,12 @@
       });
     }
 
+    if (headerFavoritesBtn) {
+      headerFavoritesBtn.addEventListener("click", () => {
+        requestTradeFavoritesPanel();
+      });
+    }
+
     if (headerSearchForm) {
       headerSearchForm.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -7580,6 +7913,12 @@
       viewWalletBtn.addEventListener("click", () => {
         if (!state.wallet) return;
         openWalletOverlay(state.wallet, { pushHistory: false });
+      });
+    }
+
+    if (closeWalletShellBtn) {
+      closeWalletShellBtn.addEventListener("click", () => {
+        closeWalletOverlay({ pushHistory: true });
       });
     }
 
@@ -7639,10 +7978,12 @@
       }
     });
 
-    walletModalTabButtons.forEach((button) => {
+    walletSectionTabButtons.forEach((button) => {
       button.addEventListener("click", () => {
         if (!state.wallet) return;
-        setWalletModalSection(button.dataset.walletSection || "overview");
+        const fallbackSection =
+          walletShellChrome && walletShellChrome.contains(button) ? "positions" : "overview";
+        setWalletModalSection(button.dataset.walletSection || fallbackSection);
       });
     });
 
@@ -7952,6 +8293,12 @@
         syncTradeFrameLayout();
         syncTradeTimeframe();
         syncTradeDrawingTool();
+        if (pendingTradeFavoritesPanelOpen && String(tradeFrame.getAttribute("src") || "").includes("track.html") && tradeFrame.contentWindow) {
+          try {
+            tradeFrame.contentWindow.postMessage({ type: "hypermonitor:open-favorites-panel" }, "*");
+            pendingTradeFavoritesPanelOpen = false;
+          } catch (_) {}
+        }
       });
     }
 
@@ -7980,6 +8327,16 @@
       const isPrimaryFrame = event.source === tradeFrame?.contentWindow;
       const extraFrameIndex = extraTradeFrames.findIndex((frame) => frame?.contentWindow === event.source);
       if (!isPrimaryFrame && extraFrameIndex === -1) return;
+      if (data.type === "hypermonitor:wallet-change") {
+        if (!isPrimaryFrame) return;
+        const wallet = normalizeFavoriteWallet(data.wallet);
+        if (!wallet) return;
+        state.wallet = wallet;
+        syncWalletUi();
+        highlightSelectedWallet();
+        updateUrl(false);
+        return;
+      }
       if (data.type === "hypermonitor:coin-change") {
         const coin = String(data.coin || "").trim();
         if (!coin) return;
@@ -8052,7 +8409,14 @@
       syncTradeLayout();
     });
 
+    window.addEventListener("storage", (event) => {
+      if (event.key !== FAVORITES_KEY) return;
+      loadFavoriteWallets();
+      renderTable(state.displayRows);
+    });
+
     initTheme();
+    loadFavoriteWallets();
 
     state.coin = parseCoin();
     state.wallet = parseWallet();
