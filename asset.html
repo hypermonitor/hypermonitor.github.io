@@ -879,15 +879,35 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            max-height: calc(100% - 84px);
             padding: 8px 6px;
             border-radius: 14px;
             border: 1px solid rgba(72, 84, 101, 0.36);
             background: rgba(12, 16, 22, 0.88);
             box-shadow: 0 16px 28px rgba(0, 0, 0, 0.28);
             backdrop-filter: blur(10px);
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(124, 132, 143, 0.55) transparent;
+            -webkit-overflow-scrolling: touch;
             opacity: 1;
             transform: translateX(0);
             transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), background 0.14s ease, border-color 0.14s ease;
+        }
+
+        .chart-drawing-toolbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chart-drawing-toolbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chart-drawing-toolbar::-webkit-scrollbar-thumb {
+            background: rgba(124, 132, 143, 0.42);
+            border-radius: 999px;
         }
 
         html.light .chart-drawing-toolbar {
@@ -5696,6 +5716,20 @@
             syncAllDrawingSelectionUi();
         }
 
+        function bindDrawingToolbarScroll(toolbar) {
+            if (!toolbar) return;
+            toolbar.addEventListener('wheel', event => {
+                if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+                const maxScroll = Math.max(0, toolbar.scrollHeight - toolbar.clientHeight);
+                if (maxScroll <= 0) return;
+                const nextTop = Math.max(0, Math.min(maxScroll, toolbar.scrollTop + event.deltaY));
+                if (Math.abs(nextTop - toolbar.scrollTop) < 0.5) return;
+                toolbar.scrollTop = nextTop;
+                event.preventDefault();
+                event.stopPropagation();
+            }, { passive: false });
+        }
+
         function notifyParentDrawingTool(tool) {
             if (window.parent === window) return;
             try {
@@ -5837,49 +5871,52 @@
                 if (!next.fill) continue;
                 const y1 = start.y + (verticalSpan * current.value);
                 const y2 = start.y + (verticalSpan * next.value);
-                layer.appendChild(createSvgNode('rect', {
+                const band = createSvgNode('rect', {
                     x: left,
                     y: Math.min(y1, y2),
                     width,
                     height: Math.max(1, Math.abs(y2 - y1)),
                     class: 'chart-drawing-shape fib-box',
-                    fill: next.fill,
-                    stroke: 'none',
                     'fill-opacity': isDraft ? '0.55' : '1'
-                }));
+                });
+                band.style.fill = next.fill;
+                band.style.stroke = 'none';
+                layer.appendChild(band);
             }
 
-            layer.appendChild(createSvgNode('line', {
+            const guide = createSvgNode('line', {
                 x1: start.x,
                 y1: start.y,
                 x2: end.x,
                 y2: end.y,
                 class: 'chart-drawing-shape fib-line',
-                stroke: 'rgba(148, 163, 184, 0.74)',
                 'stroke-width': '1.2',
                 'stroke-dasharray': '6 5',
                 'stroke-opacity': isDraft ? '0.52' : '0.82'
-            }));
+            });
+            guide.style.stroke = 'rgba(148, 163, 184, 0.74)';
+            layer.appendChild(guide);
 
             FIBONACCI_LEVELS.forEach((level) => {
                 const y = start.y + (verticalSpan * level.value);
-                layer.appendChild(createSvgNode('line', {
+                const fibLine = createSvgNode('line', {
                     x1: left,
                     y1: y,
                     x2: right,
                     y2: y,
                     class: 'chart-drawing-shape fib-line',
-                    stroke: level.color,
                     'stroke-width': level.value === 0 || level.value === 1 ? '1.2' : '1',
                     'stroke-opacity': isDraft ? '0.58' : '1'
-                }));
+                });
+                fibLine.style.stroke = level.color;
+                layer.appendChild(fibLine);
                 const text = createSvgNode('text', {
                     x: labelX,
                     y,
                     class: 'chart-drawing-label',
-                    fill: level.color,
                     'text-anchor': labelAnchor
                 });
+                text.style.fill = level.color;
                 text.textContent = level.value === 0 || level.value === 1
                     ? String(level.value)
                     : level.value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
@@ -5888,14 +5925,15 @@
         }
 
         function renderHorizontalLineDrawing(layer, y, width, isDraft) {
-            layer.appendChild(createSvgNode('line', {
+            const line = createSvgNode('line', {
                 x1: 0,
                 y1: y,
                 x2: width,
                 y2: y,
                 class: `chart-drawing-shape hline${isDraft ? ' is-draft' : ''}`,
                 'stroke-opacity': isDraft ? '0.72' : '1'
-            }));
+            });
+            layer.appendChild(line);
         }
 
         function renderTextDrawing(layer, point, textValue) {
@@ -5937,7 +5975,7 @@
                     if (!Number.isFinite(y)) return;
                     renderHorizontalLineDrawing(group, y, width, isDraft);
                     group.querySelectorAll('.chart-drawing-shape').forEach((shape) => {
-                        shape.setAttribute('stroke', color);
+                        shape.style.stroke = color;
                     });
                     layer.appendChild(group);
                     return;
@@ -5958,14 +5996,14 @@
                 }
                 group.querySelectorAll('.chart-drawing-shape').forEach((shape) => {
                     if (item.type === 'fib') return;
-                    shape.setAttribute('stroke', color);
+                    shape.style.stroke = color;
                     if (item.type === 'rect') {
-                        shape.setAttribute('fill', hexToRgba(color, isDraft ? 0.05 : 0.1));
+                        shape.style.fill = hexToRgba(color, isDraft ? 0.05 : 0.1);
                     }
                 });
                 group.querySelectorAll('.chart-drawing-label').forEach((label) => {
                     if (item.type === 'fib') return;
-                    label.setAttribute('fill', item.type === 'text' ? color : hexToRgba(color, 0.88));
+                    label.style.fill = item.type === 'text' ? color : hexToRgba(color, 0.88);
                 });
                 layer.appendChild(group);
             });
@@ -7562,6 +7600,8 @@
 
         buildDrawingPaletteOptions();
         updateDrawingColorUi();
+        bindDrawingToolbarScroll(chartDrawingToolbar1);
+        bindDrawingToolbarScroll(chartDrawingToolbar2);
 
         document.querySelectorAll('.chart-drawing-btn[data-draw-tool]').forEach(button => {
             button.addEventListener('click', event => {

@@ -75,9 +75,18 @@
       color: var(--text-main);
     }
 
+    html {
+      height: 100%;
+    }
+
     body.embed-popup,
     body.embed-shell {
       overflow-x: hidden;
+    }
+
+    body.embed-shell {
+      height: 100vh;
+      overflow: hidden;
     }
 
     #app {
@@ -92,6 +101,11 @@
       padding-top: 0;
     }
 
+    body.embed-shell #app {
+      height: 100%;
+      padding-bottom: 0;
+    }
+
     body.embed-popup .dashboard-shell {
       grid-template-columns: 1fr;
       gap: 0.8rem;
@@ -101,6 +115,7 @@
     body.embed-shell .dashboard-shell {
       margin-bottom: 0.8rem;
       align-items: stretch;
+      height: calc(100vh - 12px);
       min-height: calc(100vh - 12px);
     }
 
@@ -112,15 +127,26 @@
       gap: 0.8rem;
       grid-template-rows: auto minmax(0, 1fr);
       align-content: stretch;
+      height: 100%;
       min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
     }
 
-    .shell-main-topbar {
+    body.embed-shell .dashboard-main::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+  .shell-main-topbar {
       display: none;
       align-items: center;
       justify-content: space-between;
       gap: 0.8rem;
       min-height: 30px;
+      padding-top: 12px;
+      margin-bottom: 2px;
     }
 
     body.embed-shell .shell-main-topbar {
@@ -205,6 +231,7 @@
       position: static;
       align-self: stretch;
       display: flex;
+      height: 100%;
       min-height: 0;
     }
 
@@ -214,7 +241,7 @@
       height: 100%;
       min-height: 100%;
       max-height: none;
-      overflow: auto;
+      overflow: hidden;
     }
 
     body.embed-shell .dashboard-main > .card {
@@ -1921,6 +1948,58 @@
       border-top: 1px solid rgba(148, 163, 184, 0.14);
     }
 
+    .overview-radar-panel {
+      margin-top: 0.9rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .overview-radar-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 0.7rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .overview-radar-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #f8fafc;
+      letter-spacing: 0.02em;
+    }
+
+    .overview-radar-subtitle {
+      margin-top: 0.2rem;
+      font-size: 0.73rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .overview-radar-value {
+      flex: 0 0 auto;
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .overview-radar-wrap {
+      position: relative;
+      height: 248px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.028);
+      overflow: hidden;
+    }
+
+    .overview-radar-wrap canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
     .overview-metric-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -2915,6 +2994,10 @@
       min-height: 0;
     }
 
+    .distribution-card {
+      min-height: 0;
+    }
+
     .heatmap-card .pnl-heatmap-wrap {
       flex: 1 1 auto;
       min-height: 0;
@@ -3471,6 +3554,24 @@
     body.light .overview-section,
     body.light .overview-metric-list {
       border-top-color: #e5e7eb;
+    }
+
+    body.light .overview-radar-panel {
+      border-top-color: #e5e7eb;
+    }
+
+    body.light .overview-radar-title {
+      color: #0f172a;
+    }
+
+    body.light .overview-radar-subtitle,
+    body.light .overview-radar-value {
+      color: #64748b;
+    }
+
+    body.light .overview-radar-wrap {
+      background: rgba(248, 250, 252, 0.96);
+      border-color: #d8dee6;
     }
 
     body.light .overview-allocation-track,
@@ -5593,6 +5694,18 @@
         </span>
       </div>
       <div id="marginSummary"><span class="muted">Loading…</span></div>
+      <div class="overview-radar-panel" id="overviewRadarPanel">
+        <div class="overview-radar-head">
+          <div>
+            <div class="overview-radar-title">Wallet Skill Map</div>
+            <div class="overview-radar-subtitle">Derived from realized trading behavior, current exposure, and execution quality.</div>
+          </div>
+          <div class="overview-radar-value" id="overviewRadarRangeLabel">All Time</div>
+        </div>
+        <div class="overview-radar-wrap">
+          <canvas id="overviewRadarChart"></canvas>
+        </div>
+      </div>
       <div class="error" id="snapshotError"></div>
     </section>
     </aside>
@@ -5836,6 +5949,15 @@
               <div class="pnl-heatmap-grid" id="pnlHeatmapGrid"></div>
             </div>
             <div class="pnl-heatmap-hover" id="pnlHeatmapHover"></div>
+          </div>
+        </div>
+
+        <div class="chart-card distribution-card">
+          <h3 class="pnl-card-title">
+            <span class="pnl-card-heading">Profit Distribution <span class="spark-label" id="distributionTitleValue">[-]</span></span>
+          </h3>
+          <div class="chart-canvas-wrap logo-watermark">
+            <canvas id="profitDistributionChart"></canvas>
           </div>
         </div>
       </div>
@@ -6486,6 +6608,8 @@
   const metricSkillPersistenceEl = document.getElementById("metricSkillPersistence");
   const metricExcessPnlEl = document.getElementById("metricExcessPnl");
   const metricBetaAlphaEl = document.getElementById("metricBetaAlpha");
+  const overviewRadarCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("overviewRadarChart"));
+  const overviewRadarRangeLabelEl = document.getElementById("overviewRadarRangeLabel");
 
   const pnlShareModalEl = document.getElementById("pnlShareModal");
   const shareModalTitleEl = document.getElementById("shareModalTitle");
@@ -6516,6 +6640,8 @@
   const pnlHeatmapNextBtnEl = document.getElementById("pnlHeatmapNextBtn");
   const pnlViewButtons = document.querySelectorAll(".pnl-view-btn");
   const depositsCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("depositsChart"));
+  const profitDistributionCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("profitDistributionChart"));
+  const distributionTitleValueEl = document.getElementById("distributionTitleValue");
   const depositsChartWrapEl = document.getElementById("depositsChartWrap");
   const transfersListWrapEl = document.getElementById("transfersListWrap");
   const transfersListBodyEl = document.getElementById("transfersListBody");
@@ -6632,6 +6758,9 @@
   let isAccountOverviewReady = false;
   let portfolioLoadSettled = false;
   let historicalFillsLoadSettled = false;
+  let portfolioLoadPromise = null;
+  let historicalFillsLoadPromise = null;
+  let initialWalletTrackingComplete = false;
   let accountOverviewScrollHideTimer = null;
   let primaryPerformanceMode = "pnl";
   let activityViewMode = "trades";
@@ -7567,8 +7696,9 @@
   const transferHistoryByWallet = new Map();
   let transfersRequestToken = 0;
   const TRANSFERS_MAX_ROWS = 120;
-  const portfolioCharts = { drawdown: null, equity: null, exposure: null, pnl: null, activity: null, deposits: null };
+  const portfolioCharts = { drawdown: null, equity: null, exposure: null, pnl: null, activity: null, deposits: null, distribution: null };
   const portfolioBreakdownChart = { chart: null };
+  const overviewCharts = { radar: null };
   const WALLET_COLOR_PALETTE = ["#38bdf8", "#f59e0b", "#f472b6", "#22d3ee", "#a78bfa", "#34d399", "#f97316", "#60a5fa"];
   const walletColorMap = new Map();
   const HFT_CANCEL_THRESHOLD_PER_MIN = 10;
@@ -14080,8 +14210,38 @@
     if (!currentWallets.length) return;
     const tasks = [];
     if (!historicalOrdersLoaded) tasks.push(loadHistoricalOrders(currentWallets));
-    if (!historicalFillsLoaded) tasks.push(loadHistoricalFills(currentWallets));
+    if (!historicalFillsLoaded) tasks.push(ensureHistoricalFillsLoaded(currentWallets));
     if (tasks.length) await Promise.all(tasks);
+  }
+
+  async function ensurePortfolioLoaded(wallets = currentWallets) {
+    const walletList = Array.isArray(wallets) ? wallets : [wallets];
+    if (!walletList.length) return;
+    if (portfolioLoadSettled && portfolioDataByWallet.size) return;
+    if (portfolioLoadPromise) return portfolioLoadPromise;
+    portfolioLoadSettled = false;
+    syncPerformanceLoadingState();
+    portfolioLoadPromise = (async () => {
+      await loadPortfolio(walletList);
+    })().finally(() => {
+      portfolioLoadPromise = null;
+    });
+    return portfolioLoadPromise;
+  }
+
+  async function ensureHistoricalFillsLoaded(wallets = currentWallets) {
+    const walletList = Array.isArray(wallets) ? wallets : [wallets];
+    if (!walletList.length) return;
+    if (historicalFillsLoaded) return;
+    if (historicalFillsLoadPromise) return historicalFillsLoadPromise;
+    historicalFillsLoadSettled = false;
+    syncPerformanceLoadingState();
+    historicalFillsLoadPromise = (async () => {
+      await loadHistoricalFills(walletList);
+    })().finally(() => {
+      historicalFillsLoadPromise = null;
+    });
+    return historicalFillsLoadPromise;
   }
 
   function toColumnName(idx) {
@@ -14712,6 +14872,8 @@
     const positionsColspan = getPositionsColspan();
     positionsBodyEl.innerHTML = `<tr class='loading-row'><td colspan='${positionsColspan}' class='muted'>Loading…</td></tr>`;
     marginSummaryEl.innerHTML = "<span class='muted'>Loading…</span>";
+    renderOverviewRadar(currentRangeKey, null, null);
+    renderProfitDistributionChart(null);
 
     recomputeTimelineControls();
     refreshBreakdownIfOpen();
@@ -16414,7 +16576,9 @@
   function computeHoldingStats(fillsForStats) {
     const lotsByCoin = new Map();
     const lifecyclePnlByCoin = new Map();
+    const lifecycleOpenedAtByCoin = new Map();
     const holdingTimes = [];
+    const closedTrades = [];
     let realizedPnl = 0;
     let wins = 0;
     let closedCount = 0;
@@ -16432,6 +16596,9 @@
 
       const key = coin || "__unknown__";
       const lots = lotsByCoin.get(key) || [];
+      if (lots.length && !lifecycleOpenedAtByCoin.has(key)) {
+        lifecycleOpenedAtByCoin.set(key, Number.isFinite(lots[0]?.time) ? lots[0].time : time);
+      }
       let remaining = sizeAbs;
       let matchedAny = false;
       let lifecyclePnl = lifecyclePnlByCoin.get(key) || 0;
@@ -16457,6 +16624,13 @@
       }
 
       if (matchedAny && lots.length === 0) {
+        const openedAt = lifecycleOpenedAtByCoin.get(key);
+        closedTrades.push({
+          coin: key,
+          pnl: lifecyclePnl,
+          closeTime: time,
+          holdingTime: Number.isFinite(openedAt) ? Math.max(0, time - openedAt) : null,
+        });
         if (lifecyclePnl > 0) {
           wins += 1;
           closedCount += 1;
@@ -16464,9 +16638,13 @@
           closedCount += 1;
         }
         lifecyclePnl = 0;
+        lifecycleOpenedAtByCoin.delete(key);
       }
 
       if (remaining > 0) {
+        if (!lots.length) {
+          lifecycleOpenedAtByCoin.set(key, time);
+        }
         lots.push({ sideSign, size: remaining, price, time });
       }
 
@@ -16492,6 +16670,7 @@
       medianHoldingTime,
       closedCount,
       wins,
+      closedTrades,
     };
   }
 
@@ -16617,11 +16796,282 @@
       profitFactor: holdingStats.profitFactor,
       wins: holdingStats.wins,
       closedCount: holdingStats.closedCount,
+      closedTrades: holdingStats.closedTrades,
       sideBias,
       aggressiveness,
       cancelRatio,
       reactionSpeed,
     };
+  }
+
+  function normalizeRadarScore(value, min = 0, max = 1, invert = false) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    const clamped = Math.max(min, Math.min(max, n));
+    const raw = max === min ? 0 : (clamped - min) / (max - min);
+    const ratio = invert ? 1 - raw : raw;
+    return Math.round(Math.max(0, Math.min(1, ratio)) * 1000) / 10;
+  }
+
+  function buildOverviewRadarSeries(metrics, tradeMetrics) {
+    const activityComposite =
+      tradeMetrics
+        ? ((Number(tradeMetrics.activeDaysRatio || 0) * 0.58) + (Math.min(Number(tradeMetrics.tradesPerDay || 0) / 12, 1) * 0.42))
+        : null;
+    const exposureRatio =
+      Number.isFinite(lastComputedTotalNotional) && Number.isFinite(latestLiveEquityValue) && Math.abs(latestLiveEquityValue) > 1e-9
+        ? Math.abs(lastComputedTotalNotional) / Math.abs(latestLiveEquityValue)
+        : null;
+    const holdingHours = Number.isFinite(tradeMetrics?.medianHoldingTime) ? Number(tradeMetrics.medianHoldingTime) / 3600000 : null;
+    const axes = [
+      {
+        label: "Win Rate",
+        score: normalizeRadarScore(tradeMetrics?.winRate, 0, 1),
+        text: Number.isFinite(tradeMetrics?.winRate) ? formatPercent(tradeMetrics.winRate) : "N/A",
+      },
+      {
+        label: "Activity",
+        score: normalizeRadarScore(activityComposite, 0, 1),
+        text: Number.isFinite(activityComposite) ? `${Math.round(activityComposite * 100)}%` : "N/A",
+      },
+      {
+        label: "Profit Quality",
+        score: tradeMetrics?.profitFactor === Infinity ? 100 : normalizeRadarScore(tradeMetrics?.profitFactor, 0, 3),
+        text:
+          tradeMetrics?.profitFactor === Infinity
+            ? "Inf"
+            : Number.isFinite(tradeMetrics?.profitFactor)
+              ? formatRatio(tradeMetrics.profitFactor, 2)
+              : "N/A",
+      },
+      {
+        label: "Risk Control",
+        score: normalizeRadarScore(exposureRatio, 0, 3.5, true),
+        text: Number.isFinite(exposureRatio) ? `${formatRatio(exposureRatio, 2)}x` : "N/A",
+      },
+      {
+        label: "Aggressiveness",
+        score: normalizeRadarScore(tradeMetrics?.aggressiveness, 0, 1),
+        text: Number.isFinite(tradeMetrics?.aggressiveness) ? formatPercent(tradeMetrics.aggressiveness) : "N/A",
+      },
+      {
+        label: "Holding Time",
+        score: Number.isFinite(holdingHours) ? normalizeRadarScore(Math.log1p(holdingHours), 0, Math.log1p(24 * 7)) : null,
+        text: Number.isFinite(tradeMetrics?.medianHoldingTime) ? formatDuration(tradeMetrics.medianHoldingTime) : "N/A",
+      },
+    ];
+
+    if (metrics && Number.isFinite(metrics.skillPersistence)) {
+      axes.splice(2, 0, {
+        label: "Consistency",
+        score: normalizeRadarScore(metrics.skillPersistence, -1, 1),
+        text: formatRatio(metrics.skillPersistence, 2),
+      });
+    }
+
+    return axes;
+  }
+
+  function renderOverviewRadar(rangeKey, metrics, tradeMetrics) {
+    if (!overviewRadarCanvas) return;
+    const axes = buildOverviewRadarSeries(metrics, tradeMetrics);
+    const labels = axes.map((entry) => entry.label);
+    const values = axes.map((entry) => (Number.isFinite(entry.score) ? entry.score : 0));
+    const detailByLabel = new Map(axes.map((entry) => [entry.label, entry.text || "N/A"]));
+    if (overviewRadarRangeLabelEl) overviewRadarRangeLabelEl.textContent = getRangeLabel(rangeKey);
+    const isLight = document.body.classList.contains("light");
+    const textColor = getChartTextColor();
+    const tooltipBg = isLight ? "rgba(255, 255, 255, 0.96)" : "rgba(15, 18, 23, 0.96)";
+    const gridColor = isLight ? "rgba(31, 41, 55, 0.14)" : "rgba(148, 163, 184, 0.14)";
+    const angleLineColor = isLight ? "rgba(31, 41, 55, 0.12)" : "rgba(148, 163, 184, 0.12)";
+    if (!overviewCharts.radar) {
+      overviewCharts.radar = new Chart(overviewRadarCanvas.getContext("2d"), {
+        type: "radar",
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            borderColor: "rgba(99, 102, 241, 0.96)",
+            backgroundColor: "rgba(99, 102, 241, 0.14)",
+            pointBackgroundColor: "rgba(99, 102, 241, 1)",
+            pointBorderColor: isLight ? "#ffffff" : "#0d1014",
+            pointBorderWidth: 1.4,
+            pointRadius: 2.8,
+            pointHoverRadius: 4.4,
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: tooltipBg,
+              borderColor: isLight ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.28)",
+              borderWidth: 1,
+              titleColor: textColor,
+              bodyColor: textColor,
+              displayColors: false,
+              callbacks: {
+                title: (items) => items?.[0]?.label || "",
+                label: (ctx) => detailByLabel.get(String(ctx.label || "")) || "N/A",
+              },
+            },
+          },
+          scales: {
+            r: {
+              min: 0,
+              max: 100,
+              ticks: { display: false, stepSize: 20 },
+              angleLines: { color: angleLineColor },
+              grid: { color: gridColor },
+              pointLabels: {
+                color: textColor,
+                font: { size: 11, weight: 600, family: "'Outfit', system-ui, sans-serif" },
+              },
+            },
+          },
+        },
+      });
+      return;
+    }
+    const chart = overviewCharts.radar;
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = values;
+    chart.data.datasets[0].pointBorderColor = isLight ? "#ffffff" : "#0d1014";
+    chart.options.plugins.tooltip.backgroundColor = tooltipBg;
+    chart.options.plugins.tooltip.borderColor = isLight ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.28)";
+    chart.options.plugins.tooltip.titleColor = textColor;
+    chart.options.plugins.tooltip.bodyColor = textColor;
+    chart.options.scales.r.angleLines.color = angleLineColor;
+    chart.options.scales.r.grid.color = gridColor;
+    chart.options.scales.r.pointLabels.color = textColor;
+    chart.update();
+  }
+
+  function buildProfitDistribution(closedTrades, limit = 2000) {
+    const rows = Array.isArray(closedTrades)
+      ? closedTrades
+          .filter((entry) => entry && Number.isFinite(Number(entry.pnl)) && Number.isFinite(Number(entry.closeTime)))
+          .sort((a, b) => Number(a.closeTime) - Number(b.closeTime))
+          .slice(-limit)
+      : [];
+    if (!rows.length) return null;
+    const pnls = rows.map((entry) => Number(entry.pnl));
+    const min = Math.min(...pnls);
+    const max = Math.max(...pnls);
+    const binCount = Math.max(12, Math.min(28, Math.round(Math.sqrt(rows.length))));
+    const span = Math.max(1e-9, max - min);
+    const step = span / binCount;
+    const bins = Array.from({ length: binCount }, (_, idx) => ({
+      min: min + (step * idx),
+      max: idx === binCount - 1 ? max : min + (step * (idx + 1)),
+      count: 0,
+    }));
+    rows.forEach((entry) => {
+      const pnl = Number(entry.pnl);
+      const rawIndex = step > 0 ? Math.floor((pnl - min) / step) : 0;
+      const index = Math.max(0, Math.min(binCount - 1, rawIndex));
+      bins[index].count += 1;
+    });
+    return {
+      labels: bins.map((bin) => `${fmtMoneyCompact(bin.min, 1)} to ${fmtMoneyCompact(bin.max, 1)}`),
+      counts: bins.map((bin) => bin.count),
+      colors: bins.map((bin) => {
+        const mid = (bin.min + bin.max) / 2;
+        return mid < 0 ? "rgba(246, 70, 93, 0.5)" : mid > 0 ? "rgba(14, 203, 129, 0.46)" : "rgba(148, 163, 184, 0.42)";
+      }),
+      borders: bins.map((bin) => {
+        const mid = (bin.min + bin.max) / 2;
+        return mid < 0 ? "rgba(246, 70, 93, 0.82)" : mid > 0 ? "rgba(14, 203, 129, 0.78)" : "rgba(148, 163, 184, 0.66)";
+      }),
+      totalTrades: rows.length,
+    };
+  }
+
+  function renderProfitDistributionChart(tradeMetrics) {
+    if (!profitDistributionCanvas) return;
+    const distribution = buildProfitDistribution(tradeMetrics?.closedTrades || [], 2000);
+    if (distributionTitleValueEl) {
+      distributionTitleValueEl.textContent = distribution ? `${distribution.totalTrades.toLocaleString()} trades` : "No closed trades";
+      distributionTitleValueEl.className = "spark-label neutral";
+    }
+    if (!distribution) {
+      if (portfolioCharts.distribution) {
+        portfolioCharts.distribution.destroy();
+        portfolioCharts.distribution = null;
+      }
+      return;
+    }
+    const isLight = document.body.classList.contains("light");
+    const textColor = getChartTextColor();
+    const tooltipBg = isLight ? "rgba(255,255,255,0.96)" : "rgba(15,18,23,0.96)";
+    if (!portfolioCharts.distribution) {
+      portfolioCharts.distribution = new Chart(profitDistributionCanvas.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: distribution.labels,
+          datasets: [{
+            data: distribution.counts,
+            backgroundColor: distribution.colors,
+            borderColor: distribution.borders,
+            borderWidth: 1,
+            borderRadius: 3,
+            borderSkipped: false,
+            maxBarThickness: 22,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: tooltipBg,
+              borderColor: isLight ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.28)",
+              borderWidth: 1,
+              titleColor: textColor,
+              bodyColor: textColor,
+              displayColors: false,
+              callbacks: {
+                title: (items) => items?.[0]?.label || "",
+                label: (ctx) => `${Number(ctx.parsed?.y ?? 0).toLocaleString()} closed trades`,
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: textColor,
+                maxTicksLimit: 6,
+                callback: (_, index) => distribution.labels[index] || "",
+              },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: textColor, precision: 0 },
+              grid: { color: getChartGridColor() },
+            },
+          },
+        },
+      });
+      return;
+    }
+    const chart = portfolioCharts.distribution;
+    chart.data.labels = distribution.labels;
+    chart.data.datasets[0].data = distribution.counts;
+    chart.data.datasets[0].backgroundColor = distribution.colors;
+    chart.data.datasets[0].borderColor = distribution.borders;
+    chart.options.plugins.tooltip.backgroundColor = tooltipBg;
+    chart.options.plugins.tooltip.borderColor = isLight ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.28)";
+    chart.options.plugins.tooltip.titleColor = textColor;
+    chart.options.plugins.tooltip.bodyColor = textColor;
+    chart.options.scales.x.ticks.color = textColor;
+    chart.options.scales.y.ticks.color = textColor;
+    chart.options.scales.y.grid.color = getChartGridColor();
+    chart.update();
   }
 
   function clearPerformanceMetrics() {
@@ -16658,6 +17108,10 @@
       el.style.color = "";
     });
     if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = "-";
+    if (distributionTitleValueEl) {
+      distributionTitleValueEl.textContent = "[-]";
+      distributionTitleValueEl.className = "spark-label";
+    }
   }
 
   function setPortfolioMetricsUnavailable() {
@@ -17941,6 +18395,8 @@
         setMetricValue(metricCancelRatioEl, "-", null);
         setMetricValue(metricReactionSpeedEl, "-", null);
       }
+      renderOverviewRadar(rangeKey, null, tradeMetrics);
+      renderProfitDistributionChart(tradeMetrics);
       return;
     }
     if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = source?.label || "-";
@@ -18050,6 +18506,8 @@
         baseEquity: metrics.baseEquity,
       }, metrics.totalPnl, metrics.baseEquity, rangeWindow);
     }
+    renderOverviewRadar(rangeKey, metrics, tradeMetrics);
+    renderProfitDistributionChart(tradeMetrics);
   }
 
   function openPortfolioModal() {
@@ -18743,11 +19201,24 @@
   function updateChartTheme() {
     const gridColor = getChartGridColor();
     const textColor = getChartTextColor();
+    const isLight = document.body.classList.contains("light");
     Object.values(portfolioCharts).forEach((chart) => {
       if (!chart) return;
       chart.options.scales.y.grid.color = gridColor;
+      if (chart.options.scales.x?.ticks) {
+        chart.options.scales.x.ticks.color = textColor;
+      }
+      if (chart.options.scales.y?.ticks) {
+        chart.options.scales.y.ticks.color = textColor;
+      }
       if (chart.options.plugins?.legend?.labels) {
         chart.options.plugins.legend.labels.color = textColor;
+      }
+      if (chart.options.plugins?.tooltip) {
+        chart.options.plugins.tooltip.backgroundColor = isLight ? "rgba(255,255,255,0.96)" : "rgba(15,18,23,0.96)";
+        chart.options.plugins.tooltip.borderColor = isLight ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.28)";
+        chart.options.plugins.tooltip.titleColor = textColor;
+        chart.options.plugins.tooltip.bodyColor = textColor;
       }
       chart.update();
     });
@@ -18767,6 +19238,17 @@
     }
     if (portfolioCharts.exposure) {
       applyExposureChartStyling(portfolioCharts.exposure, portfolioCharts.exposure.data?.datasets || []);
+    }
+    if (overviewCharts.radar) {
+      overviewCharts.radar.options.plugins.tooltip.backgroundColor = isLight ? "rgba(255,255,255,0.96)" : "rgba(15,18,23,0.96)";
+      overviewCharts.radar.options.plugins.tooltip.borderColor = isLight ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.28)";
+      overviewCharts.radar.options.plugins.tooltip.titleColor = textColor;
+      overviewCharts.radar.options.plugins.tooltip.bodyColor = textColor;
+      overviewCharts.radar.options.scales.r.angleLines.color = isLight ? "rgba(31, 41, 55, 0.12)" : "rgba(148, 163, 184, 0.12)";
+      overviewCharts.radar.options.scales.r.grid.color = isLight ? "rgba(31, 41, 55, 0.14)" : "rgba(148, 163, 184, 0.14)";
+      overviewCharts.radar.options.scales.r.pointLabels.color = textColor;
+      overviewCharts.radar.data.datasets[0].pointBorderColor = isLight ? "#ffffff" : "#0d1014";
+      overviewCharts.radar.update();
     }
   }
 
@@ -18877,10 +19359,14 @@
       ];
 
       if (shouldPreloadPerformanceSection()) {
-        loadTasks.push(loadPortfolio(walletList));
+        loadTasks.push(ensurePortfolioLoaded(walletList));
         if (isEmbedPopup) {
-          loadTasks.push(loadHistoricalFills(walletList));
+          loadTasks.push(ensureHistoricalFillsLoaded(walletList));
         }
+      }
+
+      if (isEmbedShell) {
+        loadTasks.push(ensureHistoricalFillsLoaded(walletList));
       }
 
       if (shouldPreloadStandaloneHistory()) {
@@ -18895,7 +19381,7 @@
         await loadHistoricalOrders(walletList);
       }
       if (shouldPreloadStandaloneHistory() && historyLayoutEl && !historyLayoutEl.classList.contains("hidden") && fillsHistoryPanelEl && !fillsHistoryPanelEl.classList.contains("hidden")) {
-        await loadHistoricalFills(walletList);
+        await ensureHistoricalFillsLoaded(walletList);
       }
       await accountOverviewReadyTask;
       startLiveSnapshotRefreshTimer(walletList);
@@ -18941,6 +19427,8 @@
 
     // ✅ Replace URL on first load (so / becomes /?wallet=... without extra history)
     await trackWallets({ wallets: initialWallets }, { replaceUrl: true });
+    initialWalletTrackingComplete = true;
+    if (isEmbedSectionMode) setEmbedSection(initialEmbedSection);
     await initFooterStream();
     updateMarketToggleIndicator();
     updateRangeToggleIndicator();
@@ -19451,6 +19939,11 @@
     accountOverviewCardEl.addEventListener("mouseleave", () => {
       accountOverviewCardEl.classList.remove("is-scrolling");
     });
+    accountOverviewCardEl.addEventListener("wheel", handleAccountOverviewWheel, { passive: false, capture: true });
+    accountOverviewCardEl.addEventListener("scroll", () => {
+      const target = getEmbedShellScrollTarget();
+      if (target) syncShellScroll(accountOverviewCardEl, target);
+    }, { passive: true });
     accountOverviewCardEl.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-action='copy-overview-wallet']");
       if (!btn) return;
@@ -19494,6 +19987,19 @@
 
   if (dashboardMainEl) {
     dashboardMainEl.addEventListener("wheel", handleShellSectionWheel, { passive: false });
+    dashboardMainEl.addEventListener("scroll", () => {
+      syncShellScroll(dashboardMainEl, accountOverviewCardEl);
+    }, { passive: true });
+  }
+
+  [positionsSectionEl, performanceSectionEl, liveLayoutEl, historyLayoutEl].filter(Boolean).forEach((sectionEl) => {
+    sectionEl.addEventListener("scroll", () => {
+      syncShellScroll(sectionEl, accountOverviewCardEl);
+    }, { passive: true });
+  });
+
+  if (dashboardSidebarEl) {
+    dashboardSidebarEl.addEventListener("wheel", handleShellSidebarWheel, { passive: false, capture: true });
   }
 
   document.addEventListener("click", (e) => {
@@ -19628,7 +20134,7 @@
     });
   }
 
-  let lastHistoryFocus = "orders";
+  var lastHistoryFocus = "orders";
   function setHistoryMode(enabled, focus = lastHistoryFocus) {
     if (liveLayoutEl) liveLayoutEl.classList.toggle("hidden", enabled);
     if (historyLayoutEl) historyLayoutEl.classList.toggle("hidden", !enabled);
@@ -19695,6 +20201,7 @@
   let shellSectionWheelAccum = 0;
   let shellSectionWheelResetTimer = 0;
   let shellSectionLastSwitchAt = 0;
+  let shellScrollSyncLock = false;
 
   function handleShellSectionWheel(event) {
     if (!isEmbedShell) return;
@@ -19718,6 +20225,78 @@
     shellSectionWheelAccum = 0;
     event.preventDefault();
     switchEmbedShellSectionBy(delta > 0 ? 1 : -1);
+  }
+
+  function syncShellScroll(sourceEl, targetEl) {
+    if (!isEmbedShell || shellScrollSyncLock || !sourceEl || !targetEl) return;
+    const sourceMax = Math.max(0, sourceEl.scrollHeight - sourceEl.clientHeight);
+    const targetMax = Math.max(0, targetEl.scrollHeight - targetEl.clientHeight);
+    if (targetMax <= 0) return;
+    const progress = sourceMax > 0 ? sourceEl.scrollTop / sourceMax : 0;
+    shellScrollSyncLock = true;
+    targetEl.scrollTop = targetMax * progress;
+    requestAnimationFrame(() => {
+      shellScrollSyncLock = false;
+    });
+  }
+
+  function isElementScrollable(el) {
+    if (!el || typeof el.scrollHeight !== "number" || typeof el.clientHeight !== "number") return false;
+    if (el.classList?.contains("hidden")) return false;
+    const style = getComputedStyle(el);
+    if (style.display === "none" || style.visibility === "hidden") return false;
+    return el.scrollHeight - el.clientHeight > 2;
+  }
+
+  function getEmbedShellScrollTarget() {
+    if (!isEmbedShell) return null;
+    const current = getCurrentEmbedShellSection();
+    const candidates = [];
+    if (current === "performance") {
+      candidates.push(performanceSectionEl);
+    } else if (current === "orders") {
+      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden")) candidates.push(historyLayoutEl);
+      if (liveLayoutEl && !liveLayoutEl.classList.contains("hidden")) candidates.push(liveLayoutEl);
+    } else {
+      candidates.push(positionsSectionEl);
+    }
+    candidates.push(dashboardMainEl, document.scrollingElement);
+    return candidates.find((el) => isElementScrollable(el)) || null;
+  }
+
+  function scrollEmbedShellMainBy(deltaY) {
+    if (!isEmbedShell || Math.abs(deltaY) < 1) return false;
+    const target = getEmbedShellScrollTarget();
+    if (!target) return false;
+    const max = Math.max(0, target.scrollHeight - target.clientHeight);
+    if (max <= 0) return false;
+    const nextTop = Math.max(0, Math.min(max, target.scrollTop + deltaY));
+    if (Math.abs(nextTop - target.scrollTop) < 0.5) return false;
+    target.scrollTop = nextTop;
+    syncShellScroll(target, accountOverviewCardEl);
+    return true;
+  }
+
+  function handleAccountOverviewWheel(event) {
+    if (!isEmbedShell) return;
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) >= 14) {
+      handleShellSectionWheel(event);
+      return;
+    }
+    if (scrollEmbedShellMainBy(event.deltaY)) {
+      event.preventDefault();
+    }
+  }
+
+  function handleShellSidebarWheel(event) {
+    if (!isEmbedShell) return;
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) >= 14) {
+      handleShellSectionWheel(event);
+      return;
+    }
+    if (scrollEmbedShellMainBy(event.deltaY)) {
+      event.preventDefault();
+    }
   }
 
   function shouldPreloadPerformanceSection() {
@@ -19768,6 +20347,20 @@
     }
 
     if (nextSection === "performance") {
+      if (initialWalletTrackingComplete && currentWallets.length) {
+        const loadTasks = [];
+        if (!portfolioLoadSettled || !portfolioDataByWallet.size) {
+          loadTasks.push(ensurePortfolioLoaded(currentWallets));
+        }
+        if (!historicalFillsLoaded) {
+          loadTasks.push(ensureHistoricalFillsLoaded(currentWallets));
+        }
+        if (loadTasks.length) {
+          Promise.allSettled(loadTasks).then(() => {
+            resizeVisiblePopupCharts();
+          });
+        }
+      }
       resizeVisiblePopupCharts();
     }
     notifyParentShellSection(nextSection);
