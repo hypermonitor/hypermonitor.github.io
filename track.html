@@ -241,7 +241,14 @@
       height: 100%;
       min-height: 100%;
       max-height: none;
-      overflow: hidden;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+    }
+
+    body.embed-shell .dashboard-sidebar .account-overview-card::-webkit-scrollbar {
+      width: 0;
+      height: 0;
     }
 
     body.embed-shell .dashboard-main > .card {
@@ -16813,63 +16820,202 @@
     return Math.round(Math.max(0, Math.min(1, ratio)) * 1000) / 10;
   }
 
-  function buildOverviewRadarSeries(metrics, tradeMetrics) {
-    const activityComposite =
-      tradeMetrics
-        ? ((Number(tradeMetrics.activeDaysRatio || 0) * 0.58) + (Math.min(Number(tradeMetrics.tradesPerDay || 0) / 12, 1) * 0.42))
-        : null;
-    const exposureRatio =
-      Number.isFinite(lastComputedTotalNotional) && Number.isFinite(latestLiveEquityValue) && Math.abs(latestLiveEquityValue) > 1e-9
-        ? Math.abs(lastComputedTotalNotional) / Math.abs(latestLiveEquityValue)
-        : null;
-    const holdingHours = Number.isFinite(tradeMetrics?.medianHoldingTime) ? Number(tradeMetrics.medianHoldingTime) / 3600000 : null;
-    const axes = [
-      {
-        label: "Win Rate",
-        score: normalizeRadarScore(tradeMetrics?.winRate, 0, 1),
-        text: Number.isFinite(tradeMetrics?.winRate) ? formatPercent(tradeMetrics.winRate) : "N/A",
-      },
-      {
-        label: "Activity",
-        score: normalizeRadarScore(activityComposite, 0, 1),
-        text: Number.isFinite(activityComposite) ? `${Math.round(activityComposite * 100)}%` : "N/A",
-      },
-      {
-        label: "Profit Quality",
-        score: tradeMetrics?.profitFactor === Infinity ? 100 : normalizeRadarScore(tradeMetrics?.profitFactor, 0, 3),
-        text:
-          tradeMetrics?.profitFactor === Infinity
-            ? "Inf"
-            : Number.isFinite(tradeMetrics?.profitFactor)
-              ? formatRatio(tradeMetrics.profitFactor, 2)
-              : "N/A",
-      },
-      {
-        label: "Risk Control",
-        score: normalizeRadarScore(exposureRatio, 0, 3.5, true),
-        text: Number.isFinite(exposureRatio) ? `${formatRatio(exposureRatio, 2)}x` : "N/A",
-      },
-      {
-        label: "Aggressiveness",
-        score: normalizeRadarScore(tradeMetrics?.aggressiveness, 0, 1),
-        text: Number.isFinite(tradeMetrics?.aggressiveness) ? formatPercent(tradeMetrics.aggressiveness) : "N/A",
-      },
-      {
-        label: "Holding Time",
-        score: Number.isFinite(holdingHours) ? normalizeRadarScore(Math.log1p(holdingHours), 0, Math.log1p(24 * 7)) : null,
-        text: Number.isFinite(tradeMetrics?.medianHoldingTime) ? formatDuration(tradeMetrics.medianHoldingTime) : "N/A",
-      },
-    ];
+  function averageRadarScores(scores, fallback = 50) {
+    const list = Array.isArray(scores) ? scores.filter((value) => Number.isFinite(value)) : [];
+    if (!list.length) return fallback;
+    const avg = list.reduce((sum, value) => sum + Number(value), 0) / list.length;
+    return Math.round(Math.max(0, Math.min(100, avg)) * 10) / 10;
+  }
 
-    if (metrics && Number.isFinite(metrics.skillPersistence)) {
-      axes.splice(2, 0, {
-        label: "Consistency",
-        score: normalizeRadarScore(metrics.skillPersistence, -1, 1),
-        text: formatRatio(metrics.skillPersistence, 2),
+  function formatRadarPercent(score) {
+    return formatPercent(Math.max(0, Math.min(100, Number(score) || 0)) / 100, 0);
+  }
+
+  function computeHoldingDisciplineScore(hours) {
+    const n = Number(hours);
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return normalizeRadarScore(Math.log1p(n), 0, Math.log1p(24 * 7));
+  }
+
+  function buildLiveOverviewSkillSnapshot(assetPositions = currentAssetPositions) {
+    const source = isTimelineActive()
+      ? computeTimelineAdjustedPositions(assetPositions)
+      : Array.isArray(assetPositions)
+        ? assetPositions
+        : [];
+
+    const notionalByAsset = new Map();
+    const ageHours = [];
+    const liqSafetyScores = [];
+    let positiveCount = 0;
+    let positionCount = 0;
+    let positiveNotional = 0;
+    let totalNotional = 0;
+    let totalMarginUsed = 0;
+
+    source.forEach((item) => {
+      const p = item?.position || {};
+      const size = Number(p.szi ?? 0);
+      if (!Number.isFinite(size) || size === 0) return;
+
+      const coin = String(p.coin || "").trim();
+      const entryPx = Number(p.entryPx ?? 0);
+      const snapshotValue = Number(p.positionValue ?? 0);
+      const contextPx = getMarkPriceForCoin(coin);
+      let markPx = Number.isFinite(contextPx) ? contextPx : undefined;
+      if ((!Number.isFinite(markPx) || Number.isNaN(markPx)) && Number.isFinite(snapshotValue)) {
+        markPx = Math.abs(snapshotValue) / Math.max(1e-9, Math.abs(size));
+      }
+
+      let positionValue = snapshotValue;
+      if (Number.isFinite(markPx) && size !== 0) {
+        positionValue = markPx * size;
+      } else if (Number.isFinite(entryPx) && size !== 0) {
+        positionValue = entryPx * size;
+      }
+
+      const absNotional = Math.abs(Number(positionValue));
+      if (!Number.isFinite(absNotional) || absNotional <= 0) return;
+
+      positionCount += 1;
+      totalNotional += absNotional;
+
+      const { base: assetBase } = splitDexCoin(coin);
+      const assetKey = assetBase || coin || "UNKNOWN";
+      notionalByAsset.set(assetKey, (notionalByAsset.get(assetKey) || 0) + absNotional);
+
+      let upnl = Number(p.unrealizedPnl ?? 0);
+      if (Number.isFinite(markPx) && Number.isFinite(entryPx) && size !== 0) {
+        upnl = (markPx - entryPx) * size;
+      }
+      if (Number.isFinite(upnl) && upnl >= 0) positiveCount += 1;
+      if (Number.isFinite(upnl) && upnl > 0) positiveNotional += absNotional;
+
+      const leverageValue = p.leverage?.value ?? p.leverage ?? p.lever ?? p.leverageValue;
+      const leverageNum = Number(leverageValue);
+      if (item?.marketType !== "spot" && Number.isFinite(leverageNum) && leverageNum > 0) {
+        totalMarginUsed += absNotional / leverageNum;
+      }
+
+      const wallet = item?.wallet || primaryWallet;
+      const ageMs = isTimelineActive()
+        ? computePositionAgeMsAtTime(coin, size, wallet, timelineAsOfMs)
+        : computePositionAgeMs(coin, size, wallet);
+      if (Number.isFinite(ageMs) && ageMs > 0) ageHours.push(ageMs / 3600000);
+
+      if (item?.marketType === "spot" || !Number.isFinite(markPx) || markPx <= 0) return;
+      const liqValue = Number(p.liqPx ?? p.liquidationPx ?? p.liquidationPrice ?? p.liqPrice);
+      if (!Number.isFinite(liqValue) || liqValue <= 0) return;
+      const distanceFrac = Math.abs(markPx - liqValue) / Math.max(1e-9, Math.abs(markPx));
+      if (Number.isFinite(distanceFrac)) {
+        liqSafetyScores.push(Math.max(0, Math.min(1, distanceFrac / 0.35)));
+      }
+    });
+
+    const assetCount = notionalByAsset.size;
+    let herfindahl = null;
+    if (totalNotional > 0 && assetCount > 0) {
+      herfindahl = 0;
+      notionalByAsset.forEach((value) => {
+        const share = value / totalNotional;
+        herfindahl += share * share;
       });
     }
 
-    return axes;
+    const sortedAgeHours = ageHours.slice().sort((a, b) => a - b);
+    const medianAgeHours = sortedAgeHours.length
+      ? sortedAgeHours[Math.floor(sortedAgeHours.length / 2)]
+      : null;
+
+    const exposureRatio =
+      Number.isFinite(lastComputedTotalNotional) && Number.isFinite(latestLiveEquityValue) && Math.abs(latestLiveEquityValue) > 1e-9
+        ? Math.abs(lastComputedTotalNotional) / Math.abs(latestLiveEquityValue)
+        : totalNotional > 0 && Number.isFinite(latestLiveEquityValue) && Math.abs(latestLiveEquityValue) > 1e-9
+          ? totalNotional / Math.abs(latestLiveEquityValue)
+          : null;
+    const marginUsedRatio =
+      totalMarginUsed > 0 && Number.isFinite(latestLiveEquityValue) && Math.abs(latestLiveEquityValue) > 1e-9
+        ? totalMarginUsed / Math.abs(latestLiveEquityValue)
+        : null;
+
+    return {
+      positionCount,
+      assetCount,
+      openPositiveShare: positionCount > 0 ? positiveCount / positionCount : null,
+      openPositiveNotionalShare: totalNotional > 0 ? positiveNotional / totalNotional : null,
+      diversification: Number.isFinite(herfindahl) ? Math.max(0, 1 - herfindahl) : null,
+      activityBase: positionCount > 0
+        ? Math.min(positionCount / 10, 1) * 0.62 + Math.min(assetCount / 6, 1) * 0.38
+        : null,
+      liqSafety: liqSafetyScores.length
+        ? liqSafetyScores.reduce((sum, value) => sum + value, 0) / liqSafetyScores.length
+        : null,
+      exposureRatio,
+      marginUsedRatio,
+      holdingScore: computeHoldingDisciplineScore(medianAgeHours),
+    };
+  }
+
+  function buildOverviewRadarSeries(metrics, tradeMetrics) {
+    const liveSnapshot = buildLiveOverviewSkillSnapshot();
+    const activityComposite = tradeMetrics
+      ? (Number(tradeMetrics.activeDaysRatio || 0) * 0.58) + (Math.min(Number(tradeMetrics.tradesPerDay || 0) / 12, 1) * 0.42)
+      : null;
+    const profitFactorScore = tradeMetrics?.profitFactor === Infinity
+      ? 100
+      : normalizeRadarScore(tradeMetrics?.profitFactor, 0.75, 3);
+    const returnScore = normalizeRadarScore(metrics?.returnPct, -0.15, 0.3);
+    const winRateScore = averageRadarScores([
+      normalizeRadarScore(tradeMetrics?.winRate, 0, 1),
+      normalizeRadarScore(liveSnapshot.openPositiveShare, 0, 1),
+    ]);
+    const activityScore = averageRadarScores([
+      normalizeRadarScore(activityComposite, 0, 1),
+      normalizeRadarScore(liveSnapshot.activityBase, 0, 1),
+    ]);
+    const qualityScore = averageRadarScores([
+      profitFactorScore,
+      returnScore,
+      normalizeRadarScore(liveSnapshot.openPositiveNotionalShare, 0, 1),
+    ]);
+    const consistencyScore = averageRadarScores([
+      normalizeRadarScore(metrics?.skillPersistence, -1, 1),
+      normalizeRadarScore(metrics?.pnlStability, 0, 2, true),
+      normalizeRadarScore(liveSnapshot.diversification, 0, 1),
+      normalizeRadarScore(tradeMetrics?.herfindahl, 0, 1, true),
+    ]);
+    const riskScore = averageRadarScores([
+      normalizeRadarScore(liveSnapshot.exposureRatio, 0.25, 3.5, true),
+      normalizeRadarScore(liveSnapshot.marginUsedRatio, 0.1, 1, true),
+      normalizeRadarScore(liveSnapshot.liqSafety, 0, 1),
+    ]);
+    const aggressivenessScore = averageRadarScores([
+      normalizeRadarScore(tradeMetrics?.aggressiveness, 0, 1),
+      normalizeRadarScore(Math.abs(Number(tradeMetrics?.sideBias ?? NaN)), 0, 1),
+      normalizeRadarScore(liveSnapshot.exposureRatio, 0.2, 3.5),
+    ]);
+    const holdingScore = averageRadarScores([
+      Number.isFinite(tradeMetrics?.medianHoldingTime)
+        ? computeHoldingDisciplineScore(Number(tradeMetrics.medianHoldingTime) / 3600000)
+        : null,
+      liveSnapshot.holdingScore,
+    ]);
+
+    const axes = [
+      { label: "Quality", score: qualityScore },
+      { label: "Consistency", score: consistencyScore },
+      { label: "Activity", score: activityScore },
+      { label: "Win Rate", score: winRateScore },
+      { label: "Risk Control", score: riskScore },
+      { label: "Aggressiveness", score: aggressivenessScore },
+      { label: "Holding Time", score: holdingScore },
+    ];
+
+    return axes.map((entry) => ({
+      ...entry,
+      score: Math.round(Math.max(0, Math.min(100, Number(entry.score) || 0)) * 10) / 10,
+      text: formatRadarPercent(entry.score),
+    }));
   }
 
   function renderOverviewRadar(rangeKey, metrics, tradeMetrics) {
@@ -19939,10 +20085,9 @@
     accountOverviewCardEl.addEventListener("mouseleave", () => {
       accountOverviewCardEl.classList.remove("is-scrolling");
     });
-    accountOverviewCardEl.addEventListener("wheel", handleAccountOverviewWheel, { passive: false, capture: true });
+    accountOverviewCardEl.addEventListener("wheel", handleShellGestureWheel, { passive: false, capture: true });
     accountOverviewCardEl.addEventListener("scroll", () => {
-      const target = getEmbedShellScrollTarget();
-      if (target) syncShellScroll(accountOverviewCardEl, target);
+      syncShellScrollGroup(accountOverviewCardEl);
     }, { passive: true });
     accountOverviewCardEl.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-action='copy-overview-wallet']");
@@ -19986,20 +20131,20 @@
   }
 
   if (dashboardMainEl) {
-    dashboardMainEl.addEventListener("wheel", handleShellSectionWheel, { passive: false });
+    dashboardMainEl.addEventListener("wheel", handleShellGestureWheel, { passive: false, capture: true });
     dashboardMainEl.addEventListener("scroll", () => {
-      syncShellScroll(dashboardMainEl, accountOverviewCardEl);
+      syncShellScrollGroup(dashboardMainEl);
     }, { passive: true });
   }
 
   [positionsSectionEl, performanceSectionEl, liveLayoutEl, historyLayoutEl].filter(Boolean).forEach((sectionEl) => {
     sectionEl.addEventListener("scroll", () => {
-      syncShellScroll(sectionEl, accountOverviewCardEl);
+      syncShellScrollGroup(sectionEl);
     }, { passive: true });
   });
 
   if (dashboardSidebarEl) {
-    dashboardSidebarEl.addEventListener("wheel", handleShellSidebarWheel, { passive: false, capture: true });
+    dashboardSidebarEl.addEventListener("wheel", handleShellGestureWheel, { passive: false, capture: true });
   }
 
   document.addEventListener("click", (e) => {
@@ -20202,6 +20347,9 @@
   let shellSectionWheelResetTimer = 0;
   let shellSectionLastSwitchAt = 0;
   let shellScrollSyncLock = false;
+  let shellWheelRaf = 0;
+  let shellWheelDelta = 0;
+  let shellWheelSourceEl = null;
 
   function handleShellSectionWheel(event) {
     if (!isEmbedShell) return;
@@ -20227,76 +20375,111 @@
     switchEmbedShellSectionBy(delta > 0 ? 1 : -1);
   }
 
-  function syncShellScroll(sourceEl, targetEl) {
-    if (!isEmbedShell || shellScrollSyncLock || !sourceEl || !targetEl) return;
+  function getEmbedShellRightScrollPeers() {
+    if (!isEmbedShell) return [];
+    const peers = [];
+    const current = getCurrentEmbedShellSection();
+    if (current === "performance") {
+      if (performanceSectionEl && !performanceSectionEl.classList.contains("hidden")) peers.push(performanceSectionEl);
+    } else if (current === "orders") {
+      if (liveLayoutEl && !liveLayoutEl.classList.contains("hidden")) peers.push(liveLayoutEl);
+      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden")) peers.push(historyLayoutEl);
+    } else {
+      if (positionsSectionEl && !positionsSectionEl.classList.contains("hidden")) peers.push(positionsSectionEl);
+    }
+    if (dashboardMainEl) peers.push(dashboardMainEl);
+    return Array.from(new Set(peers.filter(Boolean)));
+  }
+
+  function getShellScrollMax(el) {
+    if (!el) return 0;
+    return Math.max(0, Number(el.scrollHeight || 0) - Number(el.clientHeight || 0));
+  }
+
+  function resolveShellScrollSource(preferredEl) {
+    const preferred = preferredEl && getShellScrollMax(preferredEl) > 0 ? preferredEl : null;
+    if (preferred) return preferred;
+    const isLeft = preferredEl === accountOverviewCardEl || dashboardSidebarEl?.contains(preferredEl);
+    const rightCandidates = getEmbedShellRightScrollPeers();
+    const ordered = isLeft
+      ? [accountOverviewCardEl, ...rightCandidates]
+      : [...rightCandidates, accountOverviewCardEl];
+    return ordered.find((el) => getShellScrollMax(el) > 0) || null;
+  }
+
+  function getShellWheelSource(target) {
+    if (!isEmbedShell) return null;
+    if (target instanceof Element && dashboardSidebarEl?.contains(target)) return accountOverviewCardEl;
+    const current = getCurrentEmbedShellSection();
+    if (current === "performance") return performanceSectionEl || dashboardMainEl;
+    if (current === "orders") {
+      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden")) return historyLayoutEl;
+      if (liveLayoutEl && !liveLayoutEl.classList.contains("hidden")) return liveLayoutEl;
+      return dashboardMainEl;
+    }
+    if (positionsSectionEl && !positionsSectionEl.classList.contains("hidden")) return positionsSectionEl;
+    return dashboardMainEl || accountOverviewCardEl;
+  }
+
+  function flushShellWheelScroll() {
+    shellWheelRaf = 0;
+    const delta = shellWheelDelta;
+    const sourceEl = resolveShellScrollSource(shellWheelSourceEl);
+    shellWheelDelta = 0;
+    shellWheelSourceEl = null;
+    if (!sourceEl || Math.abs(delta) < 0.5) return;
+    const max = getShellScrollMax(sourceEl);
+    if (max <= 0) return;
+    const nextTop = Math.max(0, Math.min(max, sourceEl.scrollTop + delta));
+    if (Math.abs(nextTop - sourceEl.scrollTop) < 0.5) return;
+    sourceEl.scrollTop = nextTop;
+    syncShellScrollGroup(sourceEl);
+  }
+
+  function queueShellWheelScroll(sourceEl, deltaY) {
+    if (!Number.isFinite(deltaY) || Math.abs(deltaY) < 0.25) return;
+    shellWheelDelta += deltaY;
+    shellWheelSourceEl = sourceEl || shellWheelSourceEl;
+    if (shellWheelRaf) return;
+    shellWheelRaf = requestAnimationFrame(flushShellWheelScroll);
+  }
+
+  function syncShellScrollGroup(sourceEl) {
+    if (!isEmbedShell || !sourceEl || shellScrollSyncLock) return;
+    const targets = [accountOverviewCardEl, ...getEmbedShellRightScrollPeers()]
+      .filter((el, index, list) => el && el !== sourceEl && list.indexOf(el) === index);
+    if (!targets.length) return;
     const sourceMax = Math.max(0, sourceEl.scrollHeight - sourceEl.clientHeight);
-    const targetMax = Math.max(0, targetEl.scrollHeight - targetEl.clientHeight);
-    if (targetMax <= 0) return;
     const progress = sourceMax > 0 ? sourceEl.scrollTop / sourceMax : 0;
     shellScrollSyncLock = true;
-    targetEl.scrollTop = targetMax * progress;
+    targets.forEach((targetEl) => {
+      const targetMax = Math.max(0, targetEl.scrollHeight - targetEl.clientHeight);
+      if (targetMax > 0) {
+        targetEl.scrollTop = targetMax * progress;
+      }
+    });
     requestAnimationFrame(() => {
       shellScrollSyncLock = false;
     });
   }
 
-  function isElementScrollable(el) {
-    if (!el || typeof el.scrollHeight !== "number" || typeof el.clientHeight !== "number") return false;
-    if (el.classList?.contains("hidden")) return false;
-    const style = getComputedStyle(el);
-    if (style.display === "none" || style.visibility === "hidden") return false;
-    return el.scrollHeight - el.clientHeight > 2;
-  }
-
-  function getEmbedShellScrollTarget() {
-    if (!isEmbedShell) return null;
-    const current = getCurrentEmbedShellSection();
-    const candidates = [];
-    if (current === "performance") {
-      candidates.push(performanceSectionEl);
-    } else if (current === "orders") {
-      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden")) candidates.push(historyLayoutEl);
-      if (liveLayoutEl && !liveLayoutEl.classList.contains("hidden")) candidates.push(liveLayoutEl);
-    } else {
-      candidates.push(positionsSectionEl);
-    }
-    candidates.push(dashboardMainEl, document.scrollingElement);
-    return candidates.find((el) => isElementScrollable(el)) || null;
-  }
-
-  function scrollEmbedShellMainBy(deltaY) {
-    if (!isEmbedShell || Math.abs(deltaY) < 1) return false;
-    const target = getEmbedShellScrollTarget();
-    if (!target) return false;
-    const max = Math.max(0, target.scrollHeight - target.clientHeight);
-    if (max <= 0) return false;
-    const nextTop = Math.max(0, Math.min(max, target.scrollTop + deltaY));
-    if (Math.abs(nextTop - target.scrollTop) < 0.5) return false;
-    target.scrollTop = nextTop;
-    syncShellScroll(target, accountOverviewCardEl);
-    return true;
-  }
-
-  function handleAccountOverviewWheel(event) {
+  function handleShellGestureWheel(event) {
     if (!isEmbedShell) return;
+    if (event.defaultPrevented) return;
     if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) >= 14) {
       handleShellSectionWheel(event);
       return;
     }
-    if (scrollEmbedShellMainBy(event.deltaY)) {
-      event.preventDefault();
-    }
-  }
-
-  function handleShellSidebarWheel(event) {
-    if (!isEmbedShell) return;
-    if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) >= 14) {
-      handleShellSectionWheel(event);
-      return;
-    }
-    if (scrollEmbedShellMainBy(event.deltaY)) {
-      event.preventDefault();
-    }
+    const deltaY = event.deltaMode === 1
+      ? event.deltaY * 16
+      : event.deltaMode === 2
+        ? event.deltaY * window.innerHeight
+        : event.deltaY;
+    if (!Number.isFinite(deltaY) || Math.abs(deltaY) < 0.8) return;
+    const sourceEl = getShellWheelSource(event.target);
+    if (!sourceEl) return;
+    event.preventDefault();
+    queueShellWheelScroll(sourceEl, deltaY);
   }
 
   function shouldPreloadPerformanceSection() {

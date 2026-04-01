@@ -982,6 +982,61 @@
             transform: translateX(0);
         }
 
+        .chart-live-return {
+            position: absolute;
+            left: 54px;
+            bottom: 10px;
+            z-index: 7;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 30px;
+            padding: 0 10px;
+            border: 1px solid rgba(72, 84, 101, 0.38);
+            border-radius: 999px;
+            background: rgba(12, 16, 22, 0.9);
+            color: var(--text);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+            transition: opacity 0.18s ease, transform 0.22s ease, border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+        }
+
+        .chart-live-return.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .chart-live-return:hover,
+        .chart-live-return:focus-visible {
+            border-color: rgba(148, 163, 184, 0.48);
+            color: var(--text);
+            outline: none;
+        }
+
+        .chart-live-return svg {
+            width: 13px;
+            height: 13px;
+            display: block;
+        }
+
+        .chart-live-return.secondary {
+            left: 10px;
+        }
+
+        html.light .chart-live-return {
+            border-color: rgba(148, 163, 184, 0.26);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+        }
+
         .chart-drawing-divider {
             width: calc(100% - 8px);
             height: 1px;
@@ -3039,6 +3094,13 @@
                                         <path d="M5.25 3.5L9.75 8L5.25 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
                                     </svg>
                                 </button>
+                                <button id="chart-live-return" class="chart-live-return" type="button" aria-label="Go to current time" title="Go to current time">
+                                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                                        <path d="M3 8h7.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+                                        <path d="M7.9 4.6L11.25 8l-3.35 3.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                    <span>Current</span>
+                                </button>
                                 <div id="chart-drawing-selection" class="chart-drawing-selection" aria-hidden="true">
                                     <button id="chart-drawing-delete-btn" class="chart-drawing-btn" type="button" title="Delete selected drawing" aria-label="Delete selected drawing">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 5.5H14M6 5.5V13.25M9 5.5V13.25M12 5.5V13.25M6.5 3.5H11.5L12.25 5.5H5.75L6.5 3.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -3165,6 +3227,13 @@
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 5.5H14M6 5.5V13.25M9 5.5V13.25M12 5.5V13.25M6.5 3.5H11.5L12.25 5.5H5.75L6.5 3.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     </button>
                                 </div>
+                                <button id="chart-live-return-2" class="chart-live-return secondary" type="button" aria-label="Go to current time" title="Go to current time">
+                                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                                        <path d="M3 8h7.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+                                        <path d="M7.9 4.6L11.25 8l-3.35 3.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                    <span>Current</span>
+                                </button>
                                 <div class="chart-watermark" aria-hidden="true">
                                     <img src="images/logo.png" alt="">
                                     <span>HYPERMONITOR</span>
@@ -3990,6 +4059,8 @@
         const chartDrawingSelection2 = $('chart-drawing-selection-2');
         const chartDrawingDeleteBtn1 = $('chart-drawing-delete-btn');
         const chartDrawingDeleteBtn2 = $('chart-drawing-delete-btn-2');
+        const chartLiveReturnBtn1 = $('chart-live-return');
+        const chartLiveReturnBtn2 = $('chart-live-return-2');
         const chartLowerPane1 = $('chart-lower-pane');
         const chartLowerPane2 = $('chart-lower-pane-2');
         const chartLowerSplitter1 = $('lower-pane-splitter');
@@ -4033,6 +4104,8 @@
             2: { tool: 'cursor', drawings: [], draft: null, nextId: 1, pointerId: null, selectedId: null }
         };
         const drawingFrameState = { 1: 0, 2: 0 };
+        const returnToLiveFrameState = { 1: 0, 2: 0 };
+        const returnToLiveState = { 1: false, 2: false };
         const chartMaxLabel1 = $('chart-max-label');
         const chartMaxLabel2 = $('chart-max-label-2');
         const chartMinLabel1 = $('chart-min-label');
@@ -4152,6 +4225,10 @@
             return target === 2
                 ? { wrap: chartWrap2, pane: chartLowerPane2, splitter: chartLowerSplitter2, band: chartRsiBand2, restore: lowerPaneRestore2 }
                 : { wrap: chartWrap, pane: chartLowerPane1, splitter: chartLowerSplitter1, band: chartRsiBand1, restore: lowerPaneRestore1 };
+        }
+
+        function getReturnToLiveButton(target) {
+            return target === 2 ? chartLiveReturnBtn2 : chartLiveReturnBtn1;
         }
 
         function clampLowerPaneHeight(nextHeight) {
@@ -5376,8 +5453,77 @@
             requestAnimationFrame(() => {
                 paneSyncState[target] = false;
                 scheduleVisibleExtremaUpdate(target);
+                scheduleReturnToLiveUpdate(target);
                 scheduleDrawingRender(target);
             });
+        }
+
+        function shouldShowReturnToLive(target) {
+            const bundle = getSeriesBundle(target);
+            const data = getSortedCandleData(target);
+            if (!bundle?.chart || data.length < 2) return false;
+            const range = bundle.chart.timeScale().getVisibleLogicalRange?.();
+            if (!range || !Number.isFinite(range.to) || !Number.isFinite(range.from)) return false;
+            const lastIndex = data.length - 1;
+            const span = Math.max(1, range.to - range.from);
+            const barsAway = lastIndex - Number(range.to);
+            return barsAway > Math.max(6, span * 0.08);
+        }
+
+        function updateReturnToLiveButton(target) {
+            const button = getReturnToLiveButton(target);
+            if (!button) return;
+            const visible = shouldShowReturnToLive(target) && !returnToLiveFrameState[target];
+            returnToLiveState[target] = visible;
+            button.classList.toggle('is-visible', visible);
+            button.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        }
+
+        function scheduleReturnToLiveUpdate(target) {
+            requestAnimationFrame(() => updateReturnToLiveButton(target));
+        }
+
+        function animateReturnToLive(target) {
+            const bundle = getSeriesBundle(target);
+            const data = getSortedCandleData(target);
+            if (!bundle?.chart || data.length < 2) return;
+            const currentRange = bundle.chart.timeScale().getVisibleLogicalRange?.();
+            const lastIndex = data.length - 1;
+            if (!currentRange || !Number.isFinite(currentRange.from) || !Number.isFinite(currentRange.to)) {
+                applyDefaultZoom(bundle.chart, data.length, S.tf);
+                scheduleReturnToLiveUpdate(target);
+                return;
+            }
+            const span = Math.max(8, currentRange.to - currentRange.from);
+            const rightPad = Math.max(3, Math.round(span * 0.06));
+            const targetTo = lastIndex + rightPad;
+            const targetFrom = targetTo - span;
+            const startFrom = Number(currentRange.from);
+            const startTo = Number(currentRange.to);
+            if (returnToLiveFrameState[target]) cancelAnimationFrame(returnToLiveFrameState[target]);
+            const startAt = performance.now();
+            const duration = 420;
+            const step = (now) => {
+                const t = Math.max(0, Math.min(1, (now - startAt) / duration));
+                const eased = 1 - Math.pow(1 - t, 3);
+                try {
+                    bundle.chart.timeScale().setVisibleLogicalRange({
+                        from: startFrom + ((targetFrom - startFrom) * eased),
+                        to: startTo + ((targetTo - startTo) * eased)
+                    });
+                } catch (_) {}
+                if (t < 1) {
+                    returnToLiveFrameState[target] = requestAnimationFrame(step);
+                } else {
+                    returnToLiveFrameState[target] = 0;
+                    try {
+                        bundle.chart.timeScale().setVisibleLogicalRange({ from: targetFrom, to: targetTo });
+                    } catch (_) {}
+                    scheduleReturnToLiveUpdate(target);
+                }
+            };
+            returnToLiveFrameState[target] = requestAnimationFrame(step);
+            scheduleReturnToLiveUpdate(target);
         }
 
         function wirePaneCharts(target, mainChartInstance, lowerChartInstance) {
@@ -5385,12 +5531,14 @@
                 if (range && range.from < 10) loadOlderCandles(target);
                 syncPaneRange(target, mainChartInstance, lowerChartInstance, range);
                 scheduleVisibleExtremaUpdate(target);
+                scheduleReturnToLiveUpdate(target);
                 scheduleDrawingRender(target);
             });
             lowerChartInstance.timeScale().subscribeVisibleLogicalRangeChange(range => {
                 if (range && range.from < 10) loadOlderCandles(target);
                 syncPaneRange(target, lowerChartInstance, mainChartInstance, range);
                 scheduleVisibleExtremaUpdate(target);
+                scheduleReturnToLiveUpdate(target);
                 scheduleDrawingRender(target);
             });
         }
@@ -6474,6 +6622,7 @@
             syncChartStudyVisibility(target);
             syncStudyLegend(target);
             scheduleVisibleExtremaUpdate(target);
+            scheduleReturnToLiveUpdate(target);
             scheduleRsiBandUpdate(target);
         }
 
@@ -6659,6 +6808,7 @@
                     });
                     syncStudyLegend(1, last.time);
                 }
+                scheduleReturnToLiveUpdate(1);
                 scheduleDrawingRender(1);
             } catch(e) {} finally {
                 setChartLoading(1, false);
@@ -6696,6 +6846,7 @@
                     });
                     syncStudyLegend(2, last.time);
                 }
+                scheduleReturnToLiveUpdate(2);
                 scheduleDrawingRender(2);
             } catch(e) {} finally {
                 setChartLoading(2, false);
@@ -6725,6 +6876,7 @@
                     if (targetChart === 1) oldestTs = cvArr[0].time; else oldestTs2 = cvArr[0].time;
                     seriesC.setData(cvArr); seriesV.setData([...mapVL.values()].sort((a,b)=>a.time-b.time));
                     syncDerivedSeries(targetChart);
+                    scheduleReturnToLiveUpdate(targetChart);
                     scheduleDrawingRender(targetChart);
                 }
             } catch(e) {}
@@ -7602,6 +7754,12 @@
         updateDrawingColorUi();
         bindDrawingToolbarScroll(chartDrawingToolbar1);
         bindDrawingToolbarScroll(chartDrawingToolbar2);
+        if (chartLiveReturnBtn1) {
+            chartLiveReturnBtn1.addEventListener('click', () => animateReturnToLive(1));
+        }
+        if (chartLiveReturnBtn2) {
+            chartLiveReturnBtn2.addEventListener('click', () => animateReturnToLive(2));
+        }
 
         document.querySelectorAll('.chart-drawing-btn[data-draw-tool]').forEach(button => {
             button.addEventListener('click', event => {
