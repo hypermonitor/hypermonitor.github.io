@@ -984,7 +984,7 @@
 
         .chart-live-return {
             position: absolute;
-            left: 54px;
+            left: 70px;
             bottom: 10px;
             z-index: 7;
             display: inline-flex;
@@ -1079,8 +1079,12 @@
         }
 
         .chart-drawing-shape-group.is-selected .chart-drawing-shape {
-            stroke-width: 2.15;
+            stroke-width: 2.35;
             filter: drop-shadow(0 0 6px rgba(15, 23, 42, 0.34));
+        }
+
+        .chart-drawing-shape-group.is-selected .chart-drawing-shape.arrow {
+            stroke-width: 4.8;
         }
 
         .chart-drawing-shape-group.is-selected .chart-drawing-label {
@@ -1102,6 +1106,7 @@
 
         .chart-drawing-shape.arrow {
             stroke: #60a5fa;
+            stroke-width: 4.2;
         }
 
         .chart-drawing-shape.hline {
@@ -2257,6 +2262,59 @@
             background: var(--surface2) !important;
         }
 
+        #ob-hover-card {
+            position: absolute;
+            min-width: 154px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(245, 247, 250, 0.96);
+            color: #111827;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.24);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            pointer-events: none;
+            opacity: 0;
+            transform: translate3d(0, 4px, 0);
+            transition: opacity 120ms ease, transform 120ms ease;
+            z-index: 24;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        #ob-hover-card.is-visible {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+
+        .ob-hover-row {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: baseline;
+        }
+
+        .ob-hover-row + .ob-hover-row {
+            margin-top: 3px;
+        }
+
+        .ob-hover-key {
+            color: #4b5563;
+            white-space: nowrap;
+        }
+
+        .ob-hover-value {
+            color: #111827;
+            font-weight: 600;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        html.light #ob-hover-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(148, 163, 184, 0.34);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+        }
+
         .ob-row.is-interactive:focus-visible {
             outline: none;
             background: rgba(255, 255, 255, 0.02) !important;
@@ -3066,7 +3124,7 @@
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 13.5L13.75 4.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="3" cy="13.5" r="1.5" fill="currentColor"></circle><circle cx="13.75" cy="4.25" r="1.5" fill="currentColor"></circle></svg>
                                     </button>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="arrow" data-draw-target="1" title="Right arrow" aria-label="Right arrow">
-                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9H13.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M10 5.6L14 9L10 12.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9H13.2" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round"></path><path d="M10 5.2L14.6 9L10 12.8" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     </button>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="rect" data-draw-target="1" title="Rectangle" aria-label="Rectangle">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3.25" y="4" width="11.5" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect></svg>
@@ -3202,7 +3260,7 @@
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 13.5L13.75 4.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="3" cy="13.5" r="1.5" fill="currentColor"></circle><circle cx="13.75" cy="4.25" r="1.5" fill="currentColor"></circle></svg>
                                     </button>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="arrow" data-draw-target="2" title="Right arrow" aria-label="Right arrow">
-                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9H13.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M10 5.6L14 9L10 12.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9H13.2" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round"></path><path d="M10 5.2L14.6 9L10 12.8" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     </button>
                                     <button class="chart-drawing-btn" type="button" data-draw-tool="rect" data-draw-target="2" title="Rectangle" aria-label="Rectangle">
                                         <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3.25" y="4" width="11.5" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect></svg>
@@ -3392,6 +3450,7 @@
                                 <span class="lbl">S</span>
                             </div>
                         </div>
+                        <div id="ob-hover-card" aria-hidden="true"></div>
                         <div id="ob-detail-sheet" aria-hidden="true">
                             <div id="ob-detail-head">
                                 <button id="ob-detail-back" type="button" aria-label="Back to order book">‹</button>
@@ -3857,7 +3916,7 @@
         const S = {
             coin: parseCoin(), tf: '15m', markPx: 0, aggTick: 0,
             obView: 'both', aggTicks: [],
-            markets: [], tradeBuf: [], ws: null,
+            markets: [], tradeBuf: [], ws: null, wsSeq: 0,
             priceMode: initialChartPrefs.priceMode,
             lowerStudy: initialChartPrefs.lowerStudy,
             showMAs: initialChartPrefs.showMAs,
@@ -4011,6 +4070,7 @@
         const obRatioAsk = $('ob-ratio-ask');
         const obRatioFillBid = $('ob-ratio-fill-bid');
         const obRatioFillAsk = $('ob-ratio-fill-ask');
+        const obHoverCard = $('ob-hover-card');
         const tradesList = $('trades-list');
         const walletModalBackdrop = $('wallet-modal-backdrop');
         const walletModalFrame = $('wallet-modal-frame');
@@ -4762,6 +4822,35 @@
             return v.toFixed(2);
         }
 
+        function fmtExactMoney(v, decimals = 2) {
+            const n = Number(v);
+            if (!Number.isFinite(n)) return '–';
+            return n.toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function fmtBaseSize(v) {
+            const n = Number(v);
+            if (!Number.isFinite(n)) return '–';
+            const abs = Math.abs(n);
+            const decimals = abs >= 1000 ? 3 : abs >= 100 ? 4 : abs >= 1 ? 5 : 6;
+            return n.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: decimals
+            });
+        }
+
         function formatTitlePrice(value) {
             const price = Number(value);
             if (!Number.isFinite(price) || price <= 0) return '';
@@ -4983,6 +5072,41 @@
                 obDetailSheet.setAttribute('aria-hidden', 'true');
             }
             if (obDetailList) obDetailList.replaceChildren();
+            hideOrderBookHoverCard();
+        }
+
+        function hideOrderBookHoverCard() {
+            if (!obHoverCard) return;
+            obHoverCard.classList.remove('is-visible');
+            obHoverCard.setAttribute('aria-hidden', 'true');
+        }
+
+        function showOrderBookHoverCard(level, event) {
+            if (!obHoverCard || !level || !Number.isFinite(level.px) || !Number.isFinite(level.sz)) {
+                hideOrderBookHoverCard();
+                return;
+            }
+            const coinLabel = getSelectedCoinLabel(S.coin);
+            const totalSize = Number(level.cumSz || level.sz);
+            const totalValue = Number(level.cum || (Number(level.px) * Number(level.sz)));
+            const avgPrice = Number.isFinite(totalValue) && totalSize > 0 ? totalValue / totalSize : Number(level.px);
+            obHoverCard.innerHTML =
+                "<div class='ob-hover-row'><span class='ob-hover-key'>Avg.Price:</span><span class='ob-hover-value'>≈ $" + escapeHtml(fmt(avgPrice, pxDec(avgPrice || level.px))) + "</span></div>" +
+                "<div class='ob-hover-row'><span class='ob-hover-key'>Sum " + escapeHtml(coinLabel) + ":</span><span class='ob-hover-value'>" + escapeHtml(fmtBaseSize(totalSize)) + "</span></div>" +
+                "<div class='ob-hover-row'><span class='ob-hover-key'>Sum USD:</span><span class='ob-hover-value'>" + escapeHtml(fmtExactMoney(totalValue, 2)) + "</span></div>";
+            const panelRect = obTab?.getBoundingClientRect();
+            if (!panelRect) {
+                hideOrderBookHoverCard();
+                return;
+            }
+            const cardWidth = obHoverCard.offsetWidth || 164;
+            const cardHeight = obHoverCard.offsetHeight || 74;
+            const left = Math.max(10, Math.min(event.clientX - panelRect.left + 14, panelRect.width - cardWidth - 10));
+            const top = Math.max(10, Math.min(event.clientY - panelRect.top - cardHeight / 2, panelRect.height - cardHeight - 10));
+            obHoverCard.style.left = `${left}px`;
+            obHoverCard.style.top = `${top}px`;
+            obHoverCard.classList.add('is-visible');
+            obHoverCard.setAttribute('aria-hidden', 'false');
         }
 
         function renderOrderBookDetail() {
@@ -5048,6 +5172,7 @@
 
         function openOrderBookDetail(side, level) {
             if (!side || !level || !Number.isFinite(level.px)) return;
+            hideOrderBookHoverCard();
             activeBookDetail = {
                 side,
                 tick: S.aggTick || 0,
@@ -5073,6 +5198,20 @@
                     event.preventDefault();
                     openOrderBookDetail(side, row._bookLevel);
                 }
+            });
+
+            row.addEventListener('mouseenter', event => {
+                if (!row._bookLevel || activeBookDetail) return;
+                showOrderBookHoverCard(row._bookLevel, event);
+            });
+
+            row.addEventListener('mousemove', event => {
+                if (!row._bookLevel || activeBookDetail) return;
+                showOrderBookHoverCard(row._bookLevel, event);
+            });
+
+            row.addEventListener('mouseleave', () => {
+                hideOrderBookHoverCard();
             });
 
             const bar = document.createElement('div');
@@ -5115,6 +5254,7 @@
                 rowRef.c1.textContent = '';
                 rowRef.c2.textContent = '';
                 rowRef.c3.textContent = '';
+                if (obHoverCard?.classList.contains('is-visible')) hideOrderBookHoverCard();
                 return;
             }
             const hasLevel = Boolean(
@@ -5128,6 +5268,7 @@
             rowRef.row.tabIndex = hasLevel ? 0 : -1;
             rowRef.row.style.visibility = hasLevel ? 'visible' : 'hidden';
             rowRef.row.setAttribute('aria-hidden', hasLevel ? 'false' : 'true');
+            if (!hasLevel && obHoverCard?.classList.contains('is-visible')) hideOrderBookHoverCard();
             rowRef.bar.style.width = hasLevel && maxT > 0 ? `${(level.cum / maxT * 100).toFixed(1)}%` : '0%';
             rowRef.c1.textContent = hasLevel ? fmt(level.px, decimals) : '';
             rowRef.c2.textContent = hasLevel ? fmtK(level.sz) : '';
@@ -5550,10 +5691,12 @@
         let candleMap = new Map(), volMap = new Map();
         let oldestTs = null, isLoadingHistory = false;
         let studyCache1 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
+        let candleFetchSeq1 = 0;
 
         let candleMap2 = new Map(), volMap2 = new Map();
         let oldestTs2 = null, isLoadingHistory2 = false;
         let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
+        let candleFetchSeq2 = 0;
 
         function getSeriesBundle(target) {
             return target === 2 ? chartSeries2 : chartSeries1;
@@ -5968,8 +6111,8 @@
 
         function renderArrowDrawing(layer, start, end, isDraft) {
             const angle = Math.atan2(end.y - start.y, end.x - start.x);
-            const length = 7;
-            const wing = 4;
+            const length = 14;
+            const wing = 8;
             const leftX = end.x - Math.cos(angle) * length + Math.sin(angle) * wing;
             const leftY = end.y - Math.sin(angle) * length - Math.cos(angle) * wing;
             const rightX = end.x - Math.cos(angle) * length - Math.sin(angle) * wing;
@@ -5980,11 +6123,13 @@
                 x2: end.x,
                 y2: end.y,
                 class: `chart-drawing-shape arrow${isDraft ? ' is-draft' : ''}`,
+                'stroke-width': '4.2',
                 'stroke-opacity': isDraft ? '0.72' : '1'
             }));
             layer.appendChild(createSvgNode('polyline', {
                 points: `${leftX},${leftY} ${end.x},${end.y} ${rightX},${rightY}`,
                 class: `chart-drawing-shape arrow${isDraft ? ' is-draft' : ''}`,
+                'stroke-width': '4.2',
                 'stroke-opacity': isDraft ? '0.72' : '1'
             }));
         }
@@ -6783,12 +6928,16 @@
         }
 
         async function fetchCandles() {
+            const requestSeq = ++candleFetchSeq1;
+            const requestCoin = S.coin;
+            const requestTf = S.tf;
             const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
             const showLoading = candleMap.size === 0;
             if (showLoading) setChartLoading(1, true);
             try {
                 const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin, interval: S.tf, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
+                if (requestSeq !== candleFetchSeq1 || requestCoin !== S.coin || requestTf !== S.tf) return;
                 candleMap.clear(); volMap.clear();
                 cv.forEach(c => candleMap.set(c.time, c)); vl.forEach(v => volMap.set(v.time, v));
                 const cvArr = [...candleMap.values()].sort((a,b)=>a.time-b.time);
@@ -6817,6 +6966,9 @@
         
         async function fetchCandles2() {
             if (!S.chart2Active) return;
+            const requestSeq = ++candleFetchSeq2;
+            const requestCoin = S.coin2;
+            const requestTf = S.tf;
             const coinLabel = getSelectedCoinLabel(S.coin2);
             $(`legend-name-2`).textContent = `${coinLabel}/USD • ${S.tf}`;
             syncSelectedCoinUi(2);
@@ -6827,6 +6979,7 @@
             try {
                 const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin2, interval: S.tf, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
+                if (requestSeq !== candleFetchSeq2 || requestCoin !== S.coin2 || requestTf !== S.tf) return;
                 candleMap2.clear(); volMap2.clear();
                 cv.forEach(c => candleMap2.set(c.time, c)); vl.forEach(v => volMap2.set(v.time, v));
                 const cvArr = [...candleMap2.values()].sort((a,b)=>a.time-b.time);
@@ -7082,16 +7235,19 @@
             const aggAsks = aggregateLevels(asks, tick, 'ask').slice(0, rowCount);
             const aggBids = aggregateLevels(bids, tick, 'bid').slice(0, rowCount);
             const view = getOrderBookView();
-            let aLvl = [], bLvl = [], cum = 0;
+            let aLvl = [], bLvl = [], cum = 0, cumSz = 0;
             for (const a of aggAsks) {
+                cumSz += a.sz;
                 cum += a.px * a.sz;
-                aLvl.push({ ...a, cum });
+                aLvl.push({ ...a, cum, cumSz });
             }
             const askMax = cum;
             cum = 0;
+            cumSz = 0;
             for (const b of aggBids) {
+                cumSz += b.sz;
                 cum += b.px * b.sz;
-                bLvl.push({ ...b, cum });
+                bLvl.push({ ...b, cum, cumSz });
             }
             const bidMax = cum;
             const maxT = view === 'asks' ? askMax : view === 'bids' ? bidMax : Math.max(askMax, bidMax);
@@ -7304,6 +7460,55 @@
             tradesList.replaceChildren();
         }
 
+        function resetChartLegend(target) {
+            const refs = getLegendRefs(target);
+            if (!refs) return;
+            refs.open.textContent = '–';
+            refs.high.textContent = '–';
+            refs.low.textContent = '–';
+            refs.close.textContent = '–';
+            refs.change.textContent = '–';
+            refs.range.textContent = '–';
+            refs.open.style.color = '';
+            refs.high.style.color = '';
+            refs.low.style.color = '';
+            refs.close.style.color = '';
+            refs.change.style.color = '';
+            refs.range.style.color = '';
+            if (refs.ma7) refs.ma7.textContent = '–';
+            if (refs.ma25) refs.ma25.textContent = '–';
+            if (refs.ma99) refs.ma99.textContent = '–';
+            if (refs.lowerValue) refs.lowerValue.textContent = '–';
+        }
+
+        function resetPrimaryChartForCoinChange() {
+            candleFetchSeq1 += 1;
+            candleMap.clear();
+            volMap.clear();
+            oldestTs = null;
+            candles.setData([]);
+            lineSeries.setData([]);
+            volSeries.setData([]);
+            syncDerivedSeries(1);
+            resetChartLegend(1);
+            scheduleVisibleExtremaUpdate(1);
+            scheduleReturnToLiveUpdate(1);
+        }
+
+        function resetSecondaryChartForCoinChange() {
+            candleFetchSeq2 += 1;
+            candleMap2.clear();
+            volMap2.clear();
+            oldestTs2 = null;
+            candles2.setData([]);
+            lineSeries2.setData([]);
+            volSeries2.setData([]);
+            syncDerivedSeries(2);
+            resetChartLegend(2);
+            scheduleVisibleExtremaUpdate(2);
+            scheduleReturnToLiveUpdate(2);
+        }
+
         function ingestTrades(rawTrades) {
             const nextTrades = [];
             for (const rawTrade of Array.isArray(rawTrades) ? rawTrades : []) {
@@ -7341,10 +7546,29 @@
         // ── WebSocket ──────────────────────────────────────────────
         let tradeKeys = new Set();
 
+        function disconnectWs() {
+            S.wsSeq += 1;
+            const socket = S.ws;
+            S.ws = null;
+            if (!socket) return;
+            try {
+                socket.onopen = null;
+                socket.onmessage = null;
+                socket.onclose = null;
+                socket.onerror = null;
+                socket.close();
+            } catch (_) {}
+        }
+
         function connectWs() {
-            if (S.ws) { try { S.ws.close(); } catch (_) { } }
-            S.ws = new WebSocket(WS);
-            S.ws.onopen = () => {
+            if (S.ws) {
+                try { S.ws.close(); } catch (_) {}
+            }
+            const wsSeq = ++S.wsSeq;
+            const socket = new WebSocket(WS);
+            S.ws = socket;
+            socket.onopen = () => {
+                if (wsSeq !== S.wsSeq || S.ws !== socket) return;
                 const subs = IS_COMPACT
                     ? [
                         { type: 'candle', coin: S.coin, interval: S.tf }
@@ -7357,9 +7581,10 @@
                 if (!IS_COMPACT && S.chart2Active && S.coin !== S.coin2) {
                     subs.push({ type: 'candle', coin: S.coin2, interval: S.tf });
                 }
-                subs.forEach(sub => S.ws.send(JSON.stringify({ method: 'subscribe', subscription: sub })));
+                subs.forEach(sub => socket.send(JSON.stringify({ method: 'subscribe', subscription: sub })));
             };
-            S.ws.onmessage = ev => {
+            socket.onmessage = ev => {
+                if (wsSeq !== S.wsSeq || S.ws !== socket) return;
                 try {
                     const msg = JSON.parse(ev.data), ch = msg.channel, d = msg.data;
                     if (ch === 'l2Book') {
@@ -7415,7 +7640,13 @@
                     }
                 } catch (_) { }
             };
-            S.ws.onclose = () => { setTimeout(connectWs, 2000); };
+            socket.onclose = () => {
+                if (wsSeq !== S.wsSeq || S.ws !== socket) return;
+                setTimeout(() => {
+                    if (wsSeq !== S.wsSeq || S.ws !== socket) return;
+                    connectWs();
+                }, 2000);
+            };
         }
 
         // ── Coin Picker Maps ───────────────────────────────────────
@@ -7687,11 +7918,14 @@
                 return false;
             }
             S.coin = selected;
+            disconnectWs();
             clearDrawings(1);
             resetTrades();
+            resetPrimaryChartForCoinChange();
             if (options.closeDropdown !== false) dropdown?.classList.remove('open');
             syncPrimaryCoinUrl();
             syncSelectedCoinUi(1);
+            setChartLoading(1, true);
             if (options.notifyParent !== false) {
                 notifyParentCoinChange();
             }
@@ -7708,10 +7942,13 @@
                     closeDropdown: true
                 });
             } else {
+                disconnectWs();
                 S.coin2 = selected;
                 clearDrawings(2);
+                resetSecondaryChartForCoinChange();
                 $('coin-dropdown-2').style.display = 'none';
                 syncSelectedCoinUi(2);
+                setChartLoading(2, true);
                 fetchCandles2();
                 connectWs();
             }

@@ -2777,17 +2777,17 @@
 
     .chart-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       align-items: stretch;
-      gap: 0.8rem;
-      margin-top: 0.5rem;
+      gap: 0.65rem;
+      margin-top: 0.45rem;
     }
 
     .chart-card {
       border-radius: 0.75rem;
       border: 1px solid var(--border);
       background: var(--panel-strong);
-      padding: 0.72rem 0.8rem 0.8rem;
+      padding: 0.62rem 0.68rem 0.7rem;
       position: relative;
       overflow: hidden;
       display: flex;
@@ -2988,12 +2988,12 @@
       position: relative;
       flex: 0 0 auto;
       width: 100%;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 16 / 10;
       min-height: 0;
     }
 
     .exposure-chart-wrap {
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 16 / 10;
       min-height: 0;
     }
 
@@ -3009,7 +3009,13 @@
       flex: 1 1 auto;
       min-height: 0;
       max-height: none;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 16 / 10;
+    }
+
+    @media (max-width: 1520px) {
+      .chart-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 1180px) {
@@ -7644,6 +7650,8 @@
   let historicalOrdersLoaded = false;
   const historicalFills = [];
   let historicalFillsLoaded = false;
+  let historicalClosedPnlCacheKey = "";
+  let historicalClosedPnlCache = null;
 
   let infoClient = null;
   let subsClient = null;
@@ -13815,6 +13823,96 @@
     });
   }
 
+  function resetHistoricalClosedPnlCache() {
+    historicalClosedPnlCacheKey = "";
+    historicalClosedPnlCache = null;
+  }
+
+  function getHistoricalClosedPnlCacheKey() {
+    if (!historicalFills.length) return "0";
+    const newest = historicalFills[0];
+    const oldest = historicalFills[historicalFills.length - 1];
+    return [
+      historicalFills.length,
+      Number(newest?.time ?? newest?.timestamp ?? 0),
+      Number(oldest?.time ?? oldest?.timestamp ?? 0),
+    ].join("|");
+  }
+
+  function getHistoricalClosedPnlMap() {
+    const cacheKey = getHistoricalClosedPnlCacheKey();
+    if (historicalClosedPnlCache && historicalClosedPnlCacheKey === cacheKey) {
+      return historicalClosedPnlCache;
+    }
+
+    const closedPnlMap = new Map();
+    const sortedForPnl = [...historicalFills].sort(
+      (a, b) => Number(a.time ?? a.timestamp ?? 0) - Number(b.time ?? b.timestamp ?? 0)
+    );
+    const positionByCoin = new Map();
+
+    sortedForPnl.forEach((fill) => {
+      const { sideSign, sizeAbs } = getFillSideAndSize(fill);
+      const price = Number(fill.px ?? fill.price ?? 0);
+      if (!sideSign || !Number.isFinite(sizeAbs) || sizeAbs <= 0 || !Number.isFinite(price)) return;
+      const rawCoin = fill.coin ?? fill.asset ?? fill.symbol ?? fill.sym ?? "";
+      const coin = resolveCoinName(rawCoin, fill.asset ?? fill.symbol ?? fill.sym) || rawCoin || "";
+      if (!coin) return;
+
+      const lots = positionByCoin.get(coin) || [];
+      let remaining = sizeAbs;
+      let realized = 0;
+
+      while (remaining > 0 && lots.length > 0 && lots[0].sideSign !== sideSign) {
+        const lot = lots[0];
+        const matchSize = Math.min(remaining, lot.size);
+        realized += (price - lot.price) * matchSize * lot.sideSign;
+        lot.size -= matchSize;
+        remaining -= matchSize;
+        if (lot.size <= 0) lots.shift();
+      }
+
+      if (remaining > 0) {
+        lots.push({ sideSign, size: remaining, price });
+      }
+
+      positionByCoin.set(coin, lots);
+
+      if (realized !== 0) {
+        closedPnlMap.set(fill, realized);
+      }
+    });
+
+    historicalClosedPnlCacheKey = cacheKey;
+    historicalClosedPnlCache = closedPnlMap;
+    return closedPnlMap;
+  }
+
+  function getClosedTradesFromHistoricalFills({ walletSet, marketType = currentMarketType, limit = 2000 } = {}) {
+    if (!historicalFillsLoaded || !historicalFills.length) return [];
+    const closedPnlMap = getHistoricalClosedPnlMap();
+    const rows = historicalFills
+      .filter((fill) => {
+        if (marketType && marketType !== "all" && !entryMatchesMarketType(fill, marketType)) return false;
+        const walletKey = String(fill?.wallet || "").toLowerCase();
+        if (walletSet && walletKey && !walletSet.has(walletKey)) return false;
+        return Number.isFinite(closedPnlMap.get(fill));
+      })
+      .map((fill) => {
+        const rawCoin = fill.coin ?? fill.asset ?? fill.symbol ?? fill.sym ?? "";
+        const coin = resolveCoinName(rawCoin, fill.asset ?? fill.symbol ?? fill.sym) || rawCoin || "";
+        return {
+          coin,
+          pnl: Number(closedPnlMap.get(fill)),
+          closeTime: Number(fill.time ?? fill.timestamp ?? 0),
+        };
+      })
+      .filter((entry) => Number.isFinite(entry.pnl) && Number.isFinite(entry.closeTime))
+      .sort((a, b) => a.closeTime - b.closeTime);
+
+    return Number.isFinite(limit) && limit > 0 ? rows.slice(-limit) : rows;
+  }
+
   function renderHistoricalFills() {
     if (!historicalFillsBodyEl) return;
 
@@ -13845,49 +13943,7 @@
       return true;
     });
 
-    let historicalFillsClosedPnl = null;
-    if (!historicalFillsClosedPnl) {
-      const closedPnlMap = new Map();
-      const sortedForPnl = [...marketFiltered].sort(
-        (a, b) => Number(a.time ?? a.timestamp ?? 0) - Number(b.time ?? b.timestamp ?? 0)
-      );
-      const positionByCoin = new Map();
-
-      sortedForPnl.forEach((fill) => {
-        const { sideSign, sizeAbs } = getFillSideAndSize(fill);
-        const price = Number(fill.px ?? fill.price ?? 0);
-        if (!sideSign || !Number.isFinite(sizeAbs) || sizeAbs <= 0 || !Number.isFinite(price)) return;
-        const rawCoin = fill.coin ?? fill.asset ?? fill.symbol ?? fill.sym ?? "";
-        const coin = resolveCoinName(rawCoin, fill.asset ?? fill.symbol ?? fill.sym) || rawCoin || "";
-        if (!coin) return;
-
-        const lots = positionByCoin.get(coin) || [];
-        let remaining = sizeAbs;
-        let realized = 0;
-
-        while (remaining > 0 && lots.length > 0 && lots[0].sideSign !== sideSign) {
-          const lot = lots[0];
-          const matchSize = Math.min(remaining, lot.size);
-          const pnl = (price - lot.price) * matchSize * lot.sideSign;
-          realized += pnl;
-          lot.size -= matchSize;
-          remaining -= matchSize;
-          if (lot.size <= 0) lots.shift();
-        }
-
-        if (remaining > 0) {
-          lots.push({ sideSign, size: remaining, price });
-        }
-
-        positionByCoin.set(coin, lots);
-
-        if (realized !== 0) {
-          closedPnlMap.set(fill, realized);
-        }
-      });
-
-      historicalFillsClosedPnl = closedPnlMap;
-    }
+    const historicalFillsClosedPnl = getHistoricalClosedPnlMap();
 
     const fillsViewRows = isHistoryAggregatedByOrderId()
       ? aggregateHistoricalFillsByOrderId(filtered, historicalFillsClosedPnl)
@@ -14764,6 +14820,7 @@
 
     historicalFillsLoaded = false;
     historicalFillsLoadSettled = false;
+    resetHistoricalClosedPnlCache();
     if (historicalFillsCountEl) historicalFillsCountEl.textContent = "–";
     historicalFillsBodyEl.innerHTML = "<tr><td colspan='6' class='muted'>Loading historical fills…</td></tr>";
 
@@ -14793,6 +14850,7 @@
           .sort((a, b) => (Number(b.time ?? b.timestamp ?? 0) - Number(a.time ?? a.timestamp ?? 0)))
           .forEach((f) => historicalFills.push(f));
       }
+      resetHistoricalClosedPnlCache();
 
       historicalFillsLoaded = true;
       historicalFillsLoadSettled = true;
@@ -14843,6 +14901,7 @@
     historicalOrdersLoaded = false;
     historicalFills.length = 0;
     historicalFillsLoaded = false;
+    resetHistoricalClosedPnlCache();
     timelineAsOfMs = null;
     timelineTimestamps = [];
     timelineSelectedIndex = -1;
@@ -14880,7 +14939,7 @@
     positionsBodyEl.innerHTML = `<tr class='loading-row'><td colspan='${positionsColspan}' class='muted'>Loading…</td></tr>`;
     marginSummaryEl.innerHTML = "<span class='muted'>Loading…</span>";
     renderOverviewRadar(currentRangeKey, null, null);
-    renderProfitDistributionChart(null);
+    renderProfitDistributionChart();
 
     recomputeTimelineControls();
     refreshBreakdownIfOpen();
@@ -17107,17 +17166,24 @@
     const pnls = rows.map((entry) => Number(entry.pnl));
     const min = Math.min(...pnls);
     const max = Math.max(...pnls);
-    const binCount = Math.max(12, Math.min(28, Math.round(Math.sqrt(rows.length))));
-    const span = Math.max(1e-9, max - min);
-    const step = span / binCount;
+    const maxAbs = Math.max(Math.abs(min), Math.abs(max), 1);
+    const targetBins = Math.max(10, Math.min(24, Math.round(Math.sqrt(rows.length) * 1.35)));
+    const roughStep = Math.max(1, (maxAbs * 2) / targetBins);
+    const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+    const normalized = roughStep / magnitude;
+    const niceMultiplier = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+    const step = niceMultiplier * magnitude;
+    const minEdge = Math.min(0, Math.floor(min / step) * step);
+    const maxEdge = Math.max(step, Math.ceil(max / step) * step);
+    const binCount = Math.max(1, Math.round((maxEdge - minEdge) / step));
     const bins = Array.from({ length: binCount }, (_, idx) => ({
-      min: min + (step * idx),
-      max: idx === binCount - 1 ? max : min + (step * (idx + 1)),
+      min: minEdge + (step * idx),
+      max: minEdge + (step * (idx + 1)),
       count: 0,
     }));
     rows.forEach((entry) => {
       const pnl = Number(entry.pnl);
-      const rawIndex = step > 0 ? Math.floor((pnl - min) / step) : 0;
+      const rawIndex = step > 0 ? Math.floor((pnl - minEdge) / step) : 0;
       const index = Math.max(0, Math.min(binCount - 1, rawIndex));
       bins[index].count += 1;
     });
@@ -17136,11 +17202,27 @@
     };
   }
 
-  function renderProfitDistributionChart(tradeMetrics) {
+  function getProfitDistributionClosedTrades({ tradeMetrics, walletSet, marketType = currentMarketType } = {}) {
+    const fillsSource = getClosedTradesFromHistoricalFills({ walletSet, marketType, limit: 2000 });
+    if (fillsSource.length) {
+      return {
+        rows: fillsSource,
+        label: fillsSource.length === 1 ? "1 closed fill" : `${fillsSource.length.toLocaleString()} closed fills`,
+      };
+    }
+    const fallback = Array.isArray(tradeMetrics?.closedTrades) ? tradeMetrics.closedTrades : [];
+    return {
+      rows: fallback,
+      label: fallback.length ? `${fallback.length.toLocaleString()} closed trades` : "No closed trades",
+    };
+  }
+
+  function renderProfitDistributionChart({ tradeMetrics = null, walletSet = null, marketType = currentMarketType } = {}) {
     if (!profitDistributionCanvas) return;
-    const distribution = buildProfitDistribution(tradeMetrics?.closedTrades || [], 2000);
+    const distributionSource = getProfitDistributionClosedTrades({ tradeMetrics, walletSet, marketType });
+    const distribution = buildProfitDistribution(distributionSource.rows || [], 2000);
     if (distributionTitleValueEl) {
-      distributionTitleValueEl.textContent = distribution ? `${distribution.totalTrades.toLocaleString()} trades` : "No closed trades";
+      distributionTitleValueEl.textContent = distribution ? distributionSource.label : "No closed trades";
       distributionTitleValueEl.className = "spark-label neutral";
     }
     if (!distribution) {
@@ -18542,7 +18624,11 @@
         setMetricValue(metricReactionSpeedEl, "-", null);
       }
       renderOverviewRadar(rangeKey, null, tradeMetrics);
-      renderProfitDistributionChart(tradeMetrics);
+      renderProfitDistributionChart({
+        tradeMetrics,
+        walletSet,
+        marketType: currentMarketType,
+      });
       return;
     }
     if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = source?.label || "-";
@@ -18653,7 +18739,11 @@
       }, metrics.totalPnl, metrics.baseEquity, rangeWindow);
     }
     renderOverviewRadar(rangeKey, metrics, tradeMetrics);
-    renderProfitDistributionChart(tradeMetrics);
+    renderProfitDistributionChart({
+      tradeMetrics,
+      walletSet,
+      marketType: currentMarketType,
+    });
   }
 
   function openPortfolioModal() {
@@ -19574,7 +19664,7 @@
     // ✅ Replace URL on first load (so / becomes /?wallet=... without extra history)
     await trackWallets({ wallets: initialWallets }, { replaceUrl: true });
     initialWalletTrackingComplete = true;
-    if (isEmbedSectionMode) setEmbedSection(initialEmbedSection);
+    if (isEmbedSectionMode) setEmbedSection(getCurrentEmbedShellSection());
     await initFooterStream();
     updateMarketToggleIndicator();
     updateRangeToggleIndicator();

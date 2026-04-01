@@ -1828,57 +1828,62 @@
     .leaderboard-panel th:nth-child(1),
     .trade-leaderboard-panel th:nth-child(1),
     .leaderboard-panel td:nth-child(1),
-    .trade-leaderboard-panel td:nth-child(1) { width: 2.4%; }
+    .trade-leaderboard-panel td:nth-child(1) { width: 2.2%; }
 
     .leaderboard-panel th:nth-child(2),
     .trade-leaderboard-panel th:nth-child(2),
     .leaderboard-panel td:nth-child(2),
-    .trade-leaderboard-panel td:nth-child(2) { width: 3.3%; }
+    .trade-leaderboard-panel td:nth-child(2) { width: 3%; }
 
     .leaderboard-panel th:nth-child(3),
     .trade-leaderboard-panel th:nth-child(3),
     .leaderboard-panel td:nth-child(3),
-    .trade-leaderboard-panel td:nth-child(3) { width: 15%; }
+    .trade-leaderboard-panel td:nth-child(3) { width: 14.4%; }
 
     .leaderboard-panel th:nth-child(4),
     .trade-leaderboard-panel th:nth-child(4),
     .leaderboard-panel td:nth-child(4),
-    .trade-leaderboard-panel td:nth-child(4) { width: 12%; }
+    .trade-leaderboard-panel td:nth-child(4) { width: 11.4%; }
 
     .leaderboard-panel th:nth-child(5),
     .trade-leaderboard-panel th:nth-child(5),
     .leaderboard-panel td:nth-child(5),
-    .trade-leaderboard-panel td:nth-child(5) { width: 11%; }
+    .trade-leaderboard-panel td:nth-child(5) { width: 10.3%; }
 
     .leaderboard-panel th:nth-child(6),
     .trade-leaderboard-panel th:nth-child(6),
     .leaderboard-panel td:nth-child(6),
-    .trade-leaderboard-panel td:nth-child(6) { width: 8%; }
+    .trade-leaderboard-panel td:nth-child(6) { width: 12.6%; }
 
     .leaderboard-panel th:nth-child(7),
     .trade-leaderboard-panel th:nth-child(7),
     .leaderboard-panel td:nth-child(7),
-    .trade-leaderboard-panel td:nth-child(7) { width: 10%; }
+    .trade-leaderboard-panel td:nth-child(7) { width: 7.4%; }
 
     .leaderboard-panel th:nth-child(8),
     .trade-leaderboard-panel th:nth-child(8),
     .leaderboard-panel td:nth-child(8),
-    .trade-leaderboard-panel td:nth-child(8) { width: 8%; }
+    .trade-leaderboard-panel td:nth-child(8) { width: 8.8%; }
 
     .leaderboard-panel th:nth-child(9),
     .trade-leaderboard-panel th:nth-child(9),
     .leaderboard-panel td:nth-child(9),
-    .trade-leaderboard-panel td:nth-child(9) { width: 8%; }
+    .trade-leaderboard-panel td:nth-child(9) { width: 7.3%; }
 
     .leaderboard-panel th:nth-child(10),
     .trade-leaderboard-panel th:nth-child(10),
     .leaderboard-panel td:nth-child(10),
-    .trade-leaderboard-panel td:nth-child(10) { width: 8%; }
+    .trade-leaderboard-panel td:nth-child(10) { width: 6.9%; }
 
     .leaderboard-panel th:nth-child(11),
     .trade-leaderboard-panel th:nth-child(11),
     .leaderboard-panel td:nth-child(11),
-    .trade-leaderboard-panel td:nth-child(11) { width: 9%; }
+    .trade-leaderboard-panel td:nth-child(11) { width: 7.3%; }
+
+    .leaderboard-panel th:nth-child(12),
+    .trade-leaderboard-panel th:nth-child(12),
+    .leaderboard-panel td:nth-child(12),
+    .trade-leaderboard-panel td:nth-child(12) { width: 8.4%; }
 
     th.sortable {
       cursor: pointer;
@@ -1900,6 +1905,12 @@
       overflow: visible;
       padding-left: 0.08rem;
       padding-right: 0.08rem;
+    }
+
+    thead th:nth-child(2),
+    tbody td:nth-child(2) {
+      width: 3.1rem;
+      min-width: 3.1rem;
     }
 
     .favorites-col {
@@ -2027,7 +2038,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: flex-start;
-      min-width: 2.4rem;
+      min-width: 2.72rem;
       padding-left: 0.28rem;
       color: var(--muted-strong);
       font-weight: 600;
@@ -2059,6 +2070,104 @@
       font-size: clamp(0.78rem, 0.62vw, 0.92rem);
       font-weight: 600;
       color: var(--text);
+    }
+
+    .pnl-cell {
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .pnl-inline {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.34rem;
+      min-width: 100%;
+    }
+
+    .pnl-marker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.88;
+      flex: 0 0 auto;
+    }
+
+    .pnl-marker svg {
+      width: 11px;
+      height: 11px;
+      display: block;
+    }
+
+    .pnl-value {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .largest-position-cell {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.42rem;
+      min-width: 100%;
+      color: var(--text);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .largest-position-side {
+      min-width: 1.08rem;
+      height: 1.08rem;
+      border-radius: 0.3rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: rgba(148, 163, 184, 0.14);
+      color: var(--muted-strong);
+      flex: 0 0 auto;
+    }
+
+    .largest-position-side.is-long {
+      background: rgba(14, 203, 129, 0.16);
+      color: #0ecb81;
+    }
+
+    .largest-position-side.is-short {
+      background: rgba(246, 70, 93, 0.16);
+      color: #f6465d;
+    }
+
+    .largest-position-symbol {
+      color: var(--text);
+      font-weight: 600;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    .largest-position-value {
+      color: var(--muted-strong);
+      flex: 0 0 auto;
+    }
+
+    .largest-position-empty {
+      color: var(--muted);
+    }
+
+    body.light .largest-position-side {
+      background: rgba(100, 116, 139, 0.12);
+      color: #475569;
+    }
+
+    body.light .largest-position-side.is-long {
+      background: rgba(14, 203, 129, 0.16);
+      color: #059669;
+    }
+
+    body.light .largest-position-side.is-short {
+      background: rgba(246, 70, 93, 0.16);
+      color: #e11d48;
     }
 
     .wallet-meta {
@@ -7256,6 +7365,151 @@
       return null;
     }
 
+    function firstFiniteValue(values) {
+      for (const value of values) {
+        const numeric = Number(value);
+        if (Number.isFinite(numeric)) return numeric;
+      }
+      return NaN;
+    }
+
+    function normalizeLargestPositionSide(value) {
+      const raw = String(value || "").trim().toUpperCase();
+      if (!raw) return "";
+      if (raw === "L" || raw === "LONG" || raw === "BUY") return "L";
+      if (raw === "S" || raw === "SHORT" || raw === "SELL") return "S";
+      return "";
+    }
+
+    function normalizeLargestPositionEntry(entry) {
+      if (!entry) return null;
+      if (typeof entry === "string") {
+        const label = entry.trim();
+        return label ? { side: "", coin: label, value: NaN } : null;
+      }
+      if (typeof entry !== "object") return null;
+      const source =
+        entry.position && typeof entry.position === "object"
+          ? { ...entry.position, ...entry }
+          : entry;
+
+      const side = normalizeLargestPositionSide(
+        source.side ??
+        source.direction ??
+        source.dir ??
+        source.positionSide ??
+        (source.isLong === true ? "long" : source.isShort === true ? "short" : "")
+      );
+      const coin = String(
+        source.coin ??
+        source.asset ??
+        source.symbol ??
+        source.ticker ??
+        source.name ??
+        source.product ??
+        ""
+      ).trim();
+      const value = firstFiniteValue([
+        source.value,
+        source.usdValue,
+        source.usd_value,
+        source.notional,
+        source.notionalUsd,
+        source.notional_usd,
+        source.positionValue,
+        source.position_value,
+        source.markValue,
+        source.mark_value,
+        source.sizeUsd,
+        source.size_usd,
+        source.szUsd,
+        source.sz_usd,
+        source.usd,
+      ]);
+
+      if (!coin && !Number.isFinite(value)) return null;
+      return { side, coin, value };
+    }
+
+    function extractLargestPosition(row) {
+      const scalarCoin = String(
+        row.largestPositionCoin ??
+        row.largest_position_coin ??
+        row.topPositionCoin ??
+        row.top_position_coin ??
+        row.biggestPositionCoin ??
+        row.biggest_position_coin ??
+        ""
+      ).trim();
+      const scalarValue = firstFiniteValue([
+        row.largestPositionValue,
+        row.largest_position_value,
+        row.topPositionValue,
+        row.top_position_value,
+        row.biggestPositionValue,
+        row.biggest_position_value,
+      ]);
+      const scalarSide = normalizeLargestPositionSide(
+        row.largestPositionSide ??
+        row.largest_position_side ??
+        row.topPositionSide ??
+        row.top_position_side
+      );
+      if (scalarCoin || Number.isFinite(scalarValue)) {
+        return {
+          side: scalarSide,
+          coin: scalarCoin,
+          value: scalarValue,
+        };
+      }
+
+      const directCandidates = [
+        row.largestPosition,
+        row.largest_position,
+        row.topPosition,
+        row.top_position,
+        row.biggestPosition,
+        row.biggest_position,
+        row.maxPosition,
+        row.max_position,
+        row.largestPos,
+        row.largest_pos,
+      ];
+
+      for (const candidate of directCandidates) {
+        const parsed = normalizeLargestPositionEntry(candidate);
+        if (parsed) return parsed;
+      }
+
+      const collectionCandidates = [
+        row.positions,
+        row.openPositions,
+        row.open_positions,
+        row.assetPositions,
+        row.asset_positions,
+        row.positionBreakdown,
+        row.position_breakdown,
+      ];
+
+      for (const collection of collectionCandidates) {
+        if (!Array.isArray(collection) || !collection.length) continue;
+        const parsed = collection
+          .map((item) => normalizeLargestPositionEntry(item))
+          .filter(Boolean)
+          .sort((left, right) => {
+            const leftValue = Math.abs(Number(left?.value));
+            const rightValue = Math.abs(Number(right?.value));
+            if (!Number.isFinite(leftValue) && !Number.isFinite(rightValue)) return 0;
+            if (!Number.isFinite(leftValue)) return 1;
+            if (!Number.isFinite(rightValue)) return -1;
+            return rightValue - leftValue;
+          });
+        if (parsed.length) return parsed[0];
+      }
+
+      return null;
+    }
+
     function normalizeLeaderboardRows(rows) {
       return (rows || []).map((row, index) => {
         const performance = perfForWindow(row, state.windowKey) || {};
@@ -7276,7 +7530,9 @@
           walletScore: Number(row.wallet_score ?? row.walletScore ?? NaN),
           trendScore: Number(row.full_slope_score ?? row.trendScore ?? NaN),
           consistencyScore: Number(row.full_R_sq_score ?? row.consistencyScore ?? NaN),
-          activityScore: Number(row.activity_score ?? row.activityScore ?? NaN)
+          activityScore: Number(row.activity_score ?? row.activityScore ?? NaN),
+          largestPosition: extractLargestPosition(row),
+          rawRow: row,
         };
 
         return normalized;
@@ -7333,6 +7589,7 @@
 
         const haystack = [
           row.address,
+          row.largestPosition?.coin || "",
           sizeTierLabel(row),
           qualityLabel(row.walletScore),
           percentFormat(row.roi),
@@ -7404,6 +7661,23 @@
       });
     }
 
+    function renderPnlCell(row, pnlClass, pnlTone) {
+      const valueText = moneyFormat(row.pnl);
+      const marker = Number.isFinite(row.pnl)
+        ? (
+            "<span class='pnl-marker' aria-hidden='true'>" +
+              "<svg viewBox='0 0 16 16' fill='none'>" +
+                (row.pnl >= 0
+                  ? "<path d='M2.5 11.5 6.2 7.8l2.35 2.35L13.5 5.2' stroke='currentColor' stroke-width='1.65' stroke-linecap='round' stroke-linejoin='round'></path><path d='M10.5 5.2h3v3' stroke='currentColor' stroke-width='1.65' stroke-linecap='round' stroke-linejoin='round'></path>"
+                  : "<path d='M2.5 5.2 6.2 8.9l2.35-2.35L13.5 11.5' stroke='currentColor' stroke-width='1.65' stroke-linecap='round' stroke-linejoin='round'></path><path d='M10.5 11.5h3v-3' stroke='currentColor' stroke-width='1.65' stroke-linecap='round' stroke-linejoin='round'></path>") +
+              "</svg>" +
+            "</span>"
+          )
+        : "";
+      const toneStyle = pnlTone ? " style='color:" + escapeHtml(pnlTone) + "'" : "";
+      return "<td class='money pnl-cell " + pnlClass + "'" + toneStyle + "><span class='pnl-inline'>" + marker + "<span class='pnl-value'>" + valueText + "</span></span></td>";
+    }
+
     function renderTable(rows) {
       if (!rows.length) {
         leaderboardBodies.forEach((body) => {
@@ -7441,7 +7715,7 @@
               "</a>" +
             "</td>" +
             "<td class='money hide-phone'>" + moneyFormat(row.accountValue) + "</td>" +
-            "<td class='money " + pnlClass + "'" + (pnlTone ? " style='color:" + escapeHtml(pnlTone) + "'" : "") + ">" + moneyFormat(row.pnl) + "</td>" +
+            renderPnlCell(row, pnlClass, pnlTone) +
             "<td class='money " + roiClass + "'" + (roiTone ? " style='color:" + escapeHtml(roiTone) + "'" : "") + ">" + percentFormat(row.roi) + "</td>" +
             "<td class='money hide-mobile'>" + compactMoney(row.volume) + "</td>" +
             "<td class='hide-phone'>" + renderScoreCell(qualityPct) + "</td>" +
