@@ -8760,10 +8760,12 @@
             connectWs();
             loadResolvedCoinLogoCache();
             applyChartPrefs(loadChartPrefs(), { persist: false });
-            await fetchMeta();
+            const metaPromise = fetchMeta();
+            const candlePromise = fetchCandles();
+            await metaPromise;
             buildCoinList();
             applyStats();
-            await fetchCandles();
+            await candlePromise;
             connectWs();
             notifyParentChartState();
             syncTopSplitters();

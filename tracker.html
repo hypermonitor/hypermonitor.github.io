@@ -3938,6 +3938,8 @@
     let footerInitScheduled = false;
     let footerInitIdleHandle = 0;
     let footerInitTimer = 0;
+    let footerDeferredInitTimer = 0;
+    let footerInitAwaitingPrimaryAsset = false;
     let footerChangeEnabled = true;
     let footerChangeRange = "1d";
     let footerChangeRangeKey = "1d";
@@ -7096,6 +7098,29 @@
       footerInitTimer = window.setTimeout(start, 1200);
     }
 
+    function scheduleFooterBarInitAfterPrimaryAsset() {
+      if (footerInitPromise || footerInitScheduled || footerInitAwaitingPrimaryAsset) return;
+      footerInitAwaitingPrimaryAsset = true;
+      if (footerDeferredInitTimer) {
+        window.clearTimeout(footerDeferredInitTimer);
+      }
+      footerDeferredInitTimer = window.setTimeout(() => {
+        footerDeferredInitTimer = 0;
+        footerInitAwaitingPrimaryAsset = false;
+        scheduleFooterBarInit();
+      }, 4000);
+    }
+
+    function flushDeferredFooterBarInit() {
+      if (!footerInitAwaitingPrimaryAsset || footerInitPromise || footerInitScheduled) return;
+      footerInitAwaitingPrimaryAsset = false;
+      if (footerDeferredInitTimer) {
+        window.clearTimeout(footerDeferredInitTimer);
+        footerDeferredInitTimer = 0;
+      }
+      scheduleFooterBarInit();
+    }
+
     async function ensureHeaderCoinOptions() {
       if (headerCoinOptionsPromise) return headerCoinOptionsPromise;
 
@@ -8939,7 +8964,12 @@
         tradeFrameReady = true;
         postThemeToFrame(tradeFrame);
         if (state.wallet) postWalletSkillOverridesToFrame(tradeFrame, state.wallet);
-        scheduleFooterBarInit();
+        const tradeSrc = String(tradeFrame.getAttribute("src") || "");
+        if (tradeSrc.includes("asset.html")) {
+          scheduleFooterBarInitAfterPrimaryAsset();
+        } else {
+          scheduleFooterBarInit();
+        }
         syncTradeFrameExtraCount();
         syncTradeFrameLayout();
         syncTradeTimeframe();
@@ -9003,6 +9033,7 @@
         const coin = String(data.coin || "").trim();
         if (!coin) return;
         if (isPrimaryFrame) {
+          flushDeferredFooterBarInit();
           state.coin = coin;
           syncTrackerDocumentTitle();
         } else if (extraFrameIndex >= 0 && extraFrameIndex < state.extraCharts.length) {
@@ -9012,6 +9043,7 @@
       }
       if (data.type === "hypermonitor:live-price") {
         if (!isPrimaryFrame) return;
+        flushDeferredFooterBarInit();
         const rawCoin = String(data.coin || state.coin || "").trim();
         const price = Number(data.price);
         if (!rawCoin || !Number.isFinite(price) || price <= 0) return;
@@ -9057,6 +9089,7 @@
         return;
       }
       if (data.type !== "hypermonitor:asset-chart-state") return;
+      flushDeferredFooterBarInit();
       state.topChartCount = data.chart2Active ? 2 : 1;
       if (typeof data.orderBookVisible === "boolean") {
         state.topOrderBookVisible = data.orderBookVisible;
