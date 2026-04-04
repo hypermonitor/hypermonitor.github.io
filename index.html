@@ -3,13 +3,13 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Hypermonitor — Discover & Track Top Hyperliquid Wallets</title>
+  <title>Hypermonitor | Discover & Track Top Hyperliquid Wallets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description"
     content="Track Hyperliquid wallets in real time. Monitor positions, orders, fills, PnL, and performance with Hypermonitor." />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Hypermonitor — Discover & Track Top Hyperliquid Wallets" />
+  <meta property="og:title" content="Hypermonitor | Discover & Track Top Hyperliquid Wallets" />
   <meta property="og:description"
     content="Track Hyperliquid wallets in real time. Monitor positions, orders, fills, PnL, and performance with Hypermonitor." />
   <meta property="og:type" content="website" />
@@ -26,7 +26,7 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Hypermonitor — Discover & Track Top Hyperliquid Wallets" />
+  <meta name="twitter:title" content="Hypermonitor | Discover & Track Top Hyperliquid Wallets" />
   <meta name="twitter:description"
     content="Discover, rank, and live-track Hyperliquid wallets. Subscribe to curated vaults." />
   <meta name="twitter:url" content="https://hypermonitor.org/" />
@@ -111,32 +111,6 @@
       line-height: 1.6;
       overflow-x: hidden;
     }
-
-    body.home-page {
-      min-height: 100svh;
-    }
-
-    body.home-page.scroll-lock {
-      overflow: hidden;
-      overscroll-behavior: none;
-    }
-
-    body.home-page #app {
-      min-height: 100svh;
-    }
-
-    body.home-page.scroll-lock #app {
-      height: 100svh;
-      overflow: hidden;
-    }
-
-    body.home-page .hero {
-      min-height: 100svh;
-    }
-
-
-
-
 
     h1,
     h2,
@@ -983,7 +957,7 @@
   </style>
 </head>
 
-<body class="home-page">
+<body>
   <div id="app">
 
     <!-- HEADER / NAV -->
@@ -1039,10 +1013,6 @@
             <span class="pill pill-soon">Coming</span>
             <span class="muted-text">Copy trading execution + curated vaults</span>
           </div> -->
-          <div class="stats-line">
-            <span class="stat-item"><strong class="count-up" data-count="159" data-suffix="K">159K</strong> Tracked</span>
-            <span class="stat-item"><strong class="count-up" data-count="28" data-suffix="K">28K</strong> Ranked</span>
-          </div>
         </div>
       </div>
     </section>
@@ -1075,7 +1045,9 @@
         width: 100%;
         height: calc(100% - var(--hero-video-offset) + var(--hero-video-bleed));
         object-fit: cover;
-        object-position: center 62%;
+        object-position: center center;
+        transform: scale(1.04);
+        transform-origin: center;
         opacity: 0.6;
         z-index: 1;
       }
@@ -1104,6 +1076,24 @@
         background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.45) 100%);
         pointer-events: none;
         z-index: 2;
+      }
+
+      @media (min-width: 769px) {
+        .hero {
+          min-height: 100svh;
+        }
+
+        .hero-content {
+          padding-top: 4.5vh;
+          padding-bottom: 2rem;
+        }
+
+        .hero-video {
+          height: 100%;
+          top: 0;
+          bottom: 0;
+          transform: scale(1.08);
+        }
       }
 
       .hero h1 {
@@ -1272,12 +1262,15 @@
         }
 
         .hero {
+          min-height: 80vh;
           padding-top: calc(4.5rem + var(--hero-overlap));
         }
 
         .hero-content {
           padding-bottom: 1.65rem;
           padding-top: 5.15vh;
+          min-height: auto;
+          justify-content: flex-start;
         }
 
         .hero-status-lines {
@@ -1302,6 +1295,13 @@
         .stats-line .stat-item,
         .separator {
           text-align: center;
+        }
+
+        .hero-video {
+          top: calc(var(--hero-video-offset) - var(--hero-video-bleed));
+          height: calc(100% - var(--hero-video-offset) + var(--hero-video-bleed));
+          object-position: center 62%;
+          transform: none;
         }
       }
 
@@ -1399,18 +1399,6 @@
       }, { threshold: 0.6 });
 
       counters.forEach(el => io.observe(el));
-    }
-
-    let scrollLockFrame = 0;
-    function syncHomeScrollLock() {
-      if (!document.body.classList.contains("home-page")) return;
-      document.body.classList.remove("scroll-lock");
-      if (scrollLockFrame) cancelAnimationFrame(scrollLockFrame);
-      scrollLockFrame = requestAnimationFrame(() => {
-        const lockByHeight = window.innerHeight >= 1080;
-        const fitsViewport = document.documentElement.scrollHeight <= window.innerHeight + 1;
-        document.body.classList.toggle("scroll-lock", lockByHeight || fitsViewport);
-      });
     }
 
     // Contact form success popup
@@ -1730,7 +1718,6 @@
       initFeatureCardInteraction();
       initLeaderboardPreview();
       initHeroRotator();
-      syncHomeScrollLock();
     };
 
     function initHeroRotator() {
@@ -1756,12 +1743,6 @@
       document.addEventListener("DOMContentLoaded", initCore, { once: true });
     } else {
       initCore();
-    }
-
-    window.addEventListener("resize", syncHomeScrollLock);
-    window.addEventListener("load", syncHomeScrollLock, { once: true });
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(syncHomeScrollLock).catch(() => {});
     }
 
     runAfterLoad(() => {

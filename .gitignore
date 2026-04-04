@@ -3,3 +3,6 @@
 workers/
 __pycache__/
 *.pyc
+/node_modules
+data/
+scripts/
