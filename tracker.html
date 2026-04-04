@@ -2304,11 +2304,12 @@
       border-top: 1px solid var(--border);
       box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.5);
       transition: opacity 0.18s ease, transform 0.18s ease;
+      overflow: hidden;
     }
 
     .price-footer.pending {
-      opacity: 0;
-      transform: translateY(8px);
+      opacity: 1;
+      transform: none;
       pointer-events: none;
     }
 
@@ -2327,8 +2328,15 @@
       position: relative;
       height: 34px;
       min-height: 34px;
-      overflow: hidden;
+      overflow: visible;
       padding: 0 8px;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .price-footer.pending .price-footer-inner {
+      opacity: 0;
+      transform: translateY(6px);
+      pointer-events: none;
     }
 
     .price-brand-wrap {
@@ -2353,6 +2361,115 @@
       background: #ffffff;
       border-color: #e5e7eb;
       box-shadow: none;
+    }
+
+    .price-footer-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s step-end;
+      pointer-events: none;
+    }
+
+    .price-footer.pending .price-footer-loading {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .price-footer-loading-shell {
+      display: inline-grid;
+      grid-auto-flow: column;
+      grid-auto-columns: max-content;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      min-width: 0;
+      max-width: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      backdrop-filter: none;
+      box-shadow: none;
+    }
+
+    .price-footer-loading-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+      flex: 0 0 auto;
+    }
+
+    .price-footer-loading-brand img {
+      width: 17px;
+      height: 17px;
+      border-radius: 4px;
+      object-fit: contain;
+      flex: 0 0 17px;
+    }
+
+    .price-footer-loading-name {
+      color: var(--text-main);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .price-footer-loading-copy {
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .price-footer-loading-pips {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0;
+      width: 24px;
+      flex: 0 0 auto;
+      transform: translateY(1px);
+    }
+
+    .price-footer-loading-pips span {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(127, 142, 161, 0.95) 0%, rgba(127, 142, 161, 0.45) 100%);
+      opacity: 0.32;
+      animation: footerLoadingPulse 1.4s ease-in-out infinite;
+    }
+
+    .price-footer-loading-pips span:nth-child(2) {
+      animation-delay: 0.16s;
+    }
+
+    .price-footer-loading-pips span:nth-child(3) {
+      animation-delay: 0.32s;
+    }
+
+    @keyframes footerLoadingPulse {
+      0%, 100% {
+        opacity: 0.22;
+        transform: translateY(0) scale(0.92);
+      }
+      50% {
+        opacity: 0.88;
+        transform: translateY(-1px) scale(1);
+      }
     }
 
     .price-currency-btn {
@@ -2564,6 +2681,23 @@
       justify-content: flex-end;
       gap: 0.4rem;
       height: 100%;
+      position: relative;
+      z-index: 3;
+    }
+
+    .footer-coin-suggestions {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 8px);
+      width: 280px;
+      max-width: min(320px, calc(100vw - 16px));
+      top: auto;
+      left: auto;
+      z-index: 70;
+    }
+
+    .footer-coin-suggestions .header-search-suggestion-type {
+      min-width: 48px;
     }
 
     .price-add-toggle-btn {
@@ -3370,6 +3504,15 @@
         gap: 0.45rem;
       }
 
+      .price-footer-loading-shell {
+        width: auto;
+        gap: 0.5rem;
+      }
+
+      .price-footer-loading-copy {
+        display: none;
+      }
+
       .price-ticker {
         -webkit-mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
         mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
@@ -3509,7 +3652,21 @@
     </main>
   </div>
 
-  <div class="price-footer" aria-label="Live prices">
+  <div class="price-footer pending" aria-label="Live prices">
+    <div class="price-footer-loading" aria-hidden="true">
+      <div class="price-footer-loading-shell">
+        <span class="price-footer-loading-brand">
+          <img src="images/logo.png" alt="" />
+          <span class="price-footer-loading-name">Hypermonitor</span>
+        </span>
+        <span class="price-footer-loading-copy">Syncing live markets</span>
+        <span class="price-footer-loading-pips" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </div>
+    </div>
     <div class="price-footer-inner" id="priceFooter">
       <div class="price-brand-wrap">
         <div class="price-currency-switch" id="priceCurrencySwitch" role="group" aria-label="Footer price currency">
@@ -3543,8 +3700,9 @@
             <path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
           </svg>
         </button>
-        <input id="priceAddInput" class="price-input" type="text" placeholder="Add coin" autocomplete="off" />
+        <input id="priceAddInput" class="price-input" type="text" placeholder="Add coin" autocomplete="off" aria-expanded="false" aria-controls="footerCoinSuggestions" />
         <button id="priceAddBtn" class="price-add-btn" type="button">Add</button>
+        <div class="header-search-suggestions footer-coin-suggestions" id="footerCoinSuggestions" hidden></div>
       </div>
     </div>
   </div>
@@ -3729,7 +3887,9 @@
       sizeFilter: "all",
       marketHeatmapRows: [],
       headerSuggestions: [],
-      headerSuggestionIndex: -1
+      headerSuggestionIndex: -1,
+      footerSuggestions: [],
+      footerSuggestionIndex: -1
     };
 
     const THEME_ICON_SUN = `
@@ -3851,6 +4011,7 @@
     const priceAddInputEl = document.getElementById("priceAddInput");
     const priceAddBtnEl = document.getElementById("priceAddBtn");
     const priceAddToggleBtnEl = document.getElementById("priceAddToggleBtn");
+    const footerCoinSuggestionsEl = document.getElementById("footerCoinSuggestions");
     const priceContextMenuEl = document.getElementById("priceContextMenu");
 
     const walletModalBackdrop = document.getElementById("walletModalBackdrop");
@@ -6363,6 +6524,7 @@
         );
         const desired = trackedFooterCoins.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
         let allFooterPricesReady = desired.length > 0;
+        let allFooterChangesReady = !footerChangeEnabled || desired.length > 0;
 
         existing.forEach((el, coin) => {
           if (!desired.includes(coin)) el.remove();
@@ -6488,6 +6650,7 @@
               return;
             }
             const changePct = getFooterChangePct(coin);
+            if (!Number.isFinite(changePct)) allFooterChangesReady = false;
             if (Number.isFinite(changePct)) {
               const isFlatChange = Math.abs(changePct) < 0.00005;
               const triangle = isFlatChange ? "■" : changePct > 0 ? "▲" : "▼";
@@ -6539,7 +6702,7 @@
 
         requestAnimationFrame(() => {
           schedulePriceTickerRollingUpdate(structureChanged);
-          if (!footerReady && priceFooterWrapEl && allFooterPricesReady) {
+          if (!footerReady && priceFooterWrapEl && allFooterPricesReady && allFooterChangesReady) {
             revealFooter(true);
           }
           syncTrackerDocumentTitle();
@@ -7066,7 +7229,6 @@
         updateFooterChangeMenu();
         syncFooterAddControls();
         renderFooterPrices();
-        revealFooter(true);
         await bootstrapFooterCatalog();
         renderFooterPrices();
         await initFooterStream();
@@ -8317,6 +8479,38 @@
       if (headerSearchInput) headerSearchInput.setAttribute("aria-expanded", "true");
     }
 
+    function closeFooterSuggestions() {
+      state.footerSuggestions = [];
+      state.footerSuggestionIndex = -1;
+      if (footerCoinSuggestionsEl) footerCoinSuggestionsEl.hidden = true;
+      if (priceAddInputEl) priceAddInputEl.setAttribute("aria-expanded", "false");
+    }
+
+    function renderFooterSuggestions() {
+      if (!footerCoinSuggestionsEl) return;
+      const suggestions = state.footerSuggestions || [];
+
+      if (!suggestions.length) {
+        footerCoinSuggestionsEl.innerHTML = "";
+        footerCoinSuggestionsEl.hidden = true;
+        if (priceAddInputEl) priceAddInputEl.setAttribute("aria-expanded", "false");
+        return;
+      }
+
+      footerCoinSuggestionsEl.innerHTML = suggestions.map((item, index) => (
+        "<button class='header-search-suggestion" + (index === state.footerSuggestionIndex ? " is-active" : "") + "' type='button' data-footer-suggestion-index='" + index + "'>" +
+          "<span class='header-search-suggestion-copy'>" +
+            "<span class='header-search-suggestion-label'>" + escapeHtml(item.label) + "</span>" +
+            "<span class='header-search-suggestion-meta'>" + escapeHtml(item.meta) + "</span>" +
+          "</span>" +
+          "<span class='header-search-suggestion-type'>" + escapeHtml(item.type) + "</span>" +
+        "</button>"
+      )).join("");
+
+      footerCoinSuggestionsEl.hidden = false;
+      if (priceAddInputEl) priceAddInputEl.setAttribute("aria-expanded", "true");
+    }
+
     function scoreWalletSuggestion(address, query) {
       const target = String(address || "").toLowerCase();
       if (!target) return Number.POSITIVE_INFINITY;
@@ -8391,6 +8585,32 @@
         }));
     }
 
+    function buildFooterCoinSuggestions(query) {
+      const seenBases = new Set();
+      return buildCoinSuggestions(query)
+        .sort((left, right) => {
+          const leftBase = getFooterBase(left.value);
+          const rightBase = getFooterBase(right.value);
+          const leftIsBase = String(left.value || "").toUpperCase() === String(leftBase || "").toUpperCase();
+          const rightIsBase = String(right.value || "").toUpperCase() === String(rightBase || "").toUpperCase();
+          if (leftBase === rightBase && leftIsBase !== rightIsBase) return leftIsBase ? -1 : 1;
+          return 0;
+        })
+        .filter((item) => {
+          const base = getFooterBase(item.value);
+          if (!base || seenBases.has(base)) return false;
+          seenBases.add(base);
+          return true;
+        })
+        .map((item) => {
+          const base = getFooterBase(item.value);
+          return {
+            ...item,
+            label: base || item.label,
+          };
+        });
+    }
+
     function updateHeaderSuggestions() {
       if (!headerSearchInput) return;
       const rawQuery = headerSearchInput.value.trim();
@@ -8411,6 +8631,28 @@
       renderHeaderSuggestions();
     }
 
+    function updateFooterSuggestions() {
+      if (!priceAddInputEl) return;
+      const rawQuery = priceAddInputEl.value.trim();
+      if (!rawQuery) {
+        closeFooterSuggestions();
+        return;
+      }
+
+      const suggestions = buildFooterCoinSuggestions(rawQuery)
+        .slice(0, 8)
+        .map((item) => ({
+          ...item,
+          meta: findTrackedFooterCoinByBase(getFooterBase(item.value))
+            ? `${item.meta} • In bar`
+            : item.meta
+        }));
+
+      state.footerSuggestions = suggestions;
+      state.footerSuggestionIndex = -1;
+      renderFooterSuggestions();
+    }
+
     function applyHeaderSuggestion(index) {
       const item = state.headerSuggestions[index];
       if (!item) return;
@@ -8424,6 +8666,21 @@
         return;
       }
       openCoinInShell(item.value, { pushHistory: true });
+    }
+
+    async function applyFooterSuggestion(index) {
+      const item = state.footerSuggestions[index];
+      if (!item) return;
+      closeFooterSuggestions();
+      if (priceAddInputEl) {
+        priceAddInputEl.setCustomValidity("");
+        priceAddInputEl.value = item.label;
+      }
+      updateFooterActionLabel();
+      await toggleFooterCoin(item.value);
+      if (priceAddInputEl) priceAddInputEl.value = "";
+      updateFooterActionLabel();
+      closeFooterAddControls(true);
     }
 
     function focusHeaderSearch(options = {}) {
@@ -8584,6 +8841,24 @@
       });
     }
 
+    if (footerCoinSuggestionsEl) {
+      footerCoinSuggestionsEl.addEventListener("mousedown", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.closest("[data-footer-suggestion-index]")) event.preventDefault();
+      });
+
+      footerCoinSuggestionsEl.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const button = target.closest("[data-footer-suggestion-index]");
+        if (!button) return;
+        const index = Number(button.getAttribute("data-footer-suggestion-index"));
+        if (!Number.isFinite(index)) return;
+        await applyFooterSuggestion(index);
+      });
+    }
+
     if (viewWalletBtn) {
       viewWalletBtn.addEventListener("click", () => {
         if (!state.wallet) return;
@@ -8661,6 +8936,9 @@
       if (headerSearchForm && !headerSearchForm.contains(target)) {
         closeHeaderSuggestions();
       }
+      if (priceControlsEl && !priceControlsEl.contains(target)) {
+        closeFooterSuggestions();
+      }
     });
 
     closeWalletModalBtn.addEventListener("click", () => {
@@ -8711,20 +8989,61 @@
 
     if (priceAddInputEl) {
       priceAddInputEl.addEventListener("keydown", async (event) => {
+        if (state.footerSuggestions.length) {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            state.footerSuggestionIndex =
+              state.footerSuggestionIndex < state.footerSuggestions.length - 1
+                ? state.footerSuggestionIndex + 1
+                : 0;
+            renderFooterSuggestions();
+            return;
+          }
+
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            state.footerSuggestionIndex =
+              state.footerSuggestionIndex > 0
+                ? state.footerSuggestionIndex - 1
+                : state.footerSuggestions.length - 1;
+            renderFooterSuggestions();
+            return;
+          }
+
+          if (event.key === "Enter" && state.footerSuggestionIndex >= 0) {
+            event.preventDefault();
+            await applyFooterSuggestion(state.footerSuggestionIndex);
+            return;
+          }
+        }
+
         if (event.key === "Enter") {
           await toggleFooterCoin(priceAddInputEl.value);
           priceAddInputEl.value = "";
+          closeFooterSuggestions();
           updateFooterActionLabel();
           closeFooterAddControls(true);
         } else if (event.key === "Escape") {
           priceAddInputEl.value = "";
+          closeFooterSuggestions();
           updateFooterActionLabel();
           closeFooterAddControls(true);
         }
       });
-      priceAddInputEl.addEventListener("input", updateFooterActionLabel);
+      priceAddInputEl.addEventListener("input", () => {
+        updateFooterActionLabel();
+        updateFooterSuggestions();
+      });
+      priceAddInputEl.addEventListener("focus", () => {
+        ensureHeaderCoinOptions().then(() => {
+          updateFooterSuggestions();
+        });
+      });
       priceAddInputEl.addEventListener("blur", () => {
-        window.setTimeout(() => closeFooterAddControls(false), 0);
+        window.setTimeout(() => {
+          closeFooterSuggestions();
+          closeFooterAddControls(false);
+        }, 0);
       });
     }
 
