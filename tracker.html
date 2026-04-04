@@ -85,8 +85,7 @@
 
     body.light {
       background-color: #f4f4f3;
-      background-image:
-        linear-gradient(180deg, #fafaf9 0%, #f4f4f3 42%, #efefee 100%);
+      background-image: none;
       color-scheme: light;
       --bg: #fbfcfe;
       --bg-soft: #f1f5f9;
@@ -111,7 +110,7 @@
       --danger-soft: rgba(220, 38, 38, 0.14);
       --glass-border: #dbe3ee;
       --neutral-blue: #2563eb;
-      --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      --shadow: none;
     }
 
     body.modal-open {
@@ -161,7 +160,7 @@
 
     body.light .shell-header {
       border-bottom-color: rgba(148, 163, 184, 0.24);
-      background: rgba(251, 252, 254, 0.94);
+      background: var(--bg);
     }
 
     .brand {
@@ -351,7 +350,7 @@
 
     body.light .header-search-shortcut {
       background: #ffffff;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      box-shadow: none;
     }
 
     body.light .header-search-shell:focus-within .header-search-shortcut {
@@ -375,7 +374,7 @@
 
     body.light .header-search-suggestions {
       background: #ffffff;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      box-shadow: none;
     }
 
     .header-search-suggestions[hidden] {
@@ -658,29 +657,6 @@
       background: var(--bg);
     }
 
-    .wallet-shell-chrome {
-      display: none;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 12px;
-      min-height: 44px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
-      flex: 0 0 auto;
-      padding-right: 8px;
-    }
-
-    .top-frame-panel.is-wallet-mode .wallet-shell-chrome {
-      display: none;
-    }
-
-    .wallet-shell-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      flex: 0 0 auto;
-    }
-
     .trade-view-stack {
       --trade-bottom-gap: 0px;
       --trade-book-width: 310px;
@@ -691,6 +667,11 @@
       height: 100%;
       min-height: 0;
       position: relative;
+      transition: grid-template-rows 340ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .trade-view-stack.is-split-dragging {
+      transition: none;
     }
 
     .trade-view-stack[data-layout="multi"] {
@@ -768,6 +749,64 @@
       backdrop-filter: none;
     }
 
+    .trade-leaderboard-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 34px;
+      padding: 0 8px 0 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      flex: 0 0 auto;
+    }
+
+    .trade-leaderboard-head .panel-title {
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-strong);
+    }
+
+    .trade-leaderboard-toggle-btn {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+    }
+
+    .trade-leaderboard-toggle-btn[hidden] {
+      display: none !important;
+    }
+
+    .trade-leaderboard-toggle-btn svg {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .trade-leaderboard-panel.is-collapsed .trade-leaderboard-toggle-btn svg {
+      transform: rotate(180deg);
+    }
+
+    .trade-leaderboard-body {
+      display: flex;
+      flex: 1 1 auto;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+      transition: opacity 0.2s ease, transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .trade-leaderboard-panel.is-collapsed .trade-leaderboard-head {
+      border-bottom-color: transparent;
+    }
+
+    .trade-leaderboard-panel.is-collapsed .trade-leaderboard-body {
+      opacity: 0;
+      transform: translateY(18px);
+      pointer-events: none;
+    }
+
     .trade-leaderboard-panel[hidden] {
       display: none !important;
     }
@@ -799,7 +838,7 @@
     }
 
     .top-frame-panel {
-      --pane-btn-top: 61.5px;
+      --pane-btn-top: 3px;
       --pane-btn-right: var(--top-frame-btn-right, calc(var(--trade-book-width) + 44px));
     }
 
@@ -1835,12 +1874,12 @@
     .leaderboard-panel th:nth-child(2),
     .trade-leaderboard-panel th:nth-child(2),
     .leaderboard-panel td:nth-child(2),
-    .trade-leaderboard-panel td:nth-child(2) { width: 3%; }
+    .trade-leaderboard-panel td:nth-child(2) { width: 3.7%; }
 
     .leaderboard-panel th:nth-child(3),
     .trade-leaderboard-panel th:nth-child(3),
     .leaderboard-panel td:nth-child(3),
-    .trade-leaderboard-panel td:nth-child(3) { width: 14.4%; }
+    .trade-leaderboard-panel td:nth-child(3) { width: 13.7%; }
 
     .leaderboard-panel th:nth-child(4),
     .trade-leaderboard-panel th:nth-child(4),
@@ -1911,8 +1950,8 @@
 
     thead th:nth-child(2),
     tbody td:nth-child(2) {
-      width: 3.1rem;
-      min-width: 3.1rem;
+      width: 3.5rem;
+      min-width: 3.5rem;
     }
 
     .favorites-col {
@@ -1971,13 +2010,17 @@
       border-color: var(--border);
     }
 
+    body.light .trade-leaderboard-head {
+      background: var(--surface2);
+    }
+
     body.light .active-filters-bar {
       background: #fafaf9;
     }
 
     body.light .table-wrap,
     body.light .trade-leaderboard-panel .table-wrap {
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.02), transparent 12%), #fafaf9;
+      background: #fafaf9;
     }
 
     body.light .table-wrap.loading,
@@ -2269,6 +2312,11 @@
       pointer-events: none;
     }
 
+    body.light .price-footer {
+      background: var(--panel-strong);
+      box-shadow: none;
+    }
+
     .price-footer-inner {
       width: min(1920px, 100vw);
       margin: 0 auto;
@@ -2304,7 +2352,7 @@
     body.light .price-currency-switch {
       background: #ffffff;
       border-color: #e5e7eb;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      box-shadow: none;
     }
 
     .price-currency-btn {
@@ -2633,7 +2681,7 @@
 
     body.light .price-context-menu,
     body.light .price-context-submenu {
-      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+      box-shadow: none;
     }
 
     .price-context-menu.show {
@@ -2746,7 +2794,7 @@
     body.light .wallet-modal {
       background: var(--panel-strong);
       border-color: var(--border);
-      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+      box-shadow: none;
     }
 
     .wallet-modal-head {
@@ -3383,15 +3431,6 @@
                 <path d="M8 3.25V12.75M3.25 8H12.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
               </svg>
             </button>
-            <div class="wallet-shell-chrome" id="walletShellChrome" hidden>
-              <div class="wallet-shell-actions">
-                <button class="icon-btn" type="button" id="closeWalletShellBtn" aria-label="Close wallet tracker" title="Close wallet tracker">
-                  <svg viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
             <iframe
               class="trade-frame"
               id="tradeFrame"
@@ -3421,34 +3460,45 @@
           </section>
 
           <section class="panel trade-leaderboard-panel" id="tradeLeaderboardPanel">
-            <div class="active-filters-bar is-hidden">
-              <div class="active-filters" id="tradeActiveFilters"></div>
+            <div class="trade-leaderboard-head">
+              <h2 class="panel-title">Leaderboard</h2>
+              <button class="icon-btn trade-leaderboard-toggle-btn" type="button" id="tradeLeaderboardToggleBtn" aria-label="Hide leaderboard" title="Hide leaderboard">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M4.25 6.25 8 10l3.75-3.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </button>
             </div>
 
-            <div class="table-wrap loading" id="tradeTableWrap">
-              <div class="loading-overlay"></div>
-              <table>
-                <thead>
-                  <tr>
-                    <th class="favorites-col" aria-label="Favorites">
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12 3.9 14.5 8.8l5.4.77-3.9 3.75.92 5.3L12 16l-4.92 2.61.93-5.3-3.9-3.75 5.4-.77L12 3.9Z" fill="currentColor"></path>
-                      </svg>
-                    </th>
-                    <th class="sortable" data-key="rank">Rank<span class="sort-indicator"></span></th>
-                    <th class="sortable" data-key="address">Wallet<span class="sort-indicator"></span></th>
-                    <th class="sortable hide-phone" data-key="accountValue">Account value<span class="sort-indicator"></span></th>
-                    <th class="sortable" data-key="pnl">PnL<span class="sort-indicator"></span></th>
-                    <th class="sortable" data-key="roi">ROI<span class="sort-indicator"></span></th>
-                    <th class="sortable hide-mobile" data-key="volume">Volume<span class="sort-indicator"></span></th>
-                    <th class="sortable hide-phone" data-key="walletScore">Quality<span class="sort-indicator"></span></th>
-                    <th class="sortable hide-tablet" data-key="trendScore">Trend<span class="sort-indicator"></span></th>
-                    <th class="sortable hide-tablet" data-key="consistencyScore">Consistency<span class="sort-indicator"></span></th>
-                    <th class="sortable hide-mobile" data-key="activityScore">Activity<span class="sort-indicator"></span></th>
-                  </tr>
-                </thead>
-                <tbody id="tradeTbody"></tbody>
-              </table>
+            <div class="trade-leaderboard-body" id="tradeLeaderboardBody">
+              <div class="active-filters-bar is-hidden">
+                <div class="active-filters" id="tradeActiveFilters"></div>
+              </div>
+
+              <div class="table-wrap loading" id="tradeTableWrap">
+                <div class="loading-overlay"></div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="favorites-col" aria-label="Favorites">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 3.9 14.5 8.8l5.4.77-3.9 3.75.92 5.3L12 16l-4.92 2.61.93-5.3-3.9-3.75 5.4-.77L12 3.9Z" fill="currentColor"></path>
+                        </svg>
+                      </th>
+                      <th class="sortable" data-key="rank">Rank<span class="sort-indicator"></span></th>
+                      <th class="sortable" data-key="address">Wallet<span class="sort-indicator"></span></th>
+                      <th class="sortable hide-phone" data-key="accountValue">Account value<span class="sort-indicator"></span></th>
+                      <th class="sortable" data-key="pnl">PnL<span class="sort-indicator"></span></th>
+                      <th class="sortable" data-key="roi">ROI<span class="sort-indicator"></span></th>
+                      <th class="sortable hide-mobile" data-key="volume">Volume<span class="sort-indicator"></span></th>
+                      <th class="sortable hide-phone" data-key="walletScore">Quality<span class="sort-indicator"></span></th>
+                      <th class="sortable hide-tablet" data-key="trendScore">Trend<span class="sort-indicator"></span></th>
+                      <th class="sortable hide-tablet" data-key="consistencyScore">Consistency<span class="sort-indicator"></span></th>
+                      <th class="sortable hide-mobile" data-key="activityScore">Activity<span class="sort-indicator"></span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tradeTbody"></tbody>
+                </table>
+              </div>
             </div>
           </section>
 
@@ -3473,15 +3523,15 @@
             <span class="price-end-marker" aria-hidden="true">Hypermonitor</span>
             <span class="price-item" data-coin="BTC"><img class="coinIcon coin-info-trigger" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20shape-rendering%3D%22geometricPrecision%22%20text-rendering%3D%22geometricPrecision%22%20image-rendering%3D%22optimizeQuality%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20viewBox%3D%220%200%204091.27%204091.73%22%3E%3Cg%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill%3D%22%23F7931A%22%20d%3D%22M4030.06%202540.77C3756.82%203636.78%202646.74%204303.79%201550.6%204030.48%20454.92%203757.24-212.09%202647.09%2061.27%201551.17c273.12-1096.13%201383.2-1763.19%202479-1489.95C3636.33%20334.46%204303.3%201444.73%204030.03%202540.79l.02-.02z%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2947.77%201754.38c40.72-272.26-166.56-418.61-450-516.24l91.95-368.8-224.5-55.94-89.51%20359.09c-59.02-14.72-119.63-28.59-179.87-42.34L2186%20768.69l-224.36-55.94-92%20368.68c-48.84-11.12-96.81-22.11-143.35-33.69l.26-1.16-309.59-77.31-59.72%20239.78s166.56%2038.18%20163.05%2040.53c90.91%2022.69%20107.35%2082.87%20104.62%20130.57l-104.74%20420.15c6.26%201.59%2014.38%203.89%2023.34%207.49-7.49-1.86-15.46-3.89-23.73-5.87l-146.81%20588.57c-11.11%2027.62-39.31%2069.07-102.87%2053.33%202.25%203.26-163.17-40.72-163.17-40.72l-111.46%20256.98%20292.15%2072.83c54.35%2013.63%20107.61%2027.89%20160.06%2041.3l-92.9%20373.03%20224.24%2055.94%2092-369.07c61.26%2016.63%20120.71%2031.97%20178.91%2046.43l-91.69%20367.33%20224.51%2055.94%2092.89-372.33c382.82%2072.45%20670.67%2043.24%20791.83-303.02%2097.63-278.78-4.86-439.58-206.26-544.44%20146.69-33.83%20257.18-130.31%20286.64-329.61l-.07-.05zm-512.93%20719.26c-69.38%20278.78-538.76%20128.08-690.94%2090.29l123.28-494.2c152.17%2037.99%20640.17%20113.17%20567.67%20403.91zm69.43-723.3c-63.29%20253.58-453.96%20124.75-580.69%2093.16l111.77-448.21c126.73%2031.59%20534.85%2090.55%20468.94%20355.05h-.02z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" alt="BTC" data-logo-key="BTC" data-coin-key="BTC" data-coin-label="BTC" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('BTC', this)" onerror="window.__logoErr('BTC', this, 'B')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="ETH"><img class="coinIcon coin-info-trigger" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E" alt="ETH" data-logo-key="ETH" data-coin-key="ETH" data-coin-label="ETH" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="SOL"><img class="coinIcon coin-info-trigger" src="images/coins/SOL.svg" alt="SOL" data-logo-key="SOL" data-coin-key="SOL" data-coin-label="SOL" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('SOL', this)" onerror="window.__logoErr('SOL', this, 'S')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="HYPE"><img class="coinIcon coin-info-trigger" src="https://hyperfoundation.org/landing/blob_green.gif" alt="HYPE" data-logo-key="HYPE" data-coin-key="HYPE" data-coin-label="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="LINK"><img class="coinIcon coin-info-trigger" src="https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif" alt="LINK" data-logo-key="LINK" data-coin-key="LINK" data-coin-label="LINK" loading="lazy" referrerpolicy="no-referrer" style="border-radius:50%;" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="SOL"><img class="coinIcon coin-info-trigger" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ4IiBoZWlnaHQ9IjE0OCIgdmlld0JveD0iMCAwIDE0OCAxNDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijc0IiBjeT0iNzQiIHI9Ijc0IiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNNDQuODA5OCA5MS4xMzY3QzQ1LjMyMjcgOTAuNjIwOCA0Ni4wMjc5IDkwLjMxOTkgNDYuNzc1OSA5MC4zMTk5SDExNC42MDdDMTE1Ljg0NiA5MC4zMTk5IDExNi40NjYgOTEuODI0NSAxMTUuNTkgOTIuNzA1OEwxMDIuMTkgMTA2LjE4M0MxMDEuNjc3IDEwNi42OTkgMTAwLjk3MiAxMDcgMTAwLjIyNCAxMDdIMzIuMzkzNEMzMS4xNTM5IDEwNyAzMC41MzQyIDEwNS40OTUgMzEuNDEwNCAxMDQuNjE0TDQ0LjgwOTggOTEuMTM2N1oiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcikiLz4KPHBhdGggZD0iTTQ0LjgwOTggNDAuODE2OEM0NS4zNDQxIDQwLjMwMDkgNDYuMDQ5MyA0MCA0Ni43NzU5IDQwSDExNC42MDdDMTE1Ljg0NiA0MCAxMTYuNDY2IDQxLjUwNDcgMTE1LjU5IDQyLjM4NTlMMTAyLjE5IDU1Ljg2MzNDMTAxLjY3NyA1Ni4zNzkyIDEwMC45NzIgNTYuNjgwMSAxMDAuMjI0IDU2LjY4MDFIMzIuMzkzNEMzMS4xNTM5IDU2LjY4MDEgMzAuNTM0MiA1NS4xNzU1IDMxLjQxMDQgNTQuMjk0Mkw0NC44MDk4IDQwLjgxNjhaIiBmaWxsPSJ1cmwoI3BhaW50MV9saW5lYXIpIi8+CjxwYXRoIGQ9Ik0xMDIuMTkgNjUuODE1NUMxMDEuNjc3IDY1LjI5OTYgMTAwLjk3MiA2NC45OTg3IDEwMC4yMjQgNjQuOTk4N0gzMi4zOTM0QzMxLjE1MzkgNjQuOTk4NyAzMC41MzQyIDY2LjUwMzQgMzEuNDEwNCA2Ny4zODQ3TDQ0LjgwOTggODAuODYyQzQ1LjMyMjcgODEuMzc3OSA0Ni4wMjc5IDgxLjY3ODkgNDYuNzc1OSA4MS42Nzg5SDExNC42MDdDMTE1Ljg0NiA4MS42Nzg5IDExNi40NjYgODAuMTc0MiAxMTUuNTkgNzkuMjkyOUwxMDIuMTkgNjUuODE1NVoiIGZpbGw9InVybCgjcGFpbnQyX2xpbmVhcikiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhciIgeDE9Ijk3Ljc5ODIiIHkxPSIyNi41MjUyIiB4Mj0iNTAuNDI0NiIgeTI9IjExNi43NCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMDBGRkEzIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0RDMUZGRiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MV9saW5lYXIiIHgxPSI5Ny43OTgyIiB5MT0iMjYuNTI1MiIgeDI9IjUwLjQyNDYiIHkyPSIxMTYuNzQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwRkZBMyIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNEQzFGRkYiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDJfbGluZWFyIiB4MT0iOTcuNzk4MiIgeTE9IjI2LjUyNTIiIHgyPSI1MC40MjQ2IiB5Mj0iMTE2Ljc0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMwMEZGQTMiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjREMxRkZGIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+Cg==" alt="SOL" data-logo-key="SOL" data-coin-key="SOL" data-coin-label="SOL" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('SOL', this)" onerror="window.__logoErr('SOL', this, 'S')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="HYPE"><img class="coinIcon coin-info-trigger" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDE0NCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xNDQgNzEuNjk5MUMxNDQgMTE5LjMwNiAxMTQuODY2IDEzNC41ODIgOTkuNTE1NiAxMjAuOThDODYuODgwNCAxMDkuODg5IDgzLjEyMTEgODYuNDUyMSA2NC4xMTYgODQuMDQ1NkMzOS45OTQyIDgxLjAxMTMgMzcuOTA1NyAxMTMuMTMzIDIyLjAzMzQgMTEzLjEzM0MzLjU1MDQgMTEzLjEzMyAwIDg2LjI0MjggMCA3Mi40MzE1QzAgNTguMzA2MyAzLjk2ODA5IDM5LjA1NDIgMTkuNzM2IDM5LjA1NDJDMzguMTE0NiAzOS4wNTQyIDM5LjE1ODggNjYuNTcyMiA2Mi4xMzIgNjUuMTA3M0M4NS4wMDA3IDYzLjUzNzkgODUuNDE4NCAzNC44Njg5IDEwMC4yNDcgMjIuNjI3MUMxMTMuMTk1IDEyLjA1OTMgMTQ0IDIzLjQ2NDEgMTQ0IDcxLjY5OTFaIiBmaWxsPSIjOTdGQ0U0Ii8+Cjwvc3ZnPgo=" alt="HYPE" data-logo-key="HYPE" data-coin-key="HYPE" data-coin-label="HYPE" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="LINK"><img class="coinIcon coin-info-trigger" src="https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif" alt="LINK" data-logo-key="LINK" data-coin-key="LINK" data-coin-label="LINK" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-end-marker" aria-hidden="true">Hypermonitor</span>
             <span class="price-item" data-coin="xyz:GOLD"><img class="coinIcon coin-info-trigger" src="images/coins/GOLD.svg" alt="GOLD" data-logo-key="xyz:GOLD" data-coin-key="xyz:GOLD" data-coin-label="GOLD" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon coin-info-trigger" src="images/coins/SILVER.svg" alt="SILVER" data-logo-key="xyz:SILVER" data-coin-key="xyz:SILVER" data-coin-label="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="cash:USA500"><img class="coinIcon coin-info-trigger" src="images/coins/USA500.png" alt="USA500" data-logo-key="cash:USA500" data-coin-key="cash:USA500" data-coin-label="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:NVDA"><img class="coinIcon coin-info-trigger" src="https://app.hyperliquid.xyz/coins/xyz%3ANVDA.svg" alt="NVDA" data-logo-key="xyz:NVDA" data-coin-key="xyz:NVDA" data-coin-label="NVDA" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('xyz:NVDA', this)" onerror="window.__logoErr('xyz:NVDA', this, 'N')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:MSTR"><img class="coinIcon coin-info-trigger" src="https://app.hyperliquid.xyz/coins/xyz%3AMSTR.svg" alt="MSTR" data-logo-key="xyz:MSTR" data-coin-key="xyz:MSTR" data-coin-label="MSTR" loading="lazy" referrerpolicy="no-referrer" onload="window.__logoOk('xyz:MSTR', this)" onerror="window.__logoErr('xyz:MSTR', this, 'M')" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:NVDA"><img class="coinIcon coin-info-trigger" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJOVkRBIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iIzc2YjkwMCIvPgogIDxwYXRoIGQ9Ik0xNCAzMS43YzUuNC04LjQgMTIuOS0xMy4xIDIyLjUtMTMuMSA2LjMgMCAxMS43IDIuMSAxNS41IDYtMy44LTEuOS03LjYtMi44LTExLjctMi44LTcuNSAwLTEzLjkgMy4yLTE5LjIgOS44IDMuMiA0LjMgNy40IDYuNCAxMi40IDYuNCA0LjcgMCA4LjYtMi4xIDExLjMtNi4zLTIuMy0xLjktNC45LTIuOS03LjctMi45LTMuOCAwLTYuOSAxLjgtOS4yIDUuMiAxLjQtNSA1LjctOC4zIDEwLjctOC4zIDMuOCAwIDcuMSAxLjMgOS45IDMuOGwuOS44LS41IDFjLTMuOSA3LTkuOSAxMC42LTE3LjcgMTAuNi03LjIgMC0xMy4xLTMuNC0xOC0xMGwtLjctLjl6IiBmaWxsPSIjZmZmIi8+CiAgPGNpcmNsZSBjeD0iMzguNSIgY3k9IjMyLjIiIHI9IjUuNSIgZmlsbD0iIzc2YjkwMCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIuOCIvPgo8L3N2Zz4K" alt="NVDA" data-logo-key="xyz:NVDA" data-coin-key="xyz:NVDA" data-coin-label="NVDA" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
+            <span class="price-item" data-coin="xyz:MSTR"><img class="coinIcon coin-info-trigger" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJNU1RSIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iI2ZmOGExYyIvPgogIDxwYXRoIGQ9Ik0xMyA0N1YxN2g4LjFMMzIgMjkuNiA0Mi45IDE3SDUxdjMwaC04VjI4LjhMMzIgNDEgMjEgMjguOFY0N3oiIGZpbGw9IiNmZmYiLz4KICA8cGF0aCBkPSJNNDYgMTRoNnY4aC02eiIgZmlsbD0iIzJiMjExOSIgb3BhY2l0eT0iLjkiLz4KPC9zdmc+Cg==" alt="MSTR" data-logo-key="xyz:MSTR" data-coin-key="xyz:MSTR" data-coin-label="MSTR" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
           </div>
           <div class="price-list clone" id="priceListClone" aria-hidden="true"></div>
           <div class="price-list clone" id="priceListClone2" aria-hidden="true"></div>
@@ -3663,7 +3713,9 @@
       tradeBookWidth: 310,
       tradeDrawingTool: "cursor",
       tradeChartSplitRatio: 0.5,
+      tradeLeaderboardCollapsed: false,
       tradeSingleRowRatio: null,
+      tradeWalletRowRatio: null,
       tradeMultiRowRatio: null,
       rawRows: [],
       normalizedRows: [],
@@ -3708,19 +3760,22 @@
     const MIN_TRADE_COLUMN_WIDTH = 280;
     const MIN_TRADE_TOP_HEIGHT_SINGLE = 280;
     const MIN_TRADE_BOTTOM_HEIGHT_SINGLE = 180;
+    const MIN_TRADE_BOTTOM_HEIGHT_WALLET = 140;
     const MIN_TRADE_TOP_HEIGHT_MULTI = 220;
     const MIN_TRADE_BOTTOM_HEIGHT_MULTI = 180;
     const DEFAULT_TRADE_SINGLE_ROW_RATIO = 3.85 / (3.85 + 1.45);
+    const DEFAULT_TRADE_SINGLE_ROW_RATIO_WALLET = 0.85;
     const DEFAULT_TRADE_MULTI_ROW_RATIO_THREE = 1.21 / (1.21 + 1);
     const DEFAULT_TRADE_MULTI_ROW_RATIO_FOUR = 1.78 / (1.78 + 0.9);
+    const TRADE_LEADERBOARD_COLLAPSED_HEIGHT = 40;
 
     const tradeFrame = document.getElementById("tradeFrame");
     const topFramePanel = document.querySelector(".top-frame-panel");
     const tradeViewStack = document.querySelector(".trade-view-stack");
     const tradeAddChartBtn = document.getElementById("tradeAddChartBtn");
-    const walletShellChrome = document.getElementById("walletShellChrome");
-    const closeWalletShellBtn = document.getElementById("closeWalletShellBtn");
     const tradeLeaderboardPanel = document.getElementById("tradeLeaderboardPanel");
+    const tradeLeaderboardBody = document.getElementById("tradeLeaderboardBody");
+    const tradeLeaderboardToggleBtn = document.getElementById("tradeLeaderboardToggleBtn");
     const tradeRowSplitter = document.getElementById("tradeRowSplitter");
     const tradeColumnSplitter = document.getElementById("tradeColumnSplitter");
     const extraChartPanels = [
@@ -3801,9 +3856,8 @@
     const walletModalBackdrop = document.getElementById("walletModalBackdrop");
     const walletTrackerFrame = document.getElementById("walletTrackerFrame");
     const walletModalSubtitle = document.getElementById("walletModalSubtitle");
-    const walletShellTabButtons = walletShellChrome ? Array.from(walletShellChrome.querySelectorAll("[data-wallet-section]")) : [];
     const walletModalTabButtons = walletModalBackdrop ? Array.from(walletModalBackdrop.querySelectorAll("[data-wallet-section]")) : [];
-    const walletSectionTabButtons = [...walletShellTabButtons, ...walletModalTabButtons];
+    const walletSectionTabButtons = [...walletModalTabButtons];
     const closeWalletModalBtn = document.getElementById("closeWalletModalBtn");
     const openStandaloneWallet = document.getElementById("openStandaloneWallet");
     const copyWalletLinkBtn = document.getElementById("copyWalletLinkBtn");
@@ -3818,20 +3872,25 @@
     const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl", "cash"];
     const INLINE_BTC_LOGO = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20shape-rendering%3D%22geometricPrecision%22%20text-rendering%3D%22geometricPrecision%22%20image-rendering%3D%22optimizeQuality%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20viewBox%3D%220%200%204091.27%204091.73%22%3E%3Cg%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill%3D%22%23F7931A%22%20d%3D%22M4030.06%202540.77C3756.82%203636.78%202646.74%204303.79%201550.6%204030.48%20454.92%203757.24-212.09%202647.09%2061.27%201551.17c273.12-1096.13%201383.2-1763.19%202479-1489.95C3636.33%20334.46%204303.3%201444.73%204030.03%202540.79l.02-.02z%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2947.77%201754.38c40.72-272.26-166.56-418.61-450-516.24l91.95-368.8-224.5-55.94-89.51%20359.09c-59.02-14.72-119.63-28.59-179.87-42.34L2186%20768.69l-224.36-55.94-92%20368.68c-48.84-11.12-96.81-22.11-143.35-33.69l.26-1.16-309.59-77.31-59.72%20239.78s166.56%2038.18%20163.05%2040.53c90.91%2022.69%20107.35%2082.87%20104.62%20130.57l-104.74%20420.15c6.26%201.59%2014.38%203.89%2023.34%207.49-7.49-1.86-15.46-3.89-23.73-5.87l-146.81%20588.57c-11.11%2027.62-39.31%2069.07-102.87%2053.33%202.25%203.26-163.17-40.72-163.17-40.72l-111.46%20256.98%20292.15%2072.83c54.35%2013.63%20107.61%2027.89%20160.06%2041.3l-92.9%20373.03%20224.24%2055.94%2092-369.07c61.26%2016.63%20120.71%2031.97%20178.91%2046.43l-91.69%20367.33%20224.51%2055.94%2092.89-372.33c382.82%2072.45%20670.67%2043.24%20791.83-303.02%2097.63-278.78-4.86-439.58-206.26-544.44%20146.69-33.83%20257.18-130.31%20286.64-329.61l-.07-.05zm-512.93%20719.26c-69.38%20278.78-538.76%20128.08-690.94%2090.29l123.28-494.2c152.17%2037.99%20640.17%20113.17%20567.67%20403.91zm69.43-723.3c-63.29%20253.58-453.96%20124.75-580.69%2093.16l111.77-448.21c126.73%2031.59%20534.85%2090.55%20468.94%20355.05h-.02z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E";
     const INLINE_ETH_LOGO = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E";
+    const INLINE_SOL_LOGO = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ4IiBoZWlnaHQ9IjE0OCIgdmlld0JveD0iMCAwIDE0OCAxNDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijc0IiBjeT0iNzQiIHI9Ijc0IiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNNDQuODA5OCA5MS4xMzY3QzQ1LjMyMjcgOTAuNjIwOCA0Ni4wMjc5IDkwLjMxOTkgNDYuNzc1OSA5MC4zMTk5SDExNC42MDdDMTE1Ljg0NiA5MC4zMTk5IDExNi40NjYgOTEuODI0NSAxMTUuNTkgOTIuNzA1OEwxMDIuMTkgMTA2LjE4M0MxMDEuNjc3IDEwNi42OTkgMTAwLjk3MiAxMDcgMTAwLjIyNCAxMDdIMzIuMzkzNEMzMS4xNTM5IDEwNyAzMC41MzQyIDEwNS40OTUgMzEuNDEwNCAxMDQuNjE0TDQ0LjgwOTggOTEuMTM2N1oiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcikiLz4KPHBhdGggZD0iTTQ0LjgwOTggNDAuODE2OEM0NS4zNDQxIDQwLjMwMDkgNDYuMDQ5MyA0MCA0Ni43NzU5IDQwSDExNC42MDdDMTE1Ljg0NiA0MCAxMTYuNDY2IDQxLjUwNDcgMTE1LjU5IDQyLjM4NTlMMTAyLjE5IDU1Ljg2MzNDMTAxLjY3NyA1Ni4zNzkyIDEwMC45NzIgNTYuNjgwMSAxMDAuMjI0IDU2LjY4MDFIMzIuMzkzNEMzMS4xNTM5IDU2LjY4MDEgMzAuNTM0MiA1NS4xNzU1IDMxLjQxMDQgNTQuMjk0Mkw0NC44MDk4IDQwLjgxNjhaIiBmaWxsPSJ1cmwoI3BhaW50MV9saW5lYXIpIi8+CjxwYXRoIGQ9Ik0xMDIuMTkgNjUuODE1NUMxMDEuNjc3IDY1LjI5OTYgMTAwLjk3MiA2NC45OTg3IDEwMC4yMjQgNjQuOTk4N0gzMi4zOTM0QzMxLjE1MzkgNjQuOTk4NyAzMC41MzQyIDY2LjUwMzQgMzEuNDEwNCA2Ny4zODQ3TDQ0LjgwOTggODAuODYyQzQ1LjMyMjcgODEuMzc3OSA0Ni4wMjc5IDgxLjY3ODkgNDYuNzc1OSA4MS42Nzg5SDExNC42MDdDMTE1Ljg0NiA4MS42Nzg5IDExNi40NjYgODAuMTc0MiAxMTUuNTkgNzkuMjkyOUwxMDIuMTkgNjUuODE1NVoiIGZpbGw9InVybCgjcGFpbnQyX2xpbmVhcikiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhciIgeDE9Ijk3Ljc5ODIiIHkxPSIyNi41MjUyIiB4Mj0iNTAuNDI0NiIgeTI9IjExNi43NCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMDBGRkEzIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0RDMUZGRiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MV9saW5lYXIiIHgxPSI5Ny43OTgyIiB5MT0iMjYuNTI1MiIgeDI9IjUwLjQyNDYiIHkyPSIxMTYuNzQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwRkZBMyIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNEQzFGRkYiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDJfbGluZWFyIiB4MT0iOTcuNzk4MiIgeTE9IjI2LjUyNTIiIHgyPSI1MC40MjQ2IiB5Mj0iMTE2Ljc0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMwMEZGQTMiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjREMxRkZGIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+Cg==";
+    const INLINE_HYPE_LOGO = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDE0NCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xNDQgNzEuNjk5MUMxNDQgMTE5LjMwNiAxMTQuODY2IDEzNC41ODIgOTkuNTE1NiAxMjAuOThDODYuODgwNCAxMDkuODg5IDgzLjEyMTEgODYuNDUyMSA2NC4xMTYgODQuMDQ1NkMzOS45OTQyIDgxLjAxMTMgMzcuOTA1NyAxMTMuMTMzIDIyLjAzMzQgMTEzLjEzM0MzLjU1MDQgMTEzLjEzMyAwIDg2LjI0MjggMCA3Mi40MzE1QzAgNTguMzA2MyAzLjk2ODA5IDM5LjA1NDIgMTkuNzM2IDM5LjA1NDJDMzguMTE0NiAzOS4wNTQyIDM5LjE1ODggNjYuNTcyMiA2Mi4xMzIgNjUuMTA3M0M4NS4wMDA3IDYzLjUzNzkgODUuNDE4NCAzNC44Njg5IDEwMC4yNDcgMjIuNjI3MUMxMTMuMTk1IDEyLjA1OTMgMTQ0IDIzLjQ2NDEgMTQ0IDcxLjY5OTFaIiBmaWxsPSIjOTdGQ0U0Ii8+Cjwvc3ZnPgo=";
+    const INLINE_NVDA_LOGO = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJOVkRBIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iIzc2YjkwMCIvPgogIDxwYXRoIGQ9Ik0xNCAzMS43YzUuNC04LjQgMTIuOS0xMy4xIDIyLjUtMTMuMSA2LjMgMCAxMS43IDIuMSAxNS41IDYtMy44LTEuOS03LjYtMi44LTExLjctMi44LTcuNSAwLTEzLjkgMy4yLTE5LjIgOS44IDMuMiA0LjMgNy40IDYuNCAxMi40IDYuNCA0LjcgMCA4LjYtMi4xIDExLjMtNi4zLTIuMy0xLjktNC45LTIuOS03LjctMi45LTMuOCAwLTYuOSAxLjgtOS4yIDUuMiAxLjQtNSA1LjctOC4zIDEwLjctOC4zIDMuOCAwIDcuMSAxLjMgOS45IDMuOGwuOS44LS41IDFjLTMuOSA3LTkuOSAxMC42LTE3LjcgMTAuNi03LjIgMC0xMy4xLTMuNC0xOC0xMGwtLjctLjl6IiBmaWxsPSIjZmZmIi8+CiAgPGNpcmNsZSBjeD0iMzguNSIgY3k9IjMyLjIiIHI9IjUuNSIgZmlsbD0iIzc2YjkwMCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIuOCIvPgo8L3N2Zz4K";
+    const INLINE_MSTR_LOGO = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJNU1RSIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iI2ZmOGExYyIvPgogIDxwYXRoIGQ9Ik0xMyA0N1YxN2g4LjFMMzIgMjkuNiA0Mi45IDE3SDUxdjMwaC04VjI4LjhMMzIgNDEgMjEgMjguOFY0N3oiIGZpbGw9IiNmZmYiLz4KICA8cGF0aCBkPSJNNDYgMTRoNnY4aC02eiIgZmlsbD0iIzJiMjExOSIgb3BhY2l0eT0iLjkiLz4KPC9zdmc+Cg==";
     const FOOTER_SPECIAL_LOGOS = new Map([
-      ["HYPE", "https://hyperfoundation.org/landing/blob_green.gif"],
+      ["HYPE", INLINE_HYPE_LOGO],
+      ["SOL", INLINE_SOL_LOGO],
       ["DOGE", "https://s2.coinmarketcap.com/static/img/coins/64x64/74.gif"],
       ["DOT", "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.gif"],
       ["LINK", "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif"],
       ["RENDER", "https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif"],
       ["XRP", "https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif"],
+      ["NVDA", INLINE_NVDA_LOGO],
+      ["MSTR", INLINE_MSTR_LOGO],
       ["GOLD", "images/coins/GOLD.svg"],
       ["SILVER", "images/coins/SILVER.svg"],
       ["USA500", "images/coins/USA500.png"]
     ]);
     const DOMAIN_LOGOS = new Map([
-      ["NVDA", "https://logo.clearbit.com/nvidia.com"],
-      ["MSTR", "https://logo.clearbit.com/microstrategy.com"],
       ["TSLA", "https://logo.clearbit.com/tesla.com"],
       ["AAPL", "https://logo.clearbit.com/apple.com"],
       ["AMZN", "https://logo.clearbit.com/amazon.com"],
@@ -3844,6 +3903,11 @@
     const SPECIAL_LOGOS = new Map([
       ["BTC", INLINE_BTC_LOGO],
       ["ETH", INLINE_ETH_LOGO],
+      ["SOL", INLINE_SOL_LOGO],
+      ["HYPE", INLINE_HYPE_LOGO],
+      ["LINK", "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif"],
+      ["NVDA", INLINE_NVDA_LOGO],
+      ["MSTR", INLINE_MSTR_LOGO],
       ["USA500", "images/coins/USA500.png"],
       ["COPPER", "images/coins/COPPER.png"],
       ["GOLD", "images/coins/GOLD.svg"],
@@ -3859,7 +3923,7 @@
       ["USA500", "#e04f5f"],
       ["XRP", "#ffffff"]
     ]);
-    const GLOBAL_SPECIAL_LOGO_PRIORITY = new Set(["BTC", "ETH", "USA500"]);
+    const GLOBAL_SPECIAL_LOGO_PRIORITY = new Set(["BTC", "ETH", "SOL", "HYPE", "LINK", "NVDA", "MSTR", "USA500"]);
     const FOOTER_CHANGE_RANGES = {
       "5m": { label: "5 min", ms: 5 * 60 * 1000, interval: "1m" },
       "1h": { label: "1 hr", ms: 60 * 60 * 1000, interval: "5m" },
@@ -3870,6 +3934,10 @@
     let trackedFooterCoins = TRACKER_FOOTER_DEFAULT_COINS.slice();
     let footerRefreshTimer = null;
     let footerReady = false;
+    let footerInitPromise = null;
+    let footerInitScheduled = false;
+    let footerInitIdleHandle = 0;
+    let footerInitTimer = 0;
     let footerChangeEnabled = true;
     let footerChangeRange = "1d";
     let footerChangeRangeKey = "1d";
@@ -3908,6 +3976,7 @@
     let manualMidTimer = null;
     let lastManualMidRefreshRequestMs = 0;
     let footerDexNames = null;
+    let footerStreamStartedAt = 0;
     let footerTickerUpdateRaf = 0;
     let footerTickerLastMeasureAt = 0;
     let footerTickerMetricsSignature = "";
@@ -4777,8 +4846,7 @@
     function buildWalletShellTrackerHref(wallet, section = state.walletModalSection) {
       const params = new URLSearchParams();
       params.set("wallet", wallet);
-      params.set("embed", "shell");
-      params.set("section", normalizeWalletShellSection(section));
+      params.set("embed", "tracker");
       applyWalletSkillOverrides(params, wallet);
       return "track.html?" + params.toString();
     }
@@ -5261,7 +5329,8 @@
         });
 
         const specialLogo = getSpecialLogoUrl(rawName, cleanName);
-        if (shouldPrioritizeSpecialLogo && specialLogo) candidates.push(specialLogo);
+        const shouldPrioritizeLocalSpecialLogo = specialLogo && isSameOriginAsset(specialLogo);
+        if ((shouldPrioritizeSpecialLogo || shouldPrioritizeLocalSpecialLogo) && specialLogo) candidates.push(specialLogo);
 
         // Prefer exact prefixed Hyperliquid logos for HIP-3/non-crypto assets.
         addPrefixedCandidates(cleanName);
@@ -5273,7 +5342,7 @@
         addWrappedSpotFallback(cleanName);
         addWrappedSpotFallback(rawName);
 
-        if (!shouldPrioritizeSpecialLogo && specialLogo) candidates.push(specialLogo);
+        if (!(shouldPrioritizeSpecialLogo || shouldPrioritizeLocalSpecialLogo) && specialLogo) candidates.push(specialLogo);
         addSymbolCandidates(rawName);
         addSymbolCandidates(cleanName);
 
@@ -5857,8 +5926,20 @@
       }
 
       async function primeManualMidsForFooter() {
-        const manualCoins = trackedFooterCoins.filter((coin) => coin.includes(":"));
-        if (!manualCoins.length) return;
+        if (!footerStreamStartedAt || Date.now() - footerStreamStartedAt < 3000) {
+          manualMidCoins.clear();
+          stopManualMidTimerIfIdle();
+          return;
+        }
+        const manualCoins = trackedFooterCoins.filter((coin) => {
+          if (!coin.includes(":")) return false;
+          return !Number.isFinite(getExactLivePriceForCoin(coin));
+        });
+        manualMidCoins.clear();
+        if (!manualCoins.length) {
+          stopManualMidTimerIfIdle();
+          return;
+        }
         manualCoins.forEach((coin) => manualMidCoins.add(coin));
         ensureManualMidTimer();
         await refreshManualMids();
@@ -5970,17 +6051,9 @@
         const existing = getExactLivePriceForCoin(coinKey);
         let mid = Number.isFinite(existing) ? existing : null;
         let logoUrl = null;
-        if (Number.isFinite(existing) && normalizedCoin.includes(":")) {
-          manualMidCoins.add(normalizedCoin);
-          ensureManualMidTimer();
-        }
         if (!Number.isFinite(existing)) {
           logoUrl = await findAvailableLogoUrl(coinKey);
           if (logoUrl) rememberLogoOk(coinKey, logoUrl);
-          if (normalizedCoin.includes(":")) {
-            manualMidCoins.add(normalizedCoin);
-            ensureManualMidTimer();
-          }
         }
         if (!logoUrl && Number.isFinite(existing)) {
           return { coinKey, hasLogo: false, hasPrice: true };
@@ -6367,12 +6440,19 @@
           }
           if (priceEl) {
             if (!Number.isFinite(price)) {
-              const retryCoins = coin.includes(":") ? [normalizeFooterCoinValue(coin)] : getPrefixedCandidates(base);
+              const retryCoins =
+                coin.includes(":") &&
+                footerStreamStartedAt &&
+                Date.now() - footerStreamStartedAt >= 3000
+                  ? [normalizeFooterCoinValue(coin)]
+                  : [];
               retryCoins.forEach((retryCoin) => {
                 if (retryCoin) manualMidCoins.add(normalizeFooterCoinValue(retryCoin));
               });
-              ensureManualMidTimer();
-              requestManualMidRefresh();
+              if (retryCoins.length) {
+                ensureManualMidTimer();
+                requestManualMidRefresh();
+              }
             }
             if (Number.isFinite(displayPrice)) {
               let decimals = coinPriceDecimals.get(footerPriceCacheKey);
@@ -6744,6 +6824,7 @@
         if (baseResult) {
           trackedFooterCoins.push(baseResult.coinKey);
           saveFooterCoins();
+          void ensureFooterPriceStream();
           renderFooterPrices();
           return;
         }
@@ -6754,6 +6835,7 @@
           if (prefixedResult) {
             trackedFooterCoins.push(prefixedResult.coinKey);
             saveFooterCoins();
+            void ensureFooterPriceStream();
             renderFooterPrices();
             return;
           }
@@ -6767,6 +6849,7 @@
         coinPriceDecimals.delete(symbol);
         stopManualMidTimerIfIdle();
         saveFooterCoins();
+        void ensureFooterPriceStream();
         renderFooterPrices();
       }
 
@@ -6899,6 +6982,7 @@
 
       ws.addEventListener("close", () => {
         if (footerWsByDex.get(wsKey) === ws) footerWsByDex.delete(wsKey);
+        if (!getRequiredFooterDexNames().includes(wsKey)) return;
         window.setTimeout(() => connectFooterWsForDex(wsKey), 2000);
       });
 
@@ -6907,24 +6991,45 @@
       });
     }
 
+    function getRequiredFooterDexNames() {
+      const required = new Set([""]);
+      trackedFooterCoins.forEach((coin) => {
+        const { dex } = splitDexCoin(coin);
+        if (dex) required.add(String(dex));
+      });
+      return Array.from(required);
+    }
+
     async function ensureFooterPriceStream() {
-      const dexNames = await fetchFooterDexNames();
+      await fetchFooterDexNames();
+      const dexNames = getRequiredFooterDexNames();
+      footerStreamStartedAt = Date.now();
+      footerWsByDex.forEach((ws, dex) => {
+        if (dexNames.includes(dex)) return;
+        footerWsByDex.delete(dex);
+        try { ws.close(); } catch (error) {}
+      });
       dexNames.forEach((dex) => connectFooterWsForDex(dex));
     }
 
     async function refreshFooterBar() {
-      await ensureFooterPriceStream();
+      if (!footerInitPromise) {
+        await initFooterBar();
+        return;
+      }
       await bootstrapFooterCatalog(true);
+      await sanitizeFooterCoins();
+      await ensureFooterPriceStream();
       await refreshFooterChanges();
       await primeManualMidsForFooter();
       renderFooterPrices();
     }
 
     async function initFooterStream() {
-      await ensureFooterPriceStream();
       applyFooterChangeVisibility();
       await refreshFooterChanges();
       await sanitizeFooterCoins();
+      await ensureFooterPriceStream();
       await primeManualMidsForFooter();
       syncFooterCurrencyButtons();
       if (footerPriceCurrency === "EUR") {
@@ -6937,21 +7042,58 @@
     }
 
     async function initFooterBar() {
-      loadFooterCoins();
-      loadFooterCurrencyPref();
-      loadFooterChangePrefs();
-      loadCoinNameCache();
-      loadCoinColorCache();
-      syncFooterCurrencyButtons();
-      applyFooterChangeVisibility();
-      updateFooterChangeMenu();
-      syncFooterAddControls();
-      renderFooterPrices();
-      revealFooter(true);
-      await bootstrapFooterCatalog();
-      renderFooterPrices();
-      await initFooterStream();
-      ensureFooterChangeTimer();
+      if (footerInitPromise) return footerInitPromise;
+      if (footerInitIdleHandle && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(footerInitIdleHandle);
+        footerInitIdleHandle = 0;
+      }
+      if (footerInitTimer) {
+        window.clearTimeout(footerInitTimer);
+        footerInitTimer = 0;
+      }
+      footerInitScheduled = false;
+
+      footerInitPromise = (async () => {
+        loadFooterCoins();
+        loadFooterCurrencyPref();
+        loadFooterChangePrefs();
+        loadCoinNameCache();
+        loadCoinColorCache();
+        syncFooterCurrencyButtons();
+        applyFooterChangeVisibility();
+        updateFooterChangeMenu();
+        syncFooterAddControls();
+        renderFooterPrices();
+        revealFooter(true);
+        await bootstrapFooterCatalog();
+        renderFooterPrices();
+        await initFooterStream();
+        ensureFooterChangeTimer();
+      })().catch((error) => {
+        footerInitPromise = null;
+        console.error("Failed to initialize footer bar", error);
+        throw error;
+      });
+
+      return footerInitPromise;
+    }
+
+    function scheduleFooterBarInit() {
+      if (footerInitPromise || footerInitScheduled) return;
+      footerInitScheduled = true;
+
+      const start = () => {
+        footerInitIdleHandle = 0;
+        footerInitTimer = 0;
+        void initFooterBar().catch(() => {});
+      };
+
+      if (typeof window.requestIdleCallback === "function") {
+        footerInitIdleHandle = window.requestIdleCallback(start, { timeout: 2500 });
+        return;
+      }
+
+      footerInitTimer = window.setTimeout(start, 1200);
     }
 
     async function ensureHeaderCoinOptions() {
@@ -7066,17 +7208,19 @@
     function getDefaultTradeRowRatio(extraCount) {
       if (extraCount >= 2) return DEFAULT_TRADE_MULTI_ROW_RATIO_FOUR;
       if (extraCount === 1) return DEFAULT_TRADE_MULTI_ROW_RATIO_THREE;
-      return DEFAULT_TRADE_SINGLE_ROW_RATIO;
+      return state.wallet ? DEFAULT_TRADE_SINGLE_ROW_RATIO_WALLET : DEFAULT_TRADE_SINGLE_ROW_RATIO;
     }
 
     function getTradeRowRatio(extraCount) {
       if (extraCount > 0) return state.tradeMultiRowRatio ?? getDefaultTradeRowRatio(extraCount);
+      if (state.wallet) return state.tradeWalletRowRatio ?? getDefaultTradeRowRatio(extraCount);
       return state.tradeSingleRowRatio ?? getDefaultTradeRowRatio(extraCount);
     }
 
     function setTradeRowRatio(extraCount, ratio) {
       const nextRatio = Number.isFinite(ratio) ? ratio : getDefaultTradeRowRatio(extraCount);
       if (extraCount > 0) state.tradeMultiRowRatio = nextRatio;
+      else if (state.wallet) state.tradeWalletRowRatio = nextRatio;
       else state.tradeSingleRowRatio = nextRatio;
     }
 
@@ -7117,7 +7261,7 @@
 
       const rowTop = layout.topPx + ((layout.rowGap || 0) / 2);
       tradeViewStack.style.setProperty("--trade-row-splitter-top", rowTop + "px");
-      tradeRowSplitter.hidden = false;
+      tradeRowSplitter.hidden = Boolean(layout.hideRow);
       if (layout.multi && Number.isFinite(layout.leftPx)) {
         tradeViewStack.style.setProperty("--trade-column-splitter-left", layout.leftPx + "px");
         tradeViewStack.style.setProperty("--trade-column-splitter-top", "0px");
@@ -7165,6 +7309,7 @@
       const computed = getComputedStyle(tradeViewStack);
       const rowGap = parseFloat(computed.rowGap) || 0;
       const multiLayout = extraCount > 0;
+      const leaderboardCollapsed = !multiLayout && state.tradeLeaderboardCollapsed;
 
       if (multiLayout) {
         const bookWidth = clampTradeBookWidth(state.tradeBookWidth, width);
@@ -7179,18 +7324,50 @@
         tradeViewStack.style.gridTemplateRows = "minmax(0, " + topPx + "px) minmax(0, 1fr)";
         tradeViewStack.style.gridTemplateColumns = "minmax(0, " + leftPx + "px) minmax(0, 1fr)";
 
-        syncTradeSplitters({ multi: true, topPx, leftPx, rowGap: 0 });
+        syncTradeSplitters({ multi: true, topPx, leftPx, rowGap: 0, hideRow: false });
         syncTradeFrameLayout();
         return;
       }
 
       const ratio = getTradeRowRatio(0);
       const usableHeight = Math.max(0, height - rowGap);
-      const topMax = Math.max(MIN_TRADE_TOP_HEIGHT_SINGLE, usableHeight - MIN_TRADE_BOTTOM_HEIGHT_SINGLE);
-      const topPx = clamp(Math.round(usableHeight * ratio), MIN_TRADE_TOP_HEIGHT_SINGLE, topMax);
-      tradeViewStack.style.gridTemplateRows = "minmax(0, " + topPx + "px) minmax(0, 1fr)";
-      syncTradeSplitters({ multi: false, topPx, rowGap });
+      let topPx = 0;
+      if (leaderboardCollapsed) {
+        const bottomPx = Math.max(0, Math.min(TRADE_LEADERBOARD_COLLAPSED_HEIGHT, usableHeight - MIN_TRADE_TOP_HEIGHT_SINGLE));
+        topPx = Math.max(0, usableHeight - bottomPx);
+        tradeViewStack.style.gridTemplateRows = "minmax(0, " + topPx + "px) minmax(0, " + bottomPx + "px)";
+        syncTradeSplitters({ multi: false, topPx, rowGap, hideRow: true });
+      } else {
+        const minBottom = state.wallet ? MIN_TRADE_BOTTOM_HEIGHT_WALLET : MIN_TRADE_BOTTOM_HEIGHT_SINGLE;
+        const topMax = Math.max(MIN_TRADE_TOP_HEIGHT_SINGLE, usableHeight - minBottom);
+        topPx = clamp(Math.round(usableHeight * ratio), MIN_TRADE_TOP_HEIGHT_SINGLE, topMax);
+        tradeViewStack.style.gridTemplateRows = "minmax(0, " + topPx + "px) minmax(0, 1fr)";
+        syncTradeSplitters({ multi: false, topPx, rowGap, hideRow: false });
+      }
       syncTradeFrameLayout();
+    }
+
+    function syncTradeLeaderboardUi() {
+      if (!tradeLeaderboardPanel || !tradeLeaderboardToggleBtn) return;
+      const totalCharts = state.topChartCount + state.extraCharts.length;
+      const visible = !tradeLeaderboardPanel.hidden;
+      const collapsed = totalCharts < 3 && visible && state.tradeLeaderboardCollapsed;
+      tradeLeaderboardPanel.classList.toggle("is-collapsed", collapsed);
+      if (tradeLeaderboardBody) {
+        tradeLeaderboardBody.setAttribute("aria-hidden", collapsed ? "true" : "false");
+      }
+      tradeLeaderboardToggleBtn.hidden = totalCharts === 3 || !visible;
+      tradeLeaderboardToggleBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      tradeLeaderboardToggleBtn.setAttribute("aria-label", collapsed ? "Show leaderboard" : "Hide leaderboard");
+      tradeLeaderboardToggleBtn.setAttribute("title", collapsed ? "Show leaderboard" : "Hide leaderboard");
+    }
+
+    function setTradeLeaderboardCollapsed(collapsed) {
+      const next = Boolean(collapsed);
+      if (state.tradeLeaderboardCollapsed === next) return;
+      state.tradeLeaderboardCollapsed = next;
+      syncTradeLeaderboardUi();
+      applyTradeViewInlineLayout(state.extraCharts.length);
     }
 
     function updateExtraTradeFrames() {
@@ -7301,8 +7478,10 @@
         tradeLeaderboardPanel.hidden = extraCount >= 2;
       }
 
+      syncTradeLeaderboardUi();
+
       if (tradeAddChartBtn) {
-        tradeAddChartBtn.hidden = Boolean(state.wallet) || !(state.topChartCount >= 2 && totalCharts < 4);
+        tradeAddChartBtn.hidden = true;
       }
 
       updateExtraTradeFrames();
@@ -7357,7 +7536,9 @@
         const rowGap = extraCount > 0 ? 0 : (parseFloat(getComputedStyle(tradeViewStack).rowGap) || 0);
         const usableHeight = Math.max(0, height - rowGap);
         const minTop = extraCount > 0 ? MIN_TRADE_TOP_HEIGHT_MULTI : MIN_TRADE_TOP_HEIGHT_SINGLE;
-        const minBottom = extraCount > 0 ? MIN_TRADE_BOTTOM_HEIGHT_MULTI : MIN_TRADE_BOTTOM_HEIGHT_SINGLE;
+        const minBottom = extraCount > 0
+          ? MIN_TRADE_BOTTOM_HEIGHT_MULTI
+          : (state.wallet ? MIN_TRADE_BOTTOM_HEIGHT_WALLET : MIN_TRADE_BOTTOM_HEIGHT_SINGLE);
         const targetTop = clamp(
           Math.round(tradeSplitDrag.lastClientY - bounds.top - rowGap / 2),
           minTop,
@@ -7392,6 +7573,7 @@
       tradeSplitDrag.handle = null;
       if (tradeRowSplitter) tradeRowSplitter.classList.remove("is-dragging");
       if (tradeColumnSplitter) tradeColumnSplitter.classList.remove("is-dragging");
+      if (tradeViewStack) tradeViewStack.classList.remove("is-split-dragging");
       document.body.style.removeProperty("cursor");
       document.body.style.removeProperty("user-select");
     }
@@ -7422,6 +7604,7 @@
       }
       if (kind === "column" && tradeColumnSplitter) tradeColumnSplitter.classList.add("is-dragging");
       if (kind === "row" && tradeRowSplitter) tradeRowSplitter.classList.add("is-dragging");
+      if (tradeViewStack) tradeViewStack.classList.add("is-split-dragging");
       queueTradeSplitDragFrame();
     }
 
@@ -7469,7 +7652,6 @@
       if (selectedWalletPill) selectedWalletPill.hidden = !hasWallet;
       if (tradeWalletInline) tradeWalletInline.hidden = !hasWallet;
       if (viewWalletBtn) viewWalletBtn.hidden = !hasWallet;
-      if (walletShellChrome) walletShellChrome.hidden = !hasWallet;
       if (topFramePanel) topFramePanel.classList.toggle("is-wallet-mode", hasWallet);
 
       if (hasWallet) {
@@ -7483,10 +7665,7 @@
 
     function syncWalletModalTabs() {
       walletSectionTabButtons.forEach((button) => {
-        const targetSection =
-          walletShellChrome && walletShellChrome.contains(button)
-            ? normalizeWalletShellSection(state.walletModalSection)
-            : state.walletModalSection;
+        const targetSection = state.walletModalSection;
         const isActive = button.dataset.walletSection === targetSection;
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-selected", isActive ? "true" : "false");
@@ -7516,9 +7695,13 @@
     function openWalletOverlay(wallet, options = {}) {
       const targetWallet = (wallet || "").trim();
       if (!targetWallet) return;
+      const wasWalletOpen = Boolean(state.wallet);
 
       state.wallet = targetWallet;
       state.walletModalSection = normalizeWalletModalSection(options.section || "positions");
+      if (!wasWalletOpen) {
+        state.tradeLeaderboardCollapsed = true;
+      }
       syncWalletUi();
       syncWalletModalTabs();
 
@@ -7543,6 +7726,7 @@
       pendingTradeFavoritesPanelOpen = false;
       state.wallet = "";
       state.walletModalSection = "positions";
+      state.tradeLeaderboardCollapsed = false;
       syncWalletUi();
       syncWalletModalTabs();
       walletTrackerFrame.src = "";
@@ -8382,12 +8566,6 @@
       });
     }
 
-    if (closeWalletShellBtn) {
-      closeWalletShellBtn.addEventListener("click", () => {
-        closeWalletOverlay({ pushHistory: true });
-      });
-    }
-
     if (profitFilterList) {
       profitFilterList.addEventListener("click", (event) => {
         const target = event.target;
@@ -8447,8 +8625,7 @@
     walletSectionTabButtons.forEach((button) => {
       button.addEventListener("click", () => {
         if (!state.wallet) return;
-        const fallbackSection =
-          walletShellChrome && walletShellChrome.contains(button) ? "positions" : "overview";
+        const fallbackSection = "overview";
         setWalletModalSection(button.dataset.walletSection || fallbackSection);
       });
     });
@@ -8735,6 +8912,12 @@
       });
     }
 
+    if (tradeLeaderboardToggleBtn) {
+      tradeLeaderboardToggleBtn.addEventListener("click", () => {
+        setTradeLeaderboardCollapsed(!state.tradeLeaderboardCollapsed);
+      });
+    }
+
     if (tradeRowSplitter) {
       tradeRowSplitter.addEventListener("pointerdown", (event) => {
         startTradeSplitDrag("row", event);
@@ -8756,6 +8939,7 @@
         tradeFrameReady = true;
         postThemeToFrame(tradeFrame);
         if (state.wallet) postWalletSkillOverridesToFrame(tradeFrame, state.wallet);
+        scheduleFooterBarInit();
         syncTradeFrameExtraCount();
         syncTradeFrameLayout();
         syncTradeTimeframe();
@@ -8839,6 +9023,10 @@
         return;
       }
       if (!isPrimaryFrame) return;
+      if (data.type === "hypermonitor:add-extra-chart") {
+        addExtraChart();
+        return;
+      }
       if (data.type === "hypermonitor:remove-extra-chart") {
         removeLastExtraChart();
         return;
@@ -8903,7 +9091,6 @@
     syncTradeLayout();
     syncWalletUi();
 
-    initFooterBar();
     ensureHeaderCoinOptions().then(() => {
       updateHeaderSuggestions();
     });

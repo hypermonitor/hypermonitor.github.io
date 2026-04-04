@@ -29,6 +29,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
 
   <link rel="icon" type="image/png" href="images/favicon.png" />
+  <script>
+    (() => {
+      document.documentElement.classList.add("tracker-startup-loading");
+      try {
+        if (localStorage.getItem("hypermonitor-theme") === "light") {
+          document.documentElement.classList.add("light");
+        }
+      } catch (_) {}
+    })();
+  </script>
 
   <style>
     :root {
@@ -36,6 +46,7 @@
       color-scheme: dark;
       --bg: #0d1014;
       --bg-soft: #12161c;
+      --surface2: #0f1318;
       --panel: rgba(15, 18, 23, 0.92);
       --panel-strong: rgba(15, 18, 23, 0.98);
       --panel-muted: rgba(255, 255, 255, 0.02);
@@ -67,6 +78,10 @@
 
     * { box-sizing: border-box; }
 
+    html.light {
+      color-scheme: light;
+    }
+
     body {
       margin: 0;
       padding: 0;
@@ -80,13 +95,14 @@
     }
 
     body.embed-popup,
-    body.embed-shell {
+    body.embed-shell,
+    body.embed-tracker {
       overflow-x: hidden;
     }
 
     body.embed-shell {
-      height: 100vh;
-      overflow: hidden;
+      height: auto;
+      overflow-y: auto;
     }
 
     #app {
@@ -96,50 +112,257 @@
     }
 
     body.embed-popup #app,
-    body.embed-shell #app {
+    body.embed-shell #app,
+    body.embed-tracker #app {
       width: calc(100vw - 12px);
       padding-top: 0;
     }
 
     body.embed-shell #app {
-      height: 100%;
-      padding-bottom: 0;
+      height: auto;
+      padding-bottom: 32px;
     }
 
     body.embed-popup .dashboard-shell {
       grid-template-columns: 1fr;
-      gap: 0.8rem;
+      gap: 0.85rem;
       margin-bottom: 0.8rem;
+    }
+
+    body.embed-tracker .dashboard-shell {
+      grid-template-columns: minmax(290px, 336px) minmax(0, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 0.8rem;
+      align-items: start;
+    }
+
+    body.embed-tracker .dashboard-main {
+      gap: 0.85rem;
+      align-content: start;
+    }
+
+    body.embed-tracker #performanceSection {
+      order: 1;
+    }
+
+    body.embed-tracker .positions-card {
+      order: 2;
+    }
+
+    body.embed-tracker #liveLayout,
+    body.embed-tracker #historyLayout {
+      order: 3;
+    }
+
+    body.embed-tracker .card,
+    body.embed-tracker .chart-card {
+      border-radius: 10px;
+      background: transparent;
+      border-color: transparent;
+      border-width: 0;
+      box-shadow: none;
+    }
+
+    body.embed-tracker .card::before,
+    body.embed-tracker .chart-card::before {
+      opacity: 0;
+    }
+
+    body.embed-tracker .account-overview-card,
+    body.embed-tracker .positions-card,
+    body.embed-tracker #performanceSection,
+    body.embed-tracker #liveLayout,
+    body.embed-tracker #historyLayout {
+      padding: 0.82rem;
+      border: 0;
+      border-radius: 12px;
+      background: var(--surface2);
+      box-shadow: none;
+    }
+
+    body.embed-tracker .section-title {
+      margin: 0 0 0.55rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    body.embed-tracker .section-title h2 {
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-main);
+    }
+
+    body.embed-tracker #performanceSection .section-title {
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    body.embed-tracker #performanceSection .performance-share-btn {
+      display: none;
+    }
+
+    body.embed-tracker #performanceSection .performance-close-btn {
+      display: inline-flex;
+    }
+
+    body.embed-tracker .chart-grid.performance-tile-layout {
+      gap: 8px;
+    }
+
+    body.embed-tracker .chart-card {
+      padding: 0.64rem 0.66rem 0.68rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.018);
+    }
+
+    body.embed-tracker .chart-card h3 {
+      margin-bottom: 0.22rem;
+      font-size: 0.8rem;
+      line-height: 1.15;
+    }
+
+    body.embed-tracker .spark-label {
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    body.embed-tracker .chart-canvas-wrap,
+    body.embed-tracker .transfers-wrap,
+    body.embed-tracker .pnl-heatmap-wrap,
+    body.embed-tracker .overview-radar-wrap,
+    body.embed-tracker .overview-breakdown-panel,
+    body.embed-tracker .positions-table-wrap {
+      border-radius: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    body.embed-tracker .positions-timeline-wrap {
+      margin: 0.1rem 0 0.7rem;
+      border-radius: 12px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    body.embed-tracker thead {
+      background: #0f1318;
+    }
+
+    body.embed-tracker tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    body.embed-tracker .position-row:hover,
+    body.embed-tracker tbody tr:hover {
+      background: rgba(148, 163, 184, 0.06);
+    }
+
+    body.embed-tracker .overview-subtitle,
+    body.embed-tracker .overview-section-subtitle {
+      display: none;
+    }
+
+    body.embed-tracker .overview-main-value {
+      font-size: clamp(1.6rem, 2.4vw, 2.18rem);
+      letter-spacing: -0.035em;
+    }
+
+    body.embed-tracker .overview-main-meta {
+      display: none;
+    }
+
+    body.embed-tracker .overview-direction-track,
+    body.embed-tracker .overview-allocation-track {
+      background: rgba(148, 163, 184, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.06);
+    }
+
+    body.embed-tracker .overview-wallet-copy:hover,
+    body.embed-tracker .overview-wallet-copy:focus-visible {
+      background: rgba(148, 163, 184, 0.08);
+    }
+
+    body.light.embed-tracker .card,
+    body.light.embed-tracker .chart-card {
+      background: transparent;
+      border-color: transparent;
+    }
+
+    body.light.embed-tracker .account-overview-card,
+    body.light.embed-tracker .positions-card,
+    body.light.embed-tracker #performanceSection,
+    body.light.embed-tracker #liveLayout,
+    body.light.embed-tracker #historyLayout {
+      background: var(--panel);
+      border: 0;
+      box-shadow: none;
+    }
+
+    body.light.embed-tracker .chart-card,
+    body.light.embed-tracker .overview-section,
+    body.light.embed-tracker .overview-radar-panel,
+    body.light.embed-tracker .overview-breakdown-panel,
+    body.light.embed-tracker .overview-metric-list,
+    body.light.embed-tracker .positions-timeline-wrap {
+      background: rgba(255, 255, 255, 0.98);
+      border: 0;
+      box-shadow: none;
+    }
+
+    body.light.embed-tracker .chart-canvas-wrap,
+    body.light.embed-tracker .transfers-wrap,
+    body.light.embed-tracker .pnl-heatmap-wrap,
+    body.light.embed-tracker .overview-radar-wrap,
+    body.light.embed-tracker .positions-table-wrap,
+    body.light.embed-tracker .overview-section,
+    body.light.embed-tracker .overview-radar-panel,
+    body.light.embed-tracker .overview-breakdown-panel,
+    body.light.embed-tracker .overview-metric-list,
+    body.light.embed-tracker .positions-timeline-wrap {
+      background: transparent;
+      border: 0;
+    }
+
+    body.light.embed-tracker thead {
+      background: #f5f7fb;
+    }
+
+    body.light.embed-tracker tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.015);
+    }
+
+    body.light.embed-tracker .position-row:hover,
+    body.light.embed-tracker tbody tr:hover {
+      background: rgba(15, 23, 42, 0.04);
     }
 
     body.embed-shell .dashboard-shell {
       margin-bottom: 0.8rem;
-      align-items: stretch;
-      height: calc(100vh - 12px);
-      min-height: calc(100vh - 12px);
+      align-items: start;
+      height: auto;
+      min-height: 0;
       --shell-sidebar-col: minmax(280px, 330px);
       grid-template-columns: var(--shell-sidebar-col) minmax(0, 1fr);
       transition: grid-template-columns 240ms ease, gap 240ms ease;
     }
 
     body.embed-popup .dashboard-main {
-      gap: 0.8rem;
+      gap: 0.85rem;
     }
 
     body.embed-shell .dashboard-main {
-      gap: 0.8rem;
-      grid-template-rows: auto minmax(0, 1fr);
-      align-content: stretch;
-      height: 100%;
+      gap: 0.85rem;
+      grid-template-rows: auto;
+      align-content: start;
+      height: auto;
       min-height: 0;
-      overflow: auto;
-      overscroll-behavior: contain;
-      scrollbar-width: none;
-    }
-
-    body.embed-shell .dashboard-main::-webkit-scrollbar {
-      width: 0;
-      height: 0;
+      overflow: visible;
+      overscroll-behavior: auto;
+      scrollbar-width: auto;
     }
 
   .shell-main-topbar {
@@ -230,76 +453,25 @@
       display: block;
     }
 
-    .shell-overview-toggle-btn {
-      width: 30px;
-      height: 30px;
-      min-width: 30px;
-      border: 0;
-      border-radius: 4px;
-      background: transparent;
-      color: var(--muted);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      cursor: pointer;
-      transition: color 160ms ease, transform 220ms ease;
-      flex: 0 0 auto;
-    }
-
-    .shell-overview-toggle-btn:hover,
-    .shell-overview-toggle-btn:focus-visible {
-      color: var(--text-main);
-      outline: none;
-    }
-
-    .shell-overview-toggle-btn svg {
-      width: 16px;
-      height: 16px;
-      display: block;
-    }
-
     body.embed-shell .dashboard-sidebar {
       position: static;
-      align-self: stretch;
+      align-self: start;
       display: flex;
-      height: 100%;
+      height: auto;
       min-height: 0;
       min-width: 0;
-      overflow: hidden;
+      overflow: visible;
       transition: opacity 220ms ease, transform 220ms ease;
     }
 
     body.embed-shell .dashboard-sidebar .account-overview-card {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 100%;
+      display: block;
+      height: auto;
+      min-height: 0;
       max-height: none;
-      overflow: auto;
-      overscroll-behavior: contain;
-      scrollbar-width: none;
-    }
-
-    body.embed-shell.shell-overview-collapsed .dashboard-shell {
-      --shell-sidebar-col: 0px;
-      gap: 0;
-    }
-
-    body.embed-shell.shell-overview-collapsed .dashboard-sidebar {
-      opacity: 0;
-      transform: translateX(-18px);
-      pointer-events: none;
-    }
-
-    body.embed-shell.shell-overview-collapsed .shell-overview-toggle-btn svg {
-      transform: rotate(180deg);
-      transform-origin: 50% 50%;
-    }
-
-    body.embed-shell .dashboard-sidebar .account-overview-card::-webkit-scrollbar {
-      width: 0;
-      height: 0;
+      overflow: visible;
+      overscroll-behavior: auto;
+      scrollbar-width: auto;
     }
 
     body.embed-shell .dashboard-main > .card {
@@ -307,7 +479,7 @@
     }
 
     body.embed-shell .dashboard-main > .card:not(.hidden) {
-      height: 100%;
+      height: auto;
     }
 
     body.embed-shell .positions-card,
@@ -335,11 +507,9 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    body.embed-popup header {
-      display: none;
-    }
-
-    body.embed-shell header {
+    body.embed-popup header,
+    body.embed-shell header,
+    body.embed-tracker header {
       display: none;
     }
 
@@ -1200,19 +1370,16 @@
         flex-wrap: wrap;
       }
 
-      .performance-title h2 {
+      .performance-title .performance-toolbar {
         order: 1;
+        width: auto;
+        justify-content: flex-start;
+        flex: 1 1 auto;
       }
 
       .performance-title .chart-actions {
         order: 2;
         margin-left: auto;
-      }
-
-      .performance-title .performance-toolbar {
-        order: 3;
-        width: 100%;
-        justify-content: flex-start;
       }
 
       .history-orders-table td .price-stack,
@@ -1457,8 +1624,8 @@
     .dashboard-shell {
       display: grid;
       grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
       align-items: start;
     }
 
@@ -1469,50 +1636,33 @@
 
     .dashboard-main {
       display: grid;
-      gap: 1rem;
+      gap: 0.85rem;
       align-content: start;
     }
 
     @media (min-width: 901px) {
       .dashboard-sidebar {
-        position: sticky;
-        top: 1rem;
+        position: static;
+        top: auto;
         align-self: start;
       }
 
       .dashboard-sidebar .account-overview-card {
-        max-height: calc(100vh - 92px);
-        overflow: auto;
-        overscroll-behavior: contain;
-        scrollbar-width: none;
-      }
-
-      .dashboard-sidebar .account-overview-card::-webkit-scrollbar {
-        width: 0;
-      }
-
-      .dashboard-sidebar .account-overview-card.is-scrolling {
-        scrollbar-width: thin;
-      }
-
-      .dashboard-sidebar .account-overview-card.is-scrolling::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      .dashboard-sidebar .account-overview-card.is-scrolling::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.16);
-        border-radius: 999px;
+        max-height: none;
+        overflow: visible;
+        overscroll-behavior: auto;
+        scrollbar-width: auto;
       }
     }
 
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
+      background: var(--surface2);
+      border: 0;
       border-radius: 12px;
       padding: 1rem;
       position: relative;
       overflow: hidden;
-      box-shadow: var(--shadow);
+      box-shadow: none;
     }
 
     .card::before {
@@ -1554,6 +1704,13 @@
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
+    }
+
+    html.tracker-startup-loading .market-toggle,
+    html.tracker-startup-loading .positions-table-wrap thead {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
     }
 
     @media (min-width: 901px) {
@@ -1691,17 +1848,26 @@
     }
 
     .overview-panel {
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.025);
-      padding: 0.95rem 1rem 1rem;
+      border: 0;
+      background: transparent;
+      padding: 0;
       display: grid;
-      gap: 0.95rem;
+      gap: 0.75rem;
     }
 
     .overview-panel-header {
       display: grid;
-      gap: 0.45rem;
+      gap: 0.28rem;
+    }
+
+    .overview-market-switch {
+      margin: 0 0 0.12rem;
+      gap: 0.48rem;
+    }
+
+    .overview-market-switch .chart-range-btn {
+      padding-inline: 0;
+      min-width: 0;
     }
 
     .overview-eyebrow {
@@ -1800,18 +1966,21 @@
     }
 
     .overview-section {
-      padding-top: 1rem;
-      border-top: 1px solid rgba(148, 163, 184, 0.14);
+      margin-top: 0;
+      padding: 0.78rem 0.82rem;
+      border-top: 0;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.018);
     }
 
     .overview-section-head {
       display: grid;
       gap: 0.45rem;
-      margin-bottom: 0.72rem;
+      margin-bottom: 0.58rem;
     }
 
     .overview-section-title {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: #f8fafc;
       letter-spacing: 0.02em;
@@ -2043,15 +2212,20 @@
 
     .overview-metric-list {
       display: grid;
-      gap: 0.2rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(148, 163, 184, 0.14);
+      gap: 0;
+      margin-top: 0;
+      padding: 0.78rem 0.82rem;
+      border-top: 0;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.018);
     }
 
     .overview-radar-panel {
-      margin-top: 0.9rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(148, 163, 184, 0.14);
+      margin-top: 0;
+      padding: 0.78rem 0.82rem 0.82rem;
+      border-top: 0;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.018);
     }
 
     .overview-radar-head {
@@ -2059,11 +2233,11 @@
       align-items: flex-end;
       justify-content: space-between;
       gap: 0.7rem;
-      margin-bottom: 0.7rem;
+      margin-bottom: 0.58rem;
     }
 
     .overview-radar-title {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: #f8fafc;
       letter-spacing: 0.02em;
@@ -2105,7 +2279,7 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 0.9rem;
       align-items: center;
-      padding: 0.52rem 0;
+      padding: 0.42rem 0;
     }
 
     .overview-metric-main {
@@ -2145,7 +2319,7 @@
 
     @media (max-width: 720px) {
       .overview-panel {
-        padding: 0.88rem 0.9rem 0.92rem;
+        padding: 0;
       }
 
       .overview-panel-header,
@@ -2562,17 +2736,14 @@
       gap: 0.8rem;
       margin: 0.2rem 0 0.85rem;
       padding: 0.72rem 0.82rem;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 0;
       border-radius: 14px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.018));
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      background: transparent;
+      box-shadow: none;
     }
 
     .positions-timeline-wrap.is-time-travel {
-      border-color: rgba(255, 255, 255, 0.14);
-      background:
-        linear-gradient(180deg, rgba(245, 158, 11, 0.08), rgba(255, 255, 255, 0.02));
+      background: transparent;
     }
 
     .positions-timeline-meta {
@@ -2583,12 +2754,20 @@
       white-space: nowrap;
     }
 
+    .positions-timeline-heading {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
     .positions-timeline-label {
-      font-size: 0.72rem;
+      font-size: 0.95rem;
       font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(226, 232, 240, 0.64);
+      letter-spacing: 0.01em;
+      text-transform: none;
+      color: var(--text-main);
       white-space: nowrap;
     }
 
@@ -2785,59 +2964,39 @@
       align-items: center;
       justify-content: flex-start;
       gap: 0.5rem;
+      min-width: 0;
+      flex: 1 1 auto;
     }
 
     .chart-actions {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
+      flex: 0 0 auto;
     }
 
     .range-toggle {
       margin: 0;
-      padding: 2px;
-      border-radius: 999px;
-      border: 1px solid var(--glass-border);
-      background: rgba(10, 10, 12, 0.45);
-      gap: 0.2rem;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      gap: 0.12rem;
       display: inline-flex;
-      align-items: stretch;
-      justify-content: center;
+      align-items: center;
+      justify-content: flex-start;
       width: fit-content;
       max-width: 100%;
       position: relative;
       overflow: visible;
-      height: var(--switch-height);
+      min-height: 0;
     }
 
-    .range-toggle .chart-range-btn {
-      border-color: transparent;
-      background: transparent;
-      position: relative;
-      z-index: 2;
-    }
-
-    .range-toggle .chart-range-btn.active {
-      border-color: transparent;
-      background: rgba(255, 255, 255, 0.08);
+    .range-toggle.overview-market-switch {
+      gap: 0.48rem;
     }
 
     .range-toggle-indicator {
-      position: absolute;
-      top: 2px;
-      bottom: 2px;
-      left: 0;
-      width: 0;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255,255,255,0.45);
-      z-index: 1;
-      opacity: 0;
-      transition: transform 220ms ease, width 220ms ease, opacity 120ms ease;
-    }
-
-    .range-toggle.ready .range-toggle-indicator {
-      opacity: 1;
+      display: none;
     }
 
     .performance-share-btn:disabled {
@@ -2846,48 +3005,123 @@
     }
 
     .chart-range-btn {
-      border-radius: 999px;
-      border: 1px solid transparent;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 0;
       background: transparent;
       color: var(--muted);
-      padding: 0 0.85rem;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.75rem;
-      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-      height: 100%;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.2;
+      font-family: inherit;
+      transition: color 0.15s ease;
+      height: auto;
     }
 
     .chart-range-btn:hover {
-      border-color: rgba(255,255,255,0.22);
-      color: #f8fafc;
-      background: rgba(18, 18, 24, 0.6);
+      border-color: transparent;
+      color: rgba(234, 236, 239, 0.78);
+      background: transparent;
     }
 
     .chart-range-btn.active {
       border-color: transparent;
-      color: #f8fafc;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .pnl-card-heading,
+    .deposits-card-heading,
+    .exposure-card-heading {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1 1 auto;
+    }
+
+    .pnl-card-title .equity-view-toggle,
+    .deposits-card-title .third-panel-toggle,
+    .exposure-card-title .equity-view-toggle {
+      flex-shrink: 0;
+    }
+
+    .performance-close-btn {
+      display: none;
     }
 
     .chart-grid {
+      --performance-row-size: clamp(96px, 7vw, 128px);
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-auto-flow: dense;
       align-items: stretch;
       gap: 0.65rem;
       margin-top: 0.45rem;
     }
 
+    .chart-grid.performance-tile-layout {
+      grid-template-columns: minmax(0, 1.56fr) minmax(430px, 1.08fr);
+      align-items: start;
+      gap: 8px;
+    }
+
+    .performance-tile-stack {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .performance-left-stack {
+      align-self: start;
+    }
+
+    .performance-left-stack > .performance-tile {
+      width: 100%;
+    }
+
+    .performance-right-stack {
+      align-self: stretch;
+      --right-performance-top-height: auto;
+      --right-performance-bottom-height: auto;
+    }
+
+    .performance-right-stack > .performance-tile {
+      flex: 0 0 auto;
+      min-height: 0;
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .performance-right-stack > .performance-tile[data-tile-id="deposits"],
+    .performance-right-stack > .performance-tile[data-tile-id="risk"] {
+      height: var(--right-performance-top-height);
+    }
+
+    .performance-right-stack > .performance-tile[data-tile-id="distribution"] {
+      height: var(--right-performance-bottom-height);
+    }
+
+    .chart-grid.performance-tile-layout .performance-tile {
+      min-height: 0;
+    }
+
     .chart-card {
       border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      padding: 0.62rem 0.68rem 0.7rem;
+      border: 0;
+      background: rgba(255, 255, 255, 0.018);
+      padding: 0.62rem 0.68rem 0.58rem;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       min-height: 0;
-      box-shadow: var(--shadow);
+      box-shadow: none;
+    }
+
+    .performance-tile[data-tile-span="2"] {
+      grid-column: span 2;
     }
 
     .chart-card h3 {
@@ -2896,29 +3130,35 @@
       display: flex;
       align-items: center;
       gap: 0.35rem;
+      min-width: 0;
     }
 
     .equity-card-title,
     .pnl-card-title,
-    .exposure-card-title {
+    .exposure-card-title,
+    .deposits-card-title {
       justify-content: space-between;
       gap: 0.5rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      align-items: center;
+      min-width: 0;
     }
 
     .equity-card-heading,
     .pnl-card-heading,
-    .exposure-card-heading {
+    .exposure-card-heading,
+    .deposits-card-heading {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+      min-width: 0;
     }
 
     .chart-card::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%);
+      background: none;
       pointer-events: none;
     }
 
@@ -2947,8 +3187,8 @@
       gap: 0.14rem;
       padding: 0.52rem 0.65rem;
       border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.03);
+      border: 0;
+      background: rgba(255, 255, 255, 0.028);
     }
 
     .exposure-stat-label {
@@ -3012,18 +3252,6 @@
     .equity-view-btn:not(.active):hover,
     .pnl-view-btn:not(.active):hover { color: #f8fafc; }
 
-    .deposits-card-title {
-      justify-content: space-between;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .deposits-card-heading {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
     .third-panel-toggle {
       display: inline-flex;
       align-items: center;
@@ -3068,6 +3296,7 @@
       font-size: 0.7rem;
       color: var(--muted);
       font-weight: 400;
+      white-space: nowrap;
     }
 
     .chart-card h3 span.spark-label.positive { color: var(--accent); }
@@ -3093,21 +3322,58 @@
 
     .heatmap-card {
       min-height: 0;
-      grid-column: span 2;
+      align-self: start;
+      height: auto;
+      padding-bottom: 0.44rem;
     }
 
     .distribution-card {
       min-height: 0;
+      padding-bottom: 0.46rem;
     }
 
     .heatmap-card .pnl-heatmap-wrap {
       flex: 1 1 auto;
       min-height: 0;
-      max-height: none;
-      aspect-ratio: 32 / 10;
+      max-height: 100%;
+      aspect-ratio: auto;
     }
 
-    @media (max-width: 1520px) {
+    .chart-grid.performance-tile-layout .performance-tile .chart-canvas-wrap,
+    .chart-grid.performance-tile-layout .performance-tile .exposure-chart-wrap,
+    .chart-grid.performance-tile-layout .performance-tile .transfers-wrap,
+    .chart-grid.performance-tile-layout .performance-tile .pnl-heatmap-wrap {
+      flex: 1 1 auto;
+      height: 100%;
+      min-height: 0;
+      aspect-ratio: auto;
+    }
+
+    .chart-grid.performance-tile-layout .heatmap-card .pnl-heatmap-wrap {
+      flex: 0 0 auto;
+      height: auto;
+    }
+
+    @media (max-width: 1180px) {
+      .chart-grid.performance-tile-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .performance-right-stack > .performance-tile {
+        height: auto;
+        width: 100%;
+        margin-left: 0;
+      }
+
+      .equity-card-title,
+      .pnl-card-title,
+      .exposure-card-title,
+      .deposits-card-title {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 1480px) {
       .chart-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
@@ -3124,36 +3390,25 @@
         grid-template-columns: 1fr;
       }
 
+      .chart-grid.performance-tile-layout {
+        grid-template-rows: none;
+      }
+
       .heatmap-card {
         grid-column: span 1;
+      }
+
+      .performance-tile[data-tile-span="2"] {
+        grid-column: span 1;
+      }
+
+      .performance-right-stack > .performance-tile {
+        height: auto;
       }
     }
 
     body.embed-shell #performanceSection .chart-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.5rem;
-    }
-
-    @media (max-width: 1480px) {
-      body.embed-shell #performanceSection .chart-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 1140px) {
-      body.embed-shell #performanceSection .chart-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 760px) {
-      body.embed-shell #performanceSection .chart-grid {
-        grid-template-columns: 1fr;
-      }
-
-      body.embed-shell #performanceSection .heatmap-card {
-        grid-column: span 1;
-      }
     }
 
     body.embed-shell #performanceSection .chart-card {
@@ -3171,7 +3426,7 @@
     }
 
     body.embed-shell #performanceSection .heatmap-card .pnl-heatmap-wrap {
-      aspect-ratio: 32 / 8.25;
+      aspect-ratio: auto;
     }
 
     .chart-canvas-wrap.logo-watermark,
@@ -3229,41 +3484,10 @@
     #performanceSection {
       position: relative;
       overflow: hidden;
-      --performance-watermark-text-color: rgba(234, 236, 239, 0.16);
     }
 
     #portfolioCharts {
       position: relative;
-    }
-
-    .chart-loading-wrap:not(.loading) #portfolioCharts::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: url("images/logo.png");
-      background-repeat: no-repeat;
-      background-position: center 48%;
-      background-size: min(30vw, 320px);
-      opacity: 0.08;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .chart-loading-wrap:not(.loading) #portfolioCharts::after {
-      content: "HYPERMONITOR";
-      position: absolute;
-      left: 50%;
-      top: 61.5%;
-      transform: translateX(-50%);
-      font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: clamp(1.2rem, 2vw, 2rem);
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--performance-watermark-text-color);
-      white-space: nowrap;
-      pointer-events: none;
-      z-index: 0;
     }
 
     .chart-loading-wrap:not(.loading) #performanceSection .chart-canvas-wrap.logo-watermark::before,
@@ -3274,26 +3498,50 @@
     }
 
     .pnl-heatmap-wrap {
+      --pnl-heatmap-cell-size: clamp(8px, 0.62vw, 10px);
       width: 100%;
       min-height: 0;
       height: auto;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: auto;
       max-height: none;
-      border: 1px solid var(--border);
+      border: 0;
       border-radius: 0.5rem;
-      background: rgba(8, 14, 24, 0.18);
-      padding: 0.35rem 0.45rem 0.4rem;
+      background: transparent;
+      padding: 0.32rem 0.4rem 0.18rem;
       display: flex;
       flex: 0 0 auto;
       flex-direction: column;
-      gap: 0.3rem;
+      align-items: flex-start;
+      gap: 0.22rem;
+      position: relative;
+    }
+
+    .activity-card-title {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    .activity-card-title .pnl-card-heading {
+      justify-self: start;
+      min-width: 0;
+    }
+
+    .activity-card-spacer {
+      min-width: 0;
     }
 
     .pnl-heatmap-toolbar {
       display: grid;
-      grid-template-columns: 22px 1fr 22px;
+      grid-template-columns: 22px minmax(0, auto) 22px;
       align-items: center;
+      justify-content: center;
       gap: 0.35rem;
+      width: max-content;
+      max-width: 100%;
+      margin: 0 auto;
     }
 
     .pnl-heatmap-nav {
@@ -3323,8 +3571,7 @@
       text-align: center;
       font-size: 0.66rem;
       color: var(--muted);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      letter-spacing: 0.01em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -3334,63 +3581,65 @@
       flex: 1 1 auto;
       min-height: 0;
       display: grid;
-      grid-template-columns: repeat(var(--pnl-heatmap-columns, 53), minmax(0, 1fr));
-      grid-template-rows: repeat(7, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--pnl-heatmap-columns, 53), var(--pnl-heatmap-cell-size));
+      grid-template-rows: repeat(7, var(--pnl-heatmap-cell-size));
       gap: 2px;
+      width: max-content;
     }
 
     .pnl-heatmap-body {
       flex: 1 1 auto;
       min-height: 0;
       display: grid;
-      grid-template-columns: 18px 1fr;
+      grid-template-columns: 28px max-content;
       gap: 4px;
       align-items: stretch;
+      justify-content: flex-start;
     }
 
     .pnl-heatmap-months {
       display: grid;
-      grid-template-columns: repeat(var(--pnl-heatmap-columns, 53), minmax(0, 1fr));
+      grid-template-columns: repeat(var(--pnl-heatmap-columns, 53), var(--pnl-heatmap-cell-size));
       gap: 2px;
       min-height: 12px;
-      padding-left: 22px;
+      padding-left: 32px;
+      width: max-content;
     }
 
     .pnl-heatmap-month {
       font-size: 0.55rem;
       color: var(--muted);
       line-height: 1;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.01em;
       white-space: nowrap;
       overflow: visible;
     }
 
     .pnl-heatmap-weekdays {
       display: grid;
-      grid-template-rows: repeat(7, minmax(0, 1fr));
+      grid-template-rows: repeat(7, var(--pnl-heatmap-cell-size));
       gap: 2px;
       min-height: 0;
     }
 
     .pnl-heatmap-weekday {
-      font-size: 0.52rem;
+      font-size: 0.54rem;
       color: var(--muted);
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       line-height: 1;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.01em;
       user-select: none;
     }
 
     .pnl-heatmap-cell {
       position: relative;
-      border-radius: 3px;
-      border: 1px solid rgba(148, 163, 184, 0.22);
+      width: var(--pnl-heatmap-cell-size);
+      height: var(--pnl-heatmap-cell-size);
+      border-radius: 2px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
       background: rgba(148, 163, 184, 0.08);
-      min-height: 0;
       cursor: pointer;
       transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, filter 0.14s ease;
       transform-origin: center;
@@ -3431,6 +3680,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex: 1 1 auto;
     }
 
     .pnl-heatmap-hover .value {
@@ -3441,18 +3691,108 @@
     .pnl-heatmap-hover .value.negative { color: var(--danger); }
     .pnl-heatmap-hover .value.neutral { color: var(--muted); }
 
-    .pnl-heatmap-legend {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.62rem;
-      color: var(--muted);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+    .pnl-heatmap-hover-card {
+      position: absolute;
+      min-width: 158px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(20, 24, 31, 0.98);
+      color: #f3f4f6;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      pointer-events: none;
+      opacity: 0;
+      transform: translate3d(0, 4px, 0);
+      transition: opacity 120ms ease, transform 120ms ease;
+      z-index: 8;
+      font-size: 11px;
+      line-height: 1.45;
     }
 
-    .pnl-heatmap-legend .neg { color: var(--danger); }
-    .pnl-heatmap-legend .neutral { color: #94a3b8; }
-    .pnl-heatmap-legend .pos { color: var(--accent); }
+    .pnl-heatmap-hover-card.is-visible {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+
+    .pnl-heatmap-hover-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .pnl-heatmap-hover-row + .pnl-heatmap-hover-row {
+      margin-top: 3px;
+    }
+
+    .pnl-heatmap-hover-key {
+      color: #97a3b6;
+      white-space: nowrap;
+    }
+
+    .pnl-heatmap-hover-card .pnl-heatmap-hover-value {
+      color: #f9fafb;
+      font-weight: 600;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .pnl-heatmap-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      min-height: 1rem;
+      margin-top: 0.02rem;
+    }
+
+    .overview-breakdown-panel {
+      margin-top: 0;
+      padding: 0.78rem 0.82rem 0.82rem;
+      border-top: 0;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.018);
+    }
+
+    .overview-breakdown-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.7rem;
+      margin-bottom: 0.58rem;
+    }
+
+    .overview-breakdown-body {
+      display: grid;
+      gap: 0.62rem;
+    }
+
+    .pnl-heatmap-legend {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 0 0 auto;
+      white-space: nowrap;
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+
+    .pnl-heatmap-legend-scale {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .pnl-heatmap-legend-box {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(148, 163, 184, 0.08);
+      flex: 0 0 auto;
+    }
 
     .transfers-wrap {
       width: 100%;
@@ -3460,9 +3800,9 @@
       height: auto;
       aspect-ratio: 16 / 9;
       max-height: none;
-      border: 1px solid var(--border);
+      border: 0;
       border-radius: 0.5rem;
-      background: rgba(8, 14, 24, 0.18);
+      background: transparent;
       padding: 0;
       overflow: hidden;
       display: flex;
@@ -3597,6 +3937,7 @@
 
     .chart-loading-wrap.loading {
       --pulse-size: 220px;
+      background-color: var(--panel);
       background-image: url("images/pulse.gif");
       background-repeat: no-repeat;
       background-position: center 50%;
@@ -3665,12 +4006,32 @@
       text-align: center;
     }
 
+    html.light body,
     body.light {
       background-color: #f4f4f3;
-      background-image:
-        linear-gradient(180deg, #fafaf9 0%, #f4f4f3 44%, #efefee 100%);
+      background-image: none;
       color: #0f172a;
       color-scheme: light;
+      --bg: #fbfcfe;
+      --bg-soft: #f1f5f9;
+      --surface2: #f5f7fb;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: rgba(255, 255, 255, 0.98);
+      --panel-muted: rgba(15, 23, 42, 0.04);
+      --card-bg: #f5f7fb;
+      --accent: #16a34a;
+      --accent-soft: rgba(22, 163, 74, 0.14);
+      --danger: #dc2626;
+      --border: #dbe3ee;
+      --border-strong: #cbd5e1;
+      --muted: #64748b;
+      --text-main: #0f172a;
+      --glass: rgba(255, 255, 255, 0.98);
+      --glass-border: #dbe3ee;
+      --accent-blue: #64748b;
+      --accent-cyan: #64748b;
+      --neutral-blue: #2563eb;
+      --shadow: none;
     }
 
     body.light #app { color: #0f172a; }
@@ -3713,11 +4074,11 @@
     body.light .status-dot { box-shadow: 0 0 4px rgba(251, 191, 36, 0.6); }
 
     body.light .card {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
+      background: var(--panel);
+      border: 0;
     }
 
-    body.light .card { box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08); }
+    body.light .card { box-shadow: none; }
 
     body.light .card h2 span.badge {
       border-color: #e5e7eb;
@@ -3726,13 +4087,17 @@
 
     body.light .muted { color: #6b7280; }
     body.light .overview-panel {
-      border-color: #e5e7eb;
-      background: #f8fafc;
+      border-color: transparent;
+      background: transparent;
       box-shadow: none;
     }
 
     body.light .overview-eyebrow {
       color: #64748b;
+    }
+
+    body.light .overview-market-switch .chart-range-btn:hover {
+      color: rgba(15, 23, 42, 0.74);
     }
 
     body.light .overview-title,
@@ -3766,12 +4131,15 @@
     }
 
     body.light .overview-section,
-    body.light .overview-metric-list {
-      border-top-color: #e5e7eb;
+    body.light .overview-metric-list,
+    body.light .overview-breakdown-panel {
+      border-top-color: transparent;
+      background: var(--panel-strong);
     }
 
     body.light .overview-radar-panel {
-      border-top-color: #e5e7eb;
+      border-top-color: transparent;
+      background: var(--panel-strong);
     }
 
     body.light .overview-radar-title {
@@ -3784,8 +4152,8 @@
     }
 
     body.light .overview-radar-wrap {
-      background: rgba(248, 250, 252, 0.96);
-      border-color: #d8dee6;
+      background: transparent;
+      border-color: transparent;
     }
 
     body.light .overview-allocation-track,
@@ -3801,50 +4169,40 @@
     body.light .wallet-tag { border-color: #e5e7eb; color: #6b7280; }
 
     body.light table { color: #0f172a; }
-    body.light thead { background: #f9fafb; }
+    body.light thead { background: var(--surface2); }
 
     body.light th, body.light td { border-bottom: 1px solid #e5e7eb; }
-    body.light tbody tr:nth-child(even) { background: #f9fafb; }
+    body.light tbody tr:nth-child(even) { background: #f1f1ef; }
     body.light .timestamp { color: #6b7280; }
 
     body.light .chart-range-btn {
       background: transparent;
-      color: #475569;
+      color: #64748b;
       border-color: transparent;
     }
 
-    body.light .chart-range-btn:hover { border-color: #d1d5db; }
+    body.light .chart-range-btn:hover {
+      border-color: transparent;
+      color: rgba(15, 23, 42, 0.72);
+      background: transparent;
+    }
 
     body.light .chart-range-btn.active {
       color: #0f172a;
     }
 
-    body.light .range-toggle {
-      background: #ffffff;
-      border-color: #e5e7eb;
-    }
-
-    body.light .range-toggle .chart-range-btn.active {
-      background: #f8fafc;
-    }
-
-    body.light .range-toggle-indicator {
-      background: #f8fafc;
-      border-color: #cbd5f5;
-    }
-
     body.light .positions-timeline-wrap {
-      border-color: #e5e7eb;
-      background: #f8fafc;
+      border-color: transparent;
+      background: transparent;
     }
 
     body.light .positions-timeline-wrap.is-time-travel {
-      border-color: #cbd5e1;
-      background: #f1f5f9;
+      border-color: transparent;
+      background: transparent;
     }
 
     body.light .positions-timeline-label {
-      color: #475569;
+      color: #0f172a;
     }
 
     body.light .positions-timeline-edge {
@@ -3880,8 +4238,22 @@
     }
 
     body.light .chart-card {
-      background: var(--panel);
-      border: 1px solid #e5e7eb;
+      background: var(--panel-strong);
+      border: 0;
+    }
+
+    body.light .chart-loading-wrap.loading {
+      background-color: transparent;
+    }
+
+    body.light .chart-canvas-wrap,
+    body.light .pnl-heatmap-wrap {
+      background: transparent;
+      border-radius: 0;
+    }
+
+    body.light .mobile-loading-overlay {
+      background: rgba(250, 250, 249, 0.96);
     }
 
     body.light .exposure-card-subtitle {
@@ -3889,7 +4261,7 @@
     }
 
     body.light .exposure-stat {
-      border-color: #e5e7eb;
+      border-color: transparent;
       background: #f8fafc;
     }
 
@@ -3904,10 +4276,6 @@
     body.light .chart-canvas-wrap.logo-watermark,
     body.light .pnl-heatmap-wrap.logo-watermark {
       --perf-watermark-text-color: rgba(15, 23, 42, 0.14);
-    }
-
-    body.light #performanceSection {
-      --performance-watermark-text-color: rgba(15, 23, 42, 0.14);
     }
 
     body.light .equity-view-toggle,
@@ -3928,28 +4296,50 @@
     }
 
     body.light .pnl-heatmap-wrap {
-      background: #ffffff;
-      border-color: #e5e7eb;
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    body.light .pnl-heatmap-hover-card {
+      background: rgba(255, 255, 255, 0.98);
+      border-color: rgba(148, 163, 184, 0.34);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+    }
+
+    body.light .pnl-heatmap-hover-key {
+      color: #4b5563;
+    }
+
+    body.light .pnl-heatmap-hover-card .pnl-heatmap-hover-value {
+      color: #111827;
     }
 
     body.light .pnl-heatmap-nav {
-      background: #ffffff;
-      border-color: #d1d5db;
-      color: #64748b;
+      background: #f6f8fa;
+      border-color: #d0d7de;
+      color: #57606a;
     }
 
     body.light .pnl-heatmap-nav:hover:not(:disabled) {
-      border-color: #cbd5e1;
-      color: #0f172a;
+      background: #ffffff;
+      border-color: #8c959f;
+      color: #24292f;
     }
 
-    body.light .pnl-heatmap-title { color: #64748b; }
-    body.light .pnl-heatmap-month { color: #64748b; }
-    body.light .pnl-heatmap-weekday { color: #64748b; }
-    body.light .pnl-heatmap-cell { border-color: #d1d5db; background: #f8fafc; }
-    body.light .pnl-heatmap-legend { color: #64748b; }
-    body.light .pnl-heatmap-hover { color: #475569; }
-    body.light .pnl-heatmap-hover .value.neutral { color: #475569; }
+    body.light .pnl-heatmap-title { color: #57606a; }
+    body.light .pnl-heatmap-month { color: #24292f; }
+    body.light .pnl-heatmap-weekday { color: #24292f; }
+    body.light .pnl-heatmap-cell { border-color: #d0d7de; background: #ebedf0; }
+    body.light .pnl-heatmap-cell.empty { border-color: transparent; background: transparent; }
+    body.light .pnl-heatmap-cell:not(.empty):hover {
+      border-color: #57606a;
+      box-shadow: 0 0 0 1px rgba(87, 96, 106, 0.12), 0 2px 8px rgba(31, 35, 40, 0.12);
+      filter: none;
+    }
+    body.light .pnl-heatmap-legend { color: #57606a; }
+    body.light .pnl-heatmap-hover { color: #57606a; }
+    body.light .pnl-heatmap-hover .value.neutral { color: #24292f; }
 
     body.light .third-panel-toggle {
       background: #ffffff;
@@ -3966,8 +4356,8 @@
     }
 
     body.light .transfers-wrap {
-      background: #ffffff;
-      border-color: #e5e7eb;
+      background: transparent;
+      border-color: transparent;
     }
 
     body.light .transfers-list-status {
@@ -4705,28 +5095,6 @@
       height: 260px;
     }
 
-    .breakdown-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 0.5rem;
-      font-size: 0.85rem;
-    }
-
-    .breakdown-stat {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.6rem 0.75rem;
-      background: #0f172a33;
-    }
-
-    body.light .breakdown-stat {
-      background: #f8fafc;
-      border-color: #e5e7eb;
-    }
-
-    .breakdown-label { color: var(--muted); }
-    body.light .breakdown-label { color: #0f172a; }
-
     .metrics-card {
       margin-top: 0.35rem;
       padding-top: 0.3rem;
@@ -4907,9 +5275,7 @@
     .metric-value.negative { color: var(--danger); }
 
     .metric-sub {
-      margin-top: 0.25rem;
-      font-size: 0.7rem;
-      color: var(--muted);
+      display: none;
     }
 
     body.light .metric-label,
@@ -5743,15 +6109,15 @@
     }
 
     body.light .price-footer {
-      background: rgba(255, 255, 255, 0.9);
+      background: var(--panel-strong);
       border-top-color: #e5e7eb;
-      box-shadow: 0 -12px 24px rgba(15, 23, 42, 0.08);
+      box-shadow: none;
     }
 
     body.light .price-currency-switch {
       background: #ffffff;
       border-color: #e5e7eb;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      box-shadow: none;
     }
 
     body.light .price-currency-btn {
@@ -5829,6 +6195,8 @@
         document.body.classList.add("embed-popup");
       } else if (embedMode === "shell") {
         document.body.classList.add("embed-shell");
+      } else if (embedMode === "tracker") {
+        document.body.classList.add("embed-tracker");
       }
     </script>
     <div class="mobile-loading-overlay" id="mobileLoadingOverlay" aria-hidden="true">
@@ -5910,19 +6278,17 @@
   <div class="dashboard-shell">
     <aside class="dashboard-sidebar">
     <section class="card account-overview-card">
-      <div class="section-title">
-        <h2>Account Overview</h2>
-        <span class="market-toggle no-label" role="group" aria-label="Market type">
-          <span class="market-toggle-label">Market</span>
-          <span class="orders-tabs" role="tablist">
-            <span class="market-toggle-indicator" aria-hidden="true"></span>
-            <button class="orders-tab-btn market-tab-btn active" data-market="perp" type="button" aria-pressed="true">Perps</button>
-            <button class="orders-tab-btn market-tab-btn" data-market="spot" type="button" aria-pressed="false">Spot</button>
-            <button class="orders-tab-btn market-tab-btn" data-market="all" type="button" aria-pressed="false">All</button>
-          </span>
-        </span>
-      </div>
       <div id="marginSummary"><span class="muted">Loading…</span></div>
+      <div class="overview-breakdown-panel" id="overviewBreakdownPanel">
+        <div class="overview-breakdown-head">
+          <div class="overview-section-title">Portfolio Breakdown</div>
+        </div>
+        <div class="overview-breakdown-body">
+          <div class="portfolio-doughnut-wrap">
+            <canvas id="portfolioDoughnut"></canvas>
+          </div>
+        </div>
+      </div>
       <div class="overview-radar-panel" id="overviewRadarPanel">
         <div class="overview-radar-head">
           <div class="overview-radar-title">Wallet Skill Map</div>
@@ -5937,46 +6303,19 @@
 
     <div class="dashboard-main">
     <div class="shell-main-topbar">
-      <button class="shell-overview-toggle-btn" id="shellOverviewToggleBtn" type="button" aria-label="Hide Account Overview" title="Hide Account Overview" aria-pressed="false">
-        <svg viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M10.25 3.5L5.75 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
       <div class="shell-section-switch" id="shellSectionTabs" role="tablist" aria-label="Wallet section tabs">
         <button class="orders-tab-btn shell-section-btn active" type="button" data-shell-section="positions" aria-selected="true">Positions</button>
         <button class="orders-tab-btn shell-section-btn" type="button" data-shell-section="performance" aria-selected="false">Performance</button>
         <button class="orders-tab-btn shell-section-btn" type="button" data-shell-section="orders" aria-selected="false">Orders</button>
       </div>
-      <button class="shell-close-btn" id="shellCloseBtn" type="button" aria-label="Close wallet tracker" title="Close wallet tracker">
-        <svg viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-        </svg>
-      </button>
     </div>
     <section class="card positions-card">
-      <div class="section-title">
-        <h2>Positions</h2>
-        <div class="section-actions">
-          <button id="positionsChartBtn" class="pill-action-btn" aria-label="Pie chart">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:14px;height:14px;">
-              <path d="M11 2a10 10 0 1 0 10 10h-9z" fill="currentColor"/>
-              <path d="M13 2.05V11h8.95A10 10 0 0 0 13 2.05z" fill="currentColor" opacity="0.6"/>
-            </svg>
-          </button>
-          <button id="exportExcelBtn" class="export-btn" aria-label="Export Excel">
-            <svg class="export-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-              <path d="M12 3v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M8 10l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M5 18h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-            <span class="sr-only">Export Excel</span>
-          </button>
-        </div>
-      </div>
       <div class="positions-timeline-wrap" id="positionsTimelineWrap">
       <div class="positions-timeline-meta">
-        <div class="positions-timeline-label">History</div>
-        <span id="positionsTimelineStamp" class="positions-timeline-stamp">Live</span>
+        <div class="positions-timeline-heading">
+          <div class="positions-timeline-label">Positions</div>
+          <span id="positionsTimelineStamp" class="positions-timeline-stamp">Live</span>
+        </div>
       </div>
       <div class="positions-timeline-controls">
         <span class="positions-timeline-edge">Past</span>
@@ -6022,30 +6361,6 @@
       </div>
     </section>
 
-  <div class="portfolio-modal" id="portfolioModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Portfolio breakdown</h3>
-        <button id="portfolioModalClose" class="modal-close-btn" aria-label="Close portfolio breakdown">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="portfolio-doughnut-wrap">
-          <canvas id="portfolioDoughnut"></canvas>
-        </div>
-        <div class="breakdown-stats">
-          <div class="breakdown-stat">
-            <div class="breakdown-label">Open positions value</div>
-            <div class="money" id="positionsValueStat">$0.00</div>
-          </div>
-          <div class="breakdown-stat">
-            <div class="breakdown-label">Withdrawable</div>
-            <div class="money" id="withdrawableValueStat">$0.00</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="portfolio-modal" id="coinInfoModal" aria-hidden="true">
     <div class="modal-card">
       <div class="modal-header">
@@ -6070,83 +6385,80 @@
 
     <section class="card" id="performanceSection">
     <div class="section-title performance-title">
-      <h2>Performance</h2>
       <div class="performance-toolbar is-hidden" id="performanceToolbar">
-        <div class="chart-toolbar">
-          <span class="range-toggle" role="tablist" aria-label="Performance range">
-            <span class="range-toggle-indicator" aria-hidden="true"></span>
-            <button class="chart-range-btn" data-range="day">Day</button>
-            <button class="chart-range-btn" data-range="week">Week</button>
-            <button class="chart-range-btn" data-range="month">Month</button>
-            <button class="chart-range-btn active" data-range="allTime">All</button>
-          </span>
-        </div>
+        <span class="range-toggle" role="tablist" aria-label="Performance range">
+          <button class="chart-range-btn" data-range="day">1D</button>
+          <button class="chart-range-btn" data-range="week">1W</button>
+          <button class="chart-range-btn" data-range="month">1M</button>
+          <button class="chart-range-btn active" data-range="allTime">All</button>
+        </span>
       </div>
       <div class="chart-actions is-hidden" id="performanceActions">
-        <button class="pill-action-btn performance-share-btn" id="performanceShareBtn" type="button" title="Share performance" aria-label="Share performance">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:10px;height:10px;">
-            <path d="M14 3h7v7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M10 14L21 3" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <button id="exportExcelBtn" class="shell-close-btn performance-download-btn" type="button" aria-label="Download wallet data" title="Download wallet data">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+            <path d="M12 4.5v10.25" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8.5 11.75L12 15.25l3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 18.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </button>
-        <button class="metrics-toggle" id="metricsToggle" type="button" aria-expanded="false">
-          <span class="sr-only">Toggle metrics</span>
-          <span aria-hidden="true">▾</span>
+        <button class="shell-close-btn performance-close-btn" id="performanceCloseBtn" type="button" aria-label="Close wallet tracker" title="Close wallet tracker">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3.75 3.75L12.25 12.25M12.25 3.75L3.75 12.25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+          </svg>
         </button>
       </div>
     </div>
 
       <div class="chart-loading-wrap loading" id="portfolioLoadingWrap">
-      <div class="chart-grid" id="portfolioCharts">
-        <div class="chart-card">
+      <div class="chart-grid performance-tile-layout" id="portfolioCharts">
+        <div class="performance-tile-stack performance-left-stack" id="performanceLeftStack">
+        <div class="chart-card performance-tile" data-tile-id="pnl" data-tile-span="2">
           <h3 class="pnl-card-title">
             <span class="pnl-card-heading"><span id="primaryChartLabel">Profit &amp; Loss</span> <span class="spark-label" id="primaryChartTitleValue">[-]</span></span>
             <span class="equity-view-toggle" role="tablist" aria-label="Primary performance chart">
               <button class="equity-view-btn active" type="button" data-performance-view="pnl" aria-selected="true">P&amp;L</button>
               <button class="equity-view-btn" type="button" data-performance-view="equity" aria-selected="false">Equity</button>
+              <button class="equity-view-btn" type="button" data-performance-view="roi" aria-selected="false">ROI</button>
             </span>
           </h3>
-          <div class="chart-canvas-wrap logo-watermark" id="pnlChartWrap">
+          <div class="chart-canvas-wrap" id="pnlChartWrap">
             <canvas id="pnlChart"></canvas>
           </div>
-          <div class="chart-canvas-wrap logo-watermark is-hidden" id="equityChartWrap">
+          <div class="chart-canvas-wrap is-hidden" id="equityChartWrap">
             <canvas id="equityChart"></canvas>
           </div>
-        </div>
-
-        <div class="chart-card">
-          <h3 class="equity-card-title">
-            <span class="equity-card-heading">Drawdown <span class="spark-label" id="drawdownTitleValue">[-]</span></span>
-          </h3>
-          <div class="chart-canvas-wrap logo-watermark">
-            <canvas id="drawdownChart"></canvas>
+          <div class="chart-canvas-wrap is-hidden" id="roiChartWrap">
+            <canvas id="roiChart"></canvas>
           </div>
         </div>
 
-        <div class="chart-card exposure-card">
-          <h3 class="exposure-card-title">
-            <span class="exposure-card-heading">Exposure <span class="spark-label" id="exposureTitleValue">[-]</span></span>
-          </h3>
-          <div class="chart-canvas-wrap logo-watermark exposure-chart-wrap">
-            <canvas id="exposureChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h3 class="pnl-card-title">
-            <span>Trading Activity <span class="spark-label" id="activityTitleValue">[-]</span></span>
-            <span class="equity-view-toggle" role="tablist" aria-label="Trading activity chart">
-              <button class="equity-view-btn active" type="button" data-activity-view="trades" aria-selected="true">Trades</button>
-              <button class="equity-view-btn" type="button" data-activity-view="volume" aria-selected="false">Vol</button>
+        <div class="chart-card heatmap-card performance-tile" data-tile-id="activity" data-tile-span="2">
+          <h3 class="activity-card-title">
+            <span class="pnl-card-heading">Activity</span>
+            <span class="pnl-heatmap-toolbar">
+              <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous year">‹</button>
+              <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Activity heatmap</span>
+              <button class="pnl-heatmap-nav" id="pnlHeatmapNextBtn" type="button" aria-label="Next year">›</button>
             </span>
+            <span class="activity-card-spacer" aria-hidden="true"></span>
           </h3>
-          <div class="chart-canvas-wrap logo-watermark" id="activityChartWrap">
-            <canvas id="activityChart"></canvas>
+          <div class="pnl-heatmap-wrap" id="pnlHeatmapWrap">
+            <div class="pnl-heatmap-months" id="pnlHeatmapMonths"></div>
+            <div class="pnl-heatmap-body">
+              <div class="pnl-heatmap-weekdays" id="pnlHeatmapWeekdays"></div>
+              <div class="pnl-heatmap-grid" id="pnlHeatmapGrid"></div>
+            </div>
+            <div class="pnl-heatmap-footer">
+              <div class="pnl-heatmap-hover" id="pnlHeatmapHover"></div>
+              <div class="pnl-heatmap-legend" id="pnlHeatmapLegend"></div>
+            </div>
           </div>
+          <div class="pnl-heatmap-hover-card" id="pnlHeatmapHoverCard" aria-hidden="true"></div>
+        </div>
         </div>
 
-        <div class="chart-card">
+        <div class="performance-tile-stack performance-right-stack" id="performanceRightStack">
+        <div class="chart-card performance-tile" data-tile-id="deposits" data-tile-span="1">
           <h3 class="deposits-card-title">
             <span class="deposits-card-heading">Deposits <span class="spark-label" id="depositsTitleValue">[-]</span></span>
             <span class="third-panel-toggle" role="tablist" aria-label="Deposits panel mode">
@@ -6154,7 +6466,7 @@
               <button class="third-panel-btn" type="button" data-panel-mode="transfers" aria-selected="false">List</button>
             </span>
           </h3>
-          <div class="chart-canvas-wrap logo-watermark" id="depositsChartWrap">
+          <div class="chart-canvas-wrap" id="depositsChartWrap">
             <canvas id="depositsChart"></canvas>
           </div>
           <div class="transfers-wrap is-hidden" id="transfersListWrap">
@@ -6163,167 +6475,37 @@
           </div>
         </div>
 
-        <div class="chart-card distribution-card">
+        <div class="chart-card exposure-card performance-tile" data-tile-id="risk" data-tile-span="1">
+          <h3 class="exposure-card-title">
+            <span class="exposure-card-heading"><span id="riskChartLabel">Exposure</span> <span class="spark-label" id="riskTitleValue">[-]</span></span>
+            <span class="equity-view-toggle" role="tablist" aria-label="Risk chart">
+              <button class="equity-view-btn active" type="button" data-risk-view="exposure" aria-selected="true">Exposure</button>
+              <button class="equity-view-btn" type="button" data-risk-view="drawdown" aria-selected="false">Drawdown</button>
+            </span>
+          </h3>
+          <div class="chart-canvas-wrap exposure-chart-wrap" id="exposureChartWrap">
+            <canvas id="exposureChart"></canvas>
+          </div>
+          <div class="chart-canvas-wrap exposure-chart-wrap is-hidden" id="drawdownChartWrap">
+            <canvas id="drawdownChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card distribution-card performance-tile" data-tile-id="distribution" data-tile-span="1">
           <h3 class="pnl-card-title">
             <span class="pnl-card-heading">Profit Distribution <span class="spark-label" id="distributionTitleValue">[-]</span></span>
           </h3>
-          <div class="chart-canvas-wrap logo-watermark">
+          <div class="chart-canvas-wrap">
             <canvas id="profitDistributionChart"></canvas>
           </div>
         </div>
-
-        <div class="chart-card heatmap-card">
-          <h3 class="pnl-card-title">
-            <span class="pnl-card-heading">Daily Profit &amp; Loss</span>
-          </h3>
-          <div class="pnl-heatmap-wrap logo-watermark" id="pnlHeatmapWrap">
-            <div class="pnl-heatmap-toolbar">
-              <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous year">‹</button>
-              <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Yearly daily PnL</span>
-              <button class="pnl-heatmap-nav" id="pnlHeatmapNextBtn" type="button" aria-label="Next year">›</button>
-            </div>
-            <div class="pnl-heatmap-months" id="pnlHeatmapMonths"></div>
-            <div class="pnl-heatmap-body">
-              <div class="pnl-heatmap-weekdays" id="pnlHeatmapWeekdays"></div>
-              <div class="pnl-heatmap-grid" id="pnlHeatmapGrid"></div>
-            </div>
-            <div class="pnl-heatmap-hover" id="pnlHeatmapHover"></div>
-          </div>
         </div>
+      </div>
       </div>
 
-      <div class="metrics-card collapsed loading" id="metricsCard">
-      <button class="metrics-scroll-arrow left" type="button" aria-label="Scroll metrics left">‹</button>
-      <button class="metrics-scroll-arrow right" type="button" aria-label="Scroll metrics right">›</button>
-      <div class="metrics-grid">
-        <div class="metric">
-          <div class="metric-label" title="Net change in portfolio PnL over the selected range." data-tooltip="Net change in portfolio PnL over the selected range.">Total PnL</div>
-          <div class="metric-value" id="metricTotalPnl">-</div>
-          <div class="metric-sub" id="metricTotalPnlSub">PnL change over range</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="PnL change divided by total deposits in the range." data-tooltip="PnL change divided by total deposits in the range.">Return</div>
-          <div class="metric-value" id="metricReturn">-</div>
-          <div class="metric-sub">PnL vs initial account value</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Largest peak-to-trough drop vs deposit baseline." data-tooltip="Largest peak-to-trough drop vs deposit baseline.">Max Drawdown</div>
-          <div class="metric-value" id="metricMaxDrawdown">-</div>
-          <div class="metric-sub">Peak-to-trough vs initial</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Average PnL change divided by its volatility." data-tooltip="Average PnL change divided by its volatility.">Sharpe (PnL)</div>
-          <div class="metric-value" id="metricSharpe">-</div>
-          <div class="metric-sub">Mean / stdev of PnL deltas</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Standard deviation of PnL changes." data-tooltip="Standard deviation of PnL changes.">PnL Volatility</div>
-          <div class="metric-value" id="metricVolatility">-</div>
-          <div class="metric-sub">Stdev of PnL deltas</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Largest positive PnL change between adjacent points." data-tooltip="Largest positive PnL change between adjacent points.">Best Interval</div>
-          <div class="metric-value" id="metricBestInterval">-</div>
-          <div class="metric-sub">Largest positive delta</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Realized PnL from matched closed positions." data-tooltip="Realized PnL from matched closed positions.">Realized PnL (Fills)</div>
-          <div class="metric-value" id="metricRealizedPnl">-</div>
-          <div class="metric-sub">From matched closed positions</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Share of closed positions that were profitable." data-tooltip="Share of closed positions that were profitable.">Win Rate</div>
-          <div class="metric-value" id="metricWinRate">-</div>
-          <div class="metric-sub">Closed positions with profit</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Total gains divided by total losses on closed positions." data-tooltip="Total gains divided by total losses on closed positions.">Profit Factor</div>
-          <div class="metric-value" id="metricProfitFactor">-</div>
-          <div class="metric-sub">Gains / losses</div>
-        </div>
-        <div class="metric">
-        <div class="metric-label" title="Average submitted orders and executed trades per day." data-tooltip="Average submitted orders and executed trades per day.">Orders (Trades) / Day</div>
-          <div class="metric-value" id="metricOrdersTradesPerDay">-</div>
-          <div class="metric-sub">Submitted (executed) per day</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Days with at least one trade divided by observed days." data-tooltip="Days with at least one trade divided by observed days.">Active Days Ratio</div>
-          <div class="metric-value" id="metricActiveDays">-</div>
-          <div class="metric-sub">Days with trades / observed</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Number of unique products traded." data-tooltip="Number of unique products traded.">Product Count</div>
-          <div class="metric-value" id="metricProductCount">-</div>
-          <div class="metric-sub">Unique traded products</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Herfindahl index of notional by product (higher = more concentrated)." data-tooltip="Herfindahl index of notional by product (higher = more concentrated).">Volume Concentration</div>
-          <div class="metric-value" id="metricHerfindahl">-</div>
-          <div class="metric-sub">Herfindahl index</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Average absolute price times size per trade." data-tooltip="Average absolute price times size per trade.">Avg Trade Notional</div>
-          <div class="metric-value" id="metricAvgNotional">-</div>
-          <div class="metric-sub">Mean |price * size|</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Count of days with at least one trade." data-tooltip="Count of days with at least one trade.">Days Active</div>
-          <div class="metric-value" id="metricActiveDaysCount">-</div>
-          <div class="metric-sub">Days with at least 1 trade</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Median holding duration for closed positions." data-tooltip="Median holding duration for closed positions.">Median Holding Time</div>
-          <div class="metric-value" id="metricMedianHolding">-</div>
-          <div class="metric-sub">Typical position duration</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Notional buy minus sell, normalized by total notional." data-tooltip="Notional buy minus sell, normalized by total notional.">Buy-Sell Imbalance</div>
-          <div class="metric-value" id="metricSideBias">-</div>
-          <div class="metric-sub">Notional bias</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Share of market orders among all orders." data-tooltip="Share of market orders among all orders.">Order Aggressiveness</div>
-          <div class="metric-value" id="metricAggressiveness">-</div>
-          <div class="metric-sub">Market orders / total</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Canceled orders divided by total submitted orders." data-tooltip="Canceled orders divided by total submitted orders.">Cancel Ratio</div>
-          <div class="metric-value" id="metricCancelRatio">-</div>
-          <div class="metric-sub">Canceled / submitted</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Average time from order submission to fill." data-tooltip="Average time from order submission to fill.">Reaction Speed</div>
-          <div class="metric-value" id="metricReactionSpeed">-</div>
-          <div class="metric-sub">Order submit to fill</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Weekly PnL volatility relative to weekly mean." data-tooltip="Weekly PnL volatility relative to weekly mean.">PnL Stability</div>
-          <div class="metric-value" id="metricPnlStability">-</div>
-          <div class="metric-sub">Weekly CV</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Autocorrelation of weekly PnL." data-tooltip="Autocorrelation of weekly PnL.">Skill Persistence</div>
-          <div class="metric-value" id="metricSkillPersistence">-</div>
-          <div class="metric-sub">Weekly autocorrelation</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="PnL minus a BTC benchmark over the same window." data-tooltip="PnL minus a BTC benchmark over the same window.">Excess PnL</div>
-          <div class="metric-value" id="metricExcessPnl">-</div>
-          <div class="metric-sub">Vs benchmark (BTC)</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label" title="Sensitivity to BTC (beta) and regression intercept (alpha)." data-tooltip="Sensitivity to BTC (beta) and regression intercept (alpha).">Beta & Alpha</div>
-          <div class="metric-value" id="metricBetaAlpha">-</div>
-          <div class="metric-sub">PnL vs BTC</div>
-        </div>
-      </div>
-      </div>
       <div class="chart-loading" id="portfolioLoading">Loading performance data…</div>
-    </div>
     <div class="error" id="portfolioError"></div>
   </section>
-
-  <div class="metric-tooltip" id="metricTooltip" role="tooltip" aria-hidden="true"></div>
 
   <section class="card" id="liveLayout">
     <div class="section-title">
@@ -6681,6 +6863,7 @@
   const pageParams = new URLSearchParams(window.location.search);
   const isEmbedPopup = pageParams.get("embed") === "popup";
   const isEmbedShell = pageParams.get("embed") === "shell";
+  const isEmbedTracker = pageParams.get("embed") === "tracker";
   const isEmbedSectionMode = isEmbedPopup || isEmbedShell;
   const initialEmbedSection = normalizeEmbedSection(pageParams.get("section"));
   const clampWalletSkillScore = (value) => {
@@ -6698,12 +6881,11 @@
   const USER_FILLS_HISTORY_CAP = 2000;
   const PORTFOLIO_API_URL = "https://api.hyperliquid.xyz/info";
   const PERP_ANNOTATION_API_URL = "https://api-ui.hyperliquid.xyz/info";
+  const rootEl = document.documentElement;
 
   const walletInputsEl = document.getElementById("walletInputs");
   const addWalletBtnEl = document.getElementById("addWalletBtn");
   const trackBtnEl = document.getElementById("trackBtn");
-  const marketToggleButtons = document.querySelectorAll(".market-tab-btn");
-  const marketToggleIndicatorEl = document.querySelector(".market-toggle-indicator");
   const rangeToggleIndicatorEl = document.querySelector(".range-toggle-indicator");
   const accountModeLabelEl = document.getElementById("accountModeLabel");
   const positionsModeLabelEl = document.getElementById("positionsModeLabel");
@@ -6718,22 +6900,18 @@
   const marginSummaryEl = document.getElementById("marginSummary");
   const snapshotErrorEl = document.getElementById("snapshotError");
   const accountOverviewCardEl = document.querySelector(".account-overview-card");
+  const overviewBreakdownPanelEl = document.getElementById("overviewBreakdownPanel");
   const dashboardSidebarEl = document.querySelector(".dashboard-sidebar");
   const dashboardMainEl = document.querySelector(".dashboard-main");
-  const shellOverviewToggleBtn = document.getElementById("shellOverviewToggleBtn");
   const shellSectionTabsEl = document.getElementById("shellSectionTabs");
   const shellSectionButtons = shellSectionTabsEl ? Array.from(shellSectionTabsEl.querySelectorAll("[data-shell-section]")) : [];
-  const shellCloseBtn = document.getElementById("shellCloseBtn");
   const positionsSectionEl = document.querySelector(".positions-card");
   const performanceSectionEl = document.getElementById("performanceSection");
 
   const positionsBodyEl = document.getElementById("positionsBody");
-  const positionsChartBtn = document.getElementById("positionsChartBtn");
   const positionsTimelineWrapEl = document.getElementById("positionsTimelineWrap");
   const positionsTimelineSliderEl = document.getElementById("positionsTimelineSlider");
   const positionsTimelineStampEl = document.getElementById("positionsTimelineStamp");
-  const portfolioModalEl = document.getElementById("portfolioModal");
-  const portfolioModalCloseEl = document.getElementById("portfolioModalClose");
   const coinInfoModalEl = document.getElementById("coinInfoModal");
   const coinInfoModalCloseEl = document.getElementById("coinInfoModalClose");
   const coinInfoLogoEl = document.getElementById("coinInfoLogo");
@@ -6741,8 +6919,6 @@
   const coinInfoCategoryEl = document.getElementById("coinInfoCategory");
   const coinInfoDescriptionEl = document.getElementById("coinInfoDescription");
   const portfolioDoughnutCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("portfolioDoughnut"));
-  const positionsValueStatEl = document.getElementById("positionsValueStat");
-  const withdrawableValueStatEl = document.getElementById("withdrawableValueStat");
   const priceFooterEl = document.getElementById("priceFooter");
   const priceFooterWrapEl = document.querySelector(".price-footer");
   const priceCurrencySwitchEl = document.getElementById("priceCurrencySwitch");
@@ -6813,18 +6989,19 @@
   const portfolioChartsEl = document.getElementById("portfolioCharts");
   const performanceToolbarEl = document.getElementById("performanceToolbar");
   const performanceActionsEl = document.getElementById("performanceActions");
+  const performanceLeftStackEl = document.getElementById("performanceLeftStack");
+  const performanceRightStackEl = document.getElementById("performanceRightStack");
   const spotPerformanceNoteEl = document.getElementById("spotPerformanceNote");
   const rangeButtons = document.querySelectorAll(".chart-range-btn");
   const exportExcelBtn = document.getElementById("exportExcelBtn");
+  const performanceCloseBtnEl = document.getElementById("performanceCloseBtn");
   const metricsCardEl = document.getElementById("metricsCard");
   const metricsGridEl = metricsCardEl ? metricsCardEl.querySelector(".metrics-grid") : null;
-  const metricsToggleEl = document.getElementById("metricsToggle");
   const performanceShareBtnEl = document.getElementById("performanceShareBtn");
   const mobileLoadingOverlayEl = document.getElementById("mobileLoadingOverlay");
   const metricsWalletLabelEl = document.getElementById("metricsWalletLabel");
   const metricsRangeLabelEl = document.getElementById("metricsRangeLabel");
   const metricTotalPnlEl = document.getElementById("metricTotalPnl");
-  const metricTotalPnlSubEl = document.getElementById("metricTotalPnlSub");
   const metricReturnEl = document.getElementById("metricReturn");
   const metricMaxDrawdownEl = document.getElementById("metricMaxDrawdown");
   const metricSharpeEl = document.getElementById("metricSharpe");
@@ -6860,23 +7037,28 @@
   const shareModalCloseEl = document.getElementById("shareModalClose");
 
   const drawdownCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("drawdownChart"));
+  const drawdownChartWrapEl = document.getElementById("drawdownChartWrap");
   const equityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("equityChart"));
   const equityChartWrapEl = document.getElementById("equityChartWrap");
+  const roiCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("roiChart"));
+  const roiChartWrapEl = document.getElementById("roiChartWrap");
   const equityViewButtons = document.querySelectorAll("[data-equity-view]");
   const primaryPerformanceButtons = document.querySelectorAll("[data-performance-view]");
-  const activityViewButtons = document.querySelectorAll("[data-activity-view]");
+  const riskViewButtons = document.querySelectorAll("[data-risk-view]");
   const primaryChartLabelEl = document.getElementById("primaryChartLabel");
   const primaryChartTitleValueEl = document.getElementById("primaryChartTitleValue");
   const exposureCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("exposureChart"));
+  const exposureChartWrapEl = document.getElementById("exposureChartWrap");
   const pnlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("pnlChart"));
   const pnlChartWrapEl = document.getElementById("pnlChartWrap");
-  const activityCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("activityChart"));
   const pnlHeatmapWrapEl = document.getElementById("pnlHeatmapWrap");
   const pnlHeatmapMonthsEl = document.getElementById("pnlHeatmapMonths");
   const pnlHeatmapWeekdaysEl = document.getElementById("pnlHeatmapWeekdays");
   const pnlHeatmapGridEl = document.getElementById("pnlHeatmapGrid");
   const pnlHeatmapTitleEl = document.getElementById("pnlHeatmapTitle");
   const pnlHeatmapHoverEl = document.getElementById("pnlHeatmapHover");
+  const pnlHeatmapHoverCardEl = document.getElementById("pnlHeatmapHoverCard");
+  const pnlHeatmapLegendEl = document.getElementById("pnlHeatmapLegend");
   const pnlHeatmapPrevBtnEl = document.getElementById("pnlHeatmapPrevBtn");
   const pnlHeatmapNextBtnEl = document.getElementById("pnlHeatmapNextBtn");
   const pnlViewButtons = document.querySelectorAll(".pnl-view-btn");
@@ -6888,10 +7070,9 @@
   const transfersListBodyEl = document.getElementById("transfersListBody");
   const transfersListStatusEl = document.getElementById("transfersListStatus");
   const thirdPanelModeButtons = document.querySelectorAll(".third-panel-btn");
-  const activityTitleValueEl = document.getElementById("activityTitleValue");
-  const drawdownTitleValueEl = document.getElementById("drawdownTitleValue");
   const equityTitleValueEl = document.getElementById("equityTitleValue");
-  const exposureTitleValueEl = document.getElementById("exposureTitleValue");
+  const riskChartLabelEl = document.getElementById("riskChartLabel");
+  const riskTitleValueEl = document.getElementById("riskTitleValue");
   const pnlTitleValueEl = document.getElementById("pnlTitleValue");
   const depositsTitleValueEl = document.getElementById("depositsTitleValue");
 
@@ -6900,9 +7081,17 @@
   const COIN_ICON_BASE = "https://app.hyperliquid.xyz/coins/";
   const INLINE_BTC_LOGO = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20shape-rendering%3D%22geometricPrecision%22%20text-rendering%3D%22geometricPrecision%22%20image-rendering%3D%22optimizeQuality%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20viewBox%3D%220%200%204091.27%204091.73%22%3E%3Cg%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill%3D%22%23F7931A%22%20d%3D%22M4030.06%202540.77C3756.82%203636.78%202646.74%204303.79%201550.6%204030.48%20454.92%203757.24-212.09%202647.09%2061.27%201551.17c273.12-1096.13%201383.2-1763.19%202479-1489.95C3636.33%20334.46%204303.3%201444.73%204030.03%202540.79l.02-.02z%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2947.77%201754.38c40.72-272.26-166.56-418.61-450-516.24l91.95-368.8-224.5-55.94-89.51%20359.09c-59.02-14.72-119.63-28.59-179.87-42.34L2186%20768.69l-224.36-55.94-92%20368.68c-48.84-11.12-96.81-22.11-143.35-33.69l.26-1.16-309.59-77.31-59.72%20239.78s166.56%2038.18%20163.05%2040.53c90.91%2022.69%20107.35%2082.87%20104.62%20130.57l-104.74%20420.15c6.26%201.59%2014.38%203.89%2023.34%207.49-7.49-1.86-15.46-3.89-23.73-5.87l-146.81%20588.57c-11.11%2027.62-39.31%2069.07-102.87%2053.33%202.25%203.26-163.17-40.72-163.17-40.72l-111.46%20256.98%20292.15%2072.83c54.35%2013.63%20107.61%2027.89%20160.06%2041.3l-92.9%20373.03%20224.24%2055.94%2092-369.07c61.26%2016.63%20120.71%2031.97%20178.91%2046.43l-91.69%20367.33%20224.51%2055.94%2092.89-372.33c382.82%2072.45%20670.67%2043.24%20791.83-303.02%2097.63-278.78-4.86-439.58-206.26-544.44%20146.69-33.83%20257.18-130.31%20286.64-329.61l-.07-.05zm-512.93%20719.26c-69.38%20278.78-538.76%20128.08-690.94%2090.29l123.28-494.2c152.17%2037.99%20640.17%20113.17%20567.67%20403.91zm69.43-723.3c-63.29%20253.58-453.96%20124.75-580.69%2093.16l111.77-448.21c126.73%2031.59%20534.85%2090.55%20468.94%20355.05h-.02z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E";
   const INLINE_ETH_LOGO = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E";
+  const INLINE_SOL_LOGO = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ4IiBoZWlnaHQ9IjE0OCIgdmlld0JveD0iMCAwIDE0OCAxNDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9Ijc0IiBjeT0iNzQiIHI9Ijc0IiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNNDQuODA5OCA5MS4xMzY3QzQ1LjMyMjcgOTAuNjIwOCA0Ni4wMjc5IDkwLjMxOTkgNDYuNzc1OSA5MC4zMTk5SDExNC42MDdDMTE1Ljg0NiA5MC4zMTk5IDExNi40NjYgOTEuODI0NSAxMTUuNTkgOTIuNzA1OEwxMDIuMTkgMTA2LjE4M0MxMDEuNjc3IDEwNi42OTkgMTAwLjk3MiAxMDcgMTAwLjIyNCAxMDdIMzIuMzkzNEMzMS4xNTM5IDEwNyAzMC41MzQyIDEwNS40OTUgMzEuNDEwNCAxMDQuNjE0TDQ0LjgwOTggOTEuMTM2N1oiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcikiLz4KPHBhdGggZD0iTTQ0LjgwOTggNDAuODE2OEM0NS4zNDQxIDQwLjMwMDkgNDYuMDQ5MyA0MCA0Ni43NzU5IDQwSDExNC42MDdDMTE1Ljg0NiA0MCAxMTYuNDY2IDQxLjUwNDcgMTE1LjU5IDQyLjM4NTlMMTAyLjE5IDU1Ljg2MzNDMTAxLjY3NyA1Ni4zNzkyIDEwMC45NzIgNTYuNjgwMSAxMDAuMjI0IDU2LjY4MDFIMzIuMzkzNEMzMS4xNTM5IDU2LjY4MDEgMzAuNTM0MiA1NS4xNzU1IDMxLjQxMDQgNTQuMjk0Mkw0NC44MDk4IDQwLjgxNjhaIiBmaWxsPSJ1cmwoI3BhaW50MV9saW5lYXIpIi8+CjxwYXRoIGQ9Ik0xMDIuMTkgNjUuODE1NUMxMDEuNjc3IDY1LjI5OTYgMTAwLjk3MiA2NC45OTg3IDEwMC4yMjQgNjQuOTk4N0gzMi4zOTM0QzMxLjE1MzkgNjQuOTk4NyAzMC41MzQyIDY2LjUwMzQgMzEuNDEwNCA2Ny4zODQ3TDQ0LjgwOTggODAuODYyQzQ1LjMyMjcgODEuMzc3OSA0Ni4wMjc5IDgxLjY3ODkgNDYuNzc1OSA4MS42Nzg5SDExNC42MDdDMTE1Ljg0NiA4MS42Nzg5IDExNi40NjYgODAuMTc0MiAxMTUuNTkgNzkuMjkyOUwxMDIuMTkgNjUuODE1NVoiIGZpbGw9InVybCgjcGFpbnQyX2xpbmVhcikiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhciIgeDE9Ijk3Ljc5ODIiIHkxPSIyNi41MjUyIiB4Mj0iNTAuNDI0NiIgeTI9IjExNi43NCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjMDBGRkEzIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0RDMUZGRiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MV9saW5lYXIiIHgxPSI5Ny43OTgyIiB5MT0iMjYuNTI1MiIgeDI9IjUwLjQyNDYiIHkyPSIxMTYuNzQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwRkZBMyIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNEQzFGRkYiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDJfbGluZWFyIiB4MT0iOTcuNzk4MiIgeTE9IjI2LjUyNTIiIHgyPSI1MC40MjQ2IiB5Mj0iMTE2Ljc0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMwMEZGQTMiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjREMxRkZGIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+Cg==";
+  const INLINE_HYPE_LOGO = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDE0NCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xNDQgNzEuNjk5MUMxNDQgMTE5LjMwNiAxMTQuODY2IDEzNC41ODIgOTkuNTE1NiAxMjAuOThDODYuODgwNCAxMDkuODg5IDgzLjEyMTEgODYuNDUyMSA2NC4xMTYgODQuMDQ1NkMzOS45OTQyIDgxLjAxMTMgMzcuOTA1NyAxMTMuMTMzIDIyLjAzMzQgMTEzLjEzM0MzLjU1MDQgMTEzLjEzMyAwIDg2LjI0MjggMCA3Mi40MzE1QzAgNTguMzA2MyAzLjk2ODA5IDM5LjA1NDIgMTkuNzM2IDM5LjA1NDJDMzguMTE0NiAzOS4wNTQyIDM5LjE1ODggNjYuNTcyMiA2Mi4xMzIgNjUuMTA3M0M4NS4wMDA3IDYzLjUzNzkgODUuNDE4NCAzNC44Njg5IDEwMC4yNDcgMjIuNjI3MUMxMTMuMTk1IDEyLjA1OTMgMTQ0IDIzLjQ2NDEgMTQ0IDcxLjY5OTFaIiBmaWxsPSIjOTdGQ0U0Ii8+Cjwvc3ZnPgo=";
+  const INLINE_NVDA_LOGO = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJOVkRBIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iIzc2YjkwMCIvPgogIDxwYXRoIGQ9Ik0xNCAzMS43YzUuNC04LjQgMTIuOS0xMy4xIDIyLjUtMTMuMSA2LjMgMCAxMS43IDIuMSAxNS41IDYtMy44LTEuOS03LjYtMi44LTExLjctMi44LTcuNSAwLTEzLjkgMy4yLTE5LjIgOS44IDMuMiA0LjMgNy40IDYuNCAxMi40IDYuNCA0LjcgMCA4LjYtMi4xIDExLjMtNi4zLTIuMy0xLjktNC45LTIuOS03LjctMi45LTMuOCAwLTYuOSAxLjgtOS4yIDUuMiAxLjQtNSA1LjctOC4zIDEwLjctOC4zIDMuOCAwIDcuMSAxLjMgOS45IDMuOGwuOS44LS41IDFjLTMuOSA3LTkuOSAxMC42LTE3LjcgMTAuNi03LjIgMC0xMy4xLTMuNC0xOC0xMGwtLjctLjl6IiBmaWxsPSIjZmZmIi8+CiAgPGNpcmNsZSBjeD0iMzguNSIgY3k9IjMyLjIiIHI9IjUuNSIgZmlsbD0iIzc2YjkwMCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIuOCIvPgo8L3N2Zz4K";
+  const INLINE_MSTR_LOGO = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJNU1RSIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iI2ZmOGExYyIvPgogIDxwYXRoIGQ9Ik0xMyA0N1YxN2g4LjFMMzIgMjkuNiA0Mi45IDE3SDUxdjMwaC04VjI4LjhMMzIgNDEgMjEgMjguOFY0N3oiIGZpbGw9IiNmZmYiLz4KICA8cGF0aCBkPSJNNDYgMTRoNnY4aC02eiIgZmlsbD0iIzJiMjExOSIgb3BhY2l0eT0iLjkiLz4KPC9zdmc+Cg==";
   const SPECIAL_LOGOS = new Map([
     ["BTC", INLINE_BTC_LOGO],
     ["ETH", INLINE_ETH_LOGO],
+    ["SOL", INLINE_SOL_LOGO],
+    ["HYPE", INLINE_HYPE_LOGO],
+    ["NVDA", INLINE_NVDA_LOGO],
+    ["MSTR", INLINE_MSTR_LOGO],
     ["USDT0", "https://app.hyperliquid.xyz/coins/USDT_spot.svg"],
     ["USA500", "images/coins/USA500.png"],
     ["COPPER", "images/coins/COPPER.png"],
@@ -6910,12 +7099,15 @@
     ["SILVER", "images/coins/SILVER.svg"],
   ]);
   const FOOTER_SPECIAL_LOGOS = new Map([
-    ["HYPE", "https://hyperfoundation.org/landing/blob_green.gif"],
+    ["HYPE", INLINE_HYPE_LOGO],
+    ["SOL", INLINE_SOL_LOGO],
     ["DOGE", "https://s2.coinmarketcap.com/static/img/coins/64x64/74.gif"],
     ["DOT", "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.gif"],
     ["LINK", "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif"],
     ["RENDER", "https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif"],
     ["XRP", "https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif"],
+    ["NVDA", INLINE_NVDA_LOGO],
+    ["MSTR", INLINE_MSTR_LOGO],
     ["USA500", "images/coins/USA500.png"],
   ]);
   const FOOTER_CIRCLE_LOGOS = new Set(["DOGE", "DOT", "RENDER", "XRP"]);
@@ -6928,10 +7120,8 @@
     ["USA500", "#e04f5f"],
     ["XRP", "#ffffff"],
   ]);
-  const GLOBAL_SPECIAL_LOGO_PRIORITY = new Set(["BTC", "ETH", "USA500"]);
+  const GLOBAL_SPECIAL_LOGO_PRIORITY = new Set(["BTC", "ETH", "SOL", "HYPE", "LINK", "NVDA", "MSTR", "USA500"]);
   const DOMAIN_LOGOS = new Map([
-    ["NVDA", "https://logo.clearbit.com/nvidia.com"],
-    ["MSTR", "https://logo.clearbit.com/microstrategy.com"],
     ["TSLA", "https://logo.clearbit.com/tesla.com"],
     ["AAPL", "https://logo.clearbit.com/apple.com"],
     ["AMZN", "https://logo.clearbit.com/amazon.com"],
@@ -7000,20 +7190,27 @@
   let latestLiveEquityValue = null;
   let latestLivePnlValue = null;
   let latestBaseEquityValue = null;
+  let latestOverviewPerformanceSummary = null;
+  let latestOverviewTradeSummary = null;
   let isAccountOverviewReady = false;
   let portfolioLoadSettled = false;
   let historicalFillsLoadSettled = false;
   let portfolioLoadPromise = null;
   let historicalFillsLoadPromise = null;
   let initialWalletTrackingComplete = false;
-  let accountOverviewScrollHideTimer = null;
   let primaryPerformanceMode = "pnl";
+  let riskPerformanceMode = "exposure";
   let activityViewMode = "trades";
+  function setStartupChromeLoading(isLoading) {
+    rootEl.classList.toggle("tracker-startup-loading", Boolean(isLoading));
+  }
+
   const chartLastValues = {
     equity: null,
     equityDrawdown: null,
     exposure: null,
     pnl: null,
+    roi: null,
     activityTrades: null,
     activityVolume: null,
     deposits: null,
@@ -7942,12 +8139,13 @@
   let pnlViewMode = "line";
   let pnlHeatmapMonths = [];
   let pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
+  let pnlHeatmapYearKey = "";
   let pnlHeatmapRows = [];
   let thirdPanelMode = "chart";
   const transferHistoryByWallet = new Map();
   let transfersRequestToken = 0;
   const TRANSFERS_MAX_ROWS = 120;
-  const portfolioCharts = { drawdown: null, equity: null, exposure: null, pnl: null, activity: null, deposits: null, distribution: null };
+  const portfolioCharts = { drawdown: null, equity: null, exposure: null, pnl: null, roi: null, activity: null, deposits: null, distribution: null };
   const portfolioBreakdownChart = { chart: null };
   const overviewCharts = { radar: null };
   let walletSkillOverrides = extractWalletSkillOverrides({
@@ -8578,6 +8776,23 @@
     if (next === "transfers") refreshTransfersPanel(currentRangeKey);
   }
 
+  function schedulePerformanceTileResize() {
+    requestAnimationFrame(() => {
+      Object.values(portfolioCharts).forEach((chart) => {
+        if (!chart || typeof chart.resize !== "function") return;
+        chart.resize();
+        chart.update("none");
+      });
+      if (pnlHeatmapRows.length) {
+        renderPnlHeatmap(currentRangeKey);
+      }
+    });
+  }
+
+  function initPerformanceTileLayout() {
+    schedulePerformanceTileResize();
+  }
+
   function getDisplayCurrencyMeta(value) {
     const n = Number(value);
     if (!Number.isFinite(n)) return null;
@@ -8660,54 +8875,51 @@
     const equityDrawdownValue = Number.isFinite(chartLastValues.equityDrawdown) ? chartLastValues.equityDrawdown : null;
     const exposureChartValue = Number.isFinite(chartLastValues.exposure) ? chartLastValues.exposure : null;
     const pnlChartValue = Number.isFinite(chartLastValues.pnl) ? chartLastValues.pnl : null;
+    const roiChartValue = Number.isFinite(chartLastValues.roi) ? chartLastValues.roi : null;
     const activityTradesValue = Number.isFinite(chartLastValues.activityTrades) ? chartLastValues.activityTrades : null;
     const activityVolumeValue = Number.isFinite(chartLastValues.activityVolume) ? chartLastValues.activityVolume : null;
     const depositsChartValue = Number.isFinite(chartLastValues.deposits) ? chartLastValues.deposits : null;
 
-    if (drawdownTitleValueEl) {
-      drawdownTitleValueEl.textContent =
-        equityDrawdownValue !== null ? formatSignedPercent(equityDrawdownValue, 2) : "-";
-      drawdownTitleValueEl.classList.remove("positive", "negative", "neutral");
-      if (Number.isFinite(equityDrawdownValue)) {
-        if (equityDrawdownValue < 0) drawdownTitleValueEl.classList.add("negative");
-        else if (equityDrawdownValue > 0) drawdownTitleValueEl.classList.add("positive");
-        else drawdownTitleValueEl.classList.add("neutral");
-      }
-    }
-
-    if (exposureTitleValueEl) {
-      exposureTitleValueEl.textContent = exposureChartValue !== null ? formatExposureMultiple(exposureChartValue, 2) : "-";
-      exposureTitleValueEl.classList.remove("positive", "negative", "neutral", "exposure-accent");
-      if (Number.isFinite(exposureChartValue)) {
-        exposureTitleValueEl.classList.add("exposure-accent");
+    if (riskChartLabelEl && riskTitleValueEl) {
+      const isDrawdown = riskPerformanceMode === "drawdown";
+      riskChartLabelEl.textContent = isDrawdown ? "Drawdown" : "Exposure";
+      riskTitleValueEl.textContent = isDrawdown
+        ? (equityDrawdownValue !== null ? formatSignedPercent(equityDrawdownValue, 2) : "-")
+        : (exposureChartValue !== null ? formatExposureMultiple(exposureChartValue, 2) : "-");
+      riskTitleValueEl.classList.remove("positive", "negative", "neutral", "exposure-accent");
+      if (isDrawdown) {
+        if (Number.isFinite(equityDrawdownValue)) {
+          if (equityDrawdownValue < 0) riskTitleValueEl.classList.add("negative");
+          else if (equityDrawdownValue > 0) riskTitleValueEl.classList.add("positive");
+          else riskTitleValueEl.classList.add("neutral");
+        }
+      } else if (Number.isFinite(exposureChartValue)) {
+        riskTitleValueEl.classList.add("exposure-accent");
       }
     }
 
     if (primaryChartLabelEl && primaryChartTitleValueEl) {
       latestLivePnlValue = Number.isFinite(pnlChartValue) ? pnlChartValue : null;
-      primaryChartLabelEl.textContent = primaryPerformanceMode === "equity" ? "Equity" : "Profit & Loss";
+      primaryChartLabelEl.textContent =
+        primaryPerformanceMode === "equity"
+          ? "Equity"
+          : primaryPerformanceMode === "roi"
+            ? "ROI"
+            : "Profit & Loss";
       primaryChartTitleValueEl.classList.remove("positive", "negative", "neutral", "equity-accent");
       if (primaryPerformanceMode === "equity") {
         primaryChartTitleValueEl.textContent = equityChartValue !== null ? fmtMoney(equityChartValue, 0) : "-";
         primaryChartTitleValueEl.classList.add("equity-accent");
+      } else if (primaryPerformanceMode === "roi") {
+        primaryChartTitleValueEl.textContent = roiChartValue !== null ? formatSignedPercent(roiChartValue, 2) : "-";
+        if (Number.isFinite(roiChartValue)) {
+          primaryChartTitleValueEl.classList.add(roiChartValue >= 0 ? "positive" : "negative");
+        }
       } else {
-        primaryChartTitleValueEl.textContent = pnlChartValue !== null ? formatSignedCompactDollarWithPlus(pnlChartValue, 1) : "-";
+        primaryChartTitleValueEl.textContent = pnlChartValue !== null ? formatSignedDollarWithPlus(pnlChartValue, 0) : "-";
         if (Number.isFinite(pnlChartValue)) {
           primaryChartTitleValueEl.classList.add(pnlChartValue >= 0 ? "positive" : "negative");
         }
-      }
-    }
-
-    if (activityTitleValueEl) {
-      activityTitleValueEl.textContent =
-        activityViewMode === "volume"
-          ? (activityVolumeValue !== null
-              ? formatActivityVolumeLabel(activityVolumeValue, Number(activityTradesValue) >= USER_FILLS_HISTORY_CAP)
-              : "-")
-          : (activityTradesValue !== null ? formatTradeCountLabel(activityTradesValue) : "-");
-      activityTitleValueEl.classList.remove("positive", "negative", "neutral", "activity-accent");
-      if (Number.isFinite(activityTradesValue) || Number.isFinite(activityVolumeValue)) {
-        activityTitleValueEl.classList.add("activity-accent");
       }
     }
 
@@ -8719,26 +8931,6 @@
         depositsTitleValueEl.classList.add("deposits-accent");
       }
     }
-  }
-
-  function getRangePnlLabel(rangeKey) {
-    switch (rangeKey) {
-      case "day":
-        return "24 hr PnL change";
-      case "week":
-        return "7 day PnL change";
-      case "month":
-        return "30 day PnL change";
-      case "allTime":
-        return "All time PnL change";
-      default:
-        return "PnL change";
-    }
-  }
-
-  function updateTotalPnlSubLabel(rangeKey) {
-    if (!metricTotalPnlSubEl) return;
-    metricTotalPnlSubEl.textContent = getRangePnlLabel(rangeKey);
   }
 
   function applyPnlTooltipStyling(chart) {
@@ -8844,6 +9036,64 @@
       positionChartTooltip(tooltipEl, chart, tooltip);
       tooltipEl.style.opacity = "1";
     };
+  }
+
+  function applyRoiTooltipStyling(chart) {
+    if (!chart?.options?.plugins?.tooltip) return;
+    chart.options.plugins.tooltip.enabled = false;
+    chart.options.plugins.tooltip.external = (context) => {
+      const { chart, tooltip } = context;
+      let tooltipEl = chart.canvas.parentElement?.querySelector(".pnl-tooltip");
+      if (!tooltipEl) {
+        tooltipEl = document.createElement("div");
+        tooltipEl.className = "pnl-tooltip";
+        chart.canvas.parentElement?.appendChild(tooltipEl);
+      }
+      if (!tooltip || tooltip.opacity === 0) {
+        tooltipEl.style.opacity = "0";
+        return;
+      }
+
+      const point = tooltip.dataPoints?.[0];
+      const value = Number(point?.parsed?.y ?? point?.raw ?? 0);
+      const title = tooltip.title?.[0] || point?.label || "";
+
+      tooltipEl.innerHTML = `
+        <div class="pnl-tooltip-title">${title}</div>
+        <div class="pnl-tooltip-value">${formatSignedPercent(value, 2)}</div>
+      `;
+
+      const valueEl = tooltipEl.querySelector(".pnl-tooltip-value");
+      if (valueEl) {
+        valueEl.style.color =
+          value < 0
+            ? getCssVar("--danger", "#F6465D")
+            : value > 0
+              ? getCssVar("--accent", "#0ECB81")
+              : getCssVar("--neutral-blue", "rgba(124, 176, 255, 0.95)");
+      }
+      positionChartTooltip(tooltipEl, chart, tooltip);
+      tooltipEl.style.opacity = "1";
+    };
+  }
+
+  function applyRoiChartStyling(chart) {
+    if (!chart) return;
+    if (chart.options.plugins?.zeroBaseline) {
+      chart.options.plugins.zeroBaseline.enabled = true;
+    }
+    if (chart.options.plugins?.referenceLine) {
+      chart.options.plugins.referenceLine.enabled = false;
+    }
+    chart.options.scales.y.ticks.callback = (value) => {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "";
+      return formatPercent(n, Math.abs(n) >= 1 ? 0 : 1);
+    };
+    delete chart.options.scales.y.suggestedMin;
+    delete chart.options.scales.y.suggestedMax;
+    applyRoiTooltipStyling(chart);
+    chart.update();
   }
 
   function applyExposureTooltipStyling(chart) {
@@ -9779,6 +10029,13 @@
     return String(text || "").replace(/\b(\d[\d,]*)\.00\b/g, "$1");
   }
 
+  function getPerformanceShareSummary() {
+    return {
+      performance: latestOverviewPerformanceSummary,
+      trades: latestOverviewTradeSummary,
+    };
+  }
+
   async function buildPnlShareImage(data) {
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
@@ -10014,14 +10271,33 @@
         : `${primaryWalletLabel}`;
     const marketLabel = currentMarketType === "spot" ? "Spot" : "Perps";
 
-    const totalPnlText = getMetricText(metricTotalPnlEl);
-    const returnText = getMetricText(metricReturnEl);
-    const maxDrawdownText = getMetricText(metricMaxDrawdownEl);
-    const sharpeText = getMetricText(metricSharpeEl);
-    const volatilityText = getMetricText(metricVolatilityEl);
-    const bestIntervalText = getMetricText(metricBestIntervalEl);
-    const winRateText = getMetricText(metricWinRateEl);
-    const ordersPerDayText = stripWholeDecimals(getMetricText(metricOrdersTradesPerDayEl));
+    const shareSummary = getPerformanceShareSummary();
+    const totalPnlText = shareSummary.performance ? formatSignedDollarWithPlus(shareSummary.performance.totalPnl) : "-";
+    const returnText = shareSummary.performance ? formatSignedPercent(shareSummary.performance.returnPct) : "-";
+    const maxDrawdownText =
+      shareSummary.performance && Number.isFinite(shareSummary.performance.maxDrawdown)
+        ? formatPercent(shareSummary.performance.maxDrawdown)
+        : "-";
+    const sharpeText =
+      shareSummary.performance && Number.isFinite(shareSummary.performance.sharpe)
+        ? formatRatio(shareSummary.performance.sharpe, 2)
+        : "-";
+    const volatilityText =
+      shareSummary.performance && Number.isFinite(shareSummary.performance.volatility)
+        ? fmtMoney(shareSummary.performance.volatility, 2)
+        : "-";
+    const bestIntervalText =
+      shareSummary.performance && Number.isFinite(shareSummary.performance.bestInterval)
+        ? formatSignedDollarWithPlus(shareSummary.performance.bestInterval)
+        : "-";
+    const winRateText =
+      shareSummary.trades && Number.isFinite(shareSummary.trades.winRate)
+        ? formatPercent(shareSummary.trades.winRate)
+        : "-";
+    const ordersPerDayText =
+      shareSummary.trades && Number.isFinite(shareSummary.trades.ordersPerDay)
+        ? stripWholeDecimals(formatNumber(shareSummary.trades.ordersPerDay, 2) || "-")
+        : "-";
 
     const pnlValue = parseSignedMoney(totalPnlText);
     const accent = pnlValue !== null && pnlValue < 0 ? "#F6465D" : "#0ECB81";
@@ -10843,25 +11119,11 @@
   }
 
   function updateMarketToggleButtons() {
-    marketToggleButtons.forEach((btn) => {
+    document.querySelectorAll(".market-tab-btn").forEach((btn) => {
       const isActive = btn.dataset.market === currentMarketType;
       btn.classList.toggle("active", isActive);
       btn.setAttribute("aria-pressed", isActive ? "true" : "false");
     });
-    updateMarketToggleIndicator();
-  }
-
-  function updateMarketToggleIndicator() {
-    if (!marketToggleIndicatorEl) return;
-    const active = document.querySelector(".market-tab-btn.active");
-    if (!active) return;
-    const parent = active.parentElement;
-    if (!parent) return;
-    const parentRect = parent.getBoundingClientRect();
-    const activeRect = active.getBoundingClientRect();
-    const left = activeRect.left - parentRect.left;
-    marketToggleIndicatorEl.style.width = `${activeRect.width}px`;
-    marketToggleIndicatorEl.style.transform = `translateX(${left}px)`;
   }
 
   function updateRangeToggleIndicator() {
@@ -13030,6 +13292,80 @@
     return n > 0 ? "overview-positive" : "overview-negative";
   }
 
+  function buildOverviewSummaryStats({
+    openPnlTotal = 0,
+    openPositionsMeta = "0 open positions",
+    marginUsedTotal = 0,
+    marginUsedRatio = null,
+    performanceSummary = null,
+    tradeSummary = null,
+  } = {}) {
+    const stats = [
+      {
+        label: "Open PnL",
+        value: formatSignedDollarWithPlus(openPnlTotal, 0),
+        meta: openPositionsMeta,
+        tone: getOverviewToneClass(openPnlTotal),
+      },
+      {
+        label: "Margin Used",
+        value: fmtMoneyCompact(marginUsedTotal, 2),
+        meta: marginUsedRatio !== null ? `${formatPercent(marginUsedRatio, 1)} of equity` : "No margin in use",
+        tone: "",
+      },
+    ];
+
+    if (performanceSummary) {
+      stats.push(
+        {
+          label: "Return",
+          value: formatSignedPercent(performanceSummary.returnPct),
+          meta: "vs initial equity",
+          tone: getOverviewToneClass(performanceSummary.returnPct),
+        },
+        {
+          label: "Max Drawdown",
+          value: formatPercent(performanceSummary.maxDrawdown),
+          meta: "peak to trough",
+          tone: "overview-negative",
+        }
+      );
+    }
+
+    if (tradeSummary) {
+      const profitFactorText =
+        tradeSummary.profitFactor === Infinity
+          ? "Inf"
+          : Number.isFinite(tradeSummary.profitFactor)
+            ? formatRatio(tradeSummary.profitFactor, 2)
+            : "-";
+      stats.push(
+        {
+          label: "Win Rate",
+          value: formatPercent(tradeSummary.winRate),
+          meta: Number.isFinite(tradeSummary.closedCount)
+            ? `${formatNumber(tradeSummary.closedCount, 0)} closed trades`
+            : "Closed trades",
+          tone: "",
+        },
+        {
+          label: "Profit Factor",
+          value: profitFactorText,
+          meta: "gross wins vs losses",
+          tone: "",
+        },
+        {
+          label: "Median Holding",
+          value: formatDuration(tradeSummary.medianHoldingTime),
+          meta: "typical position duration",
+          tone: "",
+        }
+      );
+    }
+
+    return stats;
+  }
+
   function renderMarginSummary(items, { estimated = false } = {}) {
     if (!Array.isArray(items) || items.length === 0) {
       marginSummaryEl.innerHTML = "<span class='muted'>No margin summary.</span>";
@@ -13103,12 +13439,6 @@
     const marginUsedRatio = Math.abs(selectedEquity) > 1e-9 ? marginUsedTotal / Math.abs(selectedEquity) : null;
     const exposureMultiple = Math.abs(selectedEquity) > 1e-9 ? grossExposure / Math.abs(selectedEquity) : null;
     const biasLabel = describeOverviewBias(longShare, shortShare, grossExposure);
-    const marketLabel =
-      currentMarketType === "spot"
-        ? "Spot"
-        : currentMarketType === "all"
-          ? "All Markets"
-          : "Perps";
     const headline =
       currentMarketType === "spot"
         ? "Spot Total Value"
@@ -13124,20 +13454,17 @@
       ? "1 open position"
       : `${formatNumber(positionCount, 0)} open positions`;
 
-    const stats = [
-      {
-        label: "Open PnL",
-        value: formatSignedDollarWithPlus(openPnlTotal, 0),
-        meta: openPositionsMeta,
-        tone: getOverviewToneClass(openPnlTotal),
-      },
-      {
-        label: "Margin Used",
-        value: fmtMoneyCompact(marginUsedTotal, 2),
-        meta: marginUsedRatio !== null ? `${formatPercent(marginUsedRatio, 1)} of equity` : "No margin in use",
-        tone: "",
-      },
-    ];
+    const performanceSummary = latestOverviewPerformanceSummary;
+    const tradeSummary = latestOverviewTradeSummary;
+
+    const stats = buildOverviewSummaryStats({
+      openPnlTotal,
+      openPositionsMeta,
+      marginUsedTotal,
+      marginUsedRatio,
+      performanceSummary,
+      tradeSummary,
+    });
 
     const metricHtml = stats
       .map(
@@ -13182,7 +13509,11 @@
         <article class="overview-panel">
           <div class="overview-panel-header">
             <div>
-              <div class="overview-eyebrow">${xmlEscape(marketLabel)}</div>
+              <div class="range-toggle overview-market-switch" role="tablist" aria-label="Market type">
+                <button class="chart-range-btn market-tab-btn${currentMarketType === "perp" ? " active" : ""}" data-market="perp" type="button" aria-pressed="${currentMarketType === "perp" ? "true" : "false"}">Perps</button>
+                <button class="chart-range-btn market-tab-btn${currentMarketType === "spot" ? " active" : ""}" data-market="spot" type="button" aria-pressed="${currentMarketType === "spot" ? "true" : "false"}">Spot</button>
+                <button class="chart-range-btn market-tab-btn${currentMarketType === "all" ? " active" : ""}" data-market="all" type="button" aria-pressed="${currentMarketType === "all" ? "true" : "false"}">All</button>
+              </div>
               <h3 class="overview-title">${xmlEscape(headline)}</h3>
               <div class="overview-subtitle">${xmlEscape(overviewSubtitle)}</div>
               ${overviewWalletMarkup}
@@ -13229,13 +13560,12 @@
           <div class="overview-section overview-exposure-posture">
             <div class="overview-section-head">
               <div>
-                <div class="overview-section-title">Exposure Posture</div>
-                <div class="overview-section-subtitle">${xmlEscape(positionCount ? biasLabel : "Open a position to populate exposure posture.")}</div>
+                <div class="overview-section-title">Exposure</div>
+                <div class="overview-section-subtitle">${xmlEscape(positionCount ? biasLabel : "Open a position to populate exposure.")}</div>
               </div>
             </div>
             <div class="overview-direction-head">
               <div class="overview-direction-head-main">
-                <span>Long / Short Exposure</span>
                 <span class="overview-direction-meta">${xmlEscape(exposureMultiple !== null ? `${formatExposureMultiple(exposureMultiple, 2)} of equity` : "No active leverage")}</span>
               </div>
               <strong>${grossExposure > 0 ? fmtMoneyCompact(grossExposure, 2) : fmtMoney(0, 2)}</strong>
@@ -13270,9 +13600,18 @@
     `;
 
     const portfolioMixSection = marginSummaryEl.querySelector(".overview-portfolio-mix");
+    const exposurePostureSection = marginSummaryEl.querySelector(".overview-exposure-posture");
+    const overviewMetricList = marginSummaryEl.querySelector(".overview-metric-list");
     if (overviewRadarPanelEl && portfolioMixSection) {
       portfolioMixSection.insertAdjacentElement("afterend", overviewRadarPanelEl);
     }
+    if (overviewBreakdownPanelEl) {
+      if (overviewMetricList) overviewMetricList.insertAdjacentElement("afterend", overviewBreakdownPanelEl);
+      else if (exposurePostureSection) exposurePostureSection.insertAdjacentElement("afterend", overviewBreakdownPanelEl);
+      else if (overviewRadarPanelEl?.parentElement) overviewRadarPanelEl.insertAdjacentElement("afterend", overviewBreakdownPanelEl);
+      else if (portfolioMixSection) portfolioMixSection.insertAdjacentElement("afterend", overviewBreakdownPanelEl);
+    }
+    updatePortfolioBreakdownChart();
   }
 
   function recomputeAndRenderMarginSummary() {
@@ -15237,6 +15576,7 @@
   }
 
   function resetState() {
+    setStartupChromeLoading(true);
     isAccountOverviewReady = false;
     Object.values(walletSnapshotsByType).forEach((map) => map.clear());
     Object.values(walletTotalsByType).forEach((map) => map.clear());
@@ -15544,8 +15884,9 @@
     pnlHeatmapRows = [];
     pnlHeatmapMonths = [];
     pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
+    pnlHeatmapYearKey = "";
     if (pnlHeatmapGridEl) pnlHeatmapGridEl.innerHTML = "";
-    if (pnlHeatmapTitleEl) pnlHeatmapTitleEl.textContent = "Yearly daily PnL";
+    if (pnlHeatmapTitleEl) pnlHeatmapTitleEl.textContent = "Activity heatmap";
     if (pnlHeatmapHoverEl) pnlHeatmapHoverEl.textContent = "";
     if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
     if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
@@ -15554,14 +15895,19 @@
       if (chart) chart.destroy();
       portfolioCharts[key] = null;
     });
+    resetChartLastValues();
+    updateChartTitleValues();
+  }
+
+  function resetChartLastValues() {
     chartLastValues.equity = null;
     chartLastValues.equityDrawdown = null;
     chartLastValues.exposure = null;
     chartLastValues.pnl = null;
+    chartLastValues.roi = null;
     chartLastValues.activityTrades = null;
     chartLastValues.activityVolume = null;
     chartLastValues.deposits = null;
-    updateChartTitleValues();
   }
 
   async function fetchPortfolio(wallet) {
@@ -15643,11 +15989,60 @@
     if (equity.length < 2 || pnl.length < 2 || times.length < 2) return null;
 
     const rawDeposits = equity.map((eq, i) => (eq - (pnl[i] ?? 0)));
-
     const base = Number.isFinite(rawDeposits[0]) ? rawDeposits[0] : 0;
     const deposits = rawDeposits.map((d) => Math.round((d - base) * 100) / 100);
+    const capital = buildInvestedCapitalSeries(rawDeposits, equity);
+    const pnlStart = Number(pnl[0]);
+    const roi = pnl.map((value, index) => {
+      const currentPnl = Number(value);
+      const invested = Number(capital.series[index]);
+      if (!Number.isFinite(currentPnl) || !Number.isFinite(invested) || Math.abs(invested) <= 1e-9) return null;
+      return (currentPnl - pnlStart) / Math.abs(invested);
+    });
 
-    return { times, equity, pnl, deposits, rawDeposits };
+    return {
+      times,
+      equity,
+      pnl,
+      deposits,
+      rawDeposits,
+      investedCapital: capital.series,
+      roi,
+      baseEquity: capital.latest,
+    };
+  }
+
+  function buildInvestedCapitalSeries(rawDeposits, equityValues) {
+    const deposits = Array.isArray(rawDeposits) ? rawDeposits : [];
+    const equity = Array.isArray(equityValues) ? equityValues : [];
+    const length = Math.min(deposits.length || 0, equity.length || 0);
+    if (!length) return { series: [], latest: null };
+
+    const firstDeposit = Number(deposits[0]);
+    const firstEquity = Number(equity[0]);
+    let invested =
+      Number.isFinite(firstDeposit) && firstDeposit > 0
+        ? firstDeposit
+        : Number.isFinite(firstEquity) && Math.abs(firstEquity) > 1e-9
+          ? Math.abs(firstEquity)
+          : null;
+
+    const series = [];
+    for (let index = 0; index < length; index += 1) {
+      if (index > 0) {
+        const prev = Number(deposits[index - 1]);
+        const curr = Number(deposits[index]);
+        if (Number.isFinite(prev) && Number.isFinite(curr)) {
+          const delta = curr - prev;
+          if (delta > 0) {
+            invested = (Number.isFinite(invested) ? invested : 0) + delta;
+          }
+        }
+      }
+      series.push(Number.isFinite(invested) && invested > 0 ? invested : null);
+    }
+
+    return { series, latest: getLastFiniteValue(series) };
   }
 
   function toPerpKey(rangeKey) {
@@ -15765,6 +16160,74 @@
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
 
+  function getActivityTradeIdentity(fill) {
+    if (!fill || typeof fill !== "object") return "";
+    const wallet = String(fill.wallet || "").toLowerCase();
+    const oid = fill.oid ?? fill.orderId ?? fill.order_id ?? "";
+    if (oid) return `${wallet}|${oid}`;
+    const side = String(fill.side || "").toUpperCase();
+    const price = Number(fill.price ?? fill.px ?? 0);
+    const size = Math.abs(Number(fill.size ?? fill.sz ?? 0));
+    const rawCoin = fill.coin ?? fill.asset ?? fill.symbol ?? fill.sym ?? "";
+    const coin = resolveCoinName(rawCoin, fill.asset ?? fill.symbol ?? fill.sym) || rawCoin || "";
+    const time = normalizeTimestamp(fill.time ?? fill.timestamp);
+    return [
+      wallet,
+      coin,
+      side,
+      Number.isFinite(price) ? price : "",
+      Number.isFinite(size) ? size : "",
+      Number.isFinite(time) ? time : "",
+    ].join("|");
+  }
+
+  function buildDailyActivityRows(fillsSource, { startDay = null, endDay = null } = {}) {
+    const fillsList = Array.isArray(fillsSource) ? fillsSource : [];
+    const tradeKeysByDay = new Map();
+    const volumeByDay = new Map();
+    let resolvedStartDay = Number.isFinite(startDay) ? startDay : null;
+    let resolvedEndDay = Number.isFinite(endDay) ? endDay : null;
+
+    fillsList.forEach((fill) => {
+      const dayMs = toLocalDayStartMs(fill?.time ?? fill?.timestamp);
+      if (!Number.isFinite(dayMs)) return;
+      if (!Number.isFinite(resolvedStartDay) || dayMs < resolvedStartDay) resolvedStartDay = dayMs;
+      if (!Number.isFinite(resolvedEndDay) || dayMs > resolvedEndDay) resolvedEndDay = dayMs;
+
+      let dayTradeKeys = tradeKeysByDay.get(dayMs);
+      if (!dayTradeKeys) {
+        dayTradeKeys = new Set();
+        tradeKeysByDay.set(dayMs, dayTradeKeys);
+      }
+      const tradeIdentity = getActivityTradeIdentity(fill);
+      if (tradeIdentity) dayTradeKeys.add(tradeIdentity);
+
+      const size = Math.abs(Number(fill?.size ?? fill?.sz ?? 0));
+      const price = Number(fill?.price ?? fill?.px ?? 0);
+      const notional = Number.isFinite(size) && Number.isFinite(price) ? size * price : 0;
+      volumeByDay.set(dayMs, (volumeByDay.get(dayMs) || 0) + (Number.isFinite(notional) ? notional : 0));
+    });
+
+    if (!Number.isFinite(resolvedStartDay) || !Number.isFinite(resolvedEndDay) || resolvedEndDay < resolvedStartDay) {
+      return { rows: [], totalTrades: 0, totalVolume: 0, startDay: null, endDay: null };
+    }
+
+    const rows = [];
+    let totalTrades = 0;
+    let totalVolume = 0;
+    for (let dayMs = resolvedStartDay; Number.isFinite(dayMs) && dayMs <= resolvedEndDay; dayMs = addLocalDays(dayMs, 1)) {
+      const trades = tradeKeysByDay.get(dayMs)?.size || 0;
+      const volume = Number(volumeByDay.get(dayMs) || 0);
+      rows.push({ dayMs, trades, volume });
+      totalTrades += trades;
+      totalVolume += volume;
+      const nextDay = addLocalDays(dayMs, 1);
+      if (!Number.isFinite(nextDay) || nextDay === dayMs) break;
+    }
+
+    return { rows, totalTrades, totalVolume, startDay: resolvedStartDay, endDay: resolvedEndDay };
+  }
+
   function buildActivitySeries(rangeKey = currentRangeKey, marketType = currentMarketType) {
     const walletSet = new Set(currentWallets.map((wallet) => String(wallet || "").toLowerCase()).filter(Boolean));
     const rangeWindow = getRangeWindowForKey(rangeKey);
@@ -15808,40 +16271,59 @@
       return { labels: [], trades: [], volume: [], totalTrades: 0, totalVolume: 0 };
     }
 
-    const countsByDay = new Map();
-    const volumeByDay = new Map();
-    fillsForRange.forEach((fill) => {
-      const dayMs = toLocalDayStartMs(fill?.time);
-      if (!Number.isFinite(dayMs)) return;
-      countsByDay.set(dayMs, (countsByDay.get(dayMs) || 0) + 1);
-      const size = Math.abs(Number(fill?.size ?? 0));
-      const price = Number(fill?.price ?? 0);
-      const notional = Number.isFinite(size) && Number.isFinite(price) ? size * price : 0;
-      volumeByDay.set(dayMs, (volumeByDay.get(dayMs) || 0) + (Number.isFinite(notional) ? notional : 0));
-    });
-
+    const dailyActivity = buildDailyActivityRows(fillsForRange, { startDay, endDay });
     const labels = [];
     const trades = [];
     const volume = [];
-    let totalTrades = 0;
-    let totalVolume = 0;
-    for (let dayMs = startDay; Number.isFinite(dayMs) && dayMs <= endDay; dayMs = addLocalDays(dayMs, 1)) {
-      const count = Number(countsByDay.get(dayMs) || 0);
-      const dayVolume = Number(volumeByDay.get(dayMs) || 0);
-      labels.push(formatActivityDayLabel(dayMs));
-      trades.push(count);
-      volume.push(dayVolume);
-      totalTrades += count;
-      totalVolume += dayVolume;
-      const nextDay = addLocalDays(dayMs, 1);
-      if (!Number.isFinite(nextDay) || nextDay === dayMs) break;
-    }
+    const rows = Array.isArray(dailyActivity.rows) ? dailyActivity.rows : [];
+    rows.forEach((row) => {
+      labels.push(formatActivityDayLabel(row.dayMs));
+      trades.push(Number(row.trades || 0));
+      volume.push(Number(row.volume || 0));
+    });
 
-    return { labels, trades, volume, totalTrades, totalVolume };
+    return {
+      labels,
+      trades,
+      volume,
+      rows,
+      totalTrades: Number(dailyActivity.totalTrades || 0),
+      totalVolume: Number(dailyActivity.totalVolume || 0),
+    };
+  }
+
+  function buildActivityHeatmapSeries(marketType = currentMarketType) {
+    const walletSet = new Set(currentWallets.map((wallet) => String(wallet || "").toLowerCase()).filter(Boolean));
+    const fillsForHistory = historicalFillsLoaded && historicalFills.length
+      ? historicalFills
+          .map((fill) => normalizeFillForMetrics(fill))
+          .filter((fill) => {
+            if (!fill) return false;
+            if (marketType && marketType !== "all" && fill.marketType && fill.marketType !== marketType) return false;
+            if (walletSet && fill.wallet && !walletSet.has(String(fill.wallet).toLowerCase())) return false;
+            return true;
+          })
+      : getAllFillsForMetrics({
+          walletSet,
+          marketType,
+        });
+    return buildDailyActivityRows(fillsForHistory);
+  }
+
+  function getActivityHeatmapYearKeys(marketType = currentMarketType) {
+    const years = new Set();
+
+    const activitySeries = buildActivityHeatmapSeries(marketType);
+    (Array.isArray(activitySeries?.rows) ? activitySeries.rows : []).forEach((row) => {
+      const yearKey = getYearKeyFromDayMs(row?.dayMs);
+      if (yearKey) years.add(yearKey);
+    });
+
+    return Array.from(years).sort((a, b) => Number(a) - Number(b));
   }
 
   function setPrimaryPerformanceMode(mode) {
-    const next = mode === "equity" ? "equity" : "pnl";
+    const next = mode === "equity" || mode === "roi" ? mode : "pnl";
     primaryPerformanceMode = next;
     primaryPerformanceButtons.forEach((btn) => {
       const isActive = btn.dataset.performanceView === next;
@@ -15850,20 +16332,40 @@
     });
     if (pnlChartWrapEl) pnlChartWrapEl.classList.toggle("is-hidden", next !== "pnl");
     if (equityChartWrapEl) equityChartWrapEl.classList.toggle("is-hidden", next !== "equity");
+    if (roiChartWrapEl) roiChartWrapEl.classList.toggle("is-hidden", next !== "roi");
+    const activeChart =
+      next === "equity" ? portfolioCharts.equity
+      : next === "roi" ? portfolioCharts.roi
+      : portfolioCharts.pnl;
+    if (activeChart && typeof activeChart.resize === "function") {
+      activeChart.resize();
+      activeChart.update("none");
+    }
+    updateChartTitleValues();
+  }
+
+  function setRiskPerformanceMode(mode) {
+    const next = mode === "drawdown" ? "drawdown" : "exposure";
+    riskPerformanceMode = next;
+    riskViewButtons.forEach((btn) => {
+      const isActive = btn.dataset.riskView === next;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", String(isActive));
+    });
+    if (exposureChartWrapEl) exposureChartWrapEl.classList.toggle("is-hidden", next !== "exposure");
+    if (drawdownChartWrapEl) drawdownChartWrapEl.classList.toggle("is-hidden", next !== "drawdown");
+    const activeChart = next === "drawdown" ? portfolioCharts.drawdown : portfolioCharts.exposure;
+    if (activeChart && typeof activeChart.resize === "function") {
+      activeChart.resize();
+      activeChart.update("none");
+    }
     updateChartTitleValues();
   }
 
   function setActivityViewMode(mode) {
-    const next = mode === "volume" ? "volume" : "trades";
+    const next = "trades";
     activityViewMode = next;
-    activityViewButtons.forEach((btn) => {
-      const isActive = btn.dataset.activityView === next;
-      btn.classList.toggle("active", isActive);
-      btn.setAttribute("aria-selected", String(isActive));
-    });
-    if (portfolioCharts.activity?.$activitySeries) {
-      setActivityChartMode(portfolioCharts.activity, portfolioCharts.activity.$activitySeries, next);
-    }
+    renderPnlHeatmap(currentRangeKey);
     updateChartTitleValues();
   }
 
@@ -15908,7 +16410,7 @@
   }
 
   function getChartAxisTextColor() {
-    return document.body.classList.contains("light") ? "#64748b" : "#94a3b8";
+    return document.body.classList.contains("light") ? "#64748b" : "#7c848f";
   }
 
   function getChartTextColor() {
@@ -15943,7 +16445,7 @@
 
   function formatYearKey(yearKey) {
     const year = Number(yearKey);
-    if (!Number.isFinite(year)) return "Daily PnL Heatmap";
+    if (!Number.isFinite(year)) return "Activity Heatmap";
     return `${year}`;
   }
 
@@ -15973,80 +16475,120 @@
     return { year, quarter, startMonth, startMs, endMs };
   }
 
-  function interpolateRgb(a, b, t) {
-    const clamped = Math.max(0, Math.min(1, t));
-    const r = Math.round(a.r + (b.r - a.r) * clamped);
-    const g = Math.round(a.g + (b.g - a.g) * clamped);
-    const b2 = Math.round(a.b + (b.b - a.b) * clamped);
-    return `rgb(${r}, ${g}, ${b2})`;
-  }
-
-  function getHeatmapColor(value, maxAbs) {
-    const n = Number(value);
-    if (!Number.isFinite(n) || !Number.isFinite(maxAbs) || maxAbs <= 0) {
-      return "rgb(226, 232, 240)";
+  function getActivityHeatmapPalette() {
+    if (document.body.classList.contains("light")) {
+      return [
+        { fill: "#ebedf0", border: "#d8dee4" },
+        { fill: "#9be9a8", border: "#9be9a8" },
+        { fill: "#40c463", border: "#40c463" },
+        { fill: "#30a14e", border: "#30a14e" },
+        { fill: "#216e39", border: "#216e39" },
+      ];
     }
-    const neutral = { r: 226, g: 232, b: 240 };
-    const negHigh = { r: 220, g: 38, b: 38 };
-    const posHigh = { r: 22, g: 163, b: 74 };
-    const clamped = Math.max(-maxAbs, Math.min(maxAbs, n));
-    if (clamped === 0) return interpolateRgb(neutral, neutral, 0);
-    const strength = Math.min(1, Math.abs(clamped) / maxAbs);
-    const eased = Math.pow(strength, 0.82);
-    if (clamped > 0) return interpolateRgb(neutral, posHigh, eased);
-    return interpolateRgb(neutral, negHigh, eased);
+    return [
+      { fill: "#161b22", border: "#1f242d" },
+      { fill: "#0e4429", border: "#0e4429" },
+      { fill: "#006d32", border: "#006d32" },
+      { fill: "#26a641", border: "#26a641" },
+      { fill: "#39d353", border: "#39d353" },
+    ];
   }
 
-  function setPnlHeatmapHoverValue(dayMs, value) {
+  function getActivityHeatmapThresholds(rows, metricKey) {
+    const positives = (Array.isArray(rows) ? rows : [])
+      .map((row) => Number(row?.[metricKey] || 0))
+      .filter((value) => Number.isFinite(value) && value > 0)
+      .sort((a, b) => a - b);
+    if (!positives.length) return [0, 0, 0, 0];
+    const pick = (q) => {
+      const idx = Math.max(0, Math.min(positives.length - 1, Math.floor((positives.length - 1) * q)));
+      return positives[idx];
+    };
+    return [pick(0.2), pick(0.45), pick(0.7), pick(0.9)];
+  }
+
+  function getActivityHeatmapLevel(value, thresholds) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) return 0;
+    if (n <= thresholds[0]) return 1;
+    if (n <= thresholds[1]) return 2;
+    if (n <= thresholds[2]) return 3;
+    return 4;
+  }
+
+  function syncActivityHeatmapCellSize(weekCount) {
+    if (!pnlHeatmapWrapEl || !Number.isFinite(weekCount) || weekCount <= 0) return;
+    const wrapStyles = getComputedStyle(pnlHeatmapWrapEl);
+    const paddingLeft = parseFloat(wrapStyles.paddingLeft || "0") || 0;
+    const paddingRight = parseFloat(wrapStyles.paddingRight || "0") || 0;
+    const weekdayColumnWidth = 28;
+    const bodyGap = 4;
+    const cellGap = 2;
+    const availableGridWidth = Math.max(
+      0,
+      pnlHeatmapWrapEl.clientWidth - paddingLeft - paddingRight - weekdayColumnWidth - bodyGap
+    );
+    const fittedCellSize = (availableGridWidth - (Math.max(0, weekCount - 1) * cellGap)) / weekCount;
+    const nextCellSize = Math.max(8, Math.min(12, fittedCellSize));
+    pnlHeatmapWrapEl.style.setProperty("--pnl-heatmap-cell-size", `${nextCellSize}px`);
+  }
+
+  function renderActivityHeatmapLegend() {
+    if (!pnlHeatmapLegendEl) return;
+    const palette = getActivityHeatmapPalette();
+    pnlHeatmapLegendEl.innerHTML =
+      "<span>Less</span>" +
+      "<span class='pnl-heatmap-legend-scale'>" +
+      palette.map((entry) => (
+        "<span class='pnl-heatmap-legend-box' style='background:" + entry.fill + ";border-color:" + entry.border + ";'></span>"
+      )).join("") +
+      "</span>" +
+      "<span>More</span>";
+  }
+
+  function setPnlHeatmapHoverValue(dayMs, row) {
     if (!pnlHeatmapHoverEl) return;
     const dateText = fmtDateOnly(dayMs);
-    const amountText = formatSignedDollarWithPlus(value, 2);
-    let tone = "neutral";
-    if (Number(value) > 0) tone = "positive";
-    if (Number(value) < 0) tone = "negative";
-    pnlHeatmapHoverEl.innerHTML = `<span class="date">${dateText}: </span><span class="value ${tone}">${amountText}</span>`;
+    const trades = Number(row?.trades || 0);
+    const volume = Number(row?.volume || 0);
+    pnlHeatmapHoverEl.innerHTML =
+      `<span class="date">${dateText}: </span><span class="value neutral">${formatTradeCountLabel(trades)} trades</span><span class="date"> · ${fmtMoneyCompact(volume, 1)} volume</span>`;
   }
 
-  function buildPnlDailyDeltas(view) {
-    const times = Array.isArray(view?.times) ? view.times : [];
-    const pnl = Array.isArray(view?.pnl) ? view.pnl : [];
-    if (!times.length || !pnl.length || times.length !== pnl.length) return [];
-    const historyPairs = [];
-    for (let i = 0; i < times.length; i += 1) {
-      const timeMs = new Date(times[i]).getTime();
-      const pnlVal = Number(pnl[i]);
-      if (!Number.isFinite(timeMs) || !Number.isFinite(pnlVal)) continue;
-      historyPairs.push([timeMs, pnlVal]);
-    }
-    historyPairs.sort((a, b) => a[0] - b[0]);
-    if (!historyPairs.length) return [];
+  function setPnlHeatmapSummary(yearKey, rows) {
+    if (!pnlHeatmapHoverEl) return;
+    const totalTrades = (Array.isArray(rows) ? rows : []).reduce((sum, row) => sum + (Number(row?.trades) || 0), 0);
+    const totalVolume = (Array.isArray(rows) ? rows : []).reduce((sum, row) => sum + (Number(row?.volume) || 0), 0);
+    pnlHeatmapHoverEl.innerHTML =
+      `<span class="date">${formatYearKey(yearKey)}: </span><span class="value neutral">${formatTradeCountLabel(totalTrades)} trades</span><span class="date"> · ${fmtMoneyCompact(totalVolume, 1)} volume</span>`;
+  }
 
-    const firstTime = Number(historyPairs[0][0]);
-    const lastTime = Number(historyPairs[historyPairs.length - 1][0]);
-    const firstDay = toLocalDayStartMs(firstTime);
-    const lastDay = toLocalDayStartMs(lastTime);
-    if (!Number.isFinite(firstDay) || !Number.isFinite(lastDay)) return [];
+  function hidePnlHeatmapHoverCard() {
+    if (!pnlHeatmapHoverCardEl) return;
+    pnlHeatmapHoverCardEl.classList.remove("is-visible");
+    pnlHeatmapHoverCardEl.setAttribute("aria-hidden", "true");
+  }
 
-    const rows = [];
-    let prevClose = null;
-    for (let dayMs = firstDay; Number.isFinite(dayMs) && dayMs <= lastDay; dayMs = addLocalDays(dayMs, 1)) {
-      const nextDay = addLocalDays(dayMs, 1);
-      if (!Number.isFinite(nextDay)) break;
-      const closeTarget = Math.min(nextDay - 1, lastTime);
-      if (!Number.isFinite(closeTarget) || closeTarget < firstTime) continue;
-      const closePnl = interpolateHistoryValue(historyPairs, closeTarget);
-      if (!Number.isFinite(closePnl)) continue;
-      if (prevClose === null) {
-        const openTarget = Math.max(firstTime, dayMs);
-        const openPnl = interpolateHistoryValue(historyPairs, openTarget);
-        rows.push({ dayMs, delta: Number.isFinite(openPnl) ? closePnl - openPnl : 0 });
-      } else {
-        rows.push({ dayMs, delta: closePnl - prevClose });
-      }
-      prevClose = closePnl;
-      if (dayMs === lastDay) break;
-    }
-    return rows;
+  function showPnlHeatmapHoverCard(entry, anchorRect) {
+    if (!pnlHeatmapHoverCardEl || !pnlHeatmapWrapEl || !entry || !anchorRect) return;
+    const wrapRect = pnlHeatmapWrapEl.getBoundingClientRect();
+    const dateText = fmtDateOnly(entry.dayMs);
+    const tradesText = formatTradeCountLabel(Number(entry.trades || 0));
+    const volumeText = fmtMoneyCompact(Number(entry.volume || 0), 1);
+    pnlHeatmapHoverCardEl.innerHTML =
+      "<div class='pnl-heatmap-hover-row'><span class='pnl-heatmap-hover-key'>Date:</span><span class='pnl-heatmap-hover-value'>" + xmlEscape(dateText) + "</span></div>" +
+      "<div class='pnl-heatmap-hover-row'><span class='pnl-heatmap-hover-key'>Trades:</span><span class='pnl-heatmap-hover-value'>" + xmlEscape(tradesText) + "</span></div>" +
+      "<div class='pnl-heatmap-hover-row'><span class='pnl-heatmap-hover-key'>Volume:</span><span class='pnl-heatmap-hover-value'>" + xmlEscape(volumeText) + "</span></div>";
+    const cardWidth = pnlHeatmapHoverCardEl.offsetWidth || 168;
+    const cardHeight = pnlHeatmapHoverCardEl.offsetHeight || 78;
+    const cellCenterX = anchorRect.left - wrapRect.left + (anchorRect.width / 2);
+    const cellTopY = anchorRect.top - wrapRect.top;
+    const left = Math.max(8, Math.min(Math.round(cellCenterX - cardWidth / 2), Math.round(wrapRect.width - cardWidth - 8)));
+    const top = Math.max(34, Math.min(Math.round(cellTopY - cardHeight - 10), Math.round(wrapRect.height - cardHeight - 8)));
+    pnlHeatmapHoverCardEl.style.left = `${left}px`;
+    pnlHeatmapHoverCardEl.style.top = `${top}px`;
+    pnlHeatmapHoverCardEl.classList.add("is-visible");
+    pnlHeatmapHoverCardEl.setAttribute("aria-hidden", "false");
   }
 
   function setPnlViewMode(mode) {
@@ -16086,8 +16628,9 @@
 
   function renderPnlHeatmap(rangeKey = currentRangeKey) {
     if (!pnlHeatmapGridEl || !pnlHeatmapTitleEl) return;
+    hidePnlHeatmapHoverCard();
     if (pnlHeatmapWeekdaysEl && !pnlHeatmapWeekdaysEl.childElementCount) {
-      const weekdayLabels = ["S", "M", "T", "W", "T", "F", "S"];
+      const weekdayLabels = ["", "Mon", "", "Wed", "", "Fri", ""];
       const fragment = document.createDocumentFragment();
       weekdayLabels.forEach((label) => {
         const el = document.createElement("div");
@@ -16098,48 +16641,37 @@
       pnlHeatmapWeekdaysEl.innerHTML = "";
       pnlHeatmapWeekdaysEl.appendChild(fragment);
     }
-    const source = getMetricsSource(rangeKey);
-    if (!source?.view) {
+    const activitySeries = buildActivityHeatmapSeries(currentMarketType);
+    const activityRows = Array.isArray(activitySeries?.rows) ? activitySeries.rows : [];
+    renderActivityHeatmapLegend();
+    if (!activityRows.length) {
       pnlHeatmapGridEl.innerHTML = "";
       if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.innerHTML = "";
-      pnlHeatmapTitleEl.textContent = "No PnL data";
+      pnlHeatmapTitleEl.textContent = "No activity data";
+      if (pnlHeatmapHoverEl) pnlHeatmapHoverEl.textContent = "";
       if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
       if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
+      syncPerformanceTileHeights();
       return;
     }
 
-    pnlHeatmapRows = buildPnlDailyDeltas(source.view);
-    if (!pnlHeatmapRows.length) {
-      pnlHeatmapGridEl.innerHTML = "";
-      if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.innerHTML = "";
-      pnlHeatmapTitleEl.textContent = "Not enough daily data";
-      if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
-      if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
-      return;
-    }
+    pnlHeatmapRows = activityRows;
 
-    const yearSet = new Set(
-      pnlHeatmapRows
-        .map((row) => {
-          const d = new Date(row.dayMs);
-          return Number.isFinite(d.getTime()) ? String(d.getFullYear()) : "";
-        })
-        .filter(Boolean)
-    );
-    pnlHeatmapMonths = Array.from(yearSet).sort((a, b) => Number(a) - Number(b));
+    pnlHeatmapMonths = getActivityHeatmapYearKeys(currentMarketType);
     if (!pnlHeatmapMonths.length) {
       pnlHeatmapGridEl.innerHTML = "";
       if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.innerHTML = "";
       pnlHeatmapTitleEl.textContent = "No yearly data";
       if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
       if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
+      syncPerformanceTileHeights();
       return;
     }
 
-    if (!Number.isFinite(pnlHeatmapMonthIndex) || pnlHeatmapMonthIndex < 0 || pnlHeatmapMonthIndex >= pnlHeatmapMonths.length) {
-      pnlHeatmapMonthIndex = pnlHeatmapMonths.length - 1;
+    if (!pnlHeatmapYearKey || !pnlHeatmapMonths.includes(pnlHeatmapYearKey)) {
+      pnlHeatmapYearKey = pnlHeatmapMonths[pnlHeatmapMonths.length - 1];
     }
-
+    pnlHeatmapMonthIndex = Math.max(0, pnlHeatmapMonths.indexOf(pnlHeatmapYearKey));
     const yearKey = pnlHeatmapMonths[pnlHeatmapMonthIndex];
     const yearRange = getYearDateRange(yearKey);
     if (!yearRange) {
@@ -16148,6 +16680,7 @@
       pnlHeatmapTitleEl.textContent = "No yearly data";
       if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = true;
       if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = true;
+      syncPerformanceTileHeights();
       return;
     }
 
@@ -16157,6 +16690,7 @@
       const d = new Date(row.dayMs);
       return Number.isFinite(d.getTime()) && d.getFullYear() === year;
     });
+    const metricKey = "trades";
     const firstDataDay = yearRows.reduce((min, row) => {
       const t = Number(row?.dayMs);
       if (!Number.isFinite(t)) return min;
@@ -16168,8 +16702,8 @@
       return max === null || t > max ? t : max;
     }, null);
     const todayStartMs = toLocalDayStartMs(Date.now());
-    const maxAbs = yearRows.reduce((max, row) => Math.max(max, Math.abs(Number(row.delta) || 0)), 0);
-    const byDay = new Map(yearRows.map((row) => [row.dayMs, row.delta]));
+    const thresholds = getActivityHeatmapThresholds(yearRows, metricKey);
+    const byDay = new Map(yearRows.map((row) => [row.dayMs, row]));
     const monthByWeek = new Map();
     let maxWeekIdx = 0;
     for (let m = 0; m < 12; m += 1) {
@@ -16187,6 +16721,7 @@
     maxWeekIdx = Math.max(maxWeekIdx, Math.floor((totalYearDays - 1 + yearStart.getDay()) / 7));
     const weekCount = Math.max(1, maxWeekIdx + 1);
 
+    syncActivityHeatmapCellSize(weekCount);
     if (pnlHeatmapGridEl) pnlHeatmapGridEl.style.setProperty("--pnl-heatmap-columns", String(weekCount));
     if (pnlHeatmapMonthsEl) pnlHeatmapMonthsEl.style.setProperty("--pnl-heatmap-columns", String(weekCount));
 
@@ -16214,12 +16749,13 @@
         let weekIdx = Math.floor((dayOffset + yearStart.getDay()) / 7);
         if (weekIdx > weekCount - 1) weekIdx = weekCount - 1;
         const index = weekday * weekCount + weekIdx;
-        const val = byDay.has(dayMs) ? byDay.get(dayMs) : 0;
-        cells[index] = { dayMs, delta: val };
+        const row = byDay.has(dayMs) ? byDay.get(dayMs) : { dayMs, trades: 0, volume: 0 };
+        cells[index] = row;
       }
       dayMs = addLocalDays(dayMs, 1);
     }
 
+    const palette = getActivityHeatmapPalette();
     const fragment = document.createDocumentFragment();
     cells.forEach((entry) => {
       const cell = document.createElement("div");
@@ -16229,23 +16765,45 @@
         fragment.appendChild(cell);
         return;
       }
-      const val = Number(entry.delta ?? 0);
-      cell.style.backgroundColor = getHeatmapColor(val, maxAbs);
-      cell.style.borderColor = "rgba(148, 163, 184, 0.35)";
-      const hoverText = `${fmtDateOnly(entry.dayMs)}: ${formatSignedDollarWithPlus(val, 2)}`;
+      const metricValue = Number(entry?.[metricKey] || 0);
+      const level = getActivityHeatmapLevel(metricValue, thresholds);
+      const color = palette[Math.max(0, Math.min(palette.length - 1, level))];
+      cell.style.backgroundColor = color.fill;
+      cell.style.borderColor = color.border;
+      cell.dataset.dayMs = String(entry.dayMs);
+      cell.dataset.trades = String(Number(entry.trades || 0));
+      cell.dataset.volume = String(Number(entry.volume || 0));
+      const hoverText = `${fmtDateOnly(entry.dayMs)}: ${formatTradeCountLabel(Number(entry.trades || 0))} trades · ${fmtMoneyCompact(Number(entry.volume || 0), 1)} volume`;
       cell.title = hoverText;
-      cell.addEventListener("mouseenter", () => {
-        setPnlHeatmapHoverValue(entry.dayMs, val);
-      });
       fragment.appendChild(cell);
     });
 
     pnlHeatmapGridEl.innerHTML = "";
     pnlHeatmapGridEl.appendChild(fragment);
-    pnlHeatmapTitleEl.textContent = `${formatYearKey(yearKey)} · Daily PnL`;
+    setPnlHeatmapSummary(yearKey, yearRows);
+    const handleGridHover = (event) => {
+      const target = event.target instanceof Element ? event.target.closest(".pnl-heatmap-cell[data-day-ms]") : null;
+      if (!target) return;
+      const row = {
+        dayMs: Number(target.dataset.dayMs || 0),
+        trades: Number(target.dataset.trades || 0),
+        volume: Number(target.dataset.volume || 0),
+      };
+      setPnlHeatmapHoverValue(row.dayMs, row);
+      showPnlHeatmapHoverCard(row, target.getBoundingClientRect());
+    };
+    pnlHeatmapGridEl.onmouseover = handleGridHover;
+    pnlHeatmapGridEl.onmousemove = handleGridHover;
+    pnlHeatmapGridEl.onmouseleave = () => {
+      hidePnlHeatmapHoverCard();
+      setPnlHeatmapSummary(yearKey, yearRows);
+    };
+    const yearTrades = yearRows.reduce((sum, row) => sum + (Number(row?.trades) || 0), 0);
+    pnlHeatmapTitleEl.textContent = `${formatYearKey(yearKey)} · ${formatTradeCountLabel(yearTrades)} trades`;
 
     if (pnlHeatmapPrevBtnEl) pnlHeatmapPrevBtnEl.disabled = pnlHeatmapMonthIndex <= 0;
     if (pnlHeatmapNextBtnEl) pnlHeatmapNextBtnEl.disabled = pnlHeatmapMonthIndex >= pnlHeatmapMonths.length - 1;
+    syncPerformanceTileHeights();
   }
 
   function getWalletColor(wallet) {
@@ -16263,9 +16821,12 @@
   }
 
   function buildPositionBreakdown() {
-    if (!Array.isArray(currentAssetPositions) || currentAssetPositions.length === 0) return [];
+    const basePositions = Array.isArray(currentAssetPositions) ? currentAssetPositions : [];
+    if (!basePositions.length) return [];
+    const sourcePositions = isTimelineActive() ? computeTimelineAdjustedPositions(basePositions) : basePositions;
+    if (!Array.isArray(sourcePositions) || !sourcePositions.length) return [];
 
-    return currentAssetPositions
+    return sourcePositions
       .map((item) => {
         const p = item.position;
         const coin = p.coin;
@@ -16274,7 +16835,7 @@
         if (!coin || !Number.isFinite(szi) || szi === 0) return null;
 
         const entryPx = Number(p.entryPx ?? 0);
-        const contextPx = getMarkPriceForCoin(coin);
+        const contextPx = isTimelineActive() ? getTimelinePriceForCoin(coin) : getMarkPriceForCoin(coin);
         let markPx = Number.isFinite(contextPx) ? contextPx : undefined;
 
         const snapshotValue = Number(p.positionValue ?? 0);
@@ -16303,16 +16864,7 @@
     if (!portfolioDoughnutCanvas) return;
 
     const positions = buildPositionBreakdown();
-    const positionsValue = positions.reduce((sum, p) => sum + (p?.value ?? 0), 0);
-    const withdrawableValue = Math.max(0, getWithdrawableAmount());
-
-    if (positionsValueStatEl) positionsValueStatEl.textContent = fmtMoney(positionsValue);
-    if (withdrawableValueStatEl) withdrawableValueStatEl.textContent = fmtMoney(withdrawableValue);
-
-    const rawSeries = [
-      ...positions,
-      { label: "Withdrawable", value: withdrawableValue },
-    ].filter((item) => Number.isFinite(item.value));
+    const rawSeries = positions.filter((item) => Number.isFinite(item.value));
 
     const dataValues = rawSeries.map((p) => Math.max(0, p.value));
     const labels = rawSeries.map((p) => p.label);
@@ -16392,9 +16944,7 @@
   }
 
   function refreshBreakdownIfOpen() {
-    if (portfolioModalEl && portfolioModalEl.classList.contains("open")) {
-      updatePortfolioBreakdownChart();
-    }
+    updatePortfolioBreakdownChart();
   }
 
   function updateBreakdownTheme() {
@@ -16767,6 +17317,17 @@
     });
 
     return datasets;
+  }
+
+  function buildRoiDatasets(views, labels) {
+    const singleWallet = views.length === 1;
+    const singleColor = getCssVar("--accent", "#0ECB81");
+    const weightedRoi = buildWeightedSeries(views, labels, "roi", singleColor);
+    const datasets = [
+      ...(weightedRoi ? [weightedRoi] : []),
+      ...buildWalletDatasets(views, labels, "roi", singleWallet ? singleColor : null),
+    ];
+    return datasets.map((dataset) => decorateSignedPnlDataset(dataset));
   }
 
   function detectOrderType(order) {
@@ -17557,44 +18118,91 @@
           .slice(-limit)
       : [];
     if (!rows.length) return null;
-    const pnls = rows.map((entry) => Number(entry.pnl));
-    const min = Math.min(...pnls);
-    const max = Math.max(...pnls);
-    const totalRange = Math.max(1, max - min);
-    const targetBins = Math.max(28, Math.min(72, Math.round(Math.sqrt(rows.length) * 1.6)));
-    let step = Math.pow(10, Math.floor(Math.log10(Math.max(1, totalRange / targetBins))));
-    if (!Number.isFinite(step) || step <= 0) step = 1;
-    let minEdge = min < 0 ? Math.floor(min / step) * step : 0;
-    let maxEdge = max > 0 ? Math.ceil(max / step) * step : step;
-    let binCount = Math.max(1, Math.round((maxEdge - minEdge) / step));
-    while (binCount > 96) {
-      step *= 10;
-      minEdge = min < 0 ? Math.floor(min / step) * step : 0;
-      maxEdge = max > 0 ? Math.ceil(max / step) * step : step;
-      binCount = Math.max(1, Math.round((maxEdge - minEdge) / step));
+    const pnls = rows.map((entry) => Number(entry.pnl)).filter(Number.isFinite).sort((a, b) => a - b);
+    if (!pnls.length) return null;
+
+    const pickQuantile = (values, q) => {
+      if (!Array.isArray(values) || !values.length) return null;
+      const clampedQ = Math.max(0, Math.min(1, Number(q) || 0));
+      const pos = (values.length - 1) * clampedQ;
+      const lowerIdx = Math.floor(pos);
+      const upperIdx = Math.ceil(pos);
+      const lower = values[lowerIdx];
+      const upper = values[upperIdx];
+      if (!Number.isFinite(lower) || !Number.isFinite(upper)) return null;
+      if (lowerIdx === upperIdx) return lower;
+      const weight = pos - lowerIdx;
+      return lower + ((upper - lower) * weight);
+    };
+
+    const getNiceBucketStep = (rawStep) => {
+      const safe = Math.max(Number(rawStep) || 0, 1e-9);
+      const magnitude = Math.pow(10, Math.floor(Math.log10(safe)));
+      const normalized = safe / magnitude;
+      const niceBase = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+      const step = niceBase * magnitude;
+      return Number.isFinite(step) && step > 0 ? step : 1;
+    };
+
+    const formatBucketMoney = (value, decimals) => {
+      const abs = Math.abs(Number(value) || 0);
+      if (abs >= 10000) return fmtMoneyCompact(value, Math.max(0, Math.min(1, decimals)));
+      return fmtMoney(value, Math.max(0, Math.min(2, decimals)));
+    };
+
+    const formatRangeLabel = (minValue, maxValue, decimals) =>
+      `${formatBucketMoney(minValue, decimals)} to ${formatBucketMoney(maxValue, decimals)}`;
+
+    const min = pnls[0];
+    const max = pnls[pnls.length - 1];
+    const innerMin = pickQuantile(pnls, 0.05) ?? min;
+    const innerMax = pickQuantile(pnls, 0.95) ?? max;
+    const focusMin = Math.min(innerMin, innerMax);
+    const focusMax = Math.max(innerMin, innerMax);
+    const focusRange = Math.max(Math.abs(focusMax - focusMin), Math.max(Math.abs(focusMin), Math.abs(focusMax), 1) * 0.1, 1);
+    const targetBins = Math.max(24, Math.min(56, Math.round(Math.sqrt(rows.length) * 1.9)));
+    const step = getNiceBucketStep(focusRange / targetBins);
+    let minEdge = Math.floor(focusMin / step) * step;
+    let maxEdge = Math.ceil(focusMax / step) * step;
+    if (!Number.isFinite(minEdge)) minEdge = 0;
+    if (!Number.isFinite(maxEdge)) maxEdge = step;
+    if (maxEdge <= minEdge) {
+      minEdge = Math.floor((focusMin - step) / step) * step;
+      maxEdge = minEdge + step;
     }
-    while (binCount < 24 && step > 1) {
-      const nextStep = step / 10;
-      const nextMinEdge = min < 0 ? Math.floor(min / nextStep) * nextStep : 0;
-      const nextMaxEdge = max > 0 ? Math.ceil(max / nextStep) * nextStep : nextStep;
-      const nextBinCount = Math.max(1, Math.round((nextMaxEdge - nextMinEdge) / nextStep));
-      if (nextBinCount > 140) break;
-      step = nextStep;
-      minEdge = nextMinEdge;
-      maxEdge = nextMaxEdge;
-      binCount = nextBinCount;
-    }
-    const bins = Array.from({ length: binCount }, (_, idx) => ({
+
+    const binCount = Math.max(1, Math.round((maxEdge - minEdge) / step));
+    const hasLowerOverflow = min < minEdge;
+    const hasUpperOverflow = max > maxEdge;
+    const coreBins = Array.from({ length: binCount }, (_, idx) => ({
       min: minEdge + (step * idx),
       max: minEdge + (step * (idx + 1)),
       count: 0,
+      overflow: null,
     }));
+    const bins = [
+      ...(hasLowerOverflow ? [{ min: Number.NEGATIVE_INFINITY, max: minEdge, count: 0, overflow: "lower" }] : []),
+      ...coreBins,
+      ...(hasUpperOverflow ? [{ min: maxEdge, max: Number.POSITIVE_INFINITY, count: 0, overflow: "upper" }] : []),
+    ];
+
     rows.forEach((entry) => {
       const pnl = Number(entry.pnl);
+      if (!Number.isFinite(pnl)) return;
+      if (hasLowerOverflow && pnl < minEdge) {
+        bins[0].count += 1;
+        return;
+      }
+      if (hasUpperOverflow && pnl > maxEdge) {
+        bins[bins.length - 1].count += 1;
+        return;
+      }
       const rawIndex = step > 0 ? Math.floor((pnl - minEdge) / step) : 0;
-      const index = Math.max(0, Math.min(binCount - 1, rawIndex));
-      bins[index].count += 1;
+      const boundedIndex = Math.max(0, Math.min(coreBins.length - 1, rawIndex));
+      const targetIndex = boundedIndex + (hasLowerOverflow ? 1 : 0);
+      bins[targetIndex].count += 1;
     });
+
     let firstFilledIndex = bins.findIndex((bin) => bin.count > 0);
     let lastFilledIndex = -1;
     for (let index = bins.length - 1; index >= 0; index -= 1) {
@@ -17604,17 +18212,30 @@
       }
     }
     if (firstFilledIndex < 0 || lastFilledIndex < firstFilledIndex) return null;
+
     const visibleBins = bins.slice(firstFilledIndex, lastFilledIndex + 1);
-    const labelDecimals = step >= 10 ? 0 : step >= 1 ? 1 : 2;
+    const labelDecimals = step >= 100 ? 0 : step >= 10 ? 1 : step >= 1 ? 2 : 3;
     return {
-      labels: visibleBins.map((bin) => `${fmtMoneyCompact(bin.min, labelDecimals)} to ${fmtMoneyCompact(bin.max, labelDecimals)}`),
+      labels: visibleBins.map((bin) => {
+        if (bin.overflow === "lower") return `< ${formatBucketMoney(bin.max, labelDecimals)}`;
+        if (bin.overflow === "upper") return `> ${formatBucketMoney(bin.min, labelDecimals)}`;
+        return formatRangeLabel(bin.min, bin.max, labelDecimals);
+      }),
       counts: visibleBins.map((bin) => bin.count),
       colors: visibleBins.map((bin) => {
-        const mid = (bin.min + bin.max) / 2;
+        const mid = bin.overflow === "lower"
+          ? Math.min(bin.max, 0)
+          : bin.overflow === "upper"
+            ? Math.max(bin.min, 0)
+            : (bin.min + bin.max) / 2;
         return mid < 0 ? "rgba(246, 70, 93, 0.5)" : mid > 0 ? "rgba(14, 203, 129, 0.46)" : "rgba(148, 163, 184, 0.42)";
       }),
       borders: visibleBins.map((bin) => {
-        const mid = (bin.min + bin.max) / 2;
+        const mid = bin.overflow === "lower"
+          ? Math.min(bin.max, 0)
+          : bin.overflow === "upper"
+            ? Math.max(bin.min, 0)
+            : (bin.min + bin.max) / 2;
         return mid < 0 ? "rgba(246, 70, 93, 0.82)" : mid > 0 ? "rgba(14, 203, 129, 0.78)" : "rgba(148, 163, 184, 0.66)";
       }),
       totalTrades: rows.length,
@@ -17654,6 +18275,7 @@
     }
     const isLight = document.body.classList.contains("light");
     const textColor = getChartTextColor();
+    const axisTextColor = getChartAxisTextColor();
     const tooltipBg = isLight ? "rgba(255,255,255,0.96)" : "rgba(15,18,23,0.96)";
     if (!portfolioCharts.distribution) {
       portfolioCharts.distribution = new Chart(profitDistributionCanvas.getContext("2d"), {
@@ -17699,14 +18321,14 @@
             x: {
               grid: { display: false },
               ticks: {
-                color: textColor,
+                color: axisTextColor,
                 maxTicksLimit: 6,
                 callback: (_, index) => distribution.labels[index] || "",
               },
             },
             y: {
               beginAtZero: true,
-              ticks: { color: textColor, precision: 0 },
+              ticks: { color: axisTextColor, precision: 0 },
               grid: { color: getChartGridColor() },
             },
           },
@@ -17723,13 +18345,52 @@
     chart.options.plugins.tooltip.borderColor = isLight ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.28)";
     chart.options.plugins.tooltip.titleColor = textColor;
     chart.options.plugins.tooltip.bodyColor = textColor;
-    chart.options.scales.x.ticks.color = textColor;
-    chart.options.scales.y.ticks.color = textColor;
+    chart.options.scales.x.ticks.color = axisTextColor;
+    chart.options.scales.y.ticks.color = axisTextColor;
     chart.options.scales.y.grid.color = getChartGridColor();
     chart.update();
   }
 
+  let performanceTileHeightRaf = 0;
+  let performanceTileResizeRaf = 0;
+
+  function syncPerformanceTileHeights() {
+    if (!performanceLeftStackEl || !performanceRightStackEl) return;
+    cancelAnimationFrame(performanceTileHeightRaf);
+    performanceTileHeightRaf = requestAnimationFrame(() => {
+      if (window.matchMedia("(max-width: 1180px)").matches) {
+        performanceRightStackEl.style.removeProperty("--right-performance-top-height");
+        performanceRightStackEl.style.removeProperty("--right-performance-bottom-height");
+        cancelAnimationFrame(performanceTileResizeRaf);
+        performanceTileResizeRaf = requestAnimationFrame(() => {
+          Object.values(portfolioCharts).forEach((chart) => chart?.resize?.());
+        });
+        return;
+      }
+
+      const pnlTile = performanceLeftStackEl.querySelector('[data-tile-id="pnl"]');
+      const activityTile = performanceLeftStackEl.querySelector('[data-tile-id="activity"]');
+      if (!pnlTile || !activityTile) return;
+
+      const pnlHeight = pnlTile.getBoundingClientRect().height;
+      const activityHeight = activityTile.getBoundingClientRect().height;
+      const gapValue = parseFloat(getComputedStyle(performanceRightStackEl).rowGap || getComputedStyle(performanceRightStackEl).gap || "0") || 0;
+      const topHeight = (pnlHeight - gapValue) / 2;
+      const bottomHeight = activityHeight;
+      if (!Number.isFinite(topHeight) || topHeight <= 0 || !Number.isFinite(bottomHeight) || bottomHeight <= 0) return;
+
+      performanceRightStackEl.style.setProperty("--right-performance-top-height", `${topHeight}px`);
+      performanceRightStackEl.style.setProperty("--right-performance-bottom-height", `${bottomHeight}px`);
+      cancelAnimationFrame(performanceTileResizeRaf);
+      performanceTileResizeRaf = requestAnimationFrame(() => {
+        Object.values(portfolioCharts).forEach((chart) => chart?.resize?.());
+      });
+    });
+  }
+
   function clearPerformanceMetrics() {
+    latestOverviewPerformanceSummary = null;
+    latestOverviewTradeSummary = null;
     const placeholders = [
       metricTotalPnlEl,
       metricReturnEl,
@@ -17770,6 +18431,7 @@
   }
 
   function setPortfolioMetricsUnavailable() {
+    latestOverviewPerformanceSummary = null;
     setMetricValue(metricTotalPnlEl, "N/A", null);
     setMetricValue(metricReturnEl, "N/A", null);
     setMetricValue(metricMaxDrawdownEl, "N/A", null);
@@ -18465,6 +19127,8 @@
     const weightedEquity = buildWeightedSeries(views, labels, "equity");
     const weightedPnl = buildWeightedSeries(views, labels, "pnl");
     const weightedRawDeposits = buildWeightedSeries(views, labels, "rawDeposits");
+    const weightedInvestedCapital = buildWeightedSeries(views, labels, "investedCapital");
+    const weightedRoi = buildWeightedSeries(views, labels, "roi");
     return {
       label: "Weighted",
       view: {
@@ -18472,6 +19136,9 @@
         equity: weightedEquity?.data || views[0].view.equity,
         pnl: weightedPnl?.data || views[0].view.pnl,
         rawDeposits: weightedRawDeposits?.data || views[0].view.rawDeposits || [],
+        investedCapital: weightedInvestedCapital?.data || [],
+        roi: weightedRoi?.data || [],
+        baseEquity: getLastFiniteValue(weightedInvestedCapital?.data || []),
       },
     };
   }
@@ -18530,17 +19197,13 @@
     const pnlStart = Number(pnl[0]);
     const pnlEnd = Number(pnl[pnl.length - 1]);
     const totalPnl = pnlEnd - pnlStart;
-    const depositsBase = Number.isFinite(rawDeposits[0]) ? rawDeposits[0] : 0;
-    let totalDeposits = Number.isFinite(depositsBase) && depositsBase > 0 ? depositsBase : 0;
-    for (let i = 1; i < rawDeposits.length; i += 1) {
-      const prev = Number(rawDeposits[i - 1]);
-      const curr = Number(rawDeposits[i]);
-      if (!Number.isFinite(prev) || !Number.isFinite(curr)) continue;
-      const delta = curr - prev;
-      if (delta > 0) totalDeposits += delta;
-    }
-
-    const baseEquity = totalDeposits > 0 ? totalDeposits : Number(equity[0]);
+    const investedCapitalSeries = Array.isArray(view?.investedCapital) && view.investedCapital.length
+      ? view.investedCapital
+      : buildInvestedCapitalSeries(rawDeposits, equity).series;
+    const baseEquity =
+      Number.isFinite(view?.baseEquity) && Math.abs(Number(view.baseEquity)) > 1e-9
+        ? Number(view.baseEquity)
+        : getLastFiniteValue(investedCapitalSeries) ?? Number(equity[0]);
     const baseDenom = baseEquity ? Math.abs(baseEquity) : null;
     const returnPct = baseDenom ? totalPnl / baseDenom : null;
 
@@ -18974,11 +19637,8 @@
   }
 
   function updatePerformanceMetrics(rangeKey) {
-    if (metricsRangeLabelEl) metricsRangeLabelEl.textContent = getRangeLabel(rangeKey);
-
     const source = getMetricsSource(rangeKey);
     if (!source) {
-      if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = "-";
       const rangeWindow = getRangeWindowForKey(rangeKey);
       const walletSet = new Set(currentWallets.map((w) => String(w).toLowerCase()));
       const tradeMetrics = computeTradeOrderMetrics({
@@ -18987,6 +19647,15 @@
         walletSet,
         marketType: currentMarketType,
       });
+      latestOverviewTradeSummary = tradeMetrics
+        ? {
+            winRate: tradeMetrics.winRate,
+            profitFactor: tradeMetrics.profitFactor,
+            medianHoldingTime: tradeMetrics.medianHoldingTime,
+            closedCount: tradeMetrics.closedCount,
+            ordersPerDay: tradeMetrics.ordersPerDay,
+          }
+        : null;
       setPortfolioMetricsUnavailable();
       if (tradeMetrics) {
         setMetricValue(metricRealizedPnlEl, formatSignedDollarWithPlus(tradeMetrics.realizedPnl), tradeMetrics.realizedPnl);
@@ -19056,11 +19725,9 @@
         walletSet,
         marketType: currentMarketType,
       });
+      recomputeAndRenderMarginSummary();
       return;
     }
-    if (metricsWalletLabelEl) metricsWalletLabelEl.textContent = source?.label || "-";
-    updateTotalPnlSubLabel(rangeKey);
-
     const metrics = computePerformanceMetrics(source.view);
     const rangeWindow = getMetricsRangeWindow(source.view, rangeKey);
     const walletSet = new Set(currentWallets.map((w) => String(w).toLowerCase()));
@@ -19070,6 +19737,26 @@
       walletSet,
       marketType: currentMarketType,
     });
+    latestOverviewPerformanceSummary = metrics
+      ? {
+          rangeLabel: getRangeLabel(rangeKey),
+          totalPnl: metrics.totalPnl,
+          returnPct: metrics.returnPct,
+          maxDrawdown: metrics.maxDrawdown,
+          sharpe: metrics.sharpe,
+          volatility: metrics.volatility,
+          bestInterval: metrics.bestInterval,
+        }
+      : null;
+    latestOverviewTradeSummary = tradeMetrics
+      ? {
+          winRate: tradeMetrics.winRate,
+          profitFactor: tradeMetrics.profitFactor,
+          medianHoldingTime: tradeMetrics.medianHoldingTime,
+          closedCount: tradeMetrics.closedCount,
+          ordersPerDay: tradeMetrics.ordersPerDay,
+        }
+      : null;
     if (metrics) {
       latestBaseEquityValue = Number.isFinite(metrics.baseEquity) ? metrics.baseEquity : null;
       const totalPnlValue = metrics.totalPnl;
@@ -19171,17 +19858,7 @@
       walletSet,
       marketType: currentMarketType,
     });
-  }
-
-  function openPortfolioModal() {
-    if (!portfolioModalEl) return;
-    portfolioModalEl.classList.add("open");
-    updatePortfolioBreakdownChart();
-  }
-
-  function closePortfolioModal() {
-    if (!portfolioModalEl) return;
-    portfolioModalEl.classList.remove("open");
+    recomputeAndRenderMarginSummary();
   }
 
   function closeCoinInfoModal() {
@@ -19507,11 +20184,12 @@
         },
         scales: {
           x: {
-            ticks: { maxTicksLimit: 6, minRotation: 25, maxRotation: 25 },
+            ticks: { color: getChartAxisTextColor(), maxTicksLimit: 6, minRotation: 25, maxRotation: 25 },
             grid: { display: false },
           },
           y: {
             ticks: {
+              color: getChartAxisTextColor(),
               // ✅ -$1000 not $-1000
               callback: (value) => {
                 const n = Number(value);
@@ -19529,118 +20207,12 @@
     });
   }
 
-  function setActivityChartMode(chart, activitySeries, mode = activityViewMode) {
-    if (!chart) return;
-    const next = mode === "volume" ? "volume" : "trades";
-    const labels = Array.isArray(activitySeries?.labels) ? activitySeries.labels : [];
-    const values = Array.isArray(activitySeries?.[next]) ? activitySeries[next] : [];
-    chart.$activityMode = next;
-    chart.$activitySeries = activitySeries || { labels: [], trades: [], volume: [], totalTrades: 0, totalVolume: 0 };
-    chart.data.labels = labels;
-    if (!chart.data.datasets?.[0]) {
-      chart.data.datasets = [{
-        label: next === "volume" ? "Volume" : "Trades",
-        data: values,
-      }];
-    } else {
-      chart.data.datasets[0].label = next === "volume" ? "Volume" : "Trades";
-      chart.data.datasets[0].data = values;
-    }
-    chart.data.datasets[0].backgroundColor =
-      next === "volume"
-        ? getCssVar("--activity-volume-bar-bg", "rgba(244, 114, 182, 0.72)")
-        : getCssVar("--activity-bar-bg", "rgba(59, 130, 246, 0.72)");
-    chart.data.datasets[0].borderColor =
-      next === "volume"
-        ? getCssVar("--activity-volume-bar-border", "rgba(244, 114, 182, 0.92)")
-        : getCssVar("--activity-bar-border", "rgba(59, 130, 246, 0.92)");
-    chart.options.scales.y.ticks.callback = (value) => {
-      const n = Number(value);
-      if (!Number.isFinite(n)) return "";
-      if (next === "volume") return fmtMoneyCompact(n, 1);
-      return Number.isInteger(n) ? `${n}` : n.toFixed(0);
-    };
-    chart.update();
-  }
-
-  function createActivityChart(ctx, activitySeries, mode = activityViewMode) {
-    const chart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: Array.isArray(activitySeries?.labels) ? activitySeries.labels : [],
-        datasets: [{
-          label: "Trades",
-          data: Array.isArray(activitySeries?.trades) ? activitySeries.trades : [],
-          backgroundColor: getCssVar("--activity-bar-bg", "rgba(59, 130, 246, 0.72)"),
-          borderColor: getCssVar("--activity-bar-border", "rgba(59, 130, 246, 0.92)"),
-          borderWidth: 1,
-          borderRadius: 3,
-          borderSkipped: false,
-          maxBarThickness: 18,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: "index", intersect: false },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            borderColor: "rgba(148,163,184,0.5)",
-            borderWidth: 1,
-            titleColor: "#e5e7eb",
-            bodyColor: "#e5e7eb",
-            displayColors: false,
-            padding: 8,
-            cornerRadius: 6,
-            callbacks: {
-              label: (ctx) => {
-                const value = Number(ctx.parsed?.y ?? ctx.raw ?? 0);
-                if (ctx.chart?.$activityMode === "volume") {
-                  return `Volume: ${fmtMoney(value, 2)}`;
-                }
-                return `${Number.isFinite(value) ? value.toLocaleString() : "0"} trades`;
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: {
-              maxTicksLimit: 6,
-              minRotation: 0,
-              maxRotation: 0,
-              autoSkip: true,
-            },
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              maxTicksLimit: 5,
-            },
-            grid: { color: getChartGridColor() },
-          },
-        },
-      },
-    });
-    setActivityChartMode(chart, activitySeries, mode);
-    return chart;
-  }
-
   function initPortfolioCharts(rangeKey) {
     const views = getWalletViews(rangeKey, currentMarketType);
     if (!views.length) {
       portfolioErrorEl.textContent = "No performance data available for the selected wallets.";
       if (currentMarketType === "perp") clearPerformanceMetrics();
-      chartLastValues.equity = null;
-      chartLastValues.equityDrawdown = null;
-      chartLastValues.exposure = null;
-      chartLastValues.pnl = null;
-      chartLastValues.activityTrades = null;
-      chartLastValues.activityVolume = null;
-      chartLastValues.deposits = null;
+      resetChartLastValues();
       updateChartTitleValues();
       return;
     }
@@ -19662,12 +20234,11 @@
       "deposits",
       getCssVar("--deposits-accent", "#f4b942")
     );
-    const activitySeries = buildActivitySeries(rangeKey, currentMarketType);
-
     const pnlDatasets = [
       ...(weightedPnl ? [weightedPnl] : []),
       ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
     ].map((dataset) => decorateSignedPnlDataset(dataset));
+    const roiDatasets = buildRoiDatasets(views, labels);
     const depositsDatasets = [
       ...(weightedDeposits ? [weightedDeposits] : []),
       ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
@@ -19705,11 +20276,13 @@
     applyTimelineFutureFade(portfolioCharts.pnl, views[0].view.times);
     applyPnlTooltipStyling(portfolioCharts.pnl);
 
-    portfolioCharts.activity = createActivityChart(
-      activityCanvas.getContext("2d"),
-      activitySeries,
-      activityViewMode
+    portfolioCharts.roi = createLineChart(
+      roiCanvas.getContext("2d"),
+      labels,
+      roiDatasets
     );
+    applyTimelineFutureFade(portfolioCharts.roi, views[0].view.times);
+    applyRoiChartStyling(portfolioCharts.roi);
 
     portfolioCharts.deposits = createLineChart(
       depositsCanvas.getContext("2d"),
@@ -19722,8 +20295,9 @@
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
     chartLastValues.exposure = getLastFiniteValue(exposureDataset?.data || []);
     chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
-    chartLastValues.activityTrades = Number.isFinite(activitySeries.totalTrades) ? activitySeries.totalTrades : null;
-    chartLastValues.activityVolume = Number.isFinite(activitySeries.totalVolume) ? activitySeries.totalVolume : null;
+    chartLastValues.roi = getLastFiniteFromDatasets(roiDatasets);
+    chartLastValues.activityTrades = null;
+    chartLastValues.activityVolume = null;
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
     updateChartTitleValues();
     updatePerformanceMetrics(rangeKey);
@@ -19735,13 +20309,7 @@
     if (!views.length) {
       portfolioErrorEl.textContent = "No performance data available for the selected range.";
       if (currentMarketType === "perp") clearPerformanceMetrics();
-      chartLastValues.equity = null;
-      chartLastValues.equityDrawdown = null;
-      chartLastValues.exposure = null;
-      chartLastValues.pnl = null;
-      chartLastValues.activityTrades = null;
-      chartLastValues.activityVolume = null;
-      chartLastValues.deposits = null;
+      resetChartLastValues();
       updateChartTitleValues();
       return;
     }
@@ -19763,11 +20331,11 @@
       "deposits",
       getCssVar("--deposits-accent", "#f4b942")
     );
-    const activitySeries = buildActivitySeries(rangeKey, currentMarketType);
     const pnlDatasets = [
       ...(weightedPnl ? [weightedPnl] : []),
       ...buildWalletDatasets(views, labels, "pnl", singleWallet ? singleColors.pnl : null),
     ].map((dataset) => decorateSignedPnlDataset(dataset));
+    const roiDatasets = buildRoiDatasets(views, labels);
     const depositsDatasets = [
       ...(weightedDeposits ? [weightedDeposits] : []),
       ...buildWalletDatasets(views, labels, "deposits", singleWallet ? singleColors.deposits : null),
@@ -19778,10 +20346,10 @@
       equity: equityChart,
       exposure: exposureChart,
       pnl: pnlChart,
-      activity: activityChart,
+      roi: roiChart,
       deposits: depositsChart,
     } = portfolioCharts;
-    if (!drawdownChart || !equityChart || !exposureChart || !pnlChart || !activityChart || !depositsChart) {
+    if (!drawdownChart || !equityChart || !exposureChart || !pnlChart || !roiChart || !depositsChart) {
       initPortfolioCharts(rangeKey);
       return;
     }
@@ -19807,9 +20375,13 @@
     applyPnlTooltipStyling(pnlChart);
     pnlChart.update();
 
-    setActivityChartMode(activityChart, activitySeries, activityViewMode);
-    activityChart.options.scales.y.grid.color = getChartGridColor();
-    activityChart.update();
+    roiChart.data.labels = labels;
+    roiChart.data.datasets = roiDatasets;
+    applyTimelineFutureFade(roiChart, views[0].view.times);
+    if (roiChart.options.plugins?.legend) {
+      roiChart.options.plugins.legend.display = roiDatasets.length > 1;
+    }
+    applyRoiChartStyling(roiChart);
 
     depositsChart.data.labels = labels;
     depositsChart.data.datasets = depositsDatasets;
@@ -19822,8 +20394,9 @@
     chartLastValues.equity = getLastFiniteFromDatasets(equityDatasets);
     chartLastValues.exposure = getLastFiniteValue(exposureDataset?.data || []);
     chartLastValues.pnl = getLastFiniteFromDatasets(pnlDatasets);
-    chartLastValues.activityTrades = Number.isFinite(activitySeries.totalTrades) ? activitySeries.totalTrades : null;
-    chartLastValues.activityVolume = Number.isFinite(activitySeries.totalVolume) ? activitySeries.totalVolume : null;
+    chartLastValues.roi = getLastFiniteFromDatasets(roiDatasets);
+    chartLastValues.activityTrades = null;
+    chartLastValues.activityVolume = null;
     chartLastValues.deposits = getLastFiniteFromDatasets(depositsDatasets);
     updateChartTitleValues();
     updatePerformanceMetrics(rangeKey);
@@ -19864,15 +20437,16 @@
   function updateChartTheme() {
     const gridColor = getChartGridColor();
     const textColor = getChartTextColor();
+    const axisTextColor = getChartAxisTextColor();
     const isLight = document.body.classList.contains("light");
     Object.values(portfolioCharts).forEach((chart) => {
       if (!chart) return;
       chart.options.scales.y.grid.color = gridColor;
       if (chart.options.scales.x?.ticks) {
-        chart.options.scales.x.ticks.color = textColor;
+        chart.options.scales.x.ticks.color = axisTextColor;
       }
       if (chart.options.scales.y?.ticks) {
-        chart.options.scales.y.ticks.color = textColor;
+        chart.options.scales.y.ticks.color = axisTextColor;
       }
       if (chart.options.plugins?.legend?.labels) {
         chart.options.plugins.legend.labels.color = textColor;
@@ -19899,6 +20473,9 @@
         portfolioCharts.equity.$equityMode || "line"
       );
     }
+    if (portfolioCharts.roi) {
+      applyRoiChartStyling(portfolioCharts.roi);
+    }
     if (portfolioCharts.exposure) {
       applyExposureChartStyling(portfolioCharts.exposure, portfolioCharts.exposure.data?.datasets || []);
     }
@@ -19913,6 +20490,7 @@
       overviewCharts.radar.data.datasets[0].pointBorderColor = isLight ? "#ffffff" : "#0d1014";
       overviewCharts.radar.update();
     }
+    renderPnlHeatmap(currentRangeKey);
   }
 
   function applyTheme(theme) {
@@ -20014,6 +20592,7 @@
         }
         isAccountOverviewReady = true;
         recomputeAndRenderMarginSummary();
+        setStartupChromeLoading(false);
       })();
 
       const loadTasks = [
@@ -20049,6 +20628,7 @@
       await accountOverviewReadyTask;
       startLiveSnapshotRefreshTimer(walletList);
     } finally {
+      setStartupChromeLoading(false);
       trackBtnEl.disabled = false;
     }
   }
@@ -20093,7 +20673,6 @@
     initialWalletTrackingComplete = true;
     if (isEmbedSectionMode) setEmbedSection(getCurrentEmbedShellSection());
     await initFooterStream();
-    updateMarketToggleIndicator();
     updateRangeToggleIndicator();
     updateTabSwitchIndicator(modeTabsEl);
     updateTabSwitchIndicator(modeTabsHistoryEl);
@@ -20105,20 +20684,30 @@
     if (config) trackWallets(config);
   });
 
-  marketToggleButtons.forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const next = btn.dataset.market;
-      await setMarketType(next);
-      updateMarketToggleIndicator();
-    });
+  document.addEventListener("click", async (event) => {
+    const btn = event.target.closest(".market-tab-btn");
+    if (!btn) return;
+    const next = btn.dataset.market;
+    await setMarketType(next);
   });
 
   window.addEventListener("resize", () => {
-    updateMarketToggleIndicator();
     updateRangeToggleIndicator();
     updateTabSwitchIndicator(modeTabsEl);
     updateTabSwitchIndicator(modeTabsHistoryEl);
+    syncPerformanceTileHeights();
+    if (!pnlHeatmapWrapEl?.classList.contains("is-hidden")) {
+      renderPnlHeatmap(currentRangeKey);
+    }
   });
+
+  if (typeof ResizeObserver !== "undefined" && performanceLeftStackEl) {
+    const performanceLayoutObserver = new ResizeObserver(() => {
+      syncPerformanceTileHeights();
+    });
+    performanceLayoutObserver.observe(performanceLeftStackEl);
+    if (performanceRightStackEl) performanceLayoutObserver.observe(performanceRightStackEl);
+  }
 
   if (walletInputsEl) {
     walletInputsEl.addEventListener("keydown", (e) => {
@@ -20587,25 +21176,6 @@
   }
 
   if (accountOverviewCardEl) {
-    const revealAccountOverviewScrollbar = () => {
-      accountOverviewCardEl.classList.add("is-scrolling");
-      clearTimeout(accountOverviewScrollHideTimer);
-      accountOverviewScrollHideTimer = setTimeout(() => {
-        accountOverviewCardEl.classList.remove("is-scrolling");
-      }, 700);
-    };
-
-    accountOverviewCardEl.addEventListener("scroll", revealAccountOverviewScrollbar, { passive: true });
-    accountOverviewCardEl.addEventListener("mouseenter", () => {
-      clearTimeout(accountOverviewScrollHideTimer);
-    });
-    accountOverviewCardEl.addEventListener("mouseleave", () => {
-      accountOverviewCardEl.classList.remove("is-scrolling");
-    });
-    accountOverviewCardEl.addEventListener("wheel", handleShellGestureWheel, { passive: false, capture: true });
-    accountOverviewCardEl.addEventListener("scroll", () => {
-      syncShellScrollGroup(accountOverviewCardEl);
-    }, { passive: true });
     accountOverviewCardEl.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-action='copy-overview-wallet']");
       if (!btn) return;
@@ -20637,42 +21207,12 @@
     shellSectionTabsEl.addEventListener("wheel", handleShellSectionWheel, { passive: false });
   }
 
-  if (shellCloseBtn) {
-    shellCloseBtn.addEventListener("click", () => {
-      if (window.parent && window.parent !== window) {
-        try {
-          window.parent.postMessage({ type: "hypermonitor:close-wallet-shell" }, "*");
-        } catch (_) {}
-      }
-    });
-  }
-
-  if (shellOverviewToggleBtn) {
-    shellOverviewToggleBtn.addEventListener("click", () => {
-      if (!isEmbedShell) return;
-      applyShellOverviewCollapsed(!document.body.classList.contains("shell-overview-collapsed"));
-    });
-  }
-
-  if (isEmbedShell) {
-    applyShellOverviewCollapsed(getShellOverviewCollapsedPref(), { persist: false });
-  }
-
-  if (dashboardMainEl) {
-    dashboardMainEl.addEventListener("wheel", handleShellGestureWheel, { passive: false, capture: true });
-    dashboardMainEl.addEventListener("scroll", () => {
-      syncShellScrollGroup(dashboardMainEl);
-    }, { passive: true });
-  }
-
-  [positionsSectionEl, performanceSectionEl, liveLayoutEl, historyLayoutEl].filter(Boolean).forEach((sectionEl) => {
-    sectionEl.addEventListener("scroll", () => {
-      syncShellScrollGroup(sectionEl);
-    }, { passive: true });
-  });
-
-  if (dashboardSidebarEl) {
-    dashboardSidebarEl.addEventListener("wheel", handleShellGestureWheel, { passive: false, capture: true });
+  function requestWalletShellClose() {
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({ type: "hypermonitor:close-wallet-shell" }, "*");
+      } catch (_) {}
+    }
   }
 
   document.addEventListener("click", (e) => {
@@ -20714,11 +21254,11 @@
       const range = btn.dataset.range;
       currentRangeKey = range;
       pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
+      pnlHeatmapYearKey = "";
 
       rangeButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       updateRangeToggleIndicator();
-      updateTotalPnlSubLabel(currentRangeKey);
 
       if (portfolioDataByWallet.size) {
         updatePortfolioCharts(currentRangeKey);
@@ -20740,9 +21280,9 @@
     });
   });
 
-  activityViewButtons.forEach((btn) => {
+  riskViewButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      setActivityViewMode(btn.dataset.activityView);
+      setRiskPerformanceMode(btn.dataset.riskView);
     });
   });
 
@@ -20756,7 +21296,10 @@
   pnlViewButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const mode = btn.dataset.pnlView === "heatmap" ? "heatmap" : "line";
-      if (mode === "heatmap") pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
+      if (mode === "heatmap") {
+        pnlHeatmapMonthIndex = Number.MAX_SAFE_INTEGER;
+        pnlHeatmapYearKey = "";
+      }
       setPnlViewMode(mode);
     });
   });
@@ -20764,7 +21307,7 @@
   if (pnlHeatmapPrevBtnEl) {
     pnlHeatmapPrevBtnEl.addEventListener("click", () => {
       if (pnlHeatmapMonthIndex <= 0) return;
-      pnlHeatmapMonthIndex -= 1;
+      pnlHeatmapYearKey = pnlHeatmapMonths[pnlHeatmapMonthIndex - 1] || pnlHeatmapYearKey;
       renderPnlHeatmap(currentRangeKey);
     });
   }
@@ -20772,19 +21315,32 @@
   if (pnlHeatmapNextBtnEl) {
     pnlHeatmapNextBtnEl.addEventListener("click", () => {
       if (pnlHeatmapMonthIndex >= pnlHeatmapMonths.length - 1) return;
-      pnlHeatmapMonthIndex += 1;
+      pnlHeatmapYearKey = pnlHeatmapMonths[pnlHeatmapMonthIndex + 1] || pnlHeatmapYearKey;
       renderPnlHeatmap(currentRangeKey);
     });
   }
 
   thirdPanelModeButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       const mode = btn.dataset.panelMode === "transfers" ? "transfers" : "chart";
       setThirdPanelMode(mode);
     });
   });
 
+  document.addEventListener("click", (event) => {
+    const btn = event.target.closest(".third-panel-btn");
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const mode = btn.dataset.panelMode === "transfers" ? "transfers" : "chart";
+    setThirdPanelMode(mode);
+  }, true);
+
+  initPerformanceTileLayout();
   setPrimaryPerformanceMode(primaryPerformanceMode);
+  setRiskPerformanceMode(riskPerformanceMode);
   setActivityViewMode(activityViewMode);
 
   if (transfersListBodyEl) {
@@ -20874,10 +21430,6 @@
   let shellSectionWheelAccum = 0;
   let shellSectionWheelResetTimer = 0;
   let shellSectionLastSwitchAt = 0;
-  let shellScrollSyncLock = false;
-  let shellWheelRaf = 0;
-  let shellWheelDelta = 0;
-  let shellWheelSourceEl = null;
 
   function handleShellSectionWheel(event) {
     if (!isEmbedShell) return;
@@ -20901,143 +21453,6 @@
     shellSectionWheelAccum = 0;
     event.preventDefault();
     switchEmbedShellSectionBy(delta > 0 ? 1 : -1);
-  }
-
-  function getEmbedShellRightScrollPeers() {
-    if (!isEmbedShell) return [];
-    const peers = [];
-    const current = getCurrentEmbedShellSection();
-    if (current === "performance") {
-      if (performanceSectionEl && !performanceSectionEl.classList.contains("hidden")) peers.push(performanceSectionEl);
-    } else if (current === "orders") {
-      if (liveLayoutEl && !liveLayoutEl.classList.contains("hidden")) peers.push(liveLayoutEl);
-      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden")) peers.push(historyLayoutEl);
-    } else {
-      if (positionsSectionEl && !positionsSectionEl.classList.contains("hidden")) peers.push(positionsSectionEl);
-    }
-    if (dashboardMainEl) peers.push(dashboardMainEl);
-    return Array.from(new Set(peers.filter(Boolean)));
-  }
-
-  function getShellScrollMax(el) {
-    if (!el) return 0;
-    return Math.max(0, Number(el.scrollHeight || 0) - Number(el.clientHeight || 0));
-  }
-
-  function resolveShellScrollSource(preferredEl) {
-    const preferred = preferredEl && getShellScrollMax(preferredEl) > 0 ? preferredEl : null;
-    if (preferred) return preferred;
-    const isLeft = preferredEl === accountOverviewCardEl || dashboardSidebarEl?.contains(preferredEl);
-    const rightCandidates = getEmbedShellRightScrollPeers();
-    const ordered = isLeft
-      ? [accountOverviewCardEl, ...rightCandidates]
-      : [...rightCandidates, accountOverviewCardEl];
-    return ordered.find((el) => getShellScrollMax(el) > 0) || null;
-  }
-
-  function getShellWheelSource(target) {
-    if (!isEmbedShell) return null;
-    if (target instanceof Element && dashboardSidebarEl?.contains(target)) return accountOverviewCardEl;
-    const current = getCurrentEmbedShellSection();
-    if (current === "performance") return performanceSectionEl || dashboardMainEl;
-    if (current === "orders") {
-      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden")) return historyLayoutEl;
-      if (liveLayoutEl && !liveLayoutEl.classList.contains("hidden")) return liveLayoutEl;
-      return dashboardMainEl;
-    }
-    if (positionsSectionEl && !positionsSectionEl.classList.contains("hidden")) return positionsSectionEl;
-    return dashboardMainEl || accountOverviewCardEl;
-  }
-
-  function flushShellWheelScroll() {
-    shellWheelRaf = 0;
-    const delta = shellWheelDelta;
-    const sourceEl = resolveShellScrollSource(shellWheelSourceEl);
-    shellWheelDelta = 0;
-    shellWheelSourceEl = null;
-    if (!sourceEl || Math.abs(delta) < 0.5) return;
-    const max = getShellScrollMax(sourceEl);
-    if (max <= 0) return;
-    const nextTop = Math.max(0, Math.min(max, sourceEl.scrollTop + delta));
-    if (Math.abs(nextTop - sourceEl.scrollTop) < 0.5) return;
-    sourceEl.scrollTop = nextTop;
-    syncShellScrollGroup(sourceEl);
-  }
-
-  function queueShellWheelScroll(sourceEl, deltaY) {
-    if (!Number.isFinite(deltaY) || Math.abs(deltaY) < 0.25) return;
-    shellWheelDelta += deltaY;
-    shellWheelSourceEl = sourceEl || shellWheelSourceEl;
-    if (shellWheelRaf) return;
-    shellWheelRaf = requestAnimationFrame(flushShellWheelScroll);
-  }
-
-  function getShellOverviewCollapsedPref() {
-    try {
-      return window.localStorage.getItem("hypermonitor-shell-overview-collapsed") === "1";
-    } catch (_) {
-      return false;
-    }
-  }
-
-  function applyShellOverviewCollapsed(collapsed, { persist = true } = {}) {
-    if (!isEmbedShell) return;
-    document.body.classList.toggle("shell-overview-collapsed", Boolean(collapsed));
-    if (shellOverviewToggleBtn) {
-      const nextLabel = collapsed ? "Show Account Overview" : "Hide Account Overview";
-      shellOverviewToggleBtn.setAttribute("aria-pressed", String(Boolean(collapsed)));
-      shellOverviewToggleBtn.setAttribute("aria-label", nextLabel);
-      shellOverviewToggleBtn.title = nextLabel;
-    }
-    if (persist) {
-      try {
-        window.localStorage.setItem("hypermonitor-shell-overview-collapsed", collapsed ? "1" : "0");
-      } catch (_) {}
-    }
-    requestAnimationFrame(() => {
-      window.dispatchEvent(new Event("resize"));
-      resizeVisiblePopupCharts();
-      if (overviewCharts.radar?.resize) overviewCharts.radar.resize();
-      if (overviewCharts.radar?.update) overviewCharts.radar.update("none");
-    });
-  }
-
-  function syncShellScrollGroup(sourceEl) {
-    if (!isEmbedShell || !sourceEl || shellScrollSyncLock) return;
-    const targets = [accountOverviewCardEl, ...getEmbedShellRightScrollPeers()]
-      .filter((el, index, list) => el && el !== sourceEl && list.indexOf(el) === index);
-    if (!targets.length) return;
-    const sourceMax = Math.max(0, sourceEl.scrollHeight - sourceEl.clientHeight);
-    const progress = sourceMax > 0 ? sourceEl.scrollTop / sourceMax : 0;
-    shellScrollSyncLock = true;
-    targets.forEach((targetEl) => {
-      const targetMax = Math.max(0, targetEl.scrollHeight - targetEl.clientHeight);
-      if (targetMax > 0) {
-        targetEl.scrollTop = targetMax * progress;
-      }
-    });
-    requestAnimationFrame(() => {
-      shellScrollSyncLock = false;
-    });
-  }
-
-  function handleShellGestureWheel(event) {
-    if (!isEmbedShell) return;
-    if (event.defaultPrevented) return;
-    if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) >= 14) {
-      handleShellSectionWheel(event);
-      return;
-    }
-    const deltaY = event.deltaMode === 1
-      ? event.deltaY * 16
-      : event.deltaMode === 2
-        ? event.deltaY * window.innerHeight
-        : event.deltaY;
-    if (!Number.isFinite(deltaY) || Math.abs(deltaY) < 0.8) return;
-    const sourceEl = getShellWheelSource(event.target);
-    if (!sourceEl) return;
-    event.preventDefault();
-    queueShellWheelScroll(sourceEl, deltaY);
   }
 
   function shouldPreloadPerformanceSection() {
@@ -21105,22 +21520,6 @@
       resizeVisiblePopupCharts();
     }
     notifyParentShellSection(nextSection);
-  }
-
-  if (metricsToggleEl && metricsCardEl) {
-    metricsToggleEl.addEventListener("click", () => {
-      const isCollapsed = metricsCardEl.classList.toggle("collapsed");
-      const icon = metricsToggleEl.querySelector("[aria-hidden='true']");
-      if (icon) icon.textContent = isCollapsed ? "▾" : "▴";
-      metricsToggleEl.setAttribute("aria-expanded", String(!isCollapsed));
-      if (metricsGridEl) {
-        const maxScroll = metricsGridEl.scrollWidth - metricsGridEl.clientWidth;
-        const leftOk = metricsGridEl.scrollLeft > 2;
-        const rightOk = metricsGridEl.scrollLeft < maxScroll - 2;
-        metricsCardEl.classList.toggle("show-left", isCollapsed && leftOk);
-        metricsCardEl.classList.toggle("show-right", isCollapsed && rightOk);
-      }
-    });
   }
 
   if (metricsGridEl) {
@@ -21351,20 +21750,8 @@
     });
   }
 
-  if (positionsChartBtn) {
-    positionsChartBtn.addEventListener("click", () => {
-      openPortfolioModal();
-    });
-  }
-
-  if (portfolioModalCloseEl) {
-    portfolioModalCloseEl.addEventListener("click", closePortfolioModal);
-  }
-
-  if (portfolioModalEl) {
-    portfolioModalEl.addEventListener("click", (e) => {
-      if (e.target === portfolioModalEl) closePortfolioModal();
-    });
+  if (performanceCloseBtnEl) {
+    performanceCloseBtnEl.addEventListener("click", requestWalletShellClose);
   }
 
   if (coinInfoModalCloseEl) {
@@ -21459,9 +21846,6 @@
   }
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && portfolioModalEl?.classList.contains("open")) {
-      closePortfolioModal();
-    }
     if (e.key === "Escape" && coinInfoModalEl?.classList.contains("open")) {
       closeCoinInfoModal();
     }
