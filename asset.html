@@ -3694,9 +3694,15 @@
             const displayLabel = base;
             const fullLabel = dex ? `${dex}:${base}` : base;
 
+            const INLINE_HYPE_LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDE0NCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xNDQgNzEuNjk5MUMxNDQgMTE5LjMwNiAxMTQuODY2IDEzNC41ODIgOTkuNTE1NiAxMjAuOThDODYuODgwNCAxMDkuODg5IDgzLjEyMTEgODYuNDUyMSA2NC4xMTYgODQuMDQ1NkMzOS45OTQyIDgxLjAxMTMgMzcuOTA1NyAxMTMuMTMzIDIyLjAzMzQgMTEzLjEzM0MzLjU1MDQgMTEzLjEzMyAwIDg2LjI0MjggMCA3Mi40MzE1QzAgNTguMzA2MyAzLjk2ODA5IDM5LjA1NDIgMTkuNzM2IDM5LjA1NDJDMzguMTE0NiAzOS4wNTQyIDM5LjE1ODggNjYuNTcyMiA2Mi4xMzIgNjUuMTA3M0M4NS4wMDA3IDYzLjUzNzkgODUuNDE4NCAzNC44Njg5IDEwMC4yNDcgMjIuNjI3MUMxMTMuMTk1IDEyLjA1OTMgMTQ0IDIzLjQ2NDEgMTQ0IDcxLjY5OTFaIiBmaWxsPSIjOTdGQ0U0Ii8+Cjwvc3ZnPgo=';
+            const INLINE_NVDA_LOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJOVkRBIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iIzc2YjkwMCIvPgogIDxwYXRoIGQ9Ik0xNCAzMS43YzUuNC04LjQgMTIuOS0xMy4xIDIyLjUtMTMuMSA2LjMgMCAxMS43IDIuMSAxNS41IDYtMy44LTEuOS03LjYtMi44LTExLjctMi44LTcuNSAwLTEzLjkgMy4yLTE5LjIgOS44IDMuMiA0LjMgNy40IDYuNCAxMi40IDYuNCA0LjcgMCA4LjYtMi4xIDExLjMtNi4zLTIuMy0xLjktNC45LTIuOS03LjctMi45LTMuOCAwLTYuOSAxLjgtOS4yIDUuMiAxLjQtNSA1LjctOC4zIDEwLjctOC4zIDMuOCAwIDcuMSAxLjMgOS45IDMuOGwuOS44LS41IDFjLTMuOSA3LTkuOSAxMC42LTE3LjcgMTAuNi03LjIgMC0xMy4xLTMuNC0xOC0xMGwtLjctLjl6IiBmaWxsPSIjZmZmIi8+CiAgPGNpcmNsZSBjeD0iMzguNSIgY3k9IjMyLjIiIHI9IjUuNSIgZmlsbD0iIzc2YjkwMCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIuOCIvPgo8L3N2Zz4K';
+            const INLINE_MSTR_LOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJNU1RSIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iI2ZmOGExYyIvPgogIDxwYXRoIGQ9Ik0xMyA0N1YxN2g4LjFMMzIgMjkuNiA0Mi45IDE3SDUxdjMwaC04VjI4LjhMMzIgNDEgMjEgMjguOFY0N3oiIGZpbGw9IiNmZmYiLz4KICA8cGF0aCBkPSJNNDYgMTRoNnY4aC02eiIgZmlsbD0iIzJiMjExOSIgb3BhY2l0eT0iLjkiLz4KPC9zdmc+Cg==';
             const specialLogos = {
                 BTC: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20shape-rendering%3D%22geometricPrecision%22%20text-rendering%3D%22geometricPrecision%22%20image-rendering%3D%22optimizeQuality%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20viewBox%3D%220%200%204091.27%204091.73%22%3E%3Cg%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill%3D%22%23F7931A%22%20d%3D%22M4030.06%202540.77C3756.82%203636.78%202646.74%204303.79%201550.6%204030.48%20454.92%203757.24-212.09%202647.09%2061.27%201551.17c273.12-1096.13%201383.2-1763.19%202479-1489.95C3636.33%20334.46%204303.3%201444.73%204030.03%202540.79l.02-.02z%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2947.77%201754.38c40.72-272.26-166.56-418.61-450-516.24l91.95-368.8-224.5-55.94-89.51%20359.09c-59.02-14.72-119.63-28.59-179.87-42.34L2186%20768.69l-224.36-55.94-92%20368.68c-48.84-11.12-96.81-22.11-143.35-33.69l.26-1.16-309.59-77.31-59.72%20239.78s166.56%2038.18%20163.05%2040.53c90.91%2022.69%20107.35%2082.87%20104.62%20130.57l-104.74%20420.15c6.26%201.59%2014.38%203.89%2023.34%207.49-7.49-1.86-15.46-3.89-23.73-5.87l-146.81%20588.57c-11.11%2027.62-39.31%2069.07-102.87%2053.33%202.25%203.26-163.17-40.72-163.17-40.72l-111.46%20256.98%20292.15%2072.83c54.35%2013.63%20107.61%2027.89%20160.06%2041.3l-92.9%20373.03%20224.24%2055.94%2092-369.07c61.26%2016.63%20120.71%2031.97%20178.91%2046.43l-91.69%20367.33%20224.51%2055.94%2092.89-372.33c382.82%2072.45%20670.67%2043.24%20791.83-303.02%2097.63-278.78-4.86-439.58-206.26-544.44%20146.69-33.83%20257.18-130.31%20286.64-329.61l-.07-.05zm-512.93%20719.26c-69.38%20278.78-538.76%20128.08-690.94%2090.29l123.28-494.2c152.17%2037.99%20640.17%20113.17%20567.67%20403.91zm69.43-723.3c-63.29%20253.58-453.96%20124.75-580.69%2093.16l111.77-448.21c126.73%2031.59%20534.85%2090.55%20468.94%20355.05h-.02z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E',
                 ETH: 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E',
+                HYPE: INLINE_HYPE_LOGO,
+                NVDA: INLINE_NVDA_LOGO,
+                MSTR: INLINE_MSTR_LOGO,
                 USA500: 'images/coins/USA500.png',
                 COPPER: 'images/coins/COPPER.png',
                 GOLD: 'images/coins/GOLD.svg',
@@ -3706,8 +3712,6 @@
                 USOIL: 'images/coins/USOIL.svg'
             };
             const domainLogos = {
-                NVDA: 'https://logo.clearbit.com/nvidia.com',
-                MSTR: 'https://logo.clearbit.com/microstrategy.com',
                 TSLA: 'https://logo.clearbit.com/tesla.com',
                 AAPL: 'https://logo.clearbit.com/apple.com',
                 AMZN: 'https://logo.clearbit.com/amazon.com',
@@ -3819,13 +3823,15 @@
         const EMBED_PANE = String(PAGE_PARAMS.get('pane') || '').trim();
         const MOBILE_ASSET_QUERY = window.matchMedia('(max-width: 720px)');
         const FOOTER_SPECIAL_LOGOS = new Map([
-            ['HYPE', 'https://hyperfoundation.org/landing/blob_green.gif'],
+            ['HYPE', INLINE_HYPE_LOGO],
             ['DOGE', 'https://s2.coinmarketcap.com/static/img/coins/64x64/74.gif'],
             ['DOT', 'https://s2.coinmarketcap.com/static/img/coins/64x64/6636.gif'],
             ['LINK', 'https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif'],
             ['hyna:LINK', 'https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif'],
             ['RENDER', 'https://s2.coinmarketcap.com/static/img/coins/64x64/5690.gif'],
             ['XRP', 'https://s2.coinmarketcap.com/static/img/coins/64x64/52.gif'],
+            ['NVDA', INLINE_NVDA_LOGO],
+            ['MSTR', INLINE_MSTR_LOGO],
             ['GOLD', 'images/coins/GOLD.svg'],
             ['SILVER', 'images/coins/SILVER.svg'],
             ['USA500', 'images/coins/USA500.png']
@@ -3834,6 +3840,9 @@
         const SPECIAL_LOGOS = new Map([
             ['BTC', 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20shape-rendering%3D%22geometricPrecision%22%20text-rendering%3D%22geometricPrecision%22%20image-rendering%3D%22optimizeQuality%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20viewBox%3D%220%200%204091.27%204091.73%22%3E%3Cg%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill%3D%22%23F7931A%22%20d%3D%22M4030.06%202540.77C3756.82%203636.78%202646.74%204303.79%201550.6%204030.48%20454.92%203757.24-212.09%202647.09%2061.27%201551.17c273.12-1096.13%201383.2-1763.19%202479-1489.95C3636.33%20334.46%204303.3%201444.73%204030.03%202540.79l.02-.02z%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2947.77%201754.38c40.72-272.26-166.56-418.61-450-516.24l91.95-368.8-224.5-55.94-89.51%20359.09c-59.02-14.72-119.63-28.59-179.87-42.34L2186%20768.69l-224.36-55.94-92%20368.68c-48.84-11.12-96.81-22.11-143.35-33.69l.26-1.16-309.59-77.31-59.72%20239.78s166.56%2038.18%20163.05%2040.53c90.91%2022.69%20107.35%2082.87%20104.62%20130.57l-104.74%20420.15c6.26%201.59%2014.38%203.89%2023.34%207.49-7.49-1.86-15.46-3.89-23.73-5.87l-146.81%20588.57c-11.11%2027.62-39.31%2069.07-102.87%2053.33%202.25%203.26-163.17-40.72-163.17-40.72l-111.46%20256.98%20292.15%2072.83c54.35%2013.63%20107.61%2027.89%20160.06%2041.3l-92.9%20373.03%20224.24%2055.94%2092-369.07c61.26%2016.63%20120.71%2031.97%20178.91%2046.43l-91.69%20367.33%20224.51%2055.94%2092.89-372.33c382.82%2072.45%20670.67%2043.24%20791.83-303.02%2097.63-278.78-4.86-439.58-206.26-544.44%20146.69-33.83%20257.18-130.31%20286.64-329.61l-.07-.05zm-512.93%20719.26c-69.38%20278.78-538.76%20128.08-690.94%2090.29l123.28-494.2c152.17%2037.99%20640.17%20113.17%20567.67%20403.91zm69.43-723.3c-63.29%20253.58-453.96%20124.75-580.69%2093.16l111.77-448.21c126.73%2031.59%20534.85%2090.55%20468.94%20355.05h-.02z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E'],
             ['ETH', 'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E'],
+            ['HYPE', INLINE_HYPE_LOGO],
+            ['NVDA', INLINE_NVDA_LOGO],
+            ['MSTR', INLINE_MSTR_LOGO],
             ['USA500', 'images/coins/USA500.png'],
             ['COPPER', 'images/coins/COPPER.png'],
             ['GOLD', 'images/coins/GOLD.svg'],
@@ -3843,8 +3852,6 @@
             ['USOIL', 'images/coins/USOIL.svg']
         ]);
         const DOMAIN_LOGOS = new Map([
-            ['NVDA', 'https://logo.clearbit.com/nvidia.com'],
-            ['MSTR', 'https://logo.clearbit.com/microstrategy.com'],
             ['TSLA', 'https://logo.clearbit.com/tesla.com'],
             ['AAPL', 'https://logo.clearbit.com/apple.com'],
             ['AMZN', 'https://logo.clearbit.com/amazon.com'],
@@ -4030,6 +4037,7 @@
             coin: parseCoin(), tf: '15m', markPx: 0, aggTick: 0,
             obView: 'both', aggTicks: [],
             markets: [], tradeBuf: [], ws: null, wsSeq: 0,
+            wsConfigKey: '',
             priceMode: initialChartPrefs.priceMode,
             lowerStudy: initialChartPrefs.lowerStudy,
             showMAs: initialChartPrefs.showMAs,
@@ -4406,12 +4414,32 @@
             } catch (_) {}
         }
 
+        function notifyParentAddExtraChart() {
+            if (IS_COMPACT || window.parent === window) return;
+            try {
+                window.parent.postMessage({
+                    type: 'hypermonitor:add-extra-chart'
+                }, '*');
+            } catch (_) {}
+        }
+
         function syncChartToggleButtons() {
-            const canAddSecondChart = !IS_COMPACT && !S.chart2Active;
+            const parentCanAddExtraCharts =
+                !IS_COMPACT &&
+                window.parent !== window &&
+                Number.isFinite(S.parentExtraCharts) &&
+                S.parentExtraCharts < 2;
             const hasExtraCharts = Number.isFinite(S.parentExtraCharts) && S.parentExtraCharts > 0;
+            const canAddCharts = !IS_COMPACT && (!S.chart2Active || parentCanAddExtraCharts);
             const canRemoveSecondChart = !IS_COMPACT && (hasExtraCharts || S.chart2Active);
-            if (addChartBtn) addChartBtn.disabled = !canAddSecondChart;
-            if (removeChartBtn) removeChartBtn.disabled = !canRemoveSecondChart;
+            if (addChartBtn) {
+                addChartBtn.disabled = !canAddCharts;
+                addChartBtn.hidden = !canAddCharts;
+            }
+            if (removeChartBtn) {
+                removeChartBtn.disabled = !canRemoveSecondChart;
+                removeChartBtn.hidden = !canRemoveSecondChart;
+            }
         }
 
         function getVisibleChartWraps() {
@@ -4634,9 +4662,9 @@
             if (options.notifyParent) {
                 notifyParentTimeframe();
             }
+            connectWs();
             await fetchCandles();
             await fetchCandles2();
-            connectWs();
         }
 
         function applyTrackerLayout(bookWidth) {
@@ -4852,8 +4880,16 @@
         }
 
         function handleAddChart() {
-            if (IS_COMPACT || S.chart2Active) return;
-            toggleChart2(true);
+            if (IS_COMPACT) return;
+            if (!S.chart2Active) {
+                toggleChart2(true);
+                return;
+            }
+            if (window.parent === window) return;
+            if (!Number.isFinite(S.parentExtraCharts) || S.parentExtraCharts >= 2) return;
+            S.parentExtraCharts = Math.max(0, Math.floor(S.parentExtraCharts)) + 1;
+            syncChartToggleButtons();
+            notifyParentAddExtraChart();
         }
 
         function handleRemoveChart() {
@@ -7819,6 +7855,7 @@
 
         function disconnectWs() {
             S.wsSeq += 1;
+            S.wsConfigKey = '';
             const socket = S.ws;
             S.ws = null;
             if (!socket) return;
@@ -7831,13 +7868,30 @@
             } catch (_) {}
         }
 
+        function getWsConfigKey() {
+            const parts = [IS_COMPACT ? 'compact' : 'full', S.coin || '', S.tf || ''];
+            if (!IS_COMPACT && S.chart2Active && S.coin !== S.coin2) {
+                parts.push(S.coin2 || '');
+            }
+            return parts.join('|');
+        }
+
         function connectWs() {
+            const nextConfigKey = getWsConfigKey();
+            if (
+                S.ws &&
+                S.wsConfigKey === nextConfigKey &&
+                (S.ws.readyState === WebSocket.OPEN || S.ws.readyState === WebSocket.CONNECTING)
+            ) {
+                return;
+            }
             if (S.ws) {
                 try { S.ws.close(); } catch (_) {}
             }
             const wsSeq = ++S.wsSeq;
             const socket = new WebSocket(WS);
             S.ws = socket;
+            S.wsConfigKey = nextConfigKey;
             socket.onopen = () => {
                 if (wsSeq !== S.wsSeq || S.ws !== socket) return;
                 const subs = IS_COMPACT
@@ -8217,15 +8271,14 @@
                     closeDropdown: true
                 });
             } else {
-                disconnectWs();
                 S.coin2 = selected;
                 clearDrawings(2);
                 resetSecondaryChartForCoinChange();
                 $('coin-dropdown-2').style.display = 'none';
                 syncSelectedCoinUi(2);
                 setChartLoading(2, true);
-                fetchCandles2();
                 connectWs();
+                fetchCandles2();
             }
         }
 
@@ -8690,8 +8743,8 @@
             syncResponsiveAssetLayout();
             if (!IS_COMPACT) resetOrderBookState();
             applyStats();
-            await fetchCandles();
             connectWs();
+            await fetchCandles();
             notifyParentChartState();
             syncTopSplitters();
         }
@@ -8701,6 +8754,7 @@
             syncResponsiveAssetLayout();
             syncChartToggleButtons();
             if (!IS_COMPACT) resetOrderBookState();
+            connectWs();
             loadResolvedCoinLogoCache();
             applyChartPrefs(loadChartPrefs(), { persist: false });
             await fetchMeta();
