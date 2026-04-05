@@ -2847,23 +2847,22 @@
       gap: 0;
       width: fit-content;
       max-width: 100%;
-      padding: 0.32rem 0.62rem;
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.03);
-      font-size: 0.71rem;
-      font-weight: 600;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      font-size: 0.72rem;
+      font-weight: 500;
       line-height: 1.2;
-      color: rgba(248, 250, 252, 0.92);
+      color: rgba(124, 132, 143, 0.96);
+      letter-spacing: 0.01em;
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
       min-width: 0;
     }
 
     .positions-timeline-wrap.is-time-travel .positions-timeline-stamp {
-      border-color: rgba(245, 158, 11, 0.22);
-      background: rgba(245, 158, 11, 0.08);
-      color: #f8fafc;
+      color: rgba(226, 232, 240, 0.94);
     }
 
     .positions-timeline-slider:disabled::-webkit-slider-runnable-track,
@@ -3544,7 +3543,7 @@
       background-repeat: no-repeat;
       background-position: center center;
       background-size: min(34%, 184px);
-      opacity: 1;
+      opacity: 0.34;
       pointer-events: none;
       z-index: 0;
     }
@@ -4284,15 +4283,13 @@
     }
 
     body.light .positions-timeline-stamp {
-      border-color: #e5e7eb;
-      background: #ffffff;
-      color: #0f172a;
+      background: transparent;
+      color: #64748b;
     }
 
     body.light .positions-timeline-wrap.is-time-travel .positions-timeline-stamp {
-      border-color: rgba(245, 158, 11, 0.24);
-      background: rgba(245, 158, 11, 0.1);
-      color: #0f172a;
+      background: transparent;
+      color: #334155;
     }
 
     body.light .chart-card {
@@ -20233,10 +20230,20 @@
         const fadeColor = document.body.classList.contains("light")
           ? "rgba(148, 163, 184, 0.16)"
           : "rgba(0, 0, 0, 0.34)";
+        const splitColor = document.body.classList.contains("light")
+          ? "rgba(148, 163, 184, 0.5)"
+          : "rgba(124, 132, 143, 0.48)";
         const c = chart.ctx;
         c.save();
         c.fillStyle = fadeColor;
         c.fillRect(x, area.top, area.right - x, area.bottom - area.top);
+        c.setLineDash([5, 5]);
+        c.lineWidth = 1;
+        c.strokeStyle = splitColor;
+        c.beginPath();
+        c.moveTo(x + 0.5, area.top);
+        c.lineTo(x + 0.5, area.bottom);
+        c.stroke();
         c.restore();
       },
     };

@@ -3957,6 +3957,9 @@
     let favoriteWallets = [];
     let headerCoinOptions = [];
     let headerCoinOptionsPromise = null;
+    let authenticatedWalletAddresses = [];
+    let authenticatedWalletAddressesPromise = null;
+    let authenticatedWalletAddressesLoaded = false;
     let marketHeatmapPromise = null;
     let marketHeatmapRefreshTimer = null;
     const DEFAULT_TRADE_BOOK_WIDTH = 310;
@@ -4071,6 +4074,7 @@
     const FOOTER_CHANGE_STORAGE_KEY = "hypermonitor-footer-change";
     const FAVORITES_KEY = "hypermonitor-favorite-wallets";
     const THEME_STORAGE_KEY = "hypermonitor-theme";
+    const AUTHENTICATED_WALLETS_PATH = "data/coinmarketman_hypertracker_authenticated_addresses.txt";
     const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
     const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
     const TRACKER_FOOTER_LEGACY_DEFAULT_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
@@ -8713,11 +8717,62 @@
       return indexes.length ? Math.min(...indexes) + 2 : Number.POSITIVE_INFINITY;
     }
 
+    function isWalletLikeQuery(query) {
+      const normalized = String(query || "").trim().toLowerCase();
+      return normalized.startsWith("0x") && normalized.length >= 4;
+    }
+
+    async function ensureAuthenticatedWalletAddresses() {
+      if (authenticatedWalletAddressesPromise) return authenticatedWalletAddressesPromise;
+      authenticatedWalletAddressesPromise = fetch(AUTHENTICATED_WALLETS_PATH, { cache: "force-cache" })
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.text();
+        })
+        .then((text) => {
+          const deduped = new Set();
+          text.split(/\r?\n/).forEach((line) => {
+            const wallet = String(line || "").trim().toLowerCase();
+            if (!/^0x[a-f0-9]{40}$/.test(wallet)) return;
+            deduped.add(wallet);
+          });
+          authenticatedWalletAddresses = Array.from(deduped).sort();
+          authenticatedWalletAddressesLoaded = true;
+          return authenticatedWalletAddresses;
+        })
+        .catch((error) => {
+          console.error("Failed to load authenticated wallet addresses", error);
+          authenticatedWalletAddresses = [];
+          authenticatedWalletAddressesLoaded = true;
+          return authenticatedWalletAddresses;
+        });
+      return authenticatedWalletAddressesPromise;
+    }
+
+    function findAuthenticatedWalletPrefixMatches(query, limit = 5) {
+      const normalizedQuery = String(query || "").trim().toLowerCase();
+      if (!normalizedQuery || !authenticatedWalletAddresses.length) return [];
+      let left = 0;
+      let right = authenticatedWalletAddresses.length;
+      while (left < right) {
+        const mid = (left + right) >> 1;
+        if (authenticatedWalletAddresses[mid] < normalizedQuery) left = mid + 1;
+        else right = mid;
+      }
+      const matches = [];
+      for (let index = left; index < authenticatedWalletAddresses.length && matches.length < limit; index += 1) {
+        const address = authenticatedWalletAddresses[index];
+        if (!address.startsWith(normalizedQuery)) break;
+        matches.push(address);
+      }
+      return matches;
+    }
+
     function buildWalletSuggestions(query) {
       const normalizedQuery = String(query || "").trim().toLowerCase();
       if (!normalizedQuery) return [];
       const seen = new Set();
-      return state.normalizedRows
+      const walletRows = state.normalizedRows
         .filter((row) => row.address && row.address.toLowerCase().includes(normalizedQuery))
         .sort((left, right) => {
           const scoreDiff = scoreWalletSuggestion(left.address, normalizedQuery) - scoreWalletSuggestion(right.address, normalizedQuery);
@@ -8736,6 +8791,21 @@
           label: shortAddress(row.address),
           meta: `${row.address} • ${sizeTierLabel(row)}`
         }));
+
+      if (!isWalletLikeQuery(normalizedQuery) || !authenticatedWalletAddresses.length) {
+        return walletRows;
+      }
+
+      const externalWallets = findAuthenticatedWalletPrefixMatches(normalizedQuery, 8)
+        .filter((address) => !seen.has(address))
+        .map((address) => ({
+          type: "wallet",
+          value: address,
+          label: shortAddress(address),
+          meta: `${address} • CoinMarketMan`
+        }));
+
+      return walletRows.concat(externalWallets).slice(0, 8);
     }
 
     function buildCoinSuggestions(query) {
@@ -8795,6 +8865,14 @@
       if (!rawQuery) {
         closeHeaderSuggestions();
         return;
+      }
+
+      if (isWalletLikeQuery(rawQuery) && !authenticatedWalletAddressesLoaded) {
+        ensureAuthenticatedWalletAddresses().then(() => {
+          if (!headerSearchInput) return;
+          if (!isWalletLikeQuery(headerSearchInput.value.trim())) return;
+          updateHeaderSuggestions();
+        });
       }
 
       const walletSuggestions = buildWalletSuggestions(rawQuery);
