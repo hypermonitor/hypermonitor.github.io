@@ -3142,6 +3142,14 @@
                                     </span>
                                 </button>
                             </div>
+                            <div class="chart-settings-group">
+                                <button id="chart-grid-toggle" class="chart-settings-toggle" type="button" aria-pressed="false">
+                                    <span class="chart-settings-toggle-label">Grid</span>
+                                    <span class="chart-settings-toggle-switch" aria-hidden="true">
+                                        <span class="chart-settings-toggle-knob"></span>
+                                    </span>
+                                </button>
+                            </div>
                             <div class="chart-settings-group" id="chart-ma-periods-group" hidden>
                                 <div class="chart-settings-label">Moving Average Periods</div>
                                 <div class="chart-settings-bounds chart-settings-bounds--triple">
@@ -3805,6 +3813,7 @@
             priceMode: 'candles',
             lowerStudy: 'volume',
             showMAs: true,
+            showGrid: true,
             rsiLower: 30,
             rsiUpper: 70,
             maPeriods: [7, 25, 99],
@@ -3971,6 +3980,7 @@
             next.priceMode = raw.priceMode === 'line' ? 'line' : 'candles';
             next.lowerStudy = raw.lowerStudy === 'rsi' ? 'rsi' : 'volume';
             next.showMAs = raw.showMAs !== false;
+            next.showGrid = raw.showGrid !== false;
             const rawPeriods = Array.isArray(raw.maPeriods) ? raw.maPeriods : [raw.maFast, raw.maMid, raw.maSlow];
             next.maPeriods = rawPeriods.slice(0, 3).map((value, index) => {
                 const fallback = DEFAULT_CHART_PREFS.maPeriods[index] || DEFAULT_CHART_PREFS.maPeriods[DEFAULT_CHART_PREFS.maPeriods.length - 1];
@@ -4044,6 +4054,7 @@
             priceMode: initialChartPrefs.priceMode,
             lowerStudy: initialChartPrefs.lowerStudy,
             showMAs: initialChartPrefs.showMAs,
+            showGrid: initialChartPrefs.showGrid,
             rsiLower: initialChartPrefs.rsiLower,
             rsiUpper: initialChartPrefs.rsiUpper,
             maPeriods: initialChartPrefs.maPeriods.slice(),
@@ -4120,12 +4131,14 @@
             const crosshairLineColor = getCssVar('--chart-crosshair-line') || 'rgba(211, 216, 223, 0.14)';
             const crosshairLabelBg = getCssVar('--chart-crosshair-label-bg') || '#18202a';
             const showTimeScale = options.showTimeScale !== false;
+            const showGrid = options.showGrid !== false;
+            const gridColor = showGrid ? borderColor : 'rgba(0, 0, 0, 0)';
             return {
                 layout: { background: { color: background }, textColor, attributionLogo: false },
                 localization: {
                     timeFormatter: (time) => formatAxisTimeLabel(time, 'time'),
                 },
-                grid: { vertLines: { color: borderColor }, horzLines: { color: borderColor } },
+                grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } },
                 crosshair: {
                     mode: LightweightCharts.CrosshairMode.Normal,
                     vertLine: { color: crosshairLineColor, labelBackgroundColor: crosshairLabelBg },
@@ -4153,16 +4166,16 @@
                 } catch (_) {}
             }
             if (typeof chart !== 'undefined' && chart) {
-                chart.applyOptions(getChartThemeOptions({ showTimeScale: false }));
+                chart.applyOptions(getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid }));
             }
             if (typeof chart2 !== 'undefined' && chart2) {
-                chart2.applyOptions(getChartThemeOptions({ showTimeScale: false }));
+                chart2.applyOptions(getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid }));
             }
             if (typeof lowerChart !== 'undefined' && lowerChart) {
-                lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: true }));
+                lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid }));
             }
             if (typeof lowerChart2 !== 'undefined' && lowerChart2) {
-                lowerChart2.applyOptions(getChartThemeOptions({ showTimeScale: true }));
+                lowerChart2.applyOptions(getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid }));
             }
         }
 
@@ -4329,6 +4342,7 @@
         const chartSettingsBtn = $('chart-settings-btn');
         const chartSettingsMenu = $('chart-settings-menu');
         const chartMaToggle = $('chart-ma-toggle');
+        const chartGridToggle = $('chart-grid-toggle');
         const chartMaPeriodsGroup = $('chart-ma-periods-group');
         const chartVolumeMaPeriodsGroup = $('chart-volume-ma-periods-group');
         const chartRsiBoundsGroup = $('chart-rsi-bounds-group');
@@ -5631,8 +5645,8 @@
 
         // ── Chart 1 Setup ──────────────────────────────────────────
         const chartWrap = $('chart-wrap');
-        const chart = LightweightCharts.createChart($('chart-canvas'), getChartThemeOptions({ showTimeScale: false }));
-        const lowerChart = LightweightCharts.createChart($('chart-lower-canvas'), getChartThemeOptions({ showTimeScale: true }));
+        const chart = LightweightCharts.createChart($('chart-canvas'), getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid }));
+        const lowerChart = LightweightCharts.createChart($('chart-lower-canvas'), getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid }));
 
         function createChartSeriesBundle(chartInstance, lowerChartInstance, lowerPaneEl) {
             const candleSeries = chartInstance.addCandlestickSeries({
@@ -5782,8 +5796,8 @@
 
         // ── Chart 2 Setup ──────────────────────────────────────────
         const chartWrap2 = $('chart-wrap-2');
-        const chart2 = LightweightCharts.createChart($('chart-canvas-2'), getChartThemeOptions({ showTimeScale: false }));
-        const lowerChart2 = LightweightCharts.createChart($('chart-lower-canvas-2'), getChartThemeOptions({ showTimeScale: true }));
+        const chart2 = LightweightCharts.createChart($('chart-canvas-2'), getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid }));
+        const lowerChart2 = LightweightCharts.createChart($('chart-lower-canvas-2'), getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid }));
 
         const chartSeries2 = createChartSeriesBundle(chart2, lowerChart2, chartLowerPane2);
         const candles2 = chartSeries2.candles;
@@ -7015,8 +7029,8 @@
             });
             bundle.rsiFloor.applyOptions({ visible: showRsi && showLowerPane });
             bundle.rsiCeil.applyOptions({ visible: showRsi && showLowerPane });
-            bundle.chart.applyOptions(getChartThemeOptions({ showTimeScale: !showLowerPane }));
-            bundle.lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: showLowerPane }));
+            bundle.chart.applyOptions(getChartThemeOptions({ showTimeScale: !showLowerPane, showGrid: S.showGrid }));
+            bundle.lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: showLowerPane, showGrid: S.showGrid }));
             bundle.lowerPane?.classList.toggle('is-rsi', showRsi);
             syncRsiPriceLines(target);
             resizeChartBundle(
@@ -7106,6 +7120,10 @@
                 chartMaToggle.classList.toggle('is-active', Boolean(S.showMAs));
                 chartMaToggle.setAttribute('aria-pressed', S.showMAs ? 'true' : 'false');
             }
+            if (chartGridToggle) {
+                chartGridToggle.classList.toggle('is-active', Boolean(S.showGrid));
+                chartGridToggle.setAttribute('aria-pressed', S.showGrid ? 'true' : 'false');
+            }
             if (chartMaPeriodsGroup) {
                 const hideMaPeriods = !S.showMAs;
                 chartMaPeriodsGroup.hidden = hideMaPeriods;
@@ -7168,6 +7186,7 @@
                 priceMode: S.priceMode,
                 lowerStudy: S.lowerStudy,
                 showMAs: S.showMAs,
+                showGrid: S.showGrid,
                 maPeriods: S.maPeriods.slice(),
                 volumeMaPeriods: S.volumeMaPeriods.slice(),
                 rsiLower: S.rsiLower,
@@ -7195,6 +7214,7 @@
             const prefs = normalizeChartPrefs(nextPrefs);
             const prevLowerStudy = S.lowerStudy;
             const prevShowMAs = S.showMAs;
+            const prevShowGrid = S.showGrid;
             const prevMaPeriods = S.maPeriods.slice();
             const prevVolumeMaPeriods = S.volumeMaPeriods.slice();
             const prevRsiLower = S.rsiLower;
@@ -7202,6 +7222,7 @@
             S.priceMode = prefs.priceMode;
             S.lowerStudy = prefs.lowerStudy;
             S.showMAs = prefs.showMAs;
+            S.showGrid = prefs.showGrid;
             S.maPeriods = prefs.maPeriods.slice();
             S.volumeMaPeriods = prefs.volumeMaPeriods.slice();
             S.rsiLower = prefs.rsiLower;
@@ -7222,7 +7243,7 @@
             if (maPeriodsChanged || volumeMaPeriodsChanged) {
                 syncDerivedSeries(1);
                 syncDerivedSeries(2);
-            } else if (prevLowerStudy !== S.lowerStudy || prevRsiLower !== S.rsiLower || prevRsiUpper !== S.rsiUpper || prevShowMAs !== S.showMAs) {
+            } else if (prevLowerStudy !== S.lowerStudy || prevRsiLower !== S.rsiLower || prevRsiUpper !== S.rsiUpper || prevShowMAs !== S.showMAs || prevShowGrid !== S.showGrid) {
                 refreshLowerStudyScale(1);
                 refreshLowerStudyScale(2);
             }
@@ -8533,6 +8554,12 @@
         if (chartMaToggle) {
             chartMaToggle.addEventListener('click', () => {
                 applyChartPrefs({ ...getChartPrefsPayload(), showMAs: !S.showMAs });
+            });
+        }
+
+        if (chartGridToggle) {
+            chartGridToggle.addEventListener('click', () => {
+                applyChartPrefs({ ...getChartPrefsPayload(), showGrid: !S.showGrid });
             });
         }
 

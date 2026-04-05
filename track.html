@@ -72,6 +72,9 @@
       --exposure-accent: #b794f4;
       --control-height: 32px;
       --switch-height: 30px;
+      --track-section-pad: 0.72rem;
+      --track-chart-card-pad: 0.62rem;
+      --track-embed-chart-card-pad: 0.5rem;
       --neutral-blue: rgba(124, 176, 255, 0.95);
       --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
     }
@@ -131,13 +134,13 @@
 
     body.embed-tracker .dashboard-shell {
       grid-template-columns: minmax(290px, 336px) minmax(0, 1fr);
-      gap: 0.85rem;
-      margin-bottom: 0.8rem;
+      gap: 0.55rem;
+      margin-bottom: 0.5rem;
       align-items: start;
     }
 
     body.embed-tracker .dashboard-main {
-      gap: 0.85rem;
+      gap: 0.55rem;
       align-content: start;
     }
 
@@ -173,7 +176,7 @@
     body.embed-tracker #performanceSection,
     body.embed-tracker #liveLayout,
     body.embed-tracker #historyLayout {
-      padding: 0.82rem;
+      padding: 0.62rem;
       border: 0;
       border-radius: 12px;
       background: var(--surface2);
@@ -181,8 +184,8 @@
     }
 
     body.embed-tracker .section-title {
-      margin: 0 0 0.55rem;
-      padding-bottom: 0.5rem;
+      margin: 0 0 0.4rem;
+      padding-bottom: 0.38rem;
       border-bottom: 1px solid rgba(148, 163, 184, 0.1);
     }
 
@@ -196,7 +199,7 @@
     body.embed-tracker #performanceSection .section-title {
       align-items: center;
       justify-content: space-between;
-      gap: 0.6rem;
+      gap: 0.45rem;
     }
 
     body.embed-tracker #performanceSection .performance-share-btn {
@@ -208,17 +211,22 @@
     }
 
     body.embed-tracker .chart-grid.performance-tile-layout {
-      gap: 8px;
+      gap: 6px;
+    }
+
+    body.embed-tracker .performance-extra-layout,
+    body.embed-tracker .performance-tile-stack {
+      gap: 6px;
     }
 
     body.embed-tracker .chart-card {
-      padding: 0.64rem 0.66rem 0.68rem;
+      padding: var(--track-embed-chart-card-pad);
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.018);
     }
 
     body.embed-tracker .chart-card h3 {
-      margin-bottom: 0.22rem;
+      margin-bottom: 0.14rem;
       font-size: 0.8rem;
       line-height: 1.15;
     }
@@ -241,7 +249,7 @@
     }
 
     body.embed-tracker .positions-timeline-wrap {
-      margin: 0.1rem 0 0.7rem;
+      margin: 0.02rem 0 0.46rem;
       border-radius: 12px;
       border: 0;
       background: transparent;
@@ -1424,37 +1432,31 @@
       }
 
       /* --- Orders / Fills tables: show Asset, Side, Size, Price only --- */
-      /* Open Orders: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) MobilePrice(8) */
+      /* Open Orders: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) MobilePrice(7) */
       #openOrdersTable th:nth-child(1),
       #openOrdersTable th:nth-child(2),
       #openOrdersTable th:nth-child(6),
-      #openOrdersTable th:nth-child(7),
       #openOrdersBody td:nth-child(1),
       #openOrdersBody td:nth-child(2),
-      #openOrdersBody td:nth-child(6),
-      #openOrdersBody td:nth-child(7) {
+      #openOrdersBody td:nth-child(6) {
         display: none;
       }
 
-      /* Canceled Orders: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) MobilePrice(8) */
+      /* Canceled Orders: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) MobilePrice(7) */
       #canceledOrdersTable th:nth-child(1),
       #canceledOrdersTable th:nth-child(2),
       #canceledOrdersTable th:nth-child(6),
-      #canceledOrdersTable th:nth-child(7),
       #canceledOrdersBody td:nth-child(1),
       #canceledOrdersBody td:nth-child(2),
-      #canceledOrdersBody td:nth-child(6),
-      #canceledOrdersBody td:nth-child(7) {
+      #canceledOrdersBody td:nth-child(6) {
         display: none;
       }
 
-      /* Trades Stream: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) Type(7) */
+      /* Trades Stream: OrderID(1) Time(2) Asset(3) Side(4) Size(5) Price(6) */
       #fillsBody td:nth-child(1),
       #fillsBody th:nth-child(1),
       #fillsBody td:nth-child(2),
-      #fillsBody th:nth-child(2),
-      #fillsBody td:nth-child(7),
-      #fillsBody th:nth-child(7) {
+      #fillsBody th:nth-child(2) {
         display: none;
       }
 
@@ -1967,7 +1969,7 @@
 
     .overview-section {
       margin-top: 0;
-      padding: 0.78rem 0.82rem;
+      padding: var(--track-section-pad);
       border-top: 0;
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.018);
@@ -2214,7 +2216,7 @@
       display: grid;
       gap: 0;
       margin-top: 0;
-      padding: 0.78rem 0.82rem;
+      padding: var(--track-section-pad);
       border-top: 0;
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.018);
@@ -2222,7 +2224,7 @@
 
     .overview-radar-panel {
       margin-top: 0;
-      padding: 0.78rem 0.82rem 0.82rem;
+      padding: var(--track-section-pad);
       border-top: 0;
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.018);
@@ -3066,6 +3068,14 @@
       gap: 8px;
     }
 
+    .performance-extra-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.56fr) minmax(430px, 1.08fr);
+      align-items: start;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
     .performance-tile-stack {
       min-width: 0;
       display: flex;
@@ -3094,16 +3104,11 @@
       margin-left: 0;
     }
 
-    .performance-right-stack > .performance-tile[data-tile-id="deposits"],
-    .performance-right-stack > .performance-tile[data-tile-id="risk"] {
-      height: var(--right-performance-top-height);
-    }
-
-    .performance-right-stack > .performance-tile[data-tile-id="distribution"] {
-      height: var(--right-performance-bottom-height);
-    }
-
     .chart-grid.performance-tile-layout .performance-tile {
+      min-height: 0;
+    }
+
+    .performance-extra-layout .performance-tile {
       min-height: 0;
     }
 
@@ -3111,7 +3116,7 @@
       border-radius: 0.75rem;
       border: 0;
       background: rgba(255, 255, 255, 0.018);
-      padding: 0.62rem 0.68rem 0.58rem;
+      padding: var(--track-chart-card-pad);
       position: relative;
       overflow: hidden;
       display: flex;
@@ -3342,7 +3347,16 @@
     .chart-grid.performance-tile-layout .performance-tile .chart-canvas-wrap,
     .chart-grid.performance-tile-layout .performance-tile .exposure-chart-wrap,
     .chart-grid.performance-tile-layout .performance-tile .transfers-wrap,
-    .chart-grid.performance-tile-layout .performance-tile .pnl-heatmap-wrap {
+    .chart-grid.performance-tile-layout .performance-tile .pnl-heatmap-wrap,
+    .chart-grid.performance-tile-layout .performance-tile .positions-table-wrap {
+      flex: 1 1 auto;
+      height: 100%;
+      min-height: 0;
+      aspect-ratio: auto;
+    }
+
+    .performance-extra-layout .performance-tile .chart-canvas-wrap,
+    .performance-extra-layout .performance-tile .pnl-heatmap-wrap {
       flex: 1 1 auto;
       height: 100%;
       min-height: 0;
@@ -3354,8 +3368,27 @@
       height: auto;
     }
 
+    .performance-extra-layout .heatmap-card .pnl-heatmap-wrap {
+      flex: 0 0 auto;
+      height: auto;
+    }
+
+    .performance-extra-toggle {
+      min-width: auto;
+      width: auto;
+      padding: 0 0.7rem;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
     @media (max-width: 1180px) {
       .chart-grid.performance-tile-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .performance-extra-layout {
         grid-template-columns: 1fr;
       }
 
@@ -3392,6 +3425,10 @@
 
       .chart-grid.performance-tile-layout {
         grid-template-rows: none;
+      }
+
+      .performance-extra-layout {
+        grid-template-columns: 1fr;
       }
 
       .heatmap-card {
@@ -3494,6 +3531,27 @@
     .chart-loading-wrap:not(.loading) #performanceSection .chart-canvas-wrap.logo-watermark::after,
     .chart-loading-wrap:not(.loading) #performanceSection .pnl-heatmap-wrap.logo-watermark::before,
     .chart-loading-wrap:not(.loading) #performanceSection .pnl-heatmap-wrap.logo-watermark::after {
+      content: none;
+    }
+
+    #pnlChartWrap::before,
+    #equityChartWrap::before,
+    #roiChartWrap::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("images/chart-watermark.png");
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: min(34%, 184px);
+      opacity: 1;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .chart-loading-wrap.loading #pnlChartWrap::before,
+    .chart-loading-wrap.loading #equityChartWrap::before,
+    .chart-loading-wrap.loading #roiChartWrap::before {
       content: none;
     }
 
@@ -3749,7 +3807,7 @@
 
     .overview-breakdown-panel {
       margin-top: 0;
-      padding: 0.78rem 0.82rem 0.82rem;
+      padding: var(--track-section-pad);
       border-top: 0;
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.018);
@@ -5422,28 +5480,27 @@
 
     @media (min-width: 720px) {
       .orders-live-panel thead th:nth-child(1) { width: 16%; }
-      .orders-live-panel thead th:nth-child(2) { width: 15%; }
-      .orders-live-panel thead th:nth-child(3) { width: 12%; }
+      .orders-live-panel thead th:nth-child(2) { width: 20%; }
+      .orders-live-panel thead th:nth-child(3) { width: 13%; }
       .orders-live-panel thead th:nth-child(4) { width: 12%; }
-      .orders-live-panel thead th:nth-child(5) { width: 18%; }
-      .orders-live-panel thead th:nth-child(6) { width: 15%; }
-      .orders-live-panel thead th:nth-child(7) { width: 18%; }
+      .orders-live-panel thead th:nth-child(5) { width: 21%; }
+      .orders-live-panel thead th:nth-child(6) { width: 18%; }
+      .orders-live-panel thead th:nth-child(7) { width: 0%; }
 
       #canceledOrdersTable thead th:nth-child(1) { width: 16%; }
       #canceledOrdersTable thead th:nth-child(2) { width: 20%; }
-      #canceledOrdersTable thead th:nth-child(3) { width: 12%; }
+      #canceledOrdersTable thead th:nth-child(3) { width: 13%; }
       #canceledOrdersTable thead th:nth-child(4) { width: 12%; }
-      #canceledOrdersTable thead th:nth-child(5) { width: 17%; }
-      #canceledOrdersTable thead th:nth-child(6) { width: 13%; }
-      #canceledOrdersTable thead th:nth-child(7) { width: 16%; }
+      #canceledOrdersTable thead th:nth-child(5) { width: 21%; }
+      #canceledOrdersTable thead th:nth-child(6) { width: 18%; }
+      #canceledOrdersTable thead th:nth-child(7) { width: 0%; }
 
       #fillsTable thead th:nth-child(1) { width: 16%; }
-      #fillsTable thead th:nth-child(2) { width: 15%; }
-      #fillsTable thead th:nth-child(3) { width: 12%; }
+      #fillsTable thead th:nth-child(2) { width: 20%; }
+      #fillsTable thead th:nth-child(3) { width: 13%; }
       #fillsTable thead th:nth-child(4) { width: 12%; }
-      #fillsTable thead th:nth-child(5) { width: 18%; }
-      #fillsTable thead th:nth-child(6) { width: 15%; }
-      #fillsTable thead th:nth-child(7) { width: 18%; }
+      #fillsTable thead th:nth-child(5) { width: 21%; }
+      #fillsTable thead th:nth-child(6) { width: 18%; }
     }
 
     .trades-live-panel td.desktop-only.money:last-child {
@@ -6394,6 +6451,7 @@
         </span>
       </div>
       <div class="chart-actions is-hidden" id="performanceActions">
+        <button id="performanceExtraToggleBtn" class="shell-close-btn performance-extra-toggle" type="button" aria-expanded="false" aria-controls="performanceExtraCharts" title="Expand analytics">Expand view</button>
         <button id="exportExcelBtn" class="shell-close-btn performance-download-btn" type="button" aria-label="Download wallet data" title="Download wallet data">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
             <path d="M12 4.5v10.25" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -6431,30 +6489,6 @@
             <canvas id="roiChart"></canvas>
           </div>
         </div>
-
-        <div class="chart-card heatmap-card performance-tile" data-tile-id="activity" data-tile-span="2">
-          <h3 class="activity-card-title">
-            <span class="pnl-card-heading">Activity</span>
-            <span class="pnl-heatmap-toolbar">
-              <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous year">‹</button>
-              <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Activity heatmap</span>
-              <button class="pnl-heatmap-nav" id="pnlHeatmapNextBtn" type="button" aria-label="Next year">›</button>
-            </span>
-            <span class="activity-card-spacer" aria-hidden="true"></span>
-          </h3>
-          <div class="pnl-heatmap-wrap" id="pnlHeatmapWrap">
-            <div class="pnl-heatmap-months" id="pnlHeatmapMonths"></div>
-            <div class="pnl-heatmap-body">
-              <div class="pnl-heatmap-weekdays" id="pnlHeatmapWeekdays"></div>
-              <div class="pnl-heatmap-grid" id="pnlHeatmapGrid"></div>
-            </div>
-            <div class="pnl-heatmap-footer">
-              <div class="pnl-heatmap-hover" id="pnlHeatmapHover"></div>
-              <div class="pnl-heatmap-legend" id="pnlHeatmapLegend"></div>
-            </div>
-          </div>
-          <div class="pnl-heatmap-hover-card" id="pnlHeatmapHoverCard" aria-hidden="true"></div>
-        </div>
         </div>
 
         <div class="performance-tile-stack performance-right-stack" id="performanceRightStack">
@@ -6491,6 +6525,32 @@
           </div>
         </div>
 
+        </div>
+      </div>
+      <div class="performance-extra-layout" id="performanceExtraCharts">
+        <div class="chart-card heatmap-card performance-tile" data-tile-id="activity" data-tile-span="1">
+          <h3 class="activity-card-title">
+            <span class="pnl-card-heading">Activity</span>
+            <span class="pnl-heatmap-toolbar">
+              <button class="pnl-heatmap-nav" id="pnlHeatmapPrevBtn" type="button" aria-label="Previous year">‹</button>
+              <span class="pnl-heatmap-title" id="pnlHeatmapTitle">Activity heatmap</span>
+              <button class="pnl-heatmap-nav" id="pnlHeatmapNextBtn" type="button" aria-label="Next year">›</button>
+            </span>
+            <span class="activity-card-spacer" aria-hidden="true"></span>
+          </h3>
+          <div class="pnl-heatmap-wrap" id="pnlHeatmapWrap">
+            <div class="pnl-heatmap-months" id="pnlHeatmapMonths"></div>
+            <div class="pnl-heatmap-body">
+              <div class="pnl-heatmap-weekdays" id="pnlHeatmapWeekdays"></div>
+              <div class="pnl-heatmap-grid" id="pnlHeatmapGrid"></div>
+            </div>
+            <div class="pnl-heatmap-footer">
+              <div class="pnl-heatmap-hover" id="pnlHeatmapHover"></div>
+              <div class="pnl-heatmap-legend" id="pnlHeatmapLegend"></div>
+            </div>
+          </div>
+          <div class="pnl-heatmap-hover-card" id="pnlHeatmapHoverCard" aria-hidden="true"></div>
+        </div>
         <div class="chart-card distribution-card performance-tile" data-tile-id="distribution" data-tile-span="1">
           <h3 class="pnl-card-title">
             <span class="pnl-card-heading">Profit Distribution <span class="spark-label" id="distributionTitleValue">[-]</span></span>
@@ -6498,7 +6558,6 @@
           <div class="chart-canvas-wrap">
             <canvas id="profitDistributionChart"></canvas>
           </div>
-        </div>
         </div>
       </div>
       </div>
@@ -6547,12 +6606,11 @@
                 <th class="sortable" data-sort="side">Side</th>
                 <th class="sortable" data-sort="size">Size</th>
                 <th class="desktop-only sortable" data-sort="price">Price</th>
-                <th class="desktop-only sortable" data-sort="type">Type</th>
                 <th class="mobile-only sortable" data-sort="price">Price</th>
               </tr>
               </thead>
               <tbody id="openOrdersBody">
-              <tr><td colspan="8" class="muted">Loading open orders…</td></tr>
+              <tr><td colspan="7" class="muted">Loading open orders…</td></tr>
               </tbody>
             </table>
           </div>
@@ -6571,12 +6629,11 @@
                 <th class="sortable" data-sort="side">Side</th>
                 <th class="sortable" data-sort="size">Size</th>
                 <th class="desktop-only sortable" data-sort="price">Price</th>
-                <th class="desktop-only sortable" data-sort="type">Type</th>
                 <th class="mobile-only sortable" data-sort="price">Price</th>
               </tr>
               </thead>
               <tbody id="canceledOrdersBody">
-              <tr><td colspan="8" class="muted">No canceled orders yet.</td></tr>
+              <tr><td colspan="7" class="muted">No canceled orders yet.</td></tr>
               </tbody>
             </table>
           </div>
@@ -6601,11 +6658,10 @@
                 <th class="sortable" data-sort="side">Side</th>
                 <th class="sortable" data-sort="size">Size</th>
                 <th class="sortable" data-sort="price">Price</th>
-                <th class="desktop-only sortable" data-sort="type">Type</th>
               </tr>
               </thead>
               <tbody id="fillsBody">
-              <tr><td colspan="7" class="muted">Waiting for fills…</td></tr>
+              <tr><td colspan="6" class="muted">Waiting for fills…</td></tr>
               </tbody>
             </table>
           </div>
@@ -6987,8 +7043,10 @@
   const portfolioLoadingEl = document.getElementById("portfolioLoading");
   const portfolioLoadingWrapEl = document.getElementById("portfolioLoadingWrap");
   const portfolioChartsEl = document.getElementById("portfolioCharts");
+  const performanceExtraChartsEl = document.getElementById("performanceExtraCharts");
   const performanceToolbarEl = document.getElementById("performanceToolbar");
   const performanceActionsEl = document.getElementById("performanceActions");
+  const performanceExtraToggleBtnEl = document.getElementById("performanceExtraToggleBtn");
   const performanceLeftStackEl = document.getElementById("performanceLeftStack");
   const performanceRightStackEl = document.getElementById("performanceRightStack");
   const spotPerformanceNoteEl = document.getElementById("spotPerformanceNote");
@@ -7090,6 +7148,7 @@
     ["ETH", INLINE_ETH_LOGO],
     ["SOL", INLINE_SOL_LOGO],
     ["HYPE", INLINE_HYPE_LOGO],
+    ["EUR", "https://app.hyperliquid.xyz/coins/xyz%3AEUR.svg"],
     ["NVDA", INLINE_NVDA_LOGO],
     ["MSTR", INLINE_MSTR_LOGO],
     ["USDT0", "https://app.hyperliquid.xyz/coins/USDT_spot.svg"],
@@ -7101,6 +7160,7 @@
   const FOOTER_SPECIAL_LOGOS = new Map([
     ["HYPE", INLINE_HYPE_LOGO],
     ["SOL", INLINE_SOL_LOGO],
+    ["EUR", "https://app.hyperliquid.xyz/coins/xyz%3AEUR.svg"],
     ["DOGE", "https://s2.coinmarketcap.com/static/img/coins/64x64/74.gif"],
     ["DOT", "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.gif"],
     ["LINK", "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.gif"],
@@ -7113,6 +7173,7 @@
   const FOOTER_CIRCLE_LOGOS = new Set(["DOGE", "DOT", "RENDER", "XRP"]);
   const FOOTER_PRICE_COLOR_OVERRIDES = new Map([
     ["BTC", "#f7931a"],
+    ["EUR", "#2754d7"],
     ["SOL", "#8173d3"],
     ["GOLD", "#f3c95a"],
     ["SILVER", "#e3e8ef"],
@@ -7120,7 +7181,7 @@
     ["USA500", "#e04f5f"],
     ["XRP", "#ffffff"],
   ]);
-  const GLOBAL_SPECIAL_LOGO_PRIORITY = new Set(["BTC", "ETH", "SOL", "HYPE", "LINK", "NVDA", "MSTR", "USA500"]);
+  const GLOBAL_SPECIAL_LOGO_PRIORITY = new Set(["BTC", "ETH", "SOL", "HYPE", "LINK", "EUR", "NVDA", "MSTR", "USA500"]);
   const DOMAIN_LOGOS = new Map([
     ["TSLA", "https://logo.clearbit.com/tesla.com"],
     ["AAPL", "https://logo.clearbit.com/apple.com"],
@@ -7172,7 +7233,8 @@
   const WALLET_STAR_CLIENT_KEY = "hypermonitor-star-client-id";
   const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
   const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
-  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
+  const LEGACY_DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
+  const DEFAULT_FOOTER_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:EUR", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
   let trackedFooterCoins = [...DEFAULT_FOOTER_COINS];
   const coinNameCache = new Map();
   const coinColorCache = new Map();
@@ -7201,6 +7263,7 @@
   let primaryPerformanceMode = "pnl";
   let riskPerformanceMode = "exposure";
   let activityViewMode = "trades";
+  let performanceExtraExpanded = !isEmbedTracker;
   function setStartupChromeLoading(isLoading) {
     rootEl.classList.toggle("tracker-startup-loading", Boolean(isLoading));
   }
@@ -7248,7 +7311,15 @@
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length) {
-        trackedFooterCoins = parsed.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
+        const normalized = parsed.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
+        trackedFooterCoins = normalized;
+        const matchesLegacyDefaults =
+          normalized.length === LEGACY_DEFAULT_FOOTER_COINS.length &&
+          normalized.every((coin, idx) => coin === LEGACY_DEFAULT_FOOTER_COINS[idx]);
+        if (matchesLegacyDefaults) {
+          trackedFooterCoins = [...DEFAULT_FOOTER_COINS];
+          saveFooterCoins();
+        }
       }
     } catch (e) {}
   }
@@ -8783,7 +8854,7 @@
         chart.resize();
         chart.update("none");
       });
-      if (pnlHeatmapRows.length) {
+      if (pnlHeatmapRows.length && !performanceExtraChartsEl?.classList.contains("is-hidden")) {
         renderPnlHeatmap(currentRangeKey);
       }
     });
@@ -8791,6 +8862,27 @@
 
   function initPerformanceTileLayout() {
     schedulePerformanceTileResize();
+  }
+
+  function setPerformanceExtraExpanded(nextExpanded, { force = false } = {}) {
+    const expanded = Boolean(nextExpanded);
+    if (!force && performanceExtraExpanded === expanded) return;
+    performanceExtraExpanded = expanded;
+    if (performanceExtraChartsEl) {
+      performanceExtraChartsEl.classList.toggle("is-hidden", !expanded);
+      performanceExtraChartsEl.setAttribute("aria-hidden", expanded ? "false" : "true");
+    }
+    if (performanceExtraToggleBtnEl) {
+      performanceExtraToggleBtnEl.textContent = expanded ? "Collapse view" : "Expand view";
+      performanceExtraToggleBtnEl.setAttribute("aria-expanded", expanded ? "true" : "false");
+      performanceExtraToggleBtnEl.setAttribute("title", expanded ? "Collapse analytics" : "Expand analytics");
+    }
+    if (!expanded) hidePnlHeatmapHoverCard();
+    requestAnimationFrame(() => {
+      syncPerformanceTileHeights();
+      if (expanded) renderPnlHeatmap(currentRangeKey);
+      resizeVisiblePopupCharts();
+    });
   }
 
   function getDisplayCurrencyMeta(value) {
@@ -9677,11 +9769,11 @@
   }
 
   function getOrdersColspan() {
-    return window.matchMedia("(max-width: 600px)").matches ? 4 : 8;
+    return window.matchMedia("(max-width: 600px)").matches ? 4 : 7;
   }
 
   function getFillsColspan() {
-    return window.matchMedia("(max-width: 600px)").matches ? 4 : 7;
+    return window.matchMedia("(max-width: 600px)").matches ? 4 : 6;
   }
 
   function getPositionsSortDefaultDir(key) {
@@ -10727,10 +10819,15 @@
 
   function formatSpotIdHtml(rawId) {
     const key = String(rawId ?? "");
-    if (!key.startsWith("@")) return key;
+    if (!key.startsWith("@")) {
+      if (key.length > 6) {
+        return `<span class="order-id-compact" title="${xmlEscape(key)}">***${xmlEscape(key.slice(-3))}</span>`;
+      }
+      return xmlEscape(key);
+    }
     const meta = spotIdMetaMap.get(key);
-    if (!meta?.base) return key;
-    return `<span class="spot-id">${meta.base}</span> <span class="dex-tag spot-tag">spot</span>`;
+    if (!meta?.base) return xmlEscape(key);
+    return `<span class="spot-id">${xmlEscape(meta.base)}</span> <span class="dex-tag spot-tag">spot</span>`;
   }
 
   function resolveSpotDisplay(rawName) {
@@ -11204,6 +11301,7 @@
     const { dex, base } = splitDexCoin(cleaned);
     if (dex) return `${dex.toLowerCase()}:${String(base || "").toUpperCase()}`;
     const upper = cleaned.toUpperCase();
+    if (upper === "EUR") return "xyz:EUR";
     if (upper === "USA500") return "cash:USA500";
     return upper;
   }
@@ -11248,7 +11346,21 @@
     return trackedFooterCoins.find((coin) => getFooterBase(coin) === normBase) || null;
   }
 
+  function getSyntheticFooterUsdPrice(raw) {
+    const base = getFooterBase(raw);
+    if (base === "EUR") {
+      if (!(Number.isFinite(footerEurUsdRate) && footerEurUsdRate > 0)) {
+        ensureFooterEurUsdRate();
+        return undefined;
+      }
+      return footerEurUsdRate;
+    }
+    return undefined;
+  }
+
   function getLivePriceForCoin(raw) {
+    const synthetic = getSyntheticFooterUsdPrice(raw);
+    if (Number.isFinite(synthetic)) return synthetic;
     const { dex, base } = splitDexCoin(raw);
     const candidates = [
       raw,
@@ -14210,7 +14322,6 @@
       const wallet = order.wallet || primaryWallet;
       const forceSpot = entryMatchesMarketType(order, "spot");
       const orderIdHtml = formatSpotIdHtml(order.oid);
-      const orderType = getOrderTypeLabel(order);
       const triggerCondition = formatTriggerConditionLabel(getTriggerCondition(order));
       const limitPriceDisplay = fmtLimitPrice(order.limitPx) ?? "";
       const sizeAbs = Math.abs(Number(order.sz ?? 0));
@@ -14242,7 +14353,6 @@
               ${triggerCondition ? `<span class="notional-sub">Trigger: ${triggerCondition}</span>` : ""}
             </div>
           </td>
-          <td class="desktop-only"><span class="order-type">${orderType}</span></td>
           <td class="mobile-only money">${limitPriceDisplay}</td>
         </tr>
       `;
@@ -14303,7 +14413,6 @@
       const wallet = o.wallet || primaryWallet;
       const forceSpot = entryMatchesMarketType(o, "spot");
       const orderIdHtml = formatSpotIdHtml(o.oid);
-      const orderType = getOrderTypeLabel(o);
       const triggerCondition = formatTriggerConditionLabel(getTriggerCondition(o));
       const triggerPxRaw = o?.triggerPx ?? o?.triggerPrice ?? o?.trigger_price;
       const triggerPxValue = Number(triggerPxRaw);
@@ -14344,7 +14453,6 @@
               }
             </div>
           </td>
-          <td class="desktop-only"><span class="order-type">${orderType}</span></td>
           <td class="mobile-only money">${limitPriceDisplay}</td>
         </tr>
       `;
@@ -14393,7 +14501,6 @@
           Number.isFinite(sizeAbs) && Number.isFinite(pxVal) ? sizeAbs * pxVal : NaN;
         const signedNotional = side === "S" ? -notionalVal : notionalVal;
         const notionalDisplay = Number.isFinite(signedNotional) ? formatSignedDollar(signedNotional) : "";
-        const orderType = getOrderTypeLabel(fill);
         const typeMeta = getFillMetaLabel(fill);
         const feeLabel = getFillFeeLabel(fill);
         const liquidityLabel = getFillLiquidityLabel(fill);
@@ -14416,15 +14523,11 @@
           <td class="money">
             <div class="price-stack">
               <span>${fmtPrice(fill.px) ?? ""}</span>
-              ${feeLabel ? `<span class="notional-sub">Fee: ${feeLabel}</span>` : ""}
-            </div>
-          </td>
-          <td class="desktop-only">
-            <div class="price-stack">
-              ${orderType && orderType !== "–" ? `<span class="order-type">${orderType}</span>` : ""}
               ${
-                [typeMeta, liquidityLabel, statusLabel].filter(Boolean).length
-                  ? `<span class="notional-sub">${[typeMeta, liquidityLabel, statusLabel].filter(Boolean).join(" · ")}</span>`
+                [feeLabel ? `Fee: ${feeLabel}` : "", typeMeta, liquidityLabel, statusLabel]
+                  .filter(Boolean)
+                  .length
+                  ? `<span class="notional-sub">${[feeLabel ? `Fee: ${feeLabel}` : "", typeMeta, liquidityLabel, statusLabel].filter(Boolean).join(" · ")}</span>`
                   : ""
               }
             </div>
@@ -18140,18 +18243,19 @@
       const magnitude = Math.pow(10, Math.floor(Math.log10(safe)));
       const normalized = safe / magnitude;
       const niceBase = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
-      const step = niceBase * magnitude;
+      const step = Math.max(1, Math.round(niceBase * magnitude));
       return Number.isFinite(step) && step > 0 ? step : 1;
     };
 
-    const formatBucketMoney = (value, decimals) => {
+    const formatBucketMoney = (value) => {
       const abs = Math.abs(Number(value) || 0);
-      if (abs >= 10000) return fmtMoneyCompact(value, Math.max(0, Math.min(1, decimals)));
-      return fmtMoney(value, Math.max(0, Math.min(2, decimals)));
+      const roundedValue = Math.round(Number(value) || 0);
+      if (abs >= 10000) return fmtMoneyCompact(roundedValue, 0);
+      return fmtMoney(roundedValue, 0);
     };
 
-    const formatRangeLabel = (minValue, maxValue, decimals) =>
-      `${formatBucketMoney(minValue, decimals)} to ${formatBucketMoney(maxValue, decimals)}`;
+    const formatRangeLabel = (minValue, maxValue) =>
+      `${formatBucketMoney(minValue)} to ${formatBucketMoney(maxValue)}`;
 
     const min = pnls[0];
     const max = pnls[pnls.length - 1];
@@ -18214,12 +18318,11 @@
     if (firstFilledIndex < 0 || lastFilledIndex < firstFilledIndex) return null;
 
     const visibleBins = bins.slice(firstFilledIndex, lastFilledIndex + 1);
-    const labelDecimals = step >= 100 ? 0 : step >= 10 ? 1 : step >= 1 ? 2 : 3;
     return {
       labels: visibleBins.map((bin) => {
-        if (bin.overflow === "lower") return `< ${formatBucketMoney(bin.max, labelDecimals)}`;
-        if (bin.overflow === "upper") return `> ${formatBucketMoney(bin.min, labelDecimals)}`;
-        return formatRangeLabel(bin.min, bin.max, labelDecimals);
+        if (bin.overflow === "lower") return `< ${formatBucketMoney(bin.max)}`;
+        if (bin.overflow === "upper") return `> ${formatBucketMoney(bin.min)}`;
+        return formatRangeLabel(bin.min, bin.max);
       }),
       counts: visibleBins.map((bin) => bin.count),
       colors: visibleBins.map((bin) => {
@@ -18359,8 +18462,11 @@
     cancelAnimationFrame(performanceTileHeightRaf);
     performanceTileHeightRaf = requestAnimationFrame(() => {
       if (window.matchMedia("(max-width: 1180px)").matches) {
-        performanceRightStackEl.style.removeProperty("--right-performance-top-height");
-        performanceRightStackEl.style.removeProperty("--right-performance-bottom-height");
+        Array.from(performanceRightStackEl.children).forEach((tile) => {
+          if (tile instanceof HTMLElement) tile.style.removeProperty("height");
+        });
+        const extraDistributionTile = performanceExtraChartsEl?.querySelector('[data-tile-id="distribution"]');
+        if (extraDistributionTile instanceof HTMLElement) extraDistributionTile.style.removeProperty("height");
         cancelAnimationFrame(performanceTileResizeRaf);
         performanceTileResizeRaf = requestAnimationFrame(() => {
           Object.values(portfolioCharts).forEach((chart) => chart?.resize?.());
@@ -18369,18 +18475,33 @@
       }
 
       const pnlTile = performanceLeftStackEl.querySelector('[data-tile-id="pnl"]');
-      const activityTile = performanceLeftStackEl.querySelector('[data-tile-id="activity"]');
-      if (!pnlTile || !activityTile) return;
-
+      if (!(pnlTile instanceof HTMLElement)) return;
       const pnlHeight = pnlTile.getBoundingClientRect().height;
-      const activityHeight = activityTile.getBoundingClientRect().height;
       const gapValue = parseFloat(getComputedStyle(performanceRightStackEl).rowGap || getComputedStyle(performanceRightStackEl).gap || "0") || 0;
-      const topHeight = (pnlHeight - gapValue) / 2;
-      const bottomHeight = activityHeight;
-      if (!Number.isFinite(topHeight) || topHeight <= 0 || !Number.isFinite(bottomHeight) || bottomHeight <= 0) return;
+      const rightTiles = Array.from(performanceRightStackEl.children).filter((tile) => {
+        if (!(tile instanceof HTMLElement)) return false;
+        return !tile.classList.contains("is-hidden") && !tile.hidden;
+      });
+      const rightCount = Math.max(1, rightTiles.length);
+      const rightHeight = (pnlHeight - (gapValue * Math.max(0, rightCount - 1))) / rightCount;
+      if (Number.isFinite(rightHeight) && rightHeight > 0) {
+        rightTiles.forEach((tile) => {
+          tile.style.height = `${rightHeight}px`;
+        });
+      }
 
-      performanceRightStackEl.style.setProperty("--right-performance-top-height", `${topHeight}px`);
-      performanceRightStackEl.style.setProperty("--right-performance-bottom-height", `${bottomHeight}px`);
+      const activityTile = performanceExtraChartsEl?.querySelector('[data-tile-id="activity"]');
+      const distributionTile = performanceExtraChartsEl?.querySelector('[data-tile-id="distribution"]');
+      if (performanceExtraChartsEl && !performanceExtraChartsEl.classList.contains("is-hidden") &&
+          activityTile instanceof HTMLElement && distributionTile instanceof HTMLElement) {
+        const activityHeight = activityTile.getBoundingClientRect().height;
+        if (Number.isFinite(activityHeight) && activityHeight > 0) {
+          distributionTile.style.height = `${activityHeight}px`;
+        }
+      } else if (distributionTile instanceof HTMLElement) {
+        distributionTile.style.removeProperty("height");
+      }
+
       cancelAnimationFrame(performanceTileResizeRaf);
       performanceTileResizeRaf = requestAnimationFrame(() => {
         Object.values(portfolioCharts).forEach((chart) => chart?.resize?.());
@@ -20696,7 +20817,7 @@
     updateTabSwitchIndicator(modeTabsEl);
     updateTabSwitchIndicator(modeTabsHistoryEl);
     syncPerformanceTileHeights();
-    if (!pnlHeatmapWrapEl?.classList.contains("is-hidden")) {
+    if (!pnlHeatmapWrapEl?.classList.contains("is-hidden") && !performanceExtraChartsEl?.classList.contains("is-hidden")) {
       renderPnlHeatmap(currentRangeKey);
     }
   });
@@ -20707,6 +20828,7 @@
     });
     performanceLayoutObserver.observe(performanceLeftStackEl);
     if (performanceRightStackEl) performanceLayoutObserver.observe(performanceRightStackEl);
+    if (performanceExtraChartsEl) performanceLayoutObserver.observe(performanceExtraChartsEl);
   }
 
   if (walletInputsEl) {
@@ -21286,6 +21408,12 @@
     });
   });
 
+  if (performanceExtraToggleBtnEl) {
+    performanceExtraToggleBtnEl.addEventListener("click", () => {
+      setPerformanceExtraExpanded(!performanceExtraExpanded);
+    });
+  }
+
   equityViewButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const mode = btn.dataset.equityView === "drawdown" ? "drawdown" : "line";
@@ -21339,6 +21467,7 @@
   }, true);
 
   initPerformanceTileLayout();
+  setPerformanceExtraExpanded(performanceExtraExpanded, { force: true });
   setPrimaryPerformanceMode(primaryPerformanceMode);
   setRiskPerformanceMode(riskPerformanceMode);
   setActivityViewMode(activityViewMode);
