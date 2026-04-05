@@ -5769,47 +5769,15 @@
         if (mainLayout) new ResizeObserver(() => { syncTopSplitters(); }).observe(mainLayout);
 
         chart.subscribeCrosshairMove(param => {
-            const data = getSortedCandleData(1);
-            const hoverTime = Number(param?.time);
-            const bar = Number.isFinite(hoverTime)
-                ? data.find(entry => Number(entry.time) === hoverTime)
-                : data[data.length - 1] || param?.seriesData?.get(candles);
-            if (bar) {
-                updateLegendMetrics(bar, {
-                    open: legO,
-                    high: legH,
-                    low: legL,
-                    close: legC,
-                    change: legPct,
-                    range: legRange
-                });
-                syncStudyLegend(1, bar.time);
-            }
-            if (Number.isFinite(hoverTime)) updateSharedCrosshair(1, hoverTime);
+            const effectiveTime = handleChartLegendHover(1, param, chartMainPane1);
+            if (Number.isFinite(effectiveTime)) updateSharedCrosshair(1, effectiveTime);
             else hideSharedCrosshair(1);
         });
 
         lowerChart.subscribeCrosshairMove(param => {
-            const data = getSortedCandleData(1);
-            const hoverTime = Number(param?.time);
-            if (Number.isFinite(hoverTime)) {
-                syncStudyLegend(1, hoverTime);
-                updateSharedCrosshair(1, hoverTime);
-            } else {
-                const last = data[data.length - 1];
-                if (last) {
-                    updateLegendMetrics(last, {
-                        open: legO,
-                        high: legH,
-                        low: legL,
-                        close: legC,
-                        change: legPct,
-                        range: legRange
-                    });
-                }
-                syncStudyLegend(1);
-                hideSharedCrosshair(1);
-            }
+            const effectiveTime = handleChartLegendHover(1, param, chartLowerPane1);
+            if (Number.isFinite(effectiveTime)) updateSharedCrosshair(1, effectiveTime);
+            else hideSharedCrosshair(1);
         });
 
         // ── Chart 2 Setup ──────────────────────────────────────────
@@ -5829,47 +5797,15 @@
         new ResizeObserver(() => { resizeChartBundle(2, chartSeries2, chartMainPane2, chartLowerPane2); }).observe(chartWrap2);
 
         chart2.subscribeCrosshairMove(param => {
-            const data = getSortedCandleData(2);
-            const hoverTime = Number(param?.time);
-            const bar = Number.isFinite(hoverTime)
-                ? data.find(entry => Number(entry.time) === hoverTime)
-                : data[data.length - 1] || param?.seriesData?.get(candles2);
-            if (bar) {
-                updateLegendMetrics(bar, {
-                    open: legO2,
-                    high: legH2,
-                    low: legL2,
-                    close: legC2,
-                    change: legPct2,
-                    range: legRange2
-                });
-                syncStudyLegend(2, bar.time);
-            }
-            if (Number.isFinite(hoverTime)) updateSharedCrosshair(2, hoverTime);
+            const effectiveTime = handleChartLegendHover(2, param, chartMainPane2);
+            if (Number.isFinite(effectiveTime)) updateSharedCrosshair(2, effectiveTime);
             else hideSharedCrosshair(2);
         });
 
         lowerChart2.subscribeCrosshairMove(param => {
-            const data = getSortedCandleData(2);
-            const hoverTime = Number(param?.time);
-            if (Number.isFinite(hoverTime)) {
-                syncStudyLegend(2, hoverTime);
-                updateSharedCrosshair(2, hoverTime);
-            } else {
-                const last = data[data.length - 1];
-                if (last) {
-                    updateLegendMetrics(last, {
-                        open: legO2,
-                        high: legH2,
-                        low: legL2,
-                        close: legC2,
-                        change: legPct2,
-                        range: legRange2
-                    });
-                }
-                syncStudyLegend(2);
-                hideSharedCrosshair(2);
-            }
+            const effectiveTime = handleChartLegendHover(2, param, chartLowerPane2);
+            if (Number.isFinite(effectiveTime)) updateSharedCrosshair(2, effectiveTime);
+            else hideSharedCrosshair(2);
         });
 
         const paneSyncState = { 1: false, 2: false };
@@ -5986,6 +5922,10 @@
         let oldestTs2 = null, isLoadingHistory2 = false;
         let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
         let candleFetchSeq2 = 0;
+        const legendHoverState = {
+            1: { active: false, time: null },
+            2: { active: false, time: null }
+        };
 
         function getSeriesBundle(target) {
             return target === 2 ? chartSeries2 : chartSeries1;
@@ -6053,6 +5993,12 @@
             return [...getCandleStore(target).volMap.values()].sort((a, b) => a.time - b.time);
         }
 
+        function clearLegendHoverState(target) {
+            const safeTarget = target === 2 ? 2 : 1;
+            legendHoverState[safeTarget].active = false;
+            legendHoverState[safeTarget].time = null;
+        }
+
         function findCandleBarAtOrBefore(target, time) {
             const data = getSortedCandleData(target);
             if (!data.length) return null;
@@ -6063,6 +6009,87 @@
                 if (Number(bar?.time) <= targetTime) return bar || null;
             }
             return data[0] || null;
+        }
+
+        function isCrosshairPointInsidePane(param, paneEl) {
+            const point = param?.point;
+            if (!point || !paneEl) return false;
+            const width = Number(paneEl.clientWidth) || 0;
+            const height = Number(paneEl.clientHeight) || 0;
+            return Number.isFinite(point.x) &&
+                Number.isFinite(point.y) &&
+                point.x >= 0 &&
+                point.y >= 0 &&
+                point.x <= width &&
+                point.y <= height;
+        }
+
+        function updateLegendForTarget(target, bar) {
+            const refs = getLegendRefs(target);
+            if (!refs || !bar) return;
+            updateLegendMetrics(bar, {
+                open: refs.open,
+                high: refs.high,
+                low: refs.low,
+                close: refs.close,
+                change: refs.change,
+                range: refs.range
+            });
+            syncStudyLegend(target, bar.time);
+        }
+
+        function refreshLegend(target) {
+            const safeTarget = target === 2 ? 2 : 1;
+            const hoverState = legendHoverState[safeTarget];
+            let bar = hoverState?.active && Number.isFinite(hoverState?.time)
+                ? findCandleBarAtOrBefore(safeTarget, hoverState.time)
+                : null;
+            if (!bar) {
+                if (hoverState) {
+                    hoverState.active = false;
+                    hoverState.time = null;
+                }
+                bar = findCandleBarAtOrBefore(safeTarget, null);
+            }
+            if (bar) {
+                updateLegendForTarget(safeTarget, bar);
+                return bar;
+            }
+            syncStudyLegend(safeTarget);
+            return null;
+        }
+
+        function handleChartLegendHover(target, param, paneEl) {
+            const safeTarget = target === 2 ? 2 : 1;
+            const hoverState = legendHoverState[safeTarget];
+            const hoverTime = normalizeChartTime(param?.time);
+            const hoveredBar = Number.isFinite(hoverTime)
+                ? findCandleBarAtOrBefore(safeTarget, hoverTime)
+                : null;
+            const insidePane = isCrosshairPointInsidePane(param, paneEl);
+
+            if (hoveredBar) {
+                hoverState.active = true;
+                hoverState.time = Number(hoveredBar.time);
+                updateLegendForTarget(safeTarget, hoveredBar);
+                return Number(hoveredBar.time);
+            }
+
+            if (insidePane) {
+                hoverState.active = true;
+                if (Number.isFinite(hoverState.time)) {
+                    const lastHoveredBar = findCandleBarAtOrBefore(safeTarget, hoverState.time);
+                    if (lastHoveredBar) {
+                        updateLegendForTarget(safeTarget, lastHoveredBar);
+                        return Number(lastHoveredBar.time);
+                    }
+                }
+                return null;
+            }
+
+            clearLegendHoverState(safeTarget);
+            refreshLegend(safeTarget);
+            return null;
         }
 
         const extremaFrameState = { 1: 0, 2: 0 };
@@ -7261,18 +7288,8 @@
                 candles.setData(cvArr); volSeries.setData([...volMap.values()].sort((a,b)=>a.time-b.time));
                 syncDerivedSeries(1);
                 applyDefaultZoom(chart, cvArr.length, S.tf);
-                if (cvArr.length) {
-                    const last = cvArr[cvArr.length - 1];
-                    updateLegendMetrics(last, {
-                        open: legO,
-                        high: legH,
-                        low: legL,
-                        close: legC,
-                        change: legPct,
-                        range: legRange
-                    });
-                    syncStudyLegend(1, last.time);
-                }
+                clearLegendHoverState(1);
+                refreshLegend(1);
                 scheduleReturnToLiveUpdate(1);
                 scheduleDrawingRender(1);
             } catch(e) {} finally {
@@ -7303,18 +7320,8 @@
                 candles2.setData(cvArr); volSeries2.setData([...volMap2.values()].sort((a,b)=>a.time-b.time));
                 syncDerivedSeries(2);
                 applyDefaultZoom(chart2, cvArr.length, S.tf);
-                if (cvArr.length) {
-                    const last = cvArr[cvArr.length - 1];
-                    updateLegendMetrics(last, {
-                        open: legO2,
-                        high: legH2,
-                        low: legL2,
-                        close: legC2,
-                        change: legPct2,
-                        range: legRange2
-                    });
-                    syncStudyLegend(2, last.time);
-                }
+                clearLegendHoverState(2);
+                refreshLegend(2);
                 scheduleReturnToLiveUpdate(2);
                 scheduleDrawingRender(2);
             } catch(e) {} finally {
@@ -7657,15 +7664,7 @@
             };
             volMap.set(nextBar.time, nextVol);
             volSeries.update(nextVol);
-            updateLegendMetrics(nextBar, {
-                open: legO,
-                high: legH,
-                low: legL,
-                close: legC,
-                change: legPct,
-                range: legRange
-            });
-            syncStudyLegend(1, nextBar.time);
+            refreshLegend(1);
             scheduleVisibleExtremaUpdate(1);
         }
 
@@ -7796,6 +7795,7 @@
             candleMap.clear();
             volMap.clear();
             oldestTs = null;
+            clearLegendHoverState(1);
             candles.setData([]);
             lineSeries.setData([]);
             volSeries.setData([]);
@@ -7803,6 +7803,7 @@
             resetChartLegend(1);
             scheduleVisibleExtremaUpdate(1);
             scheduleReturnToLiveUpdate(1);
+            hideSharedCrosshair(1);
         }
 
         function resetSecondaryChartForCoinChange() {
@@ -7810,6 +7811,7 @@
             candleMap2.clear();
             volMap2.clear();
             oldestTs2 = null;
+            clearLegendHoverState(2);
             candles2.setData([]);
             lineSeries2.setData([]);
             volSeries2.setData([]);
@@ -7817,6 +7819,7 @@
             resetChartLegend(2);
             scheduleVisibleExtremaUpdate(2);
             scheduleReturnToLiveUpdate(2);
+            hideSharedCrosshair(2);
         }
 
         function ingestTrades(rawTrades) {
@@ -7934,15 +7937,7 @@
                                 volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
                                 volMap.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
                                 syncDerivedSeries(1);
-                                updateLegendMetrics(bar, {
-                                    open: legO,
-                                    high: legH,
-                                    low: legL,
-                                    close: legC,
-                                    change: legPct,
-                                    range: legRange
-                                });
-                                syncStudyLegend(1, bar.time);
+                                refreshLegend(1);
                                 scheduleVisibleExtremaUpdate(1);
                             }
                             if (S.chart2Active && coinStr === S.coin2) {
@@ -7953,15 +7948,7 @@
                                 volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
                                 volMap2.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
                                 syncDerivedSeries(2);
-                                updateLegendMetrics(bar, {
-                                    open: legO2,
-                                    high: legH2,
-                                    low: legL2,
-                                    close: legC2,
-                                    change: legPct2,
-                                    range: legRange2
-                                });
-                                syncStudyLegend(2, bar.time);
+                                refreshLegend(2);
                                 scheduleVisibleExtremaUpdate(2);
                             }
                         }
