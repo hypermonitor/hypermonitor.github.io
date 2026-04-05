@@ -3733,7 +3733,6 @@
             <span class="price-item" data-coin="xyz:SILVER"><img class="coinIcon coin-info-trigger" src="images/coins/SILVER.svg" alt="SILVER" data-logo-key="xyz:SILVER" data-coin-key="xyz:SILVER" data-coin-label="SILVER" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="cash:USA500"><img class="coinIcon coin-info-trigger" src="images/coins/USA500.png" alt="USA500" data-logo-key="cash:USA500" data-coin-key="cash:USA500" data-coin-label="USA500" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
             <span class="price-item" data-coin="xyz:NVDA"><img class="coinIcon coin-info-trigger" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJOVkRBIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iIzc2YjkwMCIvPgogIDxwYXRoIGQ9Ik0xNCAzMS43YzUuNC04LjQgMTIuOS0xMy4xIDIyLjUtMTMuMSA2LjMgMCAxMS43IDIuMSAxNS41IDYtMy44LTEuOS03LjYtMi44LTExLjctMi44LTcuNSAwLTEzLjkgMy4yLTE5LjIgOS44IDMuMiA0LjMgNy40IDYuNCAxMi40IDYuNCA0LjcgMCA4LjYtMi4xIDExLjMtNi4zLTIuMy0xLjktNC45LTIuOS03LjctMi45LTMuOCAwLTYuOSAxLjgtOS4yIDUuMiAxLjQtNSA1LjctOC4zIDEwLjctOC4zIDMuOCAwIDcuMSAxLjMgOS45IDMuOGwuOS44LS41IDFjLTMuOSA3LTkuOSAxMC42LTE3LjcgMTAuNi03LjIgMC0xMy4xLTMuNC0xOC0xMGwtLjctLjl6IiBmaWxsPSIjZmZmIi8+CiAgPGNpcmNsZSBjeD0iMzguNSIgY3k9IjMyLjIiIHI9IjUuNSIgZmlsbD0iIzc2YjkwMCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIuOCIvPgo8L3N2Zz4K" alt="NVDA" data-logo-key="xyz:NVDA" data-coin-key="xyz:NVDA" data-coin-label="NVDA" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
-            <span class="price-item" data-coin="xyz:MSTR"><img class="coinIcon coin-info-trigger" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJNU1RSIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iI2ZmOGExYyIvPgogIDxwYXRoIGQ9Ik0xMyA0N1YxN2g4LjFMMzIgMjkuNiA0Mi45IDE3SDUxdjMwaC04VjI4LjhMMzIgNDEgMjEgMjguOFY0N3oiIGZpbGw9IiNmZmYiLz4KICA8cGF0aCBkPSJNNDYgMTRoNnY4aC02eiIgZmlsbD0iIzJiMjExOSIgb3BhY2l0eT0iLjkiLz4KPC9zdmc+Cg==" alt="MSTR" data-logo-key="xyz:MSTR" data-coin-key="xyz:MSTR" data-coin-label="MSTR" loading="lazy" referrerpolicy="no-referrer" /><span class="coin-price">$--</span><span class="coin-change"></span></span>
           </div>
           <div class="price-list clone" id="priceListClone" aria-hidden="true"></div>
           <div class="price-list clone" id="priceListClone2" aria-hidden="true"></div>
@@ -4075,7 +4074,8 @@
     const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
     const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
     const TRACKER_FOOTER_LEGACY_DEFAULT_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
-    const TRACKER_FOOTER_DEFAULT_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:EUR", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
+    const TRACKER_FOOTER_PREVIOUS_DEFAULT_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:EUR", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
+    const TRACKER_FOOTER_DEFAULT_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:EUR", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA"];
     const NON_CRYPTO_PREFIXES = ["xyz", "flx", "hyna", "km", "vntl", "cash"];
     const INLINE_BTC_LOGO = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20shape-rendering%3D%22geometricPrecision%22%20text-rendering%3D%22geometricPrecision%22%20image-rendering%3D%22optimizeQuality%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20viewBox%3D%220%200%204091.27%204091.73%22%3E%3Cg%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill%3D%22%23F7931A%22%20d%3D%22M4030.06%202540.77C3756.82%203636.78%202646.74%204303.79%201550.6%204030.48%20454.92%203757.24-212.09%202647.09%2061.27%201551.17c273.12-1096.13%201383.2-1763.19%202479-1489.95C3636.33%20334.46%204303.3%201444.73%204030.03%202540.79l.02-.02z%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M2947.77%201754.38c40.72-272.26-166.56-418.61-450-516.24l91.95-368.8-224.5-55.94-89.51%20359.09c-59.02-14.72-119.63-28.59-179.87-42.34L2186%20768.69l-224.36-55.94-92%20368.68c-48.84-11.12-96.81-22.11-143.35-33.69l.26-1.16-309.59-77.31-59.72%20239.78s166.56%2038.18%20163.05%2040.53c90.91%2022.69%20107.35%2082.87%20104.62%20130.57l-104.74%20420.15c6.26%201.59%2014.38%203.89%2023.34%207.49-7.49-1.86-15.46-3.89-23.73-5.87l-146.81%20588.57c-11.11%2027.62-39.31%2069.07-102.87%2053.33%202.25%203.26-163.17-40.72-163.17-40.72l-111.46%20256.98%20292.15%2072.83c54.35%2013.63%20107.61%2027.89%20160.06%2041.3l-92.9%20373.03%20224.24%2055.94%2092-369.07c61.26%2016.63%20120.71%2031.97%20178.91%2046.43l-91.69%20367.33%20224.51%2055.94%2092.89-372.33c382.82%2072.45%20670.67%2043.24%20791.83-303.02%2097.63-278.78-4.86-439.58-206.26-544.44%20146.69-33.83%20257.18-130.31%20286.64-329.61l-.07-.05zm-512.93%20719.26c-69.38%20278.78-538.76%20128.08-690.94%2090.29l123.28-494.2c152.17%2037.99%20640.17%20113.17%20567.67%20403.91zm69.43-723.3c-63.29%20253.58-453.96%20124.75-580.69%2093.16l111.77-448.21c126.73%2031.59%20534.85%2090.55%20468.94%20355.05h-.02z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E";
     const INLINE_ETH_LOGO = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222500%22%20height%3D%222500%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23627EEA%22%2F%3E%3Cg%20fill%3D%22%23FFF%22%20fill-rule%3D%22nonzero%22%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%204v8.87l7.497%203.35z%22%2F%3E%3Cpath%20d%3D%22M16.498%204L9%2016.22l7.498-3.35z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M16.498%2021.968v6.027L24%2017.616z%22%2F%3E%3Cpath%20d%3D%22M16.498%2027.995v-6.028L9%2017.616z%22%2F%3E%3Cpath%20fill-opacity%3D%22.2%22%20d%3D%22M16.498%2020.573l7.497-4.353-7.497-3.348z%22%2F%3E%3Cpath%20fill-opacity%3D%22.602%22%20d%3D%22M9%2016.22l7.498%204.353v-7.701z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E";
@@ -4150,6 +4150,7 @@
     let footerInitTimer = 0;
     let footerDeferredInitTimer = 0;
     let footerInitAwaitingPrimaryAsset = false;
+    let footerInitStartedAt = 0;
     let footerChangeEnabled = true;
     let footerChangeRange = "1d";
     let footerChangeRangeKey = "1d";
@@ -5106,7 +5107,10 @@
             const matchesLegacyDefaults =
               normalized.length === TRACKER_FOOTER_LEGACY_DEFAULT_COINS.length &&
               normalized.every((coin, idx) => coin === TRACKER_FOOTER_LEGACY_DEFAULT_COINS[idx]);
-            if (matchesLegacyDefaults) {
+            const matchesPreviousDefaults =
+              normalized.length === TRACKER_FOOTER_PREVIOUS_DEFAULT_COINS.length &&
+              normalized.every((coin, idx) => coin === TRACKER_FOOTER_PREVIOUS_DEFAULT_COINS[idx]);
+            if (matchesLegacyDefaults || matchesPreviousDefaults) {
               trackedFooterCoins = TRACKER_FOOTER_DEFAULT_COINS.slice();
               saveFooterCoins();
             }
@@ -5908,6 +5912,31 @@
         return (last - prev) / prev;
       }
 
+      function resolveFooterChangeToFlat(raw) {
+        const coin = normalizeFooterChangeRefKey(raw);
+        if (!coin) return false;
+        const live = getLivePriceForCoin(coin);
+        if (!Number.isFinite(live) || live === 0) return false;
+        footerChangeRefs.set(coin, { prev: live, last: live });
+        footerChangePcts.set(coin, 0);
+        footerChangeProvisional.delete(coin);
+        const base = getFooterBase(coin);
+        const baseKey = normalizeFooterChangeRefKey(base);
+        if (baseKey && !String(coin).includes(":")) {
+          footerChangeRefs.set(baseKey, { prev: live, last: live });
+          footerChangePcts.set(baseKey, 0);
+          footerChangeProvisional.delete(baseKey);
+        }
+        return true;
+      }
+
+      function finalizeUnresolvedFooterChanges(coins) {
+        if (!Array.isArray(coins) || !coins.length) return;
+        coins.forEach((coin) => {
+          resolveFooterChangeToFlat(coin);
+        });
+      }
+
       async function fetchChangeFromCandles(rawCoin, rangeKey) {
         const coin = String(rawCoin || "").trim();
         const range = FOOTER_CHANGE_RANGES[rangeKey] || FOOTER_CHANGE_RANGES["1d"];
@@ -6057,9 +6086,24 @@
             })
           );
 
+          const stillUnresolved = trackedFooterCoins
+            .map((c) => normalizeFooterCoinValue(c))
+            .filter(Boolean)
+            .filter((coin) => {
+              const changeKey = normalizeFooterChangeRefKey(coin);
+              return !footerChangeRefs.has(changeKey) || footerChangeProvisional.has(changeKey);
+            });
+
+          finalizeUnresolvedFooterChanges(stillUnresolved);
+
           renderFooterPrices();
         } catch (err) {
           console.warn("Footer 24h change fetch failed", err);
+          const fallbackCoins = trackedFooterCoins
+            .map((c) => normalizeFooterCoinValue(c))
+            .filter(Boolean);
+          finalizeUnresolvedFooterChanges(fallbackCoins);
+          renderFooterPrices();
         }
       }
 
@@ -6644,18 +6688,11 @@
         const desired = trackedFooterCoins.map((c) => normalizeFooterCoinValue(c)).filter(Boolean);
         let allFooterPricesReady = desired.length > 0;
         let allFooterChangesReady = !footerChangeEnabled || desired.length > 0;
+        let readyVisibleCount = 0;
 
         existing.forEach((el, coin) => {
           if (!desired.includes(coin)) el.remove();
         });
-
-        const currentOrder = Array.from(priceListEl.children)
-          .filter((child) => child.classList?.contains("price-item"))
-          .map((child) => child.dataset.coin)
-          .filter(Boolean);
-        const orderNeedsSync =
-          currentOrder.length !== desired.length ||
-          currentOrder.some((coin, idx) => coin !== desired[idx]);
 
         desired.forEach((coin) => {
           let item = existing.get(coin);
@@ -6679,13 +6716,6 @@
           const nextIconEl = template.content.firstElementChild;
           if (nextIconEl instanceof HTMLElement) syncFooterIcon(item, nextIconEl);
         });
-
-        if (orderNeedsSync) {
-          desired.forEach((coin) => {
-            const item = existing.get(coin);
-            if (item) priceListEl.appendChild(item);
-          });
-        }
 
         desired.forEach((coin) => {
           const item = priceListEl.querySelector(`.price-item[data-coin="${coin}"]`);
@@ -6766,27 +6796,66 @@
             if (!footerChangeEnabled) {
               changeEl.textContent = "";
               changeEl.classList.remove("upnl-pos", "upnl-neg", "upnl-flat");
-              return;
-            }
-            const changePct = getFooterChangePct(coin);
-            if (!Number.isFinite(changePct)) allFooterChangesReady = false;
-            if (Number.isFinite(changePct)) {
-              const isFlatChange = Math.abs(changePct) < 0.00005;
-              const triangle = isFlatChange ? "■" : changePct > 0 ? "▲" : "▼";
-              const pctText = formatPercent(Math.abs(changePct), 2);
-              changeEl.textContent = `${triangle} ${pctText}`;
-              changeEl.classList.toggle("upnl-pos", changePct > 0 && !isFlatChange);
-              changeEl.classList.toggle("upnl-neg", changePct < 0 && !isFlatChange);
-              changeEl.classList.toggle("upnl-flat", isFlatChange);
             } else {
-              changeEl.textContent = "";
-              changeEl.classList.remove("upnl-pos", "upnl-neg", "upnl-flat");
+              const changePct = getFooterChangePct(coin);
+              if (!Number.isFinite(changePct)) allFooterChangesReady = false;
+              if (Number.isFinite(changePct)) {
+                const isFlatChange = Math.abs(changePct) < 0.00005;
+                const triangle = isFlatChange ? "■" : changePct > 0 ? "▲" : "▼";
+                const pctText = formatPercent(Math.abs(changePct), 2);
+                changeEl.textContent = `${triangle} ${pctText}`;
+                changeEl.classList.toggle("upnl-pos", changePct > 0 && !isFlatChange);
+                changeEl.classList.toggle("upnl-neg", changePct < 0 && !isFlatChange);
+                changeEl.classList.toggle("upnl-flat", isFlatChange);
+              } else {
+                changeEl.textContent = "";
+                changeEl.classList.remove("upnl-pos", "upnl-neg", "upnl-flat");
+              }
             }
           }
+
+          const itemPriceReady = Number.isFinite(displayPrice);
+          const itemChangeReady = !footerChangeEnabled || Number.isFinite(getFooterChangePct(coin));
+          const itemReady = itemPriceReady && itemChangeReady;
+          item.hidden = !itemReady;
+          if (itemReady) readyVisibleCount += 1;
         });
 
-        const footerStructureSignature = buildFooterStructureSignature(desired);
-        const structureChanged = syncFooterMarkers(desired, footerStructureSignature);
+        const visibleDesired = desired.filter((coin) => {
+          const item = existing.get(coin);
+          return item instanceof HTMLElement && !item.hidden;
+        });
+
+        const currentOrder = Array.from(priceListEl.children)
+          .filter((child) => child.classList?.contains("price-item") && !child.hidden)
+          .map((child) => child.dataset.coin)
+          .filter(Boolean);
+        const orderNeedsSync =
+          currentOrder.length !== visibleDesired.length ||
+          currentOrder.some((coin, idx) => coin !== visibleDesired[idx]);
+
+        if (orderNeedsSync) {
+          visibleDesired.forEach((coin) => {
+            const item = existing.get(coin);
+            if (item) priceListEl.appendChild(item);
+          });
+        }
+
+        const footerRevealGracePassed =
+          !footerReady &&
+          footerInitStartedAt &&
+          Date.now() - footerInitStartedAt >= 4500 &&
+          readyVisibleCount > 0;
+        const shouldRevealFooter =
+          (allFooterPricesReady && allFooterChangesReady) || footerRevealGracePassed;
+
+        if (!footerReady && readyVisibleCount === 0) {
+          allFooterPricesReady = false;
+          allFooterChangesReady = false;
+        }
+
+        const footerStructureSignature = buildFooterStructureSignature(visibleDesired);
+        const structureChanged = syncFooterMarkers(visibleDesired, footerStructureSignature);
 
         priceListCloneEls.forEach((cloneEl) => {
           const shouldRebuild = cloneEl.dataset.structureSig !== footerStructureSignature;
@@ -6800,6 +6869,7 @@
             Array.from(priceListEl.children).forEach((sourceChild, index) => {
               const cloneChild = cloneEl.children[index];
               if (!(sourceChild instanceof HTMLElement) || !(cloneChild instanceof HTMLElement)) return;
+              cloneChild.hidden = sourceChild.hidden;
               const sourceIcon = sourceChild.querySelector(".coinIcon, .coinFallback");
               if (sourceIcon instanceof HTMLElement) syncFooterIcon(cloneChild, sourceIcon.cloneNode(true));
               const sourcePrice = sourceChild.querySelector(".coin-price");
@@ -6821,7 +6891,7 @@
 
         requestAnimationFrame(() => {
           schedulePriceTickerRollingUpdate(structureChanged);
-          if (!footerReady && priceFooterWrapEl && allFooterPricesReady && allFooterChangesReady) {
+          if (!footerReady && priceFooterWrapEl && shouldRevealFooter) {
             revealFooter(true);
           }
           syncTrackerDocumentTitle();
@@ -6945,7 +7015,7 @@
 
       function updatePriceTickerRolling(force = false) {
         if (!priceFooterWrapEl || !priceListEl || !priceTickerEl || !priceTrackEl) return;
-        const items = priceListEl.querySelectorAll(".price-item");
+        const items = priceListEl.querySelectorAll(".price-item:not([hidden])");
         if (!items.length) {
           if (force || footerTickerMetricsSignature !== "empty") {
             footerTickerMetricsSignature = "empty";
@@ -7336,6 +7406,7 @@
         footerInitTimer = 0;
       }
       footerInitScheduled = false;
+      footerInitStartedAt = Date.now();
 
       footerInitPromise = (async () => {
         loadFooterCoins();
@@ -9549,6 +9620,7 @@
     setCoin(state.coin, { fromPopState: true });
     syncTradeLayout();
     syncWalletUi();
+    scheduleFooterBarInitAfterPrimaryAsset();
 
     ensureHeaderCoinOptions().then(() => {
       updateHeaderSuggestions();

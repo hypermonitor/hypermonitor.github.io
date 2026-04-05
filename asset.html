@@ -1629,10 +1629,8 @@
             position: absolute;
             inset: 0;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 0;
             pointer-events: none;
             opacity: 1;
             transition: opacity 0.18s ease;
@@ -1640,28 +1638,11 @@
         }
 
         .chart-watermark img {
-            width: min(36%, 145px);
-            max-width: 145px;
+            width: min(38%, 176px);
+            max-width: 176px;
             height: auto;
             object-fit: contain;
-            opacity: 0.08;
-        }
-
-        .chart-watermark span {
-            position: relative;
-            top: -20px;
-            font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            font-size: clamp(0.56rem, 1vw, 0.78rem);
-            line-height: 1;
-            text-transform: uppercase;
-            color: rgba(234, 236, 239, 0.14);
-            white-space: nowrap;
-        }
-
-        html.light .chart-watermark span {
-            color: rgba(55, 65, 81, 0.24);
+            opacity: 0.34;
         }
 
         .chart-loading-wrap.is-loading .chart-watermark {
@@ -3282,8 +3263,7 @@
                                     <div id="chart-drawing-palette-grid" class="chart-drawing-palette-grid"></div>
                                 </div>
                                 <div class="chart-watermark" aria-hidden="true">
-                                    <img src="images/logo.png" alt="">
-                                    <span>HYPERMONITOR</span>
+                                    <img src="images/chart-watermark-trading.png" alt="">
                                 </div>
                                 <div id="chart-legend">
                                     <div id="coin-toggle-extra" class="mini-coin-select" onclick="toggleDropdown()">
@@ -3403,8 +3383,7 @@
                                     <span>Current</span>
                                 </button>
                                 <div class="chart-watermark" aria-hidden="true">
-                                    <img src="images/logo.png" alt="">
-                                    <span>HYPERMONITOR</span>
+                                    <img src="images/chart-watermark-trading.png" alt="">
                                 </div>
                                 <div id="chart-legend" style="pointer-events:none; z-index:5;"> <!-- inherit styles -->
                                     <div id="coin-toggle-2" class="mini-coin-select" onclick="toggleDropdown2()">
