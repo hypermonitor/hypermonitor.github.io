@@ -132,6 +132,10 @@
       cursor: pointer;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
     #app {
       width: min(1920px, 100vw);
       height: 100dvh;
@@ -3562,6 +3566,407 @@
         mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
       }
     }
+
+    .mobile-watchlist-panel,
+    .mobile-wallet-panel,
+    .mobile-bottom-nav {
+      display: none;
+    }
+
+    @media (max-width: 720px) {
+      #app {
+        padding: 0 0 calc(84px + env(safe-area-inset-bottom, 0px));
+      }
+
+      .shell-header {
+        margin-bottom: 0;
+        padding: 10px 10px 8px;
+      }
+
+      main {
+        padding: 8px 10px 0;
+      }
+
+      .trade-view-stack {
+        gap: 12px;
+      }
+
+      .trade-view-stack[data-mobile-view="market"] {
+        grid-template-rows: minmax(0, auto);
+        height: auto;
+      }
+
+      .top-frame-panel,
+      .extra-chart-panel,
+      .trade-leaderboard-panel,
+      .mobile-watchlist-panel,
+      .mobile-wallet-panel {
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: var(--panel-strong);
+        overflow: hidden;
+      }
+
+      .top-frame-panel {
+        min-height: clamp(360px, 56svh, 560px);
+        height: clamp(360px, 56svh, 560px);
+      }
+
+      .trade-view-stack[data-mobile-view="market"] > .top-frame-panel {
+        min-height: clamp(420px, calc(100dvh - 220px - env(safe-area-inset-bottom, 0px)), 760px);
+        height: clamp(420px, calc(100dvh - 220px - env(safe-area-inset-bottom, 0px)), 760px);
+      }
+
+      .extra-chart-panel,
+      .extra-chart-panel.is-active {
+        min-height: clamp(260px, 38svh, 380px);
+        height: clamp(260px, 38svh, 380px);
+      }
+
+      .trade-leaderboard-head {
+        min-height: 34px;
+        padding: 0 10px;
+      }
+
+      .trade-leaderboard-head .panel-title {
+        font-size: 0.58rem;
+      }
+
+      .trade-leaderboard-toggle-btn {
+        display: none !important;
+      }
+
+      .mobile-watchlist-panel,
+      .mobile-wallet-panel {
+        display: block;
+      }
+
+      .mobile-section-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 14px;
+      }
+
+      .mobile-section-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .mobile-section-copy {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.45;
+      }
+
+      .mobile-section-title-wrap {
+        min-width: 0;
+      }
+
+      .mobile-section-eyebrow {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.58rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .mobile-section-title {
+        margin: 0;
+        color: var(--text-main);
+        font-size: 1.08rem;
+        font-weight: 600;
+        line-height: 1.1;
+      }
+
+      .mobile-section-subtitle {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.35;
+        word-break: break-all;
+      }
+
+      .mobile-wallet-panel.has-wallet .mobile-section-subtitle {
+        word-break: normal;
+      }
+
+      .mobile-watchlist-currency {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px;
+        border-radius: 999px;
+        background: var(--panel-muted);
+      }
+
+      .mobile-watchlist-currency-btn {
+        min-width: 38px;
+        height: 30px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 600;
+        transition: background-color 0.18s ease, color 0.18s ease;
+      }
+
+      .mobile-watchlist-currency-btn.is-active {
+        background: var(--accent-soft);
+        color: var(--text-main);
+      }
+
+      .mobile-watchlist-grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      .mobile-watchlist-card {
+        width: 100%;
+        border: 0;
+        border-radius: 14px;
+        background: var(--panel-muted);
+        color: inherit;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 13px;
+        text-align: left;
+      }
+
+      .mobile-watchlist-card:active {
+        transform: scale(0.992);
+      }
+
+      .mobile-watchlist-card .coinIcon,
+      .mobile-watchlist-card .coinFallback {
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+      }
+
+      .mobile-watchlist-card-main {
+        min-width: 0;
+      }
+
+      .mobile-watchlist-card-top {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        min-width: 0;
+      }
+
+      .mobile-watchlist-card-symbol {
+        min-width: 0;
+        color: var(--text-main);
+        font-size: 0.92rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .mobile-watchlist-card-badge {
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--muted);
+        font-size: 0.58rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .mobile-watchlist-card-meta {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.72rem;
+      }
+
+      .mobile-watchlist-card-side {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 3px;
+      }
+
+      .mobile-watchlist-card-price {
+        color: var(--text-main);
+        font-size: 0.92rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .mobile-watchlist-card-change {
+        font-size: 0.74rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .mobile-watchlist-card-change.upnl-pos {
+        color: var(--accent-green);
+      }
+
+      .mobile-watchlist-card-change.upnl-neg {
+        color: var(--danger);
+      }
+
+      .mobile-watchlist-card-change.upnl-flat {
+        color: var(--muted);
+      }
+
+      .mobile-watchlist-loading {
+        padding: 18px 14px;
+        border-radius: 14px;
+        background: var(--panel-muted);
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-align: center;
+      }
+
+      .mobile-wallet-empty {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .mobile-wallet-empty-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .mobile-wallet-action {
+        min-height: 36px;
+        padding: 0 12px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--panel-muted);
+        color: var(--text-main);
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+
+      .mobile-wallet-favorites {
+        display: grid;
+        gap: 8px;
+      }
+
+      .mobile-wallet-chip {
+        width: 100%;
+        min-height: 42px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--panel-muted);
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .mobile-wallet-chip code {
+        color: inherit;
+        font-size: 0.76rem;
+      }
+
+      .mobile-wallet-frame {
+        width: 100%;
+        height: calc(100dvh - 304px - env(safe-area-inset-bottom, 0px));
+        min-height: 420px;
+        border: 0;
+        border-radius: 14px;
+        background: transparent;
+      }
+
+      .mobile-bottom-nav {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        z-index: 80;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: rgba(15, 18, 23, 0.96);
+        backdrop-filter: blur(18px);
+      }
+
+      body.light .mobile-bottom-nav {
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      .mobile-bottom-nav-btn {
+        min-width: 0;
+        min-height: 52px;
+        border: 0;
+        border-radius: 16px;
+        background: transparent;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 6px 4px;
+        transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+      }
+
+      .mobile-bottom-nav-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .mobile-bottom-nav-btn span {
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .mobile-bottom-nav-btn.is-active {
+        background: var(--accent-soft);
+        color: var(--text-main);
+      }
+
+      .mobile-bottom-nav-btn:active {
+        transform: scale(0.97);
+      }
+
+      .price-footer {
+        display: none !important;
+      }
+
+      .trade-view-stack[data-mobile-view="market"] > .trade-leaderboard-panel,
+      .trade-view-stack[data-mobile-view="market"] > .mobile-watchlist-panel,
+      .trade-view-stack[data-mobile-view="market"] > .mobile-wallet-panel,
+      .trade-view-stack[data-mobile-view="leaderboard"] > .top-frame-panel,
+      .trade-view-stack[data-mobile-view="leaderboard"] > .extra-chart-panel,
+      .trade-view-stack[data-mobile-view="leaderboard"] > .mobile-watchlist-panel,
+      .trade-view-stack[data-mobile-view="leaderboard"] > .mobile-wallet-panel,
+      .trade-view-stack[data-mobile-view="watchlist"] > .top-frame-panel,
+      .trade-view-stack[data-mobile-view="watchlist"] > .extra-chart-panel,
+      .trade-view-stack[data-mobile-view="watchlist"] > .trade-leaderboard-panel,
+      .trade-view-stack[data-mobile-view="watchlist"] > .mobile-wallet-panel,
+      .trade-view-stack[data-mobile-view="wallet"] > .top-frame-panel,
+      .trade-view-stack[data-mobile-view="wallet"] > .extra-chart-panel,
+      .trade-view-stack[data-mobile-view="wallet"] > .trade-leaderboard-panel,
+      .trade-view-stack[data-mobile-view="wallet"] > .mobile-watchlist-panel {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -3689,11 +4094,80 @@
             </div>
           </section>
 
+          <section class="panel mobile-watchlist-panel" id="mobileWatchlistPanel" hidden>
+            <div class="mobile-section-shell">
+              <div class="mobile-section-head">
+                <div class="mobile-section-title-wrap">
+                  <span class="mobile-section-eyebrow">Live markets</span>
+                  <h2 class="mobile-section-title">Watchlist</h2>
+                  <div class="mobile-section-subtitle">Tap any asset to jump back into the chart.</div>
+                </div>
+                <div class="mobile-watchlist-currency" role="group" aria-label="Mobile watchlist currency">
+                  <button class="mobile-watchlist-currency-btn" type="button" data-mobile-currency="EUR">EUR</button>
+                  <button class="mobile-watchlist-currency-btn" type="button" data-mobile-currency="USD">USD</button>
+                </div>
+              </div>
+              <div class="mobile-watchlist-grid" id="mobileWatchlistGrid"></div>
+            </div>
+          </section>
+
+          <section class="panel mobile-wallet-panel" id="mobileWalletPanel" hidden>
+            <div class="mobile-section-shell">
+              <div class="mobile-section-head">
+                <div class="mobile-section-title-wrap">
+                  <span class="mobile-section-eyebrow">Wallet tracker</span>
+                  <h2 class="mobile-section-title">Wallet</h2>
+                  <div class="mobile-section-subtitle" id="mobileWalletSubtitle">Open a wallet from the leaderboard or search.</div>
+                </div>
+              </div>
+              <div class="mobile-wallet-empty" id="mobileWalletEmpty">
+                <p class="mobile-section-copy">Pick a wallet from Leaderboard, search a full address, or jump into one of your favorites.</p>
+                <div class="mobile-wallet-empty-actions">
+                  <button class="mobile-wallet-action" type="button" id="mobileWalletLeaderboardBtn">Open leaderboard</button>
+                  <button class="mobile-wallet-action" type="button" id="mobileWalletFavoritesBtn">Favorites</button>
+                </div>
+                <div class="mobile-wallet-favorites" id="mobileWalletFavorites"></div>
+              </div>
+              <iframe class="mobile-wallet-frame" id="mobileWalletFrame" title="Hypermonitor mobile wallet tracker" hidden></iframe>
+            </div>
+          </section>
+
           <div class="trade-splitter trade-row-splitter" id="tradeRowSplitter" role="separator" aria-orientation="horizontal" aria-label="Resize rows"></div>
           <div class="trade-splitter trade-column-splitter" id="tradeColumnSplitter" role="separator" aria-orientation="vertical" aria-label="Resize columns" hidden></div>
         </div>
       </section>
     </main>
+
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile navigation" hidden>
+      <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="market" aria-label="Market">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 18.5h16M6.5 15.5l3.2-3.4 2.7 2.5 5.1-6.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <span>Market</span>
+      </button>
+      <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="leaderboard" aria-label="Leaderboard">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 6.5h14M5 12h14M5 17.5h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+        </svg>
+        <span>Leaderboard</span>
+      </button>
+      <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="watchlist" aria-label="Watchlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6.5h12M6 12h12M6 17.5h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+          <circle cx="8" cy="6.5" r="1.3" fill="currentColor"></circle>
+          <circle cx="16" cy="12" r="1.3" fill="currentColor"></circle>
+          <circle cx="11.5" cy="17.5" r="1.3" fill="currentColor"></circle>
+        </svg>
+        <span>Watchlist</span>
+      </button>
+      <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="wallet" aria-label="Wallet">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4.5 7.5h15a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16V9a1.5 1.5 0 0 1 1.5-1.5Zm0 0V6A1.5 1.5 0 0 1 6 4.5h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+          <circle cx="16.6" cy="12.4" r="1.3" fill="currentColor"></circle>
+        </svg>
+        <span>Wallet</span>
+      </button>
+    </nav>
   </div>
 
   <div class="price-footer pending" aria-label="Live prices">
@@ -3908,6 +4382,8 @@
       coin: "BTC",
       tradeTimeframe: "15m",
       wallet: "",
+      mobileView: "market",
+      mobileWalletReturnView: "leaderboard",
       walletModalSection: "positions",
       topChartCount: 1,
       topOrderBookVisible: true,
@@ -3980,6 +4456,18 @@
     const tradeLeaderboardPanel = document.getElementById("tradeLeaderboardPanel");
     const tradeLeaderboardBody = document.getElementById("tradeLeaderboardBody");
     const tradeLeaderboardToggleBtn = document.getElementById("tradeLeaderboardToggleBtn");
+    const mobileWatchlistPanel = document.getElementById("mobileWatchlistPanel");
+    const mobileWatchlistGrid = document.getElementById("mobileWatchlistGrid");
+    const mobileWalletPanel = document.getElementById("mobileWalletPanel");
+    const mobileWalletFrame = document.getElementById("mobileWalletFrame");
+    const mobileWalletEmpty = document.getElementById("mobileWalletEmpty");
+    const mobileWalletSubtitle = document.getElementById("mobileWalletSubtitle");
+    const mobileWalletFavorites = document.getElementById("mobileWalletFavorites");
+    const mobileWalletLeaderboardBtn = document.getElementById("mobileWalletLeaderboardBtn");
+    const mobileWalletFavoritesBtn = document.getElementById("mobileWalletFavoritesBtn");
+    const mobileBottomNav = document.getElementById("mobileBottomNav");
+    const mobileBottomNavButtons = mobileBottomNav ? Array.from(mobileBottomNav.querySelectorAll("[data-mobile-view]")) : [];
+    const mobileCurrencyButtons = Array.from(document.querySelectorAll("[data-mobile-currency]"));
     const tradeRowSplitter = document.getElementById("tradeRowSplitter");
     const tradeColumnSplitter = document.getElementById("tradeColumnSplitter");
     const extraChartPanels = [
@@ -4003,7 +4491,9 @@
       lastClientY: 0
     };
     let tradeFrameReady = false;
+    let mobileWalletFrameReady = false;
     let pendingTradeFavoritesPanelOpen = false;
+    const MOBILE_TRACKER_QUERY = window.matchMedia("(max-width: 720px)");
     const marketChipGroup = document.getElementById("marketChipGroup");
     const tradeWalletInline = document.getElementById("tradeWalletInline");
     const tradeWalletText = document.getElementById("tradeWalletText");
@@ -4234,6 +4724,7 @@
       postThemeToFrame(tradeFrame);
       extraTradeFrames.forEach((frame) => postThemeToFrame(frame));
       postThemeToFrame(walletTrackerFrame);
+      postThemeToFrame(mobileWalletFrame);
     }
 
     function syncThemeToggleButton(theme) {
@@ -4261,6 +4752,182 @@
       if (options.broadcast !== false) {
         broadcastTheme();
       }
+    }
+
+    function isMobileTrackerLayout() {
+      return Boolean(MOBILE_TRACKER_QUERY.matches);
+    }
+
+    function normalizeMobileView(value) {
+      return value === "leaderboard" || value === "watchlist" || value === "wallet" ? value : "market";
+    }
+
+    function syncMobileViewButtons() {
+      mobileBottomNavButtons.forEach((button) => {
+        const view = normalizeMobileView(button.dataset.mobileView || "market");
+        const isActive = isMobileTrackerLayout() && state.mobileView === view;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
+      mobileCurrencyButtons.forEach((button) => {
+        const currency = String(button.dataset.mobileCurrency || "").toUpperCase();
+        button.classList.toggle("is-active", currency === footerPriceCurrency);
+        button.setAttribute("aria-pressed", currency === footerPriceCurrency ? "true" : "false");
+      });
+    }
+
+    function formatMobileWatchlistPrice(coin) {
+      const price = getLivePriceForCoin(coin);
+      const displayMeta = getDisplayCurrencyMeta(price);
+      const displayPrice = displayMeta?.value;
+      const cacheKey = `${footerPriceCurrency}:${coin}`;
+      if (Number.isFinite(displayPrice)) {
+        let decimals = coinPriceDecimals.get(cacheKey);
+        if (decimals === undefined) {
+          const abs = Math.abs(displayPrice);
+          if (abs >= 10000) decimals = 0;
+          else if (abs >= 1000) decimals = 1;
+          else if (abs >= 100) decimals = 2;
+          else if (abs >= 10) decimals = 3;
+          else if (abs >= 1) decimals = 4;
+          else if (abs >= 0.1) decimals = 5;
+          else if (abs >= 0.01) decimals = 6;
+          else decimals = 8;
+          coinPriceDecimals.set(cacheKey, decimals);
+        }
+        const formatted = fmtPriceFixed(displayPrice, decimals);
+        lastFooterPrices.set(cacheKey, formatted);
+        return formatted;
+      }
+      const fallbackSymbol = footerPriceCurrency === "EUR" ? "€" : footerPriceCurrency === "JPY" ? "¥" : "$";
+      return lastFooterPrices.get(cacheKey) || `${fallbackSymbol}--`;
+    }
+
+    function renderMobileWatchlist() {
+      if (!mobileWatchlistGrid) return;
+      const desired = trackedFooterCoins.map((coin) => normalizeFooterCoinValue(coin)).filter(Boolean);
+      if (!desired.length) {
+        mobileWatchlistGrid.innerHTML = "<div class='mobile-watchlist-loading'>No watchlist assets yet.</div>";
+        syncMobileViewButtons();
+        return;
+      }
+
+      const readyCount = desired.reduce((count, coin) => {
+        const price = getLivePriceForCoin(coin);
+        return count + (Number.isFinite(price) ? 1 : 0);
+      }, 0);
+
+      mobileWatchlistGrid.innerHTML = desired.map((coin) => {
+        const base = getCoinBaseName(coin);
+        const dex = getCoinDexName(coin);
+        const priceText = formatMobileWatchlistPrice(coin);
+        const changePct = getFooterChangePct(coin);
+        const changeClass = Number.isFinite(changePct)
+          ? (Math.abs(changePct) < 0.00005 ? "upnl-flat" : changePct > 0 ? "upnl-pos" : "upnl-neg")
+          : "";
+        const changeText = Number.isFinite(changePct)
+          ? `${changePct > 0 ? "▲" : changePct < 0 ? "▼" : "■"} ${formatPercent(Math.abs(changePct), 2)}`
+          : "Syncing";
+        return (
+          "<button class='mobile-watchlist-card' type='button' data-mobile-coin='" + escapeHtml(coin) + "'>" +
+            footerCoinIconHtml(coin, base) +
+            "<span class='mobile-watchlist-card-main'>" +
+              "<span class='mobile-watchlist-card-top'>" +
+                "<span class='mobile-watchlist-card-symbol'>" + escapeHtml(base) + "</span>" +
+                (dex ? "<span class='mobile-watchlist-card-badge'>" + escapeHtml(dex) + "</span>" : "") +
+              "</span>" +
+              "<span class='mobile-watchlist-card-meta'>Tap to open in Market</span>" +
+            "</span>" +
+            "<span class='mobile-watchlist-card-side'>" +
+              "<span class='mobile-watchlist-card-price'>" + escapeHtml(priceText) + "</span>" +
+              "<span class='mobile-watchlist-card-change " + changeClass + "'>" + escapeHtml(changeText) + "</span>" +
+            "</span>" +
+          "</button>"
+        );
+      }).join("");
+
+      if (!readyCount) {
+        mobileWatchlistGrid.insertAdjacentHTML(
+          "afterbegin",
+          "<div class='mobile-watchlist-loading'>Syncing live prices…</div>"
+        );
+      }
+
+      syncMobileViewButtons();
+    }
+
+    function renderMobileWalletFavorites() {
+      if (!mobileWalletFavorites) return;
+      if (!favoriteWallets.length) {
+        mobileWalletFavorites.innerHTML = "";
+        return;
+      }
+      mobileWalletFavorites.innerHTML = favoriteWallets.map((wallet) => (
+        "<button class='mobile-wallet-chip' type='button' data-mobile-wallet='" + escapeHtml(wallet) + "'>" +
+          "<code>" + escapeHtml(shortAddress(wallet)) + "</code>" +
+          "<span>Open</span>" +
+        "</button>"
+      )).join("");
+    }
+
+    function syncMobileWalletFrame(options = {}) {
+      if (!mobileWalletFrame || !mobileWalletEmpty || !mobileWalletSubtitle) return;
+      const hasWallet = Boolean(state.wallet);
+      mobileWalletSubtitle.textContent = hasWallet
+        ? shortAddress(state.wallet)
+        : "Open a wallet from the leaderboard or search.";
+      mobileWalletSubtitle.title = hasWallet ? state.wallet : "";
+      if (mobileWalletPanel) mobileWalletPanel.classList.toggle("has-wallet", hasWallet);
+      mobileWalletEmpty.hidden = hasWallet;
+      mobileWalletFrame.hidden = !hasWallet;
+      if (!hasWallet) {
+        mobileWalletFrameReady = false;
+        if (options.clear !== false && mobileWalletFrame.getAttribute("src")) {
+          mobileWalletFrame.setAttribute("src", "about:blank");
+        }
+        return;
+      }
+      const nextSrc = buildWalletShellTrackerHref(state.wallet);
+      if (options.forceReload || mobileWalletFrame.getAttribute("src") !== nextSrc) {
+        mobileWalletFrameReady = false;
+        mobileWalletFrame.setAttribute("src", nextSrc);
+      }
+    }
+
+    function syncMobileShell(forceFrameReload = false) {
+      const mobile = isMobileTrackerLayout();
+      const nextView = mobile && state.wallet && state.mobileView === "market"
+        ? "market"
+        : normalizeMobileView(state.mobileView);
+      if (state.mobileView !== nextView) state.mobileView = nextView;
+
+      if (tradeViewStack) tradeViewStack.dataset.mobileView = state.mobileView;
+      if (mobileBottomNav) mobileBottomNav.hidden = !mobile;
+      if (mobileWatchlistPanel) mobileWatchlistPanel.hidden = !mobile;
+      if (mobileWalletPanel) mobileWalletPanel.hidden = !mobile;
+
+      if (mobile && state.mobileView === "wallet" && !state.wallet) {
+        state.mobileView = favoriteWallets.length ? "wallet" : "leaderboard";
+        if (tradeViewStack) tradeViewStack.dataset.mobileView = state.mobileView;
+      }
+
+      renderMobileWatchlist();
+      renderMobileWalletFavorites();
+      syncMobileWalletFrame({ clear: !mobile, forceReload: forceFrameReload });
+      syncMobileViewButtons();
+      if (mobile) {
+        updateTradeFrame({ useMessage: false });
+      }
+    }
+
+    function setMobileView(nextView, options = {}) {
+      const normalized = normalizeMobileView(nextView);
+      if (state.mobileView === normalized && !options.force) {
+        syncMobileShell(options.forceFrameReload === true);
+        return;
+      }
+      state.mobileView = normalized;
+      syncMobileShell(options.forceFrameReload === true);
     }
 
     function initTheme() {
@@ -4486,6 +5153,7 @@
       headerFavoritesBtn.classList.toggle("is-active", hasFavorites);
       headerFavoritesBtn.setAttribute("aria-label", hasFavorites ? `Favorite wallets (${favoriteWallets.length})` : "Favorite wallets");
       headerFavoritesBtn.setAttribute("title", hasFavorites ? `Favorite wallets (${favoriteWallets.length})` : "Favorite wallets");
+      renderMobileWalletFavorites();
     }
 
     function toggleFavoriteWallet(wallet) {
@@ -4503,8 +5171,11 @@
     function requestTradeFavoritesPanel() {
       const activeWallet = normalizeFavoriteWallet(state.wallet);
       const fallbackWallet = favoriteWallets[0] || "";
-      const currentSrc = String(tradeFrame?.getAttribute("src") || "");
-      const trackerVisible = currentSrc.includes("track.html");
+      const mobile = isMobileTrackerLayout();
+      const targetFrame = mobile ? mobileWalletFrame : tradeFrame;
+      const trackerVisible = mobile
+        ? Boolean(state.wallet)
+        : String(tradeFrame?.getAttribute("src") || "").includes("track.html");
 
       if (!trackerVisible) {
         const targetWallet = activeWallet || fallbackWallet;
@@ -4514,13 +5185,13 @@
         return;
       }
 
-      if (!tradeFrameReady || !tradeFrame?.contentWindow) {
+      if ((mobile ? !mobileWalletFrameReady : !tradeFrameReady) || !targetFrame?.contentWindow) {
         pendingTradeFavoritesPanelOpen = true;
         return;
       }
 
       try {
-        tradeFrame.contentWindow.postMessage({ type: "hypermonitor:open-favorites-panel" }, "*");
+        targetFrame.contentWindow.postMessage({ type: "hypermonitor:open-favorites-panel" }, "*");
         pendingTradeFavoritesPanelOpen = false;
       } catch (_) {
         pendingTradeFavoritesPanelOpen = true;
@@ -5280,6 +5951,7 @@
           btn.classList.toggle("active", active);
           btn.setAttribute("aria-pressed", active ? "true" : "false");
         });
+        syncMobileViewButtons();
       }
 
       function setFooterPriceCurrency(nextCurrency, { forceRate = false } = {}) {
@@ -6894,6 +7566,7 @@
           if (!footerReady && priceFooterWrapEl && shouldRevealFooter) {
             revealFooter(true);
           }
+          renderMobileWatchlist();
           syncTrackerDocumentTitle();
         });
 
@@ -7553,6 +8226,9 @@
       if (state.wallet) {
         closeWalletOverlay({ fromPopState: true });
       }
+      if (isMobileTrackerLayout()) {
+        setMobileView("market");
+      }
       if (!options.fromPopState) {
         updateUrl(options.pushHistory === true);
       }
@@ -7728,12 +8404,13 @@
       if (!tradeLeaderboardPanel || !tradeLeaderboardToggleBtn) return;
       const totalCharts = state.topChartCount + state.extraCharts.length;
       const visible = !tradeLeaderboardPanel.hidden;
-      const collapsed = totalCharts < 3 && visible && state.tradeLeaderboardCollapsed;
+      const mobile = isMobileTrackerLayout();
+      const collapsed = !mobile && totalCharts < 3 && visible && state.tradeLeaderboardCollapsed;
       tradeLeaderboardPanel.classList.toggle("is-collapsed", collapsed);
       if (tradeLeaderboardBody) {
         tradeLeaderboardBody.setAttribute("aria-hidden", collapsed ? "true" : "false");
       }
-      tradeLeaderboardToggleBtn.hidden = totalCharts === 3 || !visible;
+      tradeLeaderboardToggleBtn.hidden = mobile || totalCharts === 3 || !visible;
       tradeLeaderboardToggleBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
       tradeLeaderboardToggleBtn.setAttribute("aria-label", collapsed ? "Show leaderboard" : "Hide leaderboard");
       tradeLeaderboardToggleBtn.setAttribute("title", collapsed ? "Show leaderboard" : "Hide leaderboard");
@@ -7852,7 +8529,7 @@
       });
 
       if (tradeLeaderboardPanel) {
-        tradeLeaderboardPanel.hidden = extraCount >= 2;
+        tradeLeaderboardPanel.hidden = isMobileTrackerLayout() ? false : extraCount >= 2;
       }
 
       syncTradeLeaderboardUi();
@@ -7864,6 +8541,7 @@
       updateExtraTradeFrames();
       syncTradeFrameExtraCount();
       syncTradeFrameLayout();
+      syncMobileShell();
     }
 
     function addExtraChart() {
@@ -7990,13 +8668,14 @@
     }
 
     function buildTradeFrameHref() {
+      if (isMobileTrackerLayout()) return buildPrimaryAssetHref(state.coin);
       return state.wallet ? buildWalletShellTrackerHref(state.wallet) : buildPrimaryAssetHref(state.coin);
     }
 
     function updateTradeFrame(options = {}) {
       const src = buildTradeFrameHref();
       const currentSrc = String(tradeFrame?.getAttribute("src") || "");
-      const nextIsAsset = !state.wallet;
+      const nextIsAsset = src.includes("asset.html");
       const currentIsAsset = currentSrc.includes("asset.html");
       const canUpdateInPlace =
         nextIsAsset &&
@@ -8018,8 +8697,8 @@
         }
       }
 
-      tradeFrameReady = false;
       if (tradeFrame.getAttribute("src") !== src) {
+        tradeFrameReady = false;
         tradeFrame.setAttribute("src", src);
       }
     }
@@ -8030,6 +8709,12 @@
       if (tradeWalletInline) tradeWalletInline.hidden = !hasWallet;
       if (viewWalletBtn) viewWalletBtn.hidden = !hasWallet;
       if (topFramePanel) topFramePanel.classList.toggle("is-wallet-mode", hasWallet);
+      if (mobileWalletSubtitle) {
+        mobileWalletSubtitle.textContent = hasWallet
+          ? shortAddress(state.wallet)
+          : "Open a wallet from the leaderboard or search.";
+        mobileWalletSubtitle.title = hasWallet ? state.wallet : "";
+      }
 
       if (hasWallet) {
         if (selectedWalletText) selectedWalletText.textContent = shortAddress(state.wallet);
@@ -8073,11 +8758,15 @@
       const targetWallet = (wallet || "").trim();
       if (!targetWallet) return;
       const wasWalletOpen = Boolean(state.wallet);
+      const mobile = isMobileTrackerLayout();
 
       state.wallet = targetWallet;
       state.walletModalSection = normalizeWalletModalSection(options.section || "positions");
-      if (!wasWalletOpen) {
+      if (!wasWalletOpen && !mobile) {
         state.tradeLeaderboardCollapsed = true;
+      }
+      if (mobile) {
+        state.mobileWalletReturnView = normalizeMobileView(state.mobileView || "leaderboard");
       }
       syncWalletUi();
       syncWalletModalTabs();
@@ -8089,7 +8778,12 @@
       walletModalBackdrop.classList.remove("is-open");
       walletModalBackdrop.setAttribute("aria-hidden", "true");
       document.body.classList.remove("modal-open");
-      updateTradeFrame({ useMessage: false });
+      if (mobile) {
+        syncMobileWalletFrame({ forceReload: true });
+        setMobileView("wallet", { force: true });
+      } else {
+        updateTradeFrame({ useMessage: false });
+      }
       syncTradeLayout();
 
       if (!options.fromPopState) {
@@ -8101,16 +8795,24 @@
 
     function closeWalletOverlay(options = {}) {
       pendingTradeFavoritesPanelOpen = false;
+      const mobile = isMobileTrackerLayout();
       state.wallet = "";
       state.walletModalSection = "positions";
-      state.tradeLeaderboardCollapsed = false;
+      if (!mobile) {
+        state.tradeLeaderboardCollapsed = false;
+      }
       syncWalletUi();
       syncWalletModalTabs();
       walletTrackerFrame.src = "";
       walletModalBackdrop.classList.remove("is-open");
       walletModalBackdrop.setAttribute("aria-hidden", "true");
       document.body.classList.remove("modal-open");
-      updateTradeFrame({ useMessage: false });
+      if (mobile) {
+        syncMobileWalletFrame({ clear: true });
+        setMobileView(state.mobileWalletReturnView || "leaderboard", { force: true });
+      } else {
+        updateTradeFrame({ useMessage: false });
+      }
       syncTradeLayout();
 
       if (!options.fromPopState) {
@@ -9424,6 +10126,7 @@
       if (!isCompactFooterAddMode()) footerAddCompactOpen = false;
       syncFooterAddControls();
       syncTradeLayout();
+      syncMobileShell();
     });
 
     window.addEventListener("scroll", hidePriceContextMenu, true);
@@ -9437,6 +10140,59 @@
     if (tradeLeaderboardToggleBtn) {
       tradeLeaderboardToggleBtn.addEventListener("click", () => {
         setTradeLeaderboardCollapsed(!state.tradeLeaderboardCollapsed);
+      });
+    }
+
+    if (mobileBottomNavButtons.length) {
+      mobileBottomNavButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setMobileView(button.dataset.mobileView || "market");
+        });
+      });
+    }
+
+    if (mobileWatchlistGrid) {
+      mobileWatchlistGrid.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const card = target.closest("[data-mobile-coin]");
+        if (!card) return;
+        const coin = card.getAttribute("data-mobile-coin");
+        if (!coin) return;
+        openCoinInShell(coin, { pushHistory: true });
+      });
+    }
+
+    if (mobileWalletFavorites) {
+      mobileWalletFavorites.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const chip = target.closest("[data-mobile-wallet]");
+        if (!chip) return;
+        const wallet = chip.getAttribute("data-mobile-wallet");
+        if (!wallet) return;
+        openWalletOverlay(wallet, { pushHistory: true });
+      });
+    }
+
+    if (mobileWalletLeaderboardBtn) {
+      mobileWalletLeaderboardBtn.addEventListener("click", () => {
+        setMobileView("leaderboard");
+      });
+    }
+
+    if (mobileWalletFavoritesBtn) {
+      mobileWalletFavoritesBtn.addEventListener("click", () => {
+        requestTradeFavoritesPanel();
+      });
+    }
+
+    if (mobileCurrencyButtons.length) {
+      mobileCurrencyButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setFooterPriceCurrency(button.dataset.mobileCurrency, { forceRate: true });
+          renderMobileWatchlist();
+        });
       });
     }
 
@@ -9455,6 +10211,13 @@
     window.addEventListener("pointermove", updateTradeSplitDrag);
     window.addEventListener("pointerup", stopTradeSplitDrag);
     window.addEventListener("pointercancel", stopTradeSplitDrag);
+
+    if (typeof MOBILE_TRACKER_QUERY.addEventListener === "function") {
+      MOBILE_TRACKER_QUERY.addEventListener("change", () => {
+        syncMobileShell(true);
+        syncTradeLayout();
+      });
+    }
 
     if (tradeFrame) {
       tradeFrame.addEventListener("load", () => {
@@ -9495,6 +10258,19 @@
       });
     }
 
+    if (mobileWalletFrame) {
+      mobileWalletFrame.addEventListener("load", () => {
+        mobileWalletFrameReady = true;
+        postThemeToFrame(mobileWalletFrame);
+        if (pendingTradeFavoritesPanelOpen && mobileWalletFrame.contentWindow) {
+          try {
+            mobileWalletFrame.contentWindow.postMessage({ type: "hypermonitor:open-favorites-panel" }, "*");
+            pendingTradeFavoritesPanelOpen = false;
+          } catch (_) {}
+        }
+      });
+    }
+
     window.addEventListener("message", (event) => {
       const data = event.data;
       if (!data || typeof data !== "object") return;
@@ -9503,26 +10279,29 @@
         return;
       }
       const isPrimaryFrame = event.source === tradeFrame?.contentWindow;
+      const isMobileWalletFrame = event.source === mobileWalletFrame?.contentWindow;
       const extraFrameIndex = extraTradeFrames.findIndex((frame) => frame?.contentWindow === event.source);
-      if (!isPrimaryFrame && extraFrameIndex === -1) return;
+      if (!isPrimaryFrame && !isMobileWalletFrame && extraFrameIndex === -1) return;
       if (data.type === "hypermonitor:wallet-change") {
-        if (!isPrimaryFrame) return;
+        if (!isPrimaryFrame && !isMobileWalletFrame) return;
         const wallet = normalizeFavoriteWallet(data.wallet);
         if (!wallet) return;
         state.wallet = wallet;
-        postWalletSkillOverridesToFrame(tradeFrame, wallet);
+        if (isPrimaryFrame) postWalletSkillOverridesToFrame(tradeFrame, wallet);
+        if (isMobileWalletFrame) postWalletSkillOverridesToFrame(mobileWalletFrame, wallet);
         syncWalletUi();
+        syncMobileWalletFrame({ clear: false });
         highlightSelectedWallet();
         updateUrl(false);
         return;
       }
       if (data.type === "hypermonitor:wallet-section-change") {
-        if (!isPrimaryFrame) return;
+        if (!isPrimaryFrame && !isMobileWalletFrame) return;
         state.walletModalSection = normalizeWalletModalSection(data.section);
         return;
       }
       if (data.type === "hypermonitor:close-wallet-shell") {
-        if (!isPrimaryFrame) return;
+        if (!isPrimaryFrame && !isMobileWalletFrame) return;
         closeWalletOverlay({ pushHistory: true });
         return;
       }
@@ -9609,6 +10388,7 @@
       if (event.key !== FAVORITES_KEY) return;
       loadFavoriteWallets();
       renderTable(state.displayRows);
+      syncMobileShell();
     });
 
     initTheme();
@@ -9616,10 +10396,12 @@
 
     state.coin = parseCoin();
     state.wallet = parseWallet();
+    state.mobileView = state.wallet ? "wallet" : "market";
 
     setCoin(state.coin, { fromPopState: true });
     syncTradeLayout();
     syncWalletUi();
+    syncMobileShell(true);
     scheduleFooterBarInitAfterPrimaryAsset();
 
     ensureHeaderCoinOptions().then(() => {
