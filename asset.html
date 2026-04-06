@@ -1761,11 +1761,11 @@
         html.mobile-layout #coin-btn {
             width: min(100%, calc(100vw - 74px));
             flex: 1 1 auto;
-            min-height: 50px;
-            padding: 0 12px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            background: var(--surface);
+            min-height: 46px;
+            padding: 0 2px 0 0;
+            border-radius: 0;
+            border: 0;
+            background: transparent;
             max-width: 100%;
             font-size: 15px;
         }
@@ -1875,7 +1875,7 @@
             justify-content: space-between;
             overflow: hidden;
             padding: 2px 12px 0;
-            gap: 10px;
+            gap: 8px;
             background: transparent;
             border-bottom: 0;
             max-width: 100vw;
@@ -1888,13 +1888,17 @@
         html.mobile-layout .tf-btn {
             flex: 0 0 auto;
             padding: 5px 0;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 600;
         }
 
         html.mobile-layout .toolbar-icon-btn {
             width: 28px;
             height: 28px;
+        }
+
+        html.mobile-layout .chart-toggle-btn {
+            display: none !important;
         }
 
         html.mobile-layout .chart-toggle-group {
@@ -1927,8 +1931,8 @@
         html.mobile-layout #chart-container-1,
         html.mobile-layout #chart-container-2 {
             flex: none !important;
-            height: clamp(300px, 40svh, 460px);
-            min-height: clamp(300px, 40svh, 460px);
+            height: clamp(320px, 42svh, 480px);
+            min-height: clamp(320px, 42svh, 480px);
             border: 0;
             border-radius: 0;
             overflow: hidden;
@@ -2135,12 +2139,13 @@
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c1,
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c2 {
             flex: 0 0 auto;
-            width: auto;
-            max-width: 48%;
+            width: 50%;
+            max-width: 50%;
         }
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c2 {
             font-size: 10.5px;
+            text-align: left;
         }
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c3 {
@@ -2156,13 +2161,17 @@
             display: none !important;
         }
 
-        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap .ob-row {
-            flex-direction: row-reverse;
-        }
-
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap .ob-row .bar.ask-bar {
             left: 0;
             right: auto;
+        }
+
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap .ob-row .c1.ask {
+            text-align: left;
+        }
+
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-bids-wrap .ob-row .c2 {
+            text-align: right;
         }
 
         html.mobile-layout #ob-hover-card {
@@ -2180,8 +2189,25 @@
 
         html.light.mobile-layout #coin-btn,
         html.light.mobile-layout .hstat {
-            border-color: rgba(148, 163, 184, 0.16);
-            background: rgba(255, 255, 255, 0.92);
+            border-color: transparent;
+            background: transparent;
+        }
+
+        html.mobile-layout #coin-dropdown {
+            min-width: 0;
+            width: 100vw;
+            max-width: 100vw;
+            left: 0 !important;
+            right: 0;
+            border: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0;
+            background: var(--surface);
+            box-shadow: none;
+        }
+
+        html.light.mobile-layout #coin-dropdown {
+            border-top-color: rgba(15, 23, 42, 0.08);
         }
 
         html.light.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap,
@@ -3450,6 +3476,7 @@
             <!-- CHART SIDE (Left by default) -->
             <div id="chart-side">
                 <div id="chart-toolbar">
+                    <button class="tf-btn" data-tf="time">Time</button>
                     <button class="tf-btn" data-tf="1m">1m</button>
                     <button class="tf-btn" data-tf="5m">5m</button>
                     <button class="tf-btn active" data-tf="15m">15m</button>
@@ -4222,7 +4249,7 @@
         ]);
         const coinResolvedLogoCache = new Map();
         const coinLogoCandidateCache = new Map();
-        const TF_MS = { '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3, '1w': 604800e3 };
+        const TF_MS = { 'time': 60e3, '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3, '1w': 604800e3 };
         const OB_ROWS_BOTH = 14;
         const OB_ROWS_SINGLE = 28;
         const ORDERBOOK_ROW_CAP = OB_ROWS_SINGLE;
@@ -4266,6 +4293,30 @@
             const base = getCoinDisplayName(normalized);
             const dex = getCoinDexLabel(normalized);
             return dex ? `${dex}:${base}` : base;
+        }
+
+        function isTimeChartMode() {
+            return String(S?.tf || '').trim() === 'time';
+        }
+
+        function getDisplayTimeframeLabel(timeframe = S?.tf) {
+            const tf = String(timeframe || '15m').trim().toLowerCase();
+            return tf === 'time' ? 'Time' : String(timeframe || '15m').trim();
+        }
+
+        function getCandleInterval(timeframe = S?.tf) {
+            const tf = String(timeframe || '15m').trim().toLowerCase();
+            return tf === 'time' ? '1m' : tf;
+        }
+
+        function getOrderBookSigFigs() {
+            const price = Number(S?.markPx);
+            const tick = Number(S?.aggTick);
+            if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(tick) || tick <= 0) return 5;
+            const tickStr = String(tick);
+            const decimals = tickStr.includes('.') ? tickStr.split('.')[1].length : 0;
+            const integerDigits = Math.max(1, Math.floor(Math.log10(Math.abs(price))) + 1);
+            return Math.max(2, Math.min(5, integerDigits + decimals));
         }
 
         function normalizeLogoKey(name) {
@@ -5033,10 +5084,12 @@
         }
 
         async function applyTimeframe(nextTf, options = {}) {
-            const tf = String(nextTf || '').trim();
+            const tf = String(nextTf || '').trim().toLowerCase();
             if (!TF_MS[tf]) return;
             if (tf === S.tf && options.force !== true) return;
             S.tf = tf;
+            clearLiveTimeTicks(1);
+            clearLiveTimeTicks(2);
             document.querySelectorAll('.tf-btn[data-tf]').forEach(button => {
                 button.classList.toggle('active', button.dataset.tf === S.tf);
             });
@@ -5497,6 +5550,19 @@
                 time: bar.time,
                 value: Number(bar.close)
             }));
+        }
+
+        function buildDisplayLineData(candlesData, liveTicks = []) {
+            const baseData = buildLineData(candlesData);
+            if (!isTimeChartMode()) return baseData;
+            const merged = new Map(baseData.map(point => [Number(point.time), point]));
+            (Array.isArray(liveTicks) ? liveTicks : []).forEach(point => {
+                const time = Number(point?.time);
+                const value = Number(point?.value);
+                if (!Number.isFinite(time) || !Number.isFinite(value)) return;
+                merged.set(time, { time, value });
+            });
+            return [...merged.values()].sort((left, right) => left.time - right.time);
         }
 
         function computeSmaData(candlesData, period) {
@@ -6300,11 +6366,13 @@
 
         // ── Candle data (deduplicated maps) ────────────────────────
         let candleMap = new Map(), volMap = new Map();
+        let timeLineTicks1 = [];
         let oldestTs = null, isLoadingHistory = false;
         let studyCache1 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
         let candleFetchSeq1 = 0;
 
         let candleMap2 = new Map(), volMap2 = new Map();
+        let timeLineTicks2 = [];
         let oldestTs2 = null, isLoadingHistory2 = false;
         let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
         let candleFetchSeq2 = 0;
@@ -6380,6 +6448,15 @@
 
         function getSortedVolumeData(target) {
             return [...getCandleStore(target).volMap.values()].sort((a, b) => a.time - b.time);
+        }
+
+        function getLiveTimeTicks(target) {
+            return target === 2 ? timeLineTicks2 : timeLineTicks1;
+        }
+
+        function clearLiveTimeTicks(target) {
+            if (target === 2) timeLineTicks2 = [];
+            else timeLineTicks1 = [];
         }
 
         function clearLegendHoverState(target) {
@@ -7405,7 +7482,7 @@
 
         function syncChartStudyVisibility(target) {
             const bundle = getSeriesBundle(target);
-            const showCandles = S.priceMode === 'candles';
+            const showCandles = S.priceMode === 'candles' && !isTimeChartMode();
             const showVolume = S.lowerStudy === 'volume';
             const showRsi = S.lowerStudy === 'rsi';
             const showLowerPane = (showVolume || showRsi) && !S.lowerPaneCollapsed;
@@ -7479,7 +7556,7 @@
             const bundle = getSeriesBundle(target);
             const store = getCandleStore(target);
             const candleData = getSortedCandleData(target);
-            const lineData = buildLineData(candleData);
+            const lineData = buildDisplayLineData(candleData, getLiveTimeTicks(target));
             const [maFast, maMid, maSlow] = S.maPeriods;
             const [volMaFastPeriod, volMaSlowPeriod] = S.volumeMaPeriods;
             store.studies = {
@@ -7664,6 +7741,7 @@
 
         function getDefaultVisibleBars(tf) {
             const barsByTf = {
+                'time': 52,
                 '1m': 90,
                 '5m': 84,
                 '15m': 64,
@@ -7677,7 +7755,10 @@
 
         function applyDefaultZoom(chartInstance, candleCount, tf) {
             if (!chartInstance || !Number.isFinite(candleCount) || candleCount <= 0) return;
-            const visibleBars = Math.max(24, Math.round(getDefaultVisibleBars(tf) * 1.5));
+            const visibleBars = Math.max(
+                24,
+                Math.round(getDefaultVisibleBars(tf) * (isMobileAssetLayout() ? 0.96 : 1.5))
+            );
             const rightPad = Math.max(3, Math.round(visibleBars * 0.06));
             if (candleCount <= visibleBars) {
                 chartInstance.timeScale().fitContent();
@@ -7695,13 +7776,15 @@
             const requestSeq = ++candleFetchSeq1;
             const requestCoin = S.coin;
             const requestTf = S.tf;
-            const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
+            const requestInterval = getCandleInterval(S.tf);
+            const ms = TF_MS[requestInterval] || 900e3, end = Date.now(), st = end - ms * 500;
             const showLoading = candleMap.size === 0;
             if (showLoading) setChartLoading(1, true);
             try {
-                const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin, interval: S.tf, startTime: st, endTime: end } }) });
+                const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin, interval: requestInterval, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
                 if (requestSeq !== candleFetchSeq1 || requestCoin !== S.coin || requestTf !== S.tf) return;
+                clearLiveTimeTicks(1);
                 candleMap.clear(); volMap.clear();
                 cv.forEach(c => candleMap.set(c.time, c)); vl.forEach(v => volMap.set(v.time, v));
                 const cvArr = [...candleMap.values()].sort((a,b)=>a.time-b.time);
@@ -7727,13 +7810,15 @@
             $(`legend-name-2`).textContent = formatLegendName(coinLabel, S.tf);
             syncSelectedCoinUi(2);
             
-            const ms = TF_MS[S.tf] || 900e3, end = Date.now(), st = end - ms * 500;
+            const requestInterval = getCandleInterval(S.tf);
+            const ms = TF_MS[requestInterval] || 900e3, end = Date.now(), st = end - ms * 500;
             const showLoading = candleMap2.size === 0;
             if (showLoading) setChartLoading(2, true);
             try {
-                const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin2, interval: S.tf, startTime: st, endTime: end } }) });
+                const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin2, interval: requestInterval, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
                 if (requestSeq !== candleFetchSeq2 || requestCoin !== S.coin2 || requestTf !== S.tf) return;
+                clearLiveTimeTicks(2);
                 candleMap2.clear(); volMap2.clear();
                 cv.forEach(c => candleMap2.set(c.time, c)); vl.forEach(v => volMap2.set(v.time, v));
                 const cvArr = [...candleMap2.values()].sort((a,b)=>a.time-b.time);
@@ -7762,8 +7847,9 @@
             }
             
             try {
-                const ms = TF_MS[S.tf] || 900e3, end = oldT * 1000, st = end - ms * 500;
-                const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: targetCoin, interval: S.tf, startTime: st, endTime: end } }) });
+                const requestInterval = getCandleInterval(S.tf);
+                const ms = TF_MS[requestInterval] || 900e3, end = oldT * 1000, st = end - ms * 500;
+                const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: targetCoin, interval: requestInterval, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
                 let added = 0;
                 cv.forEach(c => { if (!mapCV.has(c.time)) { mapCV.set(c.time, c); added++; } });
@@ -7893,6 +7979,7 @@
             legName.textContent = formatLegendName(market.label, S.tf);
             syncSelectedCoinUi(1);
             buildAggBar(mark);
+            connectWs();
         }
 
         function updateMobileLivePriceSummary(currentPrice) {
@@ -7950,6 +8037,7 @@
                 btn.classList.toggle('active', Number(btn.dataset.aggTick) === tick);
             });
             closeObAggMenu();
+            connectWs();
             if (latestBookSnapshot.bids.length && latestBookSnapshot.asks.length) {
                 renderBook(latestBookSnapshot.bids, latestBookSnapshot.asks);
             }
@@ -8041,6 +8129,7 @@
                 }
                 obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
                 updateMobileLivePriceSummary(mid);
+                updateTimeModeTick(1, mid);
                 syncAssetDocumentTitle(bestBid);
                 notifyParentLivePrice(bestBid);
             }
@@ -8077,7 +8166,7 @@
 
         function applyTradeToPrimaryCandle(trade) {
             if (!trade || !Number.isFinite(trade.px) || !Number.isFinite(trade.time)) return;
-            const tfMs = TF_MS[S.tf] || 900e3;
+            const tfMs = TF_MS[getCandleInterval(S.tf)] || 900e3;
             if (!tfMs || !candleMap.size) return;
 
             const tradeTimeMs = Number(trade.time);
@@ -8122,6 +8211,27 @@
             volSeries.update(nextVol);
             refreshLegend(1);
             scheduleVisibleExtremaUpdate(1);
+        }
+
+        function updateTimeModeTick(target, price) {
+            if (!isTimeChartMode() || !Number.isFinite(price)) return;
+            const bundle = getSeriesBundle(target);
+            if (!bundle?.line) return;
+            const ticks = getLiveTimeTicks(target);
+            const nowSec = Math.floor(Date.now() / 1000);
+            if (!Number.isFinite(nowSec)) return;
+            const lastPoint = ticks[ticks.length - 1];
+            if (lastPoint && Math.abs(Number(lastPoint.time) - nowSec) <= 1) {
+                lastPoint.value = price;
+            } else {
+                ticks.push({ time: nowSec, value: price });
+                while (ticks.length > 240) ticks.shift();
+            }
+            bundle.line.update({ time: nowSec, value: price });
+            if (!shouldShowReturnToLive(target)) {
+                const lineData = buildDisplayLineData(getSortedCandleData(target), ticks);
+                applyDefaultZoom(bundle.chart, lineData.length, S.tf);
+            }
         }
 
         function buildWalletTrackerHref(wallet) {
@@ -8334,6 +8444,7 @@
             candleFetchSeq1 += 1;
             candleMap.clear();
             volMap.clear();
+            clearLiveTimeTicks(1);
             oldestTs = null;
             clearLegendHoverState(1);
             candles.setData([]);
@@ -8350,6 +8461,7 @@
             candleFetchSeq2 += 1;
             candleMap2.clear();
             volMap2.clear();
+            clearLiveTimeTicks(2);
             oldestTs2 = null;
             clearLegendHoverState(2);
             candles2.setData([]);
@@ -8416,6 +8528,9 @@
 
         function getWsConfigKey() {
             const parts = [IS_COMPACT ? 'compact' : 'full', S.coin || '', S.tf || ''];
+            if (!IS_COMPACT) {
+                parts.push(`book:${getOrderBookSigFigs()}`);
+            }
             if (!IS_COMPACT && S.chart2Active && S.coin !== S.coin2) {
                 parts.push(S.coin2 || '');
             }
@@ -8440,17 +8555,18 @@
             S.wsConfigKey = nextConfigKey;
             socket.onopen = () => {
                 if (wsSeq !== S.wsSeq || S.ws !== socket) return;
+                const candleInterval = getCandleInterval(S.tf);
                 const subs = IS_COMPACT
                     ? [
-                        { type: 'candle', coin: S.coin, interval: S.tf }
+                        { type: 'candle', coin: S.coin, interval: candleInterval }
                     ]
                     : [
-                        { type: 'l2Book', coin: S.coin },
+                        { type: 'l2Book', coin: S.coin, nSigFigs: getOrderBookSigFigs() },
                         { type: 'trades', coin: S.coin },
-                        { type: 'candle', coin: S.coin, interval: S.tf }
+                        { type: 'candle', coin: S.coin, interval: candleInterval }
                     ];
                 if (!IS_COMPACT && S.chart2Active && S.coin !== S.coin2) {
-                    subs.push({ type: 'candle', coin: S.coin2, interval: S.tf });
+                    subs.push({ type: 'candle', coin: S.coin2, interval: candleInterval });
                 }
                 subs.forEach(sub => socket.send(JSON.stringify({ method: 'subscribe', subscription: sub })));
             };
@@ -8629,7 +8745,7 @@
 
         function formatLegendName(label, timeframe) {
             const safeLabel = String(label || '–').trim() || '–';
-            const safeTimeframe = String(timeframe || '15m').trim() || '15m';
+            const safeTimeframe = getDisplayTimeframeLabel(timeframe);
             return `${safeLabel}/USD • ${safeTimeframe} • Hypermonitor`;
         }
 

@@ -3565,8 +3565,8 @@
 
       .trade-leaderboard-panel th:nth-child(2),
       .trade-leaderboard-panel td:nth-child(2) {
-        width: 14%;
-        min-width: 48px;
+        width: 16%;
+        min-width: 54px;
       }
 
       .trade-leaderboard-panel th:nth-child(3),
@@ -3583,8 +3583,8 @@
 
       .trade-leaderboard-panel th:nth-child(8),
       .trade-leaderboard-panel td:nth-child(8) {
-        width: 29%;
-        min-width: 72px;
+        width: 24%;
+        min-width: 64px;
       }
 
       .trade-leaderboard-panel th:nth-child(8).hide-phone,
@@ -4038,6 +4038,15 @@
         min-width: 0;
       }
 
+      .mobile-watchlist-card-change-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        min-width: 66px;
+      }
+
       .mobile-watchlist-card-price-stack {
         display: flex;
         flex-direction: column;
@@ -4070,6 +4079,28 @@
         text-align: center;
         align-self: center;
         background: rgba(124, 132, 143, 0.14);
+      }
+
+      .mobile-watchlist-card-change-amount {
+        min-width: 66px;
+        color: var(--muted);
+        font-size: 0.62rem;
+        font-weight: 600;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .mobile-watchlist-card-change-stack.upnl-pos .mobile-watchlist-card-change-amount {
+        color: var(--accent-green);
+      }
+
+      .mobile-watchlist-card-change-stack.upnl-neg .mobile-watchlist-card-change-amount {
+        color: var(--danger);
+      }
+
+      .mobile-watchlist-card-change-stack.upnl-flat .mobile-watchlist-card-change-amount {
+        color: var(--muted);
       }
 
       .mobile-watchlist-card-change.upnl-pos {
@@ -4189,23 +4220,50 @@
 
       .mobile-favorites-list {
         display: grid;
-        gap: 8px;
+        gap: 0;
         padding: 0 12px 6px;
       }
 
       .mobile-favorite-card {
+        position: relative;
         width: 100%;
         min-height: 54px;
-        padding: 0 12px;
         border: 0;
-        border-radius: 14px;
-        background: var(--panel-muted);
+        border-radius: 0;
+        background: transparent;
         color: var(--text-main);
+        overflow: hidden;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      body.light .mobile-favorite-card {
+        border-bottom-color: rgba(15, 23, 42, 0.08);
+      }
+
+      .mobile-favorite-open {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        min-height: 54px;
+        padding: 0 0 0 12px;
+        border: 0;
+        background: transparent;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
         text-align: left;
+        transform: translateX(var(--mobile-favorite-swipe, 0px));
+        transition: transform 0.18s ease;
+      }
+
+      .mobile-favorite-card.is-swiping .mobile-favorite-open {
+        transition: none;
+      }
+
+      .mobile-favorite-card.is-swipe-left-open .mobile-favorite-open {
+        transform: translateX(-78px);
+        pointer-events: none;
       }
 
       .mobile-favorite-card-main {
@@ -4228,6 +4286,35 @@
         width: 14px;
         height: 14px;
         color: var(--muted);
+      }
+
+      .mobile-favorite-remove {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 0;
+        background: rgba(255, 90, 102, 0.14);
+        color: var(--danger);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateX(10px);
+        transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s;
+        z-index: 0;
+      }
+
+      .mobile-favorite-card.is-swipe-left-open > .mobile-favorite-remove {
+        opacity: 1 !important;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateX(0);
+        transition-delay: 0s;
       }
 
       .mobile-wallet-chip {
@@ -4534,8 +4621,6 @@
             <div class="mobile-section-shell">
               <div class="mobile-section-head">
                 <div class="mobile-section-title-wrap">
-                  <span class="mobile-section-eyebrow">Saved wallets</span>
-                  <h2 class="mobile-section-title">Favorites</h2>
                   <div class="mobile-section-subtitle">Open a tracked wallet directly from your saved list.</div>
                 </div>
               </div>
@@ -4959,6 +5044,17 @@
       openedCoin: "",
       openedDirection: ""
     };
+    const mobileFavoritesSwipe = {
+      pointerId: null,
+      card: null,
+      wallet: "",
+      startX: 0,
+      startY: 0,
+      startOffset: 0,
+      offsetX: 0,
+      active: false,
+      openedWallet: ""
+    };
     let tradeFrameReady = false;
     let mobileWalletFrameReady = false;
     let pendingTradeFavoritesPanelOpen = false;
@@ -5287,6 +5383,27 @@
       return lastFooterPrices.get(cacheKey) || `${fallbackSymbol}--`;
     }
 
+    function formatMobileWatchlistDollarChange(coin) {
+      const normalized = normalizeFooterCoinValue(coin);
+      const refKey = normalizeFooterChangeRefKey(normalized);
+      const base = getFooterBase(refKey);
+      const key = footerChangeRefs.has(refKey) ? refKey : footerChangeRefs.has(base) ? base : "";
+      if (!key) return "";
+      const ref = footerChangeRefs.get(key);
+      const prev = Number(ref?.prev);
+      const live = getLivePriceForCoin(normalized);
+      if (!Number.isFinite(prev) || prev === 0 || !Number.isFinite(live)) return "";
+      const delta = live - prev;
+      const abs = Math.abs(live);
+      let decimals = 4;
+      if (abs >= 10000) decimals = 0;
+      else if (abs >= 1000) decimals = 1;
+      else if (abs >= 100) decimals = 2;
+      else if (abs >= 1) decimals = 3;
+      const sign = delta > 0 ? "+" : delta < 0 ? "-" : "";
+      return `${sign}$${Math.abs(delta).toFixed(decimals)}`;
+    }
+
     function updateMobileWatchlistActionLabel() {
       if (!mobileWatchlistAddBtn || !mobileWatchlistInput) return;
       const candidate = getInputCandidateSymbol(mobileWatchlistInput.value);
@@ -5395,7 +5512,10 @@
                 "<span class='mobile-watchlist-card-price'></span>" +
                 "<span class='mobile-watchlist-card-subprice'></span>" +
               "</span>" +
-              "<span class='mobile-watchlist-card-change'></span>" +
+              "<span class='mobile-watchlist-card-change-stack'>" +
+                "<span class='mobile-watchlist-card-change'></span>" +
+                "<span class='mobile-watchlist-card-change-amount'></span>" +
+              "</span>" +
             "</span>" +
           "</span>" +
         "</button>" +
@@ -5415,6 +5535,7 @@
       const priceText = formatMobileWatchlistPriceForCurrency(normalized, "USD");
       const eurText = formatMobileWatchlistPriceForCurrency(normalized, "EUR");
       const changePct = getFooterChangePct(normalized);
+      const changeAmountText = formatMobileWatchlistDollarChange(normalized);
       const changeClass = Number.isFinite(changePct)
         ? (Math.abs(changePct) < 0.00005 ? "upnl-flat" : changePct > 0 ? "upnl-pos" : "upnl-neg")
         : "";
@@ -5433,6 +5554,8 @@
       const priceEl = card.querySelector(".mobile-watchlist-card-price");
       const subpriceEl = card.querySelector(".mobile-watchlist-card-subprice");
       const changeEl = card.querySelector(".mobile-watchlist-card-change");
+      const changeAmountEl = card.querySelector(".mobile-watchlist-card-change-amount");
+      const changeStackEl = card.querySelector(".mobile-watchlist-card-change-stack");
       const existingIcon = card.querySelector(".coinIcon, .coinFallback");
 
       card.dataset.mobileCoin = normalized;
@@ -5465,6 +5588,12 @@
       if (changeEl) {
         changeEl.textContent = changeText;
         changeEl.className = `mobile-watchlist-card-change${changeClass ? ` ${changeClass}` : ""}`;
+      }
+      if (changeAmountEl) {
+        changeAmountEl.textContent = changeAmountText || " ";
+      }
+      if (changeStackEl) {
+        changeStackEl.className = `mobile-watchlist-card-change-stack${changeClass ? ` ${changeClass}` : ""}`;
       }
 
       card.classList.toggle("is-swipe-left-open", swipeDirection === "left");
@@ -5666,14 +5795,76 @@
         return;
       }
       mobileFavoritesList.innerHTML = favoriteWallets.map((wallet) => (
-        "<button class='mobile-favorite-card' type='button' data-mobile-wallet='" + escapeHtml(wallet) + "'>" +
-          "<span class='mobile-favorite-card-main'>" +
-            "<strong>" + escapeHtml(shortAddress(wallet)) + "</strong>" +
-            "<span>" + escapeHtml(wallet) + "</span>" +
-          "</span>" +
-          "<svg viewBox='0 0 16 16' aria-hidden='true'><path d='M6 3.75 10.25 8 6 12.25' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'></path></svg>" +
-        "</button>"
+        "<article class='mobile-favorite-card' data-mobile-favorite-entry='true' data-mobile-wallet='" + escapeHtml(wallet) + "'>" +
+          "<button class='mobile-favorite-open' type='button' data-mobile-wallet='" + escapeHtml(wallet) + "'>" +
+            "<span class='mobile-favorite-card-main'>" +
+              "<strong>" + escapeHtml(shortAddress(wallet)) + "</strong>" +
+              "<span>" + escapeHtml(wallet) + "</span>" +
+            "</span>" +
+            "<svg viewBox='0 0 16 16' aria-hidden='true'><path d='M6 3.75 10.25 8 6 12.25' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'></path></svg>" +
+          "</button>" +
+          "<button class='mobile-favorite-remove' type='button' data-mobile-remove-wallet='" + escapeHtml(wallet) + "' aria-label='Remove favorite wallet' title='Remove favorite wallet'>" +
+            "<svg viewBox='0 0 16 16' aria-hidden='true'><path d='M4.25 8H11.75' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'></path></svg>" +
+          "</button>" +
+        "</article>"
       )).join("");
+    }
+
+    function getMobileFavoriteCards() {
+      return mobileFavoritesList
+        ? Array.from(mobileFavoritesList.querySelectorAll("[data-mobile-favorite-entry]"))
+        : [];
+    }
+
+    function setMobileFavoriteSwipeOffset(card, offset) {
+      if (!(card instanceof HTMLElement)) return;
+      const nextOffset = Math.max(-78, Math.min(0, Number(offset) || 0));
+      if (Math.abs(nextOffset) < 0.5) {
+        card.style.removeProperty("--mobile-favorite-swipe");
+      } else {
+        card.style.setProperty("--mobile-favorite-swipe", `${nextOffset}px`);
+      }
+    }
+
+    function resetMobileFavoritesSwipePointer() {
+      mobileFavoritesSwipe.pointerId = null;
+      mobileFavoritesSwipe.card = null;
+      mobileFavoritesSwipe.wallet = "";
+      mobileFavoritesSwipe.startX = 0;
+      mobileFavoritesSwipe.startY = 0;
+      mobileFavoritesSwipe.startOffset = 0;
+      mobileFavoritesSwipe.offsetX = 0;
+      mobileFavoritesSwipe.active = false;
+    }
+
+    function closeMobileFavoritesSwipe({ exceptWallet = "" } = {}) {
+      const normalizedExcept = normalizeFavoriteWallet(exceptWallet);
+      getMobileFavoriteCards().forEach((card) => {
+        const wallet = normalizeFavoriteWallet(card.getAttribute("data-mobile-wallet"));
+        if (normalizedExcept && wallet === normalizedExcept) return;
+        card.classList.remove("is-swiping", "is-swipe-left-open");
+        card.style.removeProperty("--mobile-favorite-swipe");
+      });
+      mobileFavoritesSwipe.openedWallet = normalizedExcept || "";
+    }
+
+    function finalizeMobileFavoritesSwipe(card) {
+      if (!(card instanceof HTMLElement)) {
+        resetMobileFavoritesSwipePointer();
+        return;
+      }
+      const currentOffset = Number.parseFloat(card.style.getPropertyValue("--mobile-favorite-swipe")) || 0;
+      const wallet = normalizeFavoriteWallet(card.getAttribute("data-mobile-wallet"));
+      card.classList.remove("is-swiping");
+      if (currentOffset <= -42 && wallet) {
+        closeMobileFavoritesSwipe();
+        card.classList.add("is-swipe-left-open");
+        mobileFavoritesSwipe.openedWallet = wallet;
+        card.style.removeProperty("--mobile-favorite-swipe");
+      } else {
+        closeMobileFavoritesSwipe();
+      }
+      resetMobileFavoritesSwipePointer();
     }
 
     function syncMobileWalletFrame(options = {}) {
@@ -11179,6 +11370,16 @@
       resetMobileWatchlistSwipePointer();
     });
 
+    window.addEventListener("pointerup", (event) => {
+      if (mobileFavoritesSwipe.pointerId === event.pointerId && mobileFavoritesSwipe.active) {
+        finalizeMobileFavoritesSwipe(mobileFavoritesSwipe.card);
+        return;
+      }
+      if (mobileFavoritesSwipe.pointerId !== event.pointerId) return;
+      closeMobileFavoritesSwipe({ exceptWallet: mobileFavoritesSwipe.openedWallet });
+      resetMobileFavoritesSwipePointer();
+    });
+
     window.addEventListener("pointercancel", (event) => {
       if (mobileWatchlistSwipe.pointerId === event.pointerId) {
         closeMobileWatchlistSwipe({ exceptCoin: mobileWatchlistSwipe.openedCoin });
@@ -11187,6 +11388,13 @@
       if (mobileWatchlistDrag.pointerId !== event.pointerId) return;
       stopMobileWatchlistDrag();
       flushPendingMobileWatchlistRender();
+    });
+
+    window.addEventListener("pointercancel", (event) => {
+      if (mobileFavoritesSwipe.pointerId === event.pointerId) {
+        closeMobileFavoritesSwipe({ exceptWallet: mobileFavoritesSwipe.openedWallet });
+        resetMobileFavoritesSwipePointer();
+      }
     });
 
     if (mobileWatchlistSuggestions) {
@@ -11281,12 +11489,76 @@
       mobileFavoritesList.addEventListener("click", (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
+        const removeBtn = target.closest("[data-mobile-remove-wallet]");
+        if (removeBtn instanceof HTMLElement) {
+          event.preventDefault();
+          event.stopPropagation();
+          const wallet = removeBtn.getAttribute("data-mobile-remove-wallet");
+          if (!wallet) return;
+          closeMobileFavoritesSwipe();
+          toggleFavoriteWallet(wallet);
+          return;
+        }
         const card = target.closest("[data-mobile-wallet]");
         if (!card) return;
         const wallet = card.getAttribute("data-mobile-wallet");
         if (!wallet) return;
+        if (mobileFavoritesSwipe.openedWallet) {
+          closeMobileFavoritesSwipe();
+        }
         openWalletOverlay(wallet, { pushHistory: true });
       });
+
+      mobileFavoritesList.addEventListener("pointerdown", (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target || event.pointerType === "mouse" || event.button !== 0) return;
+        if (target.closest("[data-mobile-remove-wallet]")) return;
+        const card = target.closest("[data-mobile-favorite-entry]");
+        if (!(card instanceof HTMLElement)) return;
+        if (card.setPointerCapture) {
+          try { card.setPointerCapture(event.pointerId); } catch (_) {}
+        }
+        closeMobileFavoritesSwipe({ exceptWallet: card.getAttribute("data-mobile-wallet") || "" });
+        mobileFavoritesSwipe.pointerId = event.pointerId;
+        mobileFavoritesSwipe.card = card;
+        mobileFavoritesSwipe.wallet = card.getAttribute("data-mobile-wallet") || "";
+        mobileFavoritesSwipe.startX = event.clientX;
+        mobileFavoritesSwipe.startY = event.clientY;
+        mobileFavoritesSwipe.startOffset =
+          mobileFavoritesSwipe.openedWallet === mobileFavoritesSwipe.wallet ? -78 : 0;
+        mobileFavoritesSwipe.offsetX = mobileFavoritesSwipe.startOffset;
+        mobileFavoritesSwipe.active = false;
+      }, { passive: true });
+
+      mobileFavoritesList.addEventListener("pointermove", (event) => {
+        if (mobileFavoritesSwipe.pointerId !== event.pointerId || !mobileFavoritesSwipe.card) return;
+        const dx = event.clientX - mobileFavoritesSwipe.startX;
+        const dy = event.clientY - mobileFavoritesSwipe.startY;
+        if (mobileFavoritesSwipe.active || (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.15)) {
+          mobileFavoritesSwipe.active = true;
+          mobileFavoritesSwipe.card.classList.add("is-swiping");
+          const nextOffset = Math.max(-78, Math.min(0, mobileFavoritesSwipe.startOffset + dx));
+          mobileFavoritesSwipe.offsetX = nextOffset;
+          event.preventDefault();
+          setMobileFavoriteSwipeOffset(mobileFavoritesSwipe.card, nextOffset);
+        }
+      });
+
+      const finishMobileFavoritesSwipe = (event) => {
+        if (mobileFavoritesSwipe.pointerId !== event.pointerId) return;
+        if (mobileFavoritesSwipe.card?.releasePointerCapture) {
+          try { mobileFavoritesSwipe.card.releasePointerCapture(event.pointerId); } catch (_) {}
+        }
+        if (mobileFavoritesSwipe.active) {
+          finalizeMobileFavoritesSwipe(mobileFavoritesSwipe.card);
+          return;
+        }
+        closeMobileFavoritesSwipe({ exceptWallet: mobileFavoritesSwipe.openedWallet });
+        resetMobileFavoritesSwipePointer();
+      };
+
+      mobileFavoritesList.addEventListener("pointerup", finishMobileFavoritesSwipe);
+      mobileFavoritesList.addEventListener("pointercancel", finishMobileFavoritesSwipe);
     }
 
     if (mobileWalletLeaderboardBtn) {
