@@ -1004,6 +1004,11 @@
       min-height: 0;
     }
 
+    .mobile-wallet-tail,
+    .mobile-roi-pnl {
+      display: none;
+    }
+
     .trade-footnote {
       padding: 12px 18px 16px;
       border-top: 1px solid var(--border);
@@ -3542,6 +3547,16 @@
         display: none !important;
       }
 
+      .trade-leaderboard-panel th:nth-child(3),
+      .trade-leaderboard-panel td:nth-child(3) {
+        display: table-cell !important;
+      }
+
+      .trade-leaderboard-panel th:nth-child(5),
+      .trade-leaderboard-panel td:nth-child(5) {
+        display: none !important;
+      }
+
       .trade-leaderboard-panel th:nth-child(1),
       .trade-leaderboard-panel td:nth-child(1) {
         width: 13%;
@@ -3550,20 +3565,26 @@
 
       .trade-leaderboard-panel th:nth-child(2),
       .trade-leaderboard-panel td:nth-child(2) {
-        width: 18%;
+        width: 14%;
         min-width: 48px;
+      }
+
+      .trade-leaderboard-panel th:nth-child(3),
+      .trade-leaderboard-panel td:nth-child(3) {
+        width: 18%;
+        min-width: 56px;
       }
 
       .trade-leaderboard-panel th:nth-child(6),
       .trade-leaderboard-panel td:nth-child(6) {
-        width: 34%;
+        width: 28%;
         min-width: 82px;
       }
 
       .trade-leaderboard-panel th:nth-child(8),
       .trade-leaderboard-panel td:nth-child(8) {
-        width: 35%;
-        min-width: 84px;
+        width: 29%;
+        min-width: 72px;
       }
 
       .trade-leaderboard-panel th:nth-child(8).hide-phone,
@@ -3577,6 +3598,33 @@
 
       .wallet-link strong {
         font-size: 0.82rem;
+      }
+
+      .wallet-link .wallet-link-main {
+        display: none;
+      }
+
+      .mobile-wallet-tail {
+        display: inline;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      .trade-leaderboard-panel td:nth-child(6) {
+        text-align: left;
+      }
+
+      .trade-leaderboard-panel td:nth-child(6) .mobile-roi-main {
+        display: block;
+      }
+
+      .trade-leaderboard-panel td:nth-child(6) .mobile-roi-pnl {
+        display: block;
+        margin-top: 2px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        opacity: 0.8;
       }
 
       .wallet-meta {
@@ -3614,6 +3662,7 @@
     }
 
     .mobile-watchlist-panel,
+    .mobile-favorites-panel,
     .mobile-wallet-panel,
     .mobile-bottom-nav {
       display: none;
@@ -3621,20 +3670,21 @@
 
     @media (max-width: 720px) {
       #app {
-        padding: 0 0 calc(84px + env(safe-area-inset-bottom, 0px));
+        width: 100vw;
+        padding: 0 0 calc(74px + env(safe-area-inset-bottom, 0px));
       }
 
       .shell-header {
         margin-bottom: 0;
-        padding: 10px 10px 8px;
+        padding: 10px 12px 8px;
       }
 
       main {
-        padding: 8px 10px 0;
+        padding: 0;
       }
 
       .trade-view-stack {
-        gap: 12px;
+        gap: 8px;
       }
 
       .trade-view-stack[data-mobile-view="market"] {
@@ -3645,17 +3695,18 @@
       .top-frame-panel,
       .extra-chart-panel,
       .trade-leaderboard-panel,
+      .mobile-favorites-panel,
       .mobile-wallet-panel {
-        border-radius: 18px;
-        border: 1px solid var(--border);
-        background: var(--panel-strong);
+        border-radius: 0;
+        border: 0;
+        background: transparent;
         overflow: hidden;
       }
 
       .mobile-watchlist-panel {
-        border-radius: 18px;
-        border: 1px solid var(--border);
-        background: var(--panel-strong);
+        border-radius: 0;
+        border: 0;
+        background: transparent;
         overflow: visible;
       }
 
@@ -3689,6 +3740,7 @@
       }
 
       .mobile-watchlist-panel,
+      .mobile-favorites-panel,
       .mobile-wallet-panel {
         display: block;
       }
@@ -3696,8 +3748,8 @@
       .mobile-section-shell {
         display: flex;
         flex-direction: column;
-        gap: 14px;
-        padding: 14px;
+        gap: 10px;
+        padding: 10px 0 0;
         overflow: visible;
       }
 
@@ -3706,6 +3758,7 @@
         align-items: flex-start;
         justify-content: space-between;
         gap: 12px;
+        padding: 0 12px;
       }
 
       .mobile-section-copy {
@@ -3732,7 +3785,7 @@
       .mobile-section-title {
         margin: 0;
         color: var(--text-main);
-        font-size: 1.08rem;
+        font-size: 1rem;
         font-weight: 600;
         line-height: 1.1;
       }
@@ -3777,6 +3830,7 @@
 
       .mobile-watchlist-controls {
         position: relative;
+        padding: 0 12px;
       }
 
       .mobile-watchlist-input-shell {
@@ -3831,18 +3885,23 @@
 
       .mobile-watchlist-grid {
         display: grid;
-        gap: 10px;
+        gap: 0;
+        padding: 0 12px 6px;
       }
 
       .mobile-watchlist-card {
         width: 100%;
-        border-radius: 14px;
-        background: var(--panel-muted);
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        border-radius: 0;
+        background: transparent;
+        display: block;
         align-items: center;
         overflow: hidden;
-        transition: box-shadow 0.18s ease, transform 0.18s ease;
+        transition: transform 0.18s ease;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      body.light .mobile-watchlist-card {
+        border-bottom-color: rgba(15, 23, 42, 0.08);
       }
 
       .mobile-watchlist-open {
@@ -3854,7 +3913,7 @@
         grid-template-columns: auto minmax(0, 1fr) auto;
         align-items: center;
         gap: 12px;
-        padding: 12px 8px 12px 13px;
+        padding: 11px 0;
         text-align: left;
         touch-action: pan-y;
         user-select: none;
@@ -3869,18 +3928,26 @@
       }
 
       .mobile-watchlist-card.is-dragging {
+        opacity: 0.7;
+      }
+
+      .mobile-watchlist-card.is-source-hidden {
+        visibility: hidden;
+      }
+
+      .mobile-watchlist-ghost {
         position: fixed;
-        z-index: 120;
+        z-index: 160;
         pointer-events: none;
-        transform: scale(1.015);
-        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+        transform: scale(1.006);
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.32);
+        opacity: 0.98;
       }
 
       .mobile-watchlist-card-placeholder {
         width: 100%;
-        border-radius: 14px;
-        border: 1px dashed rgba(255, 255, 255, 0.12);
-        background: rgba(255, 255, 255, 0.02);
+        border-radius: 0;
+        background: transparent;
       }
 
       .mobile-watchlist-card .coinIcon,
@@ -3897,14 +3964,14 @@
       .mobile-watchlist-card-top {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 6px;
         min-width: 0;
       }
 
       .mobile-watchlist-card-symbol {
         min-width: 0;
         color: var(--text-main);
-        font-size: 0.92rem;
+        font-size: 0.95rem;
         font-weight: 600;
         white-space: nowrap;
         overflow: hidden;
@@ -3923,52 +3990,42 @@
       }
 
       .mobile-watchlist-card-meta {
-        margin-top: 4px;
-        color: var(--muted);
-        font-size: 0.72rem;
-      }
-
-      .mobile-watchlist-card-reorder {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        color: rgba(124, 132, 143, 0.78);
-        flex: 0 0 auto;
-      }
-
-      .mobile-watchlist-card-reorder svg {
-        width: 14px;
-        height: 14px;
+        display: none;
       }
 
       .mobile-watchlist-card-side {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 3px;
+        gap: 6px;
       }
 
       .mobile-watchlist-card-price {
         color: var(--text-main);
-        font-size: 0.92rem;
+        font-size: 1rem;
         font-weight: 600;
         white-space: nowrap;
       }
 
       .mobile-watchlist-card-change {
+        min-width: 84px;
+        padding: 4px 10px;
+        border-radius: 999px;
         font-size: 0.74rem;
         font-weight: 600;
         white-space: nowrap;
+        text-align: center;
+        background: rgba(124, 132, 143, 0.14);
       }
 
       .mobile-watchlist-card-change.upnl-pos {
         color: var(--accent-green);
+        background: rgba(34, 197, 94, 0.16);
       }
 
       .mobile-watchlist-card-change.upnl-neg {
         color: var(--danger);
+        background: rgba(255, 90, 102, 0.14);
       }
 
       .mobile-watchlist-card-change.upnl-flat {
@@ -3976,14 +4033,7 @@
       }
 
       .mobile-watchlist-remove {
-        align-self: stretch;
-        width: 42px;
-        border: 0;
-        background: transparent;
-        color: var(--muted);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        display: none !important;
       }
 
       .mobile-watchlist-remove svg {
@@ -4024,8 +4074,54 @@
       }
 
       .mobile-wallet-favorites {
+        display: none !important;
+      }
+
+      .mobile-favorites-panel .mobile-section-shell {
+        padding-top: 12px;
+      }
+
+      .mobile-favorites-list {
         display: grid;
         gap: 8px;
+        padding: 0 12px 6px;
+      }
+
+      .mobile-favorite-card {
+        width: 100%;
+        min-height: 54px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 14px;
+        background: var(--panel-muted);
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        text-align: left;
+      }
+
+      .mobile-favorite-card-main {
+        min-width: 0;
+      }
+
+      .mobile-favorite-card-main strong {
+        display: block;
+        font-size: 0.84rem;
+      }
+
+      .mobile-favorite-card-main span {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 0.72rem;
+      }
+
+      .mobile-favorite-card svg {
+        width: 14px;
+        height: 14px;
+        color: var(--muted);
       }
 
       .mobile-wallet-chip {
@@ -4078,21 +4174,22 @@
         border-radius: 18px;
       }
 
+
       .mobile-bottom-nav {
         position: fixed;
-        left: 10px;
-        right: 10px;
-        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        left: 0;
+        right: 0;
+        bottom: 0;
         z-index: 80;
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 8px;
-        padding: 8px;
-        border: 1px solid var(--border);
-        border-radius: 22px;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 4px;
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+        border: 0;
+        border-radius: 0;
         background: rgba(15, 18, 23, 0.96);
         backdrop-filter: blur(18px);
-        box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.02);
+        box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.04);
       }
 
       body.light .mobile-bottom-nav {
@@ -4141,19 +4238,28 @@
 
       .trade-view-stack[data-mobile-view="market"] > .trade-leaderboard-panel,
       .trade-view-stack[data-mobile-view="market"] > .mobile-watchlist-panel,
+      .trade-view-stack[data-mobile-view="market"] > .mobile-favorites-panel,
       .trade-view-stack[data-mobile-view="market"] > .mobile-wallet-panel,
       .trade-view-stack[data-mobile-view="leaderboard"] > .top-frame-panel,
       .trade-view-stack[data-mobile-view="leaderboard"] > .extra-chart-panel,
       .trade-view-stack[data-mobile-view="leaderboard"] > .mobile-watchlist-panel,
+      .trade-view-stack[data-mobile-view="leaderboard"] > .mobile-favorites-panel,
       .trade-view-stack[data-mobile-view="leaderboard"] > .mobile-wallet-panel,
       .trade-view-stack[data-mobile-view="watchlist"] > .top-frame-panel,
       .trade-view-stack[data-mobile-view="watchlist"] > .extra-chart-panel,
       .trade-view-stack[data-mobile-view="watchlist"] > .trade-leaderboard-panel,
+      .trade-view-stack[data-mobile-view="watchlist"] > .mobile-favorites-panel,
       .trade-view-stack[data-mobile-view="watchlist"] > .mobile-wallet-panel,
+      .trade-view-stack[data-mobile-view="favorites"] > .top-frame-panel,
+      .trade-view-stack[data-mobile-view="favorites"] > .extra-chart-panel,
+      .trade-view-stack[data-mobile-view="favorites"] > .trade-leaderboard-panel,
+      .trade-view-stack[data-mobile-view="favorites"] > .mobile-watchlist-panel,
+      .trade-view-stack[data-mobile-view="favorites"] > .mobile-wallet-panel,
       .trade-view-stack[data-mobile-view="wallet"] > .top-frame-panel,
       .trade-view-stack[data-mobile-view="wallet"] > .extra-chart-panel,
       .trade-view-stack[data-mobile-view="wallet"] > .trade-leaderboard-panel,
-      .trade-view-stack[data-mobile-view="wallet"] > .mobile-watchlist-panel {
+      .trade-view-stack[data-mobile-view="wallet"] > .mobile-watchlist-panel,
+      .trade-view-stack[data-mobile-view="wallet"] > .mobile-favorites-panel {
         display: none !important;
       }
     }
@@ -4284,7 +4390,7 @@
             </div>
           </section>
 
-      <section class="panel mobile-watchlist-panel" id="mobileWatchlistPanel" hidden>
+          <section class="panel mobile-watchlist-panel" id="mobileWatchlistPanel" hidden>
             <div class="mobile-section-shell">
               <div class="mobile-section-head">
                 <div class="mobile-section-title-wrap">
@@ -4316,6 +4422,19 @@
             </div>
           </section>
 
+          <section class="panel mobile-favorites-panel" id="mobileFavoritesPanel" hidden>
+            <div class="mobile-section-shell">
+              <div class="mobile-section-head">
+                <div class="mobile-section-title-wrap">
+                  <span class="mobile-section-eyebrow">Saved wallets</span>
+                  <h2 class="mobile-section-title">Favorites</h2>
+                  <div class="mobile-section-subtitle">Open a tracked wallet directly from your saved list.</div>
+                </div>
+              </div>
+              <div class="mobile-favorites-list" id="mobileFavoritesList"></div>
+            </div>
+          </section>
+
           <section class="panel mobile-wallet-panel" id="mobileWalletPanel" hidden>
             <div class="mobile-section-shell">
               <div class="mobile-section-head">
@@ -4326,12 +4445,10 @@
                 </div>
               </div>
               <div class="mobile-wallet-empty" id="mobileWalletEmpty">
-                <p class="mobile-section-copy">Pick a wallet from Leaderboard, search a full address, or jump into one of your favorites.</p>
+                <p class="mobile-section-copy">Pick a wallet from Leaderboard, search a full address, or open one from Favorites.</p>
                 <div class="mobile-wallet-empty-actions">
                   <button class="mobile-wallet-action" type="button" id="mobileWalletLeaderboardBtn">Open leaderboard</button>
-                  <button class="mobile-wallet-action" type="button" id="mobileWalletFavoritesBtn">Favorites</button>
                 </div>
-                <div class="mobile-wallet-favorites" id="mobileWalletFavorites"></div>
               </div>
               <iframe class="mobile-wallet-frame" id="mobileWalletFrame" title="Hypermonitor mobile wallet tracker" hidden></iframe>
             </div>
@@ -4364,6 +4481,12 @@
           <path d="M5 6.5h14M5 12h14M5 17.5h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
         </svg>
         <span>Leaderboard</span>
+      </button>
+      <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="favorites" aria-label="Favorites">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 4.2 14.35 8.96l5.25.76-3.8 3.66.9 5.2L12 16.1l-4.7 2.48.89-5.2-3.79-3.66 5.24-.76L12 4.2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+        </svg>
+        <span>Favorites</span>
       </button>
       <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="wallet" aria-label="Wallet">
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -4668,13 +4791,14 @@
     const mobileWatchlistInput = document.getElementById("mobileWatchlistInput");
     const mobileWatchlistAddBtn = document.getElementById("mobileWatchlistAddBtn");
     const mobileWatchlistSuggestions = document.getElementById("mobileWatchlistSuggestions");
+    const mobileFavoritesPanel = document.getElementById("mobileFavoritesPanel");
+    const mobileFavoritesList = document.getElementById("mobileFavoritesList");
     const mobileWalletPanel = document.getElementById("mobileWalletPanel");
     const mobileWalletFrame = document.getElementById("mobileWalletFrame");
     const mobileWalletEmpty = document.getElementById("mobileWalletEmpty");
     const mobileWalletSubtitle = document.getElementById("mobileWalletSubtitle");
     const mobileWalletFavorites = document.getElementById("mobileWalletFavorites");
     const mobileWalletLeaderboardBtn = document.getElementById("mobileWalletLeaderboardBtn");
-    const mobileWalletFavoritesBtn = document.getElementById("mobileWalletFavoritesBtn");
     const mobileBottomNav = document.getElementById("mobileBottomNav");
     const mobileBottomNavButtons = mobileBottomNav ? Array.from(mobileBottomNav.querySelectorAll("[data-mobile-view]")) : [];
     const mobileCurrencyButtons = Array.from(document.querySelectorAll("[data-mobile-currency]"));
@@ -4704,6 +4828,7 @@
       pointerId: null,
       timerId: 0,
       card: null,
+      ghost: null,
       placeholder: null,
       startX: 0,
       startY: 0,
@@ -4981,7 +5106,7 @@
     }
 
     function normalizeMobileView(value) {
-      return value === "leaderboard" || value === "watchlist" || value === "wallet" ? value : "market";
+      return value === "leaderboard" || value === "watchlist" || value === "favorites" || value === "wallet" ? value : "market";
     }
 
     function syncMobileViewButtons() {
@@ -5137,16 +5262,10 @@
                   "<span class='mobile-watchlist-card-symbol'>" + escapeHtml(base) + "</span>" +
                   (dex ? "<span class='mobile-watchlist-card-badge'>" + escapeHtml(dex) + "</span>" : "") +
                 "</span>" +
-                "<span class='mobile-watchlist-card-meta'>Tap to open • Hold to reorder</span>" +
               "</span>" +
               "<span class='mobile-watchlist-card-side'>" +
                 "<span class='mobile-watchlist-card-price'>" + escapeHtml(priceText) + "</span>" +
                 "<span class='mobile-watchlist-card-change " + changeClass + "'>" + escapeHtml(changeText) + "</span>" +
-              "</span>" +
-              "<span class='mobile-watchlist-card-reorder' aria-hidden='true'>" +
-                "<svg viewBox='0 0 16 16'>" +
-                  "<path d='M5 4H11M5 8H11M5 12H11' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'></path>" +
-                "</svg>" +
               "</span>" +
             "</button>" +
             "<button class='mobile-watchlist-remove' type='button' data-mobile-remove-coin='" + escapeHtml(coin) + "' aria-label='Remove asset from watchlist' title='Remove asset'>" +
@@ -5195,14 +5314,12 @@
     function stopMobileWatchlistDrag({ commit = false } = {}) {
       clearMobileWatchlistHoldTimer();
       const card = mobileWatchlistDrag.card;
+      const ghost = mobileWatchlistDrag.ghost;
       const placeholder = mobileWatchlistDrag.placeholder;
       if (card) {
-        card.classList.remove("is-drag-ready", "is-dragging");
-        card.style.removeProperty("width");
-        card.style.removeProperty("height");
-        card.style.removeProperty("left");
-        card.style.removeProperty("top");
+        card.classList.remove("is-drag-ready", "is-dragging", "is-source-hidden");
       }
+      if (ghost?.parentNode) ghost.parentNode.removeChild(ghost);
       if (card && placeholder && placeholder.parentNode) {
         placeholder.parentNode.insertBefore(card, placeholder);
       }
@@ -5218,6 +5335,7 @@
 
       mobileWatchlistDrag.pointerId = null;
       mobileWatchlistDrag.card = null;
+      mobileWatchlistDrag.ghost = null;
       mobileWatchlistDrag.placeholder = null;
       mobileWatchlistDrag.startX = 0;
       mobileWatchlistDrag.startY = 0;
@@ -5238,27 +5356,32 @@
       placeholder.style.height = `${rect.height}px`;
       mobileWatchlistDrag.placeholder = placeholder;
       card.parentNode.insertBefore(placeholder, card.nextSibling);
+      const ghost = card.cloneNode(true);
+      ghost.classList.add("mobile-watchlist-ghost");
+      ghost.style.width = `${rect.width}px`;
+      ghost.style.height = `${rect.height}px`;
+      ghost.style.left = `${rect.left}px`;
+      ghost.style.top = `${pointerY - mobileWatchlistDrag.offsetY}px`;
+      document.body.appendChild(ghost);
+      mobileWatchlistDrag.ghost = ghost;
       mobileWatchlistDrag.active = true;
-      card.classList.add("is-dragging");
+      card.classList.add("is-dragging", "is-source-hidden");
       card.classList.remove("is-drag-ready");
-      card.style.width = `${rect.width}px`;
-      card.style.height = `${rect.height}px`;
-      card.style.left = `${rect.left}px`;
-      card.style.top = `${pointerY - mobileWatchlistDrag.offsetY}px`;
       document.body.style.userSelect = "none";
       document.body.style.cursor = "grabbing";
     }
 
     function updateMobileWatchlistDrag(pointerX, pointerY) {
       const card = mobileWatchlistDrag.card;
+      const ghost = mobileWatchlistDrag.ghost;
       const placeholder = mobileWatchlistDrag.placeholder;
       const grid = mobileWatchlistGrid;
-      if (!mobileWatchlistDrag.active || !card || !placeholder || !grid) return;
+      if (!mobileWatchlistDrag.active || !card || !ghost || !placeholder || !grid) return;
 
       const nextTop = pointerY - mobileWatchlistDrag.offsetY;
       const nextLeft = pointerX - mobileWatchlistDrag.offsetX;
-      card.style.top = `${nextTop}px`;
-      card.style.left = `${nextLeft}px`;
+      ghost.style.top = `${nextTop}px`;
+      ghost.style.left = `${nextLeft}px`;
 
       const cards = getMobileWatchlistCards().filter((entry) => entry !== card);
       const insertBefore = cards.find((entry) => {
@@ -5281,15 +5404,19 @@
     }
 
     function renderMobileWalletFavorites() {
-      if (!mobileWalletFavorites) return;
+      if (mobileWalletFavorites) mobileWalletFavorites.innerHTML = "";
+      if (!mobileFavoritesList) return;
       if (!favoriteWallets.length) {
-        mobileWalletFavorites.innerHTML = "";
+        mobileFavoritesList.innerHTML = "<div class='mobile-watchlist-loading'>No favorite wallets yet.</div>";
         return;
       }
-      mobileWalletFavorites.innerHTML = favoriteWallets.map((wallet) => (
-        "<button class='mobile-wallet-chip' type='button' data-mobile-wallet='" + escapeHtml(wallet) + "'>" +
-          "<code>" + escapeHtml(shortAddress(wallet)) + "</code>" +
-          "<span>Open</span>" +
+      mobileFavoritesList.innerHTML = favoriteWallets.map((wallet) => (
+        "<button class='mobile-favorite-card' type='button' data-mobile-wallet='" + escapeHtml(wallet) + "'>" +
+          "<span class='mobile-favorite-card-main'>" +
+            "<strong>" + escapeHtml(shortAddress(wallet)) + "</strong>" +
+            "<span>" + escapeHtml(wallet) + "</span>" +
+          "</span>" +
+          "<svg viewBox='0 0 16 16' aria-hidden='true'><path d='M6 3.75 10.25 8 6 12.25' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'></path></svg>" +
         "</button>"
       )).join("");
     }
@@ -5328,14 +5455,10 @@
       if (tradeViewStack) tradeViewStack.dataset.mobileView = state.mobileView;
       if (mobileBottomNav) mobileBottomNav.hidden = !mobile;
       if (mobileWatchlistPanel) mobileWatchlistPanel.hidden = !mobile;
+      if (mobileFavoritesPanel) mobileFavoritesPanel.hidden = !mobile;
       if (mobileWalletPanel) mobileWalletPanel.hidden = !mobile;
       if (!mobile || state.mobileView !== "watchlist") {
         closeMobileWatchlistSuggestions();
-      }
-
-      if (mobile && state.mobileView === "wallet" && !state.wallet) {
-        state.mobileView = favoriteWallets.length ? "wallet" : "leaderboard";
-        if (tradeViewStack) tradeViewStack.dataset.mobileView = state.mobileView;
       }
 
       renderMobileWatchlist();
@@ -5701,6 +5824,13 @@
       if (!address) return "-";
       if (address.length <= 14) return address;
       return address.slice(0, 6) + "..." + address.slice(-4);
+    }
+
+    function shortMobileLeaderboardAddress(address) {
+      const value = String(address || "").trim();
+      if (!value) return "***";
+      const suffix = value.slice(-3);
+      return "***" + suffix;
     }
 
     function scorePercent(value) {
@@ -9598,6 +9728,7 @@
         const activityPct = scorePercent(row.activityScore);
         const roiTone = Number.isFinite(row.roi) ? getSignedToneColor(row.roi * 100, 180) : "";
         const pnlTone = Number.isFinite(row.roi) ? getSignedToneColor(row.roi * 100, 180) : "";
+        const mobilePnlTone = Number.isFinite(row.pnl) ? getSignedToneColor(row.pnl, 180) : "";
         const href = buildWalletTrackerHref(row.address);
         const selectedClass = row.address === state.wallet ? " is-selected" : "";
         const favoriteClass = isFavoriteWallet(row.address) ? " is-active" : "";
@@ -9614,12 +9745,16 @@
             "<td><span class='rank-badge'>" + row.rank + "</span></td>" +
             "<td>" +
               "<a class='wallet-link' href='" + escapeHtml(href) + "' data-wallet-link='" + escapeHtml(row.address) + "'>" +
-                "<strong>" + escapeHtml(shortLeaderboardAddress(row.address)) + "</strong>" +
+                "<strong class='wallet-link-main'>" + escapeHtml(shortLeaderboardAddress(row.address)) + "</strong>" +
+                "<span class='mobile-wallet-tail'>" + escapeHtml(shortMobileLeaderboardAddress(row.address)) + "</span>" +
               "</a>" +
             "</td>" +
             "<td class='money hide-phone'>" + moneyFormat(row.accountValue) + "</td>" +
             renderPnlCell(row, pnlClass, pnlTone) +
-            "<td class='money " + roiClass + "'" + (roiTone ? " style='color:" + escapeHtml(roiTone) + "'" : "") + ">" + percentFormat(row.roi) + "</td>" +
+            "<td class='money " + roiClass + "'" + (roiTone ? " style='color:" + escapeHtml(roiTone) + "'" : "") + ">" +
+              "<span class='mobile-roi-main'>" + percentFormat(row.roi) + "</span>" +
+              "<span class='mobile-roi-pnl " + pnlClass + "'" + (mobilePnlTone ? " style='color:" + escapeHtml(mobilePnlTone) + "'" : "") + ">" + escapeHtml(compactMoney(row.pnl)) + "</span>" +
+            "</td>" +
             "<td class='money hide-mobile'>" + compactMoney(row.volume) + "</td>" +
             "<td class='hide-phone'>" + renderScoreCell(qualityPct) + "</td>" +
             "<td class='hide-tablet'>" + renderScoreCell(trendPct) + "</td>" +
@@ -10591,17 +10726,6 @@
         }
         const target = event.target instanceof Element ? event.target : null;
         if (!target) return;
-        const removeBtn = target.closest("[data-mobile-remove-coin]");
-        if (removeBtn) {
-          const coinToRemove = removeBtn.getAttribute("data-mobile-remove-coin");
-          if (!coinToRemove) return;
-          event.preventDefault();
-          event.stopPropagation();
-          removeFooterCoin(coinToRemove);
-          renderMobileWatchlist();
-          updateMobileWatchlistActionLabel();
-          return;
-        }
         const card = target.closest("[data-mobile-coin]");
         if (!card) return;
         const coin = card.getAttribute("data-mobile-coin");
@@ -10612,9 +10736,11 @@
       mobileWatchlistGrid.addEventListener("pointerdown", (event) => {
         const target = event.target instanceof Element ? event.target : null;
         if (!target || event.pointerType === "mouse" || event.button !== 0) return;
-        if (target.closest("[data-mobile-remove-coin]")) return;
         const card = target.closest("[data-mobile-watchlist-entry]");
         if (!(card instanceof HTMLElement)) return;
+        if (card.setPointerCapture) {
+          try { card.setPointerCapture(event.pointerId); } catch (_) {}
+        }
         clearMobileWatchlistHoldTimer();
         mobileWatchlistDrag.pointerId = event.pointerId;
         mobileWatchlistDrag.card = card;
@@ -10645,6 +10771,9 @@
 
       const finishMobileWatchlistDrag = (event, commit) => {
         if (mobileWatchlistDrag.pointerId !== event.pointerId) return;
+        if (mobileWatchlistDrag.card?.releasePointerCapture) {
+          try { mobileWatchlistDrag.card.releasePointerCapture(event.pointerId); } catch (_) {}
+        }
         stopMobileWatchlistDrag({ commit });
       };
 
@@ -10766,15 +10895,21 @@
       });
     }
 
-    if (mobileWalletLeaderboardBtn) {
-      mobileWalletLeaderboardBtn.addEventListener("click", () => {
-        setMobileView("leaderboard");
+    if (mobileFavoritesList) {
+      mobileFavoritesList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const card = target.closest("[data-mobile-wallet]");
+        if (!card) return;
+        const wallet = card.getAttribute("data-mobile-wallet");
+        if (!wallet) return;
+        openWalletOverlay(wallet, { pushHistory: true });
       });
     }
 
-    if (mobileWalletFavoritesBtn) {
-      mobileWalletFavoritesBtn.addEventListener("click", () => {
-        requestTradeFavoritesPanel();
+    if (mobileWalletLeaderboardBtn) {
+      mobileWalletLeaderboardBtn.addEventListener("click", () => {
+        setMobileView("leaderboard");
       });
     }
 

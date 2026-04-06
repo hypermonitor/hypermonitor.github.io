@@ -349,7 +349,7 @@
     }
 
     body.embed-tracker-mobile #app {
-      width: calc(100vw - 8px);
+      width: 100vw;
       padding-bottom: 10px;
     }
 
@@ -375,6 +375,7 @@
       padding: 0.6rem;
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.025);
+      scroll-margin-top: 58px;
     }
 
     body.embed-tracker-mobile .account-overview-card {
@@ -452,7 +453,7 @@
       top: 0;
       z-index: 20;
       margin-bottom: 0;
-      padding: 0.08rem 0 0.22rem;
+      padding: 0 0 0.22rem;
       background: linear-gradient(180deg, rgba(13, 16, 20, 0.985) 0%, rgba(13, 16, 20, 0.95) 82%, rgba(13, 16, 20, 0) 100%);
     }
 
@@ -462,37 +463,45 @@
 
     body.embed-tracker-mobile .shell-section-switch {
       width: 100%;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 4px;
-      padding: 4px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 12px 6px;
       border: 0;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.045);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 0;
+      background: transparent;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
 
     body.embed-tracker-mobile .shell-section-switch .orders-tab-btn {
-      min-height: 36px;
-      justify-content: center;
+      min-height: 32px;
+      justify-content: flex-start;
+      flex: 0 0 auto;
+      padding: 0 0 8px;
       border: 0;
-      border-radius: 999px;
+      border-radius: 0;
       background: transparent;
       font-size: 0.78rem;
       font-weight: 700;
+      color: var(--muted);
     }
 
     body.embed-tracker-mobile .shell-section-switch .orders-tab-btn.active {
-      background: rgba(255, 255, 255, 0.08);
-      border-bottom-color: transparent;
+      background: transparent;
+      color: var(--text-main);
+      box-shadow: inset 0 -2px 0 currentColor;
     }
 
     body.light.embed-tracker-mobile .shell-section-switch {
-      background: rgba(15, 23, 42, 0.05);
+      background: transparent;
+      border-bottom-color: rgba(15, 23, 42, 0.08);
     }
 
     body.light.embed-tracker-mobile .shell-section-switch .orders-tab-btn.active {
-      background: #ffffff;
-      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+      background: transparent;
+      box-shadow: inset 0 -2px 0 currentColor;
       color: #111827;
     }
 
@@ -7117,7 +7126,8 @@
   const isEmbedShell = embedMode === "shell";
   const isEmbedTracker = embedMode === "tracker" || embedMode === "tracker-mobile";
   const isEmbedTrackerMobile = embedMode === "tracker-mobile";
-  const isEmbedSectionMode = isEmbedPopup || isEmbedShell;
+  const isEmbedShellLike = isEmbedShell || isEmbedTrackerMobile;
+  const isEmbedSectionMode = isEmbedPopup || isEmbedShellLike;
   const initialEmbedSection = normalizeEmbedSection(pageParams.get("section"));
   const clampWalletSkillScore = (value) => {
     const numeric = Number(value);
@@ -21532,7 +21542,7 @@
 
   shellSectionButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      if (!isEmbedShell) return;
+      if (!isEmbedShellLike) return;
       const nextSection = normalizeEmbedSection(button.dataset.shellSection || "positions");
       setEmbedSection(nextSection);
     });
@@ -21750,7 +21760,7 @@
   }
 
   function notifyParentShellSection(section) {
-    if (!isEmbedShell || window.parent === window) return;
+    if (!isEmbedShellLike || window.parent === window) return;
     try {
       window.parent.postMessage({
         type: "hypermonitor:wallet-section-change",
@@ -21759,8 +21769,29 @@
     } catch (_) {}
   }
 
+  function getEmbedShellSectionTarget(section) {
+    const normalizedSection = normalizeEmbedSection(section);
+    if (normalizedSection === "performance") return performanceSectionEl;
+    if (normalizedSection === "orders") {
+      if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden")) return historyLayoutEl;
+      return liveLayoutEl;
+    }
+    return positionsSectionEl;
+  }
+
+  function scrollEmbedShellSectionIntoView(section) {
+    const target = getEmbedShellSectionTarget(section);
+    if (!target) return;
+    const topbarHeight = shellMainTopbarEl ? shellMainTopbarEl.getBoundingClientRect().height : 0;
+    const targetTop = target.getBoundingClientRect().top + window.scrollY - topbarHeight - 10;
+    window.scrollTo({
+      top: Math.max(0, targetTop),
+      behavior: "smooth"
+    });
+  }
+
   function switchEmbedShellSectionBy(direction) {
-    if (!isEmbedShell || !Number.isFinite(direction) || !direction) return;
+    if (!isEmbedShellLike || !Number.isFinite(direction) || !direction) return;
     const order = ["positions", "performance", "orders"];
     const current = getCurrentEmbedShellSection();
     const currentIndex = Math.max(0, order.indexOf(current));
@@ -21774,7 +21805,7 @@
   let shellSectionLastSwitchAt = 0;
 
   function handleShellSectionWheel(event) {
-    if (!isEmbedShell) return;
+    if (!isEmbedShellLike) return;
     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 14) return;
     shellSectionWheelAccum += event.deltaX;
     clearTimeout(shellSectionWheelResetTimer);
@@ -21817,12 +21848,33 @@
     });
   }
 
-  function setEmbedSection(section) {
+  function setEmbedSection(section, options = {}) {
     if (!isEmbedSectionMode) return;
     const normalizedSection = normalizeEmbedSection(section);
-    const nextSection = isEmbedShell && normalizedSection === "overview" ? "positions" : normalizedSection;
+    const nextSection = isEmbedShellLike && normalizedSection === "overview" ? "positions" : normalizedSection;
     document.body.dataset.popupSection = nextSection;
     syncShellSectionTabs(nextSection);
+    const shouldScroll = options.scroll !== false;
+    if (isEmbedTrackerMobile && isEmbedShell) {
+      if (dashboardSidebarEl) dashboardSidebarEl.classList.remove("hidden");
+      if (dashboardMainEl) dashboardMainEl.classList.remove("hidden");
+      if (positionsSectionEl) positionsSectionEl.classList.remove("hidden");
+      if (performanceSectionEl) performanceSectionEl.classList.remove("hidden");
+      const showHistory = Array.from(modeTabButtons).some(
+        (button) => button.dataset.tab === "history" && button.classList.contains("active")
+      );
+      if (showHistory) setHistoryMode(true, lastHistoryFocus);
+      else setHistoryMode(false);
+      notifyParentShellSection(nextSection);
+      if (shouldScroll) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            scrollEmbedShellSectionIntoView(nextSection);
+          });
+        });
+      }
+      return;
+    }
     if (isEmbedShell) {
       if (dashboardSidebarEl) dashboardSidebarEl.classList.remove("hidden");
       if (dashboardMainEl) dashboardMainEl.classList.remove("hidden");

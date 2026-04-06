@@ -1708,15 +1708,16 @@
             min-height: 0;
             display: grid;
             grid-template-columns: minmax(0, 1fr);
-            padding: 10px 10px 8px;
+            padding: 10px 0 8px;
             gap: 10px;
             background: linear-gradient(180deg, rgba(13, 16, 20, 0.98) 0%, rgba(13, 16, 20, 0.94) 100%);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            border-bottom: 0;
         }
 
         html.mobile-layout #coin-picker-wrap {
             width: 100%;
             max-width: 100%;
+            padding: 0 12px;
         }
 
         html.mobile-layout #coin-btn {
@@ -1741,6 +1742,7 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
             padding-bottom: 0;
+            padding-inline: 12px;
         }
 
         html.mobile-layout .hstat {
@@ -1774,7 +1776,7 @@
             display: block;
             flex: none;
             overflow: visible;
-            padding: 8px 10px 18px;
+            padding: 8px 0 18px;
         }
 
         html.mobile-layout #chart-side {
@@ -1791,7 +1793,7 @@
             height: auto;
             min-height: 0;
             overflow-x: auto;
-            padding: 2px 2px 0;
+            padding: 2px 12px 0;
             gap: 6px;
             background: transparent;
             border-bottom: 0;
@@ -1828,7 +1830,7 @@
             flex: none;
             overflow: visible;
             background: transparent;
-            gap: 12px;
+            gap: 8px;
         }
 
         html.mobile-layout #chart-container-1,
@@ -1837,7 +1839,7 @@
             height: clamp(300px, 40svh, 460px);
             min-height: clamp(300px, 40svh, 460px);
             border: 0;
-            border-radius: 18px;
+            border-radius: 0;
             overflow: hidden;
             background: var(--surface);
         }
@@ -1856,6 +1858,12 @@
             top: 8px;
             left: 10px;
             right: 10px;
+        }
+
+        html.mobile-layout .chart-watermark img {
+            width: min(46%, 190px);
+            max-width: 190px;
+            opacity: 0.1;
         }
 
         html.mobile-layout #legend-name {
@@ -1878,18 +1886,16 @@
             min-height: 310px;
             margin-top: 0;
             border: 0;
-            border-radius: 18px;
+            border-radius: 0;
             overflow: hidden;
             background: var(--surface);
             box-shadow: none;
         }
 
-        html.mobile-ob-collapsed #right-panel {
-            display: none;
-        }
-
-        html.mobile-ob-collapsed #ob-open-btn {
-            display: inline-flex !important;
+        html.mobile-layout #ob-open-btn,
+        html.mobile-layout .ob-close-btn,
+        html.mobile-layout #ob-view-btns {
+            display: none !important;
         }
 
         html.mobile-layout .panel-tabs {
@@ -1912,6 +1918,108 @@
             padding-right: 12px;
         }
 
+        html.mobile-layout .ob-hdr {
+            display: none;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-areas:
+                "agg agg"
+                "spread spread"
+                "bids asks"
+                "ratio ratio";
+            column-gap: 8px;
+            row-gap: 8px;
+            align-items: stretch;
+            padding-bottom: 6px;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-agg-bar {
+            grid-area: agg;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-spread {
+            grid-area: spread;
+            order: initial;
+            border-top: 0;
+            margin: 0 12px;
+            padding: 0 0 2px;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap,
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap {
+            min-height: 244px;
+            padding-top: 18px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap {
+            grid-area: bids;
+            margin-left: 12px;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap {
+            grid-area: asks;
+            margin-right: 12px;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap::before,
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 5px 8px 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            content: "";
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap::before {
+            content: "Buy";
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap::before {
+            content: "Sell";
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-ratio {
+            grid-area: ratio;
+            order: initial;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row {
+            padding: 0 8px;
+            line-height: 1.75;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row .c1,
+        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row .c2 {
+            flex: 0 0 auto;
+            width: auto;
+            max-width: 48%;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row .c2 {
+            font-size: 10.5px;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row .c3 {
+            display: none;
+        }
+
+        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap .ob-row {
+            flex-direction: row-reverse;
+        }
+
         html.mobile-layout #ob-hover-card {
             max-width: calc(100% - 24px);
         }
@@ -1922,13 +2030,18 @@
 
         html.light.mobile-layout #header {
             background: linear-gradient(180deg, rgba(244, 244, 243, 0.98) 0%, rgba(244, 244, 243, 0.95) 100%);
-            border-bottom-color: rgba(15, 23, 42, 0.06);
+            border-bottom-color: transparent;
         }
 
         html.light.mobile-layout #coin-btn,
         html.light.mobile-layout .hstat {
             border-color: rgba(148, 163, 184, 0.16);
             background: rgba(255, 255, 255, 0.92);
+        }
+
+        html.light.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap,
+        html.light.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap {
+            background: rgba(15, 23, 42, 0.025);
         }
 
         #chart-canvas {
@@ -4048,11 +4161,16 @@
 
         function normalizeChartPrefs(raw) {
             const next = { ...DEFAULT_CHART_PREFS };
-            if (!raw || typeof raw !== 'object') return next;
+            if (!raw || typeof raw !== 'object') {
+                next.showGrid = !MOBILE_ASSET_QUERY.matches;
+                return next;
+            }
             next.priceMode = raw.priceMode === 'line' ? 'line' : 'candles';
             next.lowerStudy = raw.lowerStudy === 'rsi' ? 'rsi' : 'volume';
             next.showMAs = raw.showMAs !== false;
-            next.showGrid = raw.showGrid !== false;
+            next.showGrid = Object.prototype.hasOwnProperty.call(raw, 'showGrid')
+                ? raw.showGrid !== false
+                : !MOBILE_ASSET_QUERY.matches;
             const rawPeriods = Array.isArray(raw.maPeriods) ? raw.maPeriods : [raw.maFast, raw.maMid, raw.maSlow];
             next.maPeriods = rawPeriods.slice(0, 3).map((value, index) => {
                 const fallback = DEFAULT_CHART_PREFS.maPeriods[index] || DEFAULT_CHART_PREFS.maPeriods[DEFAULT_CHART_PREFS.maPeriods.length - 1];
@@ -4118,6 +4236,9 @@
 
         // ── State ──────────────────────────────────────────────────
         const initialChartPrefs = loadChartPrefs();
+        if (MOBILE_ASSET_QUERY.matches) {
+            initialChartPrefs.showGrid = false;
+        }
         const S = {
             coin: parseCoin(), tf: '15m', markPx: 0, aggTick: 0,
             obView: 'both', aggTicks: [],
@@ -4669,12 +4790,11 @@
             if (mobile) {
                 rightPanel.style.removeProperty('width');
                 rightPanel.style.removeProperty('min-width');
-                if (!mobileOrderBookAutoApplied && !orderBookVisibilityTouched) {
-                    document.documentElement.classList.remove('mobile-ob-collapsed');
-                    rightPanel.style.display = 'flex';
-                    if (obOpenBtn) obOpenBtn.style.display = 'none';
-                    mobileOrderBookAutoApplied = true;
-                }
+                document.documentElement.classList.remove('mobile-ob-collapsed');
+                rightPanel.style.display = 'flex';
+                if (obOpenBtn) obOpenBtn.style.display = 'none';
+                if (typeof setOrderBookView === 'function') setOrderBookView('both');
+                mobileOrderBookAutoApplied = true;
             } else {
                 document.documentElement.classList.remove('mobile-ob-collapsed');
                 if (!orderBookVisibilityTouched) {
@@ -4936,7 +5056,7 @@
         }
 
         function toggleOb() {
-            if (IS_COMPACT) return;
+            if (IS_COMPACT || isMobileAssetLayout()) return;
             orderBookVisibilityTouched = true;
             if (rightPanel.style.display === 'none') {
                 if (isMobileAssetLayout()) document.documentElement.classList.remove('mobile-ob-collapsed');
