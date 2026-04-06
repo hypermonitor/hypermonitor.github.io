@@ -410,6 +410,10 @@
             min-width: 0;
         }
 
+        #mobile-market-summary {
+            display: none;
+        }
+
         .hstat {
             display: flex;
             flex-direction: column;
@@ -1690,6 +1694,7 @@
             height: auto;
             min-height: 100%;
             overflow: auto;
+            overflow-x: hidden;
             background: var(--bg);
         }
 
@@ -1697,6 +1702,7 @@
             height: auto;
             min-height: 100svh;
             overflow: visible;
+            overflow-x: hidden;
             background: var(--bg);
         }
 
@@ -1737,45 +1743,55 @@
         }
 
         html.mobile-layout #header-stats {
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-            padding-bottom: 0;
-            padding-inline: 12px;
+            display: none;
         }
 
-        html.mobile-layout .hstat {
-            min-height: 56px;
-            padding: 8px 10px;
-            border-radius: 14px;
-            background: var(--surface);
-            border: 1px solid rgba(255, 255, 255, 0.04);
+        html.mobile-layout #mobile-market-summary {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 12px;
+        }
+
+        html.mobile-layout .mobile-market-summary-main,
+        html.mobile-layout .mobile-market-summary-funding {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 4px;
+            gap: 3px;
         }
 
-        html.mobile-layout #funding-stat {
-            grid-column: 1 / -1;
-        }
-
-        html.mobile-layout .hstat .lbl {
-            font-size: 9px;
+        html.mobile-layout .mobile-market-summary-label {
+            color: var(--muted);
+            font-size: 0.64rem;
+            font-weight: 600;
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
 
-        html.mobile-layout .hstat .val {
-            font-size: 13px;
-            line-height: 1.2;
+        html.mobile-layout #s-mark-mobile {
+            color: var(--text);
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        html.mobile-layout #s-fund-mobile {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            line-height: 1.15;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
         }
 
         html.mobile-layout #main {
             display: block;
             flex: none;
             overflow: visible;
+            overflow-x: hidden;
             padding: 8px 0 18px;
         }
 
@@ -1784,6 +1800,7 @@
             flex-direction: column;
             gap: 10px;
             overflow: visible;
+            overflow-x: hidden;
         }
 
         html.mobile-layout #chart-toolbar {
@@ -1792,21 +1809,23 @@
             z-index: 9;
             height: auto;
             min-height: 0;
-            overflow-x: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
             padding: 2px 12px 0;
-            gap: 6px;
+            gap: 10px;
             background: transparent;
             border-bottom: 0;
-            scrollbar-width: none;
         }
 
-        html.mobile-layout #chart-toolbar::-webkit-scrollbar {
-            display: none;
+        html.mobile-layout #chart-toolbar > div[style*="flex:1"] {
+            display: none !important;
         }
 
         html.mobile-layout .tf-btn {
             flex: 0 0 auto;
-            padding: 5px 2px;
+            padding: 5px 0;
             font-size: 11px;
             font-weight: 600;
         }
@@ -1814,6 +1833,10 @@
         html.mobile-layout .toolbar-icon-btn {
             width: 28px;
             height: 28px;
+        }
+
+        html.mobile-layout .chart-toggle-group {
+            display: none !important;
         }
 
         #chart-drawing-toolbar-2,
@@ -1864,6 +1887,8 @@
             width: min(46%, 190px);
             max-width: 190px;
             opacity: 0.1;
+            left: 50%;
+            top: 50%;
         }
 
         html.mobile-layout #legend-name {
@@ -1922,11 +1947,10 @@
             display: none;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             grid-template-areas:
-                "agg agg"
                 "spread spread"
                 "bids asks"
                 "ratio ratio";
@@ -1936,20 +1960,46 @@
             padding-bottom: 6px;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-agg-bar {
-            grid-area: agg;
+        html.mobile-layout #ob-agg-bar {
+            display: none;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-spread {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-spread {
             grid-area: spread;
             order: initial;
             border-top: 0;
             margin: 0 12px;
-            padding: 0 0 2px;
+            padding: 2px 0 2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap,
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap {
+        html.mobile-layout #ob-spread-info {
+            display: none;
+        }
+
+        html.mobile-layout #ob-spread-selector-slot {
+            display: flex;
+            align-items: center;
+            flex: 0 0 auto;
+        }
+
+        html.mobile-layout #ob-spread-selector-slot .ob-agg-select {
+            display: flex;
+        }
+
+        html.mobile-layout #ob-spread-selector-slot .ob-agg-trigger {
+            min-width: 74px;
+            height: 32px;
+            padding: 0 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-bids-wrap,
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap {
             min-height: 244px;
             padding-top: 18px;
             position: relative;
@@ -1958,18 +2008,18 @@
             overflow: hidden;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-bids-wrap {
             grid-area: bids;
             margin-left: 12px;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap {
             grid-area: asks;
             margin-right: 12px;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap::before,
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap::before {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-bids-wrap::before,
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap::before {
             position: absolute;
             top: 0;
             left: 0;
@@ -1983,40 +2033,40 @@
             content: "";
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-bids-wrap::before {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-bids-wrap::before {
             content: "Buy";
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap::before {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap::before {
             content: "Sell";
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-ratio {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-ratio {
             grid-area: ratio;
             order: initial;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row {
             padding: 0 8px;
             line-height: 1.75;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row .c1,
-        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row .c2 {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c1,
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c2 {
             flex: 0 0 auto;
             width: auto;
             max-width: 48%;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row .c2 {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c2 {
             font-size: 10.5px;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] .ob-row .c3 {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c3 {
             display: none;
         }
 
-        html.mobile-layout #tab-ob[data-ob-view="both"] #ob-asks-wrap .ob-row {
+        html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap .ob-row {
             flex-direction: row-reverse;
         }
 
@@ -3281,6 +3331,16 @@
                 <div class="hstat"><span class="lbl">Open Interest</span><span class="val" id="s-oi">–</span></div>
                 <div class="hstat has-hover-hint" id="funding-stat"><span class="lbl">Funding / Countdown</span><span class="val" id="s-fund">–</span></div>
             </div>
+            <div id="mobile-market-summary" aria-hidden="true">
+                <div class="mobile-market-summary-main">
+                    <span class="mobile-market-summary-label">Mark Price</span>
+                    <span id="s-mark-mobile">–</span>
+                </div>
+                <div class="mobile-market-summary-funding">
+                    <span class="mobile-market-summary-label">Funding</span>
+                    <span id="s-fund-mobile">–</span>
+                </div>
+            </div>
             <div id="funding-hover-card" aria-hidden="true"></div>
         </header>
 
@@ -3724,6 +3784,7 @@
                                     style="font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.3px">–</span>
                                 <span id="ob-mid-arrow" class="val" aria-hidden="true"></span>
                             </div>
+                            <div id="ob-spread-selector-slot"></div>
                             <div id="ob-spread-info"
                                 style="color:var(--muted);font-size:10px;text-align:right;line-height:1.6">Spread –
                             </div>
@@ -4376,6 +4437,7 @@
         const $ = id => document.getElementById(id);
         const sMark = $('s-mark'), sChg = $('s-chg');
         const sVol = $('s-vol'), sOi = $('s-oi'), sFund = $('s-fund');
+        const sMarkMobile = $('s-mark-mobile'), sFundMobile = $('s-fund-mobile');
         const fundingStat = $('funding-stat');
         const fundingHoverCard = $('funding-hover-card');
         const obAsks = $('ob-asks-inner'), obBids = $('ob-bids-inner');
@@ -4383,7 +4445,10 @@
         const obMid = $('ob-mid'), obSprdInfo = $('ob-spread-info');
         const obMidArrow = $('ob-mid-arrow');
         const obTab = $('tab-ob');
+        const obAggBar = $('ob-agg-bar');
         const obAggTrigger = $('ob-agg-trigger');
+        const obAggSelect = obAggTrigger ? obAggTrigger.closest('.ob-agg-select') : null;
+        const obSpreadSelectorSlot = $('ob-spread-selector-slot');
         const obAggValue = $('ob-agg-value');
         const obAggMenu = $('ob-agg-menu');
         const obPriceLabel = $('ob-price-label');
@@ -4776,6 +4841,14 @@
         function syncResponsiveAssetLayout() {
             const mobile = isMobileAssetLayout();
             document.documentElement.classList.toggle('mobile-layout', mobile);
+
+            if (obAggSelect && obSpreadSelectorSlot && obAggBar) {
+                if (mobile) {
+                    if (obAggSelect.parentNode !== obSpreadSelectorSlot) obSpreadSelectorSlot.appendChild(obAggSelect);
+                } else if (obAggSelect.parentNode !== obAggBar) {
+                    obAggBar.appendChild(obAggSelect);
+                }
+            }
 
             if (mobile) {
                 if (chartCont1) chartCont1.style.flex = '';
@@ -7664,6 +7737,10 @@
             const fund = Number(market.funding) * 100, vol = Number(market.dayNtlVlm), oi = Number(market.openInterest) * mark;
             S.markPx = mark; const d = pxDec(mark);
             sMark.textContent = '$' + fmt(mark, d); sMark.className = 'val ' + (mark >= prev ? 'up' : 'dn');
+            if (sMarkMobile) {
+                sMarkMobile.textContent = '$' + fmt(mark, d);
+                sMarkMobile.className = mark >= prev ? 'up' : 'dn';
+            }
             if (prev > 0) {
                 const diff = mark - prev, pct = (diff / prev) * 100;
                 sChg.textContent = `${diff >= 0 ? '+' : ''}${fmt(diff, d)} / ${diff >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
@@ -7677,6 +7754,10 @@
             sFund.dataset.base = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
             sFund.dataset.fundingHourly = Number.isFinite(Number(market.funding)) ? String(Number(market.funding)) : '';
             sFund.dataset.fundingAnnualized = Number.isFinite(Number(market.funding)) ? String(annualizeHourlyFundingRate(Number(market.funding))) : '';
+            if (sFundMobile) {
+                sFundMobile.textContent = sFund.textContent;
+                sFundMobile.className = sFund.className;
+            }
             if (fundingHoverCard?.classList.contains('is-visible')) showFundingHoverCard();
             syncAssetDocumentTitle(mark);
             legName.textContent = formatLegendName(market.label, S.tf);
@@ -7783,7 +7864,7 @@
             const maxT = view === 'asks' ? askMax : view === 'bids' ? bidMax : Math.max(askMax, bidMax);
 
             ensureOrderBookRows();
-            const displayAsks = view === 'both' ? [...aLvl].reverse() : aLvl;
+            const displayAsks = view === 'both' ? (isMobileAssetLayout() ? aLvl : [...aLvl].reverse()) : aLvl;
             orderBookRows.ask.forEach((rowRef, index) => updateOrderBookRow(rowRef, displayAsks[index], maxT, d, isOrderBookSideVisible('ask') && index < rowCount));
             orderBookRows.bid.forEach((rowRef, index) => updateOrderBookRow(rowRef, bLvl[index], maxT, d, isOrderBookSideVisible('bid') && index < rowCount));
 
@@ -8896,16 +8977,46 @@
         });
 
         // ── Panel tabs ─────────────────────────────────────────────
+        function setRightPanelTab(id) {
+            const nextId = id === 'trades' ? 'trades' : 'ob';
+            closeOrderBookDetail();
+            document.querySelectorAll('.ptab').forEach(t => t.classList.toggle('active', t.dataset.tab === nextId));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === `tab-${nextId}`));
+        }
+
         document.querySelectorAll('.ptab').forEach(tab => {
             tab.addEventListener('click', () => {
-                const id = tab.dataset.tab;
-                closeOrderBookDetail();
-                document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-                tab.classList.add('active');
-                $('tab-' + id).classList.add('active');
+                setRightPanelTab(tab.dataset.tab);
             });
         });
+
+        if (rightPanel) {
+            let mobilePanelTouchStartX = 0;
+            let mobilePanelTouchStartY = 0;
+            let mobilePanelTouchReady = false;
+
+            rightPanel.addEventListener('touchstart', (event) => {
+                if (!isMobileAssetLayout()) return;
+                const touch = event.changedTouches?.[0];
+                if (!touch) return;
+                mobilePanelTouchStartX = touch.clientX;
+                mobilePanelTouchStartY = touch.clientY;
+                mobilePanelTouchReady = true;
+            }, { passive: true });
+
+            rightPanel.addEventListener('touchend', (event) => {
+                if (!isMobileAssetLayout() || !mobilePanelTouchReady) return;
+                mobilePanelTouchReady = false;
+                const touch = event.changedTouches?.[0];
+                if (!touch) return;
+                const dx = touch.clientX - mobilePanelTouchStartX;
+                const dy = touch.clientY - mobilePanelTouchStartY;
+                if (Math.abs(dx) < 52 || Math.abs(dx) <= Math.abs(dy) * 1.15) return;
+                const activeTab = document.querySelector('.ptab.active')?.dataset.tab || 'ob';
+                if (dx < 0 && activeTab === 'ob') setRightPanelTab('trades');
+                if (dx > 0 && activeTab === 'trades') setRightPanelTab('ob');
+            }, { passive: true });
+        }
 
         syncOrderBookViewUi();
         updateOrderBookLabels();
@@ -8944,6 +9055,10 @@
             const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
             const base = sFund.dataset.base || '';
             sFund.textContent = base + ` 00:${m}:${s}`;
+            if (sFundMobile) {
+                sFundMobile.textContent = base + ` 00:${m}:${s}`;
+                sFundMobile.className = sFund.className;
+            }
         }, 1000);
 
         // ── Boot ───────────────────────────────────────────────────

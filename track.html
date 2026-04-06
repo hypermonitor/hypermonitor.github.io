@@ -6565,7 +6565,8 @@
     <div class="dashboard-main">
     <div class="shell-main-topbar">
       <div class="shell-section-switch" id="shellSectionTabs" role="tablist" aria-label="Wallet section tabs">
-        <button class="orders-tab-btn shell-section-btn active" type="button" data-shell-section="positions" aria-selected="true">Positions</button>
+        <button class="orders-tab-btn shell-section-btn active" type="button" data-shell-section="overview" aria-selected="true">Overview</button>
+        <button class="orders-tab-btn shell-section-btn" type="button" data-shell-section="positions" aria-selected="false">Positions</button>
         <button class="orders-tab-btn shell-section-btn" type="button" data-shell-section="performance" aria-selected="false">Performance</button>
         <button class="orders-tab-btn shell-section-btn" type="button" data-shell-section="orders" aria-selected="false">Orders</button>
       </div>
@@ -21552,6 +21553,11 @@
     shellSectionTabsEl.addEventListener("wheel", handleShellSectionWheel, { passive: false });
   }
 
+  if (dashboardShellEl) {
+    dashboardShellEl.addEventListener("touchstart", handleShellSectionTouchStart, { passive: true });
+    dashboardShellEl.addEventListener("touchend", handleShellSectionTouchEnd, { passive: true });
+  }
+
   function requestWalletShellClose() {
     if (window.parent && window.parent !== window) {
       try {
@@ -21746,7 +21752,7 @@
   }
 
   function getCurrentEmbedShellSection() {
-    return normalizeEmbedSection(document.body.dataset.popupSection || initialEmbedSection || "positions");
+    return normalizeEmbedSection(document.body.dataset.popupSection || initialEmbedSection || "overview");
   }
 
   function syncShellSectionTabs(section) {
@@ -21771,6 +21777,7 @@
 
   function getEmbedShellSectionTarget(section) {
     const normalizedSection = normalizeEmbedSection(section);
+    if (normalizedSection === "overview") return accountOverviewCardEl;
     if (normalizedSection === "performance") return performanceSectionEl;
     if (normalizedSection === "orders") {
       if (historyLayoutEl && !historyLayoutEl.classList.contains("hidden")) return historyLayoutEl;
@@ -21792,7 +21799,9 @@
 
   function switchEmbedShellSectionBy(direction) {
     if (!isEmbedShellLike || !Number.isFinite(direction) || !direction) return;
-    const order = ["positions", "performance", "orders"];
+    const order = isEmbedTrackerMobile
+      ? ["overview", "positions", "performance", "orders"]
+      : ["positions", "performance", "orders"];
     const current = getCurrentEmbedShellSection();
     const currentIndex = Math.max(0, order.indexOf(current));
     const nextIndex = Math.max(0, Math.min(order.length - 1, currentIndex + (direction > 0 ? 1 : -1)));
@@ -21803,6 +21812,9 @@
   let shellSectionWheelAccum = 0;
   let shellSectionWheelResetTimer = 0;
   let shellSectionLastSwitchAt = 0;
+  let shellSectionTouchStartX = 0;
+  let shellSectionTouchStartY = 0;
+  let shellSectionTouchActive = false;
 
   function handleShellSectionWheel(event) {
     if (!isEmbedShellLike) return;
@@ -21828,6 +21840,26 @@
     switchEmbedShellSectionBy(delta > 0 ? 1 : -1);
   }
 
+  function handleShellSectionTouchStart(event) {
+    if (!isEmbedTrackerMobile) return;
+    const touch = event.changedTouches?.[0];
+    if (!touch) return;
+    shellSectionTouchStartX = touch.clientX;
+    shellSectionTouchStartY = touch.clientY;
+    shellSectionTouchActive = true;
+  }
+
+  function handleShellSectionTouchEnd(event) {
+    if (!isEmbedTrackerMobile || !shellSectionTouchActive) return;
+    shellSectionTouchActive = false;
+    const touch = event.changedTouches?.[0];
+    if (!touch) return;
+    const dx = touch.clientX - shellSectionTouchStartX;
+    const dy = touch.clientY - shellSectionTouchStartY;
+    if (Math.abs(dx) < 56 || Math.abs(dx) <= Math.abs(dy) * 1.15) return;
+    switchEmbedShellSectionBy(dx > 0 ? -1 : 1);
+  }
+
   function shouldPreloadPerformanceSection() {
     return !isEmbedSectionMode || initialEmbedSection === "performance";
   }
@@ -21851,7 +21883,9 @@
   function setEmbedSection(section, options = {}) {
     if (!isEmbedSectionMode) return;
     const normalizedSection = normalizeEmbedSection(section);
-    const nextSection = isEmbedShellLike && normalizedSection === "overview" ? "positions" : normalizedSection;
+    const nextSection = isEmbedTrackerMobile
+      ? normalizedSection
+      : (isEmbedShellLike && normalizedSection === "overview" ? "positions" : normalizedSection);
     document.body.dataset.popupSection = nextSection;
     syncShellSectionTabs(nextSection);
     const shouldScroll = options.scroll !== false;

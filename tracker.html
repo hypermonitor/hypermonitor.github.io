@@ -3761,6 +3761,10 @@
         padding: 0 12px;
       }
 
+      #headerFavoritesBtn {
+        display: none !important;
+      }
+
       .mobile-section-copy {
         margin: 0;
         color: var(--muted);
@@ -3800,32 +3804,6 @@
 
       .mobile-wallet-panel.has-wallet .mobile-section-subtitle {
         word-break: normal;
-      }
-
-      .mobile-watchlist-currency {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px;
-        border-radius: 999px;
-        background: var(--panel-muted);
-      }
-
-      .mobile-watchlist-currency-btn {
-        min-width: 38px;
-        height: 30px;
-        border: 0;
-        border-radius: 999px;
-        background: transparent;
-        color: var(--muted);
-        font-size: 0.76rem;
-        font-weight: 600;
-        transition: background-color 0.18s ease, color 0.18s ease;
-      }
-
-      .mobile-watchlist-currency-btn.is-active {
-        background: var(--accent-soft);
-        color: var(--text-main);
       }
 
       .mobile-watchlist-controls {
@@ -3912,8 +3890,8 @@
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto;
         align-items: center;
-        gap: 12px;
-        padding: 11px 0;
+        gap: 10px;
+        padding: 9px 0 8px;
         text-align: left;
         touch-action: pan-y;
         user-select: none;
@@ -3932,7 +3910,7 @@
       }
 
       .mobile-watchlist-card.is-source-hidden {
-        visibility: hidden;
+        display: none !important;
       }
 
       .mobile-watchlist-ghost {
@@ -3997,7 +3975,16 @@
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 6px;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .mobile-watchlist-card-quote-row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        min-width: 0;
       }
 
       .mobile-watchlist-card-price {
@@ -4007,11 +3994,18 @@
         white-space: nowrap;
       }
 
+      .mobile-watchlist-card-subprice {
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
       .mobile-watchlist-card-change {
-        min-width: 84px;
-        padding: 4px 10px;
+        min-width: 72px;
+        padding: 3px 9px;
         border-radius: 999px;
-        font-size: 0.74rem;
+        font-size: 0.7rem;
         font-weight: 600;
         white-space: nowrap;
         text-align: center;
@@ -4396,11 +4390,6 @@
                 <div class="mobile-section-title-wrap">
                   <span class="mobile-section-eyebrow">Live markets</span>
                   <h2 class="mobile-section-title">Watchlist</h2>
-                  <div class="mobile-section-subtitle">Tap any asset to jump back into the chart.</div>
-                </div>
-                <div class="mobile-watchlist-currency" role="group" aria-label="Mobile watchlist currency">
-                  <button class="mobile-watchlist-currency-btn" type="button" data-mobile-currency="EUR">EUR</button>
-                  <button class="mobile-watchlist-currency-btn" type="button" data-mobile-currency="USD">USD</button>
                 </div>
               </div>
               <div class="mobile-watchlist-controls">
@@ -4497,6 +4486,11 @@
       </button>
     </nav>
   </div>
+
+  <script>
+    window.__logoOk = window.__logoOk || function () {};
+    window.__logoErr = window.__logoErr || function () {};
+  </script>
 
   <div class="price-footer pending" aria-label="Live prices">
     <div class="price-footer-loading" aria-hidden="true">
@@ -4828,6 +4822,7 @@
       pointerId: null,
       timerId: 0,
       card: null,
+      coin: "",
       ghost: null,
       placeholder: null,
       startX: 0,
@@ -4908,6 +4903,7 @@
     const FOOTER_CHANGE_STORAGE_KEY = "hypermonitor-footer-change";
     const FAVORITES_KEY = "hypermonitor-favorite-wallets";
     const THEME_STORAGE_KEY = "hypermonitor-theme";
+    const MOBILE_VIEW_STORAGE_KEY = "hypermonitor-mobile-view";
     const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
     const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
     const TRACKER_FOOTER_LEGACY_DEFAULT_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
@@ -5116,18 +5112,22 @@
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-pressed", isActive ? "true" : "false");
       });
-      mobileCurrencyButtons.forEach((button) => {
-        const currency = String(button.dataset.mobileCurrency || "").toUpperCase();
-        button.classList.toggle("is-active", currency === footerPriceCurrency);
-        button.setAttribute("aria-pressed", currency === footerPriceCurrency ? "true" : "false");
-      });
     }
 
-    function formatMobileWatchlistPrice(coin) {
+    function formatMobileWatchlistPriceForCurrency(coin, currency = "USD") {
       const price = getLivePriceForCoin(coin);
-      const displayMeta = getDisplayCurrencyMeta(price);
+      let displayMeta = null;
+      if (Number.isFinite(price)) {
+        if (currency === "EUR" && Number.isFinite(footerEurUsdRate) && footerEurUsdRate > 0) {
+          displayMeta = { value: price / footerEurUsdRate, symbol: "€" };
+        } else if (currency === "JPY" && Number.isFinite(footerUsdJpyRate) && footerUsdJpyRate > 0) {
+          displayMeta = { value: price * footerUsdJpyRate, symbol: "¥" };
+        } else {
+          displayMeta = { value: price, symbol: "$" };
+        }
+      }
       const displayPrice = displayMeta?.value;
-      const cacheKey = `${footerPriceCurrency}:${coin}`;
+      const cacheKey = `${currency}:${coin}`;
       if (Number.isFinite(displayPrice)) {
         let decimals = coinPriceDecimals.get(cacheKey);
         if (decimals === undefined) {
@@ -5146,7 +5146,7 @@
         lastFooterPrices.set(cacheKey, formatted);
         return formatted;
       }
-      const fallbackSymbol = footerPriceCurrency === "EUR" ? "€" : footerPriceCurrency === "JPY" ? "¥" : "$";
+      const fallbackSymbol = currency === "EUR" ? "€" : currency === "JPY" ? "¥" : "$";
       return lastFooterPrices.get(cacheKey) || `${fallbackSymbol}--`;
     }
 
@@ -5245,7 +5245,8 @@
       mobileWatchlistGrid.innerHTML = desired.map((coin) => {
         const base = getCoinBaseName(coin);
         const dex = getCoinDexName(coin);
-        const priceText = formatMobileWatchlistPrice(coin);
+        const priceText = formatMobileWatchlistPriceForCurrency(coin, "USD");
+        const eurText = formatMobileWatchlistPriceForCurrency(coin, "EUR");
         const changePct = getFooterChangePct(coin);
         const changeClass = Number.isFinite(changePct)
           ? (Math.abs(changePct) < 0.00005 ? "upnl-flat" : changePct > 0 ? "upnl-pos" : "upnl-neg")
@@ -5264,8 +5265,11 @@
                 "</span>" +
               "</span>" +
               "<span class='mobile-watchlist-card-side'>" +
-                "<span class='mobile-watchlist-card-price'>" + escapeHtml(priceText) + "</span>" +
-                "<span class='mobile-watchlist-card-change " + changeClass + "'>" + escapeHtml(changeText) + "</span>" +
+                "<span class='mobile-watchlist-card-quote-row'>" +
+                  "<span class='mobile-watchlist-card-price'>" + escapeHtml(priceText) + "</span>" +
+                  "<span class='mobile-watchlist-card-change " + changeClass + "'>" + escapeHtml(changeText) + "</span>" +
+                "</span>" +
+                "<span class='mobile-watchlist-card-subprice'>" + escapeHtml(eurText) + "</span>" +
               "</span>" +
             "</button>" +
             "<button class='mobile-watchlist-remove' type='button' data-mobile-remove-coin='" + escapeHtml(coin) + "' aria-label='Remove asset from watchlist' title='Remove asset'>" +
@@ -5316,11 +5320,15 @@
       const card = mobileWatchlistDrag.card;
       const ghost = mobileWatchlistDrag.ghost;
       const placeholder = mobileWatchlistDrag.placeholder;
+      const sourceCoin = mobileWatchlistDrag.coin;
+      const gridChildren = placeholder && mobileWatchlistGrid ? Array.from(mobileWatchlistGrid.children) : [];
+      const placeholderIndex = placeholder ? Math.max(0, gridChildren.indexOf(placeholder)) : 0;
       if (card) {
         card.classList.remove("is-drag-ready", "is-dragging", "is-source-hidden");
+        card.style.removeProperty("display");
       }
       if (ghost?.parentNode) ghost.parentNode.removeChild(ghost);
-      if (card && placeholder && placeholder.parentNode) {
+      if (!commit && card && placeholder && placeholder.parentNode) {
         placeholder.parentNode.insertBefore(card, placeholder);
       }
       if (placeholder?.parentNode) placeholder.parentNode.removeChild(placeholder);
@@ -5329,12 +5337,16 @@
         const nextOrder = getMobileWatchlistCards()
           .map((entry) => entry.getAttribute("data-mobile-coin"))
           .filter(Boolean);
+        if (sourceCoin) {
+          nextOrder.splice(Math.min(placeholderIndex, nextOrder.length), 0, sourceCoin);
+        }
         commitMobileWatchlistOrder(nextOrder);
         mobileWatchlistDrag.cancelClickUntil = Date.now() + 280;
       }
 
       mobileWatchlistDrag.pointerId = null;
       mobileWatchlistDrag.card = null;
+      mobileWatchlistDrag.coin = "";
       mobileWatchlistDrag.ghost = null;
       mobileWatchlistDrag.placeholder = null;
       mobileWatchlistDrag.startX = 0;
@@ -5349,13 +5361,15 @@
     function startMobileWatchlistDrag(pointerX, pointerY) {
       const card = mobileWatchlistDrag.card;
       const grid = mobileWatchlistGrid;
-      if (!card || !grid) return;
+      if (!card || !grid || !card.parentNode) return;
       const rect = card.getBoundingClientRect();
       const placeholder = document.createElement("div");
       placeholder.className = "mobile-watchlist-card-placeholder";
       placeholder.style.height = `${rect.height}px`;
       mobileWatchlistDrag.placeholder = placeholder;
-      card.parentNode.insertBefore(placeholder, card.nextSibling);
+      mobileWatchlistDrag.coin = card.getAttribute("data-mobile-coin") || "";
+      card.parentNode.insertBefore(placeholder, card);
+      card.remove();
       const ghost = card.cloneNode(true);
       ghost.classList.add("mobile-watchlist-ghost");
       ghost.style.width = `${rect.width}px`;
@@ -5478,7 +5492,19 @@
         return;
       }
       state.mobileView = normalized;
+      try {
+        sessionStorage.setItem(MOBILE_VIEW_STORAGE_KEY, normalized);
+      } catch (_) {}
       syncMobileShell(options.forceFrameReload === true);
+    }
+
+    function loadStoredMobileView() {
+      try {
+        const stored = sessionStorage.getItem(MOBILE_VIEW_STORAGE_KEY);
+        return stored ? normalizeMobileView(stored) : "";
+      } catch (_) {
+        return "";
+      }
     }
 
     function initTheme() {
@@ -9753,7 +9779,7 @@
             renderPnlCell(row, pnlClass, pnlTone) +
             "<td class='money " + roiClass + "'" + (roiTone ? " style='color:" + escapeHtml(roiTone) + "'" : "") + ">" +
               "<span class='mobile-roi-main'>" + percentFormat(row.roi) + "</span>" +
-              "<span class='mobile-roi-pnl " + pnlClass + "'" + (mobilePnlTone ? " style='color:" + escapeHtml(mobilePnlTone) + "'" : "") + ">" + escapeHtml(compactMoney(row.pnl)) + "</span>" +
+              "<span class='mobile-roi-pnl " + pnlClass + "'" + (mobilePnlTone ? " style='color:" + escapeHtml(mobilePnlTone) + "'" : "") + ">" + escapeHtml(Number.isFinite(row.pnl) && row.pnl > 0 ? "+" + compactMoney(row.pnl) : compactMoney(row.pnl)) + "</span>" +
             "</td>" +
             "<td class='money hide-mobile'>" + compactMoney(row.volume) + "</td>" +
             "<td class='hide-phone'>" + renderScoreCell(qualityPct) + "</td>" +
@@ -11122,7 +11148,10 @@
 
     state.coin = parseCoin();
     state.wallet = parseWallet();
-    state.mobileView = state.wallet ? "wallet" : "watchlist";
+    const storedMobileView = loadStoredMobileView();
+    state.mobileView = storedMobileView === "wallet" && !state.wallet
+      ? "watchlist"
+      : storedMobileView || (state.wallet ? "wallet" : "watchlist");
 
     setCoin(state.coin, { fromPopState: true });
     syncTradeLayout();
