@@ -475,20 +475,23 @@
       width: 100%;
       display: flex;
       align-items: center;
-      gap: 18px;
-      padding: 0 12px 6px;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 2px 6px;
       border: 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 0;
       background: transparent;
-      overflow-x: auto;
+      overflow: hidden;
       scrollbar-width: none;
+      overscroll-behavior-x: none;
     }
 
     body.embed-tracker-mobile .shell-section-switch .orders-tab-btn {
       min-height: 32px;
-      justify-content: flex-start;
-      flex: 0 0 auto;
+      justify-content: center;
+      flex: 1 1 0;
+      min-width: 0;
       padding: 0 0 8px;
       border: 0;
       border-radius: 0;
@@ -547,6 +550,10 @@
 
     body.embed-tracker-mobile .performance-close-btn,
     body.embed-tracker-mobile .performance-download-btn {
+      display: none !important;
+    }
+
+    body.embed-tracker-mobile .performance-extra-toggle {
       display: none !important;
     }
 
@@ -7487,7 +7494,7 @@
   let primaryPerformanceMode = "pnl";
   let riskPerformanceMode = "exposure";
   let activityViewMode = "trades";
-  let performanceExtraExpanded = !isEmbedTracker;
+  let performanceExtraExpanded = isEmbedTrackerMobile ? true : !isEmbedTracker;
   function setStartupChromeLoading(isLoading) {
     rootEl.classList.toggle("tracker-startup-loading", Boolean(isLoading));
   }
