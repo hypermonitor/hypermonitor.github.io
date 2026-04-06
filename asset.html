@@ -4254,6 +4254,8 @@
         const OB_ROWS_SINGLE = 28;
         const ORDERBOOK_ROW_CAP = OB_ROWS_SINGLE;
         const MAX_TRADES = 80;
+        const TIME_MODE_HISTORY_WINDOW_SECONDS = 900;
+        const TIME_MODE_LABEL_INTERVAL_SECONDS = 10;
         let perpDexNames = null;
         let mobileOrderBookAutoApplied = false;
         let orderBookVisibilityTouched = false;
@@ -4512,6 +4514,16 @@
             if (type.includes('dayofmonth') || type.includes('day') || type.includes('date')) {
                 return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
             }
+            if (isTimeChartMode()) {
+                const wholeSecond = Math.floor(Number(time) || 0);
+                if (wholeSecond % TIME_MODE_LABEL_INTERVAL_SECONDS !== 0) return '';
+                return date.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+            }
             if (type.includes('timewithseconds')) {
                 return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             }
@@ -4537,11 +4549,12 @@
             const crosshairLabelBg = getCssVar('--chart-crosshair-label-bg') || '#18202a';
             const showTimeScale = options.showTimeScale !== false;
             const showGrid = options.showGrid !== false;
+            const showSeconds = options.showSeconds === true;
             const gridColor = showGrid ? borderColor : 'rgba(0, 0, 0, 0)';
             return {
                 layout: { background: { color: background }, textColor, attributionLogo: false },
                 localization: {
-                    timeFormatter: (time) => formatAxisTimeLabel(time, 'time'),
+                    timeFormatter: (time) => formatAxisTimeLabel(time, showSeconds ? 'timewithseconds' : 'time'),
                 },
                 grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } },
                 crosshair: {
@@ -4554,7 +4567,7 @@
                     borderColor,
                     visible: showTimeScale,
                     timeVisible: true,
-                    secondsVisible: false,
+                    secondsVisible: showSeconds,
                     tickMarkFormatter: (time, tickMarkType) => formatAxisTimeLabel(time, tickMarkType)
                 }
             };
@@ -4571,16 +4584,16 @@
                 } catch (_) {}
             }
             if (typeof chart !== 'undefined' && chart) {
-                chart.applyOptions(getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid }));
+                chart.applyOptions(getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
             }
             if (typeof chart2 !== 'undefined' && chart2) {
-                chart2.applyOptions(getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid }));
+                chart2.applyOptions(getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
             }
             if (typeof lowerChart !== 'undefined' && lowerChart) {
-                lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid }));
+                lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
             }
             if (typeof lowerChart2 !== 'undefined' && lowerChart2) {
-                lowerChart2.applyOptions(getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid }));
+                lowerChart2.applyOptions(getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
             }
         }
 
@@ -5088,6 +5101,7 @@
             if (!TF_MS[tf]) return;
             if (tf === S.tf && options.force !== true) return;
             S.tf = tf;
+            resetTimeModeAnimationState();
             clearLiveTimeTicks(1);
             clearLiveTimeTicks(2);
             document.querySelectorAll('.tf-btn[data-tf]').forEach(button => {
@@ -5103,6 +5117,7 @@
                 notifyParentTimeframe();
             }
             connectWs();
+            syncTimeModeTicker();
             await fetchCandles();
             await fetchCandles2();
         }
@@ -5563,6 +5578,79 @@
                 merged.set(time, { time, value });
             });
             return [...merged.values()].sort((left, right) => left.time - right.time);
+        }
+
+        function buildTimeSeriesFromTrades(rawTrades, coinKey = '') {
+            const targetCoin = buildMarketKey(coinKey);
+            const normalizedTrades = (Array.isArray(rawTrades) ? rawTrades : [])
+                .map(rawTrade => normalizeTrade(rawTrade, targetCoin))
+                .filter(trade => trade && (!targetCoin || !trade.coin || trade.coin === targetCoin))
+                .sort((left, right) => Number(left.time || 0) - Number(right.time || 0));
+            if (!normalizedTrades.length) {
+                return { candles: [], volumes: [], trades: [] };
+            }
+
+            const latestTradeSecond = Math.floor(Number(normalizedTrades[normalizedTrades.length - 1]?.time || 0) / 1000);
+            const historyStartSecond = Number.isFinite(latestTradeSecond)
+                ? Math.max(0, latestTradeSecond - TIME_MODE_HISTORY_WINDOW_SECONDS + 1)
+                : 0;
+            const secondMap = new Map();
+            normalizedTrades.forEach(trade => {
+                const second = Math.floor(Number(trade.time || 0) / 1000);
+                if (!Number.isFinite(second)) return;
+                if (second < historyStartSecond) return;
+                let entry = secondMap.get(second);
+                if (!entry) {
+                    entry = {
+                        time: second,
+                        open: Number(trade.px),
+                        high: Number(trade.px),
+                        low: Number(trade.px),
+                        close: Number(trade.px),
+                        volume: 0
+                    };
+                    secondMap.set(second, entry);
+                } else {
+                    entry.high = Math.max(Number(entry.high), Number(trade.px));
+                    entry.low = Math.min(Number(entry.low), Number(trade.px));
+                    entry.close = Number(trade.px);
+                }
+                entry.volume += Math.abs(Number(trade.sz) || 0);
+            });
+
+            const sortedSeconds = [...secondMap.keys()].sort((a, b) => a - b);
+            if (!sortedSeconds.length) {
+                return { candles: [], volumes: [], trades: normalizedTrades.slice().sort(compareTrades).slice(0, MAX_TRADES) };
+            }
+            const candlesData = [];
+            const volumeData = [];
+            let previousClose = null;
+
+            const pushPoint = (second, entry, isGap = false) => {
+                const close = Number(entry?.close ?? previousClose);
+                if (!Number.isFinite(close)) return;
+                const open = Number(entry?.open ?? previousClose ?? close);
+                const high = Number(entry?.high ?? Math.max(open, close));
+                const low = Number(entry?.low ?? Math.min(open, close));
+                candlesData.push({ time: second, open, high, low, close });
+                volumeData.push({
+                    time: second,
+                    value: isGap ? 0 : Math.max(0, Number(entry?.volume) || 0),
+                    color: close >= open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR
+                });
+                previousClose = close;
+            };
+
+            for (let second = historyStartSecond; second <= sortedSeconds[sortedSeconds.length - 1]; second += 1) {
+                if (secondMap.has(second)) pushPoint(second, secondMap.get(second), false);
+                else if (previousClose != null) pushPoint(second, { close: previousClose }, true);
+            }
+
+            return {
+                candles: candlesData,
+                volumes: volumeData,
+                trades: normalizedTrades.slice().sort(compareTrades).slice(0, MAX_TRADES)
+            };
         }
 
         function computeSmaData(candlesData, period) {
@@ -6083,8 +6171,8 @@
 
         // ── Chart 1 Setup ──────────────────────────────────────────
         const chartWrap = $('chart-wrap');
-        const chart = LightweightCharts.createChart($('chart-canvas'), getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid }));
-        const lowerChart = LightweightCharts.createChart($('chart-lower-canvas'), getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid }));
+        const chart = LightweightCharts.createChart($('chart-canvas'), getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
+        const lowerChart = LightweightCharts.createChart($('chart-lower-canvas'), getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
 
         function createChartSeriesBundle(chartInstance, lowerChartInstance, lowerPaneEl) {
             const candleSeries = chartInstance.addCandlestickSeries({
@@ -6234,8 +6322,8 @@
 
         // ── Chart 2 Setup ──────────────────────────────────────────
         const chartWrap2 = $('chart-wrap-2');
-        const chart2 = LightweightCharts.createChart($('chart-canvas-2'), getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid }));
-        const lowerChart2 = LightweightCharts.createChart($('chart-lower-canvas-2'), getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid }));
+        const chart2 = LightweightCharts.createChart($('chart-canvas-2'), getChartThemeOptions({ showTimeScale: false, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
+        const lowerChart2 = LightweightCharts.createChart($('chart-lower-canvas-2'), getChartThemeOptions({ showTimeScale: true, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
 
         const chartSeries2 = createChartSeriesBundle(chart2, lowerChart2, chartLowerPane2);
         const candles2 = chartSeries2.candles;
@@ -6278,7 +6366,7 @@
 
         function shouldShowReturnToLive(target) {
             const bundle = getSeriesBundle(target);
-            const data = getSortedCandleData(target);
+            const data = isTimeChartMode() ? getDisplayChartData(target) : getSortedCandleData(target);
             if (!bundle?.chart || data.length < 2) return false;
             const range = bundle.chart.timeScale().getVisibleLogicalRange?.();
             if (!range || !Number.isFinite(range.to) || !Number.isFinite(range.from)) return false;
@@ -6303,7 +6391,7 @@
 
         function animateReturnToLive(target) {
             const bundle = getSeriesBundle(target);
-            const data = getSortedCandleData(target);
+            const data = isTimeChartMode() ? getDisplayChartData(target) : getSortedCandleData(target);
             if (!bundle?.chart || data.length < 2) return;
             const currentRange = bundle.chart.timeScale().getVisibleLogicalRange?.();
             const lastIndex = data.length - 1;
@@ -6376,6 +6464,11 @@
         let oldestTs2 = null, isLoadingHistory2 = false;
         let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
         let candleFetchSeq2 = 0;
+        let tradeKeys = new Set();
+        let tradeKeys2 = new Set();
+        let timeModeTickFrame = 0;
+        const timeModeLastSecond = { 1: NaN, 2: NaN };
+        const latestTimeModePrice = { 1: NaN, 2: NaN };
         const legendHoverState = {
             1: { active: false, time: null },
             2: { active: false, time: null }
@@ -6450,6 +6543,10 @@
             return [...getCandleStore(target).volMap.values()].sort((a, b) => a.time - b.time);
         }
 
+        function getDisplayChartData(target) {
+            return buildDisplayLineData(getSortedCandleData(target), getLiveTimeTicks(target));
+        }
+
         function getLiveTimeTicks(target) {
             return target === 2 ? timeLineTicks2 : timeLineTicks1;
         }
@@ -6457,6 +6554,84 @@
         function clearLiveTimeTicks(target) {
             if (target === 2) timeLineTicks2 = [];
             else timeLineTicks1 = [];
+        }
+
+        function getTradeKeyStore(target) {
+            return target === 2 ? tradeKeys2 : tradeKeys;
+        }
+
+        function resetTradeKeyStore(target) {
+            if (target === 2) tradeKeys2 = new Set();
+            else tradeKeys = new Set();
+        }
+
+        function setLatestTimeModePrice(target, price) {
+            const value = Number(price);
+            if (!Number.isFinite(value)) return;
+            latestTimeModePrice[target === 2 ? 2 : 1] = value;
+        }
+
+        function stopTimeModeTicker() {
+            if (!timeModeTickFrame) return;
+            cancelAnimationFrame(timeModeTickFrame);
+            timeModeTickFrame = 0;
+        }
+
+        function getTimeModeVisibleBars() {
+            return Math.max(
+                24,
+                Math.round(getDefaultVisibleBars('time') * (isMobileAssetLayout() ? 0.96 : 1.5))
+            );
+        }
+
+        function syncTimeModeViewport(target, fraction) {
+            const safeTarget = target === 2 ? 2 : 1;
+            if (shouldShowReturnToLive(safeTarget)) return;
+            const bundle = getSeriesBundle(safeTarget);
+            const data = getDisplayChartData(safeTarget);
+            if (!bundle?.chart || data.length < 2) return;
+            const visibleBars = getTimeModeVisibleBars();
+            const rightPad = Math.max(3, Math.round(visibleBars * 0.06));
+            const lastIndex = data.length - 1;
+            try {
+                bundle.chart.timeScale().setVisibleLogicalRange({
+                    from: Math.max(0, lastIndex - visibleBars + fraction),
+                    to: lastIndex + rightPad + fraction
+                });
+            } catch (_) {}
+        }
+
+        function syncTimeModeTicker() {
+            if (!isTimeChartMode()) {
+                stopTimeModeTicker();
+                return;
+            }
+            if (timeModeTickFrame) return;
+            const step = () => {
+                if (!isTimeChartMode()) {
+                    stopTimeModeTicker();
+                    return;
+                }
+                const nowMs = Date.now();
+                const nowSec = Math.floor(nowMs / 1000);
+                const fraction = (nowMs % 1000) / 1000;
+                const primaryPrice = Number(latestTimeModePrice[1]);
+                if (Number.isFinite(primaryPrice) && timeModeLastSecond[1] !== nowSec) {
+                    timeModeLastSecond[1] = nowSec;
+                    updateTimeModeTick(1, primaryPrice);
+                }
+                syncTimeModeViewport(1, fraction);
+                if (S.chart2Active) {
+                    const secondaryPrice = Number(latestTimeModePrice[2]);
+                    if (Number.isFinite(secondaryPrice) && timeModeLastSecond[2] !== nowSec) {
+                        timeModeLastSecond[2] = nowSec;
+                        updateTimeModeTick(2, secondaryPrice);
+                    }
+                    syncTimeModeViewport(2, fraction);
+                }
+                timeModeTickFrame = requestAnimationFrame(step);
+            };
+            timeModeTickFrame = requestAnimationFrame(step);
         }
 
         function clearLegendHoverState(target) {
@@ -7506,8 +7681,8 @@
             });
             bundle.rsiFloor.applyOptions({ visible: showRsi && showLowerPane });
             bundle.rsiCeil.applyOptions({ visible: showRsi && showLowerPane });
-            bundle.chart.applyOptions(getChartThemeOptions({ showTimeScale: !showLowerPane, showGrid: S.showGrid }));
-            bundle.lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: showLowerPane, showGrid: S.showGrid }));
+            bundle.chart.applyOptions(getChartThemeOptions({ showTimeScale: !showLowerPane, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
+            bundle.lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: showLowerPane, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
             bundle.lowerPane?.classList.toggle('is-rsi', showRsi);
             syncRsiPriceLines(target);
             resizeChartBundle(
@@ -7776,6 +7951,10 @@
             const requestSeq = ++candleFetchSeq1;
             const requestCoin = S.coin;
             const requestTf = S.tf;
+            if (isTimeChartMode()) {
+                await fetchRecentTradeSeries(1, requestSeq, requestCoin, requestTf);
+                return;
+            }
             const requestInterval = getCandleInterval(S.tf);
             const ms = TF_MS[requestInterval] || 900e3, end = Date.now(), st = end - ms * 500;
             const showLoading = candleMap.size === 0;
@@ -7784,6 +7963,7 @@
                 const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin, interval: requestInterval, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
                 if (requestSeq !== candleFetchSeq1 || requestCoin !== S.coin || requestTf !== S.tf) return;
+                resetTimeModeAnimationState();
                 clearLiveTimeTicks(1);
                 candleMap.clear(); volMap.clear();
                 cv.forEach(c => candleMap.set(c.time, c)); vl.forEach(v => volMap.set(v.time, v));
@@ -7800,7 +7980,76 @@
                 setChartLoading(1, false);
             }
         }
-        
+
+        async function fetchRecentTradesSnapshot(coin) {
+            const response = await fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'recentTrades', coin })
+            });
+            if (!response.ok) throw new Error(`recentTrades error: ${response.status} ${response.statusText}`);
+            const data = await response.json();
+            return Array.isArray(data) ? data : [];
+        }
+
+        async function fetchRecentTradeSeries(target, requestSeq, requestCoin, requestTf) {
+            const bundle = getSeriesBundle(target);
+            const mapCV = target === 2 ? candleMap2 : candleMap;
+            const mapVL = target === 2 ? volMap2 : volMap;
+            const seriesC = target === 2 ? candles2 : candles;
+            const seriesV = target === 2 ? volSeries2 : volSeries;
+            const requestLabelTarget = target === 2 ? 2 : 1;
+            const showLoading = mapCV.size === 0;
+            if (showLoading) setChartLoading(requestLabelTarget, true);
+            try {
+                const rawTrades = await fetchRecentTradesSnapshot(requestCoin);
+                if (
+                    (target === 1 && requestSeq !== candleFetchSeq1) ||
+                    (target === 2 && requestSeq !== candleFetchSeq2) ||
+                    requestCoin !== (target === 2 ? S.coin2 : S.coin) ||
+                    requestTf !== S.tf
+                ) return;
+
+                const { candles: cv, volumes: vl, trades } = buildTimeSeriesFromTrades(rawTrades, requestCoin);
+                resetTimeModeAnimationState();
+                clearLiveTimeTicks(target);
+                mapCV.clear();
+                mapVL.clear();
+                cv.forEach(c => mapCV.set(c.time, c));
+                vl.forEach(v => mapVL.set(v.time, v));
+                const cvArr = [...mapCV.values()].sort((a, b) => a.time - b.time);
+                if (target === 1) oldestTs = cvArr.length ? cvArr[0].time : null;
+                else oldestTs2 = cvArr.length ? cvArr[0].time : null;
+                seriesC.setData(cvArr);
+                seriesV.setData([...mapVL.values()].sort((a, b) => a.time - b.time));
+                if (target === 1) {
+                    S.tradeBuf = trades;
+                    syncTradeKeys();
+                    renderTrades();
+                } else {
+                    tradeKeys2 = new Set(trades.map(trade => trade.key));
+                }
+                if (cvArr.length) {
+                    setLatestTimeModePrice(target, cvArr[cvArr.length - 1].close);
+                }
+                syncDerivedSeries(target);
+                applyDefaultZoom(bundle.chart, cvArr.length, S.tf);
+                clearLegendHoverState(target);
+                refreshLegend(target);
+                scheduleReturnToLiveUpdate(target);
+                scheduleDrawingRender(target);
+                syncTimeModeTicker();
+            } catch (error) {
+                if (target === 1) {
+                    S.tradeBuf = [];
+                    syncTradeKeys();
+                    renderTrades();
+                }
+            } finally {
+                setChartLoading(requestLabelTarget, false);
+            }
+        }
+
         async function fetchCandles2() {
             if (!S.chart2Active) return;
             const requestSeq = ++candleFetchSeq2;
@@ -7809,7 +8058,11 @@
             const coinLabel = getSelectedCoinLabel(S.coin2);
             $(`legend-name-2`).textContent = formatLegendName(coinLabel, S.tf);
             syncSelectedCoinUi(2);
-            
+            if (isTimeChartMode()) {
+                await fetchRecentTradeSeries(2, requestSeq, requestCoin, requestTf);
+                return;
+            }
+
             const requestInterval = getCandleInterval(S.tf);
             const ms = TF_MS[requestInterval] || 900e3, end = Date.now(), st = end - ms * 500;
             const showLoading = candleMap2.size === 0;
@@ -7818,6 +8071,7 @@
                 const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'candleSnapshot', req: { coin: S.coin2, interval: requestInterval, startTime: st, endTime: end } }) });
                 const { cv, vl } = parseRawCandles(await r.json());
                 if (requestSeq !== candleFetchSeq2 || requestCoin !== S.coin2 || requestTf !== S.tf) return;
+                resetTimeModeAnimationState();
                 clearLiveTimeTicks(2);
                 candleMap2.clear(); volMap2.clear();
                 cv.forEach(c => candleMap2.set(c.time, c)); vl.forEach(v => volMap2.set(v.time, v));
@@ -7836,6 +8090,7 @@
         }
 
         async function loadOlderCandles(targetChart) {
+            if (isTimeChartMode()) return;
             let mapCV, mapVL, oldT, loadBlock, seriesC, seriesV;
             let targetCoin = S.coin;
             if (targetChart === 1) {
@@ -7979,6 +8234,10 @@
             legName.textContent = formatLegendName(market.label, S.tf);
             syncSelectedCoinUi(1);
             buildAggBar(mark);
+            if (!isTimeChartMode()) {
+                setLatestTimeModePrice(1, mark);
+            }
+            syncTimeModeTicker();
             connectWs();
         }
 
@@ -8129,7 +8388,10 @@
                 }
                 obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
                 updateMobileLivePriceSummary(mid);
-                updateTimeModeTick(1, mid);
+                if (!isTimeChartMode()) {
+                    setLatestTimeModePrice(1, mid);
+                    updateTimeModeTick(1, mid);
+                }
                 syncAssetDocumentTitle(bestBid);
                 notifyParentLivePrice(bestBid);
             }
@@ -8164,14 +8426,20 @@
             return latest;
         }
 
-        function applyTradeToPrimaryCandle(trade) {
+        function applyTradeToTargetSeries(trade, target = 1) {
             if (!trade || !Number.isFinite(trade.px) || !Number.isFinite(trade.time)) return;
-            const tfMs = TF_MS[getCandleInterval(S.tf)] || 900e3;
-            if (!tfMs || !candleMap.size) return;
+            const safeTarget = target === 2 ? 2 : 1;
+            const tfMs = isTimeChartMode() ? 1000 : (TF_MS[getCandleInterval(S.tf)] || 900e3);
+            const mapCV = safeTarget === 2 ? candleMap2 : candleMap;
+            const mapVL = safeTarget === 2 ? volMap2 : volMap;
+            const candleSeries = safeTarget === 2 ? candles2 : candles;
+            const lineSeries = safeTarget === 2 ? lineSeries2 : lineSeries;
+            const volumeSeries = safeTarget === 2 ? volSeries2 : volSeries;
+            if (!tfMs || !mapCV.size) return;
 
             const tradeTimeMs = Number(trade.time);
             const bucketSec = Math.floor(Math.floor(tradeTimeMs / tfMs) * tfMs / 1000);
-            const latestBar = getLatestCandleBar(candleMap);
+            const latestBar = getLatestCandleBar(mapCV);
             if (!latestBar || !Number.isFinite(bucketSec)) return;
             if (bucketSec < latestBar.time) return;
 
@@ -8197,29 +8465,35 @@
                 };
             }
 
-            candleMap.set(nextBar.time, nextBar);
-            candles.update(nextBar);
+            mapCV.set(nextBar.time, nextBar);
+            candleSeries.update(nextBar);
             lineSeries.update({ time: nextBar.time, value: nextBar.close });
 
-            const existingVol = volMap.get(nextBar.time);
+            const existingVol = mapVL.get(nextBar.time);
             const nextVol = {
                 time: nextBar.time,
-                value: Number(existingVol?.value) || 0,
+                value: isTimeChartMode()
+                    ? (Number(existingVol?.value) || 0) + Math.abs(Number(trade.sz) || 0)
+                    : (Number(existingVol?.value) || 0),
                 color: nextBar.close >= nextBar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR
             };
-            volMap.set(nextBar.time, nextVol);
-            volSeries.update(nextVol);
-            refreshLegend(1);
-            scheduleVisibleExtremaUpdate(1);
+            mapVL.set(nextBar.time, nextVol);
+            volumeSeries.update(nextVol);
+            setLatestTimeModePrice(safeTarget, nextClose);
+            refreshLegend(safeTarget);
+            scheduleVisibleExtremaUpdate(safeTarget);
         }
 
         function updateTimeModeTick(target, price) {
             if (!isTimeChartMode() || !Number.isFinite(price)) return;
-            const bundle = getSeriesBundle(target);
+            const safeTarget = target === 2 ? 2 : 1;
+            const bundle = getSeriesBundle(safeTarget);
             if (!bundle?.line) return;
-            const ticks = getLiveTimeTicks(target);
+            const ticks = getLiveTimeTicks(safeTarget);
             const nowSec = Math.floor(Date.now() / 1000);
             if (!Number.isFinite(nowSec)) return;
+            setLatestTimeModePrice(safeTarget, price);
+            ensureTimeModeCarryForward(safeTarget, price, nowSec);
             const lastPoint = ticks[ticks.length - 1];
             if (lastPoint && Math.abs(Number(lastPoint.time) - nowSec) <= 1) {
                 lastPoint.value = price;
@@ -8228,8 +8502,9 @@
                 while (ticks.length > 240) ticks.shift();
             }
             bundle.line.update({ time: nowSec, value: price });
-            if (!shouldShowReturnToLive(target)) {
-                const lineData = buildDisplayLineData(getSortedCandleData(target), ticks);
+            refreshLegend(safeTarget);
+            if (!shouldShowReturnToLive(safeTarget)) {
+                const lineData = buildDisplayLineData(getSortedCandleData(safeTarget), ticks);
                 applyDefaultZoom(bundle.chart, lineData.length, S.tf);
             }
         }
@@ -8347,20 +8622,22 @@
             return String(users[1] || users[0] || '').trim();
         }
 
-        function getTradeKey(rawTrade, wallet) {
+        function getTradeKey(rawTrade, wallet, coin = '') {
             const hash = String(rawTrade?.hash || rawTrade?.txHash || '').trim();
             const tid = String(rawTrade?.tid ?? rawTrade?.tradeId ?? '').trim();
             const time = String(rawTrade?.time ?? '').trim();
             const side = String(rawTrade?.side || '').trim();
             const px = String(rawTrade?.px ?? '').trim();
             const sz = String(rawTrade?.sz ?? '').trim();
-            return [hash, tid, time, side, px, sz, wallet].join('|');
+            return [coin, hash, tid, time, side, px, sz, wallet].join('|');
         }
 
-        function normalizeTrade(rawTrade) {
+        function normalizeTrade(rawTrade, fallbackCoin = '') {
             const wallet = getTradeWallet(rawTrade);
+            const coin = buildMarketKey(rawTrade?.coin || rawTrade?.s || fallbackCoin);
             const trade = {
-                key: getTradeKey(rawTrade, wallet),
+                key: getTradeKey(rawTrade, wallet, coin),
+                coin,
                 time: Number(rawTrade?.time ?? Date.now()),
                 side: String(rawTrade?.side || '').toUpperCase(),
                 px: Number(rawTrade?.px),
@@ -8419,6 +8696,34 @@
             tradesList.replaceChildren();
         }
 
+        function ensureTimeModeCarryForward(target, price, timeSec = Math.floor(Date.now() / 1000)) {
+            if (!isTimeChartMode()) return null;
+            const safeTarget = target === 2 ? 2 : 1;
+            const value = Number(price);
+            const second = Number(timeSec);
+            if (!Number.isFinite(value) || !Number.isFinite(second)) return null;
+            const mapCV = safeTarget === 2 ? candleMap2 : candleMap;
+            const mapVL = safeTarget === 2 ? volMap2 : volMap;
+            const candleSeries = safeTarget === 2 ? candles2 : candles;
+            const volumeSeries = safeTarget === 2 ? volSeries2 : volSeries;
+            const existingBar = mapCV.get(second);
+            if (existingBar) return existingBar;
+            const previousBar = getLatestCandleBar(mapCV);
+            const open = Number(previousBar?.close ?? value);
+            const bar = { time: second, open, high: Math.max(open, value), low: Math.min(open, value), close: value };
+            const volumeBar = { time: second, value: 0, color: value >= open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR };
+            mapCV.set(second, bar);
+            mapVL.set(second, volumeBar);
+            candleSeries.update(bar);
+            volumeSeries.update(volumeBar);
+            return bar;
+        }
+
+        function resetTimeModeAnimationState() {
+            timeModeLastSecond[1] = NaN;
+            timeModeLastSecond[2] = NaN;
+        }
+
         function resetChartLegend(target) {
             const refs = getLegendRefs(target);
             if (!refs) return;
@@ -8445,6 +8750,7 @@
             candleMap.clear();
             volMap.clear();
             clearLiveTimeTicks(1);
+            latestTimeModePrice[1] = NaN;
             oldestTs = null;
             clearLegendHoverState(1);
             candles.setData([]);
@@ -8462,6 +8768,8 @@
             candleMap2.clear();
             volMap2.clear();
             clearLiveTimeTicks(2);
+            latestTimeModePrice[2] = NaN;
+            resetTradeKeyStore(2);
             oldestTs2 = null;
             clearLegendHoverState(2);
             candles2.setData([]);
@@ -8474,24 +8782,29 @@
             hideSharedCrosshair(2);
         }
 
-        function ingestTrades(rawTrades) {
+        function ingestTrades(rawTrades, options = {}) {
+            const target = options.target === 2 ? 2 : 1;
+            const keyStore = getTradeKeyStore(target);
+            const shouldUpdateTradeList = options.updateTradeList !== false && target === 1;
+            const targetCoin = target === 2 ? S.coin2 : S.coin;
             const nextTrades = [];
             for (const rawTrade of Array.isArray(rawTrades) ? rawTrades : []) {
-                const trade = normalizeTrade(rawTrade);
-                if (!trade || tradeKeys.has(trade.key)) continue;
-                tradeKeys.add(trade.key);
+                const trade = normalizeTrade(rawTrade, targetCoin);
+                if (!trade || (trade.coin && trade.coin !== buildMarketKey(targetCoin)) || keyStore.has(trade.key)) continue;
+                keyStore.add(trade.key);
                 nextTrades.push(trade);
             }
             if (!nextTrades.length) return;
 
             [...nextTrades]
                 .sort((a, b) => Number(a.time || 0) - Number(b.time || 0))
-                .forEach(applyTradeToPrimaryCandle);
+                .forEach(trade => applyTradeToTargetSeries(trade, target));
+
+            if (!shouldUpdateTradeList) return;
 
             nextTrades.sort(compareTrades);
             const currentTopTime = S.tradeBuf[0]?.time ?? -Infinity;
             const canPrepend = !S.tradeBuf.length || nextTrades.every(trade => trade.time >= currentTopTime);
-
             S.tradeBuf = nextTrades.concat(S.tradeBuf).sort(compareTrades).slice(0, MAX_TRADES);
             syncTradeKeys();
 
@@ -8509,7 +8822,6 @@
         }
 
         // ── WebSocket ──────────────────────────────────────────────
-        let tradeKeys = new Set();
 
         function disconnectWs() {
             S.wsSeq += 1;
@@ -8556,17 +8868,26 @@
             socket.onopen = () => {
                 if (wsSeq !== S.wsSeq || S.ws !== socket) return;
                 const candleInterval = getCandleInterval(S.tf);
-                const subs = IS_COMPACT
-                    ? [
-                        { type: 'candle', coin: S.coin, interval: candleInterval }
-                    ]
-                    : [
-                        { type: 'l2Book', coin: S.coin, nSigFigs: getOrderBookSigFigs() },
-                        { type: 'trades', coin: S.coin },
-                        { type: 'candle', coin: S.coin, interval: candleInterval }
-                    ];
+                const subs = [];
+                if (IS_COMPACT) {
+                    subs.push(
+                        isTimeChartMode()
+                            ? { type: 'trades', coin: S.coin }
+                            : { type: 'candle', coin: S.coin, interval: candleInterval }
+                    );
+                } else {
+                    subs.push({ type: 'l2Book', coin: S.coin, nSigFigs: getOrderBookSigFigs() });
+                    subs.push({ type: 'trades', coin: S.coin });
+                    if (!isTimeChartMode()) {
+                        subs.push({ type: 'candle', coin: S.coin, interval: candleInterval });
+                    }
+                }
                 if (!IS_COMPACT && S.chart2Active && S.coin !== S.coin2) {
-                    subs.push({ type: 'candle', coin: S.coin2, interval: candleInterval });
+                    subs.push(
+                        isTimeChartMode()
+                            ? { type: 'trades', coin: S.coin2 }
+                            : { type: 'candle', coin: S.coin2, interval: candleInterval }
+                    );
                 }
                 subs.forEach(sub => socket.send(JSON.stringify({ method: 'subscribe', subscription: sub })));
             };
@@ -8577,7 +8898,16 @@
                     if (ch === 'l2Book') {
                         renderBook(d?.levels?.[0] ?? d?.bids ?? [], d?.levels?.[1] ?? d?.asks ?? []);
                     } else if (ch === 'trades') {
-                        ingestTrades(d);
+                        const trades = Array.isArray(d) ? d : [];
+                        const primaryTrades = [];
+                        const secondaryTrades = [];
+                        trades.forEach(trade => {
+                            const coin = buildMarketKey(trade?.coin || trade?.s || '');
+                            if (coin === buildMarketKey(S.coin)) primaryTrades.push(trade);
+                            else if (S.chart2Active && coin === buildMarketKey(S.coin2)) secondaryTrades.push(trade);
+                        });
+                        if (primaryTrades.length) ingestTrades(primaryTrades, { target: 1, updateTradeList: true });
+                        if (secondaryTrades.length) ingestTrades(secondaryTrades, { target: 2, updateTradeList: false });
                     } else if (ch === 'candle') {
                         const arr = Array.isArray(d) ? d : [];
                         if (!arr.length) return;
@@ -8592,6 +8922,7 @@
                                 else { candleMap.set(bar.time, bar); }
                                 volSeries.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
                                 volMap.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
+                                setLatestTimeModePrice(1, bar.close);
                                 syncDerivedSeries(1);
                                 refreshLegend(1);
                                 scheduleVisibleExtremaUpdate(1);
@@ -8603,6 +8934,7 @@
                                 else { candleMap2.set(bar.time, bar); }
                                 volSeries2.update({ time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
                                 volMap2.set(bar.time, { time: bar.time, value: +c.v, color: bar.close >= bar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR });
+                                setLatestTimeModePrice(2, bar.close);
                                 syncDerivedSeries(2);
                                 refreshLegend(2);
                                 scheduleVisibleExtremaUpdate(2);
