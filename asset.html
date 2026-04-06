@@ -1690,68 +1690,123 @@
             height: auto;
             min-height: 100%;
             overflow: auto;
+            background: var(--bg);
         }
 
         html.mobile-layout #layout {
             height: auto;
             min-height: 100svh;
             overflow: visible;
+            background: var(--bg);
         }
 
         html.mobile-layout #header {
+            position: sticky;
+            top: 0;
+            z-index: 12;
             height: auto;
             min-height: 0;
-            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            padding: 10px 10px 8px;
             gap: 10px;
-            flex-wrap: wrap;
+            background: linear-gradient(180deg, rgba(13, 16, 20, 0.98) 0%, rgba(13, 16, 20, 0.94) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
 
         html.mobile-layout #coin-picker-wrap {
+            width: 100%;
             max-width: 100%;
         }
 
         html.mobile-layout #coin-btn {
+            width: 100%;
+            min-height: 50px;
+            padding: 0 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: var(--surface);
             max-width: 100%;
-            font-size: 14px;
+            font-size: 15px;
+        }
+
+        html.mobile-layout #coin-logo {
+            width: 28px;
+            height: 28px;
         }
 
         html.mobile-layout #header-stats {
             width: 100%;
-            gap: 14px;
-            padding-bottom: 2px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            padding-bottom: 0;
+        }
+
+        html.mobile-layout .hstat {
+            min-height: 56px;
+            padding: 8px 10px;
+            border-radius: 14px;
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        html.mobile-layout #funding-stat {
+            grid-column: 1 / -1;
         }
 
         html.mobile-layout .hstat .lbl {
             font-size: 9px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         html.mobile-layout .hstat .val {
-            font-size: 12px;
+            font-size: 13px;
+            line-height: 1.2;
         }
 
         html.mobile-layout #main {
             display: block;
             flex: none;
             overflow: visible;
+            padding: 8px 10px 18px;
         }
 
         html.mobile-layout #chart-side {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             overflow: visible;
         }
 
         html.mobile-layout #chart-toolbar {
-            position: sticky;
-            top: 0;
+            position: relative;
+            top: auto;
             z-index: 9;
-            padding: 0 8px;
-            gap: 0;
-            background: rgba(13, 16, 20, 0.94);
-            backdrop-filter: blur(12px);
+            height: auto;
+            min-height: 0;
+            overflow-x: auto;
+            padding: 2px 2px 0;
+            gap: 6px;
+            background: transparent;
+            border-bottom: 0;
+            scrollbar-width: none;
+        }
+
+        html.mobile-layout #chart-toolbar::-webkit-scrollbar {
+            display: none;
         }
 
         html.mobile-layout .tf-btn {
-            padding: 3px 6px;
+            flex: 0 0 auto;
+            padding: 5px 2px;
             font-size: 11px;
+            font-weight: 600;
         }
 
         html.mobile-layout .toolbar-icon-btn {
@@ -1773,23 +1828,23 @@
             flex: none;
             overflow: visible;
             background: transparent;
-            gap: 10px;
+            gap: 12px;
         }
 
         html.mobile-layout #chart-container-1,
         html.mobile-layout #chart-container-2 {
             flex: none !important;
-            height: clamp(420px, 68svh, 680px);
-            min-height: clamp(420px, 68svh, 680px);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            height: clamp(300px, 40svh, 460px);
+            min-height: clamp(300px, 40svh, 460px);
+            border: 0;
+            border-radius: 18px;
             overflow: hidden;
-            background: var(--bg);
+            background: var(--surface);
         }
 
         html.mobile-layout #chart-container-2 {
-            height: clamp(300px, 44svh, 460px);
-            min-height: clamp(300px, 44svh, 460px);
+            height: clamp(250px, 32svh, 360px);
+            min-height: clamp(250px, 32svh, 360px);
         }
 
         html.mobile-layout #chart-wrap,
@@ -1820,11 +1875,13 @@
         html.mobile-layout #right-panel {
             width: 100% !important;
             min-width: 0 !important;
-            min-height: 520px;
-            margin-top: 10px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            min-height: 310px;
+            margin-top: 0;
+            border: 0;
+            border-radius: 18px;
             overflow: hidden;
+            background: var(--surface);
+            box-shadow: none;
         }
 
         html.mobile-ob-collapsed #right-panel {
@@ -1833,6 +1890,45 @@
 
         html.mobile-ob-collapsed #ob-open-btn {
             display: inline-flex !important;
+        }
+
+        html.mobile-layout .panel-tabs {
+            padding: 0 10px;
+            min-height: 46px;
+            background: var(--surface);
+        }
+
+        html.mobile-layout .ptab {
+            padding: 14px 12px 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        html.mobile-layout #ob-agg-bar,
+        html.mobile-layout #trades-hdr,
+        html.mobile-layout .ob-hdr,
+        html.mobile-layout #ob-ratio {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        html.mobile-layout #ob-hover-card {
+            max-width: calc(100% - 24px);
+        }
+
+        html.mobile-layout #funding-hover-card {
+            max-width: calc(100% - 20px);
+        }
+
+        html.light.mobile-layout #header {
+            background: linear-gradient(180deg, rgba(244, 244, 243, 0.98) 0%, rgba(244, 244, 243, 0.95) 100%);
+            border-bottom-color: rgba(15, 23, 42, 0.06);
+        }
+
+        html.light.mobile-layout #coin-btn,
+        html.light.mobile-layout .hstat {
+            border-color: rgba(148, 163, 184, 0.16);
+            background: rgba(255, 255, 255, 0.92);
         }
 
         #chart-canvas {
@@ -4574,9 +4670,9 @@
                 rightPanel.style.removeProperty('width');
                 rightPanel.style.removeProperty('min-width');
                 if (!mobileOrderBookAutoApplied && !orderBookVisibilityTouched) {
-                    document.documentElement.classList.add('mobile-ob-collapsed');
-                    rightPanel.style.display = 'none';
-                    if (obOpenBtn) obOpenBtn.style.display = 'inline-flex';
+                    document.documentElement.classList.remove('mobile-ob-collapsed');
+                    rightPanel.style.display = 'flex';
+                    if (obOpenBtn) obOpenBtn.style.display = 'none';
                     mobileOrderBookAutoApplied = true;
                 }
             } else {

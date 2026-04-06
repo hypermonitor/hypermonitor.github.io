@@ -3665,8 +3665,8 @@
       }
 
       .trade-view-stack[data-mobile-view="market"] > .top-frame-panel {
-        min-height: clamp(420px, calc(100dvh - 220px - env(safe-area-inset-bottom, 0px)), 760px);
-        height: clamp(420px, calc(100dvh - 220px - env(safe-area-inset-bottom, 0px)), 760px);
+        min-height: clamp(560px, calc(100dvh - 126px - env(safe-area-inset-bottom, 0px)), 980px);
+        height: clamp(560px, calc(100dvh - 126px - env(safe-area-inset-bottom, 0px)), 980px);
       }
 
       .extra-chart-panel,
@@ -3842,6 +3842,7 @@
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
         overflow: hidden;
+        transition: box-shadow 0.18s ease, transform 0.18s ease;
       }
 
       .mobile-watchlist-open {
@@ -3855,10 +3856,31 @@
         gap: 12px;
         padding: 12px 8px 12px 13px;
         text-align: left;
+        touch-action: pan-y;
+        user-select: none;
       }
 
       .mobile-watchlist-open:active {
         transform: scale(0.992);
+      }
+
+      .mobile-watchlist-card.is-drag-ready {
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+      }
+
+      .mobile-watchlist-card.is-dragging {
+        position: fixed;
+        z-index: 120;
+        pointer-events: none;
+        transform: scale(1.015);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+      }
+
+      .mobile-watchlist-card-placeholder {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px dashed rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.02);
       }
 
       .mobile-watchlist-card .coinIcon,
@@ -3904,6 +3926,21 @@
         margin-top: 4px;
         color: var(--muted);
         font-size: 0.72rem;
+      }
+
+      .mobile-watchlist-card-reorder {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        color: rgba(124, 132, 143, 0.78);
+        flex: 0 0 auto;
+      }
+
+      .mobile-watchlist-card-reorder svg {
+        width: 14px;
+        height: 14px;
       }
 
       .mobile-watchlist-card-side {
@@ -4021,6 +4058,26 @@
         background: transparent;
       }
 
+      .mobile-wallet-panel.has-wallet {
+        border: 0;
+        background: transparent;
+      }
+
+      .mobile-wallet-panel.has-wallet .mobile-section-shell {
+        padding: 0;
+        gap: 0;
+      }
+
+      .mobile-wallet-panel.has-wallet .mobile-section-head {
+        display: none;
+      }
+
+      .mobile-wallet-panel.has-wallet .mobile-wallet-frame {
+        height: calc(100dvh - 154px - env(safe-area-inset-bottom, 0px));
+        min-height: 540px;
+        border-radius: 18px;
+      }
+
       .mobile-bottom-nav {
         position: fixed;
         left: 10px;
@@ -4035,6 +4092,7 @@
         border-radius: 22px;
         background: rgba(15, 18, 23, 0.96);
         backdrop-filter: blur(18px);
+        box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.02);
       }
 
       body.light .mobile-bottom-nav {
@@ -4286,6 +4344,15 @@
     </main>
 
     <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile navigation" hidden>
+      <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="watchlist" aria-label="Watchlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6.5h12M6 12h12M6 17.5h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+          <circle cx="8" cy="6.5" r="1.3" fill="currentColor"></circle>
+          <circle cx="16" cy="12" r="1.3" fill="currentColor"></circle>
+          <circle cx="11.5" cy="17.5" r="1.3" fill="currentColor"></circle>
+        </svg>
+        <span>Watchlist</span>
+      </button>
       <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="market" aria-label="Market">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 18.5h16M6.5 15.5l3.2-3.4 2.7 2.5 5.1-6.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -4297,15 +4364,6 @@
           <path d="M5 6.5h14M5 12h14M5 17.5h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
         </svg>
         <span>Leaderboard</span>
-      </button>
-      <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="watchlist" aria-label="Watchlist">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 6.5h12M6 12h12M6 17.5h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-          <circle cx="8" cy="6.5" r="1.3" fill="currentColor"></circle>
-          <circle cx="16" cy="12" r="1.3" fill="currentColor"></circle>
-          <circle cx="11.5" cy="17.5" r="1.3" fill="currentColor"></circle>
-        </svg>
-        <span>Watchlist</span>
       </button>
       <button class="mobile-bottom-nav-btn" type="button" data-mobile-view="wallet" aria-label="Wallet">
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -4529,8 +4587,8 @@
       coin: "BTC",
       tradeTimeframe: "15m",
       wallet: "",
-      mobileView: "market",
-      mobileWalletReturnView: "leaderboard",
+      mobileView: "watchlist",
+      mobileWalletReturnView: "watchlist",
       walletModalSection: "positions",
       topChartCount: 1,
       topOrderBookVisible: true,
@@ -4641,6 +4699,18 @@
       rafId: 0,
       lastClientX: 0,
       lastClientY: 0
+    };
+    const mobileWatchlistDrag = {
+      pointerId: null,
+      timerId: 0,
+      card: null,
+      placeholder: null,
+      startX: 0,
+      startY: 0,
+      offsetX: 0,
+      offsetY: 0,
+      active: false,
+      cancelClickUntil: 0
     };
     let tradeFrameReady = false;
     let mobileWalletFrameReady = false;
@@ -5059,7 +5129,7 @@
           ? `${changePct > 0 ? "▲" : changePct < 0 ? "▼" : "■"} ${formatPercent(Math.abs(changePct), 2)}`
           : "Syncing";
         return (
-          "<article class='mobile-watchlist-card'>" +
+          "<article class='mobile-watchlist-card' data-mobile-watchlist-entry data-mobile-coin='" + escapeHtml(coin) + "'>" +
             "<button class='mobile-watchlist-open' type='button' data-mobile-coin='" + escapeHtml(coin) + "'>" +
               footerCoinIconHtml(coin, base) +
               "<span class='mobile-watchlist-card-main'>" +
@@ -5067,11 +5137,16 @@
                   "<span class='mobile-watchlist-card-symbol'>" + escapeHtml(base) + "</span>" +
                   (dex ? "<span class='mobile-watchlist-card-badge'>" + escapeHtml(dex) + "</span>" : "") +
                 "</span>" +
-                "<span class='mobile-watchlist-card-meta'>Tap to open in Market</span>" +
+                "<span class='mobile-watchlist-card-meta'>Tap to open • Hold to reorder</span>" +
               "</span>" +
               "<span class='mobile-watchlist-card-side'>" +
                 "<span class='mobile-watchlist-card-price'>" + escapeHtml(priceText) + "</span>" +
                 "<span class='mobile-watchlist-card-change " + changeClass + "'>" + escapeHtml(changeText) + "</span>" +
+              "</span>" +
+              "<span class='mobile-watchlist-card-reorder' aria-hidden='true'>" +
+                "<svg viewBox='0 0 16 16'>" +
+                  "<path d='M5 4H11M5 8H11M5 12H11' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'></path>" +
+                "</svg>" +
               "</span>" +
             "</button>" +
             "<button class='mobile-watchlist-remove' type='button' data-mobile-remove-coin='" + escapeHtml(coin) + "' aria-label='Remove asset from watchlist' title='Remove asset'>" +
@@ -5091,6 +5166,118 @@
       }
 
       syncMobileViewButtons();
+    }
+
+    function clearMobileWatchlistHoldTimer() {
+      if (mobileWatchlistDrag.timerId) {
+        window.clearTimeout(mobileWatchlistDrag.timerId);
+        mobileWatchlistDrag.timerId = 0;
+      }
+    }
+
+    function getMobileWatchlistCards() {
+      return mobileWatchlistGrid
+        ? Array.from(mobileWatchlistGrid.querySelectorAll("[data-mobile-watchlist-entry]"))
+        : [];
+    }
+
+    function commitMobileWatchlistOrder(order) {
+      const normalizedOrder = Array.isArray(order)
+        ? order.map((coin) => normalizeFooterCoinValue(coin)).filter(Boolean)
+        : [];
+      if (!normalizedOrder.length) return;
+      trackedFooterCoins = normalizedOrder;
+      saveFooterCoins();
+      renderFooterPrices();
+      renderMobileWatchlist();
+    }
+
+    function stopMobileWatchlistDrag({ commit = false } = {}) {
+      clearMobileWatchlistHoldTimer();
+      const card = mobileWatchlistDrag.card;
+      const placeholder = mobileWatchlistDrag.placeholder;
+      if (card) {
+        card.classList.remove("is-drag-ready", "is-dragging");
+        card.style.removeProperty("width");
+        card.style.removeProperty("height");
+        card.style.removeProperty("left");
+        card.style.removeProperty("top");
+      }
+      if (card && placeholder && placeholder.parentNode) {
+        placeholder.parentNode.insertBefore(card, placeholder);
+      }
+      if (placeholder?.parentNode) placeholder.parentNode.removeChild(placeholder);
+
+      if (commit && mobileWatchlistDrag.active && mobileWatchlistGrid) {
+        const nextOrder = getMobileWatchlistCards()
+          .map((entry) => entry.getAttribute("data-mobile-coin"))
+          .filter(Boolean);
+        commitMobileWatchlistOrder(nextOrder);
+        mobileWatchlistDrag.cancelClickUntil = Date.now() + 280;
+      }
+
+      mobileWatchlistDrag.pointerId = null;
+      mobileWatchlistDrag.card = null;
+      mobileWatchlistDrag.placeholder = null;
+      mobileWatchlistDrag.startX = 0;
+      mobileWatchlistDrag.startY = 0;
+      mobileWatchlistDrag.offsetX = 0;
+      mobileWatchlistDrag.offsetY = 0;
+      mobileWatchlistDrag.active = false;
+      document.body.style.removeProperty("user-select");
+      document.body.style.removeProperty("cursor");
+    }
+
+    function startMobileWatchlistDrag(pointerX, pointerY) {
+      const card = mobileWatchlistDrag.card;
+      const grid = mobileWatchlistGrid;
+      if (!card || !grid) return;
+      const rect = card.getBoundingClientRect();
+      const placeholder = document.createElement("div");
+      placeholder.className = "mobile-watchlist-card-placeholder";
+      placeholder.style.height = `${rect.height}px`;
+      mobileWatchlistDrag.placeholder = placeholder;
+      card.parentNode.insertBefore(placeholder, card.nextSibling);
+      mobileWatchlistDrag.active = true;
+      card.classList.add("is-dragging");
+      card.classList.remove("is-drag-ready");
+      card.style.width = `${rect.width}px`;
+      card.style.height = `${rect.height}px`;
+      card.style.left = `${rect.left}px`;
+      card.style.top = `${pointerY - mobileWatchlistDrag.offsetY}px`;
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "grabbing";
+    }
+
+    function updateMobileWatchlistDrag(pointerX, pointerY) {
+      const card = mobileWatchlistDrag.card;
+      const placeholder = mobileWatchlistDrag.placeholder;
+      const grid = mobileWatchlistGrid;
+      if (!mobileWatchlistDrag.active || !card || !placeholder || !grid) return;
+
+      const nextTop = pointerY - mobileWatchlistDrag.offsetY;
+      const nextLeft = pointerX - mobileWatchlistDrag.offsetX;
+      card.style.top = `${nextTop}px`;
+      card.style.left = `${nextLeft}px`;
+
+      const cards = getMobileWatchlistCards().filter((entry) => entry !== card);
+      const insertBefore = cards.find((entry) => {
+        const rect = entry.getBoundingClientRect();
+        return pointerY < rect.top + rect.height / 2;
+      }) || null;
+
+      if (insertBefore) {
+        grid.insertBefore(placeholder, insertBefore);
+      } else {
+        grid.appendChild(placeholder);
+      }
+
+      const viewportMargin = 72;
+      if (pointerY > window.innerHeight - viewportMargin) {
+        window.scrollBy({ top: 16, behavior: "auto" });
+      } else if (pointerY < viewportMargin) {
+        window.scrollBy({ top: -16, behavior: "auto" });
+      }
     }
 
     function renderMobileWalletFavorites() {
@@ -10397,6 +10584,11 @@
 
     if (mobileWatchlistGrid) {
       mobileWatchlistGrid.addEventListener("click", (event) => {
+        if (Date.now() < mobileWatchlistDrag.cancelClickUntil) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
         const target = event.target instanceof Element ? event.target : null;
         if (!target) return;
         const removeBtn = target.closest("[data-mobile-remove-coin]");
@@ -10416,7 +10608,75 @@
         if (!coin) return;
         openCoinInShell(coin, { pushHistory: true });
       });
+
+      mobileWatchlistGrid.addEventListener("pointerdown", (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target || event.pointerType === "mouse" || event.button !== 0) return;
+        if (target.closest("[data-mobile-remove-coin]")) return;
+        const card = target.closest("[data-mobile-watchlist-entry]");
+        if (!(card instanceof HTMLElement)) return;
+        clearMobileWatchlistHoldTimer();
+        mobileWatchlistDrag.pointerId = event.pointerId;
+        mobileWatchlistDrag.card = card;
+        mobileWatchlistDrag.startX = event.clientX;
+        mobileWatchlistDrag.startY = event.clientY;
+        const rect = card.getBoundingClientRect();
+        mobileWatchlistDrag.offsetX = event.clientX - rect.left;
+        mobileWatchlistDrag.offsetY = event.clientY - rect.top;
+        card.classList.add("is-drag-ready");
+        mobileWatchlistDrag.timerId = window.setTimeout(() => {
+          startMobileWatchlistDrag(event.clientX, event.clientY);
+        }, 200);
+      }, { passive: true });
+
+      mobileWatchlistGrid.addEventListener("pointermove", (event) => {
+        if (mobileWatchlistDrag.pointerId !== event.pointerId || !mobileWatchlistDrag.card) return;
+        if (!mobileWatchlistDrag.active) {
+          const moved = Math.hypot(event.clientX - mobileWatchlistDrag.startX, event.clientY - mobileWatchlistDrag.startY);
+          if (moved > 8) {
+            mobileWatchlistDrag.card.classList.remove("is-drag-ready");
+            clearMobileWatchlistHoldTimer();
+          }
+          return;
+        }
+        event.preventDefault();
+        updateMobileWatchlistDrag(event.clientX, event.clientY);
+      });
+
+      const finishMobileWatchlistDrag = (event, commit) => {
+        if (mobileWatchlistDrag.pointerId !== event.pointerId) return;
+        stopMobileWatchlistDrag({ commit });
+      };
+
+      mobileWatchlistGrid.addEventListener("pointerup", (event) => {
+        finishMobileWatchlistDrag(event, true);
+      });
+
+      mobileWatchlistGrid.addEventListener("pointercancel", (event) => {
+        finishMobileWatchlistDrag(event, false);
+      });
+
+      mobileWatchlistGrid.addEventListener("pointerleave", (event) => {
+        if (mobileWatchlistDrag.active || mobileWatchlistDrag.pointerId === event.pointerId) return;
+        stopMobileWatchlistDrag({ commit: false });
+      });
     }
+
+    window.addEventListener("pointermove", (event) => {
+      if (mobileWatchlistDrag.pointerId !== event.pointerId || !mobileWatchlistDrag.active) return;
+      event.preventDefault();
+      updateMobileWatchlistDrag(event.clientX, event.clientY);
+    }, { passive: false });
+
+    window.addEventListener("pointerup", (event) => {
+      if (mobileWatchlistDrag.pointerId !== event.pointerId) return;
+      stopMobileWatchlistDrag({ commit: true });
+    });
+
+    window.addEventListener("pointercancel", (event) => {
+      if (mobileWatchlistDrag.pointerId !== event.pointerId) return;
+      stopMobileWatchlistDrag({ commit: false });
+    });
 
     if (mobileWatchlistSuggestions) {
       mobileWatchlistSuggestions.addEventListener("mousedown", (event) => {
@@ -10727,7 +10987,7 @@
 
     state.coin = parseCoin();
     state.wallet = parseWallet();
-    state.mobileView = state.wallet ? "wallet" : "market";
+    state.mobileView = state.wallet ? "wallet" : "watchlist";
 
     setCoin(state.coin, { fromPopState: true });
     syncTradeLayout();
