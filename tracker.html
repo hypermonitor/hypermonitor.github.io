@@ -3950,7 +3950,12 @@
         pointer-events: none;
       }
 
-      .mobile-watchlist-card.is-hold-open .mobile-watchlist-open {
+      .mobile-watchlist-card.is-swipe-left-open .mobile-watchlist-open {
+        transform: translateX(-78px);
+        pointer-events: none;
+      }
+
+      .mobile-watchlist-card.is-swipe-right-open .mobile-watchlist-open {
         transform: translateX(78px);
         pointer-events: none;
       }
@@ -4129,7 +4134,12 @@
         pointer-events: auto;
       }
 
-      .mobile-watchlist-card.is-hold-open .mobile-watchlist-priority {
+      .mobile-watchlist-card.is-swipe-left-open .mobile-watchlist-remove {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .mobile-watchlist-card.is-swipe-right-open .mobile-watchlist-priority {
         opacity: 1;
         pointer-events: auto;
       }
@@ -4149,9 +4159,7 @@
       }
 
       .mobile-wallet-empty {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
+        display: none;
       }
 
       .mobile-wallet-empty-actions {
@@ -4264,6 +4272,19 @@
 
       .mobile-wallet-panel.has-wallet .mobile-section-head {
         display: none;
+      }
+
+      .mobile-wallet-panel .mobile-section-head {
+        align-items: center;
+      }
+
+      .mobile-wallet-panel .mobile-section-title-wrap {
+        flex: 1 1 auto;
+      }
+
+      .mobile-wallet-panel .mobile-section-subtitle {
+        margin-top: 0;
+        word-break: normal;
       }
 
       .mobile-wallet-panel.has-wallet .mobile-wallet-frame {
@@ -4526,17 +4547,11 @@
             <div class="mobile-section-shell">
               <div class="mobile-section-head">
                 <div class="mobile-section-title-wrap">
-                  <span class="mobile-section-eyebrow">Wallet tracker</span>
-                  <h2 class="mobile-section-title">Wallet</h2>
                   <div class="mobile-section-subtitle" id="mobileWalletSubtitle">Open a wallet from the leaderboard or search.</div>
                 </div>
+                <button class="mobile-wallet-action" type="button" id="mobileWalletLeaderboardBtn">Open leaderboard</button>
               </div>
-              <div class="mobile-wallet-empty" id="mobileWalletEmpty">
-                <p class="mobile-section-copy">Pick a wallet from Leaderboard, search a full address, or open one from Favorites.</p>
-                <div class="mobile-wallet-empty-actions">
-                  <button class="mobile-wallet-action" type="button" id="mobileWalletLeaderboardBtn">Open leaderboard</button>
-                </div>
-              </div>
+              <div class="mobile-wallet-empty" id="mobileWalletEmpty"></div>
               <iframe class="mobile-wallet-frame" id="mobileWalletFrame" title="Hypermonitor mobile wallet tracker" hidden></iframe>
             </div>
           </section>
@@ -4941,7 +4956,8 @@
       startOffset: 0,
       offsetX: 0,
       active: false,
-      openedCoin: ""
+      openedCoin: "",
+      openedDirection: ""
     };
     let tradeFrameReady = false;
     let mobileWalletFrameReady = false;
@@ -5349,78 +5365,175 @@
       renderMobileWatchlist();
     }
 
-      function renderMobileWatchlist() {
-        if (!mobileWatchlistGrid) return;
-        if (mobileWatchlistDrag.pointerId !== null || mobileWatchlistDrag.active) {
-          mobileWatchlistDrag.pendingRender = true;
-          return;
-        }
-        const desired = trackedFooterCoins.map((coin) => normalizeFooterCoinValue(coin)).filter(Boolean);
-        if (!desired.length) {
-          mobileWatchlistGrid.innerHTML = "<div class='mobile-watchlist-loading'>No watchlist assets yet.</div>";
-          mobileWatchlistSwipe.openedCoin = "";
-          syncMobileViewButtons();
-          return;
-        }
+    function ensureMobileWatchlistLoadingEl() {
+      if (!mobileWatchlistGrid) return null;
+      let loadingEl = mobileWatchlistGrid.querySelector(".mobile-watchlist-loading");
+      if (!loadingEl) {
+        loadingEl = document.createElement("div");
+        loadingEl.className = "mobile-watchlist-loading";
+      }
+      return loadingEl;
+    }
 
-        if (mobileWatchlistSwipe.openedCoin && !desired.includes(mobileWatchlistSwipe.openedCoin)) {
-          mobileWatchlistSwipe.openedCoin = "";
+    function createMobileWatchlistCardElement(coin) {
+      const card = document.createElement("article");
+      card.className = "mobile-watchlist-card";
+      card.dataset.mobileWatchlistEntry = "true";
+      card.dataset.mobileCoin = normalizeFooterCoinValue(coin);
+      card.innerHTML =
+        "<button class='mobile-watchlist-priority' type='button' data-mobile-priority-coin='' aria-label='Move asset to top of watchlist' title='Move asset to top'>Top</button>" +
+        "<button class='mobile-watchlist-open' type='button' data-mobile-coin=''>" +
+          "<span class='mobile-watchlist-card-main'>" +
+            "<span class='mobile-watchlist-card-top'>" +
+              "<span class='mobile-watchlist-card-symbol'></span>" +
+              "<span class='mobile-watchlist-card-badge' style='display:none;'></span>" +
+            "</span>" +
+          "</span>" +
+          "<span class='mobile-watchlist-card-side'>" +
+            "<span class='mobile-watchlist-card-quote-row'>" +
+              "<span class='mobile-watchlist-card-price-stack'>" +
+                "<span class='mobile-watchlist-card-price'></span>" +
+                "<span class='mobile-watchlist-card-subprice'></span>" +
+              "</span>" +
+              "<span class='mobile-watchlist-card-change'></span>" +
+            "</span>" +
+          "</span>" +
+        "</button>" +
+        "<button class='mobile-watchlist-remove' type='button' data-mobile-remove-coin='' aria-label='Remove asset from watchlist' title='Remove asset'>" +
+          "<svg viewBox='0 0 16 16' aria-hidden='true'>" +
+            "<path d='M4.25 8H11.75' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'></path>" +
+          "</svg>" +
+        "</button>";
+      return card;
+    }
+
+    function updateMobileWatchlistCardElement(card, coin) {
+      if (!(card instanceof HTMLElement)) return;
+      const normalized = normalizeFooterCoinValue(coin);
+      const base = getCoinBaseName(normalized);
+      const dex = getCoinDexName(normalized);
+      const priceText = formatMobileWatchlistPriceForCurrency(normalized, "USD");
+      const eurText = formatMobileWatchlistPriceForCurrency(normalized, "EUR");
+      const changePct = getFooterChangePct(normalized);
+      const changeClass = Number.isFinite(changePct)
+        ? (Math.abs(changePct) < 0.00005 ? "upnl-flat" : changePct > 0 ? "upnl-pos" : "upnl-neg")
+        : "";
+      const changeText = Number.isFinite(changePct)
+        ? `${changePct > 0 ? "▲" : changePct < 0 ? "▼" : "■"} ${formatPercent(Math.abs(changePct), 2)}`
+        : "Syncing";
+      const swipeDirection = mobileWatchlistSwipe.openedCoin === normalized
+        ? mobileWatchlistSwipe.openedDirection
+        : "";
+      const iconMarkup = mobileWatchlistCoinIconHtml(normalized, base).trim();
+      const openBtn = card.querySelector(".mobile-watchlist-open");
+      const priorityBtn = card.querySelector(".mobile-watchlist-priority");
+      const removeBtn = card.querySelector(".mobile-watchlist-remove");
+      const symbolEl = card.querySelector(".mobile-watchlist-card-symbol");
+      const badgeEl = card.querySelector(".mobile-watchlist-card-badge");
+      const priceEl = card.querySelector(".mobile-watchlist-card-price");
+      const subpriceEl = card.querySelector(".mobile-watchlist-card-subprice");
+      const changeEl = card.querySelector(".mobile-watchlist-card-change");
+      const existingIcon = card.querySelector(".coinIcon, .coinFallback");
+
+      card.dataset.mobileCoin = normalized;
+      if (openBtn) openBtn.dataset.mobileCoin = normalized;
+      if (priorityBtn) priorityBtn.dataset.mobilePriorityCoin = normalized;
+      if (removeBtn) removeBtn.dataset.mobileRemoveCoin = normalized;
+
+      if (card.dataset.iconMarkup !== iconMarkup) {
+        if (existingIcon) {
+          existingIcon.remove();
         }
+        if (openBtn) {
+          openBtn.insertAdjacentHTML("afterbegin", iconMarkup);
+        }
+        card.dataset.iconMarkup = iconMarkup;
+      }
+
+      if (symbolEl) symbolEl.textContent = base;
+      if (badgeEl) {
+        if (dex) {
+          badgeEl.textContent = dex;
+          badgeEl.style.display = "";
+        } else {
+          badgeEl.textContent = "";
+          badgeEl.style.display = "none";
+        }
+      }
+      if (priceEl) priceEl.textContent = priceText;
+      if (subpriceEl) subpriceEl.textContent = eurText;
+      if (changeEl) {
+        changeEl.textContent = changeText;
+        changeEl.className = `mobile-watchlist-card-change${changeClass ? ` ${changeClass}` : ""}`;
+      }
+
+      card.classList.toggle("is-swipe-left-open", swipeDirection === "left");
+      card.classList.toggle("is-swipe-right-open", swipeDirection === "right");
+      card.classList.remove("is-swipe-open", "is-hold-open");
+      if (!swipeDirection) {
+        card.style.removeProperty("--mobile-watchlist-swipe");
+      }
+    }
+
+    function renderMobileWatchlist() {
+      if (!mobileWatchlistGrid) return;
+      if (mobileWatchlistDrag.pointerId !== null || mobileWatchlistSwipe.pointerId !== null) {
+        mobileWatchlistDrag.pendingRender = true;
+        return;
+      }
+      const desired = trackedFooterCoins.map((coin) => normalizeFooterCoinValue(coin)).filter(Boolean);
+      const loadingEl = ensureMobileWatchlistLoadingEl();
+      if (!desired.length) {
+        if (loadingEl) {
+          loadingEl.textContent = "No watchlist assets yet.";
+          mobileWatchlistGrid.replaceChildren(loadingEl);
+        } else {
+          mobileWatchlistGrid.textContent = "";
+        }
+        mobileWatchlistSwipe.openedCoin = "";
+        mobileWatchlistSwipe.openedDirection = "";
+        syncMobileViewButtons();
+        return;
+      }
+
+      if (mobileWatchlistSwipe.openedCoin && !desired.includes(mobileWatchlistSwipe.openedCoin)) {
+        mobileWatchlistSwipe.openedCoin = "";
+        mobileWatchlistSwipe.openedDirection = "";
+      }
 
       const readyCount = desired.reduce((count, coin) => {
         const price = getLivePriceForCoin(coin);
         return count + (Number.isFinite(price) ? 1 : 0);
       }, 0);
 
-      mobileWatchlistGrid.innerHTML = desired.map((coin) => {
-        const base = getCoinBaseName(coin);
-        const dex = getCoinDexName(coin);
-        const priceText = formatMobileWatchlistPriceForCurrency(coin, "USD");
-        const eurText = formatMobileWatchlistPriceForCurrency(coin, "EUR");
-        const changePct = getFooterChangePct(coin);
-        const changeClass = Number.isFinite(changePct)
-          ? (Math.abs(changePct) < 0.00005 ? "upnl-flat" : changePct > 0 ? "upnl-pos" : "upnl-neg")
-          : "";
-        const changeText = Number.isFinite(changePct)
-          ? `${changePct > 0 ? "▲" : changePct < 0 ? "▼" : "■"} ${formatPercent(Math.abs(changePct), 2)}`
-          : "Syncing";
-        const swipeClass = mobileWatchlistSwipe.openedCoin === coin ? " is-swipe-open" : "";
-        const holdClass = mobileWatchlistDrag.openedCoin === coin ? " is-hold-open" : "";
-        return (
-          "<article class='mobile-watchlist-card" + swipeClass + holdClass + "' data-mobile-watchlist-entry data-mobile-coin='" + escapeHtml(coin) + "'>" +
-            "<button class='mobile-watchlist-priority' type='button' data-mobile-priority-coin='" + escapeHtml(coin) + "' aria-label='Move asset to top of watchlist' title='Move asset to top'>Top</button>" +
-            "<button class='mobile-watchlist-open' type='button' data-mobile-coin='" + escapeHtml(coin) + "'>" +
-              mobileWatchlistCoinIconHtml(coin, base) +
-              "<span class='mobile-watchlist-card-main'>" +
-                "<span class='mobile-watchlist-card-top'>" +
-                  "<span class='mobile-watchlist-card-symbol'>" + escapeHtml(base) + "</span>" +
-                  (dex ? "<span class='mobile-watchlist-card-badge'>" + escapeHtml(dex) + "</span>" : "") +
-                "</span>" +
-              "</span>" +
-              "<span class='mobile-watchlist-card-side'>" +
-                "<span class='mobile-watchlist-card-quote-row'>" +
-                  "<span class='mobile-watchlist-card-price-stack'>" +
-                    "<span class='mobile-watchlist-card-price'>" + escapeHtml(priceText) + "</span>" +
-                    "<span class='mobile-watchlist-card-subprice'>" + escapeHtml(eurText) + "</span>" +
-                  "</span>" +
-                  "<span class='mobile-watchlist-card-change " + changeClass + "'>" + escapeHtml(changeText) + "</span>" +
-                "</span>" +
-              "</span>" +
-            "</button>" +
-            "<button class='mobile-watchlist-remove' type='button' data-mobile-remove-coin='" + escapeHtml(coin) + "' aria-label='Remove asset from watchlist' title='Remove asset'>" +
-              "<svg viewBox='0 0 16 16' aria-hidden='true'>" +
-                "<path d='M4.25 8H11.75' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'></path>" +
-              "</svg>" +
-            "</button>" +
-          "</article>"
-        );
-      }).join("");
+      const existingCards = new Map(
+        getMobileWatchlistCards().map((card) => [normalizeFooterCoinValue(card.getAttribute("data-mobile-coin")), card])
+      );
+      const orderedCards = getMobileWatchlistCards();
 
-      if (!readyCount) {
-        mobileWatchlistGrid.insertAdjacentHTML(
-          "afterbegin",
-          "<div class='mobile-watchlist-loading'>Syncing live prices…</div>"
-        );
+      desired.forEach((coin, index) => {
+        const normalized = normalizeFooterCoinValue(coin);
+        let card = existingCards.get(normalized);
+        if (!card) {
+          card = createMobileWatchlistCardElement(normalized);
+        }
+        updateMobileWatchlistCardElement(card, normalized);
+        const referenceCard = orderedCards[index] || null;
+        if (referenceCard !== card) {
+          mobileWatchlistGrid.insertBefore(card, referenceCard);
+        }
+        existingCards.delete(normalized);
+      });
+
+      existingCards.forEach((card) => card.remove());
+
+      if (loadingEl) {
+        if (readyCount) {
+          loadingEl.remove();
+        } else {
+          loadingEl.textContent = "Syncing live prices…";
+          mobileWatchlistGrid.prepend(loadingEl);
+        }
       }
 
       syncMobileViewButtons();
@@ -5452,7 +5565,7 @@
 
     function setMobileWatchlistSwipeOffset(card, offset) {
       if (!(card instanceof HTMLElement)) return;
-      const nextOffset = Math.max(-78, Math.min(0, Number(offset) || 0));
+      const nextOffset = Math.max(-78, Math.min(78, Number(offset) || 0));
       if (Math.abs(nextOffset) < 0.5) {
         card.style.removeProperty("--mobile-watchlist-swipe");
       } else {
@@ -5465,32 +5578,18 @@
       getMobileWatchlistCards().forEach((card) => {
         const coin = normalizeFooterCoinValue(card.getAttribute("data-mobile-coin"));
         if (normalizedExcept && coin === normalizedExcept) return;
-        card.classList.remove("is-swipe-open", "is-swiping");
+        card.classList.remove("is-swipe-open", "is-swiping", "is-swipe-left-open", "is-swipe-right-open");
         card.style.removeProperty("--mobile-watchlist-swipe");
       });
       mobileWatchlistSwipe.openedCoin = normalizedExcept || "";
+      if (!normalizedExcept) {
+        mobileWatchlistSwipe.openedDirection = "";
+      }
     }
 
     function closeMobileWatchlistHold({ exceptCoin = "" } = {}) {
-      const normalizedExcept = normalizeFooterCoinValue(exceptCoin);
-      getMobileWatchlistCards().forEach((card) => {
-        const coin = normalizeFooterCoinValue(card.getAttribute("data-mobile-coin"));
-        if (normalizedExcept && coin === normalizedExcept) return;
-        card.classList.remove("is-hold-open", "is-drag-ready");
-      });
-      mobileWatchlistDrag.openedCoin = normalizedExcept || "";
-    }
-
-    function openMobileWatchlistHold(card) {
-      if (!(card instanceof HTMLElement)) return;
-      const coin = normalizeFooterCoinValue(card.getAttribute("data-mobile-coin"));
-      if (!coin) return;
-      closeMobileWatchlistSwipe();
-      closeMobileWatchlistHold({ exceptCoin: coin });
-      card.classList.add("is-hold-open");
-      mobileWatchlistDrag.openedCoin = coin;
-      mobileWatchlistDrag.active = true;
-      mobileWatchlistDrag.cancelClickUntil = Date.now() + 220;
+      closeMobileWatchlistSwipe({ exceptCoin });
+      mobileWatchlistDrag.openedCoin = normalizeFooterCoinValue(exceptCoin) || "";
     }
 
     function finalizeMobileWatchlistSwipe(card) {
@@ -5502,8 +5601,16 @@
       const coin = normalizeFooterCoinValue(card.getAttribute("data-mobile-coin"));
       card.classList.remove("is-swiping", "is-drag-ready");
       if (currentOffset <= -42 && coin) {
-        closeMobileWatchlistSwipe({ exceptCoin: coin });
-        card.classList.add("is-swipe-open");
+        closeMobileWatchlistSwipe();
+        card.classList.add("is-swipe-left-open");
+        mobileWatchlistSwipe.openedCoin = coin;
+        mobileWatchlistSwipe.openedDirection = "left";
+        card.style.removeProperty("--mobile-watchlist-swipe");
+      } else if (currentOffset >= 42 && coin) {
+        closeMobileWatchlistSwipe();
+        card.classList.add("is-swipe-right-open");
+        mobileWatchlistSwipe.openedCoin = coin;
+        mobileWatchlistSwipe.openedDirection = "right";
         card.style.removeProperty("--mobile-watchlist-swipe");
       } else {
         closeMobileWatchlistSwipe();
@@ -5524,7 +5631,7 @@
     }
 
     function flushPendingMobileWatchlistRender() {
-      if (mobileWatchlistDrag.pointerId !== null || mobileWatchlistDrag.active || !mobileWatchlistDrag.pendingRender) return;
+      if (mobileWatchlistDrag.pointerId !== null || mobileWatchlistSwipe.pointerId !== null || !mobileWatchlistDrag.pendingRender) return;
       mobileWatchlistDrag.pendingRender = false;
       renderMobileWatchlist();
     }
@@ -5574,7 +5681,8 @@
         : "Open a wallet from the leaderboard or search.";
       mobileWalletSubtitle.title = hasWallet ? state.wallet : "";
       if (mobileWalletPanel) mobileWalletPanel.classList.toggle("has-wallet", hasWallet);
-      mobileWalletEmpty.hidden = hasWallet;
+      mobileWalletEmpty.hidden = true;
+      if (mobileWalletLeaderboardBtn) mobileWalletLeaderboardBtn.hidden = hasWallet;
       mobileWalletFrame.hidden = !hasWallet;
       if (!hasWallet) {
         mobileWalletFrameReady = false;
@@ -10938,7 +11046,6 @@
           event.stopPropagation();
           const coin = removeBtn.getAttribute("data-mobile-remove-coin");
           if (!coin) return;
-          closeMobileWatchlistHold();
           closeMobileWatchlistSwipe();
           toggleFooterCoin(coin).then(() => {
             renderMobileWatchlist();
@@ -10951,7 +11058,6 @@
           event.stopPropagation();
           const coin = normalizeFooterCoinValue(topBtn.getAttribute("data-mobile-priority-coin"));
           if (!coin) return;
-          closeMobileWatchlistHold();
           closeMobileWatchlistSwipe();
           commitMobileWatchlistOrder([coin].concat(trackedFooterCoins.filter((entry) => normalizeFooterCoinValue(entry) !== coin)));
           mobileWatchlistDrag.cancelClickUntil = Date.now() + 180;
@@ -10963,10 +11069,6 @@
         if (!coin) return;
         if (mobileWatchlistSwipe.openedCoin) {
           closeMobileWatchlistSwipe();
-          return;
-        }
-        if (mobileWatchlistDrag.openedCoin) {
-          closeMobileWatchlistHold();
           return;
         }
         openCoinInShell(coin, { pushHistory: true });
@@ -10982,8 +11084,6 @@
           try { card.setPointerCapture(event.pointerId); } catch (_) {}
         }
         closeMobileWatchlistSwipe({ exceptCoin: card.getAttribute("data-mobile-coin") || "" });
-        closeMobileWatchlistHold({ exceptCoin: card.getAttribute("data-mobile-coin") || "" });
-        clearMobileWatchlistHoldTimer();
         mobileWatchlistDrag.pointerId = event.pointerId;
         mobileWatchlistDrag.card = card;
         mobileWatchlistDrag.coin = card.getAttribute("data-mobile-coin") || "";
@@ -10995,25 +11095,24 @@
         mobileWatchlistSwipe.coin = card.getAttribute("data-mobile-coin") || "";
         mobileWatchlistSwipe.startX = event.clientX;
         mobileWatchlistSwipe.startY = event.clientY;
-        mobileWatchlistSwipe.startOffset = mobileWatchlistSwipe.openedCoin === mobileWatchlistSwipe.coin ? -78 : 0;
+        mobileWatchlistSwipe.startOffset =
+          mobileWatchlistSwipe.openedCoin === mobileWatchlistSwipe.coin
+            ? (mobileWatchlistSwipe.openedDirection === "right" ? 78 : -78)
+            : 0;
         mobileWatchlistSwipe.offsetX = mobileWatchlistSwipe.startOffset;
         mobileWatchlistSwipe.active = false;
-        mobileWatchlistDrag.timerId = window.setTimeout(() => {
-          openMobileWatchlistHold(card);
-        }, 320);
       }, { passive: true });
 
       mobileWatchlistGrid.addEventListener("pointermove", (event) => {
         if (mobileWatchlistDrag.pointerId !== event.pointerId || !mobileWatchlistDrag.card) return;
-        if (!mobileWatchlistDrag.active && mobileWatchlistSwipe.pointerId === event.pointerId && mobileWatchlistSwipe.card) {
+        if (mobileWatchlistSwipe.pointerId === event.pointerId && mobileWatchlistSwipe.card) {
           const dx = event.clientX - mobileWatchlistSwipe.startX;
           const dy = event.clientY - mobileWatchlistSwipe.startY;
           if (mobileWatchlistSwipe.active || (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.15)) {
             mobileWatchlistSwipe.active = true;
-            clearMobileWatchlistHoldTimer();
             mobileWatchlistDrag.card.classList.remove("is-drag-ready");
             mobileWatchlistSwipe.card.classList.add("is-swiping");
-            const nextOffset = Math.max(-78, Math.min(0, mobileWatchlistSwipe.startOffset + dx));
+            const nextOffset = Math.max(-78, Math.min(78, mobileWatchlistSwipe.startOffset + dx));
             mobileWatchlistSwipe.offsetX = nextOffset;
             event.preventDefault();
             setMobileWatchlistSwipeOffset(mobileWatchlistSwipe.card, nextOffset);
@@ -11023,7 +11122,6 @@
         const moved = Math.hypot(event.clientX - mobileWatchlistDrag.startX, event.clientY - mobileWatchlistDrag.startY);
         if (moved > 8) {
           mobileWatchlistDrag.card.classList.remove("is-drag-ready");
-          clearMobileWatchlistHoldTimer();
         }
       });
 

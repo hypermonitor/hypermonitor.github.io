@@ -169,6 +169,11 @@
             color: #facc15;
         }
 
+        #mobile-watchlist-star-btn.is-active path {
+            fill: currentColor;
+            stroke: currentColor;
+        }
+
         #coin-btn {
             display: flex;
             align-items: center;
@@ -1807,6 +1812,14 @@
             font-variant-numeric: tabular-nums;
         }
 
+        html.mobile-layout #s-mark-mobile.up {
+            color: var(--up);
+        }
+
+        html.mobile-layout #s-mark-mobile.dn {
+            color: var(--down);
+        }
+
         html.mobile-layout #s-fund-mobile {
             color: var(--muted);
             font-size: 0.86rem;
@@ -1954,6 +1967,10 @@
             display: none;
         }
 
+        html.mobile-layout #chart-legend.is-touch-active #legend-ohlc {
+            display: flex;
+        }
+
         html.mobile-layout #chart-legend .legend-studies .legend-item:last-child,
         html.mobile-layout #chart-legend-2 .legend-studies .legend-item:last-child {
             display: none;
@@ -2015,7 +2032,7 @@
                 "spread spread"
                 "bids asks"
                 "ratio ratio";
-            column-gap: 8px;
+            column-gap: 0;
             row-gap: 8px;
             align-items: stretch;
             padding-bottom: 6px;
@@ -2065,18 +2082,20 @@
             min-height: 244px;
             padding-top: 18px;
             position: relative;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 14px;
+            background: transparent;
+            border-radius: 0;
             overflow: hidden;
         }
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-bids-wrap {
             grid-area: bids;
             margin-left: 12px;
+            margin-right: 0;
         }
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap {
             grid-area: asks;
+            margin-left: 0;
             margin-right: 12px;
         }
 
@@ -4557,6 +4576,8 @@
         const walletModalLink = $('wallet-modal-link');
         const walletModalClose = $('wallet-modal-close');
         const mobileWatchlistStarBtn = $('mobile-watchlist-star-btn');
+        const chartLegendPrimary = document.querySelector('#chart-container-1 #chart-legend');
+        const chartLegendSecondary = document.querySelector('#chart-container-2 #chart-legend');
         const orderBookRows = { ask: [], bid: [] };
         let latestBookSnapshot = { bids: [], asks: [] };
         let activeBookDetail = null;
@@ -5847,11 +5868,13 @@
             });
 
             row.addEventListener('mouseenter', event => {
+                if (isMobileAssetLayout()) return;
                 if (!row._bookLevel || activeBookDetail) return;
                 showOrderBookHoverCard(row._bookLevel, event, { rowEl: row, side, rowHovered: true });
             });
 
             row.addEventListener('mousemove', event => {
+                if (isMobileAssetLayout()) return;
                 if (!row._bookLevel || activeBookDetail) return;
                 showOrderBookHoverCard(row._bookLevel, event, { rowEl: row, side, rowHovered: true });
             });
@@ -6289,6 +6312,7 @@
             1: { active: false, time: null },
             2: { active: false, time: null }
         };
+        let mobileLegendTouchHideTimer = 0;
 
         function getSeriesBundle(target) {
             return target === 2 ? chartSeries2 : chartSeries1;
@@ -6364,6 +6388,25 @@
             legendHoverState[safeTarget].time = null;
         }
 
+        function getLegendContainer(target) {
+            return target === 2 ? chartLegendSecondary : chartLegendPrimary;
+        }
+
+        function syncMobileLegendTouchState(target, active) {
+            if (!isMobileAssetLayout()) return;
+            const legendEl = getLegendContainer(target);
+            if (!legendEl) return;
+            legendEl.classList.toggle('is-touch-active', Boolean(active));
+        }
+
+        function scheduleMobileLegendTouchHide(target) {
+            if (!isMobileAssetLayout()) return;
+            if (mobileLegendTouchHideTimer) window.clearTimeout(mobileLegendTouchHideTimer);
+            mobileLegendTouchHideTimer = window.setTimeout(() => {
+                syncMobileLegendTouchState(target, false);
+            }, 320);
+        }
+
         function findCandleBarAtOrBefore(target, time) {
             const data = getSortedCandleData(target);
             if (!data.length) return null;
@@ -6437,6 +6480,7 @@
                 hoverState.active = true;
                 hoverState.time = Number(hoveredBar.time);
                 updateLegendForTarget(safeTarget, hoveredBar);
+                syncMobileLegendTouchState(safeTarget, true);
                 return Number(hoveredBar.time);
             }
 
@@ -6446,13 +6490,16 @@
                     const lastHoveredBar = findCandleBarAtOrBefore(safeTarget, hoverState.time);
                     if (lastHoveredBar) {
                         updateLegendForTarget(safeTarget, lastHoveredBar);
+                        syncMobileLegendTouchState(safeTarget, true);
                         return Number(lastHoveredBar.time);
                     }
                 }
+                syncMobileLegendTouchState(safeTarget, false);
                 return null;
             }
 
             clearLegendHoverState(safeTarget);
+            syncMobileLegendTouchState(safeTarget, false);
             refreshLegend(safeTarget);
             return null;
         }
@@ -7825,16 +7872,11 @@
             const fund = Number(market.funding) * 100, vol = Number(market.dayNtlVlm), oi = Number(market.openInterest) * mark;
             S.markPx = mark; const d = pxDec(mark);
             sMark.textContent = '$' + fmt(mark, d); sMark.className = 'val ' + (mark >= prev ? 'up' : 'dn');
-            if (sMarkMobile) {
-                sMarkMobile.textContent = '$' + fmt(mark, d);
-                sMarkMobile.className = mark >= prev ? 'up' : 'dn';
-            }
+            updateMobileLivePriceSummary(mark);
             if (prev > 0) {
                 const diff = mark - prev, pct = (diff / prev) * 100;
                 sChg.textContent = `${diff >= 0 ? '+' : ''}${fmt(diff, d)} / ${diff >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
                 sChg.className = 'val ' + (diff >= 0 ? 'up' : 'dn');
-                const perc = $('coin-perc');
-                if (perc) { perc.textContent = `${diff >= 0 ? '+' : ''}${pct.toFixed(2)}%`; perc.style.color = diff >= 0 ? 'var(--up)' : 'var(--down)'; }
             }
             sVol.textContent = '$' + fmtK(vol); sOi.textContent = '$' + fmtK(oi);
             sFund.textContent = (fund >= 0 ? '+' : '') + fund.toFixed(4) + '%';
@@ -7851,6 +7893,37 @@
             legName.textContent = formatLegendName(market.label, S.tf);
             syncSelectedCoinUi(1);
             buildAggBar(mark);
+        }
+
+        function updateMobileLivePriceSummary(currentPrice) {
+            const market = getSelectedCoinMarket(S.coin);
+            const livePrice = Number(currentPrice);
+            if (!market || !Number.isFinite(livePrice)) return;
+            const prev = Number(market.prevDayPx);
+            const diff = Number.isFinite(prev) && prev > 0 ? livePrice - prev : NaN;
+            const pct = Number.isFinite(diff) && prev > 0 ? (diff / prev) * 100 : NaN;
+            const directionClass = Number.isFinite(diff)
+                ? (Math.abs(diff) < 1e-9 ? '' : diff > 0 ? 'up' : 'dn')
+                : '';
+            const decimals = pxDec(livePrice);
+            if (sMarkMobile) {
+                sMarkMobile.textContent = '$' + fmt(livePrice, decimals);
+                sMarkMobile.className = directionClass;
+            }
+            const perc = $('coin-perc');
+            if (perc) {
+                if (Number.isFinite(pct)) {
+                    perc.textContent = `${diff >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+                    perc.style.color = diff > 0
+                        ? 'var(--up)'
+                        : diff < 0
+                            ? 'var(--down)'
+                            : 'var(--muted)';
+                } else {
+                    perc.textContent = '–';
+                    perc.style.color = 'var(--muted)';
+                }
+            }
         }
 
         // ── Aggregation bar ────────────────────────────────────────
@@ -7967,14 +8040,7 @@
                     obMidArrow.className = 'val ' + (isUp ? 'up' : 'dn');
                 }
                 obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
-                if (sMarkMobile) {
-                    const prevMid = Number(sMarkMobile.dataset.lastMid || 'NaN');
-                    sMarkMobile.textContent = '$' + fmt(mid, d);
-                    sMarkMobile.className = Number.isFinite(prevMid)
-                        ? (mid >= prevMid ? 'up' : 'dn')
-                        : (isUp ? 'up' : 'dn');
-                    sMarkMobile.dataset.lastMid = String(mid);
-                }
+                updateMobileLivePriceSummary(mid);
                 syncAssetDocumentTitle(bestBid);
                 notifyParentLivePrice(bestBid);
             }
@@ -8845,6 +8911,15 @@
 
         [[1, chartMainPane1], [2, chartMainPane2]].forEach(([target, pane]) => {
             if (!pane) return;
+            pane.addEventListener('touchstart', () => {
+                syncMobileLegendTouchState(target, true);
+                refreshLegend(target);
+            }, { passive: true });
+            pane.addEventListener('touchmove', () => {
+                syncMobileLegendTouchState(target, true);
+            }, { passive: true });
+            pane.addEventListener('touchend', () => scheduleMobileLegendTouchHide(target), { passive: true });
+            pane.addEventListener('touchcancel', () => scheduleMobileLegendTouchHide(target), { passive: true });
             pane.addEventListener('pointerdown', event => {
                 const eventTarget = event.target;
                 if (!(eventTarget instanceof Element)) return;
@@ -8869,6 +8944,15 @@
 
         [[1, chartLowerPane1], [2, chartLowerPane2]].forEach(([target, pane]) => {
             if (!pane) return;
+            pane.addEventListener('touchstart', () => {
+                syncMobileLegendTouchState(target, true);
+                refreshLegend(target);
+            }, { passive: true });
+            pane.addEventListener('touchmove', () => {
+                syncMobileLegendTouchState(target, true);
+            }, { passive: true });
+            pane.addEventListener('touchend', () => scheduleMobileLegendTouchHide(target), { passive: true });
+            pane.addEventListener('touchcancel', () => scheduleMobileLegendTouchHide(target), { passive: true });
             pane.addEventListener('pointerdown', () => beginRsiBandInteraction(target), { passive: true, capture: true });
             pane.addEventListener('wheel', () => {
                 if (!hasInteractiveRsiBand(target)) return;
