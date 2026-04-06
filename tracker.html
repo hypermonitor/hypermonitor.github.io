@@ -3677,11 +3677,16 @@
         overscroll-behavior-x: none;
       }
 
+      body {
+        touch-action: pan-y pinch-zoom;
+      }
+
       #app {
         width: 100vw;
         max-width: 100vw;
         padding: 0 0 calc(74px + env(safe-area-inset-bottom, 0px));
         overflow-x: hidden;
+        touch-action: pan-y pinch-zoom;
       }
 
       .shell-header {
@@ -3699,6 +3704,7 @@
         gap: 8px;
         max-width: 100vw;
         overflow-x: hidden;
+        touch-action: pan-y pinch-zoom;
       }
 
       .trade-view-stack[data-mobile-view="market"] {
@@ -4021,6 +4027,14 @@
         min-width: 0;
       }
 
+      .mobile-watchlist-card-price-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1px;
+        min-width: 0;
+      }
+
       .mobile-watchlist-card-price {
         color: var(--text-main);
         font-size: 0.98rem;
@@ -4043,6 +4057,7 @@
         font-weight: 600;
         white-space: nowrap;
         text-align: center;
+        align-self: center;
         background: rgba(124, 132, 143, 0.14);
       }
 
@@ -4877,12 +4892,13 @@
       card: null,
       coin: "",
       ghost: null,
-      originIndex: -1,
+      placeholder: null,
       startX: 0,
       startY: 0,
       offsetX: 0,
       offsetY: 0,
       active: false,
+      pendingRender: false,
       cancelClickUntil: 0
     };
     const mobileWatchlistSwipe = {
@@ -5182,8 +5198,13 @@
       const price = getLivePriceForCoin(coin);
       let displayMeta = null;
       if (Number.isFinite(price)) {
-        if (currency === "EUR" && Number.isFinite(footerEurUsdRate) && footerEurUsdRate > 0) {
-          displayMeta = { value: price / footerEurUsdRate, symbol: "€" };
+        if (currency === "EUR") {
+          const eurUsdRate = Number.isFinite(footerEurUsdRate) && footerEurUsdRate > 0
+            ? footerEurUsdRate
+            : getLivePriceForCoin("xyz:EUR");
+          if (Number.isFinite(eurUsdRate) && eurUsdRate > 0) {
+            displayMeta = { value: price / eurUsdRate, symbol: "€" };
+          }
         } else if (currency === "JPY" && Number.isFinite(footerUsdJpyRate) && footerUsdJpyRate > 0) {
           displayMeta = { value: price * footerUsdJpyRate, symbol: "¥" };
         } else {
@@ -5206,7 +5227,12 @@
           else decimals = 8;
           coinPriceDecimals.set(cacheKey, decimals);
         }
-        const formatted = fmtPriceFixed(displayPrice, decimals);
+        const formattedValue = Number(displayPrice).toLocaleString(undefined, {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+          useGrouping: true,
+        });
+        const formatted = `${displayMeta.symbol}${formattedValue}`;
         lastFooterPrices.set(cacheKey, formatted);
         return formatted;
       }
@@ -5294,6 +5320,10 @@
 
       function renderMobileWatchlist() {
         if (!mobileWatchlistGrid) return;
+        if (mobileWatchlistDrag.pointerId !== null || mobileWatchlistDrag.active) {
+          mobileWatchlistDrag.pendingRender = true;
+          return;
+        }
         const desired = trackedFooterCoins.map((coin) => normalizeFooterCoinValue(coin)).filter(Boolean);
         if (!desired.length) {
           mobileWatchlistGrid.innerHTML = "<div class='mobile-watchlist-loading'>No watchlist assets yet.</div>";
@@ -5336,10 +5366,12 @@
               "</span>" +
               "<span class='mobile-watchlist-card-side'>" +
                 "<span class='mobile-watchlist-card-quote-row'>" +
-                  "<span class='mobile-watchlist-card-price'>" + escapeHtml(priceText) + "</span>" +
+                  "<span class='mobile-watchlist-card-price-stack'>" +
+                    "<span class='mobile-watchlist-card-price'>" + escapeHtml(priceText) + "</span>" +
+                    "<span class='mobile-watchlist-card-subprice'>" + escapeHtml(eurText) + "</span>" +
+                  "</span>" +
                   "<span class='mobile-watchlist-card-change " + changeClass + "'>" + escapeHtml(changeText) + "</span>" +
                 "</span>" +
-                "<span class='mobile-watchlist-card-subprice'>" + escapeHtml(eurText) + "</span>" +
               "</span>" +
             "</button>" +
             "<button class='mobile-watchlist-remove' type='button' data-mobile-remove-coin='" + escapeHtml(coin) + "' aria-label='Remove asset from watchlist' title='Remove asset'>" +
@@ -5436,28 +5468,43 @@
       renderMobileWatchlist();
     }
 
+    function flushPendingMobileWatchlistRender() {
+      if (mobileWatchlistDrag.pointerId !== null || mobileWatchlistDrag.active || !mobileWatchlistDrag.pendingRender) return;
+      mobileWatchlistDrag.pendingRender = false;
+      renderMobileWatchlist();
+    }
+
     function stopMobileWatchlistDrag({ commit = false } = {}) {
       clearMobileWatchlistHoldTimer();
       const card = mobileWatchlistDrag.card;
       const ghost = mobileWatchlistDrag.ghost;
-      const originIndex = mobileWatchlistDrag.originIndex;
+      const placeholder = mobileWatchlistDrag.placeholder;
+      const sourceCoin = mobileWatchlistDrag.coin;
+      const sortableChildren = placeholder && mobileWatchlistGrid
+        ? Array.from(mobileWatchlistGrid.children).filter((entry) => (
+            entry === placeholder ||
+            (entry instanceof HTMLElement && entry.matches("[data-mobile-watchlist-entry]"))
+          ))
+        : [];
+      const placeholderIndex = placeholder ? Math.max(0, sortableChildren.indexOf(placeholder)) : 0;
       if (card) {
         card.classList.remove("is-drag-ready", "is-dragging", "is-source-hidden");
         card.style.removeProperty("--mobile-watchlist-swipe");
       }
       if (ghost?.parentNode) ghost.parentNode.removeChild(ghost);
-
-      if (!commit && card && mobileWatchlistGrid && originIndex >= 0) {
-        const siblings = getMobileWatchlistCards().filter((entry) => entry !== card);
-        const before = siblings[Math.min(originIndex, siblings.length)] || null;
-        if (before) mobileWatchlistGrid.insertBefore(card, before);
-        else mobileWatchlistGrid.appendChild(card);
+      if (!commit && card && placeholder && placeholder.parentNode) {
+        placeholder.parentNode.insertBefore(card, placeholder);
       }
+      if (placeholder?.parentNode) placeholder.parentNode.removeChild(placeholder);
 
       if (commit && mobileWatchlistDrag.active && mobileWatchlistGrid) {
-        const nextOrder = getMobileWatchlistCards()
-          .map((entry) => entry.getAttribute("data-mobile-coin"))
-          .filter(Boolean);
+        const nextOrder = trackedFooterCoins
+          .map((entry) => normalizeFooterCoinValue(entry))
+          .filter(Boolean)
+          .filter((entry) => entry !== sourceCoin);
+        if (sourceCoin) {
+          nextOrder.splice(Math.min(placeholderIndex, nextOrder.length), 0, sourceCoin);
+        }
         commitMobileWatchlistOrder(nextOrder);
         mobileWatchlistDrag.cancelClickUntil = Date.now() + 280;
       }
@@ -5466,7 +5513,7 @@
       mobileWatchlistDrag.card = null;
       mobileWatchlistDrag.coin = "";
       mobileWatchlistDrag.ghost = null;
-      mobileWatchlistDrag.originIndex = -1;
+      mobileWatchlistDrag.placeholder = null;
       mobileWatchlistDrag.startX = 0;
       mobileWatchlistDrag.startY = 0;
       mobileWatchlistDrag.offsetX = 0;
@@ -5474,6 +5521,7 @@
       mobileWatchlistDrag.active = false;
       document.body.style.removeProperty("user-select");
       document.body.style.removeProperty("cursor");
+      if (!commit) flushPendingMobileWatchlistRender();
     }
 
     function startMobileWatchlistDrag(pointerX, pointerY) {
@@ -5482,8 +5530,13 @@
       if (!card || !grid || !card.parentNode) return;
       closeMobileWatchlistSwipe();
       const rect = card.getBoundingClientRect();
-      mobileWatchlistDrag.originIndex = getMobileWatchlistCards().indexOf(card);
+      const placeholder = document.createElement("div");
+      placeholder.className = "mobile-watchlist-card-placeholder";
+      placeholder.style.height = `${rect.height}px`;
+      mobileWatchlistDrag.placeholder = placeholder;
       mobileWatchlistDrag.coin = card.getAttribute("data-mobile-coin") || "";
+      card.parentNode.insertBefore(placeholder, card);
+      card.remove();
       const ghost = card.cloneNode(true);
       ghost.classList.add("mobile-watchlist-ghost");
       ghost.style.width = `${rect.width}px`;
@@ -5497,13 +5550,15 @@
       card.classList.remove("is-drag-ready");
       document.body.style.userSelect = "none";
       document.body.style.cursor = "grabbing";
+      mobileWatchlistDrag.pendingRender = false;
     }
 
     function updateMobileWatchlistDrag(pointerX, pointerY) {
       const card = mobileWatchlistDrag.card;
       const ghost = mobileWatchlistDrag.ghost;
+      const placeholder = mobileWatchlistDrag.placeholder;
       const grid = mobileWatchlistGrid;
-      if (!mobileWatchlistDrag.active || !card || !ghost || !grid) return;
+      if (!mobileWatchlistDrag.active || !card || !ghost || !placeholder || !grid) return;
 
       const nextTop = pointerY - mobileWatchlistDrag.offsetY;
       const nextLeft = pointerX - mobileWatchlistDrag.offsetX;
@@ -5517,9 +5572,9 @@
       }) || null;
 
       if (insertBefore) {
-        grid.insertBefore(card, insertBefore);
+        grid.insertBefore(placeholder, insertBefore);
       } else {
-        grid.appendChild(card);
+        grid.appendChild(placeholder);
       }
 
       const viewportMargin = 72;
@@ -6674,7 +6729,7 @@
 
       function refreshCurrencyDisplay() {
         renderFooterPrices();
-
+        renderMobileWatchlist();
       }
 
       function saveFooterCoins() {
@@ -8617,6 +8672,20 @@
         } else {
           addFooterCoin(normalized);
         }
+      }
+
+      async function setFooterCoinTracked(raw, active) {
+        const symbol = await resolveCoinSymbol(raw);
+        if (!symbol) return;
+        const normalized = normalizeFooterCoinValue(symbol);
+        const base = getFooterBase(normalized);
+        if (!base) return;
+        const existing = findTrackedFooterCoinByBase(base);
+        if (active) {
+          if (!existing) await addFooterCoin(normalized);
+          return;
+        }
+        if (existing) removeFooterCoin(existing);
       }
 
   
@@ -10992,6 +11061,7 @@
           mobileWatchlistDrag.pointerId = null;
           mobileWatchlistDrag.card = null;
           mobileWatchlistDrag.coin = "";
+          flushPendingMobileWatchlistRender();
           return;
         }
         stopMobileWatchlistDrag({ commit });
@@ -11024,6 +11094,7 @@
         mobileWatchlistDrag.pointerId = null;
         mobileWatchlistDrag.card = null;
         mobileWatchlistDrag.coin = "";
+        flushPendingMobileWatchlistRender();
         return;
       }
       if (mobileWatchlistDrag.pointerId !== event.pointerId) return;
@@ -11038,6 +11109,7 @@
       }
       if (mobileWatchlistDrag.pointerId !== event.pointerId) return;
       stopMobileWatchlistDrag({ commit: false });
+      flushPendingMobileWatchlistRender();
     });
 
     if (mobileWatchlistSuggestions) {
@@ -11252,6 +11324,18 @@
         syncMobileWalletFrame({ clear: false });
         highlightSelectedWallet();
         updateUrl(false);
+        return;
+      }
+      if (data.type === "hypermonitor:open-wallet") {
+        if (!isPrimaryFrame && extraFrameIndex === -1) return;
+        const wallet = normalizeFavoriteWallet(data.wallet);
+        if (!wallet) return;
+        openWalletOverlay(wallet, { pushHistory: true });
+        return;
+      }
+      if (data.type === "hypermonitor:set-watchlist-coin") {
+        if (!isPrimaryFrame && extraFrameIndex === -1) return;
+        void setFooterCoinTracked(String(data.coin || ""), Boolean(data.active));
         return;
       }
       if (data.type === "hypermonitor:wallet-section-change") {
