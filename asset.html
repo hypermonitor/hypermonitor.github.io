@@ -1748,30 +1748,26 @@
 
         html.mobile-layout #mobile-market-summary {
             display: flex;
-            align-items: flex-end;
+            align-items: baseline;
             justify-content: space-between;
-            gap: 12px;
-            padding: 0 12px;
+            gap: 14px;
+            padding: 0 12px 2px;
         }
 
         html.mobile-layout .mobile-market-summary-main,
         html.mobile-layout .mobile-market-summary-funding {
             display: flex;
-            flex-direction: column;
-            gap: 3px;
+            align-items: baseline;
+            gap: 6px;
         }
 
         html.mobile-layout .mobile-market-summary-label {
-            color: var(--muted);
-            font-size: 0.64rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            display: none;
         }
 
         html.mobile-layout #s-mark-mobile {
             color: var(--text);
-            font-size: 1.8rem;
+            font-size: 1.92rem;
             font-weight: 700;
             letter-spacing: -0.04em;
             line-height: 1;
@@ -1780,11 +1776,27 @@
 
         html.mobile-layout #s-fund-mobile {
             color: var(--muted);
-            font-size: 0.9rem;
+            font-size: 0.86rem;
             font-weight: 600;
             line-height: 1.15;
             text-align: right;
             font-variant-numeric: tabular-nums;
+        }
+
+        html.mobile-layout #s-fund-mobile.up,
+        html.mobile-layout #s-fund-mobile.val.up {
+            color: var(--up);
+        }
+
+        html.mobile-layout #s-fund-mobile.dn,
+        html.mobile-layout #s-fund-mobile.val.dn {
+            color: var(--down);
+        }
+
+        html.mobile-layout,
+        html.mobile-layout body {
+            overflow-x: hidden;
+            overscroll-behavior-x: none;
         }
 
         html.mobile-layout #main {
@@ -1801,6 +1813,7 @@
             gap: 10px;
             overflow: visible;
             overflow-x: hidden;
+            max-width: 100vw;
         }
 
         html.mobile-layout #chart-toolbar {
@@ -1817,6 +1830,7 @@
             gap: 10px;
             background: transparent;
             border-bottom: 0;
+            max-width: 100vw;
         }
 
         html.mobile-layout #chart-toolbar > div[style*="flex:1"] {
@@ -1852,8 +1866,10 @@
             flex-direction: column;
             flex: none;
             overflow: visible;
+            overflow-x: hidden;
             background: transparent;
             gap: 8px;
+            max-width: 100vw;
         }
 
         html.mobile-layout #chart-container-1,
@@ -1892,12 +1908,16 @@
         }
 
         html.mobile-layout #legend-name {
-            font-size: 12px;
+            display: none;
         }
 
         html.mobile-layout #legend-ohlc {
-            font-size: 10px;
-            gap: 6px 10px;
+            display: none;
+        }
+
+        html.mobile-layout #chart-legend .legend-studies .legend-item:last-child,
+        html.mobile-layout #chart-legend-2 .legend-studies .legend-item:last-child {
+            display: none;
         }
 
         html.mobile-layout #chart-splitter,
@@ -1915,6 +1935,7 @@
             overflow: hidden;
             background: var(--surface);
             box-shadow: none;
+            max-width: 100vw;
         }
 
         html.mobile-layout #ob-open-btn,
@@ -1974,6 +1995,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
+            flex-wrap: nowrap;
         }
 
         html.mobile-layout #ob-spread-info {
@@ -2064,6 +2086,15 @@
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] .ob-row .c3 {
             display: none;
+        }
+
+        html.mobile-layout #lower-pane-item-vol-base,
+        html.mobile-layout #lower-pane-item-vol-base-2,
+        html.mobile-layout #lower-pane-item-vol-ma-fast,
+        html.mobile-layout #lower-pane-item-vol-ma-fast-2,
+        html.mobile-layout #lower-pane-item-vol-ma-slow,
+        html.mobile-layout #lower-pane-item-vol-ma-slow-2 {
+            display: none !important;
         }
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap .ob-row {
@@ -3562,7 +3593,7 @@
                                 <div class="lower-pane-overlay" id="lower-pane-overlay">
                                     <div class="lower-pane-meta">
                                         <span class="lower-pane-item" id="lower-pane-item-vol-base"><span class="lower-pane-key" id="lower-pane-key-vol-base">Vol(BTC)</span><span class="lower-pane-val" id="lower-pane-val-vol-base">–</span></span>
-                                        <span class="lower-pane-item" id="lower-pane-item-vol-usd"><span class="lower-pane-key">Vol(USD)</span><span class="lower-pane-val" id="lower-pane-val-vol-usd">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-usd"><span class="lower-pane-key" id="lower-pane-key-vol-usd">Vol(USD)</span><span class="lower-pane-val" id="lower-pane-val-vol-usd">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast"><span class="lower-pane-key" id="lower-pane-key-vol-ma-fast">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow"><span class="lower-pane-key" id="lower-pane-key-vol-ma-slow">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-rsi"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi">–</span></span>
@@ -3682,7 +3713,7 @@
                                 <div class="lower-pane-overlay" id="lower-pane-overlay-2">
                                     <div class="lower-pane-meta">
                                         <span class="lower-pane-item" id="lower-pane-item-vol-base-2"><span class="lower-pane-key" id="lower-pane-key-vol-base-2">Vol(ETH)</span><span class="lower-pane-val" id="lower-pane-val-vol-base-2">–</span></span>
-                                        <span class="lower-pane-item" id="lower-pane-item-vol-usd-2"><span class="lower-pane-key">Vol(USD)</span><span class="lower-pane-val" id="lower-pane-val-vol-usd-2">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-vol-usd-2"><span class="lower-pane-key" id="lower-pane-key-vol-usd-2">Vol(USD)</span><span class="lower-pane-val" id="lower-pane-val-vol-usd-2">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast-2"><span class="lower-pane-key" id="lower-pane-key-vol-ma-fast-2">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast-2">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow-2"><span class="lower-pane-key" id="lower-pane-key-vol-ma-slow-2">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow-2">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-rsi-2"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi-2">–</span></span>
@@ -4554,6 +4585,8 @@
         const chartSharedCrosshairTime2 = $('chart-shared-crosshair-time-2');
         const lowerPaneKeyVolBase1 = $('lower-pane-key-vol-base');
         const lowerPaneKeyVolBase2 = $('lower-pane-key-vol-base-2');
+        const lowerPaneKeyVolUsd1 = $('lower-pane-key-vol-usd');
+        const lowerPaneKeyVolUsd2 = $('lower-pane-key-vol-usd-2');
         const lowerPaneKeyVolMaFast1 = $('lower-pane-key-vol-ma-fast');
         const lowerPaneKeyVolMaFast2 = $('lower-pane-key-vol-ma-fast-2');
         const lowerPaneKeyVolMaSlow1 = $('lower-pane-key-vol-ma-slow');
@@ -6228,6 +6261,7 @@
             return target === 2
                 ? {
                     keyVolBase: lowerPaneKeyVolBase2,
+                    keyVolUsd: lowerPaneKeyVolUsd2,
                     keyVolMaFast: lowerPaneKeyVolMaFast2,
                     keyVolMaSlow: lowerPaneKeyVolMaSlow2,
                     volBase: lowerPaneValVolBase2,
@@ -6243,6 +6277,7 @@
                 }
                 : {
                     keyVolBase: lowerPaneKeyVolBase1,
+                    keyVolUsd: lowerPaneKeyVolUsd1,
                     keyVolMaFast: lowerPaneKeyVolMaFast1,
                     keyVolMaSlow: lowerPaneKeyVolMaSlow1,
                     volBase: lowerPaneValVolBase1,
@@ -7242,7 +7277,9 @@
             const effectiveTime = time == null ? null : (Number.isFinite(Number(time)) ? Number(time) : null);
             const selectedKey = target === 2 ? S.coin2 : S.coin;
             const baseLabel = getSelectedCoinName(selectedKey) || getCoinDisplayName(selectedKey);
+            const isMobile = isMobileAssetLayout();
             if (refs.keyVolBase) refs.keyVolBase.textContent = `Vol(${baseLabel})`;
+            if (refs.keyVolUsd) refs.keyVolUsd.textContent = isMobile ? 'Vol' : 'Vol(USD)';
             if (refs.keyVolMaFast) refs.keyVolMaFast.textContent = `MA(${S.volumeMaPeriods[0]})`;
             if (refs.keyVolMaSlow) refs.keyVolMaSlow.textContent = `MA(${S.volumeMaPeriods[1]})`;
             const volumeData = getSortedVolumeData(target);
@@ -7879,6 +7916,14 @@
                     obMidArrow.className = 'val ' + (isUp ? 'up' : 'dn');
                 }
                 obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
+                if (sMarkMobile) {
+                    const prevMid = Number(sMarkMobile.dataset.lastMid || 'NaN');
+                    sMarkMobile.textContent = '$' + fmt(mid, d);
+                    sMarkMobile.className = Number.isFinite(prevMid)
+                        ? (mid >= prevMid ? 'up' : 'dn')
+                        : (isUp ? 'up' : 'dn');
+                    sMarkMobile.dataset.lastMid = String(mid);
+                }
                 syncAssetDocumentTitle(bestBid);
                 notifyParentLivePrice(bestBid);
             }
