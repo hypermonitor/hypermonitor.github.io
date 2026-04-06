@@ -5509,19 +5509,20 @@
       const existingCards = new Map(
         getMobileWatchlistCards().map((card) => [normalizeFooterCoinValue(card.getAttribute("data-mobile-coin")), card])
       );
-      const orderedCards = getMobileWatchlistCards();
+      const loadingAnchor = loadingEl && loadingEl.isConnected ? loadingEl.nextSibling : mobileWatchlistGrid.firstChild;
+      let nextReferenceNode = loadingAnchor;
 
-      desired.forEach((coin, index) => {
+      desired.forEach((coin) => {
         const normalized = normalizeFooterCoinValue(coin);
         let card = existingCards.get(normalized);
         if (!card) {
           card = createMobileWatchlistCardElement(normalized);
         }
         updateMobileWatchlistCardElement(card, normalized);
-        const referenceCard = orderedCards[index] || null;
-        if (referenceCard !== card) {
-          mobileWatchlistGrid.insertBefore(card, referenceCard);
+        if (card !== nextReferenceNode) {
+          mobileWatchlistGrid.insertBefore(card, nextReferenceNode);
         }
+        nextReferenceNode = card.nextSibling;
         existingCards.delete(normalized);
       });
 
@@ -5575,6 +5576,10 @@
 
     function closeMobileWatchlistSwipe({ exceptCoin = "" } = {}) {
       const normalizedExcept = normalizeFooterCoinValue(exceptCoin);
+      const preserveDirection =
+        normalizedExcept && normalizedExcept === mobileWatchlistSwipe.openedCoin
+          ? mobileWatchlistSwipe.openedDirection
+          : "";
       getMobileWatchlistCards().forEach((card) => {
         const coin = normalizeFooterCoinValue(card.getAttribute("data-mobile-coin"));
         if (normalizedExcept && coin === normalizedExcept) return;
@@ -5582,9 +5587,7 @@
         card.style.removeProperty("--mobile-watchlist-swipe");
       });
       mobileWatchlistSwipe.openedCoin = normalizedExcept || "";
-      if (!normalizedExcept) {
-        mobileWatchlistSwipe.openedDirection = "";
-      }
+      mobileWatchlistSwipe.openedDirection = preserveDirection;
     }
 
     function closeMobileWatchlistHold({ exceptCoin = "" } = {}) {
@@ -5615,7 +5618,7 @@
       } else {
         closeMobileWatchlistSwipe();
       }
-      mobileWatchlistDrag.cancelClickUntil = Date.now() + 180;
+      mobileWatchlistDrag.cancelClickUntil = Date.now() + 260;
       resetMobileWatchlistSwipePointer();
     }
 
@@ -11069,7 +11072,6 @@
         if (!coin) return;
         if (mobileWatchlistSwipe.openedCoin) {
           closeMobileWatchlistSwipe();
-          return;
         }
         openCoinInShell(coin, { pushHistory: true });
       });
