@@ -177,18 +177,18 @@
         #coin-btn {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 5px 10px;
+            gap: 10px;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            padding: 1px 4px 1px 0;
             cursor: pointer;
             color: var(--text);
             font-weight: 600;
             font-size: 15px;
             white-space: nowrap;
             user-select: none;
-            transition: border-color 0.15s;
+            transition: color 0.15s ease, opacity 0.15s ease;
         }
 
         .coin-btn-meta {
@@ -207,13 +207,13 @@
         .coin-btn-badge {
             display: inline-flex;
             align-items: center;
-            height: 18px;
-            padding: 0 6px;
-            border: 1px solid var(--border);
+            height: 16px;
+            padding: 0 5px;
+            border: 0;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.06);
             color: var(--muted);
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
@@ -221,11 +221,7 @@
         }
 
         #coin-btn:hover {
-            border-color: #d3d8df;
-        }
-
-        html.light #coin-btn:hover {
-            border-color: #94a3b8;
+            opacity: 0.92;
         }
 
         #coin-btn .caret {
@@ -235,13 +231,13 @@
         }
 
         #coin-logo {
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             object-fit: contain;
             flex-shrink: 0;
-            background: #1e2329;
-            padding: 1px;
+            background: transparent;
+            padding: 0;
         }
 
         html.light #coin-logo,
@@ -254,19 +250,20 @@
             pointer-events: auto;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(6,7,9,0.8);
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+            gap: 8px;
+            background: transparent;
+            padding: 0 2px 0 0;
+            border-radius: 0;
+            border: 0;
             cursor: pointer;
-            margin-bottom: 4px;
+            margin-bottom: 0;
             max-width: max-content;
+            transition: opacity 0.15s ease;
         }
 
         html.light .mini-coin-select {
-            background: rgba(255, 255, 255, 0.94);
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            background: transparent;
+            box-shadow: none;
         }
 
         #coin-toggle-extra {
@@ -282,12 +279,12 @@
         }
 
         .mini-coin-logo {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             object-fit: contain;
-            background: #1e2329;
-            padding: 1px;
+            background: transparent;
+            padding: 0;
             flex-shrink: 0;
         }
 
@@ -311,11 +308,11 @@
         .mini-coin-badge {
             display: inline-flex;
             align-items: center;
-            height: 16px;
+            height: 15px;
             padding: 0 5px;
-            border: 1px solid var(--border);
+            border: 0;
             border-radius: 999px;
-            background: rgba(255,255,255,0.04);
+            background: rgba(255,255,255,0.06);
             color: var(--muted);
             font-size: 8px;
             font-weight: 700;
@@ -3476,7 +3473,6 @@
             <!-- CHART SIDE (Left by default) -->
             <div id="chart-side">
                 <div id="chart-toolbar">
-                    <button class="tf-btn" data-tf="time">Time</button>
                     <button class="tf-btn" data-tf="1m">1m</button>
                     <button class="tf-btn" data-tf="5m">5m</button>
                     <button class="tf-btn active" data-tf="15m">15m</button>
@@ -4249,7 +4245,7 @@
         ]);
         const coinResolvedLogoCache = new Map();
         const coinLogoCandidateCache = new Map();
-        const TF_MS = { 'time': 60e3, '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3, '1w': 604800e3 };
+        const TF_MS = { '1m': 60e3, '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 14400e3, '1d': 86400e3, '1w': 604800e3 };
         const OB_ROWS_BOTH = 14;
         const OB_ROWS_SINGLE = 28;
         const ORDERBOOK_ROW_CAP = OB_ROWS_SINGLE;
@@ -4297,18 +4293,27 @@
             return dex ? `${dex}:${base}` : base;
         }
 
+        function normalizeTimeframeValue(timeframe) {
+            const tf = String(timeframe || '15m').trim().toLowerCase();
+            if (tf === 'time' || !TF_MS[tf]) return '15m';
+            return tf;
+        }
+
         function isTimeChartMode() {
-            return String(S?.tf || '').trim() === 'time';
+            return false;
         }
 
         function getDisplayTimeframeLabel(timeframe = S?.tf) {
-            const tf = String(timeframe || '15m').trim().toLowerCase();
-            return tf === 'time' ? 'Time' : String(timeframe || '15m').trim();
+            const tf = normalizeTimeframeValue(timeframe);
+            return tf === '1h' ? '1H'
+                : tf === '4h' ? '4H'
+                : tf === '1d' ? '1D'
+                : tf === '1w' ? '1W'
+                : tf;
         }
 
         function getCandleInterval(timeframe = S?.tf) {
-            const tf = String(timeframe || '15m').trim().toLowerCase();
-            return tf === 'time' ? '1m' : tf;
+            return normalizeTimeframeValue(timeframe);
         }
 
         function getOrderBookSigFigs() {
@@ -5097,7 +5102,7 @@
         }
 
         async function applyTimeframe(nextTf, options = {}) {
-            const tf = String(nextTf || '').trim().toLowerCase();
+            const tf = normalizeTimeframeValue(nextTf);
             if (!TF_MS[tf]) return;
             if (tf === S.tf && options.force !== true) return;
             S.tf = tf;
@@ -7916,7 +7921,6 @@
 
         function getDefaultVisibleBars(tf) {
             const barsByTf = {
-                'time': 52,
                 '1m': 90,
                 '5m': 84,
                 '15m': 64,
