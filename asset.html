@@ -719,6 +719,43 @@
             background: var(--surface2);
         }
 
+        .toolbar-chip-btn {
+            height: 30px;
+            padding: 0 10px;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            transition: color 0.15s ease, background 0.15s ease;
+            flex: 0 0 auto;
+        }
+
+        .toolbar-chip-btn:hover,
+        .toolbar-chip-btn:focus-visible {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+
+        .toolbar-chip-btn svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+
+        html.light .toolbar-chip-btn:hover,
+        html.light .toolbar-chip-btn:focus-visible {
+            background: rgba(148, 163, 184, 0.12);
+        }
+
         .chart-settings {
             position: relative;
             flex: 0 0 auto;
@@ -728,7 +765,8 @@
             position: absolute;
             top: calc(100% + 8px);
             left: 8px;
-            width: 256px;
+            width: min(720px, calc(100vw - 32px));
+            max-height: min(78vh, 820px);
             padding: 10px;
             border-radius: 12px;
             border: 1px solid var(--border);
@@ -737,6 +775,7 @@
             display: none;
             flex-direction: column;
             gap: 10px;
+            overflow: auto;
             z-index: 32;
         }
 
@@ -761,52 +800,59 @@
             color: var(--muted);
         }
 
-        .chart-settings-segment {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 0.12rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: rgba(15, 18, 23, 0.82);
+        .chart-settings-divider {
+            height: 1px;
+            background: rgba(148, 163, 184, 0.14);
         }
 
-        html.light .chart-settings-segment {
-            background: #ffffff;
-            border-color: #e5e7eb;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        .chart-settings-segment {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            gap: 0.18rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: fit-content;
+            max-width: 100%;
+            position: relative;
+            overflow: visible;
+            min-height: 0;
         }
 
         .chart-settings-option {
-            flex: 1 1 0;
+            flex: 0 0 auto;
             min-width: 0;
-            padding: 0.18rem 0.5rem;
+            padding: 3px 8px;
+            border-radius: 4px;
             border: 0;
-            border-radius: 999px;
             background: transparent;
             color: var(--muted);
             font: inherit;
-            font-size: 0.62rem;
+            font-size: 12px;
             font-weight: 500;
-            letter-spacing: 0.05em;
+            line-height: 1.2;
             cursor: pointer;
-            transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+            transition: color 0.15s ease, opacity 0.15s ease;
         }
 
         .chart-settings-option:hover {
-            color: var(--text);
+            color: rgba(234, 236, 239, 0.78);
             background: transparent;
         }
 
         .chart-settings-option.active {
-            background: rgba(255, 255, 255, 0.12);
             color: var(--text);
+            background: transparent;
+        }
+
+        html.light .chart-settings-option:hover {
+            color: rgba(15, 23, 42, 0.72);
         }
 
         html.light .chart-settings-option.active {
-            background: #f8fafc;
             color: #0f172a;
-            box-shadow: inset 0 0 0 1px #cbd5e1;
         }
 
         .chart-settings-toggle {
@@ -953,6 +999,437 @@
 
         .chart-settings-field input:focus {
             border-color: var(--border-strong);
+        }
+
+        .chart-indicator-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(2, 6, 12, 0.56);
+            backdrop-filter: blur(8px);
+        }
+
+        .chart-indicator-backdrop.is-open {
+            display: flex;
+        }
+
+        .chart-indicator-modal {
+            width: min(760px, calc(100vw - 32px));
+            max-height: min(720px, calc(100vh - 48px));
+            display: grid;
+            grid-template-rows: auto auto auto minmax(0, 1fr);
+            gap: 14px;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(72, 84, 101, 0.34);
+            background: rgba(14, 18, 24, 0.98);
+            box-shadow: 0 28px 60px rgba(0, 0, 0, 0.44);
+            color: var(--text);
+        }
+
+        html.light .chart-indicator-modal {
+            border-color: rgba(148, 163, 184, 0.26);
+            background: rgba(255, 255, 255, 0.99);
+            box-shadow: 0 22px 44px rgba(15, 23, 42, 0.14);
+        }
+
+        .chart-indicator-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .chart-indicator-title {
+            font-size: 1.08rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .chart-indicator-subtitle {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+
+        .chart-indicator-active-wrap {
+            display: grid;
+            gap: 8px;
+        }
+
+        .chart-indicator-active-wrap--menu {
+            padding-top: 2px;
+        }
+
+        .chart-indicator-section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .chart-indicator-section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .chart-indicator-clear-all {
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            font: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: color 0.15s ease, opacity 0.15s ease;
+        }
+
+        .chart-indicator-clear-all:hover,
+        .chart-indicator-clear-all:focus-visible {
+            color: var(--text);
+            outline: none;
+        }
+
+        .chart-indicator-active {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chart-indicator-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+        }
+
+        .chart-indicator-pill:hover,
+        .chart-indicator-pill:focus-visible,
+        .chart-indicator-pill.is-selected {
+            border-color: rgba(148, 163, 184, 0.34);
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        .chart-indicator-pill .pane {
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .chart-indicator-pill-swatch {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            flex: 0 0 auto;
+        }
+
+        html.light .chart-indicator-pill {
+            border-color: rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.04);
+        }
+
+        html.light .chart-indicator-pill:hover,
+        html.light .chart-indicator-pill:focus-visible,
+        html.light .chart-indicator-pill.is-selected {
+            background: rgba(15, 23, 42, 0.08);
+        }
+
+        .chart-indicator-search {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 40px;
+            padding: 0 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(72, 84, 101, 0.34);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--muted);
+        }
+
+        .chart-indicator-search svg {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 auto;
+        }
+
+        .chart-indicator-search input {
+            flex: 1 1 auto;
+            min-width: 0;
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            font: inherit;
+            font-size: 0.92rem;
+        }
+
+        .chart-indicator-search input:focus {
+            outline: none;
+        }
+
+        html.light .chart-indicator-search {
+            border-color: rgba(148, 163, 184, 0.24);
+            background: rgba(15, 23, 42, 0.03);
+        }
+
+        .chart-indicator-layout {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 270px) minmax(0, 1fr);
+            gap: 14px;
+        }
+
+        .chart-indicator-layout--menu {
+            grid-template-columns: minmax(0, 214px) minmax(0, 1fr);
+            gap: 12px;
+        }
+
+        .chart-indicator-results,
+        .chart-indicator-editor {
+            min-height: 0;
+            border-radius: 14px;
+            border: 1px solid rgba(72, 84, 101, 0.26);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        html.light .chart-indicator-results,
+        html.light .chart-indicator-editor {
+            border-color: rgba(148, 163, 184, 0.22);
+            background: rgba(15, 23, 42, 0.03);
+        }
+
+        .chart-indicator-results {
+            padding: 8px;
+            overflow: auto;
+            display: grid;
+            align-content: start;
+            gap: 4px;
+        }
+
+        .chart-indicator-result {
+            display: grid;
+            gap: 4px;
+            width: 100%;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text);
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .chart-indicator-result:hover,
+        .chart-indicator-result:focus-visible,
+        .chart-indicator-result.is-selected {
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+
+        html.light .chart-indicator-result:hover,
+        html.light .chart-indicator-result:focus-visible,
+        html.light .chart-indicator-result.is-selected {
+            background: rgba(15, 23, 42, 0.06);
+        }
+
+        .chart-indicator-result-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .chart-indicator-result-name {
+            font-size: 0.84rem;
+            font-weight: 600;
+        }
+
+        .chart-indicator-result-pane {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .chart-indicator-result-desc {
+            color: var(--muted);
+            font-size: 0.74rem;
+            line-height: 1.4;
+        }
+
+        .chart-indicator-empty {
+            padding: 18px 12px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            text-align: center;
+        }
+
+        .chart-indicator-editor {
+            padding: 12px;
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            gap: 12px;
+        }
+
+        .chart-indicator-editor-meta {
+            display: grid;
+            gap: 6px;
+        }
+
+        .chart-indicator-name {
+            font-size: 0.98rem;
+            font-weight: 700;
+        }
+
+        .chart-indicator-description {
+            color: var(--muted);
+            font-size: 0.8rem;
+            line-height: 1.48;
+        }
+
+        .chart-indicator-params {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-content: start;
+            gap: 8px;
+            overflow: auto;
+        }
+
+        .chart-indicator-param {
+            display: grid;
+            gap: 5px;
+        }
+
+        .chart-indicator-param label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .chart-indicator-param-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chart-indicator-param-label-swatch {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.18);
+        }
+
+        .chart-indicator-param input,
+        .chart-indicator-param select {
+            width: 100%;
+            min-width: 0;
+            height: 38px;
+            padding: 0 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(72, 84, 101, 0.36);
+            background: rgba(12, 16, 22, 0.8);
+            color: var(--text);
+            font: inherit;
+        }
+
+        .chart-indicator-param input[type="color"] {
+            padding: 4px;
+            min-height: 38px;
+            background: transparent;
+        }
+
+        .chart-indicator-param input:focus-visible,
+        .chart-indicator-param select:focus-visible {
+            outline: none;
+            border-color: rgba(148, 163, 184, 0.44);
+            box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.12);
+        }
+
+        html.light .chart-indicator-param input,
+        html.light .chart-indicator-param select {
+            border-color: rgba(148, 163, 184, 0.28);
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        .chart-indicator-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 6px;
+        }
+
+        .chart-indicator-primary,
+        .chart-indicator-secondary {
+            min-height: 36px;
+            padding: 0 12px;
+            border-radius: 10px;
+            border: 0;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+        }
+
+        .chart-indicator-primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #0f172a;
+            margin-left: auto;
+        }
+
+        .chart-indicator-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        html.light .chart-indicator-primary {
+            background: #0f172a;
+            color: #ffffff;
+        }
+
+        html.light .chart-indicator-secondary {
+            background: rgba(15, 23, 42, 0.08);
+        }
+
+        @media (max-width: 860px) {
+            .chart-settings-menu {
+                width: min(92vw, 720px);
+            }
+            .chart-indicator-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+            .chart-indicator-params {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
 
         .chart-loading-wrap {
@@ -2347,6 +2824,38 @@
             color: #7c5cff;
         }
 
+        .legend-custom-indicators {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            margin-top: 4px;
+            font-size: 11px;
+            font-variant-numeric: tabular-nums;
+            color: var(--muted);
+        }
+
+        .legend-custom-indicator {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .legend-custom-indicator-swatch {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            align-self: center;
+            flex: 0 0 auto;
+        }
+
+        .legend-custom-indicator .legend-key {
+            color: var(--muted);
+        }
+
+        .legend-custom-indicator .v {
+            color: var(--text);
+        }
+
         /* ── Right panel ── */
         #right-panel {
             width: 310px;
@@ -3511,6 +4020,8 @@
                                 <div class="chart-settings-segment" role="group" aria-label="Price chart style">
                                     <button class="chart-settings-option" type="button" data-price-mode="candles">Candles</button>
                                     <button class="chart-settings-option" type="button" data-price-mode="line">Line</button>
+                                    <button class="chart-settings-option" type="button" data-price-mode="heikin">Heikin-Ashi</button>
+                                    <button class="chart-settings-option" type="button" data-price-mode="area">Area</button>
                                 </div>
                             </div>
                             <div class="chart-settings-group">
@@ -3518,15 +4029,8 @@
                                 <div class="chart-settings-segment" role="group" aria-label="Lower chart study">
                                     <button class="chart-settings-option" type="button" data-lower-study="volume">Volume</button>
                                     <button class="chart-settings-option" type="button" data-lower-study="rsi">RSI</button>
+                                    <button id="chart-lower-indicator-option" class="chart-settings-option" type="button" data-lower-study="indicator" hidden>Indicator</button>
                                 </div>
-                            </div>
-                            <div class="chart-settings-group">
-                                <button id="chart-ma-toggle" class="chart-settings-toggle" type="button" aria-pressed="false">
-                                    <span class="chart-settings-toggle-label">Moving averages</span>
-                                    <span class="chart-settings-toggle-switch" aria-hidden="true">
-                                        <span class="chart-settings-toggle-knob"></span>
-                                    </span>
-                                </button>
                             </div>
                             <div class="chart-settings-group">
                                 <button id="chart-grid-toggle" class="chart-settings-toggle" type="button" aria-pressed="false">
@@ -3536,39 +4040,13 @@
                                     </span>
                                 </button>
                             </div>
-                            <div class="chart-settings-group" id="chart-ma-periods-group" hidden>
-                                <div class="chart-settings-label">Moving Average Periods</div>
-                                <div class="chart-settings-bounds chart-settings-bounds--triple">
-                                    <label class="chart-settings-field chart-settings-field--compact">
-                                        <span>Fast</span>
-                                        <input id="chart-ma-fast" type="number" min="1" max="999" step="1" inputmode="numeric" />
-                                    </label>
-                                    <label class="chart-settings-field chart-settings-field--compact">
-                                        <span>Mid</span>
-                                        <input id="chart-ma-mid" type="number" min="1" max="999" step="1" inputmode="numeric" />
-                                    </label>
-                                    <label class="chart-settings-field chart-settings-field--compact">
-                                        <span>Slow</span>
-                                        <input id="chart-ma-slow" type="number" min="1" max="999" step="1" inputmode="numeric" />
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="chart-settings-group" id="chart-volume-ma-periods-group" hidden>
-                                <div class="chart-settings-label">Volume MA Periods</div>
-                                <div class="chart-settings-bounds">
-                                    <label class="chart-settings-field chart-settings-field--compact">
-                                        <span>Fast</span>
-                                        <input id="chart-volume-ma-fast" type="number" min="1" max="999" step="1" inputmode="numeric">
-                                    </label>
-                                    <label class="chart-settings-field chart-settings-field--compact">
-                                        <span>Slow</span>
-                                        <input id="chart-volume-ma-slow" type="number" min="1" max="999" step="1" inputmode="numeric">
-                                    </label>
-                                </div>
-                            </div>
                             <div class="chart-settings-group" id="chart-rsi-bounds-group" hidden>
                                 <div class="chart-settings-label">RSI Bounds</div>
-                                <div class="chart-settings-bounds">
+                                <div class="chart-settings-bounds chart-settings-bounds--triple">
+                                    <label class="chart-settings-field chart-settings-field--compact">
+                                        <span>Period</span>
+                                        <input id="chart-rsi-period" type="number" min="2" max="400" step="1" inputmode="numeric" />
+                                    </label>
                                     <label class="chart-settings-field">
                                         <span>Lower</span>
                                         <input id="chart-rsi-lower" type="number" min="1" max="99" step="1" inputmode="numeric" />
@@ -3577,6 +4055,37 @@
                                         <span>Upper</span>
                                         <input id="chart-rsi-upper" type="number" min="1" max="99" step="1" inputmode="numeric" />
                                     </label>
+                                </div>
+                            </div>
+                            <div class="chart-settings-group chart-settings-group--studies">
+                                <div class="chart-settings-divider"></div>
+                                <div class="chart-indicator-active-wrap chart-indicator-active-wrap--menu">
+                                    <div class="chart-indicator-section-head">
+                                        <div class="chart-indicator-section-label">On chart</div>
+                                        <button id="chart-indicator-clear-all" class="chart-indicator-clear-all" type="button">Clear all</button>
+                                    </div>
+                                    <div id="chart-indicator-active" class="chart-indicator-active"></div>
+                                </div>
+                                <label class="chart-indicator-search" for="chart-indicator-search-input">
+                                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                                        <circle cx="7" cy="7" r="4.35" fill="none" stroke="currentColor" stroke-width="1.4"></circle>
+                                        <path d="M10.3 10.3L13 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+                                    </svg>
+                                    <input id="chart-indicator-search-input" type="search" placeholder="Find an indicator">
+                                </label>
+                                <div class="chart-indicator-layout chart-indicator-layout--menu">
+                                    <div id="chart-indicator-results" class="chart-indicator-results" role="listbox" aria-label="Indicator list"></div>
+                                    <div class="chart-indicator-editor">
+                                        <div class="chart-indicator-editor-meta">
+                                            <div id="chart-indicator-name" class="chart-indicator-name">Select an indicator</div>
+                                            <div id="chart-indicator-description" class="chart-indicator-description">Pick an indicator, tune the inputs, and apply it to the chart.</div>
+                                        </div>
+                                        <div id="chart-indicator-params" class="chart-indicator-params"></div>
+                                        <div class="chart-indicator-actions">
+                                            <button id="chart-indicator-remove" class="chart-indicator-secondary" type="button" hidden>Remove</button>
+                                            <button id="chart-indicator-apply" class="chart-indicator-primary" type="button">Add to chart</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3694,6 +4203,7 @@
                                         <span class="legend-item"><span class="legend-key" id="leg-ma-key-99">MA(99)</span><span class="v" id="leg-ma-99" data-study="ma99">–</span></span>
                                         <span class="legend-item"><span class="legend-key" id="leg-lower-label">Volume</span><span class="v" id="leg-lower-value">–</span></span>
                                     </div>
+                                    <div class="legend-custom-indicators" id="legend-custom-indicators"></div>
                                 </div>
                             </div>
                             <div id="lower-pane-splitter" class="asset-splitter lower-pane-splitter" role="separator" aria-orientation="horizontal" aria-label="Resize lower pane" hidden></div>
@@ -3705,6 +4215,7 @@
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast"><span class="lower-pane-key" id="lower-pane-key-vol-ma-fast">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow"><span class="lower-pane-key" id="lower-pane-key-vol-ma-slow">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-rsi"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-custom" hidden><span class="lower-pane-key" id="lower-pane-key-custom">Indicator</span><span class="lower-pane-val" id="lower-pane-val-custom">–</span></span>
                                     </div>
                                     <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="setLowerPaneCollapsed(true)">
                                         <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
@@ -3814,6 +4325,7 @@
                                         <span class="legend-item"><span class="legend-key" id="leg-ma-key-99-2">MA(99)</span><span class="v" id="leg-ma-99-2" data-study="ma99">–</span></span>
                                         <span class="legend-item"><span class="legend-key" id="leg-lower-label-2">Volume</span><span class="v" id="leg-lower-value-2">–</span></span>
                                     </div>
+                                    <div class="legend-custom-indicators" id="legend-custom-indicators-2"></div>
                                 </div>
                             </div>
                             <div id="lower-pane-splitter-2" class="asset-splitter lower-pane-splitter" role="separator" aria-orientation="horizontal" aria-label="Resize lower pane" hidden></div>
@@ -3825,6 +4337,7 @@
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-fast-2"><span class="lower-pane-key" id="lower-pane-key-vol-ma-fast-2">MA(7)</span><span class="lower-pane-val vol-ma-fast" id="lower-pane-val-vol-ma-fast-2">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-vol-ma-slow-2"><span class="lower-pane-key" id="lower-pane-key-vol-ma-slow-2">MA(14)</span><span class="lower-pane-val vol-ma-slow" id="lower-pane-val-vol-ma-slow-2">–</span></span>
                                         <span class="lower-pane-item" id="lower-pane-item-rsi-2"><span class="lower-pane-key">RSI(14)</span><span class="lower-pane-val rsi" id="lower-pane-val-rsi-2">–</span></span>
+                                        <span class="lower-pane-item" id="lower-pane-item-custom-2" hidden><span class="lower-pane-key" id="lower-pane-key-custom-2">Indicator</span><span class="lower-pane-val" id="lower-pane-val-custom-2">–</span></span>
                                     </div>
                                     <button class="toolbar-icon-btn lower-pane-close" type="button" aria-label="Hide lower pane" title="Hide lower pane" onclick="setLowerPaneCollapsed(true)">
                                         <svg class="toolbar-icon-stroke" viewBox="0 0 16 16" aria-hidden="true">
@@ -4199,17 +4712,695 @@
             lowerStudy: 'volume',
             showMAs: true,
             showGrid: true,
+            rsiPeriod: 14,
             rsiLower: 30,
             rsiUpper: 70,
             maPeriods: [7, 25, 99],
             volumeMaPeriods: [7, 14],
-            lowerPaneHeight: 122
+            lowerPaneHeight: 122,
+            overlayIndicators: [],
+            lowerIndicator: null
         });
         const MA_COLORS = {
             7: '#f0c419',
             25: '#ff4da6',
             99: '#7c5cff'
         };
+        const INDICATOR_SOURCE_OPTIONS = Object.freeze([
+            { value: 'open', label: 'Open' }
+        ]);
+        const INDICATOR_DEFINITIONS = Object.freeze([
+            {
+                id: 'sma',
+                name: 'Simple Moving Average',
+                shortName: 'SMA',
+                pane: 'overlay',
+                description: 'Three simple moving averages using the same period setup and colors as the built-in moving averages.',
+                params: [
+                    { key: 'fast', label: 'Fast', type: 'number', min: 1, max: 400, step: 1, default: 7 },
+                    { key: 'mid', label: 'Mid', type: 'number', min: 1, max: 400, step: 1, default: 25 },
+                    { key: 'slow', label: 'Slow', type: 'number', min: 1, max: 400, step: 1, default: 99 },
+                    { key: 'volumeFast', label: 'Volume Fast', type: 'number', min: 1, max: 400, step: 1, default: 7 },
+                    { key: 'volumeSlow', label: 'Volume Slow', type: 'number', min: 1, max: 400, step: 1, default: 14 }
+                ],
+                series: [
+                    { key: 'fast', type: 'line', color: MA_COLORS[7], lineWidth: 1.4, label: 'Fast' },
+                    { key: 'mid', type: 'line', color: MA_COLORS[25], lineWidth: 1.4, label: 'Mid' },
+                    { key: 'slow', type: 'line', color: MA_COLORS[99], lineWidth: 1.4, label: 'Slow' }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'fast',
+                    legendLabel: `SMA(${params.fast}, ${params.mid}, ${params.slow})`,
+                    primaryFormat: 'price',
+                    data: {
+                        fast: computeSmaIndicator(points, params.fast, 'open'),
+                        mid: computeSmaIndicator(points, params.mid, 'open'),
+                        slow: computeSmaIndicator(points, params.slow, 'open')
+                    }
+                })
+            },
+            {
+                id: 'ema',
+                name: 'Exponential Moving Average',
+                shortName: 'EMA',
+                pane: 'overlay',
+                description: 'An exponentially weighted moving average for faster trend response.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 21 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#22c55e', lineWidth: 1.7 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `EMA(${params.period})`,
+                    primaryFormat: 'price',
+                    data: { main: computeEmaIndicator(points, params.period, params.source) }
+                })
+            },
+            {
+                id: 'dema',
+                name: 'Double Exponential Moving Average',
+                shortName: 'DEMA',
+                pane: 'overlay',
+                description: 'A double-smoothed EMA that reduces lag versus a standard EMA.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 21 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#34d399', lineWidth: 1.7 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `DEMA(${params.period})`,
+                    primaryFormat: 'price',
+                    data: { main: computeDemaIndicator(points, params.period, params.source) }
+                })
+            },
+            {
+                id: 'tema',
+                name: 'Triple Exponential Moving Average',
+                shortName: 'TEMA',
+                pane: 'overlay',
+                description: 'A triple-smoothed EMA variant for fast trend tracking with less lag.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 21 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#a78bfa', lineWidth: 1.7 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `TEMA(${params.period})`,
+                    primaryFormat: 'price',
+                    data: { main: computeTemaIndicator(points, params.period, params.source) }
+                })
+            },
+            {
+                id: 'wma',
+                name: 'Weighted Moving Average',
+                shortName: 'WMA',
+                pane: 'overlay',
+                description: 'A weighted average that emphasizes newer bars.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 21 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#60a5fa', lineWidth: 1.7 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `WMA(${params.period})`,
+                    primaryFormat: 'price',
+                    data: { main: computeWmaIndicator(points, params.period, params.source) }
+                })
+            },
+            {
+                id: 'vwma',
+                name: 'Volume Weighted Moving Average',
+                shortName: 'VWMA',
+                pane: 'overlay',
+                description: 'A moving average weighted by traded volume.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 20 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#f59e0b', lineWidth: 1.7 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `VWMA(${params.period})`,
+                    primaryFormat: 'price',
+                    data: { main: computeVwmaIndicator(points, params.period, params.source) }
+                })
+            },
+            {
+                id: 'hma',
+                name: 'Hull Moving Average',
+                shortName: 'HMA',
+                pane: 'overlay',
+                description: 'A smoother, faster moving average using weighted inputs.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 24 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#8b5cf6', lineWidth: 1.7 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `HMA(${params.period})`,
+                    primaryFormat: 'price',
+                    data: { main: computeHmaIndicator(points, params.period, params.source) }
+                })
+            },
+            {
+                id: 'alma',
+                name: 'Arnaud Legoux Moving Average',
+                shortName: 'ALMA',
+                pane: 'overlay',
+                description: 'A Gaussian-smoothed moving average with offset and sigma controls.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 14 },
+                    { key: 'offset', label: 'Offset', type: 'number', min: 0, max: 1, step: 0.01, default: 0.85 },
+                    { key: 'sigma', label: 'Sigma', type: 'number', min: 1, max: 12, step: 0.1, default: 6 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#f472b6', lineWidth: 1.7 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `ALMA(${params.period})`,
+                    primaryFormat: 'price',
+                    data: { main: computeAlmaIndicator(points, params.period, params.offset, params.sigma, params.source) }
+                })
+            },
+            {
+                id: 'avgprice',
+                name: 'Average Price',
+                shortName: 'Avg Price',
+                pane: 'overlay',
+                description: 'Plots the single candle-open value used as the base datapoint for studies.',
+                params: [],
+                series: [{ key: 'main', type: 'line', color: '#c084fc', lineWidth: 1.6 }],
+                compute: (points) => ({
+                    primaryKey: 'main',
+                    legendLabel: 'Open',
+                    primaryFormat: 'price',
+                    data: { main: computeAveragePriceIndicator(points, 'open') }
+                })
+            },
+            {
+                id: 'bb',
+                name: 'Bollinger Bands',
+                shortName: 'BB',
+                pane: 'overlay',
+                description: 'Upper, basis, and lower bands built from SMA and standard deviation.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 20 },
+                    { key: 'mult', label: 'StdDev', type: 'number', min: 0.1, max: 6, step: 0.1, default: 2 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [
+                    { key: 'band', type: 'area', colorKey: 'upper', lineVisible: false, topOpacity: 0.1, bottomOpacity: 0.1, hideColorControl: true },
+                    { key: 'mask', type: 'area', maskToBackground: true, lineVisible: false, hideColorControl: true },
+                    { key: 'upper', type: 'line', color: '#60a5fa', lineWidth: 1.4, label: 'Upper' },
+                    { key: 'mean', type: 'line', color: '#e2e8f0', lineWidth: 1.2, label: 'Mean' },
+                    { key: 'lower', type: 'line', color: '#60a5fa', lineWidth: 1.4, label: 'Lower' }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'mean',
+                    legendLabel: `BB(${params.period}, ${params.mult})`,
+                    primaryFormat: 'price',
+                    data: computeBollingerIndicator(points, params.period, params.mult, params.source)
+                })
+            },
+            {
+                id: 'donchian',
+                name: 'Donchian Channels',
+                shortName: 'Donchian',
+                pane: 'overlay',
+                description: 'Highest high and lowest low over the selected lookback.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 20 }
+                ],
+                series: [
+                    { key: 'upper', type: 'line', color: '#22c55e', lineWidth: 1.4 },
+                    { key: 'middle', type: 'line', color: '#94a3b8', lineWidth: 1.1 },
+                    { key: 'lower', type: 'line', color: '#ef4444', lineWidth: 1.4 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'middle',
+                    legendLabel: `Donchian(${params.period})`,
+                    primaryFormat: 'price',
+                    data: computeDonchianIndicator(points, params.period)
+                })
+            },
+            {
+                id: 'keltner',
+                name: 'Keltner Channels',
+                shortName: 'Keltner',
+                pane: 'overlay',
+                description: 'EMA centerline with ATR envelopes for volatility context.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 20 },
+                    { key: 'atrPeriod', label: 'ATR Period', type: 'number', min: 1, max: 400, step: 1, default: 10 },
+                    { key: 'mult', label: 'Multiplier', type: 'number', min: 0.1, max: 6, step: 0.1, default: 2 }
+                ],
+                series: [
+                    { key: 'upper', type: 'line', color: '#38bdf8', lineWidth: 1.4 },
+                    { key: 'middle', type: 'line', color: '#e2e8f0', lineWidth: 1.15 },
+                    { key: 'lower', type: 'line', color: '#38bdf8', lineWidth: 1.4 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'middle',
+                    legendLabel: `KC(${params.period})`,
+                    primaryFormat: 'price',
+                    data: computeKeltnerIndicator(points, params.period, params.atrPeriod, params.mult)
+                })
+            },
+            {
+                id: 'highlow52',
+                name: '52 Week High/Low',
+                shortName: '52W H/L',
+                pane: 'overlay',
+                description: 'Tracks the rolling 52-week high and low.',
+                params: [],
+                series: [
+                    { key: 'high', type: 'line', color: '#22c55e', lineWidth: 1.25 },
+                    { key: 'low', type: 'line', color: '#ef4444', lineWidth: 1.25 }
+                ],
+                compute: (points) => ({
+                    primaryKey: 'high',
+                    legendLabel: '52W H/L',
+                    primaryFormat: 'price',
+                    data: compute52WeekHighLowIndicator(points)
+                })
+            },
+            {
+                id: 'psar',
+                name: 'Parabolic SAR',
+                shortName: 'PSAR',
+                pane: 'overlay',
+                description: 'A trailing stop-style trend indicator based on acceleration factors.',
+                params: [
+                    { key: 'step', label: 'Step', type: 'number', min: 0.001, max: 1, step: 0.001, default: 0.02 },
+                    { key: 'max', label: 'Max', type: 'number', min: 0.01, max: 2, step: 0.01, default: 0.2 }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#60a5fa', lineWidth: 1.2, lineVisible: false, pointMarkersVisible: true, crosshairMarkerRadius: 3 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `SAR(${params.step}, ${params.max})`,
+                    primaryFormat: 'price',
+                    data: { main: computeParabolicSarIndicator(points, params.step, params.max) }
+                })
+            },
+            {
+                id: 'supertrend',
+                name: 'Supertrend',
+                shortName: 'Supertrend',
+                pane: 'overlay',
+                description: 'ATR-based trend bands with directional line coloring.',
+                params: [
+                    { key: 'period', label: 'ATR Period', type: 'number', min: 1, max: 400, step: 1, default: 10 },
+                    { key: 'mult', label: 'Multiplier', type: 'number', min: 0.1, max: 10, step: 0.1, default: 3 }
+                ],
+                series: [
+                    { key: 'up', type: 'line', color: '#22c55e', lineWidth: 1.8 },
+                    { key: 'down', type: 'line', color: '#ef4444', lineWidth: 1.8 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'up',
+                    fallbackPrimaryKey: 'down',
+                    legendLabel: `Supertrend(${params.period}, ${params.mult})`,
+                    primaryFormat: 'price',
+                    data: computeSupertrendIndicator(points, params.period, params.mult)
+                })
+            },
+            {
+                id: 'rsi',
+                name: 'Relative Strength Index',
+                shortName: 'RSI',
+                pane: 'lower',
+                description: 'Momentum oscillator with configurable period and upper/lower guide range.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 200, step: 1, default: 14 },
+                    { key: 'lower', label: 'Lower', type: 'number', min: 1, max: 99, step: 1, default: 30 },
+                    { key: 'upper', label: 'Upper', type: 'number', min: 1, max: 99, step: 1, default: 70 }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#8b5cf6', lineWidth: 1.6, label: 'RSI' }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `RSI(${params.period})`,
+                    primaryFormat: 'number',
+                    data: { main: computeRsiData(points, params.period) }
+                })
+            },
+            {
+                id: 'atr',
+                name: 'Average True Range',
+                shortName: 'ATR',
+                pane: 'lower',
+                description: 'Measures volatility using Wilder-smoothed true range.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 14 }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#f59e0b', lineWidth: 1.6 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `ATR(${params.period})`,
+                    primaryFormat: 'number',
+                    data: { main: computeAtrIndicator(points, params.period) }
+                })
+            },
+            {
+                id: 'adx',
+                name: 'Average Directional Index',
+                shortName: 'ADX',
+                pane: 'lower',
+                description: 'Shows trend strength together with +DI and -DI.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 14 }
+                ],
+                series: [
+                    { key: 'adx', type: 'line', color: '#e2e8f0', lineWidth: 1.4 },
+                    { key: 'plus', type: 'line', color: '#22c55e', lineWidth: 1.2 },
+                    { key: 'minus', type: 'line', color: '#ef4444', lineWidth: 1.2 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'adx',
+                    legendLabel: `ADX(${params.period})`,
+                    primaryFormat: 'number',
+                    data: computeAdxIndicator(points, params.period)
+                })
+            },
+            {
+                id: 'aroon',
+                name: 'Aroon',
+                shortName: 'Aroon',
+                pane: 'lower',
+                description: 'Tracks how recently highs and lows occurred.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 14 }
+                ],
+                series: [
+                    { key: 'up', type: 'line', color: '#22c55e', lineWidth: 1.3 },
+                    { key: 'down', type: 'line', color: '#ef4444', lineWidth: 1.3 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'up',
+                    legendLabel: `Aroon(${params.period})`,
+                    primaryFormat: 'number',
+                    data: computeAroonIndicator(points, params.period)
+                })
+            },
+            {
+                id: 'ao',
+                name: 'Awesome Oscillator',
+                shortName: 'AO',
+                pane: 'lower',
+                description: 'A momentum histogram based on median-price moving averages.',
+                params: [],
+                series: [{ key: 'hist', type: 'histogram' }],
+                compute: (points) => ({
+                    primaryKey: 'hist',
+                    legendLabel: 'AO',
+                    primaryFormat: 'number',
+                    data: { hist: computeAwesomeOscillator(points) }
+                })
+            },
+            {
+                id: 'ac',
+                name: 'Accelerator Oscillator',
+                shortName: 'AC',
+                pane: 'lower',
+                description: 'Acceleration of Awesome Oscillator momentum.',
+                params: [],
+                series: [{ key: 'hist', type: 'histogram' }],
+                compute: (points) => ({
+                    primaryKey: 'hist',
+                    legendLabel: 'AC',
+                    primaryFormat: 'number',
+                    data: { hist: computeAcceleratorOscillator(points) }
+                })
+            },
+            {
+                id: 'accdist',
+                name: 'Accumulation/Distribution',
+                shortName: 'A/D',
+                pane: 'lower',
+                description: 'Cumulative money flow using close location value and volume.',
+                params: [],
+                series: [{ key: 'main', type: 'line', color: '#38bdf8', lineWidth: 1.5 }],
+                compute: (points) => ({
+                    primaryKey: 'main',
+                    legendLabel: 'Accum/Dist',
+                    primaryFormat: 'volume',
+                    data: { main: computeAccumulationDistribution(points) }
+                })
+            },
+            {
+                id: 'obv',
+                name: 'On Balance Volume',
+                shortName: 'OBV',
+                pane: 'lower',
+                description: 'Cumulative volume that rises and falls with price direction.',
+                params: [],
+                series: [{ key: 'main', type: 'line', color: '#a78bfa', lineWidth: 1.5 }],
+                compute: (points) => ({
+                    primaryKey: 'main',
+                    legendLabel: 'OBV',
+                    primaryFormat: 'volume',
+                    data: { main: computeObvIndicator(points) }
+                })
+            },
+            {
+                id: 'cmf',
+                name: 'Chaikin Money Flow',
+                shortName: 'CMF',
+                pane: 'lower',
+                description: 'Measures money flow by comparing close location value with volume.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 20 }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#22d3ee', lineWidth: 1.5 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `CMF(${params.period})`,
+                    primaryFormat: 'number',
+                    data: { main: computeChaikinMoneyFlow(points, params.period) }
+                })
+            },
+            {
+                id: 'chaikin',
+                name: 'Chaikin Oscillator',
+                shortName: 'Chaikin',
+                pane: 'lower',
+                description: 'EMA spread of the accumulation/distribution line for money-flow momentum.',
+                params: [
+                    { key: 'fast', label: 'Fast EMA', type: 'number', min: 1, max: 100, step: 1, default: 3 },
+                    { key: 'slow', label: 'Slow EMA', type: 'number', min: 2, max: 200, step: 1, default: 10 }
+                ],
+                series: [{ key: 'hist', type: 'histogram' }],
+                compute: (points, params) => ({
+                    primaryKey: 'hist',
+                    legendLabel: `Chaikin(${params.fast}, ${params.slow})`,
+                    primaryFormat: 'number',
+                    data: { hist: computeChaikinOscillator(points, params.fast, params.slow) }
+                })
+            },
+            {
+                id: 'cci',
+                name: 'Commodity Channel Index',
+                shortName: 'CCI',
+                pane: 'lower',
+                description: 'Measures deviation from the typical-price mean.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 20 }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#f97316', lineWidth: 1.5 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `CCI(${params.period})`,
+                    primaryFormat: 'number',
+                    data: { main: computeCciIndicator(points, params.period) }
+                })
+            },
+            {
+                id: 'roc',
+                name: 'Rate of Change',
+                shortName: 'ROC',
+                pane: 'lower',
+                description: 'Percentage change versus a prior bar.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 12 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#22d3ee', lineWidth: 1.5 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `ROC(${params.period})`,
+                    primaryFormat: 'number',
+                    data: { main: computeRocIndicator(points, params.period, params.source) }
+                })
+            },
+            {
+                id: 'mom',
+                name: 'Momentum',
+                shortName: 'Momentum',
+                pane: 'lower',
+                description: 'Absolute change from the selected lookback.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 400, step: 1, default: 10 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#f472b6', lineWidth: 1.5 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `Momentum(${params.period})`,
+                    primaryFormat: 'number',
+                    data: { main: computeMomentumIndicator(points, params.period, params.source) }
+                })
+            },
+            {
+                id: 'mfi',
+                name: 'Money Flow Index',
+                shortName: 'MFI',
+                pane: 'lower',
+                description: 'Volume-weighted oscillator using positive and negative money flow.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 14 }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#14b8a6', lineWidth: 1.5 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `MFI(${params.period})`,
+                    primaryFormat: 'number',
+                    data: { main: computeMfiIndicator(points, params.period) }
+                })
+            },
+            {
+                id: 'stoch',
+                name: 'Stochastic',
+                shortName: 'Stochastic',
+                pane: 'lower',
+                description: 'Oscillator showing the closing price relative to the recent range.',
+                params: [
+                    { key: 'kPeriod', label: '%K Period', type: 'number', min: 1, max: 400, step: 1, default: 14 },
+                    { key: 'smooth', label: 'Smooth', type: 'number', min: 1, max: 100, step: 1, default: 3 },
+                    { key: 'dPeriod', label: '%D Period', type: 'number', min: 1, max: 100, step: 1, default: 3 }
+                ],
+                series: [
+                    { key: 'k', type: 'line', color: '#60a5fa', lineWidth: 1.4 },
+                    { key: 'd', type: 'line', color: '#f59e0b', lineWidth: 1.3 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'k',
+                    legendLabel: `Stoch(${params.kPeriod}, ${params.smooth}, ${params.dPeriod})`,
+                    primaryFormat: 'number',
+                    data: computeStochasticIndicator(points, params.kPeriod, params.smooth, params.dPeriod)
+                })
+            },
+            {
+                id: 'macd',
+                name: 'MACD',
+                shortName: 'MACD',
+                pane: 'lower',
+                description: 'Trend momentum with MACD, signal, and histogram.',
+                params: [
+                    { key: 'fast', label: 'Fast EMA', type: 'number', min: 1, max: 200, step: 1, default: 12 },
+                    { key: 'slow', label: 'Slow EMA', type: 'number', min: 2, max: 400, step: 1, default: 26 },
+                    { key: 'signal', label: 'Signal', type: 'number', min: 1, max: 200, step: 1, default: 9 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [
+                    { key: 'hist', type: 'histogram' },
+                    { key: 'macd', type: 'line', color: '#60a5fa', lineWidth: 1.3 },
+                    { key: 'signal', type: 'line', color: '#f472b6', lineWidth: 1.3 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'macd',
+                    legendLabel: `MACD(${params.fast}, ${params.slow}, ${params.signal})`,
+                    primaryFormat: 'number',
+                    data: computeMacdIndicator(points, params.fast, params.slow, params.signal, params.source)
+                })
+            },
+            {
+                id: 'stochrsi',
+                name: 'Stochastic RSI',
+                shortName: 'Stoch RSI',
+                pane: 'lower',
+                description: 'Applies a stochastic oscillator to RSI to highlight momentum extremes.',
+                params: [
+                    { key: 'rsiPeriod', label: 'RSI Period', type: 'number', min: 2, max: 200, step: 1, default: 14 },
+                    { key: 'stochPeriod', label: 'Stoch Period', type: 'number', min: 2, max: 200, step: 1, default: 14 },
+                    { key: 'smoothK', label: 'Smooth K', type: 'number', min: 1, max: 100, step: 1, default: 3 },
+                    { key: 'smoothD', label: 'Smooth D', type: 'number', min: 1, max: 100, step: 1, default: 3 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [
+                    { key: 'k', type: 'line', color: '#60a5fa', lineWidth: 1.4 },
+                    { key: 'd', type: 'line', color: '#f59e0b', lineWidth: 1.3 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'k',
+                    legendLabel: `Stoch RSI(${params.rsiPeriod}, ${params.stochPeriod})`,
+                    primaryFormat: 'number',
+                    data: computeStochRsiIndicator(points, params.rsiPeriod, params.stochPeriod, params.smoothK, params.smoothD, params.source)
+                })
+            },
+            {
+                id: 'trix',
+                name: 'TRIX',
+                shortName: 'TRIX',
+                pane: 'lower',
+                description: 'Rate of change of a triple-smoothed EMA with signal line.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 1, max: 200, step: 1, default: 18 },
+                    { key: 'signal', label: 'Signal', type: 'number', min: 1, max: 100, step: 1, default: 9 },
+                    { key: 'source', label: 'Source', type: 'select', options: INDICATOR_SOURCE_OPTIONS, default: 'close' }
+                ],
+                series: [
+                    { key: 'main', type: 'line', color: '#34d399', lineWidth: 1.4 },
+                    { key: 'signal', type: 'line', color: '#f472b6', lineWidth: 1.2 }
+                ],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `TRIX(${params.period})`,
+                    primaryFormat: 'number',
+                    data: computeTrixIndicator(points, params.period, params.signal, params.source)
+                })
+            },
+            {
+                id: 'uo',
+                name: 'Ultimate Oscillator',
+                shortName: 'Ultimate Osc',
+                pane: 'lower',
+                description: 'Weighted multi-period momentum oscillator using buying pressure and true range.',
+                params: [
+                    { key: 'short', label: 'Short', type: 'number', min: 1, max: 100, step: 1, default: 7 },
+                    { key: 'medium', label: 'Medium', type: 'number', min: 2, max: 200, step: 1, default: 14 },
+                    { key: 'long', label: 'Long', type: 'number', min: 3, max: 400, step: 1, default: 28 }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#c084fc', lineWidth: 1.5 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `Ultimate(${params.short}, ${params.medium}, ${params.long})`,
+                    primaryFormat: 'number',
+                    data: { main: computeUltimateOscillator(points, params.short, params.medium, params.long) }
+                })
+            },
+            {
+                id: 'willr',
+                name: 'Williams %R',
+                shortName: 'Williams %R',
+                pane: 'lower',
+                description: 'A momentum oscillator using the highest high and lowest low.',
+                params: [
+                    { key: 'period', label: 'Period', type: 'number', min: 2, max: 400, step: 1, default: 14 }
+                ],
+                series: [{ key: 'main', type: 'line', color: '#e879f9', lineWidth: 1.4 }],
+                compute: (points, params) => ({
+                    primaryKey: 'main',
+                    legendLabel: `Williams %R(${params.period})`,
+                    primaryFormat: 'number',
+                    data: { main: computeWilliamsRIndicator(points, params.period) }
+                })
+            }
+        ]);
+        const INDICATOR_DEFINITION_MAP = new Map(INDICATOR_DEFINITIONS.map(def => [def.id, def]));
         const RSI_PERIOD = 14;
         const LOGO_PREFETCH_LIMIT = 900;
         const PAGE_PARAMS = new URLSearchParams(location.search);
@@ -4394,18 +5585,152 @@
             return coinResolvedLogoCache.get(key) || '';
         }
 
+        function getIndicatorDefinition(id) {
+            return INDICATOR_DEFINITION_MAP.get(String(id || '').trim()) || null;
+        }
+
+        function normalizeIndicatorParams(definition, rawParams) {
+            const def = definition && typeof definition === 'object' ? definition : null;
+            const params = rawParams && typeof rawParams === 'object' ? rawParams : {};
+            const next = {};
+            (def?.params || []).forEach(param => {
+                const key = String(param.key || '').trim();
+                if (!key) return;
+                const fallback = param.default;
+                if (param.type === 'select') {
+                    const options = Array.isArray(param.options) ? param.options.map(option => String(option.value)) : [];
+                    const value = String(params[key] ?? fallback ?? '').trim();
+                    next[key] = options.includes(value) ? value : String(fallback ?? options[0] ?? '');
+                    return;
+                }
+                const rawValue = Number(params[key]);
+                const fallbackNum = Number(fallback);
+                const min = Number.isFinite(Number(param.min)) ? Number(param.min) : -Infinity;
+                const max = Number.isFinite(Number(param.max)) ? Number(param.max) : Infinity;
+                const step = Number.isFinite(Number(param.step)) && Number(param.step) > 0 ? Number(param.step) : 1;
+                const safeValue = Number.isFinite(rawValue) ? rawValue : (Number.isFinite(fallbackNum) ? fallbackNum : 0);
+                const rounded = step >= 1 ? Math.round(safeValue / step) * step : Number(safeValue.toFixed(String(step).split('.')[1]?.length || 2));
+                next[key] = Math.max(min, Math.min(max, rounded));
+            });
+            return next;
+        }
+
+        let indicatorUidCounter = 1;
+
+        function createIndicatorUid(prefix = 'study') {
+            indicatorUidCounter += 1;
+            return `${String(prefix || 'study').trim().toLowerCase()}-${Date.now().toString(36)}-${indicatorUidCounter.toString(36)}`;
+        }
+
+        function sanitizeIndicatorColor(value, fallback) {
+            const safeFallback = String(fallback || '#e2e8f0').trim();
+            const raw = String(value || '').trim();
+            return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw) ? raw : safeFallback;
+        }
+
+        function toAlpha(color, alpha = 1) {
+            const safeAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
+            const sanitized = sanitizeIndicatorColor(color, '#e2e8f0').replace('#', '');
+            const hex = sanitized.length === 3
+                ? sanitized.split('').map(char => char + char).join('')
+                : sanitized;
+            const r = parseInt(hex.slice(0, 2), 16);
+            const g = parseInt(hex.slice(2, 4), 16);
+            const b = parseInt(hex.slice(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${safeAlpha})`;
+        }
+
+        function normalizeIndicatorColors(definition, rawColors) {
+            const next = {};
+            const source = rawColors && typeof rawColors === 'object' ? rawColors : {};
+            (definition?.series || []).forEach(descriptor => {
+                if (descriptor.type !== 'line') return;
+                const key = String(descriptor.key || '').trim();
+                if (!key) return;
+                next[key] = sanitizeIndicatorColor(source[key], descriptor.color || '#e2e8f0');
+            });
+            return next;
+        }
+
+        function getIndicatorSeriesLabel(descriptor) {
+            const raw = String(descriptor?.label || descriptor?.key || 'Line').trim();
+            if (!raw) return 'Line';
+            return raw
+                .replace(/([a-z])([A-Z])/g, '$1 $2')
+                .replace(/[_-]+/g, ' ')
+                .replace(/\b\w/g, char => char.toUpperCase());
+        }
+
+        function getIndicatorDisplayPaneText(pane) {
+            return pane === 'overlay' ? 'Main' : 'Lower';
+        }
+
+        function buildIndicatorEntryLabel(entry) {
+            const definition = getIndicatorDefinition(entry?.id);
+            if (!definition) return String(entry?.id || '').trim();
+            const params = normalizeIndicatorParams(definition, entry?.params);
+            const previewValues = (definition.params || [])
+                .filter(param => param.type !== 'select')
+                .slice(0, 3)
+                .map(param => params[param.key])
+                .filter(value => value != null && value !== '');
+            return previewValues.length
+                ? `${definition.shortName}(${previewValues.join(', ')})`
+                : definition.shortName;
+        }
+
+        function normalizeOverlayIndicators(raw) {
+            const input = Array.isArray(raw) ? raw : [];
+            const next = [];
+            input.forEach(entry => {
+                const id = String(entry?.id || '').trim();
+                const definition = getIndicatorDefinition(id);
+                if (!definition || definition.pane !== 'overlay') return;
+                if (id === 'sma') return;
+                next.push({
+                    uid: String(entry?.uid || '').trim() || createIndicatorUid(id),
+                    id,
+                    params: normalizeIndicatorParams(definition, entry?.params),
+                    colors: normalizeIndicatorColors(definition, entry?.colors)
+                });
+            });
+            return next;
+        }
+
+        function normalizeLowerIndicator(raw) {
+            if (!raw || typeof raw !== 'object') return null;
+            const id = String(raw.id || '').trim();
+            const definition = getIndicatorDefinition(id);
+            if (!definition || definition.pane !== 'lower') return null;
+            return {
+                id,
+                params: normalizeIndicatorParams(definition, raw.params),
+                colors: normalizeIndicatorColors(definition, raw.colors)
+            };
+        }
+
         function normalizeChartPrefs(raw) {
             const next = { ...DEFAULT_CHART_PREFS };
             if (!raw || typeof raw !== 'object') {
                 next.showGrid = !MOBILE_ASSET_QUERY.matches;
                 return next;
             }
-            next.priceMode = raw.priceMode === 'line' ? 'line' : 'candles';
-            next.lowerStudy = raw.lowerStudy === 'rsi' ? 'rsi' : 'volume';
+            next.priceMode = ['candles', 'line', 'heikin', 'area'].includes(raw.priceMode)
+                ? raw.priceMode
+                : 'candles';
+            next.lowerStudy = raw.lowerStudy === 'rsi'
+                ? 'rsi'
+                : (raw.lowerStudy === 'indicator' ? 'indicator' : 'volume');
             next.showMAs = raw.showMAs !== false;
             next.showGrid = Object.prototype.hasOwnProperty.call(raw, 'showGrid')
                 ? raw.showGrid !== false
                 : !MOBILE_ASSET_QUERY.matches;
+            next.overlayIndicators = normalizeOverlayIndicators(raw.overlayIndicators);
+            next.lowerIndicator = normalizeLowerIndicator(raw.lowerIndicator);
+            const rsiPeriod = Number(raw.rsiPeriod);
+            next.rsiPeriod = Number.isFinite(rsiPeriod)
+                ? Math.min(400, Math.max(2, Math.round(rsiPeriod)))
+                : DEFAULT_CHART_PREFS.rsiPeriod;
             const rawPeriods = Array.isArray(raw.maPeriods) ? raw.maPeriods : [raw.maFast, raw.maMid, raw.maSlow];
             next.maPeriods = rawPeriods.slice(0, 3).map((value, index) => {
                 const fallback = DEFAULT_CHART_PREFS.maPeriods[index] || DEFAULT_CHART_PREFS.maPeriods[DEFAULT_CHART_PREFS.maPeriods.length - 1];
@@ -4431,6 +5756,7 @@
             if (next.rsiUpper <= next.rsiLower) {
                 next.rsiUpper = Math.min(99, next.rsiLower + 1);
             }
+            if (raw.lowerStudy === 'indicator' && next.lowerIndicator) next.lowerStudy = 'indicator';
             const lowerPaneHeight = Number(raw.lowerPaneHeight);
             next.lowerPaneHeight = Number.isFinite(lowerPaneHeight)
                 ? Math.min(280, Math.max(84, Math.round(lowerPaneHeight)))
@@ -4483,10 +5809,22 @@
             lowerStudy: initialChartPrefs.lowerStudy,
             showMAs: initialChartPrefs.showMAs,
             showGrid: initialChartPrefs.showGrid,
+            rsiPeriod: initialChartPrefs.rsiPeriod,
             rsiLower: initialChartPrefs.rsiLower,
             rsiUpper: initialChartPrefs.rsiUpper,
             maPeriods: initialChartPrefs.maPeriods.slice(),
             volumeMaPeriods: initialChartPrefs.volumeMaPeriods.slice(),
+            overlayIndicators: initialChartPrefs.overlayIndicators.map(entry => ({
+                uid: entry.uid,
+                id: entry.id,
+                params: { ...(entry.params || {}) },
+                colors: { ...(entry.colors || {}) }
+            })),
+            lowerIndicator: initialChartPrefs.lowerIndicator ? {
+                id: initialChartPrefs.lowerIndicator.id,
+                params: { ...initialChartPrefs.lowerIndicator.params },
+                colors: { ...(initialChartPrefs.lowerIndicator.colors || {}) }
+            } : null,
             lowerPaneHeight: initialChartPrefs.lowerPaneHeight,
             lowerPaneCollapsed: false,
             sharedDrawingTool: 'cursor',
@@ -4776,6 +6114,16 @@
         const drawingFrameState = { 1: 0, 2: 0 };
         const returnToLiveFrameState = { 1: 0, 2: 0 };
         const returnToLiveState = { 1: false, 2: false };
+        const indicatorRenderState = {
+            1: { overlay: new Map(), lower: null },
+            2: { overlay: new Map(), lower: null }
+        };
+        const indicatorEditorState = {
+            search: '',
+            selectionMode: 'catalog',
+            selectedId: INDICATOR_DEFINITIONS[0]?.id || 'ema',
+            selectedOverlayUid: ''
+        };
         const chartMaxLabel1 = $('chart-max-label');
         const chartMaxLabel2 = $('chart-max-label-2');
         const chartMinLabel1 = $('chart-min-label');
@@ -4789,22 +6137,37 @@
         const topSplitDrag = { kind: '', pointerId: null };
         const chartSettingsRoot = $('chartSettings');
         const chartSettingsBtn = $('chart-settings-btn');
+        const chartIndicatorsBtn = $('chart-indicators-btn');
         const chartSettingsMenu = $('chart-settings-menu');
-        const chartMaToggle = $('chart-ma-toggle');
         const chartGridToggle = $('chart-grid-toggle');
-        const chartMaPeriodsGroup = $('chart-ma-periods-group');
-        const chartVolumeMaPeriodsGroup = $('chart-volume-ma-periods-group');
+        const chartLowerIndicatorOption = $('chart-lower-indicator-option');
         const chartRsiBoundsGroup = $('chart-rsi-bounds-group');
-        const chartMaFastInput = $('chart-ma-fast');
-        const chartMaMidInput = $('chart-ma-mid');
-        const chartMaSlowInput = $('chart-ma-slow');
-        const chartVolumeMaFastInput = $('chart-volume-ma-fast');
-        const chartVolumeMaSlowInput = $('chart-volume-ma-slow');
+        const chartRsiPeriodInput = $('chart-rsi-period');
         const chartRsiLowerInput = $('chart-rsi-lower');
         const chartRsiUpperInput = $('chart-rsi-upper');
         const chartContextMenu = $('chart-context-menu');
         const chartContextCopyPriceLabel = $('chart-context-copy-price-label');
         const chartContextHlineLabel = $('chart-context-hline-label');
+        const chartIndicatorBackdrop = $('chart-indicator-backdrop');
+        const chartIndicatorModal = $('chart-indicator-modal');
+        const chartIndicatorClose = $('chart-indicator-close');
+        const chartIndicatorSearchInput = $('chart-indicator-search-input');
+        const chartIndicatorResults = $('chart-indicator-results');
+        const chartIndicatorActive = $('chart-indicator-active');
+        const chartIndicatorClearAll = $('chart-indicator-clear-all');
+        const chartIndicatorName = $('chart-indicator-name');
+        const chartIndicatorDescription = $('chart-indicator-description');
+        const chartIndicatorParams = $('chart-indicator-params');
+        const chartIndicatorApply = $('chart-indicator-apply');
+        const chartIndicatorRemove = $('chart-indicator-remove');
+        const legendCustomIndicators1 = $('legend-custom-indicators');
+        const legendCustomIndicators2 = $('legend-custom-indicators-2');
+        const lowerPaneItemCustom1 = $('lower-pane-item-custom');
+        const lowerPaneItemCustom2 = $('lower-pane-item-custom-2');
+        const lowerPaneKeyCustom1 = $('lower-pane-key-custom');
+        const lowerPaneKeyCustom2 = $('lower-pane-key-custom-2');
+        const lowerPaneValCustom1 = $('lower-pane-val-custom');
+        const lowerPaneValCustom2 = $('lower-pane-val-custom-2');
 
         const DRAWING_PALETTE_COLORS = [
             '#111827', '#475569', '#94a3b8', '#ffffff', '#ef4444', '#f97316',
@@ -4934,7 +6297,7 @@
         }
 
         function hasLowerPane() {
-            return S.lowerStudy === 'volume' || S.lowerStudy === 'rsi';
+            return S.lowerStudy === 'volume' || S.lowerStudy === 'rsi' || (S.lowerStudy === 'indicator' && Boolean(getActiveLowerIndicator()));
         }
 
         function isLowerPaneVisible() {
@@ -5614,6 +6977,34 @@
             return [...merged.values()].sort((left, right) => left.time - right.time);
         }
 
+        function buildAreaSeriesData(candlesData, liveTicks = []) {
+            return buildDisplayLineData(candlesData, liveTicks);
+        }
+
+        function computeHeikinAshiData(candlesData) {
+            const source = Array.isArray(candlesData) ? candlesData : [];
+            const result = [];
+            let prevOpen = null;
+            let prevClose = null;
+            source.forEach(bar => {
+                const open = Number(bar?.open);
+                const high = Number(bar?.high);
+                const low = Number(bar?.low);
+                const close = Number(bar?.close);
+                if (![open, high, low, close].every(Number.isFinite)) return;
+                const haClose = (open + high + low + close) / 4;
+                const haOpen = prevOpen == null || prevClose == null
+                    ? (open + close) / 2
+                    : (prevOpen + prevClose) / 2;
+                const haHigh = Math.max(high, haOpen, haClose);
+                const haLow = Math.min(low, haOpen, haClose);
+                result.push({ time: bar.time, open: haOpen, high: haHigh, low: haLow, close: haClose });
+                prevOpen = haOpen;
+                prevClose = haClose;
+            });
+            return result;
+        }
+
         function buildTimeSeriesFromTrades(rawTrades, coinKey = '') {
             const targetCoin = buildMarketKey(coinKey);
             const normalizedTrades = (Array.isArray(rawTrades) ? rawTrades : [])
@@ -5694,10 +7085,10 @@
             let sum = 0;
             const queue = [];
             data.forEach(bar => {
-                const close = Number(bar.close);
-                if (!Number.isFinite(close)) return;
-                queue.push(close);
-                sum += close;
+                const open = Number(bar.open);
+                if (!Number.isFinite(open)) return;
+                queue.push(open);
+                sum += open;
                 if (queue.length > period) sum -= queue.shift();
                 if (queue.length === period) {
                     values.push({ time: bar.time, value: sum / period });
@@ -5731,7 +7122,7 @@
             let avgGain = 0;
             let avgLoss = 0;
             for (let i = 1; i <= period; i += 1) {
-                const diff = Number(data[i].close) - Number(data[i - 1].close);
+                const diff = Number(data[i].open) - Number(data[i - 1].open);
                 if (diff >= 0) avgGain += diff;
                 else avgLoss -= diff;
             }
@@ -5746,7 +7137,7 @@
             };
             values.push({ time: data[period].time, value: calcRsi() });
             for (let i = period + 1; i < data.length; i += 1) {
-                const diff = Number(data[i].close) - Number(data[i - 1].close);
+                const diff = Number(data[i].open) - Number(data[i - 1].open);
                 const gain = diff > 0 ? diff : 0;
                 const loss = diff < 0 ? -diff : 0;
                 avgGain = ((avgGain * (period - 1)) + gain) / period;
@@ -5754,6 +7145,814 @@
                 values.push({ time: data[i].time, value: calcRsi() });
             }
             return values;
+        }
+
+        function getPointSourceValue(point, source = 'close') {
+            const bar = point || {};
+            const open = Number(bar.open);
+            return Number.isFinite(open) ? open : NaN;
+        }
+
+        function getSourceValues(points, source = 'close') {
+            return (Array.isArray(points) ? points : []).map(point => {
+                const value = getPointSourceValue(point, source);
+                return Number.isFinite(value) ? value : null;
+            });
+        }
+
+        function getOpenSeries(points) {
+            return getSourceValues(points, 'open');
+        }
+
+        function valuesToSeries(points, values, mapper) {
+            const sourcePoints = Array.isArray(points) ? points : [];
+            const sourceValues = Array.isArray(values) ? values : [];
+            const out = [];
+            const mapPoint = typeof mapper === 'function'
+                ? mapper
+                : ((time, value) => ({ time, value }));
+            for (let i = 0; i < Math.min(sourcePoints.length, sourceValues.length); i += 1) {
+                const value = Number(sourceValues[i]);
+                if (!Number.isFinite(value)) continue;
+                const item = mapPoint(sourcePoints[i].time, value, i);
+                if (item) out.push(item);
+            }
+            return out;
+        }
+
+        function computeSmaValues(values, period) {
+            const out = new Array(values.length).fill(null);
+            if (!Number.isFinite(period) || period <= 0) return out;
+            let sum = 0;
+            let count = 0;
+            for (let i = 0; i < values.length; i += 1) {
+                const value = Number(values[i]);
+                if (Number.isFinite(value)) {
+                    sum += value;
+                    count += 1;
+                }
+                const oldValue = Number(values[i - period]);
+                if (i >= period && Number.isFinite(oldValue)) {
+                    sum -= oldValue;
+                    count -= 1;
+                }
+                if (i >= period - 1 && count === period) out[i] = sum / period;
+            }
+            return out;
+        }
+
+        function computeEmaValues(values, period) {
+            const out = new Array(values.length).fill(null);
+            if (!Number.isFinite(period) || period <= 0) return out;
+            const multiplier = 2 / (period + 1);
+            let seedCount = 0;
+            let seedSum = 0;
+            let ema = null;
+            for (let i = 0; i < values.length; i += 1) {
+                const value = Number(values[i]);
+                if (!Number.isFinite(value)) continue;
+                if (ema == null) {
+                    seedSum += value;
+                    seedCount += 1;
+                    if (seedCount === period) {
+                        ema = seedSum / period;
+                        out[i] = ema;
+                    }
+                } else {
+                    ema = ((value - ema) * multiplier) + ema;
+                    out[i] = ema;
+                }
+            }
+            return out;
+        }
+
+        function computeRmaValues(values, period) {
+            const out = new Array(values.length).fill(null);
+            if (!Number.isFinite(period) || period <= 0) return out;
+            let seedCount = 0;
+            let seedSum = 0;
+            let rma = null;
+            for (let i = 0; i < values.length; i += 1) {
+                const value = Number(values[i]);
+                if (!Number.isFinite(value)) continue;
+                if (rma == null) {
+                    seedSum += value;
+                    seedCount += 1;
+                    if (seedCount === period) {
+                        rma = seedSum / period;
+                        out[i] = rma;
+                    }
+                } else {
+                    rma = ((rma * (period - 1)) + value) / period;
+                    out[i] = rma;
+                }
+            }
+            return out;
+        }
+
+        function computeWmaValues(values, period) {
+            const out = new Array(values.length).fill(null);
+            if (!Number.isFinite(period) || period <= 0) return out;
+            const denominator = (period * (period + 1)) / 2;
+            for (let i = period - 1; i < values.length; i += 1) {
+                let weighted = 0;
+                let valid = true;
+                for (let j = 0; j < period; j += 1) {
+                    const value = Number(values[i - period + 1 + j]);
+                    if (!Number.isFinite(value)) {
+                        valid = false;
+                        break;
+                    }
+                    weighted += value * (j + 1);
+                }
+                if (valid) out[i] = weighted / denominator;
+            }
+            return out;
+        }
+
+        function computeStdDevValues(values, period) {
+            const out = new Array(values.length).fill(null);
+            if (!Number.isFinite(period) || period <= 1) return out;
+            for (let i = period - 1; i < values.length; i += 1) {
+                let sum = 0;
+                let count = 0;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    const value = Number(values[j]);
+                    if (!Number.isFinite(value)) continue;
+                    sum += value;
+                    count += 1;
+                }
+                if (count !== period) continue;
+                const mean = sum / period;
+                let variance = 0;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    const value = Number(values[j]);
+                    variance += Math.pow(value - mean, 2);
+                }
+                out[i] = Math.sqrt(variance / period);
+            }
+            return out;
+        }
+
+        function computeTrueRangeValues(points) {
+            const out = new Array(points.length).fill(null);
+            for (let i = 0; i < points.length; i += 1) {
+                const open = Number(points[i]?.open);
+                const prevOpen = i > 0 ? Number(points[i - 1]?.open) : NaN;
+                if (!Number.isFinite(open)) continue;
+                out[i] = Number.isFinite(prevOpen) ? Math.abs(open - prevOpen) : 0;
+            }
+            return out;
+        }
+
+        function computeAtrValues(points, period) {
+            return computeRmaValues(computeTrueRangeValues(points), period);
+        }
+
+        function computeEmaIndicator(points, period, source) {
+            return valuesToSeries(points, computeEmaValues(getSourceValues(points, source), period));
+        }
+
+        function computeSmaIndicator(points, period, source) {
+            return valuesToSeries(points, computeSmaValues(getSourceValues(points, source), period));
+        }
+
+        function computeDemaIndicator(points, period, source) {
+            const sourceValues = getSourceValues(points, source);
+            const ema1 = computeEmaValues(sourceValues, period);
+            const ema2 = computeEmaValues(ema1, period);
+            const values = ema1.map((value, index) => (
+                Number.isFinite(value) && Number.isFinite(ema2[index]) ? ((2 * value) - ema2[index]) : null
+            ));
+            return valuesToSeries(points, values);
+        }
+
+        function computeTemaIndicator(points, period, source) {
+            const sourceValues = getSourceValues(points, source);
+            const ema1 = computeEmaValues(sourceValues, period);
+            const ema2 = computeEmaValues(ema1, period);
+            const ema3 = computeEmaValues(ema2, period);
+            const values = ema1.map((value, index) => (
+                Number.isFinite(value) && Number.isFinite(ema2[index]) && Number.isFinite(ema3[index])
+                    ? ((3 * value) - (3 * ema2[index]) + ema3[index])
+                    : null
+            ));
+            return valuesToSeries(points, values);
+        }
+
+        function computeWmaIndicator(points, period, source) {
+            return valuesToSeries(points, computeWmaValues(getSourceValues(points, source), period));
+        }
+
+        function computeVwmaIndicator(points, period, source) {
+            const values = getSourceValues(points, source);
+            const out = new Array(points.length).fill(null);
+            if (!Number.isFinite(period) || period <= 0) return [];
+            for (let i = period - 1; i < points.length; i += 1) {
+                let weighted = 0;
+                let volumeSum = 0;
+                let valid = true;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    const value = Number(values[j]);
+                    const volume = Math.abs(Number(points[j]?.volume));
+                    if (!Number.isFinite(value) || !Number.isFinite(volume)) {
+                        valid = false;
+                        break;
+                    }
+                    weighted += value * volume;
+                    volumeSum += volume;
+                }
+                if (valid && volumeSum > 0) out[i] = weighted / volumeSum;
+            }
+            return valuesToSeries(points, out);
+        }
+
+        function computeHmaIndicator(points, period, source) {
+            const values = getSourceValues(points, source);
+            const half = Math.max(1, Math.round(period / 2));
+            const sqrtLength = Math.max(1, Math.round(Math.sqrt(period)));
+            const wmaHalf = computeWmaValues(values, half);
+            const wmaFull = computeWmaValues(values, period);
+            const diff = values.map((_, index) => {
+                const halfValue = Number(wmaHalf[index]);
+                const fullValue = Number(wmaFull[index]);
+                return Number.isFinite(halfValue) && Number.isFinite(fullValue) ? (2 * halfValue) - fullValue : null;
+            });
+            return valuesToSeries(points, computeWmaValues(diff, sqrtLength));
+        }
+
+        function computeAlmaIndicator(points, period, offset, sigma, source) {
+            const values = getSourceValues(points, source);
+            const out = new Array(points.length).fill(null);
+            if (!Number.isFinite(period) || period <= 0) return [];
+            const m = offset * (period - 1);
+            const s = period / Math.max(0.0001, Number(sigma) || 6);
+            for (let i = period - 1; i < values.length; i += 1) {
+                let sum = 0;
+                let weightSum = 0;
+                let valid = true;
+                for (let j = 0; j < period; j += 1) {
+                    const value = Number(values[i - period + 1 + j]);
+                    if (!Number.isFinite(value)) {
+                        valid = false;
+                        break;
+                    }
+                    const weight = Math.exp(-Math.pow(j - m, 2) / (2 * Math.pow(s, 2)));
+                    sum += value * weight;
+                    weightSum += weight;
+                }
+                if (valid && weightSum > 0) out[i] = sum / weightSum;
+            }
+            return valuesToSeries(points, out);
+        }
+
+        function computeAveragePriceIndicator(points, source) {
+            return valuesToSeries(points, getSourceValues(points, source));
+        }
+
+        function computeBollingerIndicator(points, period, mult, source) {
+            const values = getSourceValues(points, source);
+            const middle = computeSmaValues(values, period);
+            const deviation = computeStdDevValues(values, period);
+            const upperValues = middle.map((value, index) => Number.isFinite(value) && Number.isFinite(deviation[index]) ? value + (deviation[index] * mult) : null);
+            const lowerValues = middle.map((value, index) => Number.isFinite(value) && Number.isFinite(deviation[index]) ? value - (deviation[index] * mult) : null);
+            return {
+                band: valuesToSeries(points, upperValues),
+                mask: valuesToSeries(points, lowerValues),
+                upper: valuesToSeries(points, upperValues),
+                mean: valuesToSeries(points, middle),
+                lower: valuesToSeries(points, lowerValues)
+            };
+        }
+
+        function computeDonchianIndicator(points, period) {
+            const opens = getOpenSeries(points);
+            const upper = new Array(points.length).fill(null);
+            const middle = new Array(points.length).fill(null);
+            const lower = new Array(points.length).fill(null);
+            for (let i = period - 1; i < points.length; i += 1) {
+                let highest = -Infinity;
+                let lowest = Infinity;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    highest = Math.max(highest, Number(opens[j]));
+                    lowest = Math.min(lowest, Number(opens[j]));
+                }
+                upper[i] = highest;
+                lower[i] = lowest;
+                middle[i] = (highest + lowest) / 2;
+            }
+            return {
+                upper: valuesToSeries(points, upper),
+                middle: valuesToSeries(points, middle),
+                lower: valuesToSeries(points, lower)
+            };
+        }
+
+        function computeKeltnerIndicator(points, period, atrPeriod, mult) {
+            const middle = computeEmaValues(getOpenSeries(points), period);
+            const atr = computeAtrValues(points, atrPeriod);
+            return {
+                upper: valuesToSeries(points, middle.map((value, index) => Number.isFinite(value) && Number.isFinite(atr[index]) ? value + (atr[index] * mult) : null)),
+                middle: valuesToSeries(points, middle),
+                lower: valuesToSeries(points, middle.map((value, index) => Number.isFinite(value) && Number.isFinite(atr[index]) ? value - (atr[index] * mult) : null))
+            };
+        }
+
+        function compute52WeekHighLowIndicator(points) {
+            const opens = getOpenSeries(points);
+            const highs = new Array(points.length).fill(null);
+            const lows = new Array(points.length).fill(null);
+            const windowSeconds = 52 * 7 * 24 * 60 * 60;
+            for (let i = 0; i < points.length; i += 1) {
+                const cutoff = Number(points[i]?.time) - windowSeconds;
+                let high = -Infinity;
+                let low = Infinity;
+                for (let j = i; j >= 0; j -= 1) {
+                    if (Number(points[j]?.time) < cutoff) break;
+                    high = Math.max(high, Number(opens[j]));
+                    low = Math.min(low, Number(opens[j]));
+                }
+                if (Number.isFinite(high)) highs[i] = high;
+                if (Number.isFinite(low)) lows[i] = low;
+            }
+            return {
+                high: valuesToSeries(points, highs),
+                low: valuesToSeries(points, lows)
+            };
+        }
+
+        function computeParabolicSarIndicator(points, step = 0.02, maxStep = 0.2) {
+            if ((Array.isArray(points) ? points.length : 0) < 2) return [];
+            const opens = getOpenSeries(points);
+            const values = new Array(points.length).fill(null);
+            let isUpTrend = Number(opens[1]) >= Number(opens[0]);
+            let af = step;
+            let ep = Number(opens[0]);
+            let sar = Number(opens[0]);
+            values[0] = sar;
+            for (let i = 1; i < points.length; i += 1) {
+                sar = sar + (af * (ep - sar));
+                const prevOpen = Number(opens[i - 1]);
+                const currOpen = Number(opens[i]);
+                const prevPrevOpen = i > 1 ? Number(opens[i - 2]) : prevOpen;
+                if (isUpTrend) {
+                    sar = Math.min(sar, prevOpen, prevPrevOpen);
+                    if (currOpen < sar) {
+                        isUpTrend = false;
+                        sar = ep;
+                        ep = currOpen;
+                        af = step;
+                    } else if (currOpen > ep) {
+                        ep = currOpen;
+                        af = Math.min(maxStep, af + step);
+                    }
+                } else {
+                    sar = Math.max(sar, prevOpen, prevPrevOpen);
+                    if (currOpen > sar) {
+                        isUpTrend = true;
+                        sar = ep;
+                        ep = currOpen;
+                        af = step;
+                    } else if (currOpen < ep) {
+                        ep = currOpen;
+                        af = Math.min(maxStep, af + step);
+                    }
+                }
+                values[i] = sar;
+            }
+            return valuesToSeries(points, values);
+        }
+
+        function computeSupertrendIndicator(points, period, mult) {
+            const opens = getOpenSeries(points);
+            const atr = computeAtrValues(points, period);
+            const upper = new Array(points.length).fill(null);
+            const lower = new Array(points.length).fill(null);
+            const finalUpper = new Array(points.length).fill(null);
+            const finalLower = new Array(points.length).fill(null);
+            const direction = new Array(points.length).fill(1);
+            for (let i = 0; i < points.length; i += 1) {
+                const open = Number(opens[i]);
+                const atrValue = Number(atr[i]);
+                if (!Number.isFinite(open) || !Number.isFinite(atrValue)) continue;
+                const basicUpper = open + (mult * atrValue);
+                const basicLower = open - (mult * atrValue);
+                if (i === 0 || !Number.isFinite(finalUpper[i - 1]) || !Number.isFinite(finalLower[i - 1])) {
+                    finalUpper[i] = basicUpper;
+                    finalLower[i] = basicLower;
+                    direction[i] = 1;
+                    lower[i] = basicLower;
+                    continue;
+                }
+                finalUpper[i] = basicUpper < finalUpper[i - 1] || Number(opens[i - 1]) > finalUpper[i - 1] ? basicUpper : finalUpper[i - 1];
+                finalLower[i] = basicLower > finalLower[i - 1] || Number(opens[i - 1]) < finalLower[i - 1] ? basicLower : finalLower[i - 1];
+                if (open > finalUpper[i - 1]) direction[i] = 1;
+                else if (open < finalLower[i - 1]) direction[i] = -1;
+                else direction[i] = direction[i - 1];
+                if (direction[i] > 0) lower[i] = finalLower[i];
+                else upper[i] = finalUpper[i];
+            }
+            return {
+                up: valuesToSeries(points, lower),
+                down: valuesToSeries(points, upper)
+            };
+        }
+
+        function computeAtrIndicator(points, period) {
+            return valuesToSeries(points, computeAtrValues(points, period));
+        }
+
+        function computeAdxIndicator(points, period) {
+            const tr = computeTrueRangeValues(points);
+            const plusDm = new Array(points.length).fill(null);
+            const minusDm = new Array(points.length).fill(null);
+            for (let i = 1; i < points.length; i += 1) {
+                const upMove = Number(points[i]?.open) - Number(points[i - 1]?.open);
+                const downMove = Number(points[i - 1]?.open) - Number(points[i]?.open);
+                plusDm[i] = upMove > downMove && upMove > 0 ? upMove : 0;
+                minusDm[i] = downMove > upMove && downMove > 0 ? downMove : 0;
+            }
+            const trRma = computeRmaValues(tr, period);
+            const plusRma = computeRmaValues(plusDm, period);
+            const minusRma = computeRmaValues(minusDm, period);
+            const plusDi = trRma.map((value, index) => Number.isFinite(value) && value !== 0 && Number.isFinite(plusRma[index]) ? (plusRma[index] / value) * 100 : null);
+            const minusDi = trRma.map((value, index) => Number.isFinite(value) && value !== 0 && Number.isFinite(minusRma[index]) ? (minusRma[index] / value) * 100 : null);
+            const dx = plusDi.map((value, index) => {
+                const minus = Number(minusDi[index]);
+                if (!Number.isFinite(value) || !Number.isFinite(minus) || value + minus === 0) return null;
+                return (Math.abs(value - minus) / (value + minus)) * 100;
+            });
+            return {
+                adx: valuesToSeries(points, computeRmaValues(dx, period)),
+                plus: valuesToSeries(points, plusDi),
+                minus: valuesToSeries(points, minusDi)
+            };
+        }
+
+        function computeAroonIndicator(points, period) {
+            const opens = getOpenSeries(points);
+            const up = new Array(points.length).fill(null);
+            const down = new Array(points.length).fill(null);
+            for (let i = period - 1; i < points.length; i += 1) {
+                let highestIndex = i;
+                let lowestIndex = i;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    if (Number(opens[j]) >= Number(opens[highestIndex])) highestIndex = j;
+                    if (Number(opens[j]) <= Number(opens[lowestIndex])) lowestIndex = j;
+                }
+                up[i] = ((period - (i - highestIndex)) / period) * 100;
+                down[i] = ((period - (i - lowestIndex)) / period) * 100;
+            }
+            return {
+                up: valuesToSeries(points, up),
+                down: valuesToSeries(points, down)
+            };
+        }
+
+        function computeAwesomeOscillator(points) {
+            const median = getOpenSeries(points);
+            const sma5 = computeSmaValues(median, 5);
+            const sma34 = computeSmaValues(median, 34);
+            const values = sma5.map((value, index) => Number.isFinite(value) && Number.isFinite(sma34[index]) ? value - sma34[index] : null);
+            let previous = null;
+            return valuesToSeries(points, values, (time, value) => {
+                const color = previous == null || value >= previous ? 'rgba(14, 203, 129, 0.78)' : 'rgba(246, 70, 93, 0.78)';
+                previous = value;
+                return { time, value, color };
+            });
+        }
+
+        function computeAcceleratorOscillator(points) {
+            const median = getOpenSeries(points);
+            const sma5 = computeSmaValues(median, 5);
+            const sma34 = computeSmaValues(median, 34);
+            const ao = sma5.map((value, index) => Number.isFinite(value) && Number.isFinite(sma34[index]) ? value - sma34[index] : null);
+            const signal = computeSmaValues(ao, 5);
+            const values = ao.map((value, index) => Number.isFinite(value) && Number.isFinite(signal[index]) ? value - signal[index] : null);
+            let previous = null;
+            return valuesToSeries(points, values, (time, value) => {
+                const color = previous == null || value >= previous ? 'rgba(14, 203, 129, 0.78)' : 'rgba(246, 70, 93, 0.78)';
+                previous = value;
+                return { time, value, color };
+            });
+        }
+
+        function computeAccumulationDistribution(points) {
+            let running = 0;
+            const values = points.map((point, index) => {
+                const open = Number(point?.open);
+                const prevOpen = index > 0 ? Number(points[index - 1]?.open) : NaN;
+                const volume = Number(point?.volume);
+                if (!Number.isFinite(open) || !Number.isFinite(volume)) {
+                    return running;
+                }
+                const multiplier = Number.isFinite(prevOpen) && prevOpen !== 0
+                    ? (open - prevOpen) / Math.abs(prevOpen)
+                    : 0;
+                running += multiplier * volume;
+                return running;
+            });
+            return valuesToSeries(points, values);
+        }
+
+        function computeObvIndicator(points) {
+            let running = 0;
+            const values = new Array(points.length).fill(null);
+            for (let i = 0; i < points.length; i += 1) {
+                if (i === 0) {
+                    values[i] = 0;
+                    continue;
+                }
+                const close = Number(points[i]?.open);
+                const prevClose = Number(points[i - 1]?.open);
+                const volume = Math.abs(Number(points[i]?.volume) || 0);
+                if (close > prevClose) running += volume;
+                else if (close < prevClose) running -= volume;
+                values[i] = running;
+            }
+            return valuesToSeries(points, values);
+        }
+
+        function computeCciIndicator(points, period) {
+            const typical = getOpenSeries(points);
+            const sma = computeSmaValues(typical, period);
+            const values = new Array(points.length).fill(null);
+            for (let i = period - 1; i < points.length; i += 1) {
+                if (!Number.isFinite(typical[i]) || !Number.isFinite(sma[i])) continue;
+                let meanDeviation = 0;
+                let count = 0;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    if (!Number.isFinite(typical[j])) continue;
+                    meanDeviation += Math.abs(typical[j] - sma[i]);
+                    count += 1;
+                }
+                if (count === period && meanDeviation !== 0) values[i] = (typical[i] - sma[i]) / (0.015 * (meanDeviation / period));
+            }
+            return valuesToSeries(points, values);
+        }
+
+        function computeRocIndicator(points, period, source) {
+            const values = getSourceValues(points, source);
+            return valuesToSeries(points, values.map((value, index) => {
+                const base = Number(values[index - period]);
+                return Number.isFinite(value) && Number.isFinite(base) && base !== 0 ? ((value - base) / base) * 100 : null;
+            }));
+        }
+
+        function computeMomentumIndicator(points, period, source) {
+            const values = getSourceValues(points, source);
+            return valuesToSeries(points, values.map((value, index) => {
+                const base = Number(values[index - period]);
+                return Number.isFinite(value) && Number.isFinite(base) ? value - base : null;
+            }));
+        }
+
+        function computeMfiIndicator(points, period) {
+            const positive = new Array(points.length).fill(0);
+            const negative = new Array(points.length).fill(0);
+            const typical = getOpenSeries(points);
+            for (let i = 1; i < points.length; i += 1) {
+                const flow = typical[i] * Math.abs(Number(points[i]?.volume) || 0);
+                if (typical[i] > typical[i - 1]) positive[i] = flow;
+                else if (typical[i] < typical[i - 1]) negative[i] = flow;
+            }
+            const values = new Array(points.length).fill(null);
+            for (let i = period; i < points.length; i += 1) {
+                let positiveFlow = 0;
+                let negativeFlow = 0;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    positiveFlow += positive[j];
+                    negativeFlow += negative[j];
+                }
+                if (negativeFlow === 0) values[i] = 100;
+                else {
+                    const ratio = positiveFlow / negativeFlow;
+                    values[i] = 100 - (100 / (1 + ratio));
+                }
+            }
+            return valuesToSeries(points, values);
+        }
+
+        function computeStochasticIndicator(points, kPeriod, smooth, dPeriod) {
+            const opens = getOpenSeries(points);
+            const rawK = new Array(points.length).fill(null);
+            for (let i = kPeriod - 1; i < points.length; i += 1) {
+                let highest = -Infinity;
+                let lowest = Infinity;
+                for (let j = i - kPeriod + 1; j <= i; j += 1) {
+                    highest = Math.max(highest, Number(opens[j]));
+                    lowest = Math.min(lowest, Number(opens[j]));
+                }
+                const close = Number(opens[i]);
+                rawK[i] = highest === lowest ? 0 : ((close - lowest) / (highest - lowest)) * 100;
+            }
+            const k = computeSmaValues(rawK, smooth);
+            const d = computeSmaValues(k, dPeriod);
+            return {
+                k: valuesToSeries(points, k),
+                d: valuesToSeries(points, d)
+            };
+        }
+
+        function computeMacdIndicator(points, fast, slow, signal, source) {
+            const values = getSourceValues(points, source);
+            const fastEma = computeEmaValues(values, fast);
+            const slowEma = computeEmaValues(values, slow);
+            const macd = values.map((_, index) => Number.isFinite(fastEma[index]) && Number.isFinite(slowEma[index]) ? fastEma[index] - slowEma[index] : null);
+            const signalValues = computeEmaValues(macd, signal);
+            const hist = macd.map((value, index) => Number.isFinite(value) && Number.isFinite(signalValues[index]) ? value - signalValues[index] : null);
+            return {
+                hist: valuesToSeries(points, hist, (time, value) => ({
+                    time,
+                    value,
+                    color: value >= 0 ? 'rgba(14, 203, 129, 0.78)' : 'rgba(246, 70, 93, 0.78)'
+                })),
+                macd: valuesToSeries(points, macd),
+                signal: valuesToSeries(points, signalValues)
+            };
+        }
+
+        function computeRsiValues(values, period) {
+            const out = new Array(values.length).fill(null);
+            if (!Number.isFinite(period) || period <= 0 || values.length <= period) return out;
+            let avgGain = 0;
+            let avgLoss = 0;
+            for (let i = 1; i <= period; i += 1) {
+                const current = Number(values[i]);
+                const previous = Number(values[i - 1]);
+                if (!Number.isFinite(current) || !Number.isFinite(previous)) return out;
+                const diff = current - previous;
+                if (diff >= 0) avgGain += diff;
+                else avgLoss -= diff;
+            }
+            avgGain /= period;
+            avgLoss /= period;
+            const calcRsi = () => {
+                if (avgLoss === 0) return 100;
+                if (avgGain === 0) return 0;
+                const rs = avgGain / avgLoss;
+                return 100 - 100 / (1 + rs);
+            };
+            out[period] = calcRsi();
+            for (let i = period + 1; i < values.length; i += 1) {
+                const current = Number(values[i]);
+                const previous = Number(values[i - 1]);
+                if (!Number.isFinite(current) || !Number.isFinite(previous)) continue;
+                const diff = current - previous;
+                const gain = diff > 0 ? diff : 0;
+                const loss = diff < 0 ? -diff : 0;
+                avgGain = ((avgGain * (period - 1)) + gain) / period;
+                avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+                out[i] = calcRsi();
+            }
+            return out;
+        }
+
+        function computeStochRsiIndicator(points, rsiPeriod, stochPeriod, smoothK, smoothD, source) {
+            const rsiValues = computeRsiValues(getSourceValues(points, source), rsiPeriod);
+            const rawK = new Array(points.length).fill(null);
+            for (let i = stochPeriod - 1; i < rsiValues.length; i += 1) {
+                let highest = -Infinity;
+                let lowest = Infinity;
+                let valid = true;
+                for (let j = i - stochPeriod + 1; j <= i; j += 1) {
+                    const value = Number(rsiValues[j]);
+                    if (!Number.isFinite(value)) {
+                        valid = false;
+                        break;
+                    }
+                    highest = Math.max(highest, value);
+                    lowest = Math.min(lowest, value);
+                }
+                const current = Number(rsiValues[i]);
+                if (!valid || !Number.isFinite(current)) continue;
+                rawK[i] = highest === lowest ? 0 : ((current - lowest) / (highest - lowest)) * 100;
+            }
+            const k = computeSmaValues(rawK, smoothK);
+            const d = computeSmaValues(k, smoothD);
+            return {
+                k: valuesToSeries(points, k),
+                d: valuesToSeries(points, d)
+            };
+        }
+
+        function computeTrixIndicator(points, period, signalPeriod, source) {
+            const sourceValues = getSourceValues(points, source);
+            const ema1 = computeEmaValues(sourceValues, period);
+            const ema2 = computeEmaValues(ema1, period);
+            const ema3 = computeEmaValues(ema2, period);
+            const trix = ema3.map((value, index) => {
+                const previous = Number(ema3[index - 1]);
+                return Number.isFinite(value) && Number.isFinite(previous) && previous !== 0
+                    ? ((value - previous) / previous) * 100
+                    : null;
+            });
+            const signal = computeEmaValues(trix, signalPeriod);
+            return {
+                main: valuesToSeries(points, trix),
+                signal: valuesToSeries(points, signal)
+            };
+        }
+
+        function computeUltimateOscillator(points, shortPeriod, mediumPeriod, longPeriod) {
+            const opens = getOpenSeries(points);
+            const buyingPressure = new Array(points.length).fill(null);
+            const trueRange = new Array(points.length).fill(null);
+            for (let i = 0; i < points.length; i += 1) {
+                const open = Number(opens[i]);
+                const prevOpen = i > 0 ? Number(opens[i - 1]) : open;
+                if (!Number.isFinite(open) || !Number.isFinite(prevOpen)) continue;
+                const trueLow = Math.min(open, prevOpen);
+                const trueHigh = Math.max(open, prevOpen);
+                buyingPressure[i] = open - trueLow;
+                trueRange[i] = trueHigh - trueLow;
+            }
+            const sumRange = (start, end, source) => {
+                let total = 0;
+                for (let i = start; i <= end; i += 1) total += Number(source[i]) || 0;
+                return total;
+            };
+            const values = new Array(points.length).fill(null);
+            const maxPeriod = Math.max(shortPeriod, mediumPeriod, longPeriod);
+            for (let i = maxPeriod - 1; i < points.length; i += 1) {
+                const avgShortDen = sumRange(i - shortPeriod + 1, i, trueRange);
+                const avgMedDen = sumRange(i - mediumPeriod + 1, i, trueRange);
+                const avgLongDen = sumRange(i - longPeriod + 1, i, trueRange);
+                if (avgShortDen <= 0 || avgMedDen <= 0 || avgLongDen <= 0) continue;
+                const avgShort = sumRange(i - shortPeriod + 1, i, buyingPressure) / avgShortDen;
+                const avgMed = sumRange(i - mediumPeriod + 1, i, buyingPressure) / avgMedDen;
+                const avgLong = sumRange(i - longPeriod + 1, i, buyingPressure) / avgLongDen;
+                values[i] = 100 * ((4 * avgShort) + (2 * avgMed) + avgLong) / 7;
+            }
+            return valuesToSeries(points, values);
+        }
+
+        function computeChaikinMoneyFlow(points, period) {
+            const opens = getOpenSeries(points);
+            const values = new Array(points.length).fill(null);
+            for (let i = period - 1; i < points.length; i += 1) {
+                let moneyFlow = 0;
+                let volumeSum = 0;
+                let validCount = 0;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    const open = Number(opens[j]);
+                    const prevOpen = j > 0 ? Number(opens[j - 1]) : open;
+                    const volume = Math.abs(Number(points[j]?.volume) || 0);
+                    if (!Number.isFinite(open) || !Number.isFinite(prevOpen) || !Number.isFinite(volume)) continue;
+                    const spread = Math.max(Math.abs(prevOpen), 1);
+                    const multiplier = (open - prevOpen) / spread;
+                    moneyFlow += multiplier * volume;
+                    volumeSum += volume;
+                    validCount += 1;
+                }
+                if (validCount === period && volumeSum > 0) values[i] = moneyFlow / volumeSum;
+            }
+            return valuesToSeries(points, values);
+        }
+
+        function computeChaikinOscillator(points, fastPeriod, slowPeriod) {
+            const opens = getOpenSeries(points);
+            let running = 0;
+            const adValues = (Array.isArray(points) ? points : []).map((point, index) => {
+                const open = Number(opens[index]);
+                const prevOpen = index > 0 ? Number(opens[index - 1]) : NaN;
+                const volume = Number(point?.volume);
+                if (!Number.isFinite(open) || !Number.isFinite(volume)) {
+                    return running;
+                }
+                const multiplier = Number.isFinite(prevOpen) && prevOpen !== 0
+                    ? (open - prevOpen) / Math.abs(prevOpen)
+                    : 0;
+                running += multiplier * volume;
+                return running;
+            });
+            const fast = computeEmaValues(adValues, fastPeriod);
+            const slow = computeEmaValues(adValues, slowPeriod);
+            const values = fast.map((value, index) => (
+                Number.isFinite(value) && Number.isFinite(slow[index]) ? value - slow[index] : null
+            ));
+            let previous = null;
+            return valuesToSeries(points, values, (time, value) => {
+                const color = previous == null || value >= previous ? 'rgba(14, 203, 129, 0.78)' : 'rgba(246, 70, 93, 0.78)';
+                previous = value;
+                return { time, value, color };
+            });
+        }
+
+        function computeWilliamsRIndicator(points, period) {
+            const opens = getOpenSeries(points);
+            const values = new Array(points.length).fill(null);
+            for (let i = period - 1; i < points.length; i += 1) {
+                let highest = -Infinity;
+                let lowest = Infinity;
+                for (let j = i - period + 1; j <= i; j += 1) {
+                    highest = Math.max(highest, Number(opens[j]));
+                    lowest = Math.min(lowest, Number(opens[j]));
+                }
+                const close = Number(opens[i]);
+                values[i] = highest === lowest ? 0 : ((highest - close) / (highest - lowest)) * -100;
+            }
+            return valuesToSeries(points, values);
         }
 
         function findStudyValue(seriesData, time) {
@@ -6216,10 +8415,28 @@
                 wickDownColor: '#F6465D',
                 borderVisible: false
             });
+            const heikinSeries = chartInstance.addCandlestickSeries({
+                upColor: '#0ECB81',
+                wickUpColor: '#0ECB81',
+                downColor: '#F6465D',
+                wickDownColor: '#F6465D',
+                borderVisible: false,
+                visible: false
+            });
             const lineSeries = chartInstance.addLineSeries({
                 color: '#8fb4ff',
                 lineWidth: 3,
                 crosshairMarkerVisible: false,
+                visible: false
+            });
+            const areaSeries = chartInstance.addAreaSeries({
+                lineColor: '#8fb4ff',
+                lineWidth: 2.4,
+                topColor: 'rgba(143, 180, 255, 0.18)',
+                bottomColor: 'rgba(143, 180, 255, 0.02)',
+                crosshairMarkerVisible: false,
+                lastValueVisible: false,
+                priceLineVisible: false,
                 visible: false
             });
             const ma7Series = chartInstance.addLineSeries({
@@ -6296,7 +8513,9 @@
                 lowerChart: lowerChartInstance,
                 lowerPane: lowerPaneEl,
                 candles: candleSeries,
+                heikin: heikinSeries,
                 line: lineSeries,
+                area: areaSeries,
                 volume: volumeSeries,
                 volumeMaFast: volumeMaFastSeries,
                 volumeMaSlow: volumeMaSlowSeries,
@@ -6310,6 +8529,260 @@
                 rsiLowerLine: null,
                 rsiMidLine: null
             };
+        }
+
+        function createIndicatorSeriesSlot(bundle, definition) {
+            const slot = {
+                pane: definition.pane,
+                definitionId: definition.id,
+                series: new Map()
+            };
+            const hostChart = definition.pane === 'overlay' ? bundle.chart : bundle.lowerChart;
+            (definition.series || []).forEach(descriptor => {
+                let series = null;
+                if (descriptor.type === 'histogram') {
+                    series = hostChart.addHistogramSeries({
+                        lastValueVisible: false,
+                        priceLineVisible: false,
+                        color: descriptor.color || '#60a5fa',
+                        visible: true
+                    });
+                } else if (descriptor.type === 'area') {
+                    const baseLineColor = descriptor.maskToBackground
+                        ? (getCssVar('--bg') || '#0d1014')
+                        : (descriptor.lineVisible === false
+                            ? 'rgba(0, 0, 0, 0)'
+                            : (descriptor.color || '#60a5fa'));
+                    series = hostChart.addAreaSeries({
+                        lineColor: baseLineColor,
+                        lineWidth: descriptor.lineWidth || 1.2,
+                        topColor: descriptor.topColor || 'rgba(96, 165, 250, 0.12)',
+                        bottomColor: descriptor.bottomColor || 'rgba(96, 165, 250, 0.02)',
+                        crosshairMarkerVisible: descriptor.crosshairMarkerVisible ?? false,
+                        lastValueVisible: false,
+                        priceLineVisible: false,
+                        visible: true
+                    });
+                } else {
+                    series = hostChart.addLineSeries({
+                        color: descriptor.color || '#e2e8f0',
+                        lineWidth: descriptor.lineWidth || 1.4,
+                        lineStyle: descriptor.lineStyle ?? 0,
+                        lineVisible: descriptor.lineVisible ?? true,
+                        pointMarkersVisible: descriptor.pointMarkersVisible ?? false,
+                        crosshairMarkerVisible: descriptor.crosshairMarkerVisible ?? false,
+                        crosshairMarkerRadius: descriptor.crosshairMarkerRadius ?? 4,
+                        lastValueVisible: false,
+                        priceLineVisible: false,
+                        visible: true
+                    });
+                }
+                slot.series.set(descriptor.key, series);
+            });
+            return slot;
+        }
+
+        function removeIndicatorSeriesSlot(bundle, slot) {
+            if (!bundle || !slot?.series) return;
+            const hostChart = slot.pane === 'overlay' ? bundle.chart : bundle.lowerChart;
+            slot.series.forEach(series => {
+                try { hostChart.removeSeries(series); } catch (_) {}
+            });
+        }
+
+        function getPrimaryIndicatorSeriesData(result) {
+            if (!result || !result.data) return [];
+            const primary = Array.isArray(result.data[result.primaryKey]) ? result.data[result.primaryKey] : [];
+            if (primary.length) return primary;
+            const fallback = Array.isArray(result.data[result.fallbackPrimaryKey]) ? result.data[result.fallbackPrimaryKey] : [];
+            return fallback;
+        }
+
+        function formatIndicatorDisplayValue(value, format, target) {
+            if (!Number.isFinite(value)) return '–';
+            if (format === 'volume') return fmtK(value);
+            if (format === 'price') {
+                const precision = Number.isFinite(seriesPricePrecision[target]) ? seriesPricePrecision[target] : pxDec(value);
+                return fmt(value, precision);
+            }
+            return fmt(value, Math.abs(value) >= 100 ? 2 : 3);
+        }
+
+        function getIndicatorSeriesDescriptors(definition) {
+            return Array.isArray(definition?.series) ? definition.series : [];
+        }
+
+        function getIndicatorLineColor(definition, entry, key) {
+            const descriptor = getIndicatorSeriesDescriptors(definition).find(item => item.key === key);
+            return sanitizeIndicatorColor(entry?.colors?.[key], descriptor?.color || '#e2e8f0');
+        }
+
+        function applyIndicatorSeriesOptions(series, descriptor, definition, entry) {
+            if (!series || !descriptor) return;
+            if (descriptor.type === 'line') {
+                try {
+                    series.applyOptions({
+                        color: getIndicatorLineColor(definition, entry, descriptor.key),
+                        lineVisible: descriptor.lineVisible ?? true,
+                        pointMarkersVisible: descriptor.pointMarkersVisible ?? false,
+                        crosshairMarkerVisible: descriptor.crosshairMarkerVisible ?? false,
+                        crosshairMarkerRadius: descriptor.crosshairMarkerRadius ?? 4
+                    });
+                } catch (_) {}
+            } else if (descriptor.type === 'area') {
+                const baseColor = getIndicatorLineColor(definition, entry, descriptor.colorKey || descriptor.key);
+                const topOpacity = Number.isFinite(Number(descriptor.topOpacity)) ? Number(descriptor.topOpacity) : 0.12;
+                const bottomOpacity = Number.isFinite(Number(descriptor.bottomOpacity)) ? Number(descriptor.bottomOpacity) : 0.02;
+                const background = getCssVar('--bg') || '#0d1014';
+                try {
+                    series.applyOptions({
+                        lineColor: descriptor.maskToBackground
+                            ? background
+                            : (descriptor.lineVisible === false ? 'rgba(0, 0, 0, 0)' : baseColor),
+                        lineWidth: descriptor.lineWidth || 1.2,
+                        topColor: descriptor.maskToBackground ? background : toAlpha(baseColor, topOpacity),
+                        bottomColor: descriptor.maskToBackground ? background : toAlpha(baseColor, bottomOpacity)
+                    });
+                } catch (_) {}
+            }
+        }
+
+        function getIndicatorRenderedSeriesData(definition, entry, descriptor, data) {
+            if (!Array.isArray(data)) return [];
+            if (descriptor?.type !== 'histogram') return data;
+            return data.map(point => {
+                if (!point || typeof point !== 'object') return point;
+                if (!Object.prototype.hasOwnProperty.call(point, 'value')) return point;
+                return { ...point };
+            });
+        }
+
+        function renderCustomIndicatorLegend(target, time) {
+            const container = getLegendCustomContainer(target);
+            const cache = getCustomIndicatorCache(target);
+            if (!container) return;
+            container.replaceChildren();
+            (cache.overlay || []).forEach(entry => {
+                const primarySeries = getPrimaryIndicatorSeriesData(entry);
+                const value = findStudyValue(primarySeries, time);
+                const item = document.createElement('span');
+                item.className = 'legend-custom-indicator';
+                const swatch = document.createElement('span');
+                swatch.className = 'legend-custom-indicator-swatch';
+                swatch.style.background = entry.swatch || 'rgba(148, 163, 184, 0.85)';
+                const key = document.createElement('span');
+                key.className = 'legend-key';
+                key.textContent = entry.label;
+                const val = document.createElement('span');
+                val.className = 'v';
+                val.textContent = formatIndicatorDisplayValue(value, entry.format, target);
+                item.append(swatch, key, val);
+                container.appendChild(item);
+            });
+        }
+
+        function syncLowerIndicatorMeta(target, time) {
+            const refs = getLowerPaneLegendRefs(target);
+            const cache = getCustomIndicatorCache(target);
+            const activeLower = cache.lower;
+            if (!refs?.itemCustom) return;
+            const showCustom = S.lowerStudy === 'indicator' && activeLower;
+            refs.itemCustom.hidden = !showCustom;
+            if (!showCustom) return;
+            refs.keyCustom.textContent = activeLower.label;
+            const value = findStudyValue(getPrimaryIndicatorSeriesData(activeLower), time);
+            refs.valCustom.textContent = formatIndicatorDisplayValue(value, activeLower.format, target);
+        }
+
+        function syncCustomIndicators(target) {
+            const bundle = getSeriesBundle(target);
+            const renderState = getIndicatorRenderSlotState(target);
+            const points = getIndicatorPoints(target);
+            const overlayIndicators = getOverlayIndicators();
+            const activeOverlayKeys = new Set(overlayIndicators.map(entry => String(entry.uid || entry.id)));
+            renderState.overlay.forEach((slot, key) => {
+                if (!activeOverlayKeys.has(key)) {
+                    removeIndicatorSeriesSlot(bundle, slot);
+                    renderState.overlay.delete(key);
+                }
+            });
+
+            const nextCache = { overlay: [], lower: null };
+
+            overlayIndicators.forEach(entry => {
+                const definition = getIndicatorDefinition(entry.id);
+                if (!definition || definition.pane !== 'overlay') return;
+                const renderKey = String(entry.uid || entry.id);
+                let slot = renderState.overlay.get(renderKey);
+                if (!slot) {
+                    slot = createIndicatorSeriesSlot(bundle, definition);
+                    renderState.overlay.set(renderKey, slot);
+                }
+                const params = normalizeIndicatorParams(definition, entry.params);
+                const result = definition.compute(points, params) || { data: {} };
+                slot.series.forEach((series, key) => {
+                    const descriptor = getIndicatorSeriesDescriptors(definition).find(item => item.key === key);
+                    const data = Array.isArray(result.data?.[key]) ? result.data[key] : [];
+                    applyIndicatorSeriesOptions(series, descriptor, definition, entry);
+                    series.setData(getIndicatorRenderedSeriesData(definition, entry, descriptor, data));
+                    try { series.applyOptions({ visible: true }); } catch (_) {}
+                });
+                const swatchDescriptor = getIndicatorSeriesDescriptors(definition).find(item => item.type === 'line') || getIndicatorSeriesDescriptors(definition)[0] || null;
+                nextCache.overlay.push({
+                    uid: renderKey,
+                    id: definition.id,
+                    label: result.legendLabel || buildIndicatorEntryLabel(entry),
+                    format: result.primaryFormat || 'price',
+                    primaryKey: result.primaryKey,
+                    fallbackPrimaryKey: result.fallbackPrimaryKey,
+                    data: result.data || {},
+                    swatch: swatchDescriptor?.type === 'line'
+                        ? getIndicatorLineColor(definition, entry, swatchDescriptor.key)
+                        : (swatchDescriptor?.color || 'rgba(148, 163, 184, 0.85)')
+                });
+            });
+
+            const lowerIndicator = getActiveLowerIndicator();
+            if (!(S.lowerStudy === 'indicator' && lowerIndicator)) {
+                if (renderState.lower) {
+                    removeIndicatorSeriesSlot(bundle, renderState.lower);
+                    renderState.lower = null;
+                }
+            } else {
+                const definition = getIndicatorDefinition(lowerIndicator.id);
+                if (definition && definition.pane === 'lower') {
+                    if (!renderState.lower || renderState.lower.definitionId !== definition.id) {
+                        if (renderState.lower) removeIndicatorSeriesSlot(bundle, renderState.lower);
+                        renderState.lower = createIndicatorSeriesSlot(bundle, definition);
+                    }
+                    const params = normalizeIndicatorParams(definition, lowerIndicator.params);
+                    const result = definition.compute(points, params) || { data: {} };
+                    renderState.lower.series.forEach((series, key) => {
+                        const descriptor = getIndicatorSeriesDescriptors(definition).find(item => item.key === key);
+                        const data = Array.isArray(result.data?.[key]) ? result.data[key] : [];
+                        applyIndicatorSeriesOptions(series, descriptor, definition, lowerIndicator);
+                        series.setData(getIndicatorRenderedSeriesData(definition, lowerIndicator, descriptor, data));
+                        try { series.applyOptions({ visible: true }); } catch (_) {}
+                    });
+                    const swatchDescriptor = getIndicatorSeriesDescriptors(definition).find(item => item.type === 'line') || getIndicatorSeriesDescriptors(definition)[0] || null;
+                    nextCache.lower = {
+                        id: definition.id,
+                        label: result.legendLabel || definition.shortName,
+                        format: result.primaryFormat || 'number',
+                        primaryKey: result.primaryKey,
+                        fallbackPrimaryKey: result.fallbackPrimaryKey,
+                        data: result.data || {},
+                        swatch: swatchDescriptor?.type === 'line'
+                            ? getIndicatorLineColor(definition, lowerIndicator, swatchDescriptor.key)
+                            : (swatchDescriptor?.color || 'rgba(148, 163, 184, 0.85)')
+                    };
+                }
+            }
+
+            if (target === 2) customIndicatorCache2 = nextCache;
+            else customIndicatorCache1 = nextCache;
+            renderCustomIndicatorLegend(target);
+            syncLowerIndicatorMeta(target);
         }
 
         const chartSeries1 = createChartSeriesBundle(chart, lowerChart, chartLowerPane1);
@@ -6491,12 +8964,14 @@
         let timeLineTicks1 = [];
         let oldestTs = null, isLoadingHistory = false;
         let studyCache1 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
+        let customIndicatorCache1 = { overlay: [], lower: null };
         let candleFetchSeq1 = 0;
 
         let candleMap2 = new Map(), volMap2 = new Map();
         let timeLineTicks2 = [];
         let oldestTs2 = null, isLoadingHistory2 = false;
         let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
+        let customIndicatorCache2 = { overlay: [], lower: null };
         let candleFetchSeq2 = 0;
         let tradeFetchSeq = 0;
         let tradePanelRefreshTimer = 0;
@@ -6521,11 +8996,13 @@
                 ? {
                     open: legO2, high: legH2, low: legL2, close: legC2, change: legPct2, range: legRange2,
                     ma7: legMa72, ma25: legMa252, ma99: legMa992, lowerLabel: legLowerLabel2, lowerValue: legLowerValue2,
+                    customContainer: legendCustomIndicators2,
                     maKey7: legMaKey72, maKey25: legMaKey252, maKey99: legMaKey992
                 }
                 : {
                     open: legO, high: legH, low: legL, close: legC, change: legPct, range: legRange,
                     ma7: legMa7, ma25: legMa25, ma99: legMa99, lowerLabel: legLowerLabel, lowerValue: legLowerValue,
+                    customContainer: legendCustomIndicators1,
                     maKey7: legMaKey7, maKey25: legMaKey25, maKey99: legMaKey99
                 };
         }
@@ -6542,11 +9019,14 @@
                     volMaFast: lowerPaneValVolMaFast2,
                     volMaSlow: lowerPaneValVolMaSlow2,
                     rsi: lowerPaneValRsi2,
+                    keyCustom: lowerPaneKeyCustom2,
+                    valCustom: lowerPaneValCustom2,
                     itemVolBase: lowerPaneItemVolBase2,
                     itemVolUsd: lowerPaneItemVolUsd2,
                     itemVolMaFast: lowerPaneItemVolMaFast2,
                     itemVolMaSlow: lowerPaneItemVolMaSlow2,
-                    itemRsi: lowerPaneItemRsi2
+                    itemRsi: lowerPaneItemRsi2,
+                    itemCustom: lowerPaneItemCustom2
                 }
                 : {
                     keyVolBase: lowerPaneKeyVolBase1,
@@ -6558,11 +9038,14 @@
                     volMaFast: lowerPaneValVolMaFast1,
                     volMaSlow: lowerPaneValVolMaSlow1,
                     rsi: lowerPaneValRsi1,
+                    keyCustom: lowerPaneKeyCustom1,
+                    valCustom: lowerPaneValCustom1,
                     itemVolBase: lowerPaneItemVolBase1,
                     itemVolUsd: lowerPaneItemVolUsd1,
                     itemVolMaFast: lowerPaneItemVolMaFast1,
                     itemVolMaSlow: lowerPaneItemVolMaSlow1,
-                    itemRsi: lowerPaneItemRsi1
+                    itemRsi: lowerPaneItemRsi1,
+                    itemCustom: lowerPaneItemCustom1
                 };
         }
 
@@ -6582,6 +9065,78 @@
 
         function getDisplayChartData(target) {
             return buildDisplayLineData(getSortedCandleData(target), getLiveTimeTicks(target));
+        }
+
+        function getIndicatorPoints(target) {
+            const candlesData = getSortedCandleData(target);
+            const volumeMapByTime = new Map(getSortedVolumeData(target).map(point => [Number(point.time), Number(point.value)]));
+            return candlesData.map(bar => ({
+                time: Number(bar.time),
+                open: Number(bar.open),
+                high: Number(bar.high),
+                low: Number(bar.low),
+                close: Number(bar.close),
+                volume: Number(volumeMapByTime.get(Number(bar.time)) || 0)
+            }));
+        }
+
+        function getOverlayIndicators() {
+            return Array.isArray(S.overlayIndicators) ? S.overlayIndicators : [];
+        }
+
+        function getActiveLowerIndicator() {
+            return S.lowerIndicator && typeof S.lowerIndicator === 'object' ? S.lowerIndicator : null;
+        }
+
+        function getBuiltInRsiIndicatorEntry() {
+            return {
+                id: 'rsi',
+                params: {
+                    period: S.rsiPeriod || RSI_PERIOD,
+                    lower: S.rsiLower,
+                    upper: S.rsiUpper
+                },
+                colors: { main: '#8b5cf6' },
+                pane: 'lower'
+            };
+        }
+
+        function getBuiltInSmaIndicatorEntry() {
+            return {
+                id: 'sma',
+                params: {
+                    fast: S.maPeriods[0],
+                    mid: S.maPeriods[1],
+                    slow: S.maPeriods[2],
+                    volumeFast: S.volumeMaPeriods[0],
+                    volumeSlow: S.volumeMaPeriods[1]
+                },
+                colors: {
+                    fast: MA_COLORS[7],
+                    mid: MA_COLORS[25],
+                    slow: MA_COLORS[99]
+                },
+                pane: 'overlay',
+                builtin: true
+            };
+        }
+
+        function getActiveLowerStudyEntry() {
+            if (S.lowerStudy === 'rsi') return getBuiltInRsiIndicatorEntry();
+            if (S.lowerStudy === 'indicator') return getActiveLowerIndicator();
+            return null;
+        }
+
+        function getCustomIndicatorCache(target) {
+            return target === 2 ? customIndicatorCache2 : customIndicatorCache1;
+        }
+
+        function getLegendCustomContainer(target) {
+            return target === 2 ? legendCustomIndicators2 : legendCustomIndicators1;
+        }
+
+        function getIndicatorRenderSlotState(target) {
+            return indicatorRenderState[target === 2 ? 2 : 1];
         }
 
         function getLiveTimeTicks(target) {
@@ -6697,7 +9252,7 @@
         }
 
         function findCandleBarAtOrBefore(target, time) {
-            const data = getSortedCandleData(target);
+            const data = getActivePriceBars(target);
             if (!data.length) return null;
             const targetTime = time == null ? NaN : Number(time);
             if (!Number.isFinite(targetTime)) return data[data.length - 1] || null;
@@ -6818,7 +9373,21 @@
 
         function getActivePriceSeries(target) {
             const bundle = getSeriesBundle(target);
-            return S.priceMode === 'line' ? bundle.line : bundle.candles;
+            if (!bundle) return null;
+            if (isTimeChartMode()) return bundle.line;
+            if (S.priceMode === 'line') return bundle.line;
+            if (S.priceMode === 'area') return bundle.area;
+            if (S.priceMode === 'heikin') return bundle.heikin;
+            return bundle.candles;
+        }
+
+        function getActivePriceBars(target) {
+            const store = getCandleStore(target);
+            if (S.priceMode === 'heikin') {
+                const heikin = Array.isArray(store?.studies?.heikin) ? store.studies.heikin : [];
+                return heikin.length ? heikin : computeHeikinAshiData(getSortedCandleData(target));
+            }
+            return getSortedCandleData(target);
         }
 
         function getRsiBandEl(target) {
@@ -7545,8 +10114,9 @@
             for (let index = from; index <= to; index += 1) {
                 const bar = data[index];
                 if (!bar) continue;
-                const highValue = S.priceMode === 'line' ? Number(bar.close) : Number(bar.high);
-                const lowValue = S.priceMode === 'line' ? Number(bar.close) : Number(bar.low);
+                const isSingleValueMode = S.priceMode === 'line' || S.priceMode === 'area';
+                const highValue = isSingleValueMode ? Number(bar.close) : Number(bar.high);
+                const lowValue = isSingleValueMode ? Number(bar.close) : Number(bar.low);
                 if (!Number.isFinite(highValue) || !Number.isFinite(lowValue)) continue;
                 if (!maxBar || highValue > maxBar.value) maxBar = { time: bar.time, value: highValue };
                 if (!minBar || lowValue < minBar.value) minBar = { time: bar.time, value: lowValue };
@@ -7678,29 +10248,39 @@
             const volMaFastValue = findStudyValue(store.studies?.volMaFast, effectiveTime);
             const volMaSlowValue = findStudyValue(store.studies?.volMaSlow, effectiveTime);
             const rsiValue = findStudyValue(store.studies?.rsi, effectiveTime);
+            const customLower = getCustomIndicatorCache(target).lower;
             const showVolume = S.lowerStudy === 'volume';
             const showRsi = S.lowerStudy === 'rsi';
+            const showCustom = S.lowerStudy === 'indicator' && customLower;
             if (refs.itemVolBase) refs.itemVolBase.style.display = showVolume ? '' : 'none';
             if (refs.itemVolUsd) refs.itemVolUsd.style.display = showVolume ? '' : 'none';
-            if (refs.itemVolMaFast) refs.itemVolMaFast.style.display = showVolume ? '' : 'none';
-            if (refs.itemVolMaSlow) refs.itemVolMaSlow.style.display = showVolume ? '' : 'none';
+            if (refs.itemVolMaFast) refs.itemVolMaFast.style.display = showVolume && S.showMAs ? '' : 'none';
+            if (refs.itemVolMaSlow) refs.itemVolMaSlow.style.display = showVolume && S.showMAs ? '' : 'none';
             if (refs.itemRsi) refs.itemRsi.style.display = showRsi ? '' : 'none';
+            if (refs.itemCustom) refs.itemCustom.style.display = showCustom ? '' : 'none';
             if (refs.volBase) refs.volBase.textContent = Number.isFinite(volumeValue) ? fmtK(volumeValue) : '–';
             if (refs.volUsd) refs.volUsd.textContent = Number.isFinite(volumeUsdValue) ? fmtK(volumeUsdValue) : '–';
             if (refs.volMaFast) refs.volMaFast.textContent = Number.isFinite(volMaFastValue) ? fmtK(volMaFastValue) : '–';
             if (refs.volMaSlow) refs.volMaSlow.textContent = Number.isFinite(volMaSlowValue) ? fmtK(volMaSlowValue) : '–';
             if (refs.rsi) refs.rsi.textContent = Number.isFinite(rsiValue) ? rsiValue.toFixed(2) : '–';
+            syncLowerIndicatorMeta(target, effectiveTime);
         }
 
         function syncChartStudyVisibility(target) {
             const bundle = getSeriesBundle(target);
             const showCandles = S.priceMode === 'candles' && !isTimeChartMode();
+            const showLine = S.priceMode === 'line' || isTimeChartMode();
+            const showHeikin = S.priceMode === 'heikin' && !isTimeChartMode();
+            const showArea = S.priceMode === 'area' && !isTimeChartMode();
             const showVolume = S.lowerStudy === 'volume';
             const showRsi = S.lowerStudy === 'rsi';
-            const showLowerPane = (showVolume || showRsi) && !S.lowerPaneCollapsed;
+            const showCustomLower = S.lowerStudy === 'indicator' && Boolean(getActiveLowerIndicator());
+            const showLowerPane = (showVolume || showRsi || showCustomLower) && !S.lowerPaneCollapsed;
             syncLowerPaneLayout();
             bundle.candles.applyOptions({ visible: showCandles, lastValueVisible: showCandles, priceLineVisible: showCandles });
-            bundle.line.applyOptions({ visible: !showCandles, lastValueVisible: !showCandles, priceLineVisible: !showCandles });
+            bundle.heikin.applyOptions({ visible: showHeikin, lastValueVisible: showHeikin, priceLineVisible: showHeikin });
+            bundle.line.applyOptions({ visible: showLine, lastValueVisible: showLine, priceLineVisible: showLine });
+            bundle.area.applyOptions({ visible: showArea, lastValueVisible: showArea, priceLineVisible: showArea });
             [bundle.ma7, bundle.ma25, bundle.ma99].forEach(series => {
                 series.applyOptions({ visible: Boolean(S.showMAs) });
             });
@@ -7709,8 +10289,8 @@
                 lastValueVisible: false,
                 priceLineVisible: false
             });
-            bundle.volumeMaFast.applyOptions({ visible: showVolume && showLowerPane });
-            bundle.volumeMaSlow.applyOptions({ visible: showVolume && showLowerPane });
+            bundle.volumeMaFast.applyOptions({ visible: showVolume && showLowerPane && Boolean(S.showMAs) });
+            bundle.volumeMaSlow.applyOptions({ visible: showVolume && showLowerPane && Boolean(S.showMAs) });
             bundle.rsi.applyOptions({
                 visible: showRsi && showLowerPane,
                 lastValueVisible: showRsi && showLowerPane,
@@ -7718,6 +10298,17 @@
             });
             bundle.rsiFloor.applyOptions({ visible: showRsi && showLowerPane });
             bundle.rsiCeil.applyOptions({ visible: showRsi && showLowerPane });
+            const renderState = getIndicatorRenderSlotState(target);
+            renderState.overlay.forEach(slot => {
+                slot.series.forEach(series => {
+                    try { series.applyOptions({ visible: true }); } catch (_) {}
+                });
+            });
+            if (renderState.lower) {
+                renderState.lower.series.forEach(series => {
+                    try { series.applyOptions({ visible: showCustomLower && showLowerPane }); } catch (_) {}
+                });
+            }
             bundle.chart.applyOptions(getChartThemeOptions({ showTimeScale: !showLowerPane, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
             bundle.lowerChart.applyOptions(getChartThemeOptions({ showTimeScale: showLowerPane, showGrid: S.showGrid, showSeconds: isTimeChartMode() }));
             bundle.lowerPane?.classList.toggle('is-rsi', showRsi);
@@ -7732,6 +10323,7 @@
             scheduleRsiBandUpdate(target);
             scheduleDrawingRender(target);
             syncLowerPaneLegend(target);
+            renderCustomIndicatorLegend(target);
         }
 
         function syncStudyLegend(target, time) {
@@ -7741,18 +10333,25 @@
             if (!refs) return;
             const effectiveTime = time == null ? null : (Number.isFinite(Number(time)) ? Number(time) : null);
             const [maFast, maMid, maSlow] = S.maPeriods;
-            const lowerValue = S.lowerStudy === 'rsi'
-                ? findStudyValue(studyCache.rsi, effectiveTime)
-                : findVolumeValue(getSortedVolumeData(target), effectiveTime);
+            const customLower = getCustomIndicatorCache(target).lower;
+            const lowerValue = S.lowerStudy === 'indicator' && customLower
+                ? findStudyValue(getPrimaryIndicatorSeriesData(customLower), effectiveTime)
+                : (S.lowerStudy === 'rsi'
+                    ? findStudyValue(studyCache.rsi, effectiveTime)
+                    : findVolumeValue(getSortedVolumeData(target), effectiveTime));
             if (refs.maKey7) refs.maKey7.textContent = `MA(${maFast})`;
             if (refs.maKey25) refs.maKey25.textContent = `MA(${maMid})`;
             if (refs.maKey99) refs.maKey99.textContent = `MA(${maSlow})`;
             const lowerItem = refs.lowerLabel?.closest('.legend-item');
-            if (lowerItem) lowerItem.style.display = 'none';
-            refs.lowerLabel.textContent = S.lowerStudy === 'rsi' ? `RSI(${RSI_PERIOD})` : 'Volume';
-            refs.lowerValue.textContent = S.lowerStudy === 'rsi'
-                ? (Number.isFinite(lowerValue) ? lowerValue.toFixed(2) : '–')
-                : (Number.isFinite(lowerValue) ? fmtK(lowerValue) : '–');
+            if (lowerItem) lowerItem.style.display = S.lowerStudy === 'indicator' && customLower ? '' : 'none';
+            refs.lowerLabel.textContent = S.lowerStudy === 'indicator' && customLower
+                ? customLower.label
+                : (S.lowerStudy === 'rsi' ? `RSI(${S.rsiPeriod || RSI_PERIOD})` : 'Volume');
+            refs.lowerValue.textContent = S.lowerStudy === 'indicator' && customLower
+                ? formatIndicatorDisplayValue(lowerValue, customLower.format, target)
+                : (S.lowerStudy === 'rsi'
+                    ? (Number.isFinite(lowerValue) ? lowerValue.toFixed(2) : '–')
+                    : (Number.isFinite(lowerValue) ? fmtK(lowerValue) : '–'));
             refs.lowerValue.style.color = S.lowerStudy === 'rsi' ? '#8b5cf6' : 'var(--text)';
             [[refs.ma7, studyCache.ma7], [refs.ma25, studyCache.ma25], [refs.ma99, studyCache.ma99]].forEach(([el, data]) => {
                 if (!el) return;
@@ -7761,27 +10360,39 @@
                 const value = findStudyValue(data, effectiveTime);
                 el.textContent = Number.isFinite(value) ? fmt(value, pxDec(value)) : '–';
             });
+            renderCustomIndicatorLegend(target, effectiveTime);
             syncLowerPaneLegend(target, effectiveTime);
+        }
+
+        function syncPrimaryDisplaySeries(target) {
+            const bundle = getSeriesBundle(target);
+            if (!bundle) return;
+            const candleData = getSortedCandleData(target);
+            bundle.line.setData(buildDisplayLineData(candleData, getLiveTimeTicks(target)));
+            bundle.area.setData(buildAreaSeriesData(candleData, getLiveTimeTicks(target)));
+            bundle.heikin.setData(computeHeikinAshiData(candleData));
         }
 
         function syncDerivedSeries(target) {
             const bundle = getSeriesBundle(target);
             const store = getCandleStore(target);
             const candleData = getSortedCandleData(target);
-            const lineData = buildDisplayLineData(candleData, getLiveTimeTicks(target));
+            const heikinData = computeHeikinAshiData(candleData);
             const [maFast, maMid, maSlow] = S.maPeriods;
             const [volMaFastPeriod, volMaSlowPeriod] = S.volumeMaPeriods;
             store.studies = {
                 ma7: computeSmaData(candleData, maFast),
                 ma25: computeSmaData(candleData, maMid),
                 ma99: computeSmaData(candleData, maSlow),
-                rsi: computeRsiData(candleData, RSI_PERIOD),
+                rsi: computeRsiData(candleData, S.rsiPeriod || RSI_PERIOD),
                 volMaFast: computeValueSmaData(getSortedVolumeData(target), volMaFastPeriod),
-                volMaSlow: computeValueSmaData(getSortedVolumeData(target), volMaSlowPeriod)
+                volMaSlow: computeValueSmaData(getSortedVolumeData(target), volMaSlowPeriod),
+                heikin: heikinData
             };
             if (target === 2) studyCache2 = store.studies;
             else studyCache1 = store.studies;
-            bundle.line.setData(lineData);
+            syncPrimaryDisplaySeries(target);
+            bundle.heikin.setData(heikinData);
             bundle.ma7.setData(store.studies.ma7);
             bundle.ma25.setData(store.studies.ma25);
             bundle.ma99.setData(store.studies.ma99);
@@ -7790,6 +10401,7 @@
             bundle.volumeMaSlow.setData(store.studies.volMaSlow);
             bundle.rsiFloor.setData(candleData.map(bar => ({ time: bar.time, value: 0 })));
             bundle.rsiCeil.setData(candleData.map(bar => ({ time: bar.time, value: 100 })));
+            syncCustomIndicators(target);
             syncChartStudyVisibility(target);
             syncStudyLegend(target);
             scheduleVisibleExtremaUpdate(target);
@@ -7798,43 +10410,32 @@
         }
 
         function syncChartPrefsUi() {
-            const showVolumeMaPeriods = S.showMAs && S.lowerStudy === 'volume';
+            const hasLowerIndicator = Boolean(getActiveLowerIndicator());
             document.querySelectorAll('[data-price-mode]').forEach(button => {
                 button.classList.toggle('active', button.dataset.priceMode === S.priceMode);
             });
             document.querySelectorAll('[data-lower-study]').forEach(button => {
                 button.classList.toggle('active', button.dataset.lowerStudy === S.lowerStudy);
             });
-            if (chartMaToggle) {
-                chartMaToggle.classList.toggle('is-active', Boolean(S.showMAs));
-                chartMaToggle.setAttribute('aria-pressed', S.showMAs ? 'true' : 'false');
+            if (chartLowerIndicatorOption) {
+                chartLowerIndicatorOption.hidden = !hasLowerIndicator;
+                chartLowerIndicatorOption.textContent = hasLowerIndicator
+                    ? (getIndicatorDefinition(getActiveLowerIndicator()?.id)?.shortName || 'Custom study')
+                    : 'Custom study';
             }
             if (chartGridToggle) {
                 chartGridToggle.classList.toggle('is-active', Boolean(S.showGrid));
                 chartGridToggle.setAttribute('aria-pressed', S.showGrid ? 'true' : 'false');
-            }
-            if (chartMaPeriodsGroup) {
-                const hideMaPeriods = !S.showMAs;
-                chartMaPeriodsGroup.hidden = hideMaPeriods;
-                chartMaPeriodsGroup.setAttribute('aria-hidden', hideMaPeriods ? 'true' : 'false');
-            }
-            if (chartVolumeMaPeriodsGroup) {
-                const hideVolumeMaPeriods = !showVolumeMaPeriods;
-                chartVolumeMaPeriodsGroup.hidden = hideVolumeMaPeriods;
-                chartVolumeMaPeriodsGroup.setAttribute('aria-hidden', hideVolumeMaPeriods ? 'true' : 'false');
             }
             if (chartRsiBoundsGroup) {
                 const hideRsiBounds = S.lowerStudy !== 'rsi';
                 chartRsiBoundsGroup.hidden = hideRsiBounds;
                 chartRsiBoundsGroup.setAttribute('aria-hidden', hideRsiBounds ? 'true' : 'false');
             }
-            if (chartMaFastInput) chartMaFastInput.value = String(S.maPeriods[0]);
-            if (chartMaMidInput) chartMaMidInput.value = String(S.maPeriods[1]);
-            if (chartMaSlowInput) chartMaSlowInput.value = String(S.maPeriods[2]);
-            if (chartVolumeMaFastInput) chartVolumeMaFastInput.value = String(S.volumeMaPeriods[0]);
-            if (chartVolumeMaSlowInput) chartVolumeMaSlowInput.value = String(S.volumeMaPeriods[1]);
+            if (chartRsiPeriodInput) chartRsiPeriodInput.value = String(S.rsiPeriod || RSI_PERIOD);
             if (chartRsiLowerInput) chartRsiLowerInput.value = String(S.rsiLower);
             if (chartRsiUpperInput) chartRsiUpperInput.value = String(S.rsiUpper);
+            renderIndicatorModal();
         }
 
         function refreshLowerStudyScale(target) {
@@ -7857,6 +10458,8 @@
                 bundle.rsi.setData(store.studies?.rsi || []);
                 bundle.rsiFloor.setData(candleData.map(bar => ({ time: bar.time, value: 0 })));
                 bundle.rsiCeil.setData(candleData.map(bar => ({ time: bar.time, value: 100 })));
+            } else if (S.lowerStudy === 'indicator') {
+                syncCustomIndicators(target);
             }
 
             requestAnimationFrame(() => {
@@ -7876,11 +10479,23 @@
                 lowerStudy: S.lowerStudy,
                 showMAs: S.showMAs,
                 showGrid: S.showGrid,
+                rsiPeriod: S.rsiPeriod,
                 maPeriods: S.maPeriods.slice(),
                 volumeMaPeriods: S.volumeMaPeriods.slice(),
                 rsiLower: S.rsiLower,
                 rsiUpper: S.rsiUpper,
-                lowerPaneHeight: S.lowerPaneHeight
+                lowerPaneHeight: S.lowerPaneHeight,
+                overlayIndicators: S.overlayIndicators.map(entry => ({
+                    uid: entry.uid,
+                    id: entry.id,
+                    params: { ...entry.params },
+                    colors: { ...(entry.colors || {}) }
+                })),
+                lowerIndicator: S.lowerIndicator ? {
+                    id: S.lowerIndicator.id,
+                    params: { ...S.lowerIndicator.params },
+                    colors: { ...(S.lowerIndicator.colors || {}) }
+                } : null
             });
         }
 
@@ -7897,6 +10512,380 @@
             chartSettingsMenu.classList.toggle('open', next);
             chartSettingsMenu.setAttribute('aria-hidden', next ? 'false' : 'true');
             chartSettingsBtn.setAttribute('aria-expanded', next ? 'true' : 'false');
+            if (next) renderIndicatorModal();
+        }
+
+        function isIndicatorModalOpen() {
+            return Boolean(chartSettingsMenu?.classList.contains('open'));
+        }
+
+        function selectIndicatorForEditing(id, mode = 'catalog', overlayUid = '') {
+            const definition = getIndicatorDefinition(id);
+            if (!definition) return;
+            indicatorEditorState.selectedId = definition.id;
+            indicatorEditorState.selectionMode = mode;
+            indicatorEditorState.selectedOverlayUid = mode === 'overlay' ? String(overlayUid || '') : '';
+            renderIndicatorModal();
+        }
+
+        function getSelectedIndicatorDefinition() {
+            return getIndicatorDefinition(indicatorEditorState.selectedId);
+        }
+
+        function getSelectedOverlayIndicator() {
+            if (indicatorEditorState.selectionMode !== 'overlay' || !indicatorEditorState.selectedOverlayUid) return null;
+            return getOverlayIndicators().find(entry => String(entry.uid || '') === indicatorEditorState.selectedOverlayUid) || null;
+        }
+
+        function getSelectedIndicatorEntry() {
+            const definition = getSelectedIndicatorDefinition();
+            if (!definition) return null;
+            if (indicatorEditorState.selectionMode === 'builtin' && definition.id === 'sma') {
+                return getBuiltInSmaIndicatorEntry();
+            }
+            if (indicatorEditorState.selectionMode === 'overlay') {
+                return getSelectedOverlayIndicator();
+            }
+            if (indicatorEditorState.selectionMode === 'lower') {
+                if (definition.id === 'rsi' && S.lowerStudy === 'rsi') return getBuiltInRsiIndicatorEntry();
+                if (getActiveLowerIndicator()?.id === definition.id) return getActiveLowerIndicator();
+            }
+            return null;
+        }
+
+        function collectIndicatorParamsFromForm(definition) {
+            const next = {};
+            (definition?.params || []).forEach(param => {
+                const input = document.getElementById(`chart-indicator-param-${param.key}`);
+                if (!input) return;
+                if (param.type === 'select') next[param.key] = String(input.value || '');
+                else next[param.key] = Number(input.value);
+            });
+            return normalizeIndicatorParams(definition, next);
+        }
+
+        function collectIndicatorColorsFromForm(definition) {
+            const next = {};
+            getIndicatorSeriesDescriptors(definition).forEach(descriptor => {
+                if (descriptor.type !== 'line') return;
+                const input = document.getElementById(`chart-indicator-color-${descriptor.key}`);
+                if (!input) return;
+                next[descriptor.key] = String(input.value || '').trim();
+            });
+            return normalizeIndicatorColors(definition, next);
+        }
+
+        function renderIndicatorActivePills() {
+            if (!chartIndicatorActive) return;
+            chartIndicatorActive.replaceChildren();
+            const activeOverlay = getOverlayIndicators();
+            const activeLower = getActiveLowerStudyEntry();
+            const entries = [
+                ...(S.showMAs ? [{ ...getBuiltInSmaIndicatorEntry(), pane: 'overlay', mode: 'builtin' }] : []),
+                ...activeOverlay.map(entry => ({ ...entry, pane: 'overlay', mode: 'overlay' })),
+                ...(activeLower ? [{ ...activeLower, pane: 'lower', mode: 'lower' }] : [])
+            ];
+            if (!entries.length) {
+                const empty = document.createElement('div');
+                empty.className = 'chart-indicator-empty';
+                empty.textContent = 'No indicators active.';
+                chartIndicatorActive.appendChild(empty);
+                return;
+            }
+            entries.forEach(entry => {
+                const definition = getIndicatorDefinition(entry.id);
+                if (!definition) return;
+                const pill = document.createElement('button');
+                pill.type = 'button';
+                pill.className = 'chart-indicator-pill';
+                if (
+                    indicatorEditorState.selectedId === definition.id &&
+                    indicatorEditorState.selectionMode === entry.mode &&
+                    (entry.mode !== 'overlay' || indicatorEditorState.selectedOverlayUid === String(entry.uid || ''))
+                ) {
+                    pill.classList.add('is-selected');
+                }
+                const swatch = document.createElement('span');
+                swatch.className = 'chart-indicator-pill-swatch';
+                swatch.style.background = entry.pane === 'overlay'
+                    ? (getIndicatorLineColor(definition, entry, getIndicatorSeriesDescriptors(definition).find(item => item.type === 'line')?.key || 'main'))
+                    : (entry.id === 'rsi' ? '#8b5cf6' : (entry.swatch || getIndicatorLineColor(definition, entry, getIndicatorSeriesDescriptors(definition).find(item => item.type === 'line')?.key || 'main')));
+                const name = document.createElement('span');
+                name.textContent = buildIndicatorEntryLabel(entry);
+                const pane = document.createElement('span');
+                pane.className = 'pane';
+                pane.textContent = getIndicatorDisplayPaneText(entry.pane);
+                pill.append(swatch, name, pane);
+                pill.addEventListener('click', () => selectIndicatorForEditing(definition.id, entry.mode, entry.uid));
+                chartIndicatorActive.appendChild(pill);
+            });
+        }
+
+        function getFilteredIndicatorDefinitions() {
+            const query = String(indicatorEditorState.search || '').trim().toLowerCase();
+            if (!query) return INDICATOR_DEFINITIONS.slice();
+            return INDICATOR_DEFINITIONS.filter(definition => {
+                const haystack = `${definition.name} ${definition.shortName} ${definition.description}`.toLowerCase();
+                return haystack.includes(query);
+            });
+        }
+
+        function renderIndicatorResults() {
+            if (!chartIndicatorResults) return;
+            chartIndicatorResults.replaceChildren();
+            const results = getFilteredIndicatorDefinitions();
+            if (!results.length) {
+                const empty = document.createElement('div');
+                empty.className = 'chart-indicator-empty';
+                empty.textContent = 'No indicators found.';
+                chartIndicatorResults.appendChild(empty);
+                return;
+            }
+            results.forEach(definition => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'chart-indicator-result';
+                if (indicatorEditorState.selectedId === definition.id) button.classList.add('is-selected');
+                button.innerHTML = `
+                    <span class="chart-indicator-result-head">
+                        <span class="chart-indicator-result-name">${definition.name}</span>
+                        <span class="chart-indicator-result-pane">${getIndicatorDisplayPaneText(definition.pane)}</span>
+                    </span>
+                    <span class="chart-indicator-result-desc">${definition.description}</span>
+                `;
+                button.addEventListener('click', () => selectIndicatorForEditing(definition.id, 'catalog'));
+                chartIndicatorResults.appendChild(button);
+            });
+        }
+
+        function getIndicatorEditorSeedEntry(definition, currentEntry) {
+            if (currentEntry) return currentEntry;
+            if (!definition) return null;
+            if (definition.id === 'sma') {
+                return {
+                    params: {
+                        fast: S.maPeriods[0],
+                        mid: S.maPeriods[1],
+                        slow: S.maPeriods[2],
+                        volumeFast: S.volumeMaPeriods[0],
+                        volumeSlow: S.volumeMaPeriods[1]
+                    },
+                    colors: {
+                        fast: MA_COLORS[7],
+                        mid: MA_COLORS[25],
+                        slow: MA_COLORS[99]
+                    }
+                };
+            }
+            if (definition.id === 'rsi' && S.lowerStudy === 'rsi') return getBuiltInRsiIndicatorEntry();
+            if (definition.pane === 'lower' && getActiveLowerIndicator()?.id === definition.id) return getActiveLowerIndicator();
+            return null;
+        }
+
+        function renderIndicatorEditor() {
+            const definition = getSelectedIndicatorDefinition();
+            if (!definition || !chartIndicatorParams || !chartIndicatorName || !chartIndicatorDescription || !chartIndicatorApply || !chartIndicatorRemove) return;
+            const currentEntry = getSelectedIndicatorEntry();
+            const seedEntry = getIndicatorEditorSeedEntry(definition, currentEntry);
+            const params = normalizeIndicatorParams(definition, seedEntry?.params || definition.params?.reduce((acc, param) => {
+                acc[param.key] = param.default;
+                return acc;
+            }, {}));
+            chartIndicatorName.textContent = definition.name;
+            chartIndicatorDescription.textContent = definition.description;
+            chartIndicatorParams.replaceChildren();
+            (definition.params || []).forEach(param => {
+                if (
+                    definition.id === 'sma' &&
+                    (param.key === 'volumeFast' || param.key === 'volumeSlow') &&
+                    S.lowerStudy !== 'volume'
+                ) {
+                    return;
+                }
+                if (param.type === 'select' && Array.isArray(param.options) && param.options.length <= 1) return;
+                const wrap = document.createElement('div');
+                wrap.className = 'chart-indicator-param';
+                const label = document.createElement('label');
+                label.setAttribute('for', `chart-indicator-param-${param.key}`);
+                if (definition.id === 'sma') {
+                    const labelInner = document.createElement('span');
+                    labelInner.className = 'chart-indicator-param-label';
+                    const swatch = document.createElement('span');
+                    swatch.className = 'chart-indicator-param-label-swatch';
+                    const labelText = document.createElement('span');
+                    labelText.textContent = param.label;
+                    const swatchColor = ({
+                        fast: MA_COLORS[7],
+                        mid: MA_COLORS[25],
+                        slow: MA_COLORS[99],
+                        volumeFast: VOLUME_MA_FAST_COLOR,
+                        volumeSlow: VOLUME_MA_SLOW_COLOR
+                    })[param.key];
+                    if (swatchColor) swatch.style.background = swatchColor;
+                    labelInner.append(swatch, labelText);
+                    label.appendChild(labelInner);
+                } else {
+                    label.textContent = param.label;
+                }
+                let input;
+                if (param.type === 'select') {
+                    input = document.createElement('select');
+                    (param.options || []).forEach(option => {
+                        const item = document.createElement('option');
+                        item.value = option.value;
+                        item.textContent = option.label;
+                        input.appendChild(item);
+                    });
+                    input.value = String(params[param.key] ?? param.default ?? '');
+                } else {
+                    input = document.createElement('input');
+                    input.type = 'number';
+                    if (param.min != null) input.min = String(param.min);
+                    if (param.max != null) input.max = String(param.max);
+                    if (param.step != null) input.step = String(param.step);
+                    input.inputMode = 'decimal';
+                    input.value = String(params[param.key] ?? param.default ?? '');
+                }
+                input.id = `chart-indicator-param-${param.key}`;
+                wrap.append(label, input);
+                chartIndicatorParams.appendChild(wrap);
+            });
+            getIndicatorSeriesDescriptors(definition).forEach(descriptor => {
+                if (descriptor.hideColorControl) return;
+                if (definition.id === 'sma') return;
+                if (descriptor.type !== 'line') return;
+                const wrap = document.createElement('div');
+                wrap.className = 'chart-indicator-param';
+                const label = document.createElement('label');
+                label.setAttribute('for', `chart-indicator-color-${descriptor.key}`);
+                label.textContent = `${getIndicatorSeriesLabel(descriptor)} Color`;
+                const input = document.createElement('input');
+                input.type = 'color';
+                input.id = `chart-indicator-color-${descriptor.key}`;
+                input.value = sanitizeIndicatorColor(seedEntry?.colors?.[descriptor.key], descriptor.color || '#e2e8f0');
+                wrap.append(label, input);
+                chartIndicatorParams.appendChild(wrap);
+            });
+
+            const isEditingBuiltin = definition.id === 'sma' && S.showMAs;
+            const isEditingOverlay = indicatorEditorState.selectionMode === 'overlay' && Boolean(getSelectedOverlayIndicator());
+            const isEditingLower = indicatorEditorState.selectionMode === 'lower' && Boolean(currentEntry);
+            chartIndicatorApply.textContent = isEditingBuiltin || isEditingOverlay
+                ? 'Apply changes'
+                : (definition.pane === 'lower'
+                    ? (definition.id === 'rsi' ? 'Use RSI' : 'Use below')
+                    : 'Add to chart');
+            chartIndicatorRemove.hidden = !(isEditingBuiltin || isEditingOverlay || isEditingLower);
+        }
+
+        function renderIndicatorModal() {
+            if (chartIndicatorSearchInput) chartIndicatorSearchInput.value = indicatorEditorState.search;
+            renderIndicatorActivePills();
+            renderIndicatorResults();
+            renderIndicatorEditor();
+        }
+
+        function openIndicatorModal(selectedId = indicatorEditorState.selectedId) {
+            if (selectedId) indicatorEditorState.selectedId = selectedId;
+            toggleChartSettingsMenu(true);
+            renderIndicatorModal();
+            requestAnimationFrame(() => chartIndicatorSearchInput?.focus());
+        }
+
+        function closeIndicatorModal() {
+            if (chartIndicatorSearchInput) chartIndicatorSearchInput.value = '';
+            indicatorEditorState.search = '';
+        }
+
+        function applyIndicatorSelection() {
+            const definition = getSelectedIndicatorDefinition();
+            if (!definition) return;
+            const params = collectIndicatorParamsFromForm(definition);
+            const colors = collectIndicatorColorsFromForm(definition);
+            const payload = getChartPrefsPayload();
+            if (definition.id === 'sma') {
+                applyChartPrefs({
+                    ...payload,
+                    showMAs: true,
+                    maPeriods: [params.fast, params.mid, params.slow],
+                    volumeMaPeriods: S.lowerStudy === 'volume'
+                        ? [params.volumeFast, params.volumeSlow]
+                        : payload.volumeMaPeriods
+                });
+                indicatorEditorState.selectionMode = 'builtin';
+                indicatorEditorState.selectedOverlayUid = '';
+            } else if (definition.pane === 'overlay') {
+                const nextOverlay = payload.overlayIndicators.slice();
+                const existingIndex = indicatorEditorState.selectionMode === 'overlay'
+                    ? nextOverlay.findIndex(entry => String(entry.uid || '') === indicatorEditorState.selectedOverlayUid)
+                    : -1;
+                if (existingIndex >= 0) {
+                    nextOverlay.splice(existingIndex, 1, {
+                        ...nextOverlay[existingIndex],
+                        id: definition.id,
+                        params,
+                        colors
+                    });
+                } else {
+                    const uid = createIndicatorUid(definition.id);
+                    nextOverlay.push({ uid, id: definition.id, params, colors });
+                    indicatorEditorState.selectedOverlayUid = uid;
+                }
+                applyChartPrefs({ ...payload, overlayIndicators: nextOverlay });
+                indicatorEditorState.selectionMode = 'overlay';
+            } else if (definition.id === 'rsi') {
+                applyChartPrefs({
+                    ...payload,
+                    lowerStudy: 'rsi',
+                    lowerIndicator: null,
+                    rsiPeriod: params.period,
+                    rsiLower: params.lower,
+                    rsiUpper: params.upper
+                });
+                indicatorEditorState.selectionMode = 'lower';
+                indicatorEditorState.selectedOverlayUid = '';
+            } else {
+                applyChartPrefs({
+                    ...payload,
+                    lowerStudy: 'indicator',
+                    lowerIndicator: { id: definition.id, params, colors }
+                });
+                indicatorEditorState.selectionMode = 'lower';
+                indicatorEditorState.selectedOverlayUid = '';
+            }
+            renderIndicatorModal();
+        }
+
+        function removeSelectedIndicator() {
+            const definition = getSelectedIndicatorDefinition();
+            if (!definition) return;
+            const payload = getChartPrefsPayload();
+            if (definition.id === 'sma' && S.showMAs) {
+                applyChartPrefs({
+                    ...payload,
+                    showMAs: false
+                });
+            } else if (indicatorEditorState.selectionMode === 'overlay' && indicatorEditorState.selectedOverlayUid) {
+                applyChartPrefs({
+                    ...payload,
+                    overlayIndicators: payload.overlayIndicators.filter(entry => String(entry.uid || '') !== indicatorEditorState.selectedOverlayUid)
+                });
+            } else if (definition.id === 'rsi' && S.lowerStudy === 'rsi') {
+                applyChartPrefs({
+                    ...payload,
+                    lowerStudy: 'volume',
+                    lowerIndicator: null
+                });
+            } else if (getActiveLowerIndicator()?.id === definition.id) {
+                applyChartPrefs({
+                    ...payload,
+                    lowerStudy: payload.lowerStudy === 'indicator' ? 'volume' : payload.lowerStudy,
+                    lowerIndicator: null
+                });
+            }
+            indicatorEditorState.selectionMode = 'catalog';
+            indicatorEditorState.selectedOverlayUid = '';
+            renderIndicatorModal();
         }
 
         function applyChartPrefs(nextPrefs, options = {}) {
@@ -7906,14 +10895,30 @@
             const prevShowGrid = S.showGrid;
             const prevMaPeriods = S.maPeriods.slice();
             const prevVolumeMaPeriods = S.volumeMaPeriods.slice();
+            const prevRsiPeriod = S.rsiPeriod;
             const prevRsiLower = S.rsiLower;
             const prevRsiUpper = S.rsiUpper;
+            const prevOverlayIndicators = JSON.stringify(S.overlayIndicators || []);
+            const prevLowerIndicator = JSON.stringify(S.lowerIndicator || null);
             S.priceMode = prefs.priceMode;
             S.lowerStudy = prefs.lowerStudy;
             S.showMAs = prefs.showMAs;
             S.showGrid = prefs.showGrid;
+            S.rsiPeriod = prefs.rsiPeriod;
             S.maPeriods = prefs.maPeriods.slice();
             S.volumeMaPeriods = prefs.volumeMaPeriods.slice();
+            S.overlayIndicators = prefs.overlayIndicators.map(entry => ({
+                uid: entry.uid,
+                id: entry.id,
+                params: { ...entry.params },
+                colors: { ...(entry.colors || {}) }
+            }));
+            S.lowerIndicator = prefs.lowerIndicator ? {
+                id: prefs.lowerIndicator.id,
+                params: { ...prefs.lowerIndicator.params },
+                colors: { ...(prefs.lowerIndicator.colors || {}) }
+            } : null;
+            if (S.lowerStudy === 'indicator' && !S.lowerIndicator) S.lowerStudy = 'volume';
             S.rsiLower = prefs.rsiLower;
             S.rsiUpper = prefs.rsiUpper;
             S.lowerPaneHeight = prefs.lowerPaneHeight;
@@ -7929,12 +10934,20 @@
             scheduleLowerPaneResize();
             const maPeriodsChanged = prevMaPeriods.length !== S.maPeriods.length || prevMaPeriods.some((value, index) => value !== S.maPeriods[index]);
             const volumeMaPeriodsChanged = prevVolumeMaPeriods.length !== S.volumeMaPeriods.length || prevVolumeMaPeriods.some((value, index) => value !== S.volumeMaPeriods[index]);
-            if (maPeriodsChanged || volumeMaPeriodsChanged) {
+            const rsiPeriodChanged = prevRsiPeriod !== S.rsiPeriod;
+            const indicatorStateChanged = prevOverlayIndicators !== JSON.stringify(S.overlayIndicators || []) || prevLowerIndicator !== JSON.stringify(S.lowerIndicator || null);
+            if (maPeriodsChanged || volumeMaPeriodsChanged || rsiPeriodChanged) {
                 syncDerivedSeries(1);
                 syncDerivedSeries(2);
-            } else if (prevLowerStudy !== S.lowerStudy || prevRsiLower !== S.rsiLower || prevRsiUpper !== S.rsiUpper || prevShowMAs !== S.showMAs || prevShowGrid !== S.showGrid) {
+            } else {
+                if (indicatorStateChanged || prevLowerStudy !== S.lowerStudy) {
+                    syncCustomIndicators(1);
+                    syncCustomIndicators(2);
+                }
+                if (prevLowerStudy !== S.lowerStudy || prevRsiPeriod !== S.rsiPeriod || prevRsiLower !== S.rsiLower || prevRsiUpper !== S.rsiUpper || prevShowMAs !== S.showMAs || prevShowGrid !== S.showGrid || indicatorStateChanged) {
                 refreshLowerStudyScale(1);
                 refreshLowerStudyScale(2);
+                }
             }
             if (options.persist !== false) saveChartPrefs(getChartPrefsPayload());
         }
@@ -8525,11 +11538,20 @@
                 minMove,
                 formatter: (value) => fmtAxisPrice(value, precision)
             };
-            [bundle.candles, bundle.line, bundle.ma7, bundle.ma25, bundle.ma99].forEach((series) => {
+            [bundle.candles, bundle.heikin, bundle.line, bundle.area, bundle.ma7, bundle.ma25, bundle.ma99].forEach((series) => {
                 if (!series?.applyOptions) return;
                 try {
                     series.applyOptions({ priceFormat: nextPriceFormat });
                 } catch (_) {}
+            });
+            const renderState = getIndicatorRenderSlotState(safeTarget);
+            renderState.overlay.forEach(slot => {
+                slot.series.forEach(series => {
+                    if (!series?.applyOptions) return;
+                    try {
+                        series.applyOptions({ priceFormat: nextPriceFormat });
+                    } catch (_) {}
+                });
             });
         }
 
@@ -8635,6 +11657,7 @@
             mapVL.set(nextBar.time, nextVol);
             volumeSeries.update(nextVol);
             setLatestTimeModePrice(safeTarget, nextClose);
+            syncPrimaryDisplaySeries(safeTarget);
             refreshLegend(safeTarget);
             scheduleVisibleExtremaUpdate(safeTarget);
         }
@@ -8670,6 +11693,7 @@
                 mapVL.set(nextBar.time, nextVol);
                 volumeSeries.update(nextVol);
             }
+            syncPrimaryDisplaySeries(safeTarget);
             refreshLegend(safeTarget);
             scheduleVisibleExtremaUpdate(safeTarget);
         }
@@ -9607,10 +12631,13 @@
             endRsiBandInteraction();
             closeDrawingPalette();
             hideChartContextMenu();
+            closeIndicatorModal();
         });
         window.addEventListener('resize', () => {
             closeDrawingPalette();
             hideChartContextMenu();
+            if (!isIndicatorModalOpen()) return;
+            renderIndicatorModal();
         });
 
         [chartDrawingDeleteBtn1, chartDrawingDeleteBtn2].forEach((button, index) => {
@@ -9643,7 +12670,13 @@
                 } else if (action === 'remove-drawings') {
                     clearDrawings(chartTarget);
                 } else if (action === 'remove-indicators') {
-                    applyChartPrefs({ ...getChartPrefsPayload(), showMAs: false });
+                    applyChartPrefs({
+                        ...getChartPrefsPayload(),
+                        showMAs: false,
+                        overlayIndicators: [],
+                        lowerIndicator: null,
+                        lowerStudy: 'volume'
+                    });
                     setLowerPaneCollapsed(true);
                 } else if (action === 'time-tools') {
                     const firstTfBtn = document.querySelector('.tf-btn');
@@ -9669,6 +12702,7 @@
             if (key !== 'Escape') return;
             closeDrawingPalette();
             hideChartContextMenu();
+            closeIndicatorModal();
             [1, 2].forEach(target => {
                 const store = getDrawingStore(target);
                 if (store.draft) {
@@ -9713,7 +12747,56 @@
         if (chartSettingsBtn) {
             chartSettingsBtn.addEventListener('click', event => {
                 event.stopPropagation();
+                closeIndicatorModal();
                 toggleChartSettingsMenu();
+            });
+        }
+
+        if (chartIndicatorsBtn) {
+            chartIndicatorsBtn.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                openIndicatorModal();
+            });
+        }
+
+        if (chartIndicatorBackdrop) {
+            chartIndicatorBackdrop.addEventListener('click', event => {
+                if (event.target === chartIndicatorBackdrop) closeIndicatorModal();
+            });
+        }
+
+        if (chartIndicatorClose) {
+            chartIndicatorClose.addEventListener('click', () => closeIndicatorModal());
+        }
+
+        if (chartIndicatorSearchInput) {
+            chartIndicatorSearchInput.addEventListener('input', () => {
+                indicatorEditorState.search = chartIndicatorSearchInput.value || '';
+                renderIndicatorResults();
+            });
+        }
+
+        if (chartIndicatorApply) {
+            chartIndicatorApply.addEventListener('click', () => applyIndicatorSelection());
+        }
+
+        if (chartIndicatorRemove) {
+            chartIndicatorRemove.addEventListener('click', () => removeSelectedIndicator());
+        }
+
+        if (chartIndicatorClearAll) {
+            chartIndicatorClearAll.addEventListener('click', () => {
+                applyChartPrefs({
+                    ...getChartPrefsPayload(),
+                    showMAs: false,
+                    overlayIndicators: [],
+                    lowerIndicator: null,
+                    lowerStudy: 'volume'
+                });
+                indicatorEditorState.selectionMode = 'catalog';
+                indicatorEditorState.selectedOverlayUid = '';
+                renderIndicatorModal();
             });
         }
 
@@ -9729,48 +12812,17 @@
             });
         });
 
-        if (chartMaToggle) {
-            chartMaToggle.addEventListener('click', () => {
-                applyChartPrefs({ ...getChartPrefsPayload(), showMAs: !S.showMAs });
-            });
-        }
-
         if (chartGridToggle) {
             chartGridToggle.addEventListener('click', () => {
                 applyChartPrefs({ ...getChartPrefsPayload(), showGrid: !S.showGrid });
             });
         }
 
-        function applyMaPeriodsFromInputs() {
-            applyChartPrefs({
-                ...getChartPrefsPayload(),
-                maPeriods: [
-                    Number(chartMaFastInput?.value),
-                    Number(chartMaMidInput?.value),
-                    Number(chartMaSlowInput?.value)
-                ]
+        if (chartRsiPeriodInput) {
+            chartRsiPeriodInput.addEventListener('change', () => {
+                applyChartPrefs({ ...getChartPrefsPayload(), rsiPeriod: Number(chartRsiPeriodInput.value) });
             });
         }
-
-        [chartMaFastInput, chartMaMidInput, chartMaSlowInput].forEach((input) => {
-            if (!input) return;
-            input.addEventListener('change', applyMaPeriodsFromInputs);
-        });
-
-        function applyVolumeMaPeriodsFromInputs() {
-            applyChartPrefs({
-                ...getChartPrefsPayload(),
-                volumeMaPeriods: [
-                    Number(chartVolumeMaFastInput?.value),
-                    Number(chartVolumeMaSlowInput?.value)
-                ]
-            });
-        }
-
-        [chartVolumeMaFastInput, chartVolumeMaSlowInput].forEach((input) => {
-            if (!input) return;
-            input.addEventListener('change', applyVolumeMaPeriodsFromInputs);
-        });
 
         if (chartRsiLowerInput) {
             chartRsiLowerInput.addEventListener('change', () => {
@@ -9811,13 +12863,17 @@
 
         document.addEventListener('click', e => {
             const compactToggle = $('coin-toggle-extra');
+            const eventPath = typeof e.composedPath === 'function' ? e.composedPath() : [];
             if (
                 !$('coin-picker-wrap').contains(e.target) &&
                 !compactToggle?.contains(e.target)
             ) $('coin-dropdown').classList.remove('open');
             if (!$('chart-container-2').contains(e.target)) $('coin-dropdown-2').style.display = 'none';
             if (!obAggTrigger?.contains(e.target) && !obAggMenu?.contains(e.target)) closeObAggMenu();
-            if (!chartSettingsRoot?.contains(e.target)) closeChartSettingsMenu();
+            if (chartSettingsRoot) {
+                const clickedInsideSettings = eventPath.includes(chartSettingsRoot) || chartSettingsRoot.contains(e.target);
+                if (!clickedInsideSettings) closeChartSettingsMenu();
+            }
         });
 
         tradesList.addEventListener('click', event => {
