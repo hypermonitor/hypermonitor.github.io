@@ -6475,6 +6475,7 @@
         let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
         let candleFetchSeq2 = 0;
         let tradeFetchSeq = 0;
+        let tradePanelRefreshTimer = 0;
         let tradeKeys = new Set();
         let tradeKeys2 = new Set();
         let timeModeTickFrame = 0;
@@ -8030,6 +8031,19 @@
             }
         }
 
+        function scheduleTradePanelRefresh() {
+            if (tradePanelRefreshTimer) {
+                clearTimeout(tradePanelRefreshTimer);
+                tradePanelRefreshTimer = 0;
+            }
+            if (IS_COMPACT || !tradesList) return;
+            tradePanelRefreshTimer = window.setTimeout(async () => {
+                tradePanelRefreshTimer = 0;
+                await fetchTradePanelSnapshot();
+                scheduleTradePanelRefresh();
+            }, 1500);
+        }
+
         async function fetchRecentTradeSeries(target, requestSeq, requestCoin, requestTf) {
             const bundle = getSeriesBundle(target);
             const mapCV = target === 2 ? candleMap2 : candleMap;
@@ -8427,10 +8441,12 @@
                     obMidArrow.className = 'val ' + (isUp ? 'up' : 'dn');
                 }
                 obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
-                updateMobileLivePriceSummary(mid);
+                const roundedMid = roundPriceToDecimals(mid, d);
+                updateMobileLivePriceSummary(roundedMid);
                 if (!isTimeChartMode()) {
-                    setLatestTimeModePrice(1, mid);
-                    updateTimeModeTick(1, mid);
+                    setLatestTimeModePrice(1, roundedMid);
+                    updateTimeModeTick(1, roundedMid);
+                    applyMidPriceToLatestCandle(1, roundedMid, d);
                 }
                 syncAssetDocumentTitle(bestBid);
                 notifyParentLivePrice(bestBid);
@@ -8448,6 +8464,13 @@
             const fragment = document.createDocumentFragment();
             S.tradeBuf.forEach(trade => fragment.appendChild(buildTradeRow(trade)));
             tradesList.replaceChildren(fragment);
+        }
+
+        function roundPriceToDecimals(price, decimals) {
+            const value = Number(price);
+            const precision = Math.max(0, Number(decimals) || 0);
+            if (!Number.isFinite(value)) return NaN;
+            return Number(value.toFixed(precision));
         }
 
         function formatWalletShort(wallet) {
@@ -8520,6 +8543,41 @@
             mapVL.set(nextBar.time, nextVol);
             volumeSeries.update(nextVol);
             setLatestTimeModePrice(safeTarget, nextClose);
+            refreshLegend(safeTarget);
+            scheduleVisibleExtremaUpdate(safeTarget);
+        }
+
+        function applyMidPriceToLatestCandle(target, midPrice, decimals) {
+            if (isTimeChartMode()) return;
+            const safeTarget = target === 2 ? 2 : 1;
+            const roundedMid = roundPriceToDecimals(midPrice, decimals);
+            if (!Number.isFinite(roundedMid)) return;
+            const mapCV = safeTarget === 2 ? candleMap2 : candleMap;
+            const mapVL = safeTarget === 2 ? volMap2 : volMap;
+            const candleSeries = safeTarget === 2 ? candles2 : candles;
+            const line = safeTarget === 2 ? lineSeries2 : lineSeries;
+            const volumeSeries = safeTarget === 2 ? volSeries2 : volSeries;
+            const latestBar = getLatestCandleBar(mapCV);
+            if (!latestBar) return;
+            const nextBar = {
+                time: latestBar.time,
+                open: Number(latestBar.open),
+                high: Math.max(Number(latestBar.high), roundedMid),
+                low: Math.min(Number(latestBar.low), roundedMid),
+                close: roundedMid
+            };
+            mapCV.set(nextBar.time, nextBar);
+            candleSeries.update(nextBar);
+            line.update({ time: nextBar.time, value: nextBar.close });
+            const existingVol = mapVL.get(nextBar.time);
+            if (existingVol) {
+                const nextVol = {
+                    ...existingVol,
+                    color: nextBar.close >= nextBar.open ? VOLUME_UP_COLOR : VOLUME_DOWN_COLOR
+                };
+                mapVL.set(nextBar.time, nextVol);
+                volumeSeries.update(nextVol);
+            }
             refreshLegend(safeTarget);
             scheduleVisibleExtremaUpdate(safeTarget);
         }
@@ -8843,22 +8901,9 @@
             if (!shouldUpdateTradeList) return;
 
             nextTrades.sort(compareTrades);
-            const currentTopTime = S.tradeBuf[0]?.time ?? -Infinity;
-            const canPrepend = !S.tradeBuf.length || nextTrades.every(trade => trade.time >= currentTopTime);
             S.tradeBuf = nextTrades.concat(S.tradeBuf).sort(compareTrades).slice(0, MAX_TRADES);
             syncTradeKeys();
-
-            if (!canPrepend) {
-                renderTrades();
-                return;
-            }
-
-            const fragment = document.createDocumentFragment();
-            nextTrades.forEach(trade => fragment.appendChild(buildTradeRow(trade)));
-            tradesList.prepend(fragment);
-            while (tradesList.childElementCount > S.tradeBuf.length) {
-                tradesList.removeChild(tradesList.lastElementChild);
-            }
+            renderTrades();
         }
 
         // ── WebSocket ──────────────────────────────────────────────
@@ -9836,6 +9881,7 @@
             const candlePromise = fetchCandles();
             const tradePromise = fetchTradePanelSnapshot();
             await Promise.all([candlePromise, tradePromise]);
+            scheduleTradePanelRefresh();
             notifyParentChartState();
             syncTopSplitters();
         }
@@ -9855,6 +9901,7 @@
             applyStats();
             const tradePromise = fetchTradePanelSnapshot();
             await Promise.all([candlePromise, tradePromise]);
+            scheduleTradePanelRefresh();
             connectWs();
             notifyParentChartState();
             syncTopSplitters();
