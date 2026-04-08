@@ -2163,6 +2163,10 @@
             right: auto;
         }
 
+        html.mobile-layout #ob-asks-inner {
+            justify-content: flex-start;
+        }
+
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap .ob-row .c1.ask {
             text-align: left;
         }
@@ -2699,7 +2703,7 @@
             color: #f3f4f6;
             box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
             border: 1px solid rgba(148, 163, 184, 0.16);
-            pointer-events: auto;
+            pointer-events: none;
             opacity: 0;
             transform: translate3d(0, 4px, 0);
             transition: opacity 120ms ease, transform 120ms ease;
@@ -2710,6 +2714,7 @@
 
         #ob-hover-card.is-visible,
         #funding-hover-card.is-visible {
+            pointer-events: auto;
             opacity: 1;
             transform: translate3d(0, 0, 0);
         }
@@ -6469,6 +6474,7 @@
         let oldestTs2 = null, isLoadingHistory2 = false;
         let studyCache2 = { ma7: [], ma25: [], ma99: [], rsi: [], volMaFast: [], volMaSlow: [] };
         let candleFetchSeq2 = 0;
+        let tradeFetchSeq = 0;
         let tradeKeys = new Set();
         let tradeKeys2 = new Set();
         let timeModeTickFrame = 0;
@@ -7996,6 +8002,34 @@
             return Array.isArray(data) ? data : [];
         }
 
+        async function fetchTradePanelSnapshot() {
+            if (IS_COMPACT || !tradesList) return;
+            const requestSeq = ++tradeFetchSeq;
+            const requestCoin = buildMarketKey(S.coin);
+            try {
+                const rawTrades = await fetchRecentTradesSnapshot(requestCoin);
+                if (requestSeq !== tradeFetchSeq || requestCoin !== buildMarketKey(S.coin)) return;
+                const trades = rawTrades
+                    .map(trade => normalizeTrade(trade, requestCoin))
+                    .filter(Boolean)
+                    .sort(compareTrades)
+                    .slice(0, MAX_TRADES);
+                const mergedTrades = [...trades, ...S.tradeBuf]
+                    .sort(compareTrades)
+                    .filter((trade, index, arr) => index === arr.findIndex(item => item.key === trade.key))
+                    .slice(0, MAX_TRADES);
+                S.tradeBuf = mergedTrades;
+                syncTradeKeys();
+                renderTrades();
+            } catch (_) {
+                if (requestSeq !== tradeFetchSeq || requestCoin !== buildMarketKey(S.coin)) return;
+                if (!S.tradeBuf.length) {
+                    syncTradeKeys();
+                    renderTrades();
+                }
+            }
+        }
+
         async function fetchRecentTradeSeries(target, requestSeq, requestCoin, requestTf) {
             const bundle = getSeriesBundle(target);
             const mapCV = target === 2 ? candleMap2 : candleMap;
@@ -8377,8 +8411,10 @@
 
             ensureOrderBookRows();
             const displayAsks = view === 'both' ? (isMobileAssetLayout() ? aLvl : [...aLvl].reverse()) : aLvl;
-            orderBookRows.ask.forEach((rowRef, index) => updateOrderBookRow(rowRef, displayAsks[index], maxT, d, isOrderBookSideVisible('ask') && index < rowCount));
-            orderBookRows.bid.forEach((rowRef, index) => updateOrderBookRow(rowRef, bLvl[index], maxT, d, isOrderBookSideVisible('bid') && index < rowCount));
+            const askVisibleCount = isMobileAssetLayout() ? Math.min(displayAsks.length, rowCount) : rowCount;
+            const bidVisibleCount = isMobileAssetLayout() ? Math.min(bLvl.length, rowCount) : rowCount;
+            orderBookRows.ask.forEach((rowRef, index) => updateOrderBookRow(rowRef, displayAsks[index], maxT, d, isOrderBookSideVisible('ask') && index < askVisibleCount));
+            orderBookRows.bid.forEach((rowRef, index) => updateOrderBookRow(rowRef, bLvl[index], maxT, d, isOrderBookSideVisible('bid') && index < bidVisibleCount));
 
             if (aggAsks.length && aggBids.length) {
                 const bestAsk = Number(aggAsks[0].px), bestBid = Number(aggBids[0].px);
@@ -9797,7 +9833,9 @@
             if (!IS_COMPACT) resetOrderBookState();
             applyStats();
             connectWs();
-            await fetchCandles();
+            const candlePromise = fetchCandles();
+            const tradePromise = fetchTradePanelSnapshot();
+            await Promise.all([candlePromise, tradePromise]);
             notifyParentChartState();
             syncTopSplitters();
         }
@@ -9815,7 +9853,8 @@
             await metaPromise;
             buildCoinList();
             applyStats();
-            await candlePromise;
+            const tradePromise = fetchTradePanelSnapshot();
+            await Promise.all([candlePromise, tradePromise]);
             connectWs();
             notifyParentChartState();
             syncTopSplitters();

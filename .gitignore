@@ -6,3 +6,5 @@ __pycache__/
 /node_modules
 data/
 scripts/
+Wallets_metrics.pdf
+widgets/footer-bar.js

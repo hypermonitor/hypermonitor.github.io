@@ -12866,15 +12866,16 @@
     );
 
     const externalBase = splitDexCoin(coin).base || coin;
-    const fromBinance = await fetchBinanceHistoricalPrice(externalBase, asOfMs);
-    if (Number.isFinite(fromBinance)) {
-      timelineCoinPriceCache.set(cacheKey, fromBinance);
-      return fromBinance;
-    }
-
     for (const candidate of candidates) {
-      const intervals = ["15m", "1h", "4h", "1d"];
-      for (const interval of intervals) {
+      const intervals = [
+        { interval: "1m", lookbackMs: 6 * 60 * 60 * 1000 },
+        { interval: "5m", lookbackMs: 24 * 60 * 60 * 1000 },
+        { interval: "15m", lookbackMs: 3 * 24 * 60 * 60 * 1000 },
+        { interval: "1h", lookbackMs: 14 * 24 * 60 * 60 * 1000 },
+        { interval: "4h", lookbackMs: 60 * 24 * 60 * 60 * 1000 },
+        { interval: "1d", lookbackMs: 365 * 24 * 60 * 60 * 1000 },
+      ];
+      for (const { interval, lookbackMs } of intervals) {
         try {
           const res = await fetch(PORTFOLIO_API_URL, {
             method: "POST",
@@ -12884,7 +12885,7 @@
               req: {
                 coin: candidate,
                 interval,
-                startTime,
+                startTime: Math.max(0, Number(asOfMs) - Number(lookbackMs || 0)),
                 endTime,
               },
             }),
@@ -12921,6 +12922,12 @@
     if (Number.isFinite(fromBybit)) {
       timelineCoinPriceCache.set(cacheKey, fromBybit);
       return fromBybit;
+    }
+
+    const fromBinance = await fetchBinanceHistoricalPrice(externalBase, asOfMs);
+    if (Number.isFinite(fromBinance)) {
+      timelineCoinPriceCache.set(cacheKey, fromBinance);
+      return fromBinance;
     }
 
     const fallback = getStablecoinPriceFallback(splitDexCoin(coin).base);
