@@ -2352,7 +2352,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      z-index: 50;
+      z-index: 120;
       background: var(--panel-strong);
       border-top: 1px solid var(--border);
       box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.5);
@@ -2740,14 +2740,12 @@
     }
 
     .footer-coin-suggestions {
-      position: absolute;
-      right: 0;
-      bottom: calc(100% + 8px);
+      position: fixed;
       width: 280px;
       max-width: min(320px, calc(100vw - 16px));
-      top: auto;
-      left: auto;
-      z-index: 70;
+      top: 0;
+      left: 0;
+      z-index: 260;
     }
 
     .footer-coin-suggestions .header-search-suggestion-type {
@@ -5112,6 +5110,9 @@
     const priceAddBtnEl = document.getElementById("priceAddBtn");
     const priceAddToggleBtnEl = document.getElementById("priceAddToggleBtn");
     const footerCoinSuggestionsEl = document.getElementById("footerCoinSuggestions");
+    if (footerCoinSuggestionsEl && footerCoinSuggestionsEl.parentElement !== document.body) {
+      document.body.appendChild(footerCoinSuggestionsEl);
+    }
     const priceContextMenuEl = document.getElementById("priceContextMenu");
 
     const walletModalBackdrop = document.getElementById("walletModalBackdrop");
@@ -8854,7 +8855,10 @@
         if (!isCompactFooterAddMode()) return;
         footerAddCompactOpen = true;
         syncFooterAddControls();
-        requestAnimationFrame(() => priceAddInputEl?.focus());
+        requestAnimationFrame(() => {
+          priceAddInputEl?.focus();
+          positionFooterSuggestions();
+        });
       }
 
       function closeFooterAddControls(force = false) {
@@ -10443,6 +10447,22 @@
       if (priceAddInputEl) priceAddInputEl.setAttribute("aria-expanded", "false");
     }
 
+    function positionFooterSuggestions() {
+      if (!footerCoinSuggestionsEl || footerCoinSuggestionsEl.hidden || !priceAddInputEl) return;
+      const inputRect = priceAddInputEl.getBoundingClientRect();
+      const popupWidth = Math.min(280, Math.max(180, window.innerWidth - 16));
+      const popupHeight = footerCoinSuggestionsEl.offsetHeight || 120;
+      const left = Math.max(8, Math.min(inputRect.right - popupWidth, window.innerWidth - popupWidth - 8));
+      const aboveTop = inputRect.top - popupHeight - 8;
+      const belowTop = inputRect.bottom + 8;
+      const top = aboveTop >= 8
+        ? aboveTop
+        : Math.min(Math.max(8, belowTop), window.innerHeight - popupHeight - 8);
+      footerCoinSuggestionsEl.style.left = `${left}px`;
+      footerCoinSuggestionsEl.style.top = `${top}px`;
+      footerCoinSuggestionsEl.style.width = `${popupWidth}px`;
+    }
+
     function renderFooterSuggestions() {
       if (!footerCoinSuggestionsEl) return;
       const suggestions = state.footerSuggestions || [];
@@ -10460,6 +10480,7 @@
 
       footerCoinSuggestionsEl.hidden = false;
       if (priceAddInputEl) priceAddInputEl.setAttribute("aria-expanded", "true");
+      positionFooterSuggestions();
     }
 
     function scoreWalletSuggestion(address, query) {
@@ -10887,7 +10908,7 @@
       if (headerSearchForm && !headerSearchForm.contains(target)) {
         closeHeaderSuggestions();
       }
-      if (priceControlsEl && !priceControlsEl.contains(target)) {
+      if (priceControlsEl && !priceControlsEl.contains(target) && !(footerCoinSuggestionsEl && footerCoinSuggestionsEl.contains(target))) {
         closeFooterSuggestions();
       }
       if (mobileWatchlistPanel && !mobileWatchlistPanel.contains(target)) {
@@ -11200,11 +11221,13 @@
       schedulePriceTickerRollingUpdate(true);
       if (!isCompactFooterAddMode()) footerAddCompactOpen = false;
       syncFooterAddControls();
+      positionFooterSuggestions();
       syncTradeLayout();
       syncMobileShell();
     });
 
     window.addEventListener("scroll", hidePriceContextMenu, true);
+    window.addEventListener("scroll", positionFooterSuggestions, true);
 
     if (tradeAddChartBtn) {
       tradeAddChartBtn.addEventListener("click", () => {
