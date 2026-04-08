@@ -2047,6 +2047,7 @@
             grid-area: spread;
             order: initial;
             border-top: 0;
+            border-bottom: 0;
             margin: 0 12px;
             padding: 2px 0 2px;
             display: flex;
@@ -2054,6 +2055,7 @@
             justify-content: space-between;
             gap: 10px;
             flex-wrap: nowrap;
+            background: transparent;
         }
 
         html.mobile-layout #ob-spread-info {
@@ -2080,12 +2082,14 @@
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-bids-wrap,
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap {
-            min-height: 244px;
+            min-height: 0;
+            height: auto;
             padding-top: 18px;
             position: relative;
             background: transparent;
             border-radius: 0;
             overflow: hidden;
+            align-self: start;
         }
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-bids-wrap {
@@ -2165,6 +2169,13 @@
 
         html.mobile-layout #ob-asks-inner {
             justify-content: flex-start;
+            height: auto;
+            min-height: 0;
+        }
+
+        html.mobile-layout #ob-bids-inner {
+            height: auto;
+            min-height: 0;
         }
 
         html.mobile-layout #tab-ob.tab-panel.active[data-ob-view="both"] #ob-asks-wrap .ob-row .c1.ask {
@@ -4565,6 +4576,7 @@
                 layout: { background: { color: background }, textColor, attributionLogo: false },
                 localization: {
                     timeFormatter: (time) => formatAxisTimeLabel(time, showSeconds ? 'timewithseconds' : 'time'),
+                    priceFormatter: (price) => fmtAxisPrice(price),
                 },
                 grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } },
                 crosshair: {
@@ -5455,6 +5467,12 @@
             if (d === undefined) d = pxDec(v);
             return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
         }
+        function fmtAxisPrice(v, d) {
+            const value = Number(v);
+            if (!Number.isFinite(value)) return '–';
+            const decimals = d === undefined ? pxDec(value) : Math.max(0, Number(d) || 0);
+            return value.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
         function fmtK(v) {
             if (!Number.isFinite(v)) return '–';
             if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
@@ -5549,9 +5567,15 @@
             return Math.abs(value).toFixed(2) + '%';
         }
 
-        function updateLegendMetrics(bar, legendRefs) {
+        function getLegendPricePrecision(target, value) {
+            const safeTarget = target === 2 ? 2 : 1;
+            const livePrecision = seriesPricePrecision[safeTarget];
+            return Number.isFinite(livePrecision) ? livePrecision : pxDec(Number(value) || 0);
+        }
+
+        function updateLegendMetrics(bar, legendRefs, target = 1) {
             if (!bar || !legendRefs) return;
-            const d = pxDec(bar.close);
+            const d = getLegendPricePrecision(target, bar.close);
             const movePct = Number.isFinite(bar.open) && bar.open !== 0 ? ((bar.close - bar.open) / bar.open * 100) : NaN;
             const rangePct = Number.isFinite(bar.low) && bar.low !== 0 ? ((bar.high - bar.low) / bar.low * 100) : NaN;
             const directionClass = Number.isFinite(movePct) && movePct < 0 ? 'var(--down)' : 'var(--up)';
@@ -6481,6 +6505,7 @@
         let timeModeTickFrame = 0;
         const timeModeLastSecond = { 1: NaN, 2: NaN };
         const latestTimeModePrice = { 1: NaN, 2: NaN };
+        const seriesPricePrecision = { 1: null, 2: null };
         const legendHoverState = {
             1: { active: false, time: null },
             2: { active: false, time: null }
@@ -6706,7 +6731,7 @@
                 close: refs.close,
                 change: refs.change,
                 range: refs.range
-            });
+            }, target);
             syncStudyLegend(target, bar.time);
         }
 
@@ -8401,10 +8426,11 @@
 
             setOrderBookLoading(false);
 
-            const d = pxDec(S.markPx || 1000), tick = S.aggTick || 0;
+            const tick = S.aggTick || 0;
             const rowCount = getOrderBookRowCount();
             const aggAsks = aggregateLevels(asks, tick, 'ask').slice(0, rowCount);
             const aggBids = aggregateLevels(bids, tick, 'bid').slice(0, rowCount);
+            const d = getBookDisplayDecimals(aggBids[0]?.px, aggAsks[0]?.px);
             const view = getOrderBookView();
             let aLvl = [], bLvl = [], cum = 0, cumSz = 0;
             for (const a of aggAsks) {
@@ -8430,26 +8456,16 @@
             orderBookRows.ask.forEach((rowRef, index) => updateOrderBookRow(rowRef, displayAsks[index], maxT, d, isOrderBookSideVisible('ask') && index < askVisibleCount));
             orderBookRows.bid.forEach((rowRef, index) => updateOrderBookRow(rowRef, bLvl[index], maxT, d, isOrderBookSideVisible('bid') && index < bidVisibleCount));
 
-            if (aggAsks.length && aggBids.length) {
-                const bestAsk = Number(aggAsks[0].px), bestBid = Number(aggBids[0].px);
-                const mid = (bestAsk + bestBid) / 2, spread = bestAsk - bestBid, pct = (spread / mid * 100).toFixed(3);
-                const isUp = mid >= S.markPx;
-                obMid.textContent = fmt(mid, d);
+            const midInfo = applyBookMidToTarget(1, aggBids, aggAsks, { decimals: d, updateSummary: true, updateTitle: true });
+            if (midInfo) {
+                const isUp = midInfo.mid >= S.markPx;
+                obMid.textContent = fmt(midInfo.mid, midInfo.decimals);
                 obMid.className = 'val ' + (isUp ? 'up' : 'dn');
                 if (obMidArrow) {
                     obMidArrow.textContent = isUp ? '↑' : '↓';
                     obMidArrow.className = 'val ' + (isUp ? 'up' : 'dn');
                 }
-                obSprdInfo.textContent = `Spread ${fmt(spread, d)} (${pct}%)`;
-                const roundedMid = roundPriceToDecimals(mid, d);
-                updateMobileLivePriceSummary(roundedMid);
-                if (!isTimeChartMode()) {
-                    setLatestTimeModePrice(1, roundedMid);
-                    updateTimeModeTick(1, roundedMid);
-                    applyMidPriceToLatestCandle(1, roundedMid, d);
-                }
-                syncAssetDocumentTitle(bestBid);
-                notifyParentLivePrice(bestBid);
+                obSprdInfo.textContent = `Spread ${fmt(midInfo.spread, midInfo.decimals)} (${midInfo.pct}%)`;
             }
 
             updateOrderBookRatio(bidMax, askMax);
@@ -8471,6 +8487,82 @@
             const precision = Math.max(0, Number(decimals) || 0);
             if (!Number.isFinite(value)) return NaN;
             return Number(value.toFixed(precision));
+        }
+
+        function countPriceDecimals(value) {
+            const raw = String(value ?? '').trim();
+            if (!raw) return -1;
+            if (/[eE]/.test(raw)) return -1;
+            const dotIndex = raw.indexOf('.');
+            return dotIndex === -1 ? 0 : Math.max(0, raw.length - dotIndex - 1);
+        }
+
+        function getBookDisplayDecimals(bestBid, bestAsk) {
+            const directPrecision = Math.max(
+                countPriceDecimals(bestBid),
+                countPriceDecimals(bestAsk),
+                countPriceDecimals(S.aggTick)
+            );
+            if (directPrecision >= 0) return directPrecision;
+            const fallback = Number.isFinite(Number(bestBid))
+                ? Number(bestBid)
+                : Number.isFinite(Number(bestAsk))
+                    ? Number(bestAsk)
+                    : Number(S.markPx || 1000);
+            return pxDec(fallback || 1000);
+        }
+
+        function syncSeriesPricePrecision(target, decimals) {
+            const safeTarget = target === 2 ? 2 : 1;
+            const bundle = getSeriesBundle(safeTarget);
+            if (!bundle) return;
+            const precision = Math.max(0, Number(decimals) || 0);
+            if (seriesPricePrecision[safeTarget] === precision) return;
+            seriesPricePrecision[safeTarget] = precision;
+            const minMove = precision > 0 ? Math.pow(10, -precision) : 1;
+            const nextPriceFormat = {
+                type: 'custom',
+                minMove,
+                formatter: (value) => fmtAxisPrice(value, precision)
+            };
+            [bundle.candles, bundle.line, bundle.ma7, bundle.ma25, bundle.ma99].forEach((series) => {
+                if (!series?.applyOptions) return;
+                try {
+                    series.applyOptions({ priceFormat: nextPriceFormat });
+                } catch (_) {}
+            });
+        }
+
+        function applyBookMidToTarget(target, bids, asks, options = {}) {
+            const bidLevels = Array.isArray(bids) ? bids : [];
+            const askLevels = Array.isArray(asks) ? asks : [];
+            const bestBid = Number(bidLevels[0]?.px ?? bidLevels[0]?.price ?? bidLevels[0]?.[0]);
+            const bestAsk = Number(askLevels[0]?.px ?? askLevels[0]?.price ?? askLevels[0]?.[0]);
+            if (!Number.isFinite(bestBid) || !Number.isFinite(bestAsk)) return null;
+            const decimals = Number.isFinite(options.decimals)
+                ? Math.max(0, Number(options.decimals) || 0)
+                : getBookDisplayDecimals(bestBid, bestAsk);
+            syncSeriesPricePrecision(target, decimals);
+            const mid = (bestAsk + bestBid) / 2;
+            const roundedMid = roundPriceToDecimals(mid, decimals);
+            if (options.updateSummary) updateMobileLivePriceSummary(roundedMid);
+            if (!isTimeChartMode()) {
+                setLatestTimeModePrice(target, roundedMid);
+                applyMidPriceToLatestCandle(target, roundedMid, decimals);
+            }
+            if (options.updateTitle) {
+                syncAssetDocumentTitle(bestBid);
+                notifyParentLivePrice(bestBid);
+            }
+            return {
+                bestBid,
+                bestAsk,
+                mid,
+                roundedMid,
+                spread: bestAsk - bestBid,
+                pct: ((bestAsk - bestBid) / mid * 100).toFixed(3),
+                decimals
+            };
         }
 
         function formatWalletShort(wallet) {
@@ -8955,6 +9047,9 @@
                 const candleInterval = getCandleInterval(S.tf);
                 const subs = [];
                 if (IS_COMPACT) {
+                    if (!isTimeChartMode()) {
+                        subs.push({ type: 'l2Book', coin: S.coin, nSigFigs: getOrderBookSigFigs() });
+                    }
                     subs.push(
                         isTimeChartMode()
                             ? { type: 'trades', coin: S.coin }
@@ -8968,6 +9063,9 @@
                     }
                 }
                 if (!IS_COMPACT && S.chart2Active && S.coin !== S.coin2) {
+                    if (!isTimeChartMode()) {
+                        subs.push({ type: 'l2Book', coin: S.coin2, nSigFigs: getOrderBookSigFigs() });
+                    }
                     subs.push(
                         isTimeChartMode()
                             ? { type: 'trades', coin: S.coin2 }
@@ -8981,7 +9079,16 @@
                 try {
                     const msg = JSON.parse(ev.data), ch = msg.channel, d = msg.data;
                     if (ch === 'l2Book') {
-                        renderBook(d?.levels?.[0] ?? d?.bids ?? [], d?.levels?.[1] ?? d?.asks ?? []);
+                        const nextBids = d?.levels?.[0] ?? d?.bids ?? [];
+                        const nextAsks = d?.levels?.[1] ?? d?.asks ?? [];
+                        const coinKey = buildMarketKey(d?.coin || d?.s || msg?.coin || '');
+                        if (IS_COMPACT) {
+                            applyBookMidToTarget(1, nextBids, nextAsks);
+                        } else if (S.chart2Active && coinKey && coinKey === buildMarketKey(S.coin2) && coinKey !== buildMarketKey(S.coin)) {
+                            applyBookMidToTarget(2, nextBids, nextAsks);
+                        } else {
+                            renderBook(nextBids, nextAsks);
+                        }
                     } else if (ch === 'trades') {
                         const trades = Array.isArray(d) ? d : [];
                         const primaryTrades = [];
