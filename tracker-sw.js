@@ -1,4 +1,4 @@
-const CACHE_NAME = "hypermonitor-tracker-v1";
+const CACHE_NAME = "hypermonitor-tracker-v2";
 const PRECACHE_URLS = [
   "/tracker.html",
   "/tracker.webmanifest",
