@@ -15,6 +15,13 @@
     rel="stylesheet"
   />
   <link rel="icon" type="image/png" href="images/favicon.png" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <link rel="manifest" href="tracker.webmanifest" />
+  <meta name="theme-color" content="#0d1014" id="themeColorMeta" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hypermonitor" />
   <script>
     (() => {
       try {
@@ -570,6 +577,136 @@
       min-height: 0;
       overflow: hidden;
       display: flex;
+    }
+
+    .mobile-install-banner {
+      display: none;
+    }
+
+    .mobile-install-banner-logo,
+    .mobile-install-banner-logo img {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      flex: 0 0 48px;
+    }
+
+    .mobile-install-banner-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    }
+
+    .mobile-install-banner-logo img {
+      display: block;
+      object-fit: cover;
+    }
+
+    .mobile-install-banner-body {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .mobile-install-banner-label {
+      color: var(--muted);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .mobile-install-banner-title {
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .mobile-install-banner-copy {
+      color: var(--muted-strong);
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    .mobile-install-banner-path {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 22px;
+      margin: 0 2px;
+      padding: 0 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    body.light .mobile-install-banner-path {
+      border-color: rgba(15, 23, 42, 0.08);
+      background: rgba(15, 23, 42, 0.04);
+    }
+
+    .mobile-install-banner-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 3px;
+    }
+
+    .mobile-install-banner-action {
+      min-height: 36px;
+      padding: 0 14px;
+      border: 0;
+      border-radius: 12px;
+      background: #f5f7fa;
+      color: #0d1014;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .mobile-install-banner-action[disabled] {
+      opacity: 0.68;
+      cursor: wait;
+    }
+
+    body.light .mobile-install-banner-action {
+      background: #0f172a;
+      color: #f8fafc;
+    }
+
+    .mobile-install-banner-close {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      align-self: flex-start;
+    }
+
+    .mobile-install-banner-close svg {
+      width: 15px;
+      height: 15px;
+      display: block;
+    }
+
+    .mobile-install-banner-close:hover,
+    .mobile-install-banner-close:focus-visible {
+      color: var(--text-main);
+      outline: none;
     }
 
     .section-intro {
@@ -4441,6 +4578,30 @@
         display: none !important;
       }
 
+      .mobile-install-banner {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+        z-index: 96;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: start;
+        gap: 12px;
+        padding: 12px 12px 12px 13px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(18, 22, 28, 0.98) 0%, rgba(10, 12, 16, 0.98) 100%);
+        box-shadow: 0 24px 46px rgba(0, 0, 0, 0.32);
+        backdrop-filter: blur(18px);
+      }
+
+      body.light .mobile-install-banner {
+        border-color: rgba(148, 163, 184, 0.2);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+        box-shadow: 0 16px 34px rgba(148, 163, 184, 0.18);
+      }
+
       .trade-view-stack[data-mobile-view="market"] > .trade-leaderboard-panel,
       .trade-view-stack[data-mobile-view="market"] > .mobile-watchlist-panel,
       .trade-view-stack[data-mobile-view="market"] > .mobile-favorites-panel,
@@ -4683,6 +4844,25 @@
       </button>
     </nav>
   </div>
+
+  <aside class="mobile-install-banner" id="mobileInstallBanner" hidden aria-live="polite">
+    <div class="mobile-install-banner-logo" aria-hidden="true">
+      <img src="images/logo.png" alt="" />
+    </div>
+    <div class="mobile-install-banner-body">
+      <div class="mobile-install-banner-label">Install app</div>
+      <strong class="mobile-install-banner-title" id="mobileInstallBannerTitle">Add Hypermonitor to your Home Screen</strong>
+      <div class="mobile-install-banner-copy" id="mobileInstallBannerCopy"></div>
+      <div class="mobile-install-banner-actions">
+        <button class="mobile-install-banner-action" id="mobileInstallBannerAction" type="button" hidden>Install</button>
+      </div>
+    </div>
+    <button class="mobile-install-banner-close" id="mobileInstallBannerDismiss" type="button" aria-label="Dismiss install prompt">
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M4 4l8 8M12 4 4 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+      </svg>
+    </button>
+  </aside>
 
   <script>
     window.__logoOk = window.__logoOk || function () {};
@@ -4970,6 +5150,7 @@
     const DEFAULT_TRADE_MULTI_ROW_RATIO_FOUR = 1.78 / (1.78 + 0.9);
     const TRADE_LEADERBOARD_COLLAPSED_HEIGHT = 30;
 
+    const themeColorMeta = document.getElementById("themeColorMeta");
     const tradeFrame = document.getElementById("tradeFrame");
     const topFramePanel = document.querySelector(".top-frame-panel");
     const tradeViewStack = document.querySelector(".trade-view-stack");
@@ -5072,6 +5253,11 @@
     const headerSearchSuggestions = document.getElementById("headerSearchSuggestions");
     const headerFavoritesBtn = document.getElementById("headerFavoritesBtn");
     const headerThemeBtn = document.getElementById("headerThemeBtn");
+    const mobileInstallBanner = document.getElementById("mobileInstallBanner");
+    const mobileInstallBannerTitle = document.getElementById("mobileInstallBannerTitle");
+    const mobileInstallBannerCopy = document.getElementById("mobileInstallBannerCopy");
+    const mobileInstallBannerAction = document.getElementById("mobileInstallBannerAction");
+    const mobileInstallBannerDismiss = document.getElementById("mobileInstallBannerDismiss");
 
     const profitFilterList = document.getElementById("profitFilterList");
     const sizeFilterList = document.getElementById("sizeFilterList");
@@ -5129,6 +5315,8 @@
     const FAVORITES_KEY = "hypermonitor-favorite-wallets";
     const THEME_STORAGE_KEY = "hypermonitor-theme";
     const MOBILE_VIEW_STORAGE_KEY = "hypermonitor-mobile-view";
+    const TRACKER_INSTALL_DISMISS_KEY = "hypermonitor-tracker-install-dismissed-v1";
+    const TRACKER_INSTALL_DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
     const COIN_NAME_CACHE_KEY = "hypermonitor-coin-name-cache";
     const COIN_COLOR_CACHE_KEY = "hypermonitor-coin-color-cache";
     const TRACKER_FOOTER_LEGACY_DEFAULT_COINS = ["BTC", "ETH", "SOL", "HYPE", "LINK", "xyz:GOLD", "xyz:SILVER", "cash:USA500", "xyz:NVDA", "xyz:MSTR"];
@@ -5251,6 +5439,10 @@
     let footerTickerUpdateRaf = 0;
     let footerTickerLastMeasureAt = 0;
     let footerTickerMetricsSignature = "";
+    let deferredTrackerInstallPrompt = null;
+    let trackerInstallFallbackTimer = 0;
+    let trackerInstallManualHintReady = false;
+    let trackerInstallPromptPending = false;
 
     function normalizeTheme(value) {
       return value === "light" ? "light" : "dark";
@@ -5303,12 +5495,18 @@
       headerThemeBtn.setAttribute("title", isLight ? "Light mode" : "Dark mode");
     }
 
+    function syncThemeColorMeta(theme) {
+      if (!themeColorMeta) return;
+      themeColorMeta.setAttribute("content", theme === "light" ? "#f4f4f3" : "#0d1014");
+    }
+
     function applyTheme(theme, options = {}) {
       const nextTheme = normalizeTheme(theme);
       const isLight = nextTheme === "light";
       document.documentElement.classList.toggle("light", isLight);
       document.body.classList.toggle("light", isLight);
       syncThemeToggleButton(nextTheme);
+      syncThemeColorMeta(nextTheme);
       if (headerSearchShortcut) headerSearchShortcut.textContent = SEARCH_SHORTCUT_LABEL;
       if (options.persist !== false) {
         try {
@@ -5326,8 +5524,172 @@
       return Boolean(MOBILE_TRACKER_QUERY.matches);
     }
 
+    function isStandaloneTrackerApp() {
+      const standaloneMedia = window.matchMedia?.("(display-mode: standalone)");
+      return Boolean(standaloneMedia?.matches || window.navigator.standalone);
+    }
+
+    function isAppleMobileDevice() {
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent || "")
+        || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    }
+
+    function isSafariBrowser() {
+      const ua = navigator.userAgent || "";
+      return /Safari/i.test(ua)
+        && !/Chrome|CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo|SamsungBrowser/i.test(ua);
+    }
+
+    function isAndroidMobileDevice() {
+      return /Android/i.test(navigator.userAgent || "");
+    }
+
     function normalizeMobileView(value) {
       return value === "leaderboard" || value === "watchlist" || value === "favorites" || value === "wallet" ? value : "market";
+    }
+
+    function readTrackerInstallDismissedAt() {
+      try {
+        const raw = Number.parseInt(localStorage.getItem(TRACKER_INSTALL_DISMISS_KEY) || "", 10);
+        return Number.isFinite(raw) ? raw : 0;
+      } catch (_) {
+        return 0;
+      }
+    }
+
+    function isTrackerInstallDismissed() {
+      const dismissedAt = readTrackerInstallDismissedAt();
+      return Boolean(dismissedAt && Date.now() - dismissedAt < TRACKER_INSTALL_DISMISS_MS);
+    }
+
+    function persistTrackerInstallDismiss() {
+      try {
+        localStorage.setItem(TRACKER_INSTALL_DISMISS_KEY, String(Date.now()));
+      } catch (_) {}
+    }
+
+    function clearTrackerInstallFallbackTimer() {
+      if (!trackerInstallFallbackTimer) return;
+      window.clearTimeout(trackerInstallFallbackTimer);
+      trackerInstallFallbackTimer = 0;
+    }
+
+    function maybeScheduleTrackerInstallFallback() {
+      if (trackerInstallFallbackTimer || deferredTrackerInstallPrompt) return;
+      if (!isAndroidMobileDevice() || isStandaloneTrackerApp() || isTrackerInstallDismissed()) return;
+      trackerInstallFallbackTimer = window.setTimeout(() => {
+        trackerInstallFallbackTimer = 0;
+        if (deferredTrackerInstallPrompt || isStandaloneTrackerApp() || isTrackerInstallDismissed()) return;
+        trackerInstallManualHintReady = true;
+        refreshTrackerInstallBanner();
+      }, 2400);
+    }
+
+    function getTrackerInstallBannerConfig() {
+      if (!isMobileTrackerLayout() || isStandaloneTrackerApp() || isTrackerInstallDismissed()) return null;
+
+      if (isAppleMobileDevice()) {
+        if (isSafariBrowser()) {
+          return {
+            title: "Add Hypermonitor to your Home Screen",
+            copyHtml:
+              "Tap <span class='mobile-install-banner-path'>Share</span> then "
+              + "<span class='mobile-install-banner-path'>Add to Home Screen</span> for one-tap access.",
+            actionLabel: ""
+          };
+        }
+        return {
+          title: "Open this page in Safari to install",
+          copyHtml:
+            "iPhone and iPad home screen install runs through "
+            + "<span class='mobile-install-banner-path'>Safari</span>. Then tap "
+            + "<span class='mobile-install-banner-path'>Share</span> and "
+            + "<span class='mobile-install-banner-path'>Add to Home Screen</span>.",
+          actionLabel: ""
+        };
+      }
+
+      if (deferredTrackerInstallPrompt) {
+        return {
+          title: "Install Hypermonitor",
+          copyHtml: "Add the tracker to your Home Screen for faster launch and an app-style fullscreen view.",
+          actionLabel: "Install"
+        };
+      }
+
+      if (isAndroidMobileDevice() && trackerInstallManualHintReady) {
+        return {
+          title: "Add Hypermonitor to your Home Screen",
+          copyHtml:
+            "Open your browser menu and tap "
+            + "<span class='mobile-install-banner-path'>Install app</span> or "
+            + "<span class='mobile-install-banner-path'>Add to Home screen</span>.",
+          actionLabel: ""
+        };
+      }
+
+      return null;
+    }
+
+    function refreshTrackerInstallBanner() {
+      if (!mobileInstallBanner || !mobileInstallBannerTitle || !mobileInstallBannerCopy || !mobileInstallBannerAction) return;
+      const config = getTrackerInstallBannerConfig();
+      if (!config) {
+        mobileInstallBanner.hidden = true;
+        mobileInstallBannerAction.hidden = true;
+        mobileInstallBannerAction.disabled = false;
+        return;
+      }
+
+      mobileInstallBannerTitle.textContent = config.title;
+      mobileInstallBannerCopy.innerHTML = config.copyHtml;
+
+      if (config.actionLabel) {
+        mobileInstallBannerAction.hidden = false;
+        mobileInstallBannerAction.textContent = config.actionLabel;
+      } else {
+        mobileInstallBannerAction.hidden = true;
+      }
+
+      mobileInstallBannerAction.disabled = trackerInstallPromptPending;
+      mobileInstallBanner.hidden = false;
+    }
+
+    async function promptTrackerInstall() {
+      if (!deferredTrackerInstallPrompt || trackerInstallPromptPending) return;
+      const promptEvent = deferredTrackerInstallPrompt;
+      deferredTrackerInstallPrompt = null;
+      trackerInstallPromptPending = true;
+      refreshTrackerInstallBanner();
+
+      try {
+        await promptEvent.prompt();
+        const result = await promptEvent.userChoice;
+        if (result?.outcome !== "accepted") {
+          persistTrackerInstallDismiss();
+        }
+      } catch (error) {
+        console.warn("Tracker install prompt failed", error);
+        trackerInstallManualHintReady = isAndroidMobileDevice();
+      } finally {
+        trackerInstallPromptPending = false;
+        refreshTrackerInstallBanner();
+        maybeScheduleTrackerInstallFallback();
+      }
+    }
+
+    function registerTrackerInstallServiceWorker() {
+      if (!("serviceWorker" in navigator)) {
+        maybeScheduleTrackerInstallFallback();
+        return;
+      }
+      navigator.serviceWorker.register("tracker-sw.js").then(() => {
+        maybeScheduleTrackerInstallFallback();
+      }).catch((error) => {
+        console.warn("Tracker service worker registration failed", error);
+        trackerInstallManualHintReady = isAndroidMobileDevice();
+        refreshTrackerInstallBanner();
+      });
     }
 
     function syncMobileViewButtons() {
@@ -11620,6 +11982,7 @@
       MOBILE_TRACKER_QUERY.addEventListener("change", () => {
         syncMobileShell(true);
         syncTradeLayout();
+        refreshTrackerInstallBanner();
       });
     }
 
@@ -11801,10 +12164,43 @@
     });
 
     window.addEventListener("storage", (event) => {
-      if (event.key !== FAVORITES_KEY) return;
-      loadFavoriteWallets();
-      renderTable(state.displayRows);
-      syncMobileShell();
+      if (event.key === FAVORITES_KEY) {
+        loadFavoriteWallets();
+        renderTable(state.displayRows);
+        syncMobileShell();
+        return;
+      }
+      if (event.key === TRACKER_INSTALL_DISMISS_KEY) {
+        refreshTrackerInstallBanner();
+      }
+    });
+
+    if (mobileInstallBannerAction) {
+      mobileInstallBannerAction.addEventListener("click", () => {
+        void promptTrackerInstall();
+      });
+    }
+
+    if (mobileInstallBannerDismiss) {
+      mobileInstallBannerDismiss.addEventListener("click", () => {
+        persistTrackerInstallDismiss();
+        refreshTrackerInstallBanner();
+      });
+    }
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredTrackerInstallPrompt = event;
+      trackerInstallManualHintReady = false;
+      clearTrackerInstallFallbackTimer();
+      refreshTrackerInstallBanner();
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredTrackerInstallPrompt = null;
+      trackerInstallManualHintReady = false;
+      clearTrackerInstallFallbackTimer();
+      refreshTrackerInstallBanner();
     });
 
     initTheme();
@@ -11821,6 +12217,8 @@
     syncTradeLayout();
     syncWalletUi();
     syncMobileShell(true);
+    refreshTrackerInstallBanner();
+    registerTrackerInstallServiceWorker();
     scheduleFooterBarInitAfterPrimaryAsset();
 
     ensureHeaderCoinOptions().then(() => {

@@ -1,0 +1,23 @@
+{
+  "id": "/tracker.html",
+  "name": "Hypermonitor Tracker",
+  "short_name": "Hypermonitor",
+  "description": "Hypermonitor trade terminal and explore leaderboard in one mobile-friendly tracker.",
+  "start_url": "/tracker.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0d1014",
+  "theme_color": "#0d1014",
+  "icons": [
+    {
+      "src": "/images/tracker-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/tracker-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
