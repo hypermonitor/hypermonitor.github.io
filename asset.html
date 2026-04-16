@@ -3623,6 +3623,17 @@
             color: var(--up);
         }
 
+        #ob-detail-note {
+            padding: 0 12px 10px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        #ob-detail-note[hidden] {
+            display: none;
+        }
+
         #ob-detail-table {
             min-height: 0;
             flex: 1;
@@ -3679,6 +3690,20 @@
 
         .ob-detail-row:nth-child(odd) {
             background: rgba(255, 255, 255, 0.01);
+        }
+
+        .ob-detail-row.is-wallet-row {
+            cursor: pointer;
+        }
+
+        .ob-detail-row.is-wallet-row:hover {
+            background: var(--surface2);
+        }
+
+        .ob-detail-row.is-wallet-row:focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 1px rgba(234, 236, 239, 0.12);
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .ob-detail-row .bar {
@@ -4483,6 +4508,7 @@
                                     <span class="v" id="ob-detail-value">–</span>
                                 </div>
                             </div>
+                            <div id="ob-detail-note" hidden></div>
                             <div id="ob-detail-table">
                                 <div id="ob-detail-hdr">
                                     <span class="c1">Price</span>
@@ -4703,6 +4729,10 @@
         const NON_CRYPTO_PREFIXES = ['xyz', 'flx', 'hyna', 'km', 'vntl', 'cash'];
         const COIN_LOGO_URL_CACHE_KEY = 'hypermonitor-logo-url-cache';
         const CHART_PREFS_STORAGE_KEY = 'hypermonitor-chart-prefs';
+        const L4_BOOK_WS_STORAGE_KEY = 'hypermonitor-l4book-ws';
+        const L4_BOOK_REQUEST_TIMEOUT_MS = 2500;
+        const L4_BOOK_SNAPSHOT_TTL_MS = 2500;
+        const DEFAULT_L4_BOOK_WS_URLS = ['ws://127.0.0.1:8000', 'ws://localhost:8000'];
         const VOLUME_UP_COLOR = 'rgba(14, 203, 129, 0.68)';
         const VOLUME_DOWN_COLOR = 'rgba(246, 70, 93, 0.68)';
         const VOLUME_MA_FAST_COLOR = '#6fe3ff';
@@ -5406,6 +5436,7 @@
         const PAGE_PARAMS = new URLSearchParams(location.search);
         const IS_COMPACT = PAGE_PARAMS.get('compact') === '1';
         const EMBED_PANE = String(PAGE_PARAMS.get('pane') || '').trim();
+        const L4_BOOK_WS_PARAM = String(PAGE_PARAMS.get('l4ws') || '').trim();
         const MOBILE_ASSET_QUERY = window.matchMedia('(max-width: 720px)');
         const INLINE_HYPE_LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDE0NCAxNDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xNDQgNzEuNjk5MUMxNDQgMTE5LjMwNiAxMTQuODY2IDEzNC41ODIgOTkuNTE1NiAxMjAuOThDODYuODgwNCAxMDkuODg5IDgzLjEyMTEgODYuNDUyMSA2NC4xMTYgODQuMDQ1NkMzOS45OTQyIDgxLjAxMTMgMzcuOTA1NyAxMTMuMTMzIDIyLjAzMzQgMTEzLjEzM0MzLjU1MDQgMTEzLjEzMyAwIDg2LjI0MjggMCA3Mi40MzE1QzAgNTguMzA2MyAzLjk2ODA5IDM5LjA1NDIgMTkuNzM2IDM5LjA1NDJDMzguMTE0NiAzOS4wNTQyIDM5LjE1ODggNjYuNTcyMiA2Mi4xMzIgNjUuMTA3M0M4NS4wMDA3IDYzLjUzNzkgODUuNDE4NCAzNC44Njg5IDEwMC4yNDcgMjIuNjI3MUMxMTMuMTk1IDEyLjA1OTMgMTQ0IDIzLjQ2NDEgMTQ0IDcxLjY5OTFaIiBmaWxsPSIjOTdGQ0U0Ii8+Cjwvc3ZnPgo=';
         const INLINE_NVDA_LOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJOVkRBIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0iIzc2YjkwMCIvPgogIDxwYXRoIGQ9Ik0xNCAzMS43YzUuNC04LjQgMTIuOS0xMy4xIDIyLjUtMTMuMSA2LjMgMCAxMS43IDIuMSAxNS41IDYtMy44LTEuOS03LjYtMi44LTExLjctMi44LTcuNSAwLTEzLjkgMy4yLTE5LjIgOS44IDMuMiA0LjMgNy40IDYuNCAxMi40IDYuNCA0LjcgMCA4LjYtMi4xIDExLjMtNi4zLTIuMy0xLjktNC45LTIuOS03LjctMi45LTMuOCAwLTYuOSAxLjgtOS4yIDUuMiAxLjQtNSA1LjctOC4zIDEwLjctOC4zIDMuOCAwIDcuMSAxLjMgOS45IDMuOGwuOS44LS41IDFjLTMuOSA3LTkuOSAxMC42LTE3LjcgMTAuNi03LjIgMC0xMy4xLTMuNC0xOC0xMGwtLjctLjl6IiBmaWxsPSIjZmZmIi8+CiAgPGNpcmNsZSBjeD0iMzguNSIgY3k9IjMyLjIiIHI9IjUuNSIgZmlsbD0iIzc2YjkwMCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIuOCIvPgo8L3N2Zz4K';
@@ -5979,11 +6010,13 @@
         const obSizeLabel = $('ob-size-label');
         const obDetailSheet = $('ob-detail-sheet');
         const obDetailBack = $('ob-detail-back');
+        const obDetailTitle = $('ob-detail-title');
         const obDetailRange = $('ob-detail-range');
         const obDetailOrders = $('ob-detail-orders');
         const obDetailSizeKey = $('ob-detail-size-key');
         const obDetailSize = $('ob-detail-size');
         const obDetailValue = $('ob-detail-value');
+        const obDetailNote = $('ob-detail-note');
         const obDetailColSize = $('ob-detail-col-size');
         const obDetailColMeta = $('ob-detail-col-meta');
         const obDetailList = $('ob-detail-list');
@@ -6005,10 +6038,14 @@
         const orderBookRows = { ask: [], bid: [] };
         let latestBookSnapshot = { bids: [], asks: [] };
         let activeBookDetail = null;
+        let activeBookDetailSource = null;
+        let activeBookDetailNote = '';
         let activeOrderBookHover = null;
         let orderBookHoverHideTimer = 0;
         let fundingHoverHideTimer = 0;
         let fundingHoverState = null;
+        const l4BookSnapshotCache = new Map();
+        let l4BookSnapshotRequest = null;
         
         // Legends
         const legName = $('legend-name'), legO = $('leg-o'), legH = $('leg-h'), legL = $('leg-l'), legC = $('leg-c'), legPct = $('leg-pct'), legRange = $('leg-range');
@@ -8001,13 +8038,211 @@
 
         function normalizeBookLevel(level) {
             if (!level) return null;
-            const px = Number(Array.isArray(level) ? level[0] : level.px);
-            const sz = Number(Array.isArray(level) ? level[1] : level.sz);
+            const px = Number(Array.isArray(level) ? level[0] : (level.limitPx ?? level.limit_px ?? level.px ?? level.price));
+            const sz = Number(Array.isArray(level) ? level[1] : (level.sz ?? level.size));
             let orders = Number(Array.isArray(level) ? level[2] : (level.n ?? level.orders ?? level.count));
-            const address = Array.isArray(level) ? '' : String(level.address ?? level.user ?? level.addr ?? '').trim();
+            const address = Array.isArray(level) ? '' : String(level.address ?? level.wallet ?? level.user ?? level.addr ?? '').trim();
             if (!Number.isFinite(px) || !Number.isFinite(sz)) return null;
             if (!Number.isFinite(orders) || orders <= 0) orders = 1;
             return { px, sz, orders, address };
+        }
+
+        function normalizeWsUrl(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '';
+            let candidate = raw;
+            if (/^https?:\/\//i.test(candidate)) {
+                candidate = candidate.replace(/^http/i, 'ws');
+            } else if (!/^wss?:\/\//i.test(candidate)) {
+                candidate = `ws://${candidate}`;
+            }
+            try {
+                const parsed = new URL(candidate);
+                return /^wss?:$/i.test(parsed.protocol) ? parsed.toString() : '';
+            } catch (_) {
+                return '';
+            }
+        }
+
+        function splitConfiguredWsUrls(value) {
+            return String(value || '')
+                .split(/[\s,]+/)
+                .map(part => normalizeWsUrl(part))
+                .filter(Boolean);
+        }
+
+        function getDerivedL4BookWsUrls() {
+            const urls = [];
+            const hostname = String(window.location.hostname || '').trim();
+            if (!hostname) return urls;
+            urls.push(normalizeWsUrl(`ws://${hostname}:8000`));
+            urls.push(normalizeWsUrl(`wss://${hostname}:8000`));
+            return urls.filter(Boolean);
+        }
+
+        function persistConfiguredL4BookWsUrls() {
+            const urls = splitConfiguredWsUrls(L4_BOOK_WS_PARAM);
+            if (!urls.length) return;
+            try {
+                localStorage.setItem(L4_BOOK_WS_STORAGE_KEY, urls.join(' '));
+            } catch (_) {}
+        }
+
+        function getConfiguredL4BookWsUrls() {
+            const urls = [];
+            const seen = new Set();
+            const pushUrl = (value) => {
+                if (!value || seen.has(value)) return;
+                seen.add(value);
+                urls.push(value);
+            };
+            splitConfiguredWsUrls(L4_BOOK_WS_PARAM).forEach(pushUrl);
+            try {
+                splitConfiguredWsUrls(localStorage.getItem(L4_BOOK_WS_STORAGE_KEY)).forEach(pushUrl);
+            } catch (_) {}
+            getDerivedL4BookWsUrls().forEach(pushUrl);
+            DEFAULT_L4_BOOK_WS_URLS.forEach(candidate => pushUrl(normalizeWsUrl(candidate)));
+            return urls;
+        }
+
+        function extractL4SnapshotPayload(data) {
+            if (!data || typeof data !== 'object') return null;
+            if (Array.isArray(data.levels) && data.coin) return data;
+            if (data.snapshot && typeof data.snapshot === 'object' && Array.isArray(data.snapshot.levels)) return data.snapshot;
+            if (data.Snapshot && typeof data.Snapshot === 'object' && Array.isArray(data.Snapshot.levels)) return data.Snapshot;
+            return null;
+        }
+
+        function normalizeL4BookSnapshot(payload, fallbackCoin, sourceUrl) {
+            const snapshot = extractL4SnapshotPayload(payload);
+            if (!snapshot) return null;
+            const levels = Array.isArray(snapshot.levels) ? snapshot.levels : [];
+            return {
+                coin: buildMarketKey(snapshot.coin || fallbackCoin),
+                bids: Array.isArray(levels[0]) ? levels[0] : [],
+                asks: Array.isArray(levels[1]) ? levels[1] : [],
+                time: Number(snapshot.time || Date.now()),
+                height: Number(snapshot.height || 0),
+                receivedAt: Date.now(),
+                sourceUrl: sourceUrl || ''
+            };
+        }
+
+        function getCachedL4BookSnapshot(coin) {
+            const coinKey = buildMarketKey(coin);
+            const cached = l4BookSnapshotCache.get(coinKey);
+            if (!cached) return null;
+            if ((Date.now() - Number(cached.receivedAt || 0)) > L4_BOOK_SNAPSHOT_TTL_MS) return null;
+            return cached;
+        }
+
+        function requestL4BookSnapshotFromUrl(url, coin) {
+            return new Promise((resolve, reject) => {
+                let settled = false;
+                let socket = null;
+                let closedByClient = false;
+                const finish = (callback, value) => {
+                    if (settled) return;
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        try {
+                            socket.send(JSON.stringify({ method: 'unsubscribe', subscription: { type: 'l4Book', coin } }));
+                        } catch (_) {}
+                    }
+                    if (socket && socket.readyState < WebSocket.CLOSING) {
+                        try {
+                            closedByClient = true;
+                            socket.close();
+                        } catch (_) {}
+                    }
+                    callback(value);
+                };
+                const timeoutId = window.setTimeout(() => {
+                    finish(reject, new Error(`Timed out waiting for l4Book snapshot from ${url}`));
+                }, L4_BOOK_REQUEST_TIMEOUT_MS);
+
+                try {
+                    socket = new WebSocket(url);
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    reject(error);
+                    return;
+                }
+
+                socket.addEventListener('open', () => {
+                    try {
+                        socket.send(JSON.stringify({
+                            method: 'subscribe',
+                            subscription: { type: 'l4Book', coin }
+                        }));
+                    } catch (error) {
+                        finish(reject, error);
+                    }
+                });
+
+                socket.addEventListener('message', (event) => {
+                    let message;
+                    try {
+                        message = JSON.parse(event.data);
+                    } catch (_) {
+                        return;
+                    }
+                    if (message?.channel === 'error') {
+                        finish(reject, new Error(String(message.data || `L4 book error from ${url}`)));
+                        return;
+                    }
+                    if (message?.channel !== 'l4Book') return;
+                    const snapshot = normalizeL4BookSnapshot(message.data, coin, url);
+                    if (!snapshot || snapshot.coin !== buildMarketKey(coin)) return;
+                    finish(resolve, snapshot);
+                });
+
+                socket.addEventListener('error', () => {
+                    finish(reject, new Error(`Unable to connect to ${url}`));
+                });
+
+                socket.addEventListener('close', () => {
+                    if (!settled && !closedByClient) {
+                        finish(reject, new Error(`L4 book connection closed before snapshot from ${url}`));
+                    }
+                });
+            });
+        }
+
+        async function fetchL4BookSnapshot(coin, options = {}) {
+            const coinKey = buildMarketKey(coin);
+            if (!coinKey) throw new Error('Missing coin for l4Book lookup');
+            if (options.force !== true) {
+                const cached = getCachedL4BookSnapshot(coinKey);
+                if (cached) return cached;
+            }
+            if (l4BookSnapshotRequest && l4BookSnapshotRequest.coin === coinKey) {
+                return l4BookSnapshotRequest.promise;
+            }
+            const urls = getConfiguredL4BookWsUrls();
+            if (!urls.length) throw new Error('No l4Book endpoint configured');
+            const promise = (async () => {
+                let lastError = null;
+                for (const url of urls) {
+                    try {
+                        const snapshot = await requestL4BookSnapshotFromUrl(url, coinKey);
+                        l4BookSnapshotCache.set(coinKey, snapshot);
+                        return snapshot;
+                    } catch (error) {
+                        lastError = error;
+                    }
+                }
+                throw lastError || new Error('Unable to fetch l4Book snapshot');
+            })();
+            l4BookSnapshotRequest = { coin: coinKey, promise };
+            try {
+                return await promise;
+            } finally {
+                if (l4BookSnapshotRequest?.promise === promise) {
+                    l4BookSnapshotRequest = null;
+                }
+            }
         }
 
         function getBucketPrice(px, tick, side) {
@@ -8028,13 +8263,21 @@
         }
 
         function closeOrderBookDetail(clearState = true) {
-            if (clearState) activeBookDetail = null;
+            if (clearState) {
+                activeBookDetail = null;
+                activeBookDetailSource = null;
+                activeBookDetailNote = '';
+            }
             if (obTab) obTab.classList.remove('show-detail');
             if (obDetailSheet) {
                 obDetailSheet.classList.remove('is-empty');
                 obDetailSheet.setAttribute('aria-hidden', 'true');
             }
             if (obDetailList) obDetailList.replaceChildren();
+            if (obDetailNote) {
+                obDetailNote.hidden = true;
+                obDetailNote.textContent = '';
+            }
             hideOrderBookHoverCard();
         }
 
@@ -8165,7 +8408,10 @@
 
         function renderOrderBookDetail() {
             if (!activeBookDetail || !obDetailSheet || !obTab) return;
-            const source = activeBookDetail.side === 'ask' ? latestBookSnapshot.asks : latestBookSnapshot.bids;
+            const detailSource = activeBookDetailSource && activeBookDetailSource.coin === activeBookDetail.coin
+                ? activeBookDetailSource
+                : latestBookSnapshot;
+            const source = activeBookDetail.side === 'ask' ? detailSource.asks : detailSource.bids;
             const aggregated = aggregateLevels(source, activeBookDetail.tick, activeBookDetail.side);
             const bucket = aggregated.find(level => getBucketKey(level.px, activeBookDetail.tick, activeBookDetail.side) === activeBookDetail.bucketKey);
             if (!bucket) {
@@ -8181,6 +8427,7 @@
             const totalValue = rawLevels.reduce((sum, row) => sum + (row.px * row.sz), 0);
             const maxRowValue = rawLevels.reduce((max, row) => Math.max(max, row.px * row.sz), 0);
 
+            if (obDetailTitle) obDetailTitle.textContent = hasAddresses ? 'Orders & Wallets' : 'Orders';
             obDetailRange.textContent = formatBucketRange(bucket, decimals);
             obDetailRange.className = `v ${sideClass}`;
             obDetailOrders.textContent = fmtOrderCount(bucket.orders);
@@ -8192,6 +8439,11 @@
             obDetailValue.className = 'v';
             obDetailColSize.textContent = `Size (${coinLabel})`;
             if (obDetailColMeta) obDetailColMeta.textContent = hasAddresses ? 'Address' : 'Orders';
+            if (obDetailNote) {
+                const detailNote = activeBookDetailNote || (hasAddresses ? 'Click an address row to open the wallet.' : '');
+                obDetailNote.textContent = detailNote;
+                obDetailNote.hidden = !detailNote;
+            }
 
             const fragment = document.createDocumentFragment();
             rawLevels.forEach((rowLevel) => {
@@ -8214,6 +8466,19 @@
                 c3.className = 'c3';
                 c3.textContent = hasAddresses ? formatBookAddress(rowLevel.address) : fmtOrderCount(rowLevel.orders);
 
+                if (rowLevel.address) {
+                    row.classList.add('is-wallet-row');
+                    row.tabIndex = 0;
+                    row.setAttribute('role', 'button');
+                    row.setAttribute('aria-label', `Open wallet ${rowLevel.address}`);
+                    row.addEventListener('click', () => openWalletFromTrade(rowLevel.address));
+                    row.addEventListener('keydown', (event) => {
+                        if (event.key !== 'Enter' && event.key !== ' ') return;
+                        event.preventDefault();
+                        openWalletFromTrade(rowLevel.address);
+                    });
+                }
+
                 row.append(bar, c1, c2, c3);
                 fragment.appendChild(row);
             });
@@ -8229,10 +8494,58 @@
             hideOrderBookHoverCard();
             activeBookDetail = {
                 side,
+                coin: buildMarketKey(S.coin),
                 tick: S.aggTick || 0,
                 bucketKey: getBucketKey(level.px, S.aggTick || 0, side)
             };
+            activeBookDetailSource = null;
+            activeBookDetailNote = '';
             renderOrderBookDetail();
+        }
+
+        async function openOrderBookDetailWithWalletLookup(side, level) {
+            openOrderBookDetail(side, level);
+            if (!activeBookDetail || activeBookDetail.coin !== buildMarketKey(S.coin)) return;
+            activeBookDetailNote = 'Loading wallet addresses...';
+            renderOrderBookDetail();
+            try {
+                const snapshot = await fetchL4BookSnapshot(activeBookDetail.coin);
+                if (
+                    !activeBookDetail ||
+                    activeBookDetail.coin !== snapshot.coin ||
+                    activeBookDetail.side !== side ||
+                    activeBookDetail.bucketKey !== getBucketKey(level.px, activeBookDetail.tick, side)
+                ) {
+                    return;
+                }
+                const detailTick = activeBookDetail.tick;
+                const bucketKey = activeBookDetail.bucketKey;
+                const source = side === 'ask' ? snapshot.asks : snapshot.bids;
+                const bucket = aggregateLevels(source, detailTick, side).find(
+                    entry => getBucketKey(entry.px, detailTick, side) === bucketKey
+                );
+                if (!bucket) {
+                    activeBookDetailNote = 'Wallet owners were unavailable for the current book level.';
+                    renderOrderBookDetail();
+                    return;
+                }
+                activeBookDetailSource = snapshot;
+                activeBookDetailNote = '';
+                if (!bucket.rawLevels.some(row => row.address)) {
+                    activeBookDetailNote = 'No wallet owners were returned for this level.';
+                }
+                renderOrderBookDetail();
+            } catch (_) {
+                if (
+                    activeBookDetail &&
+                    activeBookDetail.coin === buildMarketKey(S.coin) &&
+                    activeBookDetail.side === side &&
+                    activeBookDetail.bucketKey === getBucketKey(level.px, activeBookDetail.tick, side)
+                ) {
+                    activeBookDetailNote = 'Wallet lookup unavailable. Run the local l4Book server or pass ?l4ws=ws://host:port.';
+                    renderOrderBookDetail();
+                }
+            }
         }
 
         function createOrderBookRow(side) {
@@ -8244,13 +8557,13 @@
 
             row.addEventListener('click', () => {
                 if (!row._bookLevel) return;
-                openOrderBookDetail(side, row._bookLevel);
+                openOrderBookDetailWithWalletLookup(side, row._bookLevel);
             });
 
             row.addEventListener('keydown', event => {
                 if ((event.key === 'Enter' || event.key === ' ') && row._bookLevel) {
                     event.preventDefault();
-                    openOrderBookDetail(side, row._bookLevel);
+                    openOrderBookDetailWithWalletLookup(side, row._bookLevel);
                 }
             });
 
@@ -13054,6 +13367,7 @@
             syncResponsiveAssetLayout();
             syncChartToggleButtons();
             if (!IS_COMPACT) resetOrderBookState();
+            persistConfiguredL4BookWsUrls();
             connectWs();
             loadResolvedCoinLogoCache();
             applyChartPrefs(loadChartPrefs(), { persist: false });
