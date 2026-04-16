@@ -8071,12 +8071,35 @@
                 .filter(Boolean);
         }
 
+        function expandWsUrlCandidates(value) {
+            const normalized = normalizeWsUrl(value);
+            if (!normalized) return [];
+            const candidates = [];
+            const seen = new Set();
+            const pushCandidate = (nextValue) => {
+                const next = normalizeWsUrl(nextValue);
+                if (!next || seen.has(next)) return;
+                seen.add(next);
+                candidates.push(next);
+            };
+            try {
+                const parsed = new URL(normalized);
+                if (!parsed.pathname || parsed.pathname === '/') {
+                    const withWsPath = new URL(parsed.toString());
+                    withWsPath.pathname = '/ws';
+                    pushCandidate(withWsPath.toString());
+                }
+            } catch (_) {}
+            pushCandidate(normalized);
+            return candidates;
+        }
+
         function getDerivedL4BookWsUrls() {
             const urls = [];
             const hostname = String(window.location.hostname || '').trim();
             if (!hostname) return urls;
-            urls.push(normalizeWsUrl(`ws://${hostname}:8000`));
-            urls.push(normalizeWsUrl(`wss://${hostname}:8000`));
+            expandWsUrlCandidates(`ws://${hostname}:8000`).forEach(url => urls.push(url));
+            expandWsUrlCandidates(`wss://${hostname}:8000`).forEach(url => urls.push(url));
             return urls.filter(Boolean);
         }
 
@@ -8096,12 +8119,18 @@
                 seen.add(value);
                 urls.push(value);
             };
-            splitConfiguredWsUrls(L4_BOOK_WS_PARAM).forEach(pushUrl);
+            splitConfiguredWsUrls(L4_BOOK_WS_PARAM).forEach(value => {
+                expandWsUrlCandidates(value).forEach(pushUrl);
+            });
             try {
-                splitConfiguredWsUrls(localStorage.getItem(L4_BOOK_WS_STORAGE_KEY)).forEach(pushUrl);
+                splitConfiguredWsUrls(localStorage.getItem(L4_BOOK_WS_STORAGE_KEY)).forEach(value => {
+                    expandWsUrlCandidates(value).forEach(pushUrl);
+                });
             } catch (_) {}
             getDerivedL4BookWsUrls().forEach(pushUrl);
-            DEFAULT_L4_BOOK_WS_URLS.forEach(candidate => pushUrl(normalizeWsUrl(candidate)));
+            DEFAULT_L4_BOOK_WS_URLS.forEach(candidate => {
+                expandWsUrlCandidates(candidate).forEach(pushUrl);
+            });
             return urls;
         }
 
@@ -8542,7 +8571,7 @@
                     activeBookDetail.side === side &&
                     activeBookDetail.bucketKey === getBucketKey(level.px, activeBookDetail.tick, side)
                 ) {
-                    activeBookDetailNote = 'Wallet lookup unavailable. Run the local l4Book server or pass ?l4ws=ws://host:port.';
+                    activeBookDetailNote = 'Wallet lookup unavailable. Run the local l4Book server or pass ?l4ws=ws://host:port/ws.';
                     renderOrderBookDetail();
                 }
             }
